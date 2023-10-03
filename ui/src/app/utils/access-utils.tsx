@@ -546,88 +546,6 @@ export const isExpiringOrExpired = (
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
 };
 
-interface RenewalDisplayDates {
-  lastConfirmedDate: string;
-  nextReviewDate: string;
-  moduleStatus: AccessRenewalStatus;
-}
-export const computeRenewalDisplayDates = (
-  status: AccessModuleStatus
-): RenewalDisplayDates => {
-  const {
-    completionEpochMillis,
-    expirationEpochMillis,
-    bypassEpochMillis,
-    moduleName,
-  } = status || {};
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
-  const userExpiredModule = !!expirationEpochMillis;
-  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
-  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
-  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
-
-  const daysRemainingDisplay = () => {
-    const daysRemaining = getWholeDaysFromNow(expirationEpochMillis);
-    return `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`;
-  };
-
-  return cond<RenewalDisplayDates>(
-    // User has bypassed module
-    [
-      userBypassedModule,
-      () => ({
-        lastConfirmedDate: `${bypassDate}`,
-        nextReviewDate: 'Unavailable (bypassed)',
-        moduleStatus: AccessRenewalStatus.BYPASSED,
-      }),
-    ],
-    // Module is incomplete
-    [
-      !userCompletedModule && !userBypassedModule,
-      () => ({
-        lastConfirmedDate: 'Unavailable (not completed)',
-        nextReviewDate: 'Unavailable (not completed)',
-        moduleStatus: AccessRenewalStatus.INCOMPLETE,
-      }),
-    ],
-    // After this point, we know the module is complete and not bypassed.  The remaining checks determine whether the
-    // completion is expired, never expires, expires soon (within-lookback) or expires later (after lookback).
-    [
-      !userExpiredModule,
-      () => ({
-        lastConfirmedDate,
-        nextReviewDate: `Never Expires`,
-        moduleStatus: AccessRenewalStatus.NEVER_EXPIRES,
-      }),
-    ],
-    [
-      hasExpired(expirationEpochMillis),
-      () => ({
-        lastConfirmedDate,
-        nextReviewDate: `${nextReviewDate} (expired)`,
-        moduleStatus: AccessRenewalStatus.EXPIRED,
-      }),
-    ],
-    [
-      isExpiringOrExpired(expirationEpochMillis, moduleName),
-      () => ({
-        lastConfirmedDate,
-        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
-        moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
-      }),
-    ],
-    [
-      userCompletedModule,
-      () => ({
-        lastConfirmedDate,
-        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
-        moduleStatus: AccessRenewalStatus.CURRENT,
-      }),
-    ]
-  );
-};
-
 // return true if user is eligible for registered tier.
 // A user loses tier eligibility when they are removed from institution tier requirement
 export const eligibleForTier = (
@@ -665,7 +583,7 @@ export const isCompleted = (
   duccSignedVersion: number
 ): boolean =>
   // special case for DUCC: considered incomplete if the signed version is missing or old
-  status.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT &&
+  status?.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT &&
   !isCurrentDUCCVersion(duccSignedVersion)
     ? false
     : !!status?.completionEpochMillis;
@@ -702,6 +620,87 @@ export const isEligibleModule = (module: AccessModule, profile: Profile) => {
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
   );
   return !!controlledTierEligibility?.eligible;
+};
+
+interface RenewalDisplayDates {
+  lastConfirmedDate: string;
+  nextReviewDate: string;
+  moduleStatus: AccessRenewalStatus;
+}
+export const computeRenewalDisplayDates = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+): RenewalDisplayDates => {
+  const {
+    completionEpochMillis,
+    expirationEpochMillis,
+    bypassEpochMillis,
+    moduleName,
+  } = status || {};
+  const userExpiredModule = !!expirationEpochMillis;
+  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
+  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
+  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
+
+  const daysRemainingDisplay = () => {
+    const daysRemaining = getWholeDaysFromNow(expirationEpochMillis);
+    return `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`;
+  };
+
+  return cond<RenewalDisplayDates>(
+    // User has bypassed module
+    [
+      isBypassed(status),
+      () => ({
+        lastConfirmedDate: `${bypassDate}`,
+        nextReviewDate: 'Unavailable (bypassed)',
+        moduleStatus: AccessRenewalStatus.BYPASSED,
+      }),
+    ],
+    // Module is incomplete
+    [
+      !isCompleted(status, duccSignedVersion) && !isBypassed(status),
+      () => ({
+        lastConfirmedDate: 'Unavailable (not completed)',
+        nextReviewDate: 'Unavailable (not completed)',
+        moduleStatus: AccessRenewalStatus.INCOMPLETE,
+      }),
+    ],
+    // After this point, we know the module is complete and not bypassed.  The remaining checks determine whether the
+    // completion is expired, never expires, expires soon (within-lookback) or expires later (after lookback).
+    [
+      !userExpiredModule,
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `Never Expires`,
+        moduleStatus: AccessRenewalStatus.NEVER_EXPIRES,
+      }),
+    ],
+    [
+      hasExpired(expirationEpochMillis),
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} (expired)`,
+        moduleStatus: AccessRenewalStatus.EXPIRED,
+      }),
+    ],
+    [
+      isExpiringOrExpired(expirationEpochMillis, moduleName),
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
+        moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
+      }),
+    ],
+    [
+      isCompleted(status, duccSignedVersion),
+      () => ({
+        lastConfirmedDate,
+        nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
+        moduleStatus: AccessRenewalStatus.CURRENT,
+      }),
+    ]
+  );
 };
 
 export const getStatusText = (

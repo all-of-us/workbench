@@ -187,8 +187,10 @@ const getModuleStatus = (
   profile: Profile,
   moduleName: AccessModule
 ): AccessRenewalStatus =>
-  computeRenewalDisplayDates(getAccessModuleStatusByName(profile, moduleName))
-    .moduleStatus;
+  computeRenewalDisplayDates(
+    getAccessModuleStatusByName(profile, moduleName),
+    profile.duccSignedVersion
+  ).moduleStatus;
 
 const moduleStatusStyle = (moduleStatus) =>
   cond(

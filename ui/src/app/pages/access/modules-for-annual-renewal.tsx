@@ -231,8 +231,10 @@ export const RenewalCardBody = ({
   const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
     moduleStatus.moduleName
   );
-  const { lastConfirmedDate, nextReviewDate } =
-    computeRenewalDisplayDates(moduleStatus);
+  const { lastConfirmedDate, nextReviewDate } = computeRenewalDisplayDates(
+    moduleStatus,
+    duccSignedVersion
+  );
   const TimeEstimate = () =>
     showTimeEstimate ? (
       <FlexColumn style={{ alignItems: 'center' }}>
