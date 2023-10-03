@@ -108,14 +108,14 @@ public class InterceptorUtilsTest {
   }
 
   @Test
-  public void testIsCloudTaskRequest_true() {
+  public void testIsCloudTaskRequest() {
     Operation operation = mock(Operation.class);
     when(operation.tags()).thenReturn(new String[] {"cloudTask"});
     assertTrue(InterceptorUtils.isCloudTaskRequest(operation));
   }
 
   @Test
-  public void testIsCloudTaskRequest_false() {
+  public void testIsNotCloudTaskRequest() {
     Operation operation = mock(Operation.class);
     when(operation.tags()).thenReturn(new String[] {"FAKE_TAG"});
     assertFalse(InterceptorUtils.isCloudTaskRequest(operation));
