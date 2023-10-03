@@ -375,7 +375,7 @@ describe('RuntimeInitializer', () => {
 
 // intended to document the current behavior of this peculiar method
 describe(throwRuntimeNotFound.name, () => {
-  it('should throw the preset default if targetRuntime and currentRuntime both do not exist', () => {
+  it('should use the preset default if targetRuntime and currentRuntime both do not exist', () => {
     const currentRuntime = undefined;
     const gcePersistentDisk = undefined;
 
