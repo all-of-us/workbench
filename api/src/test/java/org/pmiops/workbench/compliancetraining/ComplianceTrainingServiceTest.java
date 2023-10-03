@@ -126,7 +126,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus() throws Exception {
+  public void testSyncComplianceTrainingStatus_Moodle() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // User completes RT training in Moodle
     var rtBadge = defaultBadgeDetails().lastissued(currentSecond());
     mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge));
@@ -168,7 +170,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_ResyncCausesNoChanges() throws Exception {
+  public void testSyncComplianceTrainingStatus_Moodle_ResyncCausesNoChanges() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // Set up: The user completes ands syncs RT training
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
@@ -187,8 +191,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_UpdatesVerificationToMoodleIfComplete()
-      throws Exception {
+  public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerification() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
@@ -212,8 +217,10 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_UpdatesVerification_OnePerAccessModule()
+  public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerification_OnePerAccessModule()
       throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     var userBadgesByNameRTOnly =
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
     var userBadgesByNameRTAndCT =
@@ -247,7 +254,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_RenewsExpiredTraining() throws Exception {
+  public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiredTraining() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // User completes trainings
     BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
@@ -300,7 +309,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_RenewsExpiringTraining() throws Exception {
+  public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiringTraining() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // User completes trainings
     BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
@@ -339,7 +350,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_NullBadge() throws ApiException {
+  public void testSyncComplianceTrainingStatus_Moodle_NullBadge() throws ApiException {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // When Moodle returns an empty RET badge response, we should clear the completion time.
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
@@ -353,7 +366,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_BadgeNotFound() throws ApiException {
+  public void testSyncComplianceTrainingStatus_Moodle_BadgeNotFound() throws ApiException {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(new ApiException(HttpStatus.NOT_FOUND.value(), "user not found"));
