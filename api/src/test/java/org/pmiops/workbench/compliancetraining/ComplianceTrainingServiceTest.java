@@ -149,7 +149,7 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion
     // for only RT training.
@@ -173,7 +173,7 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion
     // for both RT and CT training.
@@ -190,7 +190,7 @@ public class ComplianceTrainingServiceTest {
     mockGetUserEnrollments(rtCompletionTime, null);
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion
     // for only RT training.
@@ -206,7 +206,7 @@ public class ComplianceTrainingServiceTest {
     mockGetUserEnrollments(rtCompletionTime, ctCompletionTime);
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion
     // for both RT and CT training.
@@ -223,13 +223,13 @@ public class ComplianceTrainingServiceTest {
     // Set up: The user completes ands syncs RT training
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     var completionTime = currentTimestamp();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
 
     // Time passes and the user re-syncs
     tick();
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion timestamp should not change when the method is called again.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
@@ -242,12 +242,12 @@ public class ComplianceTrainingServiceTest {
     // Set up: The user completes ands syncs RT training
     var completionTime = currentInstant();
     mockGetUserEnrollments(completionTime, null);
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
 
     // Time passes and the user re-syncs
     tick();
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion timestamp should not change when the method is called again.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
@@ -262,11 +262,9 @@ public class ComplianceTrainingServiceTest {
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
-
-    reloadUser();
 
     // RT is complete, so there should be a verification record.
     var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
@@ -297,15 +295,13 @@ public class ComplianceTrainingServiceTest {
 
     // Complete RT training
     mockGetUserBadgesByBadgeName(userBadgesByNameRTOnly);
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
     // Complete CT training
     mockGetUserBadgesByBadgeName(userBadgesByNameRTAndCT);
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
-
-    reloadUser();
 
     // RT is complete, so there should be a verification record.
     var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
@@ -334,7 +330,7 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -351,7 +347,7 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, null);
 
@@ -364,7 +360,7 @@ public class ComplianceTrainingServiceTest {
 
     // Time passes, user syncs training
     tick();
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion and expiry timestamp should be updated.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -389,7 +385,7 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // User syncs training
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -405,7 +401,7 @@ public class ComplianceTrainingServiceTest {
 
     // Time passes, user syncs training
     tick();
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion should be updated to the current time.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -423,8 +419,7 @@ public class ComplianceTrainingServiceTest {
     // An empty map should be returned when we have no badge information.
     mockGetUserBadgesByBadgeName(ImmutableMap.of());
 
-    complianceTrainingService.syncComplianceTrainingStatus();
-    reloadUser();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
   }
 
@@ -443,7 +438,7 @@ public class ComplianceTrainingServiceTest {
   public void testSyncComplianceTrainingStatus_SkippedForServiceAccount() throws Exception {
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
-    complianceTrainingService.syncComplianceTrainingStatus();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
     verifyNoInteractions(mockMoodleService);
   }
 
@@ -572,10 +567,6 @@ public class ComplianceTrainingServiceTest {
             List.of(
                 new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
                 new Enrollment(CT_ABSORB_COURSE_ID, ctCompletionTime)));
-  }
-
-  private void reloadUser() {
-    user = userDao.findUserByUsername(USERNAME);
   }
 
   private Optional<DbComplianceTrainingVerification> getVerification(
