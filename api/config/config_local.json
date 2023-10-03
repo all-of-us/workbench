@@ -91,6 +91,8 @@
     "host": "https:\/\/aousupporthelp1634849601.zendesk.com"
   },
   "absorb": {
+    "externalDepartmentId": "Development",
+    "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": false,
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028"

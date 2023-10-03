@@ -91,6 +91,8 @@
     "host": "https:\/\/aoupreprodsupporthelp.zendesk.com"
   },
   "absorb": {
+    "externalDepartmentId": "Researchers",
+    "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": false,
     "samlIdentityProviderId": "TODO",
     "samlServiceProviderId": "TODO"
