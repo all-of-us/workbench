@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import * as fp from 'lodash/fp';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -133,7 +132,7 @@ const MultiRegionWorkspaceNotification = () => {
   );
 };
 
-export const WorkspaceWrapper = fp.flow()(({ hideSpinner }) => {
+export const WorkspaceWrapper = ({ hideSpinner }) => {
   const params = useParams<MatchParams>();
   const { ns, wsid } = params;
   useEffect(() => {
@@ -283,4 +282,4 @@ export const WorkspaceWrapper = fp.flow()(({ hideSpinner }) => {
       )}
     </>
   );
-});
+};
