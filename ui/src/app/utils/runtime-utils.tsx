@@ -658,6 +658,7 @@ export const maybeWithPersistentDisk = (
   if (!runtime || !persistentDisk || !runtime.gceConfig) {
     return runtime;
   }
+  // TODO: why not all fields?
   const { name, size, diskType } = persistentDisk;
   return {
     ...runtime,
