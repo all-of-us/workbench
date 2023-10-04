@@ -58,11 +58,8 @@ public class WsmConfig {
         throw new ApiException("Unauthenticated requests are not allowed");
       }
       bearerToken = bearerToken.split("Bearer ")[1];
-      // Passing on the bearer token
 
-      bearerToken =
-          "ya29.a0AfB_byBd1GJ9b2ixWwrm0EBs39XOYbjGSKzCzeygkir43mdrDV65nB2fVNarUlQw_KK7r3mR4MWHdQyVHULFZpl60uPZOcVQBGolmzHgvs3ByYCycqjBapAKXtr1aH2nNu6Zw-wI-lM98BHNuVovvfc3hd8R_pEJ8xRxy-dISaAaCgYKAX8SARESFQGOcNnCJeYH4eJfMgJqIAUgU5pTOw0178";
-      // read token from file
+      // FIXME read token from file just for now...
       try {
         bearerToken = Files.readString(Path.of("/tmp/bearer_token.txt"), Charset.defaultCharset());
       } catch (IOException e) {
