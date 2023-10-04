@@ -225,6 +225,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
         currentWorkspaceStore.next(nextWs);
         updateStores(ns);
+        setWorkspace(nextWs);
       } else {
         getWorkspaceAndUpdateStores(ns, wsid);
       }
