@@ -12,7 +12,7 @@ import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { WorkspaceRoutes } from 'app/routing/workspace-app-routing';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { LeoRuntimeInitializer } from 'app/utils/leo-runtime-initializer';
 import {
