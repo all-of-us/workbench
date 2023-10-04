@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { Workspace } from 'generated/fetch';
+
 import { StyledExternalLink } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { HelpSidebar } from 'app/components/help-sidebar';
@@ -156,6 +158,8 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
 
   const [pollAborter, setPollAborter] = useState(new AbortController());
 
+  const [workspace, setWorkspace] = useState<Workspace>(undefined);
+
   const [showNewCtNotification, setShowNewCtNotification] = useState(false);
 
   useEffect(() => {
@@ -199,6 +203,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
           accessLevel: wsResponse.accessLevel,
         });
         updateStores(wsResponse.workspace.namespace);
+        setWorkspace(wsResponse.workspace);
       } catch (ex) {
         if (ex.status === 403) {
           navigate(['/workspaces']);
@@ -225,7 +230,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       }
     }
   }, [ns, wsid]);
-  const workspace = currentWorkspaceStore.getValue();
+
   const showMultiRegionWorkspaceNotification =
     workspace &&
     new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
