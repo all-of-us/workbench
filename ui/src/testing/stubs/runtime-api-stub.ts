@@ -41,26 +41,28 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   numberOfWorkerLocalSSDs: 0,
 });
 
-export const defaultGceRuntime = (): Runtime => ({
+const runtimeDefaults: Runtime = {
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-  gceConfig: defaultGceConfig(),
   errors: [],
+};
+
+export const defaultGceRuntime = (): Runtime => ({
+  ...runtimeDefaults,
+  gceConfig: defaultGceConfig(),
 });
 
 export const defaultGceRuntimeWithPd = (): Runtime => ({
-  ...defaultGceRuntime(),
-  gceConfig: undefined,
+  ...runtimeDefaults,
   gceWithPdConfig: defaultGceWithPdConfig(),
 });
 
 export const defaultDataProcRuntime = (): Runtime => ({
-  ...defaultGceRuntime(),
-  gceConfig: undefined,
+  ...runtimeDefaults,
   dataprocConfig: defaultDataprocConfig(),
   configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
 });
