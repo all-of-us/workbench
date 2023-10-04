@@ -473,7 +473,7 @@ describe(throwRuntimeNotFound.name, () => {
       expect(currentRuntime.gceConfig).toBeFalsy();
       expect(currentRuntime.gceWithPdConfig).toBeFalsy();
 
-      // an arbitrary field - later we see that this DataProd field has been overridden by the preset GCE With PD field
+      // an arbitrary field - later we see that this DataProc field has been overridden by the preset GCE With PD field
       expect(currentRuntime.dataprocConfig.masterMachineType).not.toEqual(
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
           .masterMachineType
