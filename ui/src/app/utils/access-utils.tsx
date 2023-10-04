@@ -546,38 +546,6 @@ export const isExpiringOrExpired = (
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
 };
 
-// return true if user is eligible for registered tier.
-// A user loses tier eligibility when they are removed from institution tier requirement
-export const eligibleForTier = (
-  profile: Profile,
-  accessTierShortName: string
-): boolean => {
-  const rtEligiblity = profile.tierEligibilities.find(
-    (t) => t.accessTierShortName === accessTierShortName
-  );
-  return rtEligiblity?.eligible;
-};
-
-export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
-  // RT and CT compliance training have the same external sync action.
-  // Calling both can cause conflicts, so we need to remove one.
-  // We choose to remove CT arbitrarily.
-  const filteredModuleNames = moduleNames.includes(
-    AccessModule.COMPLIANCE_TRAINING
-  )
-    ? moduleNames.filter((m) => m !== AccessModule.CT_COMPLIANCE_TRAINING)
-    : moduleNames;
-
-  return Promise.all(
-    filteredModuleNames.map(async (moduleName) => {
-      const { externalSyncAction } = getAccessModuleConfig(moduleName);
-      if (externalSyncAction) {
-        await externalSyncAction();
-      }
-    })
-  );
-};
-
 export const isCompleted = (
   status: AccessModuleStatus,
   duccSignedVersion: number
@@ -700,6 +668,38 @@ export const computeRenewalDisplayDates = (
         moduleStatus: AccessRenewalStatus.CURRENT,
       }),
     ]
+  );
+};
+
+// return true if user is eligible for registered tier.
+// A user loses tier eligibility when they are removed from institution tier requirement
+export const eligibleForTier = (
+  profile: Profile,
+  accessTierShortName: string
+): boolean => {
+  const rtEligiblity = profile.tierEligibilities.find(
+    (t) => t.accessTierShortName === accessTierShortName
+  );
+  return rtEligiblity?.eligible;
+};
+
+export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
+  // RT and CT compliance training have the same external sync action.
+  // Calling both can cause conflicts, so we need to remove one.
+  // We choose to remove CT arbitrarily.
+  const filteredModuleNames = moduleNames.includes(
+    AccessModule.COMPLIANCE_TRAINING
+  )
+    ? moduleNames.filter((m) => m !== AccessModule.CT_COMPLIANCE_TRAINING)
+    : moduleNames;
+
+  return Promise.all(
+    filteredModuleNames.map(async (moduleName) => {
+      const { externalSyncAction } = getAccessModuleConfig(moduleName);
+      if (externalSyncAction) {
+        await externalSyncAction();
+      }
+    })
   );
 };
 
