@@ -528,37 +528,33 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testUseAbsorb_FalseWhenMoodlePreviouslyUsed_EvenIfAbsorbPreviouslyUsed() throws Exception {
+  public void testSyncComplianceTrainingStatus_AbsorbRollbacksLeadToUnexpectedComplianceLapse() throws Exception {
+    // This test documents undesired behavior. We think it is unlikely to happen and can
+    // be fixed as-needed if we roll back Absorb.
+
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
 
     // A user uses Absorb to complete RT training.
-    assertThat(complianceTrainingService.useAbsorb()).isTrue();
     var rtCompletionTime = currentInstant();
     mockGetUserEnrollments(rtCompletionTime, null);
     user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+
+    // Time passes.
+    tick();
 
     // We roll back the Absorb feature flag, for some reason.
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
 
-    tick();
-
     // The user uses Moodle to complete CT training.
-    assertThat(complianceTrainingService.useAbsorb()).isFalse();
     var ctCompletionTime = currentTimestamp();
     mockGetUserBadgesByBadgeName(ImmutableMap.of(
         BadgeName.CONTROLLED_TIER_TRAINING, defaultBadgeDetails().lastissued(currentSecond())));
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
-    // We reverse the rollback of the Absorb feature flag.
-    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
-
-    // The user should continue to use Moodle.
-    // As-is, this will lead to errors when the user renews training after one year. However,
-    // we expect to transition all users entirely to Absorb before that happens.
-    assertThat(complianceTrainingService.useAbsorb()).isFalse();
-
-    // TODO: this currently fails because Moodle overwrites it to null.
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    // Desired behavior: The user's RT training persists.
+    // Actual behavior: The user's RT training is wiped out.
+    assertModuleNotCompleted(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, ctCompletionTime);
   }
 
