@@ -133,8 +133,10 @@ const MultiRegionWorkspaceNotification = () => {
   );
 };
 
-export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
-  ({ workspace, hideSpinner }) => {
+export const WorkspaceWrapper = fp.flow()(
+  ({ hideSpinner }) => {
+    const params = useParams<MatchParams>();
+    const { ns, wsid } = params;
     useEffect(() => {
       hideSpinner();
       return () => {
@@ -146,17 +148,15 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
     }, []);
 
     useEffect(() => {
-      if (workspace) {
-        maybeStartPollingForUserApps(workspace.namespace);
+      if (ns) {
+        maybeStartPollingForUserApps(ns);
       }
-    }, [workspace]);
+    }, [ns]);
 
     const routeData = useStore(routeDataStore);
     const [navigate] = useNavigation();
 
     const [pollAborter, setPollAborter] = useState(new AbortController());
-    const params = useParams<MatchParams>();
-    const { ns, wsid } = params;
 
     const [showNewCtNotification, setShowNewCtNotification] = useState(false);
 
