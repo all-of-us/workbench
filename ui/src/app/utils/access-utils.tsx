@@ -577,19 +577,6 @@ export const isRenewalCompleteForModule = (
   );
 };
 
-export const isEligibleModule = (module: AccessModule, profile: Profile) => {
-  if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
-    // Currently a user can only be ineligible for CT modules.
-    // Note: eRA Commons is an edge case which is handled elsewhere. It is
-    // technically also possible for CT eRA commons to be ineligible.
-    return true;
-  }
-  const controlledTierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
-  );
-  return !!controlledTierEligibility?.eligible;
-};
-
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
   nextReviewDate: string;
@@ -701,6 +688,19 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
       }
     })
   );
+};
+
+export const isEligibleModule = (module: AccessModule, profile: Profile) => {
+  if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
+    // Currently a user can only be ineligible for CT modules.
+    // Note: eRA Commons is an edge case which is handled elsewhere. It is
+    // technically also possible for CT eRA commons to be ineligible.
+    return true;
+  }
+  const controlledTierEligibility = profile.tierEligibilities.find(
+    (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
+  );
+  return !!controlledTierEligibility?.eligible;
 };
 
 export const getStatusText = (
