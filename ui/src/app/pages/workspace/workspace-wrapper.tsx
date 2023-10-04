@@ -133,156 +133,154 @@ const MultiRegionWorkspaceNotification = () => {
   );
 };
 
-export const WorkspaceWrapper = fp.flow()(
-  ({ hideSpinner }) => {
-    const params = useParams<MatchParams>();
-    const { ns, wsid } = params;
-    useEffect(() => {
-      hideSpinner();
-      return () => {
-        const { timeoutID } = userAppsStore.get();
-        if (timeoutID) {
-          clearTimeout(timeoutID);
-        }
-      };
-    }, []);
-
-    useEffect(() => {
-      if (ns) {
-        maybeStartPollingForUserApps(ns);
+export const WorkspaceWrapper = fp.flow()(({ hideSpinner }) => {
+  const params = useParams<MatchParams>();
+  const { ns, wsid } = params;
+  useEffect(() => {
+    hideSpinner();
+    return () => {
+      const { timeoutID } = userAppsStore.get();
+      if (timeoutID) {
+        clearTimeout(timeoutID);
       }
-    }, [ns]);
+    };
+  }, []);
 
-    const routeData = useStore(routeDataStore);
-    const [navigate] = useNavigation();
+  useEffect(() => {
+    if (ns) {
+      maybeStartPollingForUserApps(ns);
+    }
+  }, [ns]);
 
-    const [pollAborter, setPollAborter] = useState(new AbortController());
+  const routeData = useStore(routeDataStore);
+  const [navigate] = useNavigation();
 
-    const [showNewCtNotification, setShowNewCtNotification] = useState(false);
+  const [pollAborter, setPollAborter] = useState(new AbortController());
 
-    const showMultiRegionWorkspaceNotification =
-      workspace &&
-      new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
+  const [showNewCtNotification, setShowNewCtNotification] = useState(false);
 
-    useEffect(() => {
-      const updateStores = async (namespace) => {
-        runtimeDiskStore.set({
+  useEffect(() => {
+    const updateStores = async (namespace) => {
+      runtimeDiskStore.set({
+        workspaceNamespace: namespace,
+        gcePersistentDisk: undefined,
+      });
+      runtimeStore.set({
+        workspaceNamespace: namespace,
+        runtime: undefined,
+        runtimeLoaded: false,
+      });
+      pollAborter.abort();
+      const newPollAborter = new AbortController();
+      setPollAborter(newPollAborter);
+
+      try {
+        await LeoRuntimeInitializer.initialize({
           workspaceNamespace: namespace,
-          gcePersistentDisk: undefined,
+          pollAbortSignal: newPollAborter.signal,
+          maxCreateCount: 0,
+          maxResumeCount: 0,
         });
-        runtimeStore.set({
-          workspaceNamespace: namespace,
-          runtime: undefined,
-          runtimeLoaded: false,
+      } catch {
+        // Ignore InitialRuntimeNotFoundError.
+        // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+        // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+        // initialization here.
+        // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
+        // away from a page during a poll.
+        // Ideally, we would handle or log errors except the ones listed above.
+      }
+    };
+    const getWorkspaceAndUpdateStores = async (namespace, id) => {
+      try {
+        // No destructuring because otherwise it shadows the workspace in props
+        const wsResponse = await workspacesApi().getWorkspace(namespace, id);
+        currentWorkspaceStore.next({
+          ...wsResponse.workspace,
+          accessLevel: wsResponse.accessLevel,
         });
-        pollAborter.abort();
-        const newPollAborter = new AbortController();
-        setPollAborter(newPollAborter);
-
-        try {
-          await LeoRuntimeInitializer.initialize({
-            workspaceNamespace: namespace,
-            pollAbortSignal: newPollAborter.signal,
-            maxCreateCount: 0,
-            maxResumeCount: 0,
-          });
-        } catch {
-          // Ignore InitialRuntimeNotFoundError.
-          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-          // initialization here.
-          // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
-          // away from a page during a poll.
-          // Ideally, we would handle or log errors except the ones listed above.
-        }
-      };
-      const getWorkspaceAndUpdateStores = async (namespace, id) => {
-        try {
-          // No destructuring because otherwise it shadows the workspace in props
-          const wsResponse = await workspacesApi().getWorkspace(namespace, id);
-          currentWorkspaceStore.next({
-            ...wsResponse.workspace,
-            accessLevel: wsResponse.accessLevel,
-          });
-          updateStores(wsResponse.workspace.namespace);
-        } catch (ex) {
-          if (ex.status === 403) {
-            navigate(['/workspaces']);
-          }
-        }
-      };
-
-      if (
-        !currentWorkspaceStore.getValue() ||
-        currentWorkspaceStore.getValue().namespace !== ns ||
-        currentWorkspaceStore.getValue().id !== wsid
-      ) {
-        currentWorkspaceStore.next(null);
-        // In a handful of situations - namely on workspace creation/clone,
-        // the application will preload the next workspace to avoid a redundant
-        // refetch here.
-        const nextWs = nextWorkspaceWarmupStore.getValue();
-        nextWorkspaceWarmupStore.next(undefined);
-        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-          currentWorkspaceStore.next(nextWs);
-          updateStores(ns);
-        } else {
-          getWorkspaceAndUpdateStores(ns, wsid);
+        updateStores(wsResponse.workspace.namespace);
+      } catch (ex) {
+        if (ex.status === 403) {
+          navigate(['/workspaces']);
         }
       }
-    }, [ns, wsid]);
+    };
 
-    useEffect(() => {
-      workspacesApi().updateRecentWorkspaces(ns, wsid);
-    }, [ns, wsid]);
+    if (
+      !currentWorkspaceStore.getValue() ||
+      currentWorkspaceStore.getValue().namespace !== ns ||
+      currentWorkspaceStore.getValue().id !== wsid
+    ) {
+      currentWorkspaceStore.next(null);
+      // In a handful of situations - namely on workspace creation/clone,
+      // the application will preload the next workspace to avoid a redundant
+      // refetch here.
+      const nextWs = nextWorkspaceWarmupStore.getValue();
+      nextWorkspaceWarmupStore.next(undefined);
+      if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+        currentWorkspaceStore.next(nextWs);
+        updateStores(ns);
+      } else {
+        getWorkspaceAndUpdateStores(ns, wsid);
+      }
+    }
+  }, [ns, wsid]);
+  const workspace = currentWorkspaceStore.getValue();
+  const showMultiRegionWorkspaceNotification =
+    workspace &&
+    new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
 
-    useEffect(() => {
-      const isControlled =
-        workspace?.accessTierShortName === AccessTierShortNames.Controlled;
-      const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
-      const isNew = workspace?.creationTime > tenMinutesAgo;
-      setShowNewCtNotification(isControlled && isNew);
-    }, [workspace]);
+  useEffect(() => {
+    workspacesApi().updateRecentWorkspaces(ns, wsid);
+  }, [ns, wsid]);
 
-    return (
-      <>
-        {workspace ? (
-          <>
-            {!routeData.minimizeChrome && (
-              <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
-            )}
-            {showNewCtNotification && (
-              <NewCtNotification
-                onCancel={() => setShowNewCtNotification(false)}
-              />
-            )}
-            {showMultiRegionWorkspaceNotification && (
-              <MultiRegionWorkspaceNotification />
-            )}
-            <HelpSidebar pageKey={routeData.pageKey} />
-            <div
-              style={{
-                marginRight: '45px',
-                height: !routeData.contentFullHeightOverride ? 'auto' : '100%',
-              }}
-            >
-              <WorkspaceRoutes />
-            </div>
-          </>
-        ) : (
+  useEffect(() => {
+    const isControlled =
+      workspace?.accessTierShortName === AccessTierShortNames.Controlled;
+    const tenMinutesAgo = Date.now() - 10 * 60 * 1000; // arbitrary notion of 'new' workspace
+    const isNew = workspace?.creationTime > tenMinutesAgo;
+    setShowNewCtNotification(isControlled && isNew);
+  }, [workspace]);
+
+  return (
+    <>
+      {workspace ? (
+        <>
+          {!routeData.minimizeChrome && (
+            <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab} />
+          )}
+          {showNewCtNotification && (
+            <NewCtNotification
+              onCancel={() => setShowNewCtNotification(false)}
+            />
+          )}
+          {showMultiRegionWorkspaceNotification && (
+            <MultiRegionWorkspaceNotification />
+          )}
+          <HelpSidebar pageKey={routeData.pageKey} />
           <div
             style={{
-              display: 'flex',
-              height: '100%',
-              width: '100%',
-              justifyContent: 'center',
-              alignItems: 'center',
+              marginRight: '45px',
+              height: !routeData.contentFullHeightOverride ? 'auto' : '100%',
             }}
           >
-            <Spinner title='loading workspaces spinner' />
+            <WorkspaceRoutes />
           </div>
-        )}
-      </>
-    );
-  }
-);
+        </>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            height: '100%',
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Spinner title='loading workspaces spinner' />
+        </div>
+      )}
+    </>
+  );
+});
