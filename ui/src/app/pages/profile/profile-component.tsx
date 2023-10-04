@@ -40,6 +40,7 @@ import { withUserProfile } from 'app/utils';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
+  isBypassed,
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
@@ -256,9 +257,8 @@ export const ProfileComponent = fp.flow(
       const hasExpired =
         profileConfirmationAccessModule.expirationEpochMillis &&
         profileConfirmationAccessModule.expirationEpochMillis < Date.now();
-      const bypassed = !!profileConfirmationAccessModule.bypassEpochMillis;
       const showRenewalBox =
-        (hasExpired && !bypassed) ||
+        (hasExpired && !isBypassed(profileConfirmationAccessModule)) ||
         wasReferredFromRenewal(this.props.location.search);
 
       // validatejs requires a scheme, which we don't necessarily need in the profile; rather than

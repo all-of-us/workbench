@@ -28,7 +28,11 @@ import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
-import { getAccessModuleConfig } from 'app/utils/access-utils';
+import {
+  getAccessModuleConfig,
+  getAccessModuleStatusByName,
+  isBypassed,
+} from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
@@ -60,7 +64,6 @@ import {
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
   InstitutionDropdown,
-  isBypassed,
   orderedAccessModules,
   profileNeedsUpdate,
   TierBadgesMaybe,
@@ -323,13 +326,15 @@ const ToggleForModule = (props: ToggleProps) => {
     bypassUpdate,
   } = props;
 
-  const previouslyBypassed = isBypassed(oldProfile, moduleName);
+  const previouslyBypassed = isBypassed(
+    getAccessModuleStatusByName(oldProfile, moduleName)
+  );
   const pendingBypassState = pendingBypassRequests.find(
     (r) => r.moduleName === moduleName
   );
   const isModuleBypassed = pendingBypassState
     ? pendingBypassState.bypassed
-    : isBypassed(updatedProfile, moduleName);
+    : isBypassed(getAccessModuleStatusByName(updatedProfile, moduleName));
   const highlightStyle =
     isModuleBypassed !== previouslyBypassed
       ? { background: colors.highlight }

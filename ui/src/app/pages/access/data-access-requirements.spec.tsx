@@ -1545,16 +1545,95 @@ describe('DataAccessRequirements', () => {
     ).toBeTruthy();
 
     // Only the first module is active.
-    console.error(
-      "Bob's burgers: ",
-      findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
-    );
     expect(
       findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
     expect(
       findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
     ).toBeFalsy();
+  });
+
+  it('Should enable clicking on DUCC when it is non-compliant due to an incorrect signed version', async () => {
+    let { container } = component();
+    const duccSignedVersion =
+      Math.min(...defaultServerConfig.currentDuccVersions) - 1;
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        duccSignedVersion,
+        accessModules: {
+          modules: allInitialModules.map((moduleName) => ({
+            moduleName,
+            completionEpochMillis: 1,
+          })),
+        },
+        tierEligibilities: [
+          {
+            accessTierShortName: AccessTierShortNames.Registered,
+            eraRequired: false,
+            eligible: false,
+          },
+          {
+            accessTierShortName: AccessTierShortNames.Controlled,
+            eraRequired: true,
+            eligible: true,
+          },
+        ],
+      },
+      load,
+      reload,
+      updateCache,
+    });
+    ({ container } = component());
+
+    expect(
+      findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
+    ).toBeTruthy();
+    expect(
+      findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
+    ).toBeTruthy();
+  });
+
+  it('Should enable clicking on DUCC when it is missing due to an incorrect signed version', async () => {
+    let { container } = component();
+    const duccSignedVersion = undefined;
+
+    profileStore.set({
+      profile: {
+        ...ProfileStubVariables.PROFILE_STUB,
+        duccSignedVersion,
+        accessModules: {
+          modules: allInitialModules.map((moduleName) => ({
+            moduleName,
+            completionEpochMillis: 1,
+          })),
+        },
+        tierEligibilities: [
+          {
+            accessTierShortName: AccessTierShortNames.Registered,
+            eraRequired: false,
+            eligible: false,
+          },
+          {
+            accessTierShortName: AccessTierShortNames.Controlled,
+            eraRequired: true,
+            eligible: true,
+          },
+        ],
+      },
+      load,
+      reload,
+      updateCache,
+    });
+    ({ container } = component());
+
+    expect(
+      findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
+    ).toBeTruthy();
+    expect(
+      findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
+    ).toBeTruthy();
   });
 
   it('Should render in INITIAL_REGISTRATION mode by default', async () => {
@@ -1756,6 +1835,89 @@ describe('DataAccessRequirements', () => {
       AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
+
+    component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Complete
+    expect(screen.queryAllByText('Confirmed').length).toBe(2);
+    expect(screen.queryAllByText('Completed').length).toBe(1);
+    // Incomplete
+    expect(screen.queryAllByText('View & Sign').length).toBe(1);
+
+    expectNoCompletionBanner();
+  });
+
+  it('should show the correct state when all RT modules are complete but DUCC has an incorrect version', async () => {
+    expireAllRTModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILE_CONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATION_CONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCE_TRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      oneYearFromNow()
+    );
+
+    profileStore.set({
+      profile: {
+        ...profileStore.get().profile,
+        duccSignedVersion:
+          Math.min(...defaultServerConfig.currentDuccVersions) - 1,
+      },
+      load,
+      reload,
+      updateCache,
+    });
+
+    component(DARPageMode.ANNUAL_RENEWAL);
+
+    // Complete
+    expect(screen.queryAllByText('Confirmed').length).toBe(2);
+    expect(screen.queryAllByText('Completed').length).toBe(1);
+    // Incomplete
+    expect(screen.queryAllByText('View & Sign').length).toBe(1);
+
+    expectNoCompletionBanner();
+  });
+
+  it('should show the correct state when all RT modules are complete but DUCC has a missing version', async () => {
+    expireAllRTModules();
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILE_CONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATION_CONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCE_TRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      oneYearFromNow()
+    );
+
+    profileStore.set({
+      profile: {
+        ...profileStore.get().profile,
+        duccSignedVersion: undefined,
+      },
+      load,
+      reload,
+      updateCache,
+    });
 
     component(DARPageMode.ANNUAL_RENEWAL);
 

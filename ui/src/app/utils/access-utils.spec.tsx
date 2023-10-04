@@ -19,6 +19,7 @@ import {
   computeRenewalDisplayDates,
   getTwoFactorSetupUrl,
   hasExpired,
+  isCompleted,
   isExpiringOrExpired,
   maybeDaysRemaining,
   NOTIFICATION_THRESHOLD_DAYS,
@@ -42,11 +43,12 @@ import {
 } from 'testing/stubs/profile-api-stub';
 
 import { AccessTierShortNames } from './access-tiers';
+import { getCurrentDUCCVersions } from './code-of-conduct';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
 const arbitraryModuleName = AccessModule.PUBLICATION_CONFIRMATION;
 
-describe('redirectToRegisteredTraining', () => {
+describe(redirectToRegisteredTraining.name, () => {
   let windowOpenSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -99,7 +101,7 @@ describe('redirectToRegisteredTraining', () => {
   });
 });
 
-describe('redirectToControlledTraining', () => {
+describe(redirectToControlledTraining.name, () => {
   let windowOpenSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -152,7 +154,7 @@ describe('redirectToControlledTraining', () => {
   });
 });
 
-describe('maybeDaysRemaining', () => {
+describe(maybeDaysRemaining.name, () => {
   beforeEach(() => {
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -376,9 +378,10 @@ describe('maybeDaysRemaining', () => {
   });
 });
 
-describe('computeRenewalDisplayDates', () => {
+describe(computeRenewalDisplayDates.name, () => {
   const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
   const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
+  const compliantDuccVersion = defaultServerConfig.currentDuccVersions[0]; // arbitrary
 
   beforeEach(() => {
     serverConfigStore.set({
@@ -391,9 +394,12 @@ describe('computeRenewalDisplayDates', () => {
 
   it('returns Unavailable/Incomplete when the module is incomplete', () => {
     expect(
-      computeRenewalDisplayDates({
-        moduleName: arbitraryModuleName,
-      })
+      computeRenewalDisplayDates(
+        {
+          moduleName: arbitraryModuleName,
+        },
+        compliantDuccVersion
+      )
     ).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
@@ -402,7 +408,7 @@ describe('computeRenewalDisplayDates', () => {
   });
 
   it('returns Unavailable/Incomplete when the module is undefined', () => {
-    expect(computeRenewalDisplayDates(undefined)).toStrictEqual({
+    expect(computeRenewalDisplayDates(undefined, undefined)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
       moduleStatus: AccessRenewalStatus.INCOMPLETE,
@@ -410,7 +416,7 @@ describe('computeRenewalDisplayDates', () => {
   });
 
   it('returns Unavailable/Incomplete when the module is null', () => {
-    expect(computeRenewalDisplayDates(null)).toStrictEqual({
+    expect(computeRenewalDisplayDates(null, undefined)).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
       moduleStatus: AccessRenewalStatus.INCOMPLETE,
@@ -424,10 +430,72 @@ describe('computeRenewalDisplayDates', () => {
       expirationEpochMillis: expirationDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: 'Unavailable (not completed)',
       nextReviewDate: 'Unavailable (not completed)',
       moduleStatus: AccessRenewalStatus.INCOMPLETE,
+    });
+  });
+
+  it('returns Unavailable/Incomplete for DUCC when the signed version is missing, regardless of completion date', () => {
+    const completionEpochMillis = nowPlusDays(-10);
+    const status: AccessModuleStatus = {
+      moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      completionEpochMillis,
+    };
+
+    expect(computeRenewalDisplayDates(status, undefined)).toStrictEqual({
+      lastConfirmedDate: 'Unavailable (not completed)',
+      nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
+    });
+  });
+
+  it('returns Unavailable/Incomplete for DUCC when the signed version is noncompliant, regardless of completion date', () => {
+    const completionEpochMillis = nowPlusDays(-10);
+    const nonCompliantDuccVersion = Math.min(...getCurrentDUCCVersions()) - 1;
+    const status: AccessModuleStatus = {
+      moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      completionEpochMillis,
+    };
+
+    expect(
+      computeRenewalDisplayDates(status, nonCompliantDuccVersion)
+    ).toStrictEqual({
+      lastConfirmedDate: 'Unavailable (not completed)',
+      nextReviewDate: 'Unavailable (not completed)',
+      moduleStatus: AccessRenewalStatus.INCOMPLETE,
+    });
+  });
+
+  it('ignores DUCC non-compliance for other modules', () => {
+    const completionDaysPast = 44; // arbitrary for test; completed this many days ago
+
+    // add 1 minute so we don't hit the boundary *exactly*
+    const completionEpochMillis =
+      nowPlusDays(-completionDaysPast) + ONE_MINUTE_IN_MILLIS;
+    const expirationEpochMillis = plusDays(
+      completionEpochMillis,
+      EXPIRATION_DAYS
+    );
+
+    const nonCompliantDuccVersion = Math.min(...getCurrentDUCCVersions()) - 1;
+    const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
+      completionEpochMillis,
+      expirationEpochMillis,
+    };
+
+    expect(
+      computeRenewalDisplayDates(status, nonCompliantDuccVersion)
+    ).toStrictEqual({
+      lastConfirmedDate: displayDateWithoutHours(completionEpochMillis),
+      nextReviewDate: `${displayDateWithoutHours(expirationEpochMillis)} (${
+        EXPIRATION_DAYS - completionDaysPast
+      } days)`,
+      moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
     });
   });
 
@@ -438,7 +506,9 @@ describe('computeRenewalDisplayDates', () => {
       bypassEpochMillis: bypassDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
       moduleStatus: AccessRenewalStatus.BYPASSED,
@@ -460,7 +530,9 @@ describe('computeRenewalDisplayDates', () => {
       expirationEpochMillis: expirationDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(bypassDate),
       nextReviewDate: 'Unavailable (bypassed)',
       moduleStatus: AccessRenewalStatus.BYPASSED,
@@ -485,7 +557,9 @@ describe('computeRenewalDisplayDates', () => {
       expirationEpochMillis: expirationDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
@@ -512,7 +586,9 @@ describe('computeRenewalDisplayDates', () => {
       expirationEpochMillis: expirationDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (${
         EXPIRATION_DAYS - completionDaysPast
@@ -533,7 +609,9 @@ describe('computeRenewalDisplayDates', () => {
       expirationEpochMillis: expirationDate,
     };
 
-    expect(computeRenewalDisplayDates(status)).toStrictEqual({
+    expect(
+      computeRenewalDisplayDates(status, compliantDuccVersion)
+    ).toStrictEqual({
       lastConfirmedDate: displayDateWithoutHours(completionDate),
       nextReviewDate: `${displayDateWithoutHours(expirationDate)} (expired)`,
       moduleStatus: AccessRenewalStatus.EXPIRED,
@@ -541,7 +619,7 @@ describe('computeRenewalDisplayDates', () => {
   });
 });
 
-describe('useIsUserDisabled', () => {
+describe(useIsUserDisabled.name, () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -634,7 +712,7 @@ describe('useIsUserDisabled', () => {
   });
 });
 
-describe('getTwoFactorSetupUrl', () => {
+describe(getTwoFactorSetupUrl.name, () => {
   beforeEach(async () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
@@ -658,7 +736,7 @@ describe('getTwoFactorSetupUrl', () => {
   });
 });
 
-describe('buildRasRedirectUrl', () => {
+describe(buildRasRedirectUrl.name, () => {
   it('should generate expected RAS redirect URL', () => {
     expect(buildRasRedirectUrl()).toMatch(
       encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH)
@@ -666,7 +744,7 @@ describe('buildRasRedirectUrl', () => {
   });
 });
 
-describe('hasExpired', () => {
+describe(hasExpired.name, () => {
   it('should return hasExpired=true for a date in the past', () => {
     const testTime = nowPlusDays(-10);
     expect(hasExpired(testTime)).toBeTruthy();
@@ -686,7 +764,7 @@ describe('hasExpired', () => {
   });
 });
 
-describe('isExpiringOrExpired', () => {
+describe(isExpiringOrExpired.name, () => {
   const LOOKBACK_PERIOD = 99; // arbitrary for testing; actual prod value is 330
   const TRAINING_LOOKBACK_PERIOD = 20; // arbitrary for testing; actual prod value is 30
   const EXPIRATION_DAYS = 123; // arbitrary for testing; actual prod value is 365
@@ -793,5 +871,60 @@ describe('isExpiringOrExpired', () => {
     expect(
       isExpiringOrExpired(undefined, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
+  });
+});
+
+describe(isCompleted.name, () => {
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        currentDuccVersions: [10, 11], // arbitrary
+      },
+    });
+  });
+
+  it('should return true when completion time exists', () => {
+    const ignoredDuccVersion = 0;
+    const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
+      completionEpochMillis: 12345,
+    };
+    expect(isCompleted(status, ignoredDuccVersion)).toBeTruthy();
+  });
+
+  it('should return false when completion time does not exist', () => {
+    const ignoredDuccVersion = 0;
+    const status: AccessModuleStatus = {
+      moduleName: arbitraryModuleName,
+    };
+    expect(isCompleted(status, ignoredDuccVersion)).toBeFalsy();
+  });
+
+  it('should return true for DUCC when completion time exists and the signed version is current', () => {
+    const status: AccessModuleStatus = {
+      moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      completionEpochMillis: 12345,
+    };
+    getCurrentDUCCVersions().forEach((duccSignedVersion) =>
+      expect(isCompleted(status, duccSignedVersion)).toBeTruthy()
+    );
+  });
+
+  it('should return false for DUCC when completion time exists but the signed version is missing', () => {
+    const status: AccessModuleStatus = {
+      moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      completionEpochMillis: 12345,
+    };
+    expect(isCompleted(status, undefined)).toBeFalsy();
+  });
+
+  it('should return false for DUCC when completion time exists but the signed version is too old', () => {
+    const status: AccessModuleStatus = {
+      moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
+      completionEpochMillis: 12345,
+    };
+    const duccSignedVersion = Math.min(...getCurrentDUCCVersions()) - 1;
+    expect(isCompleted(status, duccSignedVersion)).toBeFalsy();
   });
 });

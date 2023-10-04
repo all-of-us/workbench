@@ -15,6 +15,10 @@ export const getCurrentDUCCVersions = (): number[] =>
 export const getLiveDUCCVersion = (): number =>
   Math.max(...getCurrentDUCCVersions());
 
+export const isCurrentDUCCVersion = (
+  duccSignedVersion: number | undefined
+): boolean => getCurrentDUCCVersions().includes(duccSignedVersion);
+
 interface VersionInfo {
   version: number;
   path: string;
