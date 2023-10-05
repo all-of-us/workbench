@@ -26,10 +26,10 @@ export const runtimePresets: {
           diskType: DiskType.STANDARD,
           size: MIN_DISK_SIZE_GB,
           labels: {},
-          name: null,
+          name: null, // TODO: why not undefined or simply missing?
         },
         machineType: DEFAULT_MACHINE_NAME,
-        gpuConfig: null,
+        gpuConfig: null, // TODO: why not undefined or simply missing?
       },
     },
   },
@@ -70,7 +70,7 @@ export const applyPresetOverride = (runtime) => {
     return {
       ...runtime,
       gceConfig,
-      // restore the original PD name if it exists, which will cause a creation request to attach it to the new runtime
+      // restore the original PD name, which will cause a creation request to attach it to the new runtime
       gceWithPdConfig:
         gceWithPdConfig &&
         fp.set(

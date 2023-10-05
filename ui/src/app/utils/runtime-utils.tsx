@@ -651,25 +651,21 @@ export const maybeWithExistingDiskName = (
   return { ...c, existingDiskName: null };
 };
 
-// Attach an existing disk to the given runtime, if the configuration allows it.
-export const maybeWithExistingDisk = (
+export const maybeWithPersistentDisk = (
   runtime: Runtime,
-  existingDisk: Disk | null
+  persistentDisk: Disk | PersistentDiskRequest | null | undefined
 ): Runtime => {
-  if (!runtime || !existingDisk || runtime.dataprocConfig) {
+  if (!runtime || !persistentDisk || !runtime.gceConfig) {
     return runtime;
   }
-
+  // TODO: why not all fields?
+  const { name, size, diskType } = persistentDisk;
   return {
     ...runtime,
-    gceConfig: null,
+    gceConfig: null, // TODO: why not undefined?
     gceWithPdConfig: {
-      ...runtime.gceConfig,
-      persistentDisk: {
-        name: existingDisk.name,
-        size: existingDisk.size,
-        diskType: existingDisk.diskType,
-      },
+      ...runtime.gceConfig, // note: gceConfig.diskSize is discarded.  this is what we want.
+      persistentDisk: { name, size, diskType },
     },
   };
 };

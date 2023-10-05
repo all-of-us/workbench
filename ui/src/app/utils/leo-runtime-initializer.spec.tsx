@@ -27,8 +27,10 @@ import { setImmediate } from 'timers';
 
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import {
+  defaultDataprocConfig,
+  defaultDataProcRuntime,
+  defaultGceRuntimeWithPd,
   defaultRuntime,
-  defaultRuntimeWithPd,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
 
@@ -191,7 +193,8 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
-  it("should error and suggest user's most runtime if a valid one exists", async () => {
+  // RW-11032 Don't create gceConfig runtimes
+  it("should error and add a PD to user's most recent runtime if a valid one exists", async () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'researchallofus.org' } });
     mockGetRuntime.mockImplementation(() => {
       return {
@@ -212,10 +215,15 @@ describe('RuntimeInitializer', () => {
       fail('expected initializer to throw an exception');
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+      // these are the specific fields added to the runtime
+      const { name, size, diskType } =
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .persistentDisk;
       expect(e.defaultRuntime).toMatchObject({
-        gceConfig: {
+        gceWithPdConfig: {
           diskSize: 777,
           machineType: 'n1-standard-16',
+          persistentDisk: { name, size, diskType },
         },
       });
     }
@@ -393,9 +401,9 @@ describe(throwRuntimeNotFound.name, () => {
 
   it('should apply a preset override if targetRuntime does not exist but currentRuntime exists and is not DELETED', () => {
     const currentRuntime = {
-      ...defaultRuntimeWithPd(),
+      ...defaultGceRuntimeWithPd(),
       gceWithPdConfig: {
-        ...defaultRuntimeWithPd().gceWithPdConfig,
+        ...defaultGceRuntimeWithPd().gceWithPdConfig,
         machineType: 'n1-standard-2',
       },
     };
@@ -404,9 +412,9 @@ describe(throwRuntimeNotFound.name, () => {
     // preconditions check to ensure test validity
 
     expect(currentRuntime.status).not.toEqual(RuntimeStatus.DELETED);
-    expect(currentRuntime.dataprocConfig).toBeUndefined();
-    expect(currentRuntime.gceConfig).toBeUndefined();
-    expect(currentRuntime.gceWithPdConfig).not.toBeUndefined();
+    expect(currentRuntime.dataprocConfig).toBeFalsy();
+    expect(currentRuntime.gceConfig).toBeFalsy();
+    expect(currentRuntime.gceWithPdConfig).toBeTruthy();
 
     // an arbitrary non-PD field - later we see that this has been overridden by the preset
     expect(currentRuntime.gceWithPdConfig.machineType).not.toEqual(
@@ -447,8 +455,52 @@ describe(throwRuntimeNotFound.name, () => {
   });
 
   it(
+    'should apply a preset override when: ' +
+      'targetRuntime does not exist, currentRuntime exists, currentRuntime is DataProc, currentRuntime is DELETED',
+    () => {
+      const currentRuntime = {
+        ...defaultDataProcRuntime(),
+        dataprocConfig: {
+          ...defaultDataprocConfig(),
+          masterMachineType: 'n1-standard-8',
+        },
+      };
+      const gcePersistentDisk = stubDisk();
+
+      // preconditions check to ensure test validity
+
+      expect(currentRuntime.dataprocConfig).toBeTruthy();
+      expect(currentRuntime.gceConfig).toBeFalsy();
+      expect(currentRuntime.gceWithPdConfig).toBeFalsy();
+
+      // an arbitrary field - later we see that this DataProc field has been overridden by the preset GCE With PD field
+      expect(currentRuntime.dataprocConfig.masterMachineType).not.toEqual(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+          .masterMachineType
+      );
+
+      // now begin actual test
+
+      try {
+        const callSucceeded = true;
+        throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
+        expect(callSucceeded).toBeFalsy();
+      } catch (e) {
+        expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+
+        expect(e.defaultRuntime.dataprocConfig).toBeTruthy();
+        expect(e.defaultRuntime.gceConfig).toBeFalsy();
+        expect(e.defaultRuntime.gceWithPdConfig).toBeFalsy();
+        expect(e.defaultRuntime.dataprocConfig).toEqual(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+        );
+      }
+    }
+  );
+
+  it(
     'should apply a preset override and connect an existing disk when: ' +
-      'targetRuntime does not exist, currentRuntime exists, currentRuntime is DELETED',
+      'targetRuntime does not exist, currentRuntime exists, currentRuntime is GCE, currentRuntime is DELETED',
     () => {
       const currentRuntime = {
         ...defaultRuntime(),
@@ -462,9 +514,9 @@ describe(throwRuntimeNotFound.name, () => {
 
       // preconditions check to ensure test validity
 
-      expect(currentRuntime.dataprocConfig).toBeUndefined();
-      expect(currentRuntime.gceConfig).not.toBeUndefined(); // deleted runtimes do not have PDs attached, by definition
-      expect(currentRuntime.gceWithPdConfig).toBeUndefined();
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
+      expect(currentRuntime.gceConfig).toBeTruthy(); // deleted runtimes do not have PDs attached, by definition
+      expect(currentRuntime.gceWithPdConfig).toBeFalsy();
 
       expect(
         runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
@@ -492,9 +544,9 @@ describe(throwRuntimeNotFound.name, () => {
           name: gcePersistentDisk.name,
         };
 
-        expect(e.defaultRuntime.dataprocConfig).toBeUndefined();
-        expect(e.defaultRuntime.gceConfig).toBeUndefined(); // transformed by attaching the PD
-        expect(e.defaultRuntime.gceWithPdConfig).not.toBeUndefined();
+        expect(e.defaultRuntime.dataprocConfig).toBeFalsy();
+        expect(e.defaultRuntime.gceConfig).toBeFalsy(); // transformed by attaching the PD
+        expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
         expect(e.defaultRuntime.gceWithPdConfig.machineType).toEqual(
           runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
             .machineType
@@ -508,11 +560,12 @@ describe(throwRuntimeNotFound.name, () => {
 
   it(
     'should apply a preset override with an undefined persistent disk name when: ' +
-      'targetRuntime does not exist, currentRuntime exists, currentRuntime is DELETED, gcePersistentDisk does not exist',
+      'targetRuntime does not exist, currentRuntime [exists, is DELETED, is GCE, is GENERAL_ANALYSIS], gcePersistentDisk does not exist',
     () => {
       const currentRuntime = {
         ...defaultRuntime(),
         status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceConfig: {
           ...defaultRuntime().gceConfig,
           machineType: 'n1-standard-2',
@@ -522,14 +575,9 @@ describe(throwRuntimeNotFound.name, () => {
 
       // preconditions check to ensure test validity
 
-      expect(currentRuntime.dataprocConfig).toBeUndefined();
-      expect(currentRuntime.gceConfig).not.toBeUndefined(); // deleted runtimes do not have PDs attached, by definition
-      expect(currentRuntime.gceWithPdConfig).toBeUndefined();
-
-      expect(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-          .persistentDisk.name
-      ).not.toBeUndefined();
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
+      expect(currentRuntime.gceConfig).toBeTruthy(); // deleted runtimes do not have PDs attached, by definition
+      expect(currentRuntime.gceWithPdConfig).toBeFalsy();
 
       // an arbitrary field - later we see that this GCE field has been overridden by the preset GCE With PD field
       expect(currentRuntime.gceConfig.machineType).not.toEqual(
@@ -546,21 +594,87 @@ describe(throwRuntimeNotFound.name, () => {
       } catch (e) {
         expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
 
-        const runtimePresetWithNoPd: PersistentDiskRequest = {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .persistentDisk,
-          name: undefined,
-        };
-
-        expect(e.defaultRuntime.dataprocConfig).toBeUndefined();
-        expect(e.defaultRuntime.gceConfig).toBeUndefined(); // transformed by attaching the PD
-        expect(e.defaultRuntime.gceWithPdConfig).not.toBeUndefined();
+        expect(e.defaultRuntime.dataprocConfig).toBeFalsy();
+        expect(e.defaultRuntime.gceConfig).toBeFalsy(); // transformed by attaching the PD
+        expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
         expect(e.defaultRuntime.gceWithPdConfig.machineType).toEqual(
           runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
             .machineType
         );
         expect(e.defaultRuntime.gceWithPdConfig.persistentDisk).toEqual(
-          runtimePresetWithNoPd
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk
+        );
+        expect(
+          e.defaultRuntime.gceWithPdConfig.persistentDisk.name
+        ).toBeFalsy();
+      }
+    }
+  );
+
+  it(
+    'should add  an undefined persistent disk name when: ' +
+      'targetRuntime does not exist, currentRuntime [exists, is DELETED, is GCE, is USER_OVERRIDE], gcePersistentDisk does not exist',
+    () => {
+      const currentRuntime = {
+        ...defaultRuntime(),
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+        gceConfig: {
+          ...defaultRuntime().gceConfig,
+          machineType: 'n1-standard-2',
+        },
+      };
+      const gcePersistentDisk = undefined;
+
+      // preconditions check to ensure test validity
+
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
+      expect(currentRuntime.gceConfig).toBeTruthy(); // deleted runtimes do not have PDs attached, by definition
+      expect(currentRuntime.gceWithPdConfig).toBeFalsy();
+
+      // an arbitrary field - later we see that this GCE field has been NOT overridden by the preset GCE With PD field
+      expect(currentRuntime.gceConfig.machineType).not.toEqual(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .machineType
+      );
+
+      // now begin actual test
+
+      try {
+        const callSucceeded = true;
+        throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
+        expect(callSucceeded).toBeFalsy();
+      } catch (e) {
+        expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+
+        expect(e.defaultRuntime.dataprocConfig).toBeFalsy();
+        expect(e.defaultRuntime.gceConfig).toBeFalsy(); // transformed by attaching the PD
+        expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
+
+        expect(e.defaultRuntime.gceWithPdConfig.persistentDisk.name).toEqual(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk.name
+        );
+        expect(e.defaultRuntime.gceWithPdConfig.persistentDisk.size).toEqual(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk.size
+        );
+        expect(
+          e.defaultRuntime.gceWithPdConfig.persistentDisk.diskType
+        ).toEqual(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk.diskType
+        );
+
+        expect(
+          e.defaultRuntime.gceWithPdConfig.persistentDisk.name
+        ).toBeFalsy();
+
+        // the preset is NOT applied to the main configuration
+        expect(e.defaultRuntime.gceWithPdConfig.machineType).not.toEqual(
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .machineType
         );
       }
     }
