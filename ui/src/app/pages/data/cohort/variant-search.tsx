@@ -1,8 +1,15 @@
 import * as React from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
+import { Slider } from 'primereact/slider';
 
-import { CriteriaType, Domain, Variant } from 'generated/fetch';
+import {
+  CriteriaType,
+  Domain,
+  Variant,
+  VariantFilterResponse,
+} from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
@@ -20,7 +27,7 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 
-const { useState } = React;
+const { useEffect, useState } = React;
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -123,6 +130,124 @@ const searchTooltip = (
   </div>
 );
 
+const filterDisplayNames = {
+  geneList: 'Gene',
+  consequenceList: 'Consequence',
+  clinicalSignificanceList: 'ClinVar Significance',
+};
+
+const mockFilters: VariantFilterResponse = {
+  geneList: ['AL031663.2, RPL5P2, WFDC2', 'AL031663.2, WFDC2', 'WFDC2'],
+  consequenceList: [
+    '3_prime_UTR_variant',
+    '5_prime_UTR_variant',
+    'downstream_gene_variant',
+    'frameshift_variant',
+    'intron_variant',
+    'missense_variant',
+    'splice_acceptor_variant',
+    'splice_region_variant',
+    'start_lost',
+    'stop_gained',
+    'synonymous_variant',
+    'upstream_gene_variant',
+  ],
+  clinicalSignificanceList: ['n/a'],
+  countMin: 1,
+  countMax: 380240,
+  numberMin: 24,
+  numberMax: 490788,
+  frequencyMin: 0,
+  frequencyMax: 1,
+  sortByList: [
+    'Variant ID',
+    'Gene',
+    'Consequence',
+    'Protein Change',
+    'ClinVar Significance',
+    'Allele Count',
+    'Allele Number',
+    'Allele Frequency',
+  ],
+};
+
+const FilterSection = ({
+  displayName,
+  checkboxes,
+  range,
+  options,
+  updateFn,
+}: {
+  displayName: string;
+  checkboxes?: string[];
+  range?: [number, number];
+  options?: string[];
+  updateFn: Function;
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const [checkedValues, setCheckedValues] = useState([]);
+  const [rangeValues, setRangeValues] = useState(range);
+  const [sortValue, setSortValue] = useState(options?.[0]);
+
+  useEffect(() => {
+    if (checkboxes) {
+      updateFn(checkedValues);
+    }
+  }, [checkedValues]);
+
+  useEffect(() => {
+    if (options) {
+      updateFn(sortValue);
+    }
+  }, [sortValue]);
+  return (
+    <div>
+      {displayName}
+      <Clickable onClick={() => setExpanded((prevState) => !prevState)}>
+        <ClrIcon shape='angle' direction={expanded ? 'down' : 'right'} />
+      </Clickable>
+      {expanded && (
+        <div>
+          {checkboxes?.map((checkbox, index) => (
+            <input
+              key={index}
+              type='checkbox'
+              name={checkbox}
+              onChange={(e) =>
+                setCheckedValues((prevState) =>
+                  e.target.checked
+                    ? [...prevState, e.target.value]
+                    : prevState.filter((val) => val !== e.target.value)
+                )
+              }
+            />
+          ))}
+          {!!range && (
+            <Slider
+              value={rangeValues}
+              onChange={(e) => setRangeValues(e.value as [number, number])}
+              onSlideEnd={(e) => updateFn(e.value)}
+              min={range[0]}
+              max={range[1]}
+              range
+            />
+          )}
+          {!!options && (
+            <Dropdown
+              value={sortValue}
+              options={options.map((option) => ({
+                label: option,
+                value: option,
+              }))}
+              onChange={(e) => setSortValue(e.value)}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const VariantSearch = withCurrentWorkspace()(
   ({ select, selectedIds, workspace: { id, namespace } }) => {
     const [first, setFirst] = useState(0);
@@ -134,6 +259,11 @@ export const VariantSearch = withCurrentWorkspace()(
     const [searchResults, setSearchResults] = useState<Variant[]>([]);
     const [searchTerms, setSearchTerms] = useState('');
     const [totalCount, setTotalCount] = useState(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState(mockFilters);
+    const [variantFilters, setVariantFilters] = useState(mockFilters);
+    let filterIcon: HTMLElement;
+    let filterOverlay: any;
 
     const searchVariants = async (searchString: string, firstPage?: number) => {
       try {
@@ -142,6 +272,17 @@ export const VariantSearch = withCurrentWorkspace()(
             searchTerm: searchString,
             pageToken: pageToken,
           });
+        if (items.length > 1) {
+          const filters = await cohortBuilderApi().findVariantFilters(
+            namespace,
+            id,
+            {
+              searchTerm: searchString,
+              pageToken: nextPageToken,
+            }
+          );
+          console.log(filters);
+        }
         setPageToken(nextPageToken);
         setSearchResults((prevState) =>
           firstPage ? [...prevState, ...items] : items
@@ -268,6 +409,29 @@ export const VariantSearch = withCurrentWorkspace()(
         <div style={{ fontSize: '11px' }}>
           SNP/Indel Variant search is currently a proof of concept and only
           contains data for chromosome 20
+        </div>
+        <div style={{ position: 'relative' }}>
+          <Clickable onClick={() => setFiltersOpen((prevState) => !prevState)}>
+            <ClrIcon shape='filter-2' className='is-solid' size={30} />
+            Filter & Sort
+          </Clickable>
+          {filtersOpen && (
+            <div
+              style={{
+                background: 'white',
+                position: 'absolute',
+                top: '100%',
+                width: '4rem',
+                height: '10rem',
+              }}
+            >
+              <FilterSection
+                displayName='Gene'
+                checkboxes={variantFilters.geneList}
+                updateFn={() => {}}
+              />
+            </div>
+          )}
         </div>
         {loading ? (
           <SpinnerOverlay />
