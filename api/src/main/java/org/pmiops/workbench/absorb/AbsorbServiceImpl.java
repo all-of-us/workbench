@@ -20,38 +20,34 @@ import org.springframework.stereotype.Service;
 public class AbsorbServiceImpl implements AbsorbService {
   private final CloudStorageClient cloudStorageClient;
 
+  private String apiKey = null;
+  private String accessToken = null;
+  private String userId = null;
+
   @Autowired
   public AbsorbServiceImpl(CloudStorageClient cloudStorageClient) {
     this.cloudStorageClient = cloudStorageClient;
   }
 
   @Override
+  public Boolean userHasLoggedIntoAbsorb(String email) throws ApiException {
+    ensureAuthentication(email);
+
+    return this.userId != null;
+  }
+
+  @Override
   public List<Enrollment> getActiveEnrollmentsForUser(String email) throws ApiException {
-    var config = cloudStorageClient.getAbsorbCredentials();
-    var apiKey = config.getString("apiKey");
+    ensureAuthentication(email);
 
-    // Obtain an access token
-    var accessToken =
-        new AuthenticateApi()
-            .restAuthenticationAuthenticate(
-                new AuthenticationRequest()
-                    .password(config.getString("password"))
-                    .username(config.getString("username"))
-                    .privateKey(apiKey),
-                apiKey);
-
-    // Find the user id
-    var users = new UsersApi().usersGetUsers(apiKey, accessToken, "username eq '" + email + "'");
-
-    if (users.getUsers().size() == 0) {
+    if (this.userId == null) {
       throw new ApiException(404, "User not found");
     }
 
     // Fetch enrollments for the user
     var enrollmentsResponse =
         new EnrollmentsApi()
-            .enrollmentsGetUserEnrollments(
-                apiKey, accessToken, users.getUsers().get(0).getId(), "isActive")
+            .enrollmentsGetUserEnrollments(apiKey, accessToken, this.userId, "isActive")
             .getEnrollments();
 
     // Convert enrollments to our simplified and serialized model
@@ -65,6 +61,39 @@ public class AbsorbServiceImpl implements AbsorbService {
       Instant dateCompleted =
           LocalDateTime.parse(e.getDateCompleted(), ISO_DATE_TIME).toInstant(ZoneOffset.UTC);
       return new Enrollment(e.getCourseId(), dateCompleted);
+    }
+  }
+
+  // Obtains and stores a valid API key, access token, and user id for the given email address.
+  // Tokens are valid for four hours, which is well under the expected lifetime of this service.
+  private void ensureAuthentication(String email) throws ApiException {
+    if (apiKey != null && accessToken != null && userId != null) {
+      return;
+    }
+
+    var config = cloudStorageClient.getAbsorbCredentials();
+    apiKey = config.getString("apiKey");
+
+    // Obtain an access token
+    accessToken =
+        new AuthenticateApi()
+            .restAuthenticationAuthenticate(
+                new AuthenticationRequest()
+                    .password(config.getString("password"))
+                    .username(config.getString("username"))
+                    .privateKey(apiKey),
+                apiKey);
+
+    // Find the user id
+    var users = new UsersApi().usersGetUsers(apiKey, accessToken, "username eq '" + email + "'");
+
+    if (users.getUsers().size() > 1) {
+      throw new ApiException(500, "Multiple users found");
+    } else if (users.getUsers().size() == 1) {
+      userId = users.getUsers().get(0).getId();
+    } else if (users.getUsers().size() == 0) {
+      // No user found. This indicates the user has not logged in to Absorb yet.
+      userId = null;
     }
   }
 }

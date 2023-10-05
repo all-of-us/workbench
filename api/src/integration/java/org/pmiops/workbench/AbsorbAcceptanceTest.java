@@ -19,10 +19,31 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
   @Autowired private AbsorbService absorbService;
 
+  private final String partiallyCompleteUserEmail =
+      "absorb_acceptance_test_02@fake-research-aou.org";
+  private final String nonexistantUserEmail = "absorb_acceptance_test_fake@fake-research-aou.org";
+
   @TestConfiguration
   @ComponentScan(basePackageClasses = DirectoryServiceImpl.class)
   @Import({AbsorbServiceImpl.class})
   static class Configuration {}
+
+  @Test
+  @Disabled("RW-11039")
+  public void testUserHasLoggedIntoAbsorb_True() throws Exception {
+    // Setup:
+    // - A user with this email exists
+    // - The user has logged into Absorb
+    assertThat(absorbService.userHasLoggedIntoAbsorb(partiallyCompleteUserEmail)).isTrue();
+  }
+
+  @Test
+  @Disabled("RW-11039")
+  public void testUserHasLoggedIntoAbsorb_False() throws Exception {
+    // Setup:
+    // - A user with this email does not exist, therefore they have not logged into Absorb
+    assertThat(absorbService.userHasLoggedIntoAbsorb(nonexistantUserEmail)).isFalse();
+  }
 
   @Test
   @Disabled("RW-11039")
@@ -31,9 +52,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
     // - A user with this email exists
     // - The user has completed RT training in Absorb
     // - The user has not completed CT training in Absorb
-    var email = "absorb_acceptance_test_02@fake-research-aou.org";
-
-    var enrollments = absorbService.getActiveEnrollmentsForUser(email);
+    var enrollments = absorbService.getActiveEnrollmentsForUser(partiallyCompleteUserEmail);
     assertThat(enrollments.size()).isEqualTo(2);
 
     var rtTrainingEnrollment =

@@ -363,6 +363,18 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
+  public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfUserHasntSignedIntoAbsorb()
+          throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(false);
+
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    assertModuleNotCompleted(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+    assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+  }
+
+  @Test
   public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiredTraining() throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
 
@@ -593,6 +605,7 @@ public class ComplianceTrainingServiceTest {
   private void mockGetUserEnrollments(
       @Nullable Instant rtCompletionTime, @Nullable Instant ctCompletionTime)
       throws org.pmiops.workbench.absorb.ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
         .thenReturn(
             List.of(
