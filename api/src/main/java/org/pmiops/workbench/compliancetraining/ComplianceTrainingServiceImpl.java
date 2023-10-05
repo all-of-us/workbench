@@ -216,19 +216,6 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
     }
   }
 
-  /**
-   * Updates the given user's training status from Moodle.
-   *
-   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
-   * rather than user-specific OAuth tokens.
-   *
-   * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
-   * valid, we store their completion dates in the database. If they are marked invalid, we clear
-   * the completion dates from the database as the user will need to complete a new training.
-   *
-   * @param dbUser
-   * @param agent
-   */
   @Transactional
   public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
     if (!absorbService.userHasLoggedIntoAbsorb(dbUser.getUsername())) {
