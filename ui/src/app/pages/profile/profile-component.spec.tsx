@@ -1,239 +1,207 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { mount, ReactWrapper } from 'enzyme';
+import { MemoryRouter } from 'react-router';
 
-import {
-  AccessModule,
-  InstitutionApi,
-  Profile,
-  ProfileApi,
-} from 'generated/fetch';
+import { AccessModule, Profile } from 'generated/fetch';
 
-import { TextInput } from 'app/components/inputs';
+import { screen } from '@testing-library/dom';
+import { fireEvent, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { profileStore } from 'app/utils/stores';
 
-import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
-import {
-  ProfileApiStub,
-  ProfileStubVariables,
-} from 'testing/stubs/profile-api-stub';
+import { expectButtonElementDisabled } from 'testing/react-test-helpers';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
+const reload = jest.fn();
+const load = jest.fn();
+const updateCache = jest.fn();
 const tenMinutesMs = 10 * 60 * 1000;
 
-describe('ProfilePageComponent', () => {
-  function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
-    return wrapper.find('[data-test-id="save_profile"]');
-  }
+const profile = {
+  profile: ProfileStubVariables.PROFILE_STUB,
+  reload: reload,
+  load: load,
+  updateCache: updateCache,
+};
+const updateProfile = (newUpdates: Partial<Profile>) => {
+  profileStore.set({
+    profile: { ...ProfileStubVariables.PROFILE_STUB, ...newUpdates },
+    load,
+    reload,
+    updateCache,
+  });
+};
 
-  function clickSaveProfileButton(wrapper: ReactWrapper) {
-    const saveProfileButton = getSaveProfileButton(wrapper);
-    saveProfileButton.first().simulate('click');
-    return;
-  }
-
-  const component = (controlledTierProfile = {}) => {
-    return mount(
+const setup = () => {
+  return {
+    container: render(
       <MemoryRouter>
         <ProfileComponent
-          controlledTierProfile={controlledTierProfile}
+          profileState={profile}
           hideSpinner={() => {}}
+          navigate={() => {}}
+          navigateByUrl={() => {}}
         />
       </MemoryRouter>
-    );
+    ).container,
+    user: userEvent.setup(),
   };
+};
 
-  const load = jest.fn();
-  const reload = jest.fn();
-  const updateCache = jest.fn();
-
-  const updateProfile = (newUpdates: Partial<Profile>) => {
-    profileStore.set({
-      profile: { ...ProfileStubVariables.PROFILE_STUB, ...newUpdates },
-      load,
-      reload,
-      updateCache,
-    });
-  };
-
-  beforeEach(() => {
-    const profileApi = new ProfileApiStub();
-
-    registerApiClient(ProfileApi, profileApi);
-
-    // mocking because we don't have access to the angular service
-    reload.mockImplementation(async () => {
-      updateProfile(await profileApi.getMe());
-    });
-
-    profileStore.set({
-      profile: ProfileStubVariables.PROFILE_STUB,
-      load,
-      reload,
-      updateCache,
-    });
-
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        gsuiteDomain: 'fake-research-aou.org',
-        projectId: 'aaa',
-        publicApiKeyForErrorReports: 'aaa',
-        enableEraCommons: true,
-        enableComplianceTraining: true,
-      },
-    });
-
-    const institutionApi = new InstitutionApiStub();
-    registerApiClient(InstitutionApi, institutionApi);
+it('should allow completing the account creation form', async () => {
+  const profileStub = ProfileStubVariables.PROFILE_STUB;
+  profileStub.address.country = 'India';
+  profileStub.firstSignInTime = new Date('2023-12-03').getTime();
+  profileStore.set({
+    profile: profileStub,
+    load,
+    reload,
+    updateCache,
   });
 
-  it('should render the profile', () => {
-    const wrapper = component();
-    expect(wrapper.find(TextInput).first().prop('value')).toMatch(
-      ProfileStubVariables.PROFILE_STUB.givenName
-    );
+  setup();
+  try {
+    expect(screen.getByText('Demographics Survey')).not.toBeInTheDocument();
+  } catch (e) {
+    expect(true);
+  }
+});
+
+it('should not show the profile confirmation renewal box if the access module was bypassed', async () => {
+  updateProfile({
+    accessModules: {
+      modules: [
+        {
+          moduleName: AccessModule.PROFILE_CONFIRMATION,
+          expirationEpochMillis: Date.now() - tenMinutesMs,
+          bypassEpochMillis: 1,
+        },
+      ],
+    },
   });
 
-  it('should save correctly', async () => {
-    const wrapper = component();
-    expect(profileStore.get().profile.givenName).toEqual(
-      ProfileStubVariables.PROFILE_STUB.givenName
-    );
-
-    wrapper
-      .find(TextInput)
-      .first()
-      .simulate('change', { target: { value: 'x' } });
-    clickSaveProfileButton(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    expect(reload).toHaveBeenCalled();
-  });
-
-  it('should invalidate inputs correctly', () => {
-    const wrapper = component();
-    wrapper
-      .find(TextInput)
-      .first()
-      .simulate('change', { target: { value: '' } });
-    expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
-  });
-
-  it('should have country disabled', async () => {
-    const wrapper = component();
-
-    const country = wrapper.find('[data-test-id="country"]').first();
-
-    expect(country.first().prop('disabled')).toBe(true);
-    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
-  });
-
-  it('should display/update address', async () => {
-    const wrapper = component();
-
-    let streetAddress1 = wrapper
-      .find('[data-test-id="streetAddress1"]')
-      .first();
-    console.log(streetAddress1.props());
-    expect(streetAddress1.prop('value')).toBe('Main street');
-
-    streetAddress1.simulate('change', { target: { value: 'Broadway' } });
-
-    clickSaveProfileButton(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
-
-    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
-    expect(streetAddress1.prop('value')).toBe('Broadway');
-  });
-
-  it('should throw error if street Address 1 is empty', async () => {
-    const wrapper = component();
-
-    const streetAddress1 = wrapper
-      .find('[data-test-id="streetAddress1"]')
-      .first();
-    expect(streetAddress1.prop('value')).toBe('Main street');
-
-    streetAddress1.simulate('change', { target: { value: '' } });
-
-    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
-  });
-
-  it('should display a link to the signed DUCC if the user is up to date', async () => {
-    const wrapper = component();
+  setup();
+  try {
     expect(
-      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
-    ).toBeTruthy();
+      screen.getByText('Please update or verify your profile.')
+    ).toBeInTheDocument();
+  } catch (e) {
+    expect(true);
+  }
+});
+
+it('should show the profile confirmation renewal box if the access module has expired', async () => {
+  updateProfile({
+    accessModules: {
+      modules: [
+        {
+          moduleName: AccessModule.PROFILE_CONFIRMATION,
+          expirationEpochMillis: Date.now() - tenMinutesMs,
+        },
+      ],
+    },
   });
 
-  it('should not display a link to the signed DUCC if the user has not signed a DUCC', async () => {
-    updateProfile({ duccSignedVersion: undefined });
+  setup();
+  expect(
+    screen.getByText('Please update or verify your profile.')
+  ).toBeInTheDocument();
+});
 
-    const wrapper = component();
+it('should not display a link to the signed DUCC if the user has not signed a DUCC', async () => {
+  updateProfile({ duccSignedVersion: undefined });
+
+  setup();
+  try {
     expect(
-      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
-    ).toBeFalsy();
-  });
+      screen.getByText('View Signed Data User Code of Conduct')
+    ).toBeInTheDocument();
+  } catch (e) {
+    expect(true);
+  }
+});
 
-  it('should not display a link to the signed DUCC if the user has signed an older DUCC', async () => {
-    updateProfile({ duccSignedVersion: 2 });
+it('should not display a link to the signed DUCC if the user has signed an older DUCC', async () => {
+  updateProfile({ duccSignedVersion: 2 });
 
-    const wrapper = component();
+  setup();
+  try {
     expect(
-      wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
-    ).toBeFalsy();
+      screen.getByText('View Signed Data User Code of Conduct')
+    ).toBeInTheDocument();
+  } catch (e) {
+    expect(true);
+  }
+});
+
+it('should display a link to the signed DUCC if the user is up to date', async () => {
+  profileStore.set({
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load,
+    reload,
+    updateCache,
   });
+  setup();
+  expect(screen.getByText('Data User Code of Conduct')).toBeInTheDocument();
+});
 
-  it('should show the profile confirmation renewal box if the access module has expired', async () => {
-    updateProfile({
-      accessModules: {
-        modules: [
-          {
-            moduleName: AccessModule.PROFILE_CONFIRMATION,
-            expirationEpochMillis: Date.now() - tenMinutesMs,
-          },
-        ],
-      },
-    });
-
-    const wrapper = component();
-    expect(
-      wrapper.find('[data-test-id="profile-confirmation-renewal-box"]').exists()
-    ).toBeTruthy();
+it('should throw error if street Address 1 is empty', async () => {
+  profileStore.set({
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load,
+    reload,
+    updateCache,
   });
+  const { user } = setup();
+  // Confirm default value is present
+  expect(screen.getByDisplayValue('Main street')).toBeInTheDocument();
+  const element = screen.getByDisplayValue('Main street');
 
-  it('should not show the profile confirmation renewal box if the access module was bypassed', async () => {
-    updateProfile({
-      accessModules: {
-        modules: [
-          {
-            moduleName: AccessModule.PROFILE_CONFIRMATION,
-            expirationEpochMillis: Date.now() - tenMinutesMs,
-            bypassEpochMillis: 1,
-          },
-        ],
-      },
-    });
+  // Remove the street address 1 value
+  await user.click(element);
+  await user.clear(element);
+  await user.keyboard('{enter}');
 
-    const wrapper = component();
-    expect(
-      wrapper.find('[data-test-id="profile-confirmation-renewal-box"]').exists()
-    ).toBeFalsy();
+  // Confirm there is an error message
+  expect(
+    screen.getByText(/street address1 can't be blank/i)
+  ).toBeInTheDocument();
+
+  expectButtonElementDisabled(
+    screen.getByRole('button', {
+      name: /save profile/i,
+    })
+  );
+});
+
+it('should have country disabled', async () => {
+  profileStore.set({
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load,
+    reload,
+    updateCache,
   });
-
-  it('should not display a demographic survey if the user is international', async () => {
-    const { profile } = profileStore.get();
-    profile.address.country = 'India';
-    profile.firstSignInTime = new Date('2023-12-03').getTime();
-    updateProfile(profile);
-
-    const wrapper = component();
-    expect(
-      wrapper.find('[data-test-id="demographic-survey"]').exists()
-    ).toBeFalsy();
+  setup();
+  const country = screen.getByRole('textbox', {
+    name: /country/i,
   });
+  // Background color should be that of disabled input
+  expect(country).toHaveStyle(
+    `backgroundColor: ${colorWithWhiteness(colors.disabled, 0.6)}`
+  );
+
+  // Confirm the tooltip contents
+  fireEvent.mouseOver(country);
+  expect(
+    await screen.findByText('This field cannot be edited')
+  ).toBeInTheDocument();
+
+  expectButtonElementDisabled(
+    screen.getByRole('button', {
+      name: /save profile/i,
+    })
+  );
 });

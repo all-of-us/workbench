@@ -66,7 +66,7 @@ const validators = {
   state: { ...required, ...notTooLong(95) },
 };
 
-interface ProfilePageProps
+export interface ProfilePageProps
   extends WithProfileErrorModalProps,
     WithSpinnerOverlayProps,
     NavigationProps,
@@ -334,6 +334,7 @@ export const ProfileComponent = fp.flow(
             {isLong ? (
               <TextAreaWithLengthValidationMessage
                 id={id}
+                aria-label={id}
                 data-test-id={id}
                 heightOverride={styles.longInputHeightStyle}
                 initialText={inputProps.value}
@@ -352,6 +353,7 @@ export const ProfileComponent = fp.flow(
                 <div>
                   <TextInput
                     data-test-id={props.id || valueKey}
+                    aria-label={props.id}
                     {...inputProps}
                     style={
                       props.disabled
@@ -366,7 +368,9 @@ export const ProfileComponent = fp.flow(
                 </div>
               </TooltipTrigger>
             )}
-            <ValidationError>{errorText}</ValidationError>
+            <ValidationError aria-label={props.id + '_error'}>
+              {errorText}
+            </ValidationError>
           </div>
         );
       };
