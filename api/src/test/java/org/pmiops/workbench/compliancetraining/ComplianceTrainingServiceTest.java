@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -133,7 +134,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.absorb.ctTrainingCourseId = CT_ABSORB_COURSE_ID;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
-    TestMockFactory.createUserAccessModules(user, accessModules, userAccessModuleDao);
   }
 
   @Test
@@ -569,8 +569,8 @@ public class ComplianceTrainingServiceTest {
   private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName) {
     return userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
-        .get()
-        .getCompletionTime();
+        .map(DbUserAccessModule::getCompletionTime)
+        .orElse(null);
   }
 
   private BadgeDetailsV2 defaultBadgeDetails() {
