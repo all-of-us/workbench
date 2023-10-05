@@ -947,7 +947,7 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
+          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS, Domain.PERSON_HAS_EHR_DATA].includes(
             domainWithConceptSetId.domain
           )
         ) {
