@@ -364,7 +364,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfUserHasntSignedIntoAbsorb()
-          throws Exception {
+      throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
     when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(false);
 
@@ -376,7 +376,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_Moodle_DoesNothingIfNoCoursesComplete()
-          throws Exception {
+      throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
     mockGetUserBadgesByBadgeName(Map.of());
 
@@ -388,7 +388,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfNoCoursesComplete()
-          throws Exception {
+      throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
     mockGetUserEnrollments(null, null);
 

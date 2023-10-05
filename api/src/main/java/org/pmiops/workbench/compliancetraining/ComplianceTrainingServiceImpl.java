@@ -232,7 +232,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   @Transactional
   public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
     if (!absorbService.userHasLoggedIntoAbsorb(dbUser.getUsername())) {
-        return dbUser;
+      return dbUser;
     }
 
     Map<String, DbAccessModule.DbAccessModuleName> courseToAccessModuleMap =
