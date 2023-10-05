@@ -1168,6 +1168,12 @@ export const DatasetPage = fp.flow(
         // if *any* of the individual survey is unselected, unselect all-surveys
         // code here ...
         if (
+            prepackaged !== PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
+            updatedPrepackaged.has(prepackaged)
+        ) {
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA);
+        }
+        if (
           prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
           updatedPrepackaged.has(prepackaged) &&
           prepackaged.toString().startsWith('SURVEY_')
