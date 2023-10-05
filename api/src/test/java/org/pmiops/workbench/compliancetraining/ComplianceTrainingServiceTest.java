@@ -242,14 +242,16 @@ public class ComplianceTrainingServiceTest {
     var completionTime = currentInstant();
     mockGetUserEnrollments(completionTime, null);
     user = complianceTrainingService.syncComplianceTrainingStatus();
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
 
     // Time passes and the user re-syncs
     tick();
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion timestamp should not change when the method is called again.
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
   }
 
   @Test
@@ -292,7 +294,7 @@ public class ComplianceTrainingServiceTest {
     var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
     assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
-            .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
 
     // CT is incomplete, so there should not be a verification record.
     var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
@@ -336,7 +338,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerification_OnePerAccessModule()
-          throws Exception {
+      throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
@@ -528,7 +530,8 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_AbsorbRollbacksLeadToUnexpectedComplianceLapse() throws Exception {
+  public void testSyncComplianceTrainingStatus_AbsorbRollbacksLeadToUnexpectedComplianceLapse()
+      throws Exception {
     // This test documents undesired behavior. We think it is unlikely to happen and can
     // be fixed as-needed if we roll back Absorb.
 
@@ -538,7 +541,8 @@ public class ComplianceTrainingServiceTest {
     var rtCompletionTime = currentInstant();
     mockGetUserEnrollments(rtCompletionTime, null);
     user = complianceTrainingService.syncComplianceTrainingStatus();
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
 
     // Time passes.
     tick();
@@ -548,8 +552,9 @@ public class ComplianceTrainingServiceTest {
 
     // The user uses Moodle to complete CT training.
     var ctCompletionTime = currentTimestamp();
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(
-        BadgeName.CONTROLLED_TIER_TRAINING, defaultBadgeDetails().lastissued(currentSecond())));
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(
+            BadgeName.CONTROLLED_TIER_TRAINING, defaultBadgeDetails().lastissued(currentSecond())));
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Desired behavior: The user's RT training persists.

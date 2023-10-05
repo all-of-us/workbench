@@ -254,7 +254,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                 "User `%s` is not enrolled in Absorb course `%s` for access module `%s`. Users are expected to be automatically enrolled in all courses upon visiting Absorb.",
                 dbUser.getUsername(), courseId, accessModuleName));
         throw new NotFoundException(
-            String.format("User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
+            String.format(
+                "User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
       }
       var enrollment = maybeEnrollment.get();
 
