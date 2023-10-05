@@ -375,6 +375,30 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
+  public void testSyncComplianceTrainingStatus_Moodle_DoesNothingIfNoCoursesComplete()
+          throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+    mockGetUserBadgesByBadgeName(Map.of());
+
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    assertModuleNotCompleted(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+    assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfNoCoursesComplete()
+          throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+    mockGetUserEnrollments(null, null);
+
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    assertModuleNotCompleted(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+    assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+  }
+
+  @Test
   public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiredTraining() throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
 
