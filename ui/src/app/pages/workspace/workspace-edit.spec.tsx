@@ -1089,6 +1089,37 @@ describe('WorkspaceEdit', () => {
     ]);
   });
 
+  it('should show free tier user account correctly when usage is undefined', async () => {
+    mockHasBillingScope.mockImplementation(() => true);
+    workspaceEditMode = WorkspaceEditMode.Create;
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profileStore.get().profile,
+        freeTierUsage: undefined,
+      },
+    });
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const billingDropDown = wrapper
+      .find('[data-test-id="billing-dropdown"]')
+      .first();
+
+    expect(billingDropDown.props().value).toEqual('free-tier');
+    // @ts-ignore
+    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
+      'free-tier',
+      'user-billing',
+    ]);
+    // @ts-ignore
+    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
+      'Use All of Us initial credits - $34.56 left',
+      'User Billing',
+    ]);
+  });
+
   it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Create;
