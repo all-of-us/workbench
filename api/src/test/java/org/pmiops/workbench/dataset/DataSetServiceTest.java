@@ -533,6 +533,16 @@ public class DataSetServiceTest {
   }
 
   @Test
+  public void testGetValueListFromDomainPersonHasEhrData() {
+    mockPersonDomainTableFields();
+    List<DomainWithDomainValues> personDomainValueList =
+        dataSetServiceImpl.getValueListFromDomain(null, "PERSON_HAS_EHR_DATA");
+    assertThat(personDomainValueList.get(0).getItems().size()).isEqualTo(2);
+    assertThat(
+        personDomainValueList.get(0).getDomain().equals(Domain.PERSON_HAS_EHR_DATA.toString()));
+  }
+
+  @Test
   public void testGetDataSets_cohort() {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(3L);
@@ -812,6 +822,15 @@ public class DataSetServiceTest {
     doReturn(measurementList)
         .when(mockBigQueryService)
         .getTableFieldsFromDomain(Domain.MEASUREMENT);
+  }
+
+  private void mockPersonDomainTableFields() {
+    FieldList personFieldList =
+        FieldList.of(
+            ImmutableList.of(
+                Field.of("person_id", LegacySQLTypeName.INTEGER),
+                Field.of("sex_at_birth", LegacySQLTypeName.STRING)));
+    doReturn(personFieldList).when(mockBigQueryService).getTableFieldsFromDomain(Domain.PERSON);
   }
 
   private String normalizeDomainName(Domain d) {

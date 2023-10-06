@@ -7712,6 +7712,7 @@ components:
       enum:
       - NONE
       - PERSON
+      - PERSON_HAS_EHR_DATA
       - SURVEY
       - SURVEY_BASICS
       - SURVEY_LIFESTYLE
@@ -7731,7 +7732,6 @@ components:
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
-      - PERSON_HAS_EHR_DATA
     DataSetExportRequest:
       required:
       - dataSetRequest

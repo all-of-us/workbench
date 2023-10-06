@@ -280,6 +280,7 @@ interface ImmutableListItemProps {
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
+  disabled?: boolean;
 }
 const ImmutableListItem = ({
   name,
@@ -287,6 +288,7 @@ const ImmutableListItem = ({
   onChange,
   checked,
   showSourceConceptIcon,
+  disabled,
 }: ImmutableListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
@@ -301,6 +303,7 @@ const ImmutableListItem = ({
             : styles.listItemCheckbox
         }
         checked={checked}
+        disabled={disabled}
       />
       <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
         <div
@@ -947,9 +950,11 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS, Domain.PERSON_HAS_EHR_DATA].includes(
-            domainWithConceptSetId.domain
-          )
+          ![
+            domain,
+            Domain.PHYSICAL_MEASUREMENT_CSS,
+            Domain.PERSON_HAS_EHR_DATA,
+          ].includes(domainWithConceptSetId.domain)
         ) {
           updatedCrossDomainConceptSetList.add(
             domainWithConceptSetId.conceptSetId
@@ -1034,9 +1039,11 @@ export const DatasetPage = fp.flow(
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
           if (
-            ![domain, Domain.PHYSICAL_MEASUREMENT_CSS, Domain.PERSON_HAS_EHR_DATA].includes(
-              domainWithConceptSetId.domain
-            )
+            ![
+              domain,
+              Domain.PHYSICAL_MEASUREMENT_CSS,
+              Domain.PERSON_HAS_EHR_DATA,
+            ].includes(domainWithConceptSetId.domain)
           ) {
             newCrossDomainConceptSetList.add(
               domainWithConceptSetId.conceptSetId
@@ -1133,6 +1140,16 @@ export const DatasetPage = fp.flow(
       );
     };
 
+    const prepackagedIsDisabled = (prepackaged: string) =>
+      (prepackaged === PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
+        selectedPrepackagedConceptSets.includes(
+          PrePackagedConceptSetEnum.PERSON
+        )) ||
+      (prepackaged === PrePackagedConceptSetEnum.PERSON &&
+        selectedPrepackagedConceptSets.includes(
+          PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA
+        ));
+
     const selectPrePackagedConceptSet = (
       prepackaged: PrePackagedConceptSetEnum,
       selected: boolean
@@ -1168,10 +1185,12 @@ export const DatasetPage = fp.flow(
         // if *any* of the individual survey is unselected, unselect all-surveys
         // code here ...
         if (
-            prepackaged !== PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
-            updatedPrepackaged.has(prepackaged)
+          prepackaged !== PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
+          updatedPrepackaged.has(prepackaged)
         ) {
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA);
+          updatedPrepackaged.delete(
+            PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA
+          );
         }
         if (
           prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
@@ -1807,6 +1826,7 @@ export const DatasetPage = fp.flow(
                         data-test-id='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
+                        disabled={prepackagedIsDisabled(p)}
                         onChange={() =>
                           selectPrePackagedConceptSet(
                             p,

@@ -436,9 +436,6 @@ public class DataSetController implements DataSetApiDelegate {
           new DomainWithDomainValues()
               .domain(Domain.WHOLE_GENOME_VARIANT.toString())
               .addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE)));
-    } else if (domainValue.equals(Domain.PERSON_HAS_EHR_DATA.toString())) {
-      response.setItems(
-          dataSetService.getValueListFromDomain(conceptSetId, Domain.PERSON.toString()));
     } else {
       response.setItems(dataSetService.getValueListFromDomain(conceptSetId, domainValue));
     }

@@ -515,14 +515,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final ImmutableSet<Domain> domainSet =
         domainValuePairs.stream()
-            .map(
-                dvp ->
-                    dvp.getDomain() == Domain.PERSON
-                            && dbDataset
-                                .getPrePackagedConceptSetEnum()
-                                .contains(PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA)
-                        ? Domain.PERSON_HAS_EHR_DATA
-                        : dvp.getDomain())
+            .map(dvp -> dvp.getDomain())
             .collect(ImmutableSet.toImmutableSet());
 
     // now merge all the individual maps from each configuration
@@ -651,7 +644,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       boolean includesAllParticipants,
       List<DbConceptSet> conceptSetsSelected,
       String cohortQueries) {
-    boolean domainPersonHasEhrData = domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA);
+    // Adjust domain used in SQL
     final Domain domain =
         domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)
             ? Domain.PERSON
@@ -662,8 +655,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
+    // Adjust domain to PERSON if domain is PERSON_HAS_EHR_DATA
+    List<DomainValuePair> domainAdjustedDomainValuePairs = domainValuePairs;
+    if (domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)) {
+      domainAdjustedDomainValuePairs =
+          domainValuePairs.stream()
+              .map(
+                  dvp ->
+                      dvp.getDomain().equals(Domain.PERSON_HAS_EHR_DATA)
+                          ? new DomainValuePair().domain(Domain.PERSON).value(dvp.getValue())
+                          : dvp)
+              .collect(Collectors.toList());
+    }
+
     final List<DomainValuePair> domainValuePairsForCurrentDomain =
-        domainValuePairs.stream()
+        domainAdjustedDomainValuePairs.stream()
             .filter(dvp -> dvp.getDomain() == domain)
             .collect(Collectors.toList());
 
@@ -709,7 +715,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .append(")");
     }
 
-    if (domainPersonHasEhrData) {
+    if (domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)) {
       if (queryBuilder.toString().contains("WHERE")) {
         queryBuilder.append(" \nAND (");
       } else {
@@ -1371,7 +1377,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       FieldList fieldList = bigQueryService.getTableFieldsFromDomain(Domain.valueOf(d));
       returnList.add(
           new DomainWithDomainValues()
-              .domain(d)
+              .domain(
+                  Domain.PERSON_HAS_EHR_DATA.equals(Domain.valueOf(domainValue))
+                      ? Domain.PERSON_HAS_EHR_DATA.toString()
+                      : d)
               .items(
                   fieldList.stream()
                       .map(field -> new DomainValue().value(field.getName().toLowerCase()))

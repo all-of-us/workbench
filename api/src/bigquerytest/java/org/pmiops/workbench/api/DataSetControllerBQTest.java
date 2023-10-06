@@ -997,25 +997,22 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             .getItems();
 
     assertThat(
-        domainWithDomainValues.containsAll(
-            ImmutableList.of(
-                new DomainWithDomainValues()
-                    .domain(Domain.PERSON.toString())
-                    .items(
-                        ImmutableList.of(
-                            new DomainValue().value("person_id"),
-                            new DomainValue().value("gender_concept_id"),
-                            new DomainValue().value("gender"),
-                            new DomainValue().value("date_of_birth"),
-                            new DomainValue().value("race_concept_id"),
-                            new DomainValue().value("race"),
-                            new DomainValue().value("ethnicity_concept_id"),
-                            new DomainValue().value("ethnicity"),
-                            new DomainValue().value("sex_at_birth_concept_id"),
-                            new DomainValue().value("sex_at_birth")
-
-                        )
-                    ))))
+            domainWithDomainValues.containsAll(
+                ImmutableList.of(
+                    new DomainWithDomainValues()
+                        .domain(Domain.PERSON.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("gender_concept_id"),
+                                new DomainValue().value("gender"),
+                                new DomainValue().value("date_of_birth"),
+                                new DomainValue().value("race_concept_id"),
+                                new DomainValue().value("race"),
+                                new DomainValue().value("ethnicity_concept_id"),
+                                new DomainValue().value("ethnicity"),
+                                new DomainValue().value("sex_at_birth_concept_id"),
+                                new DomainValue().value("sex_at_birth"))))))
         .isEqualTo(true);
   }
 
