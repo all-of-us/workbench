@@ -399,7 +399,10 @@ export const WorkspaceEdit = fp.flow(
           profile: { freeTierDollarQuota, freeTierUsage },
         },
       } = this.props;
-      const initialCreditsBalance = freeTierDollarQuota - freeTierUsage;
+
+      const freeTierUsageInNumber = freeTierUsage ?? 0;
+
+      const initialCreditsBalance = freeTierDollarQuota - freeTierUsageInNumber;
       return (
         'Use All of Us initial credits - ' +
         formatInitialCreditsUSD(initialCreditsBalance) +
