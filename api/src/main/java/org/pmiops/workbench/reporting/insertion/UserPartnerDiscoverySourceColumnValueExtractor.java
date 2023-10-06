@@ -11,7 +11,7 @@ public enum UserPartnerDiscoverySourceColumnValueExtractor
     implements ColumnValueExtractor<ReportingUserPartnerDiscoverySource> {
   USER_ID("user_id", ReportingUserPartnerDiscoverySource::getUserId),
   ANSWER("answer", ReportingUserPartnerDiscoverySource::getAnswer),
-  OTHER_TEXT("otherText", ReportingUserPartnerDiscoverySource::getOtherText);
+  OTHER_TEXT("other_text", ReportingUserPartnerDiscoverySource::getOtherText);
 
   public static final String TABLE_NAME = "user_partner_discovery_source";
 
