@@ -387,6 +387,15 @@ jobs:
           paths:
             - api
 
+  api-test-coverage:
+    #Jacoco runs against test results to get test coverage
+    steps:
+      - run-api-test:
+          additional_steps:
+            - run:
+                working_directory: ~/workbench/api
+                command: echo test
+
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
     # And other things need memory as well. The medium+ machine has 6GB.
@@ -763,6 +772,9 @@ workflows:
       - ui-unit-test
       - api-bigquery-test
       - api-integration-test
+      - api-test-coverage:
+          requires:
+          - api-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch

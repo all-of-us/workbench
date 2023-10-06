@@ -255,11 +255,6 @@ test {
     // Circle because they are already split apart using a different algorithm.
     maxParallelForks = System.getenv('CIRCLECI') == 'true' ? 1 :
       Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    finalizedBy jacocoTestReport
-}
-
-jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
 }
 
 jacoco {
