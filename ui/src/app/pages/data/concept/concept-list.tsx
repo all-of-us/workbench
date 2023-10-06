@@ -91,12 +91,12 @@ const getConceptIdsToAddOrRemove = (
       !conceptsToCompare.find(
         (con) =>
           con.conceptId === concept.conceptId &&
-          con.isStandard === concept.isStandard
+          con.standard === concept.standard
       )
     ) {
       conceptIds.push({
         conceptId: concept.conceptId,
-        standard: concept.isStandard,
+        standard: concept.standard,
       });
     }
     return conceptIds;
@@ -257,8 +257,8 @@ export const ConceptListPage = fp.flow(
       const { concept } = this.props;
       if ([Domain.CONDITION, Domain.PROCEDURE].includes(concept[0].domainId)) {
         // Separate selections by standard and source concepts for Condition and Procedures
-        const standardConcepts = concept.filter((con) => con.isStandard);
-        const sourceConcepts = concept.filter((con) => !con.isStandard);
+        const standardConcepts = concept.filter((con) => con.standard);
+        const sourceConcepts = concept.filter((con) => !con.standard);
         return (
           <React.Fragment>
             {standardConcepts.length > 0 && (

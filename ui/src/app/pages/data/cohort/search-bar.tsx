@@ -273,7 +273,7 @@ export class SearchBar extends React.Component<Props, State> {
 
   handleInput() {
     const {
-      node: { domainId, isStandard, subtype, type },
+      node: { domainId, standard, subtype, type },
       searchTerms,
       selectedSurvey,
     } = this.props;
@@ -309,7 +309,7 @@ export class SearchBar extends React.Component<Props, State> {
           domain: domainId,
           term: searchTerms,
           type: type,
-          standard: isStandard,
+          standard: standard,
         };
         apiCall = cohortBuilderApi().findCriteriaAutoComplete(
           namespace,

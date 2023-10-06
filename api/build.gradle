@@ -170,6 +170,7 @@ swaggerSources {
     notebooks swagger3JavaClient("notebooks.yaml", "notebooks")
     jira swagger3JavaClient("jira.yaml", "jira")
     mandrill swagger3JavaClient("mandrill.yaml", "mandrill")
+    absorb swagger3JavaClient("absorb.yaml", "absorb")
     moodle swagger3JavaClient("moodle.yaml", "moodle")
     rdr swagger3JavaClient("rdr.yaml", "rdr", [
             '--model-name-prefix', 'Rdr'
@@ -191,10 +192,10 @@ swaggerSources {
     workbench {
         inputFile = file('src/main/resources/workbench-api.yaml')
         code {
-            configuration = configurations.__swaggerCodegenV2__
+            configuration = configurations.__swaggerCodegenV3__
             language = 'spring'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+            outputDir = file(SWAGGER_3_CODEGEN_DIR)
+            templateDir = file("$projectDir/src/main/resources/swagger3codegen")
             wipeOutputDir = false
             rawOptions = SWAGGER_2_RAW_OPTS
             additionalProperties = [
@@ -504,11 +505,15 @@ dependencies {
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
     // removing the generated sourceSet, or else fixing the runtime deps.
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.3'
+    implementation 'io.swagger.core.v3:swagger-models:2.2.3'
     implementation 'io.gsonfire:gson-fire:1.8.5'
     implementation 'org.threeten:threetenbp:1.6.2'
+    implementation 'io.springfox:springfox-oas:3.0.0'
     generatedCompile 'io.swagger.core.v3:swagger-annotations:2.2.3'
+    generatedCompile 'io.swagger.core.v3:swagger-models:2.2.3'
     generatedCompile 'io.gsonfire:gson-fire:1.8.5'
     generatedCompile 'org.threeten:threetenbp:1.6.2'
+    generatedCompile 'io.springfox:springfox-oas:3.0.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 

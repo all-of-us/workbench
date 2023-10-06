@@ -8,6 +8,8 @@ import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -75,6 +77,8 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -129,8 +133,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      return workbenchConfig;
+      return WorkbenchConfig.createEmptyConfig();
     }
   }
 
@@ -2495,32 +2498,203 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @ParameterizedTest
   @ValueSource(strings = {"1-101504524-G-A", "gene", "chr20:955-1000", "rs23346"})
   public void findVariants(String searchTerm) {
+    VariantFilterRequest request = new VariantFilterRequest().searchTerm(searchTerm);
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-101504524-G-A")
+            .gene("gene, gene2")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(5L)
+            .alleleNumber(18242L)
+            .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByConsequence() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene")
+            .addConsequenceListItem("intron_variant")
+            .addConsequenceListItem("non_coding_transcript_variant");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-101504524-G-A")
+            .gene("gene, gene2")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(5L)
+            .alleleNumber(18242L)
+            .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByConsequenceNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene3")
+            .addConsequenceListItem("n/a")
+            .addConsequenceListItem("intron_variant");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AA")
+            .gene("gene3")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByClinicalSignificance() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene")
+            .addClinicalSignificanceListItem("likely pathogenic")
+            .addClinicalSignificanceListItem("pathogenic");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-101504524-G-A")
+            .gene("gene, gene2")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(5L)
+            .alleleNumber(18242L)
+            .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByClinicalSignificanceNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene3")
+            .addClinicalSignificanceListItem("n/a")
+            .addClinicalSignificanceListItem("pathogenic");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AA")
+            .gene("gene3")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByGeneList() {
+    VariantFilterRequest request =
+        new VariantFilterRequest().searchTerm("gene").addGeneListItem("gene, gene2");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-101504524-G-A")
+            .gene("gene, gene2")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(5L)
+            .alleleNumber(18242L)
+            .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByGenesListNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest().searchTerm("rs23347").addGeneListItem("n/a");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AH")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByMinAndMax() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene")
+            .countMin(4L)
+            .countMax(5L)
+            .numberMin(18242L)
+            .numberMax(18245L)
+            .frequencyMin(new BigDecimal("0.000277").setScale(6, RoundingMode.HALF_UP))
+            .frequencyMax(new BigDecimal(1).setScale(6, RoundingMode.HALF_UP));
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-101504524-G-A")
+            .gene("gene, gene2")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(5L)
+            .alleleNumber(18242L)
+            .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsSortByAlleleCount() {
+    VariantFilterRequest request =
+        new VariantFilterRequest().searchTerm("gene1").pageSize(1).sortBy("Allele Count");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-H")
+            .gene("gene1")
+            .consequence("intron_variant, non_coding_transcript_variant")
+            .proteinChange("change")
+            .clinVarSignificance("likely pathogenic, pathogenic")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 2);
+  }
+
+  private void assertFindVariantsResponse(
+      VariantFilterRequest request, Variant expectedVariant, int totalSize) {
     VariantListResponse response =
-        controller
-            .findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchTerm, null, null)
-            .getBody();
+        controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     List<Variant> items = Objects.requireNonNull(response).getItems();
-    assertThat(response.getTotalSize()).isEqualTo(1);
-    assertThat(response.getNextPageToken()).isNull();
+    assertThat(response.getTotalSize()).isEqualTo(totalSize);
+    if (totalSize > 1) {
+      assertThat(response.getNextPageToken()).isNotNull();
+    } else {
+      assertThat(response.getNextPageToken()).isNull();
+    }
     assertThat(items.size()).isEqualTo(1);
-    assertThat(items.get(0))
-        .isEqualTo(
-            new Variant()
-                .vid("1-101504524-G-A")
-                .gene("gene")
-                .consequence("cons")
-                .proteinChange("change")
-                .clinVarSignificance("clinvar")
-                .alleleCount(5L)
-                .alleleNumber(18242L)
-                .alleleFrequency(0.000277)
-                .participantCount(1L));
+    assertThat(items.get(0)).isEqualTo(expectedVariant);
   }
 
   @Test
   public void findVariants_Pagination() {
+    VariantFilterRequest request = new VariantFilterRequest().searchTerm("gene1").pageSize(1);
     VariantListResponse response =
-        controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", null, 1).getBody();
+        controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     List<Variant> items = Objects.requireNonNull(response).getItems();
     assertThat(response.getTotalSize()).isEqualTo(2);
     assertThat(response.getNextPageToken()).isNotNull();
@@ -2530,10 +2704,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new Variant()
                 .vid("1-100550658-T-C")
                 .gene("gene1")
-                .consequence("cons")
+                .consequence("intron_variant, non_coding_transcript_variant")
                 .proteinChange("change")
-                .clinVarSignificance("clinvar")
-                .alleleCount(7L)
+                .clinVarSignificance("likely pathogenic, pathogenic")
+                .alleleCount(22L)
                 .alleleNumber(18226L)
                 .alleleFrequency(0.000266)
                 .participantCount(1L));
@@ -2541,7 +2715,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .findVariants(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", response.getNextPageToken(), 1)
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                request.pageToken(response.getNextPageToken()).pageSize(1))
             .getBody();
     items = Objects.requireNonNull(response).getItems();
     assertThat(response.getTotalSize()).isEqualTo(2);
@@ -2552,13 +2728,40 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new Variant()
                 .vid("1-100550658-T-H")
                 .gene("gene1")
-                .consequence("cons")
+                .consequence("intron_variant, non_coding_transcript_variant")
                 .proteinChange("change")
-                .clinVarSignificance("clinvar")
+                .clinVarSignificance("likely pathogenic, pathogenic")
                 .alleleCount(7L)
                 .alleleNumber(18226L)
                 .alleleFrequency(0.000266)
                 .participantCount(1L));
+  }
+
+  @Test
+  public void findVariantFilters() {
+    VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
+    VariantFilterResponse expectedVariantFilter =
+        new VariantFilterResponse()
+            .geneList(Arrays.asList("gene, gene2", "gene3"))
+            .consequenceList(
+                Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
+            .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
+            .countMin(5L)
+            .countMax(7L)
+            .numberMin(18226L)
+            .numberMax(18242L)
+            .frequencyMin(new BigDecimal(0))
+            .frequencyMax(new BigDecimal(1))
+            .sortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
+    assertFindVariantFiltersResponse(request, expectedVariantFilter);
+  }
+
+  private void assertFindVariantFiltersResponse(
+      VariantFilterRequest request, VariantFilterResponse expectedVariantFilter) {
+    VariantFilterResponse response =
+        controller.findVariantFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response).isEqualTo(expectedVariantFilter);
   }
 
   protected String getTablePrefix() {

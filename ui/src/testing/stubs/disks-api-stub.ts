@@ -11,7 +11,7 @@ import {
 export const stubDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.STANDARD,
-  isGceRuntime: true,
+  gceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
 });
@@ -19,7 +19,7 @@ export const stubDisk = (): Disk => ({
 export const mockJupyterDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.STANDARD,
-  isGceRuntime: true,
+  gceRuntime: true,
   name: 'mock-disk1',
   blockSize: 1,
   status: DiskStatus.READY,
@@ -31,7 +31,7 @@ export const mockJupyterDisk = (): Disk => ({
 export const mockCromwellDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.STANDARD,
-  isGceRuntime: false,
+  gceRuntime: false,
   name: 'mock-disk2',
   blockSize: 1,
   status: DiskStatus.READY,
@@ -43,7 +43,7 @@ export const mockCromwellDisk = (): Disk => ({
 export const mockRStudioDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.STANDARD,
-  isGceRuntime: false,
+  gceRuntime: false,
   name: 'mock-disk3',
   blockSize: 1,
   status: DiskStatus.READY,

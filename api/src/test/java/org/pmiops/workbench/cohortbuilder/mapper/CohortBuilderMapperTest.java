@@ -57,8 +57,9 @@ public class CohortBuilderMapperTest {
             .path("path")
             .value("value")
             .hasHierarchy(true)
-            .hasAncestorData(true)
-            .isStandard(true);
+            .hasAncestorData(true);
+
+    expectedCriteria.setStandard(true);
 
     assertThat(
             cohortBuilderMapper.dbModelToClient(

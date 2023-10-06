@@ -620,7 +620,7 @@ export const updateCriteriaSelectionStore = (
     const criteriaMatch = criteriaLookupItems.find(
       (item) =>
         item.conceptId === sel.conceptId &&
-        item.isStandard === sel.isStandard &&
+        item.standard === sel.standard &&
         (domain !== Domain.SURVEY || item.subtype === sel.subtype) &&
         (sel.subtype !== CriteriaSubType.ANSWER.toString() ||
           item.value === sel.code)

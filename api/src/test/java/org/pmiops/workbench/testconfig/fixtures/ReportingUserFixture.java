@@ -117,7 +117,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .isEqualTo(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION);
     assertTimeApprox(
         user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
-    assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
+    assertThat(user.isDisabled()).isEqualTo(USER__DISABLED);
     assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
     assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
     assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
@@ -140,7 +140,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .isEqualTo(USER__DEGREES.stream().map(Degree::toString).collect(Collectors.joining(",")));
     assertThat(user.getRaces()).isEqualTo(USER__RACE.toString());
     assertThat(user.getGenderIdentities()).isEqualTo(USER__GENDER_IDENTITY.toString());
-    assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
+    assertThat(user.isIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
     assertThat(user.getLgbtqIdentity()).isEqualTo(USER__LGBTQ_IDENTITY);
 
     // Simple null check only. These are autopopulated by Hibernate, so if the entity is saved to

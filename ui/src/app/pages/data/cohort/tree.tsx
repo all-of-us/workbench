@@ -119,7 +119,7 @@ const ANY_PM_SELECTION = {
   domainId: Domain.PHYSICAL_MEASUREMENT.toString(),
   group: false,
   hasAncestorData: false,
-  isStandard: false,
+  standard: false,
   name: 'Has Any Physical Measurements Data',
   type: CriteriaType.PPI.toString(),
   attributes: [],
@@ -214,7 +214,7 @@ export const CriteriaTree = fp.flow(
       try {
         const {
           domain,
-          node: { id, isStandard, parentId, subtype, type },
+          node: { id, standard, parentId, subtype, type },
           selectedSurvey,
           source,
         } = this.props;
@@ -235,7 +235,7 @@ export const CriteriaTree = fp.flow(
                 workspaceId,
                 domain.toString(),
                 criteriaType,
-                isStandard,
+                standard,
                 id
               ),
           this.criteriaLookupNeeded
@@ -246,11 +246,11 @@ export const CriteriaTree = fp.flow(
                 {
                   sourceConceptIds: currentCohortCriteriaStore
                     .getValue()
-                    .filter((s) => !s.isStandard)
+                    .filter((s) => !s.standard)
                     .map((s) => s.conceptId),
                   standardConceptIds: currentCohortCriteriaStore
                     .getValue()
-                    .filter((s) => s.isStandard)
+                    .filter((s) => s.standard)
                     .map((s) => s.conceptId),
                 }
               )
@@ -350,7 +350,7 @@ export const CriteriaTree = fp.flow(
 
     updatePpiSurveys(resp, selectedSurveyChild) {
       const {
-        node: { domainId, isStandard, type },
+        node: { domainId, standard, type },
       } = this.props;
       const { id, namespace } = currentWorkspaceStore.getValue();
       if (selectedSurveyChild && selectedSurveyChild.length > 0) {
@@ -360,7 +360,7 @@ export const CriteriaTree = fp.flow(
             id,
             domainId,
             type,
-            isStandard,
+            standard,
             selectedSurveyChild[0].id
           )
           .then((surveyResponse) =>

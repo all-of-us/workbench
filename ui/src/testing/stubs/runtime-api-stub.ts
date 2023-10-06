@@ -1,6 +1,7 @@
 import {
   DataprocConfig,
   GceConfig,
+  GceWithPdConfig,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -25,6 +26,11 @@ export const defaultGceConfig = (): GceConfig => ({
   machineType: 'n1-standard-4',
 });
 
+export const defaultGceWithPdConfig = (): GceWithPdConfig => ({
+  machineType: 'n1-standard-4',
+  persistentDisk: stubDisk(),
+});
+
 export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
   masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
@@ -35,16 +41,33 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   numberOfWorkerLocalSSDs: 0,
 });
 
-export const defaultRuntime = (): Runtime => ({
+const runtimeDefaults: Runtime = {
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-  gceConfig: defaultGceConfig(),
   errors: [],
+};
+
+export const defaultGceRuntime = (): Runtime => ({
+  ...runtimeDefaults,
+  gceConfig: defaultGceConfig(),
 });
+
+export const defaultGceRuntimeWithPd = (): Runtime => ({
+  ...runtimeDefaults,
+  gceWithPdConfig: defaultGceWithPdConfig(),
+});
+
+export const defaultDataProcRuntime = (): Runtime => ({
+  ...runtimeDefaults,
+  dataprocConfig: defaultDataprocConfig(),
+  configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+});
+
+export const defaultRuntime = defaultGceRuntime;
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;

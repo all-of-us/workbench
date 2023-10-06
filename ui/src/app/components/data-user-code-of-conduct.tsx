@@ -157,7 +157,7 @@ const InitialsAgreement = (props: InitialsProps) => (
         onChange={props.onChange}
         placeholder='INITIALS'
         dataTestId='ducc-initials-input'
-        style={{ width: '4ex', textAlign: 'center', padding: 0 }}
+        style={{ width: '4rem', textAlign: 'center', padding: 0 }}
       />
     )}
     <div style={{ marginLeft: '0.75rem' }}>{props.children}</div>

@@ -14,8 +14,5 @@ export const restrictDemographicSurvey = (country, date) => {
 export const shouldShowDemographicSurvey = (profile: Profile) => {
   const userCountry = profile?.address?.country;
   const signIn = new Date(profile.firstSignInTime);
-  return !restrictDemographicSurvey(
-    Country[userCountry] === Country.US,
-    signIn
-  );
+  return !restrictDemographicSurvey(userCountry, signIn);
 };

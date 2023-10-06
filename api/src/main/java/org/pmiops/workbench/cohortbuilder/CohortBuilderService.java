@@ -20,6 +20,8 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFilterResponse;
 
 public interface CohortBuilderService {
 
@@ -82,10 +84,15 @@ public interface CohortBuilderService {
   List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);
 
   /**
+   * Find variant filters by specified search term. The list of variant filters can change depending
+   * on the search results.
+   */
+  VariantFilterResponse findVariantFilters(VariantFilterRequest filters);
+
+  /**
    * Find variants by specified search term. Supported searches include variant id, gene name,
    * chromosome position and rs number. This method returns an ImmutableTriple that includes next
    * pageToken, total query count and list of variants(paginated).
    */
-  ImmutableTriple<String, Integer, List<Variant>> findVariants(
-      String searchTerm, String pageToken, Integer pageSize);
+  ImmutableTriple<String, Integer, List<Variant>> findVariants(VariantFilterRequest filters);
 }

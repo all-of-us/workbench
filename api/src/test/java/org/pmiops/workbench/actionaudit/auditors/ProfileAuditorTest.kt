@@ -79,8 +79,8 @@ class ProfileAuditorTest {
                 .apply { yearOfBirth = BigDecimal.valueOf(1999) }
                 .apply { race = listOf(Race.PREFER_NO_ANSWER) }
                 .apply { education = Education.MASTER }
-                .apply { identifiesAsLgbtq = true }
                 .apply { lgbtqIdentity = "gay" }
+                .identifiesAsLgbtq(true)
 
         val addr = Address()
             .apply { streetAddress1 = "415 Main Street" }
@@ -97,12 +97,12 @@ class ProfileAuditorTest {
                 .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
                 .apply { givenName = "Robert" }
                 .apply { familyName = "Paulson" }
-                .apply { disabled = false }
                 .apply { areaOfResearch = "Aliens" }
                 .apply { professionalUrl = "linkedin.com" }
                 .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
                 .apply { demographicSurvey = demographicSurvey1 }
                 .apply { address = addr }
+                .disabled(false)
     }
 
     @Test

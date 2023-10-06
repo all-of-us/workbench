@@ -70,7 +70,7 @@ validate.validators.checkEmailResponse = (value: CheckEmailResponse) => {
   if (value == null) {
     return '^Institutional membership check has not completed';
   }
-  if (value?.isValidMember) {
+  if (value?.validMember) {
     return null;
   } else {
     return '^Email address is not a member of the selected institution';
@@ -220,7 +220,7 @@ export class AccountCreationInstitution extends React.Component<
       return undefined;
     }
 
-    return checkEmailResponse.isValidMember;
+    return checkEmailResponse.validMember;
   }
 
   updateContactEmail(contactEmail: string) {
@@ -253,7 +253,7 @@ export class AccountCreationInstitution extends React.Component<
       return '';
     }
     // No error if the institution check was successful.
-    if (checkEmailResponse?.isValidMember) {
+    if (checkEmailResponse?.validMember) {
       return '';
     }
 

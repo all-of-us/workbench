@@ -225,7 +225,7 @@ public class DbCriteria {
   }
 
   @Column(name = "is_standard")
-  public boolean getStandard() {
+  public boolean isStandard() {
     return standard;
   }
 

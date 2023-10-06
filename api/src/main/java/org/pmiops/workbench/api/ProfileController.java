@@ -204,7 +204,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
     return ResponseEntity.ok(
-        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
+        new UsernameTakenResponse().taken(directoryService.isUsernameTaken(username)));
   }
 
   @Override
@@ -365,6 +365,11 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ServerErrorException(e);
     }
     return getProfileResponse(userProvider.get());
+  }
+
+  @Override
+  public ResponseEntity<Boolean> useAbsorb() {
+    return ResponseEntity.ok(complianceTrainingService.useAbsorb());
   }
 
   @Override

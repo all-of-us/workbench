@@ -645,16 +645,16 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(retrievedWorkspace.getId()).isEqualTo("name");
     assertThat(retrievedWorkspace.getName()).isEqualTo("name");
-    assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
-    assertThat(retrievedWorkspace.getResearchPurpose().getMethodsDevelopment()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getControlSet()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getAncestry()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getCommercialPurpose()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getSocialBehavioral()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getPopulationHealth()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getEducational()).isTrue();
-    assertThat(retrievedWorkspace.getResearchPurpose().getDrugDevelopment()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isMethodsDevelopment()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isControlSet()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isAncestry()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isCommercialPurpose()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isSocialBehavioral()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isPopulationHealth()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isEducational()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isDrugDevelopment()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getAdditionalNotes())
         .isEqualTo("additional notes");
     assertThat(retrievedWorkspace.getResearchPurpose().getReasonForAllOfUs())
@@ -664,7 +664,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getResearchPurpose().getAnticipatedFindings())
         .isEqualTo("anticipated findings");
     assertThat(retrievedWorkspace.getNamespace()).isEqualTo(workspace.getNamespace());
-    assertThat(retrievedWorkspace.getResearchPurpose().getReviewRequested()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().isReviewRequested()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
@@ -720,7 +720,7 @@ public class WorkspacesControllerTest {
             .getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getWorkspace();
-    assertThat(workspace2.getResearchPurpose().getApproved()).isNotEqualTo(true);
+    assertThat(workspace2.getResearchPurpose().isApproved()).isNotEqualTo(true);
   }
 
   @Test
@@ -1188,17 +1188,17 @@ public class WorkspacesControllerTest {
             .getBody()
             .getResearchPurpose();
 
-    assertThat(updatedRp.getDiseaseFocusedResearch()).isFalse();
+    assertThat(updatedRp.isDiseaseFocusedResearch()).isFalse();
     assertThat(updatedRp.getDiseaseOfFocus()).isNull();
-    assertThat(updatedRp.getMethodsDevelopment()).isFalse();
-    assertThat(updatedRp.getControlSet()).isFalse();
-    assertThat(updatedRp.getAncestry()).isFalse();
-    assertThat(updatedRp.getCommercialPurpose()).isFalse();
-    assertThat(updatedRp.getPopulationHealth()).isFalse();
-    assertThat(updatedRp.getSocialBehavioral()).isFalse();
-    assertThat(updatedRp.getDrugDevelopment()).isFalse();
+    assertThat(updatedRp.isMethodsDevelopment()).isFalse();
+    assertThat(updatedRp.isControlSet()).isFalse();
+    assertThat(updatedRp.isAncestry()).isFalse();
+    assertThat(updatedRp.isCommercialPurpose()).isFalse();
+    assertThat(updatedRp.isPopulationHealth()).isFalse();
+    assertThat(updatedRp.isSocialBehavioral()).isFalse();
+    assertThat(updatedRp.isDrugDevelopment()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
-    assertThat(updatedRp.getReviewRequested()).isFalse();
+    assertThat(updatedRp.isReviewRequested()).isFalse();
   }
 
   @Test
@@ -2912,8 +2912,8 @@ public class WorkspacesControllerTest {
     assertThat(observedDataSet.getDescription()).isEqualTo(expectedDataSet.getDescription());
     assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
     assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
-    assertThat(observedDataSet.getIncludesAllParticipants())
-        .isEqualTo(expectedDataSet.getIncludesAllParticipants());
+    assertThat(observedDataSet.isIncludesAllParticipants())
+        .isEqualTo(expectedDataSet.isIncludesAllParticipants());
     assertThat(observedDataSet.getLastModifiedTime())
         .isEqualTo(expectedDataSet.getLastModifiedTime());
     assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());

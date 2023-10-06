@@ -1,12 +1,13 @@
-import { Runtime, RuntimeStatus } from 'generated/fetch';
+import { Disk, Runtime, RuntimeStatus } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
-import { maybeWithExistingDisk } from './runtime-utils';
+import { maybeWithPersistentDisk } from './runtime-utils';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -69,6 +70,60 @@ export class LeoRuntimeInitializationAbortedError extends LeoRuntimeInitializati
     this.name = 'LeoRuntimeInitializationAbortedError';
   }
 }
+
+export const throwRuntimeNotFound = (
+  currentRuntime: Runtime,
+  gcePersistentDisk: Disk
+) => {
+  const defaultRuntime = cond<Runtime>(
+    // no current or deleted runtime exists, so we default to the general analysis runtime template
+    [!currentRuntime, () => runtimePresets.generalAnalysis.runtimeTemplate],
+    // a current runtime exists and is not deleted, so we use it plus any preset overrides if appropriate
+    [
+      currentRuntime?.status !== RuntimeStatus.DELETED,
+      () => applyPresetOverride(currentRuntime),
+    ],
+    // this workspace previously contained a dataproc runtime, which is now deleted,
+    // so we use that previous configuration plus any preset overrides if appropriate
+    [
+      currentRuntime?.status === RuntimeStatus.DELETED &&
+        !!currentRuntime?.dataprocConfig,
+      () => applyPresetOverride(currentRuntime),
+    ],
+    // this workspace previously contained a GCE runtime, and a GCE PD exists, so we combine them
+    // Note: we don't store information about runtime<->PD associations with the runtime, with the following implications:
+    // - matching our assumption that only one runtime and PD exist, we assume that it's appropriate to associate them
+    // - the runtime has `gceConfig` populated and NOT `gceWithPdConfig`, regardless of whether it had a PD associated with it
+    [
+      currentRuntime?.status === RuntimeStatus.DELETED &&
+        !!currentRuntime?.gceConfig &&
+        !!gcePersistentDisk,
+      () =>
+        applyPresetOverride(
+          maybeWithPersistentDisk(currentRuntime, gcePersistentDisk)
+        ),
+    ],
+    // this workspace previously contained a GCE runtime, and no GCE PD exists, but we require a PD for all GCE runtimes,
+    // so we add one to the new configuration from the general analysis runtime template.
+    // Note: all deleted runtime configurations have `gceConfig` populated and NOT `gceWithPdConfig`,
+    // regardless of whether it had a PD associated with it when it existed
+    [
+      currentRuntime?.status === RuntimeStatus.DELETED &&
+        !!currentRuntime?.gceConfig &&
+        !gcePersistentDisk,
+      () =>
+        applyPresetOverride(
+          maybeWithPersistentDisk(
+            currentRuntime,
+            runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+              .persistentDisk
+          )
+        ),
+    ]
+  );
+
+  throw new InitialRuntimeNotFoundError(defaultRuntime);
+};
 
 export interface LeoRuntimeInitializerOptions {
   // Core options. Most callers should provide these.
@@ -207,22 +262,7 @@ export class LeoRuntimeInitializer {
     const { gcePersistentDisk } = runtimeDiskStore.get();
 
     if (!this.targetRuntime) {
-      // Automatic lazy creation is not supported; the caller must specify a target.
-      let defaultRuntime = {
-        ...runtimePresets.generalAnalysis.runtimeTemplate,
-      };
-      if (this.currentRuntime) {
-        defaultRuntime =
-          this.currentRuntime.status === RuntimeStatus.DELETED
-            ? applyPresetOverride(
-                // The attached disk information is lost for deleted runtimes. In any case,
-                // by default we want to offer that the user reattach their existing disk,
-                // if any and if the configuration allows it.
-                maybeWithExistingDisk(this.currentRuntime, gcePersistentDisk)
-              )
-            : applyPresetOverride(this.currentRuntime);
-      }
-      throw new InitialRuntimeNotFoundError(defaultRuntime);
+      throwRuntimeNotFound(this.currentRuntime, gcePersistentDisk);
     }
 
     if (this.createCount >= this.maxCreateCount) {

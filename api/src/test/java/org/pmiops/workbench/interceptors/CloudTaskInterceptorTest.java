@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Rule;
@@ -15,7 +16,6 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.WorkspacesApi;
-import org.pmiops.workbench.model.ArrayOfLong;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
@@ -50,7 +50,7 @@ public class CloudTaskInterceptorTest {
     when(handler.getMethod())
         .thenReturn(
             CloudTaskRdrExportApi.class.getMethod(
-                CLOUD_TASK_METHOD_NAME, ArrayOfLong.class, Boolean.class));
+                CLOUD_TASK_METHOD_NAME, List.class, Boolean.class));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
@@ -60,7 +60,7 @@ public class CloudTaskInterceptorTest {
     when(handler.getMethod())
         .thenReturn(
             CloudTaskRdrExportApi.class.getMethod(
-                CLOUD_TASK_METHOD_NAME, ArrayOfLong.class, Boolean.class));
+                CLOUD_TASK_METHOD_NAME, List.class, Boolean.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
         .thenReturn("rdrExportQueue");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();

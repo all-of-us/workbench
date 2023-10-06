@@ -4,7 +4,7 @@ const matchReq = req =>
   && req.method === 'POST'
 
 const body = JSON.stringify(
-{ isValidMember: true }
+{ validMember: true }
 )
 
 const headers = {

@@ -64,6 +64,10 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   // Name of the "institution" custom field, whose value is the same for all Workbench users.
   private static final String GSUITE_FIELD_INSTITUTION = "Institution";
   private static final String INSTITUTION_FIELD_VALUE = "All of Us Research Workbench";
+  // A GSuite "custom field" required by Absorb for SSO via SAML.
+  // Details: https://docs.google.com/document/d/1xgcvow0xPL6K4vxyM3PVlW-1E5Ye3X1Y5wZSD5rrPlc
+  private static final String GSUITE_FIELD_ABSORB_EXTERNAL_DEPARTMENT_ID =
+      "Absorb_external_department_ID";
   private static final int MAX_USERS_LIST_PAGE_SIZE = 500;
   private static final String EMAIL_USER_FIELD = "email";
   private static final String USER_VIEW_TYPE = "domain_public";
@@ -220,7 +224,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
                         .get(GSUITE_FIELD_CONTACT_EMAIL));
   }
 
-  public static void addCustomSchemaAndEmails(User user, String username, String contactEmail) {
+  public void addCustomSchemaAndEmails(User user, String username, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
@@ -229,6 +233,15 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
     // variable.
     aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
+
+    if (configProvider.get().absorb.externalDepartmentIdPopulatedForNewUsers) {
+      // The value of this field must match one of the manually-configured values in the
+      // Absorb installation.
+      // See https://docs.google.com/document/d/1xgcvow0xPL6K4vxyM3PVlW-1E5Ye3X1Y5wZSD5rrPlc
+      aouCustomFields.put(
+          GSUITE_FIELD_ABSORB_EXTERNAL_DEPARTMENT_ID,
+          configProvider.get().absorb.externalDepartmentId);
+    }
 
     if (contactEmail != null) {
       // This gives us a structured place to store researchers' contact email addresses, in
@@ -261,7 +274,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
             .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
             .setChangePasswordAtNextLogin(true)
             .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
-    addCustomSchemaAndEmails(user, username, contactEmail);
+    this.addCustomSchemaAndEmails(user, username, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;

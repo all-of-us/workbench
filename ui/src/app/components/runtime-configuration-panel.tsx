@@ -59,7 +59,7 @@ import {
   getAnalysisConfigDiffs,
   isActionable,
   isVisible,
-  maybeWithExistingDisk,
+  maybeWithPersistentDisk,
   PanelContent,
   RuntimeStatusRequest,
   toAnalysisConfig,
@@ -202,7 +202,7 @@ const PanelMain = fp.flow(
         // The attached disk information is lost for deleted runtimes. In any case,
         // by default we want to offer that the user reattach their existing disk,
         // if any and if the configuration allows it.
-        maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
+        maybeWithPersistentDisk(currentRuntime, gcePersistentDisk)
       );
     }
 

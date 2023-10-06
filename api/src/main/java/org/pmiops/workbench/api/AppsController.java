@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
-import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -15,7 +14,6 @@ import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
 import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +53,7 @@ public class AppsController implements AppsApiDelegate {
       String workspaceNamespace, CreateAppRequest createAppRequest) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
-    validateCanPerformApiAction(dbWorkspace);
+    leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
     if (createAppRequest.getAppType() == AppType.RSTUDIO
         && !configProvider.get().featureFlags.enableRStudioGKEApp) {
       throw new UnsupportedOperationException("API not supported.");
@@ -73,7 +71,6 @@ public class AppsController implements AppsApiDelegate {
   public ResponseEntity<EmptyResponse> deleteApp(
       String workspaceNamespace, String appName, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    validateCanPerformApiAction(dbWorkspace);
 
     leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
     return ResponseEntity.ok(new EmptyResponse());
@@ -82,7 +79,6 @@ public class AppsController implements AppsApiDelegate {
   @Override
   public ResponseEntity<UserAppEnvironment> getApp(String workspaceNamespace, String appName) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    validateCanPerformApiAction(dbWorkspace);
 
     return ResponseEntity.ok(
         leonardoApiClient.getAppByNameByProjectId(dbWorkspace.getGoogleProject(), appName));
@@ -91,13 +87,13 @@ public class AppsController implements AppsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> updateApp(
       String workspaceNamespace, String appName, UserAppEnvironment app) {
+    leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
     throw new UnsupportedOperationException("API not supported.");
   }
 
   @Override
   public ResponseEntity<ListAppsResponse> listAppsInWorkspace(String workspaceNamespace) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    validateCanPerformApiAction(dbWorkspace);
 
     ListAppsResponse response = new ListAppsResponse();
     response.addAll(
@@ -118,27 +114,7 @@ public class AppsController implements AppsApiDelegate {
                     appName,
                     body.getAppType(),
                     body.getFileNames(),
-                    body.getPlaygroundMode(),
+                    body.isPlaygroundMode(),
                     false)));
-  }
-
-  /**
-   * Validates user is allowed to perform User App actions.
-   *
-   * <p>User App actions require:
-   *
-   * <ul>
-   *   <li>User compute is not suspended due to security reasons (e.g. egress alert)
-   *   <li>User is OWNER or WRITER of the workspace
-   * </ul>
-   */
-  @VisibleForTesting
-  protected void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
-    DbUser user = userProvider.get();
-    leonardoApiHelper.enforceComputeSecuritySuspension(user);
-    String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
-    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
   }
 }

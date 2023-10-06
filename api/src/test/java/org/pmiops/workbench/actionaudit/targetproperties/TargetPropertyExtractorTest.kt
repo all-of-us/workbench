@@ -31,7 +31,7 @@ class TargetPropertyExtractorTest {
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
             .apply { accessTierShortName = AccessTierService.REGISTERED_TIER_SHORT_NAME }
-            .apply { published = false }
+            .published(false)
     }
 
     @Test fun testGetsWorkspaceProperties() {

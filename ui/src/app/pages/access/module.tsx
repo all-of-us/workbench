@@ -100,7 +100,7 @@ export const Module = (props: {
       >
         <ModuleIcon
           {...{ moduleName, eligible }}
-          completedOrBypassed={isCompliant(status)}
+          completedOrBypassed={isCompliant(status, profile.duccSignedVersion)}
         />
         <FlexColumn style={{ flex: 1 }}>
           <div
@@ -123,8 +123,10 @@ export const Module = (props: {
               }}
             />
           </div>
-          {isCompliant(status) && (
-            <div style={styles.moduleDate}>{getStatusText(status)}</div>
+          {isCompliant(status, profile.duccSignedVersion) && (
+            <div style={styles.moduleDate}>
+              {getStatusText(status, profile.duccSignedVersion)}
+            </div>
           )}
         </FlexColumn>
       </ModuleBox>

@@ -146,7 +146,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       const conceptIds = fp.map(
         (selected) => ({
           conceptId: selected.conceptId,
-          standard: selected.isStandard,
+          standard: selected.standard,
         }),
         selectedConceptsInDomain
       );

@@ -23,5 +23,6 @@ export const testEnvironmentBase: EnvironmentBase = {
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
   showNewAnalysisTab: true,
+  showCBFunnelPlot: true,
   tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
 };

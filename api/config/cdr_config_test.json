@@ -31,7 +31,6 @@
       "creationTime": "2018-06-06 00:00:00Z",
       "releaseNumber": 1,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2020q1_3",
       "accessTier": "registered"
     },
     {
@@ -70,7 +69,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -104,7 +102,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2019q4_19",
       "accessTier": "registered"
     },
     {
@@ -116,7 +113,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 7,
       "numParticipants": 234525,
-      "cdrDbName": "sr_2022q4_10",
+      "cdrDbName": "sr_2022q4_11",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
@@ -134,7 +131,7 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 8,
       "numParticipants": 234525,
-      "cdrDbName": "sc_2022q4_10",
+      "cdrDbName": "sc_2022q4_11",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
@@ -154,7 +151,6 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 8,
       "numParticipants": 234525,
-      "cdrDbName": "sr_2022q4_10",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
@@ -173,7 +169,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 9,
       "numParticipants": 234525,
-      "cdrDbName": "sc_2022q4_10",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,

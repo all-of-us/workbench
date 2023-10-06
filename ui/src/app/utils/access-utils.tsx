@@ -10,8 +10,7 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
+import { cond, DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -32,6 +31,7 @@ import {
 } from 'app/utils/stores';
 
 import { AccessTierShortNames } from './access-tiers';
+import { isCurrentDUCCVersion } from './code-of-conduct';
 import {
   displayDateWithoutHours,
   getWholeDaysFromNow,
@@ -54,24 +54,63 @@ export enum DARPageMode {
 
 const { useState, useEffect } = React;
 
-export async function redirectToRegisteredTraining() {
-  AnalyticsTracker.Registration.RegisteredTraining();
+const redirectToRegisteredTrainingMoodle = async () => {
   await profileApi().updatePageVisits({ page: 'moodle' });
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`;
   window.open(url, '_blank');
+};
+
+const redirectToTrainingAbsorb = async () => {
+  await profileApi().updatePageVisits({ page: 'absorb' });
+  const {
+    config: {
+      absorbSamlIdentityProviderId,
+      absorbSamlServiceProviderId,
+      gsuiteDomain,
+    },
+  } = serverConfigStore.get();
+  const url = new URL('https://accounts.google.com/o/saml2/initsso');
+  url.searchParams.set('idpid', absorbSamlIdentityProviderId);
+  url.searchParams.set('spid', absorbSamlServiceProviderId);
+  url.searchParams.set('forceauthn', 'false');
+  url.searchParams.set('hd', gsuiteDomain);
+  window.open(url.toString(), '_blank');
+};
+
+export async function redirectToRegisteredTraining() {
+  AnalyticsTracker.Registration.RegisteredTraining();
+
+  const useAbsorb = await profileApi().useAbsorb();
+
+  if (useAbsorb) {
+    await redirectToTrainingAbsorb();
+  } else {
+    await redirectToRegisteredTrainingMoodle();
+  }
 }
 
-export async function redirectToControlledTraining() {
-  AnalyticsTracker.Registration.ControlledTraining();
+const redirectToControlledTrainingMoodle = async () => {
   await profileApi().updatePageVisits({ page: 'moodle' });
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`;
   window.open(url, '_blank');
+};
+
+export async function redirectToControlledTraining() {
+  AnalyticsTracker.Registration.ControlledTraining();
+
+  const useAbsorb = await profileApi().useAbsorb();
+
+  if (useAbsorb) {
+    await redirectToTrainingAbsorb();
+  } else {
+    await redirectToControlledTrainingMoodle();
+  }
 }
 
 export const getTwoFactorSetupUrl = (): string => {
@@ -507,14 +546,32 @@ export const isExpiringOrExpired = (
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
 };
 
+export const isCompleted = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+): boolean =>
+  status?.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT
+    ? // special case for DUCC: considered incomplete if the signed version is missing or old
+      isCurrentDUCCVersion(duccSignedVersion) && !!status?.completionEpochMillis
+    : !!status?.completionEpochMillis;
+
+export const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
+
+export const isCompliant = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+): boolean => isCompleted(status, duccSignedVersion) || isBypassed(status);
+
 // is the module "renewal complete" ?
 // meaning (bypassed || (complete and not expiring))
-export const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
-  const isComplete = !!status?.completionEpochMillis;
-  const wasBypassed = !!status?.bypassEpochMillis;
+export const isRenewalCompleteForModule = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+) => {
   return (
-    wasBypassed ||
-    (isComplete &&
+    isBypassed(status) ||
+    (isCompleted(status, duccSignedVersion) &&
       !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
   );
 };
@@ -525,7 +582,8 @@ interface RenewalDisplayDates {
   moduleStatus: AccessRenewalStatus;
 }
 export const computeRenewalDisplayDates = (
-  status: AccessModuleStatus
+  status: AccessModuleStatus,
+  duccSignedVersion: number
 ): RenewalDisplayDates => {
   const {
     completionEpochMillis,
@@ -533,8 +591,6 @@ export const computeRenewalDisplayDates = (
     bypassEpochMillis,
     moduleName,
   } = status || {};
-  const userCompletedModule = !!completionEpochMillis;
-  const userBypassedModule = !!bypassEpochMillis;
   const userExpiredModule = !!expirationEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
   const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
@@ -548,7 +604,7 @@ export const computeRenewalDisplayDates = (
   return cond<RenewalDisplayDates>(
     // User has bypassed module
     [
-      userBypassedModule,
+      isBypassed(status),
       () => ({
         lastConfirmedDate: `${bypassDate}`,
         nextReviewDate: 'Unavailable (bypassed)',
@@ -557,7 +613,7 @@ export const computeRenewalDisplayDates = (
     ],
     // Module is incomplete
     [
-      !userCompletedModule && !userBypassedModule,
+      !isCompleted(status, duccSignedVersion) && !isBypassed(status),
       () => ({
         lastConfirmedDate: 'Unavailable (not completed)',
         nextReviewDate: 'Unavailable (not completed)',
@@ -591,7 +647,7 @@ export const computeRenewalDisplayDates = (
       }),
     ],
     [
-      userCompletedModule,
+      isCompleted(status, duccSignedVersion),
       () => ({
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
@@ -633,13 +689,6 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
   );
 };
 
-export const isCompleted = (status: AccessModuleStatus): boolean =>
-  !!status?.completionEpochMillis;
-export const isBypassed = (status: AccessModuleStatus): boolean =>
-  !!status?.bypassEpochMillis;
-export const isCompliant = (status: AccessModuleStatus) =>
-  isCompleted(status) || isBypassed(status);
-
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
     // Currently a user can only be ineligible for CT modules.
@@ -653,13 +702,16 @@ export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   return !!controlledTierEligibility?.eligible;
 };
 
-export const getStatusText = (status: AccessModuleStatus) => {
+export const getStatusText = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+) => {
   console.assert(
-    isCompliant(status),
+    isCompliant(status, duccSignedVersion),
     'Cannot provide status text for incomplete module'
   );
   const { completionEpochMillis, bypassEpochMillis } = status;
-  return isCompleted(status)
+  return isCompleted(status, duccSignedVersion)
     ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };

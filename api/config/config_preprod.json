@@ -12,7 +12,7 @@
     "xAppIdValue": "preprod-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.15",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.1",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-preprod",
@@ -89,6 +89,13 @@
   },
   "zendesk": {
     "host": "https:\/\/aoupreprodsupporthelp.zendesk.com"
+  },
+  "absorb": {
+    "externalDepartmentId": "Researchers",
+    "externalDepartmentIdPopulatedForNewUsers": true,
+    "enabledForNewUsers": false,
+    "samlIdentityProviderId": "TODO",
+    "samlServiceProviderId": "TODO"
   },
   "moodle": {
     "host": "aou.nnlm.gov",

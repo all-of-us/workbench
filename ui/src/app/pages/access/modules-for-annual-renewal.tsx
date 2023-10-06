@@ -19,6 +19,7 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
+  isBypassed,
   isRenewalCompleteForModule,
   redirectToControlledTraining,
   redirectToRegisteredTraining,
@@ -169,6 +170,7 @@ interface ActionButtonInterface {
   onClick: Function;
   disabled?: boolean;
   style?: React.CSSProperties;
+  duccSignedVersion: number;
 }
 
 const ActionButton = ({
@@ -178,12 +180,12 @@ const ActionButton = ({
   onClick,
   disabled,
   style,
+  duccSignedVersion,
 }: ActionButtonInterface) => {
-  const wasBypassed = !!moduleStatus?.bypassEpochMillis;
-  return isRenewalCompleteForModule(moduleStatus) ? (
+  return isRenewalCompleteForModule(moduleStatus, duccSignedVersion) ? (
     <CompletedOrBypassedButton
       completedText={completedButtonText}
-      wasBypassed={wasBypassed}
+      wasBypassed={isBypassed(moduleStatus)}
       style={style}
     />
   ) : (
@@ -202,23 +204,23 @@ const ActionButton = ({
   );
 };
 
-export const RenewalCardBody = (props: {
+interface RenewalCardBodyProps {
   moduleStatus: AccessModuleStatus;
   setLoading: (boolean) => void;
-  hide?: boolean;
   textStyle?: CSSProperties;
   radioButtonStyle?: CSSProperties;
   showTimeEstimate?: boolean;
-}) => {
-  const {
-    moduleStatus,
-    setLoading,
-    hide,
-    textStyle,
-    radioButtonStyle,
-    showTimeEstimate = false,
-  } = props;
+  duccSignedVersion: number;
+}
 
+export const RenewalCardBody = ({
+  moduleStatus,
+  setLoading,
+  textStyle,
+  radioButtonStyle,
+  showTimeEstimate = false,
+  duccSignedVersion,
+}: RenewalCardBodyProps) => {
   const [, navigateByUrl] = useNavigation();
   const noReportId = useId();
   const reportId = useId();
@@ -229,8 +231,10 @@ export const RenewalCardBody = (props: {
   const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
     moduleStatus.moduleName
   );
-  const { lastConfirmedDate, nextReviewDate } =
-    computeRenewalDisplayDates(moduleStatus);
+  const { lastConfirmedDate, nextReviewDate } = computeRenewalDisplayDates(
+    moduleStatus,
+    duccSignedVersion
+  );
   const TimeEstimate = () =>
     showTimeEstimate ? (
       <FlexColumn style={{ alignItems: 'center' }}>
@@ -276,9 +280,9 @@ export const RenewalCardBody = (props: {
           >
             <TimeEstimate />
             <ActionButton
+              {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Review'
               completedButtonText='Confirmed'
-              moduleStatus={moduleStatus}
               onClick={() =>
                 navigateByUrl('profile', { queryParams: { renewal: 1 } })
               }
@@ -315,7 +319,10 @@ export const RenewalCardBody = (props: {
                 <RadioButton
                   data-test-id='nothing-to-report'
                   id={noReportId}
-                  disabled={isRenewalCompleteForModule(moduleStatus)}
+                  disabled={isRenewalCompleteForModule(
+                    moduleStatus,
+                    duccSignedVersion
+                  )}
                   style={radioButtonStyle}
                   checked={publications === true}
                   onChange={() => setPublications(true)}
@@ -328,7 +335,10 @@ export const RenewalCardBody = (props: {
                 <RadioButton
                   data-test-id='report-submitted'
                   id={reportId}
-                  disabled={isRenewalCompleteForModule(moduleStatus)}
+                  disabled={isRenewalCompleteForModule(
+                    moduleStatus,
+                    duccSignedVersion
+                  )}
                   style={radioButtonStyle}
                   checked={publications === false}
                   onChange={() => setPublications(false)}
@@ -347,9 +357,9 @@ export const RenewalCardBody = (props: {
             >
               <TimeEstimate />
               <ActionButton
+                {...{ moduleStatus, duccSignedVersion }}
                 actionButtonText='Confirm'
                 completedButtonText='Confirmed'
-                moduleStatus={moduleStatus}
                 onClick={async () => {
                   setLoading(true);
                   await confirmPublications();
@@ -374,7 +384,7 @@ export const RenewalCardBody = (props: {
               to understand the privacy safeguards and the compliance
               requirements for using the <AoU /> Registered Tier Dataset.
             </div>
-            {!isRenewalCompleteForModule(moduleStatus) && (
+            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <div
                 style={{
                   ...renewalStyle.complianceTrainingExpiring,
@@ -395,15 +405,15 @@ export const RenewalCardBody = (props: {
           >
             <TimeEstimate />
             <ActionButton
+              {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Complete Training'
               completedButtonText='Completed'
-              moduleStatus={moduleStatus}
               onClick={() => {
                 setTrainingRefreshButtonDisabled(false);
                 redirectToRegisteredTraining();
               }}
             />
-            {!isRenewalCompleteForModule(moduleStatus) && (
+            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <Button
                 disabled={trainingRefreshButtonDisabled}
                 onClick={async () => {
@@ -435,7 +445,7 @@ export const RenewalCardBody = (props: {
               to understand the privacy safeguards and the compliance
               requirements for using the <AoU /> Controlled Tier Dataset.
             </div>
-            {!isRenewalCompleteForModule(moduleStatus) && (
+            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <div
                 style={{
                   ...renewalStyle.complianceTrainingExpiring,
@@ -456,15 +466,15 @@ export const RenewalCardBody = (props: {
           >
             <TimeEstimate />
             <ActionButton
+              {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Complete Training'
               completedButtonText='Completed'
-              moduleStatus={moduleStatus}
               onClick={() => {
                 setTrainingRefreshButtonDisabled(false);
                 redirectToControlledTraining();
               }}
             />
-            {!isRenewalCompleteForModule(moduleStatus) && (
+            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <Button
                 disabled={trainingRefreshButtonDisabled}
                 onClick={async () => {
@@ -505,9 +515,9 @@ export const RenewalCardBody = (props: {
           >
             <TimeEstimate />
             <ActionButton
+              {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='View & Sign'
               completedButtonText='Completed'
-              moduleStatus={moduleStatus}
               onClick={() =>
                 navigateByUrl('data-code-of-conduct', {
                   queryParams: { renewal: 1 },
@@ -523,7 +533,7 @@ export const RenewalCardBody = (props: {
   return (
     <div style={renewalStyle.moduleContainer}>
       <div style={{ gridArea: 'checkbox' }}>
-        {isRenewalCompleteForModule(moduleStatus) ? (
+        {isRenewalCompleteForModule(moduleStatus, duccSignedVersion) ? (
           <CheckCircle color={colors.success} style={styles.renewalStatus} />
         ) : (
           <Circle color={'#cbcbcb'} style={styles.renewalStatus} />
@@ -532,32 +542,26 @@ export const RenewalCardBody = (props: {
       <div style={{ gridArea: 'title', fontWeight: 500 }}>
         <AARTitleComponent />
       </div>
-      {!hide && module}
+      {module}
     </div>
   );
 };
 
 export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
   const { profile, modules } = props;
-  const showingStyle = {
+  const baseStyle: CSSProperties = {
     ...styles.clickableModuleBox,
     ...styles.clickableModuleText,
-  };
-  const hiddenStyle = {
-    ...styles.backgroundModuleBox,
-    ...styles.backgroundModuleText,
   };
   return (
     <FlexColumn style={styles.modulesContainer}>
       {modules.map((moduleName, index) => {
-        // TODO RW-7797.  Until then, hardcode
-        const showModule = true;
         return (
           <FlexColumn
             data-test-id={`module-${moduleName}`}
             key={moduleName}
             style={{
-              ...(showModule ? showingStyle : hiddenStyle),
+              ...baseStyle,
               ...{
                 marginTop:
                   index > 0 ||
@@ -575,8 +579,8 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
               setLoading={() => {}}
               textStyle={{ fontSize: '0.9rem' }}
               radioButtonStyle={{ marginRight: '0.5em' }}
-              hide={!showModule}
               showTimeEstimate={true}
+              duccSignedVersion={profile.duccSignedVersion}
             />
           </FlexColumn>
         );

@@ -1,7 +1,7 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
 import java.util.logging.Logger;
-import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +26,7 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportResearcherData(ArrayOfLong researcherIds, Boolean backfill) {
+  public ResponseEntity<Void> exportResearcherData(List<Long> researcherIds, Boolean backfill) {
     if (researcherIds == null || researcherIds.isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
@@ -43,7 +43,7 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds, Boolean backfill) {
+  public ResponseEntity<Void> exportWorkspaceData(List<Long> workspaceIds, Boolean backfill) {
     if (workspaceIds == null || workspaceIds.isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();

@@ -281,7 +281,7 @@ public class WorkspaceAuditorTest {
             .additionalNotes("tall folks are tall")
             .anticipatedFindings("something to earn tenure")
             .timeReviewed(workspace1.getResearchPurpose().getTimeReviewed() + 1000L)
-            .controlSet(!workspace1.getResearchPurpose().getControlSet());
+            .controlSet(!workspace1.getResearchPurpose().isControlSet());
     final int rpChanges = 5;
 
     Workspace editedWorkspace =
@@ -292,7 +292,7 @@ public class WorkspaceAuditorTest {
             .name("a new name")
             .namespace("a new namespace")
             .creator("user10@fake-research-aou.org")
-            .published(!workspace1.getPublished());
+            .published(!workspace1.isPublished());
     final int wsChanges = 4;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
@@ -317,33 +317,33 @@ public class WorkspaceAuditorTest {
         .billingStatus(in.getBillingStatus())
         .creationTime(in.getCreationTime())
         .lastModifiedTime(in.getLastModifiedTime())
-        .published(in.getPublished());
+        .published(in.isPublished());
   }
 
   private ResearchPurpose clone(ResearchPurpose in) {
     return new ResearchPurpose()
         .additionalNotes(in.getAdditionalNotes())
-        .approved(in.getApproved())
-        .ancestry(in.getAncestry())
+        .approved(in.isApproved())
+        .ancestry(in.isAncestry())
         .anticipatedFindings(in.getAnticipatedFindings())
-        .commercialPurpose(in.getCommercialPurpose())
-        .controlSet(in.getControlSet())
-        .diseaseFocusedResearch(in.getDiseaseFocusedResearch())
+        .commercialPurpose(in.isCommercialPurpose())
+        .controlSet(in.isControlSet())
+        .diseaseFocusedResearch(in.isDiseaseFocusedResearch())
         .diseaseOfFocus(in.getDiseaseOfFocus())
-        .drugDevelopment(in.getDrugDevelopment())
-        .educational(in.getEducational())
+        .drugDevelopment(in.isDrugDevelopment())
+        .educational(in.isEducational())
         .intendedStudy(in.getIntendedStudy())
         .scientificApproach(in.getScientificApproach())
-        .methodsDevelopment(in.getMethodsDevelopment())
+        .methodsDevelopment(in.isMethodsDevelopment())
         .otherPopulationDetails(in.getOtherPopulationDetails())
-        .otherPurpose(in.getOtherPurpose())
+        .otherPurpose(in.isOtherPurpose())
         .otherPurposeDetails(in.getOtherPurposeDetails())
-        .ethics(in.getEthics())
+        .ethics(in.isEthics())
         .populationDetails(in.getPopulationDetails())
-        .populationHealth(in.getPopulationHealth())
+        .populationHealth(in.isPopulationHealth())
         .reasonForAllOfUs(in.getReasonForAllOfUs())
-        .reviewRequested(in.getReviewRequested())
-        .socialBehavioral(in.getSocialBehavioral())
+        .reviewRequested(in.isReviewRequested())
+        .socialBehavioral(in.isSocialBehavioral())
         .timeRequested(in.getTimeRequested())
         .timeReviewed(in.getTimeReviewed())
         .disseminateResearchFindingList(in.getDisseminateResearchFindingList())

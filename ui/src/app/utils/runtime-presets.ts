@@ -26,10 +26,10 @@ export const runtimePresets: {
           diskType: DiskType.STANDARD,
           size: MIN_DISK_SIZE_GB,
           labels: {},
-          name: null,
+          name: null, // TODO: why not undefined or simply missing?
         },
         machineType: DEFAULT_MACHINE_NAME,
-        gpuConfig: null,
+        gpuConfig: null, // TODO: why not undefined or simply missing?
       },
     },
   },

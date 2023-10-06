@@ -236,7 +236,7 @@ public class ProfileService {
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    user.setDisabled(updatedProfile.getDisabled());
+    user.setDisabled(updatedProfile.isDisabled());
     user.setContactEmail(updatedProfile.getContactEmail());
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
@@ -553,7 +553,7 @@ public class ProfileService {
     Optional.ofNullable(request.getAffiliation())
         .ifPresent(updatedProfile::setVerifiedInstitutionalAffiliation);
     Optional.ofNullable(request.getAccountDisabledStatus())
-        .map(AccountDisabledStatus::getDisabled)
+        .map(AccountDisabledStatus::isDisabled)
         .ifPresent(updatedProfile::setDisabled);
 
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);

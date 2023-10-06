@@ -512,7 +512,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
-                onClick={this.onSubmit(this.state.profile)}
+                onClick={() => this.onSubmit(this.state.profile)}
               >
                 Submit
               </Button>

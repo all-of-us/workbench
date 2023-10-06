@@ -1,9 +1,12 @@
 package org.pmiops.workbench.interceptors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,9 +15,11 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,16 +30,19 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.ProfileApi;
+import org.pmiops.workbench.api.UserAdminApiController;
+import org.pmiops.workbench.api.UserAdminController;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
-import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +64,9 @@ class FakeApiController {
 class FakeController {
   @AuthorityRequired({Authority.SECURITY_ADMIN})
   public void handle() {}
+
+  // Needed for tests that look for this method.
+  public void getMe() {}
 }
 
 @SpringJUnitConfig
@@ -111,6 +122,8 @@ public class AuthInterceptorTest {
   }
 
   private void mockGetCallWithBearerToken() {
+    Class mockClass = FakeController.class;
+    when(mockHandler.getBeanType()).thenReturn(mockClass);
     when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
@@ -151,6 +164,42 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void preHandleGet_usingServiceAccountNotInDb() throws Exception {
+    mockGetCallWithBearerToken();
+    Userinfo userInfo = new Userinfo();
+    String serviceAccountEmail =
+        workbenchConfig.auth.serviceAccountApiUsers.stream()
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    userInfo.setEmail(serviceAccountEmail);
+    when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(null);
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+
+    assertTrue(interceptor.preHandle(mockRequest, mockResponse, mockHandler));
+  }
+
+  @Test
+  public void preHandleGet_usingServiceAccountInDb() throws Exception {
+    mockGetCallWithBearerToken();
+    Userinfo userInfo = new Userinfo();
+    String serviceAccountEmail =
+        workbenchConfig.auth.serviceAccountApiUsers.stream()
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    userInfo.setEmail(serviceAccountEmail);
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(new DbUser());
+
+    assertTrue(interceptor.preHandle(mockRequest, mockResponse, mockHandler));
+  }
+
+  @Test
   public void preHandleGet_userInfoError() {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
@@ -161,7 +210,7 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandleGet_firecloudLookupFails() throws Exception {
+  public void preHandleGet_firecloudLookupFails() {
     mockGetCallWithBearerToken();
 
     Userinfo userInfo = new Userinfo();
@@ -223,6 +272,21 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void preHandleGet_disabledUser() {
+    mockGetCallWithBearerToken();
+    mockUserInfoSuccess();
+    user.setUsername("expiredUser");
+    user.setDisabled(true);
+
+    Throwable exception =
+        Assert.assertThrows(
+            ForbiddenException.class,
+            () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
+    assertEquals(
+        "Rejecting request for disabled user account: expiredUser", exception.getMessage());
+  }
+
+  @Test
   public void preHandleGet_noUserRecord() throws Exception {
     workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData = true;
     // Tests the flow where userDao doesn't contain a row for the authorized user.
@@ -249,6 +313,26 @@ public class AuthInterceptorTest {
     verify(devUserRegistrationService, never()).createUser(any());
   }
 
+  @Test
+  public void preHandleGet_missingAuthority() throws Exception {
+    DbUser userWithWrongAuthorities =
+        new DbUser().setAuthoritiesEnum(Collections.singleton(Authority.COMMUNICATIONS_ADMIN));
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithWrongAuthorities);
+
+    mockGetCallWithBearerToken();
+    mockUserInfoSuccess();
+    Class<?> apiControllerClass = UserAdminApiController.class;
+    Class<?>[] parameterTypes = {};
+    String methodName = "getAllUsers";
+    Method method = apiControllerClass.getMethod(methodName, parameterTypes);
+    UserAdminApiController userAdminApiController =
+        new UserAdminApiController(mock(UserAdminController.class));
+    HandlerMethod handlerMethod = new HandlerMethod(userAdminApiController, method);
+
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, handlerMethod)).isFalse();
+    verify(mockResponse).sendError(HttpServletResponse.SC_FORBIDDEN);
+  }
+
   private Method getProfileApiMethod(String methodName) {
     for (Method method : ProfileApi.class.getDeclaredMethods()) {
       if (method.getName().equals(methodName)) {
@@ -261,6 +345,16 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckPermitsWithNoAnnotation() {
     assertThat(interceptor.hasRequiredAuthority(getTestMethod(), new DbUser())).isTrue();
+  }
+
+  @Test
+  public void authorityCheckPermitsWithMissingUser() throws Exception {
+    Method apiControllerMethod = FakeController.class.getMethod("handle");
+    Throwable exception =
+        Assert.assertThrows(
+            BadRequestException.class,
+            () -> interceptor.hasRequiredAuthority(apiControllerMethod, null));
+    assertEquals("User is not initialized; please register", exception.getMessage());
   }
 
   @Test
@@ -289,6 +383,34 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void authorityCheckPermitsWhenUserHasDeveloperAuthority() throws Exception {
+    DbUser userWithDeveloperAuthorities =
+        new DbUser()
+            .setUserId(USER_ID)
+            .setAuthoritiesEnum(Collections.singleton(Authority.DEVELOPER));
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithDeveloperAuthorities);
+
+    Method apiControllerMethod = FakeController.class.getMethod("handle");
+
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, userWithDeveloperAuthorities))
+        .isTrue();
+  }
+
+  @Test
+  public void authorityCheckPermitsWhenUserHasAllAppropriateAuthority() throws Exception {
+    DbUser userWithDeveloperAuthorities =
+        new DbUser()
+            .setUserId(USER_ID)
+            .setAuthoritiesEnum(Collections.singleton(Authority.SECURITY_ADMIN));
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithDeveloperAuthorities);
+
+    Method apiControllerMethod = FakeController.class.getMethod("handle");
+
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, userWithDeveloperAuthorities))
+        .isTrue();
+  }
+
+  @Test
   public void preHandle_apiBaseUrlNotMatch_forbidden() throws Exception {
     when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
@@ -301,12 +423,11 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandle_apiBaseUrlNotMatch_cloudTask_allowed() throws Exception {
-    when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockHandler.getMethod())
         .thenReturn(
             CloudTaskRdrExportApi.class.getMethod(
-                "exportResearcherData", ArrayOfLong.class, Boolean.class));
+                "exportResearcherData", List.class, Boolean.class));
 
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 

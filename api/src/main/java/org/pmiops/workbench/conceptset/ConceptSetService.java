@@ -132,7 +132,7 @@ public class ConceptSetService {
                       c ->
                           DbConceptSetConceptId.builder()
                               .addConceptId(c.getConceptId())
-                              .addStandard(c.getStandard())
+                              .addStandard(c.isStandard())
                               .build())
                   .collect(Collectors.toList()));
     }
@@ -145,7 +145,7 @@ public class ConceptSetService {
                       c ->
                           DbConceptSetConceptId.builder()
                               .addConceptId(c.getConceptId())
-                              .addStandard(c.getStandard())
+                              .addStandard(c.isStandard())
                               .build())
                   .collect(Collectors.toList()));
     }
