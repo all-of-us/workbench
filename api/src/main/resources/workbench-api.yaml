@@ -6430,7 +6430,7 @@ components:
       - ARRAY_DATA
       - CONCEPT_SET
       - CONCEPT_QUICK_ADD
-      - -PERSON_HAS_EHR_DATA
+      - PERSON_HAS_EHR_DATA
     Surveys:
       type: string
       description: a survey for concepts
@@ -7731,6 +7731,7 @@ components:
       - WHOLE_GENOME
       - BOTH
       - ZIP_CODE_SOCIOECONOMIC
+      - PERSON_HAS_EHR_DATA
     DataSetExportRequest:
       required:
       - dataSetRequest
