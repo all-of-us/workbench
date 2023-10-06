@@ -1,9 +1,8 @@
 import * as React from 'react';
-import Nouislider from 'nouislider-react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
-import { Slider } from 'primereact/slider';
+import Nouislider from 'nouislider-react';
 
 import {
   CriteriaType,
@@ -296,23 +295,23 @@ const VariantFilters = ({
           </Clickable>
           {expanded.includes('alleleCount') && (
             <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
-              {/*<Slider*/}
-              {/*  value={[formState.countMin, formState.countMax]}*/}
-              {/*  onSlideEnd={(e) => sliderFn(['countMin', 'countMax'], e.value)}*/}
-              {/*  min={filters.countMin}*/}
-              {/*  max={filters.countMax}*/}
-              {/*  range*/}
-              {/*/>*/}
               <Nouislider
+                style={{ marginTop: '3rem' }}
                 behaviour='drag'
-                range={{min: filters.countMin, max: filters.countMax}}
-                start={[filters.countMin, filters.countMax]}
+                onEnd={(value) =>
+                  sliderFn(
+                    ['countMin', 'countMax'],
+                    value.map((val) => +val)
+                  )
+                }
+                range={{ min: filters.countMin, max: filters.countMax }}
+                start={[
+                  formState.countMin ?? filters.countMin,
+                  formState.countMin ?? filters.countMax,
+                ]}
                 tooltips
-                connect />
-              <div style={{display: 'flex'}}>
-                <div style={{flex: 7}}>{formState.countMin}</div>
-                <div style={{flex: 1}}>{formState.countMax}</div>
-              </div>
+                connect
+              />
             </div>
           )}
         </div>
@@ -329,14 +328,22 @@ const VariantFilters = ({
           </Clickable>
           {expanded.includes('alleleNumber') && (
             <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
-              <Slider
-                value={[formState.numberMin, formState.numberMax]}
-                onSlideEnd={(e) =>
-                  sliderFn(['numberMin', 'numberMax'], e.value)
+              <Nouislider
+                style={{ marginTop: '3rem' }}
+                behaviour='drag'
+                onEnd={(value) =>
+                  sliderFn(
+                    ['numberMin', 'numberMax'],
+                    value.map((val) => +val)
+                  )
                 }
-                min={filters.numberMin}
-                max={filters.numberMax}
-                range={true}
+                range={{ min: filters.numberMin, max: filters.numberMax }}
+                start={[
+                  formState.numberMin ?? filters.numberMin,
+                  formState.numberMax ?? filters.numberMax,
+                ]}
+                tooltips
+                connect
               />
             </div>
           )}
@@ -354,14 +361,22 @@ const VariantFilters = ({
           </Clickable>
           {expanded.includes('alleleFrequency') && (
             <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
-              <Slider
-                value={[formState.frequencyMin, formState.frequencyMax]}
-                onSlideEnd={(e) =>
-                  sliderFn(['frequencyMin', 'frequencyMax'], e.value)
+              <Nouislider
+                style={{ marginTop: '3rem' }}
+                behaviour='drag'
+                onEnd={(value) =>
+                  sliderFn(
+                    ['frequencyMin', 'frequencyMax'],
+                    value.map((val) => +val)
+                  )
                 }
-                min={filters.frequencyMin}
-                max={filters.frequencyMax}
-                range
+                range={{ min: filters.frequencyMin, max: filters.frequencyMax }}
+                start={[
+                  formState.frequencyMin ?? filters.frequencyMin,
+                  formState.frequencyMax ?? filters.frequencyMax,
+                ]}
+                tooltips
+                connect
               />
             </div>
           )}
@@ -424,7 +439,7 @@ export const VariantSearch = withCurrentWorkspace()(
     const [variantFilters, setVariantFilters] = useState(null);
     const [resetFilters, setResetFilters] = useState(0);
 
-    const searchVariants = async (firstPage?: number) => {
+    const searchVariants = async (newSearch: boolean, firstPage?: number) => {
       try {
         const { items, nextPageToken, totalSize } =
           await cohortBuilderApi().findVariants(namespace, id, {
@@ -432,7 +447,7 @@ export const VariantSearch = withCurrentWorkspace()(
             searchTerm: searchTerms.trim(),
             pageToken: !!firstPage ? pageToken : null,
           });
-        if (items.length > 1 && !firstPage) {
+        if (newSearch && items.length > 1) {
           const filters = await cohortBuilderApi().findVariantFilters(
             namespace,
             id,
@@ -459,7 +474,7 @@ export const VariantSearch = withCurrentWorkspace()(
     useEffect(() => {
       if (resetFilters > 0) {
         setLoading(true);
-        searchVariants();
+        searchVariants(false);
       }
     }, [resetFilters]);
 
@@ -480,7 +495,7 @@ export const VariantSearch = withCurrentWorkspace()(
           } else {
             setLoading(true);
             setSearching(true);
-            searchVariants();
+            searchVariants(true);
           }
         }
       }
@@ -497,7 +512,7 @@ export const VariantSearch = withCurrentWorkspace()(
         return;
       }
       setLoadingMore(true);
-      searchVariants(firstPage);
+      searchVariants(false, firstPage);
     };
 
     const clearSearch = () => {
@@ -635,7 +650,7 @@ export const VariantSearch = withCurrentWorkspace()(
         {searchResults.length > 1 && variantFilters && (
           <div style={{ position: 'relative' }}>
             <Clickable
-              style={{color: colors.primary}}
+              style={{ color: colors.primary }}
               onClick={() => setFiltersOpen((prevState) => !prevState)}
             >
               <ClrIcon shape='filter-2' className='is-solid' size={30} />
@@ -652,7 +667,7 @@ export const VariantSearch = withCurrentWorkspace()(
                 submitFn={() => {
                   setFiltersOpen(false);
                   setLoading(true);
-                  searchVariants();
+                  searchVariants(false);
                 }}
               />
             )}
