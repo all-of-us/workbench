@@ -776,7 +776,6 @@ workflows:
       - api-test-coverage:
           requires:
           - api-unit-test
-      - api-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
