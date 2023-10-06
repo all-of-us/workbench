@@ -397,7 +397,13 @@ jobs:
                   at: /tmp/workspace
             - run:
                 working_directory: ~/workbench/api
-                command: ls /tmp/workspace
+                command: ls /tmp/workspace/api
+            - run:
+                working_directory: ~/workbench/api
+                command: ls /tmp/workspace/api/build
+            - run:
+                working_directory: ~/workbench/api
+                command: ls /tmp/workspace/api/build/jacoco
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
