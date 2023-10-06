@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Nouislider from 'nouislider-react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
@@ -295,13 +296,23 @@ const VariantFilters = ({
           </Clickable>
           {expanded.includes('alleleCount') && (
             <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
-              <Slider
-                value={[formState.countMin, formState.countMax]}
-                onSlideEnd={(e) => sliderFn(['countMin', 'countMax'], e.value)}
-                min={filters.countMin}
-                max={filters.countMax}
-                range
-              />
+              {/*<Slider*/}
+              {/*  value={[formState.countMin, formState.countMax]}*/}
+              {/*  onSlideEnd={(e) => sliderFn(['countMin', 'countMax'], e.value)}*/}
+              {/*  min={filters.countMin}*/}
+              {/*  max={filters.countMax}*/}
+              {/*  range*/}
+              {/*/>*/}
+              <Nouislider
+                behaviour='drag'
+                range={{min: filters.countMin, max: filters.countMax}}
+                start={[filters.countMin, filters.countMax]}
+                tooltips
+                connect />
+              <div style={{display: 'flex'}}>
+                <div style={{flex: 7}}>{formState.countMin}</div>
+                <div style={{flex: 1}}>{formState.countMax}</div>
+              </div>
             </div>
           )}
         </div>
@@ -325,7 +336,7 @@ const VariantFilters = ({
                 }
                 min={filters.numberMin}
                 max={filters.numberMax}
-                range
+                range={true}
               />
             </div>
           )}
@@ -624,6 +635,7 @@ export const VariantSearch = withCurrentWorkspace()(
         {searchResults.length > 1 && variantFilters && (
           <div style={{ position: 'relative' }}>
             <Clickable
+              style={{color: colors.primary}}
               onClick={() => setFiltersOpen((prevState) => !prevState)}
             >
               <ClrIcon shape='filter-2' className='is-solid' size={30} />
