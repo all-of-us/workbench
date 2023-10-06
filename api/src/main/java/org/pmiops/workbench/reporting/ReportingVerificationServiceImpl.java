@@ -96,11 +96,11 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             Map.entry(
                 UserColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                    UserColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 CohortColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
-                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                    CohortColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
