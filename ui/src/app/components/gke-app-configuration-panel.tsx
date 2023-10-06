@@ -148,7 +148,8 @@ export const GKEAppConfigurationPanel = ({
           appType,
           [AppType.CROMWELL, () => <CreateCromwell {...createAppProps} />],
           [AppType.RSTUDIO, () => <CreateRStudio {...createAppProps} />],
-          [AppType.SAS, () => <CreateSAS {...createAppProps} />]
+          [AppType.SAS, () => <CreateSAS {...createAppProps} />],
+          [AppType.SAGEMAKER, () => <CreateSagemaker {...createAppProps} />],
         ),
     ],
     [

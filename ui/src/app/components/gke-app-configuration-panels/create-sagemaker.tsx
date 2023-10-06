@@ -2,24 +2,12 @@ import * as React from 'react';
 
 import { AppType } from 'generated/fetch';
 
-import { InfoMessage } from 'app/components/messages';
-
-import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
-
-const SupportNote = () => (
-  <InfoMessage>
-    <h4 style={{ marginTop: 0, fontSize: '1rem' }}>
-      How to create Sagemaker artifacts:
-    </h4>
-  </InfoMessage>
-);
+import { CommonCreateGkeAppProps } from './create-gke-app';
+import { CreateAwsApp } from './create-aws-app';
+import { Button } from 'primereact/button';
 
 export const CreateSagemaker = (props: CommonCreateGkeAppProps) => (
-  <CreateGkeApp
-    {...{
-      ...props,
-      SupportNote,
-    }}
-    appType={AppType.SAGEMAKER}
-  />
+  
+  //<Button>Create</Button>
+  <CreateAwsApp {...props} appType={AppType.SAGEMAKER} />
 );

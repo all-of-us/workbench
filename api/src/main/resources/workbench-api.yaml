@@ -8454,6 +8454,10 @@ components:
       - STATUS_UNSPECIFIED
       - STOPPED
       - STOPPING
+      - BROKEN
+      - CREATING
+      - READY
+      - UPDATING
     AppType:
       type: string
       enum:
@@ -8533,8 +8537,6 @@ components:
     CreateAppRequest:
       required:
       - appType
-      - kubernetesRuntimeConfig
-      - persistentDiskRequest
       type: object
       properties:
         appType:

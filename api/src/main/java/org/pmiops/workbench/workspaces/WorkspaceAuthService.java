@@ -64,6 +64,10 @@ public class WorkspaceAuthService {
 
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
       throws IllegalArgumentException {
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    if (workspace.isAws()) {
+      return WorkspaceAccessLevel.OWNER;
+    }
     String userAccess =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel().toString();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {

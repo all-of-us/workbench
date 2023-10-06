@@ -342,6 +342,7 @@ export const RMD_FILE_EXT = '.Rmd';
 export const R_SCRIPT_EXT = '.R';
 
 export const SAS_FILE_EXT = '.sas';
+export const SAGEMAKER_FILE_EXT = 'sagemakernb';
 export const GKE_APP_PROXY_PATH_SUFFIX = 'app';
 
 // https://precisionmedicineinitiative.atlassian.net/browse/RW-10698

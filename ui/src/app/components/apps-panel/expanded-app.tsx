@@ -246,7 +246,7 @@ const SagemakerButtonRow = (props: {
     openSagemaker(workspaceNamespace, userApp);
   };
 
-  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
+  const launchButtonDisabled = userApp?.status !== AppStatus.READY;
 
   return (
     <FlexRow>
@@ -266,8 +266,8 @@ const SagemakerButtonRow = (props: {
             onClick={onClickLaunch}
             disabled={launchButtonDisabled}
             icon={faRocket}
-            buttonText='Open Sagemaker'
-            data-test-id='open-RStudio-button'
+            buttonText='Launch'
+            data-test-id='open-Sagemaker-button'
           />
         </div>
       </TooltipTrigger>
@@ -394,7 +394,15 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                 />
               ),
             ],
-
+            [
+              appType === UIAppType.SAGEMAKER,
+              () => (
+                <SagemakerButtonRow
+                  userApp={initialUserAppInfo}
+                  workspaceNamespace={workspace.namespace}
+                />
+              ),
+            ],
             () => null
           )}
         </FlexColumn>

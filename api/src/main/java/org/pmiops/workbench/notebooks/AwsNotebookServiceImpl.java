@@ -1,20 +1,12 @@
 package org.pmiops.workbench.notebooks;
 
 import bio.terra.workspace.api.ResourceApi;
-import bio.terra.workspace.client.ApiException;
-import bio.terra.workspace.model.ResourceList;
-import bio.terra.workspace.model.ResourceMetadata;
-import bio.terra.workspace.model.ResourceType;
-import bio.terra.workspace.model.StewardshipType;
 import com.google.cloud.storage.Blob;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +28,10 @@ public class AwsNotebookServiceImpl implements NotebooksService {
 
   @Override
   public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceName);
+
     List<FileDetail> fileDetails = new ArrayList<>();
+    // FIXME get files from S3 bucket
+    /*DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceName);
     try {
       ResourceList resourceList =
           resourceApiProvider
@@ -56,12 +50,12 @@ public class AwsNotebookServiceImpl implements NotebooksService {
                 fileDetails.add(
                     new FileDetail()
                         .name(metadata.getName())
-                        .lastModifiedTime(metadata.getLastUpdatedDate().toEpochSecond())
+                        //.lastModifiedTime(metadata.getLastUpdatedDate().toOffsetTime())
                         .lastModifiedBy(metadata.getLastUpdatedBy()));
               });
     } catch (ApiException e) {
       throw new WorkbenchException(e);
-    }
+    }*/
     return fileDetails;
   }
 

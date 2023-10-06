@@ -682,9 +682,9 @@ export const HelpSidebar = fp.flow(
               ),
               renderBody: () => (
                 <ConfigurationPanel
-                  appType={UIAppType.SAGEMAKER}
-                  onClose={() => this.setActiveIcon(null)}
-                  gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
+                {...{ gkeAppConfPanelInitialState }}
+                appType={UIAppType.SAGEMAKER}
+                onClose={() => this.setActiveIcon(null)}
                 />
               ),
             };

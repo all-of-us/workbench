@@ -11,6 +11,7 @@ import { environment } from 'environments/environment';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
+  sagemakerConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
@@ -25,7 +26,7 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
   [AppType.SAS]: 'SAS',
-  [AppType.SAGEMAKER] : 'Sagemaker'
+  [AppType.SAGEMAKER] : 'Sagemaker',
 };
 
 const appStatusesRequiringUpdates: Array<AppStatus> = [
@@ -175,11 +176,11 @@ export const openSagemakerOrConfigPanel = (
   workspaceNamespace: string,
   userApps: ListAppsResponse
 ) => {
-  const userApp = findApp(userApps, UIAppType.RSTUDIO);
-  if (userApp?.status === AppStatus.RUNNING) {
+  const userApp = findApp(userApps, UIAppType.SAGEMAKER);
+  if (userApp?.status === AppStatus.READY) {
     openSagemaker(workspaceNamespace, userApp);
   } else {
-    setSidebarActiveIconStore.next(rstudioConfigIconId);
+    setSidebarActiveIconStore.next(sagemakerConfigIconId);
   }
 };
 

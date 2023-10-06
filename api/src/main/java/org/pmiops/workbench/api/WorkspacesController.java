@@ -954,11 +954,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.updateRecentWorkspaces(dbWorkspace);
     final WorkspaceAccessLevel workspaceAccessLevel;
 
-    try {
-      workspaceAccessLevel =
-          workspaceAuthService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (IllegalArgumentException e) {
-      throw new ServerErrorException(e);
+    if (!dbWorkspace.isAws()) {
+      try {
+        workspaceAccessLevel =
+            workspaceAuthService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      } catch (IllegalArgumentException e) {
+        throw new ServerErrorException(e);
+      }
+    } else {
+      workspaceAccessLevel = WorkspaceAccessLevel.OWNER;
     }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();

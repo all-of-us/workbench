@@ -70,9 +70,6 @@ public class WsmConfig {
     } else {
       apiClient.setAccessToken(userAuthentication.getCredentials());
     }
-    boolean useGoogleCredentials = false;
-    if (useGoogleCredentials)
-      apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
     return apiClient;
   }
 

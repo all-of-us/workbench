@@ -7,6 +7,7 @@ import {
   JUPYTER_FILE_EXT,
   R_SCRIPT_EXT,
   RMD_FILE_EXT,
+  SAGEMAKER_FILE_EXT,
   SAS_FILE_EXT,
 } from 'app/utils/constants';
 
@@ -100,6 +101,11 @@ const appsExtensionMap = [
   {
     extension: SAS_FILE_EXT,
     appType: UIAppType.SAS,
+    canPlayground: false,
+  },
+  {
+    extension: SAGEMAKER_FILE_EXT,
+    appType: UIAppType.SAGEMAKER,
     canPlayground: false,
   },
 ];
