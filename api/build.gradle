@@ -53,6 +53,7 @@ plugins {
     id 'org.hidetake.swagger.generator' version '2.19.2'
     id 'org.owasp.dependencycheck' version '8.3.1'
     id 'org.springframework.boot' version '2.7.4'
+    id 'jacoco'
 }
 
 if (JavaVersion.current() != JavaVersion.VERSION_11) {
@@ -254,6 +255,15 @@ test {
     // Circle because they are already split apart using a different algorithm.
     maxParallelForks = System.getenv('CIRCLECI') == 'true' ? 1 :
       Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
+
+jacoco {
+    toolVersion = "0.8.10"
 }
 
 // The plugin generates configuration names by concatenating SourceSet names
