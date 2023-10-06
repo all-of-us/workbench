@@ -395,7 +395,7 @@ jobs:
           additional_steps:
             - run:
                 working_directory: ~/workbench/api
-                command: echo test
+                command: ./gradlew jacocoTestReport
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
