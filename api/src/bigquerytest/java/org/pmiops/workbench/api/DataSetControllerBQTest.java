@@ -1000,7 +1000,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             domainWithDomainValues.containsAll(
                 ImmutableList.of(
                     new DomainWithDomainValues()
-                        .domain(Domain.PERSON.toString())
+                        .domain(Domain.PERSON_HAS_EHR_DATA.toString())
                         .items(
                             ImmutableList.of(
                                 new DomainValue().value("person_id"),
