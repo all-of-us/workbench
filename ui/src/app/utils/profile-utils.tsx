@@ -7,9 +7,15 @@ export const getProfilePictureSrc = () => {
   return authStore.get().auth?.user?.profile.picture;
 };
 
-export const isUserFromUSAOrSignedInBeforeNov = (profile: Profile) => {
+export const restrictDemographicSurvey = (country, date) => {
+  return country !== Country.US && INTL_USER_SIGN_IN_CHECK < date;
+};
+
+export const shouldShowDemographicSurvey = (profile: Profile) => {
   const userCountry = profile?.address?.country;
   const signIn = new Date(profile.firstSignInTime);
-  const signed_in_after_nov = INTL_USER_SIGN_IN_CHECK <= signIn;
-  return Country[userCountry] === Country.US || !signed_in_after_nov;
+  return !restrictDemographicSurvey(
+    Country[userCountry] === Country.US,
+    signIn
+  );
 };

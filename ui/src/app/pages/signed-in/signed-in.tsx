@@ -18,7 +18,7 @@ import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
 import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
-import { isUserFromUSAOrSignedInBeforeNov } from 'app/utils/profile-utils';
+import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -129,7 +129,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
   const shouldRedirectToDemographicSurveyPage = () => {
     const { demographicSurveyV2 } = profileState.profile;
     return (
-      isUserFromUSAOrSignedInBeforeNov(profileState.profile) &&
+      shouldShowDemographicSurvey(profileState.profile) &&
       !demographicSurveyV2 &&
       !hasDismissedDemographicSurvey
     );

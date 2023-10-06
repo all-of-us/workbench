@@ -18,7 +18,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { isUserFromUSAOrSignedInBeforeNov } from 'app/utils/profile-utils';
+import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import { authStore, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
@@ -99,6 +99,6 @@ export const authorityGuard = (
 });
 
 export const restrictDemographicSurvey = (): Guard => ({
-  allowed: () => isUserFromUSAOrSignedInBeforeNov(profileStore.get().profile),
+  allowed: () => shouldShowDemographicSurvey(profileStore.get().profile),
   redirectPath: '/',
 });

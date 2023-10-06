@@ -27,8 +27,8 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { Country, INTL_USER_SIGN_IN_CHECK } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
+import { restrictDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -275,8 +275,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
     if (
       steps[index] === SignInStep.ACCOUNT_DETAILS &&
-      new Date() >= INTL_USER_SIGN_IN_CHECK &&
-      profile.address.country !== Country.US
+      restrictDemographicSurvey(profile.address.country, new Date())
     ) {
       return SignInStep.SUCCESS_PAGE;
     }
@@ -421,7 +420,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     // hence to be sure lets just pass profile to submit method
     this.onSubmit(profile);
   };
-  private onSubmit = async (profileArg = null) => {
+  private onSubmit = async (profileArg) => {
     const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
       loading: true,
@@ -513,7 +512,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
-                onClick={this.onSubmit}
+                onClick={this.onSubmit(this.state.profile)}
               >
                 Submit
               </Button>
