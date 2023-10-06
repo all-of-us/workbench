@@ -393,9 +393,11 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
+            - attach_workspace:
+                  at: /tmp/workspace
             - run:
                 working_directory: ~/workbench/api
-                command: ./gradlew jacocoTestReport
+                command: ls /tmp/workspace
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
