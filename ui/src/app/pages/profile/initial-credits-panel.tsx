@@ -25,9 +25,10 @@ export const InitialCreditsPanel = (props: Props) => (
         {formatInitialCreditsUSD(props.freeTierUsage)}
       </div>
       <div style={{ fontWeight: 600 }}>
+        {' '}
         {formatInitialCreditsUSD(
-          props.freeTierDollarQuota - props.freeTierUsage
-        )}
+          props.freeTierDollarQuota - (props.freeTierUsage ?? 0)
+        )}{' '}
       </div>
     </FlexColumn>
   </FlexRow>

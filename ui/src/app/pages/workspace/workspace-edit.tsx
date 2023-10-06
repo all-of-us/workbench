@@ -400,8 +400,7 @@ export const WorkspaceEdit = fp.flow(
         },
       } = this.props;
 
-      const freeTierUsageInNumber =
-        typeof freeTierUsage === 'undefined' ? 0 : freeTierUsage;
+      const freeTierUsageInNumber = freeTierUsage ?? 0;
 
       const initialCreditsBalance = freeTierDollarQuota - freeTierUsageInNumber;
       return (
