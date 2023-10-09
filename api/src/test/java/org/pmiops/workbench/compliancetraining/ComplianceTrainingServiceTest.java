@@ -157,7 +157,11 @@ public class ComplianceTrainingServiceTest {
     assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
     // There should be a Moodle (not Absorb) verification record for RT but not CT.
-    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
     assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
 
     // Time passes
@@ -184,8 +188,16 @@ public class ComplianceTrainingServiceTest {
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
 
     // There should be Moodle (not Absorb) verification records.
-    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
-    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
   }
 
   @Test
@@ -206,7 +218,11 @@ public class ComplianceTrainingServiceTest {
     assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
     // There should be an Absorb (not Moodle) verification record for RT but not CT.
-    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
     assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
 
     // Time passes
@@ -227,8 +243,16 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctCompletionTime));
 
     // There should be Absorb (not Moodle) verification records.
-    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
-    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
   @Test
