@@ -49,6 +49,6 @@ echo "Using default application credentials from:"
 env | grep GOOGLE_APPLICATION_CREDENTIALS
 
 # run from tanagra sub-module under workbench
-cd ../tanagra
+cd tanagra
 # deploy service
 ./gradlew -PisMySQL service:bootRun
