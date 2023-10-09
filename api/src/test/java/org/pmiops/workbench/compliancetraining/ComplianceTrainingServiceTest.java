@@ -156,6 +156,10 @@ public class ComplianceTrainingServiceTest {
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, rtCompletionTime);
     assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
+    // There should be a Moodle (not Absorb) verification record for RT but not CT.
+    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
+
     // Time passes
     tick();
 
@@ -178,6 +182,10 @@ public class ComplianceTrainingServiceTest {
     // for both RT and CT training.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, rtCompletionTime);
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+
+    // There should be Moodle (not Absorb) verification records.
+    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
   }
 
   @Test
@@ -197,6 +205,10 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
     assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
+    // There should be an Absorb (not Moodle) verification record for RT but not CT.
+    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).isPresent()).isFalse();
+
     // Time passes
     tick();
 
@@ -213,6 +225,10 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctCompletionTime));
+
+    // There should be Absorb (not Moodle) verification records.
+    assertThat(getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get().getComplianceTrainingVerificationSystem()).isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
   @Test
@@ -255,54 +271,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerification() throws Exception {
-    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
-
-    mockGetUserBadgesByBadgeName(
-        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
-
-    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
-
-    user = complianceTrainingService.syncComplianceTrainingStatus();
-
-    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
-
-    // RT is complete, so there should be a verification record.
-    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
-    assertThat(rtVerification.isPresent()).isTrue();
-    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
-        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
-
-    // CT is incomplete, so there should not be a verification record.
-    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
-    assertThat(ctVerification.isPresent()).isFalse();
-  }
-
-  @Test
-  public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerification() throws Exception {
-    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
-
-    mockGetUserEnrollments(currentInstant(), null);
-
-    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
-
-    user = complianceTrainingService.syncComplianceTrainingStatus();
-
-    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
-
-    // RT is complete, so there should be a verification record.
-    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
-    assertThat(rtVerification.isPresent()).isTrue();
-    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
-        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
-
-    // CT is incomplete, so there should not be a verification record.
-    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
-    assertThat(ctVerification.isPresent()).isFalse();
-  }
-
-  @Test
-  public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerification_OnePerAccessModule()
+  public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerificationOncePerAccessModule()
       throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
 
@@ -337,7 +306,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerification_OnePerAccessModule()
+  public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerificationOncePerAccessModule()
       throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
 
