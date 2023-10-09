@@ -116,6 +116,12 @@ def dev_up_tanagra(cmd_name, args)
   start_local_db_service()
 
   Dir.chdir('../tanagra-aou-utils') do
+    if File.directory?('/tanagra')
+      common.status "repo has been cloned"
+    else
+      common.status "Need to clone repo"
+      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
+    end
     if op.opts.disable_auth_checks
       common.status "Starting tanagra-service authorization checks disabled"
       common.run_inline %W{./run_tanagra_server.sh -a}
