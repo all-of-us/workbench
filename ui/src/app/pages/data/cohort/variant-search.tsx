@@ -109,7 +109,7 @@ const styles = reactStyles({
   },
 });
 
-const pageSize = 25;
+const pageSize = 100;
 const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
@@ -434,25 +434,28 @@ export const VariantSearch = withCurrentWorkspace()(
         numberMax: null,
         frequencyMin: null,
         frequencyMax: null,
-        sortBy: 'Variant ID',
+        sortBy: 'Participant Count',
       });
     const [variantFilters, setVariantFilters] = useState(null);
     const [resetFilters, setResetFilters] = useState(0);
 
-    const searchVariants = async (newSearch: boolean, firstPage?: number) => {
+    const searchVariants = async (firstPage?: number) => {
       try {
         const { items, nextPageToken, totalSize } =
           await cohortBuilderApi().findVariants(namespace, id, {
             ...selectedFilters,
             searchTerm: searchTerms.trim(),
+            pageSize,
             pageToken: !!firstPage ? pageToken : null,
           });
-        if (newSearch && items.length > 1) {
+        if (!firstPage && items.length > 1) {
           const filters = await cohortBuilderApi().findVariantFilters(
             namespace,
             id,
             {
+              ...selectedFilters,
               searchTerm: searchTerms.trim(),
+              pageSize,
             }
           );
           setVariantFilters(filters);
@@ -474,7 +477,7 @@ export const VariantSearch = withCurrentWorkspace()(
     useEffect(() => {
       if (resetFilters > 0) {
         setLoading(true);
-        searchVariants(false);
+        searchVariants();
       }
     }, [resetFilters]);
 
@@ -495,7 +498,7 @@ export const VariantSearch = withCurrentWorkspace()(
           } else {
             setLoading(true);
             setSearching(true);
-            searchVariants(true);
+            searchVariants();
           }
         }
       }
@@ -512,7 +515,7 @@ export const VariantSearch = withCurrentWorkspace()(
         return;
       }
       setLoadingMore(true);
-      searchVariants(false, firstPage);
+      searchVariants(firstPage);
     };
 
     const clearSearch = () => {
@@ -530,7 +533,7 @@ export const VariantSearch = withCurrentWorkspace()(
         numberMax: null,
         frequencyMin: null,
         frequencyMax: null,
-        sortBy: 'Variant ID',
+        sortBy: 'Participant Count',
       });
     };
 
@@ -546,10 +549,10 @@ export const VariantSearch = withCurrentWorkspace()(
         numberMax: null,
         frequencyMin: null,
         frequencyMax: null,
-        sortBy: 'Variant ID',
+        sortBy: 'Participant Count',
       });
       setFiltersOpen(false);
-      setResetFilters((prevState) => prevState++);
+      setResetFilters((prevState) => prevState + 1);
     };
 
     const getParamId = (row: Variant) => `param${row.vid}`;
@@ -667,7 +670,7 @@ export const VariantSearch = withCurrentWorkspace()(
                 submitFn={() => {
                   setFiltersOpen(false);
                   setLoading(true);
-                  searchVariants(false);
+                  searchVariants();
                 }}
               />
             )}
@@ -682,7 +685,7 @@ export const VariantSearch = withCurrentWorkspace()(
                 displayResults.length > 0
                   ? `${first + 1} - ${
                       first + displayResults.length
-                    } of ${totalCount}`
+                    } of ${totalCount.toLocaleString()}`
                   : ''
               }
               first={first}
