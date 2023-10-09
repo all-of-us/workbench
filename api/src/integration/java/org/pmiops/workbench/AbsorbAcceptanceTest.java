@@ -32,7 +32,6 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
   @Disabled("RW-11039")
   public void testUserHasLoggedIntoAbsorb_True() throws Exception {
     // Setup:
-    // - A user with this email exists
     // - The user has logged into Absorb
     assertThat(absorbService.userHasLoggedIntoAbsorb(partiallyCompleteUserEmail)).isTrue();
   }
@@ -49,7 +48,6 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
   @Disabled("RW-11039")
   public void testGetEnrollments() throws Exception {
     // Setup:
-    // - A user with this email exists
     // - The user has completed RT training in Absorb
     // - The user has not completed CT training in Absorb
     var enrollments = absorbService.getActiveEnrollmentsForUser(partiallyCompleteUserEmail);
