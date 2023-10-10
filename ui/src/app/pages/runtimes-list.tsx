@@ -133,9 +133,11 @@ export const RuntimesList = fp.flow(
         <>
           <style>{css}</style>
           <div style={styles.bannerStyle}>
-            This page was created as part of an experiment. We are currently rewriting the page
-            to bring it up to<br/>
-            our project's standard of quality. In the meantime, please excuse the mess.
+            This page was created as part of an experiment. We are currently
+            rewriting the page to bring it up to
+            <br />
+            our project's standard of quality. In the meantime, please excuse
+            the mess.
           </div>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
