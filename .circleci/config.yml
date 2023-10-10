@@ -376,6 +376,11 @@ jobs:
                   GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests", $i }')
                   gradle :test $GRADLE_ARGS
             - run:
+                name: Rename Jacoco exec file
+                working_directory: ~/workbench/api
+                command: |
+                  mv "test.exec" "test_$CIRCLE_NODE_INDEX.exec"
+            - run:
                 name: Lint Java code
                 working_directory: ~/workbench/api
                 command: |
