@@ -261,6 +261,10 @@ jacoco {
     toolVersion = "0.8.10"
 }
 
+jacocoTestReport {
+    getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+}
+
 // The plugin generates configuration names by concatenating SourceSet names
 // with builtin identifiers according to the rules at
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
