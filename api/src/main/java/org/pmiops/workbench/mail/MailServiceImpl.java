@@ -111,7 +111,8 @@ public class MailServiceImpl implements MailService {
   private static final String TWO_STEP_VERIFICATION = "Turn on Google 2-Step Verification";
   private static final String CT_INSTITUTION_CHECK = "Check that %s allows Controlled Tier access";
   private static final String ERA_COMMON = "Connect your eRA Commons account";
-  private static final String RT_TRAINING = "Complete All of Us Registered Tier Training";
+  private static final String RT_TRAINING =
+      "Complete All of Us Responsible Conduct of Research Training";
   private static final String LOGIN_GOV = "Verify your identity with Login.gov";
 
   // CT Steps
