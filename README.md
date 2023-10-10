@@ -206,11 +206,14 @@ CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities a
 
 There are two commands for deploying the Tanagra app locally along with the Workbench
 
-To deploy the Tanagra api locally:
+To deploy the Tanagra api locally (NOTE: the Tanagra api is dependent on the workbench api being deployed in a different terminal window):
 ```
-./project.rb dev-up-tanagra --disable-auth
+./project.rb dev-up-tanagra
 ```
-The normal `./project.rb dev-up` will still need to be run to deploy the Workbench api
+Optional arguments:
+* `--disable-auth` Disable authZ
+* `--version` Deploy a tag (Ex: 0.0.252). Default is main
+* `--drop-db` Drop the Tanagra database and recreate
 
 To deploy the Tanagra UI and the Workbench UI together locally:
 ```
@@ -221,7 +224,7 @@ yarn dev-up-tanagra-local
 
 To deploy Tanagra api to test (run from `api` directory):
 ```
-./project.rb deploy-tanagra --project all-of-us-workbench-test --version my-version --promote --quiet
+./project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote --quiet
 ```
 
 To deploy Tanagra UI to test (run from `ui` directory):
