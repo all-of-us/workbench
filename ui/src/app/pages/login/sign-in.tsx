@@ -28,7 +28,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
-import { restrictDemographicSurvey } from 'app/utils/profile-utils';
+import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -275,7 +275,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
     if (
       steps[index] === SignInStep.ACCOUNT_DETAILS &&
-      restrictDemographicSurvey(profile.address.country, new Date())
+      !showDemographicSurvey(profile.address.country, new Date())
     ) {
       return SignInStep.SUCCESS_PAGE;
     }

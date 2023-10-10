@@ -7,12 +7,12 @@ export const getProfilePictureSrc = () => {
   return authStore.get().auth?.user?.profile.picture;
 };
 
-export const restrictDemographicSurvey = (country, date) => {
-  return country !== Country.US && INTL_USER_SIGN_IN_CHECK < date;
+export const showDemographicSurvey = (country, date) => {
+  return country === Country.US || INTL_USER_SIGN_IN_CHECK > date;
 };
 
 export const shouldShowDemographicSurvey = (profile: Profile) => {
   const userCountry = profile?.address?.country;
   const signIn = new Date(profile.firstSignInTime);
-  return !restrictDemographicSurvey(userCountry, signIn);
+  return showDemographicSurvey(userCountry, signIn);
 };

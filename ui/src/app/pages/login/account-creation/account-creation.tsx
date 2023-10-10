@@ -39,11 +39,9 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import {
-  INTL_USER_SIGN_IN_CHECK,
-  STATE_CODE_MAPPING,
-} from 'app/utils/constants';
+import { STATE_CODE_MAPPING } from 'app/utils/constants';
 import { Country } from 'app/utils/constants';
+import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -430,8 +428,8 @@ export class AccountCreation extends React.Component<
   // We need to stop showing demographic survey only after Nov-03
   shouldRestrictDemographicSurvey = () => {
     return (
-      new Date() >= INTL_USER_SIGN_IN_CHECK &&
-      this.state.countryDropdownSelection !== Country.US
+      !!this.state.countryDropdownSelection &&
+      !showDemographicSurvey(this.state.countryDropdownSelection, new Date())
     );
   };
 
@@ -1041,20 +1039,18 @@ export class AccountCreation extends React.Component<
               />
             </Section>
             {/* After Nov-03, if the user is international, proceed to submit the account creation request at this stage.*/}
-            {!!this.state.countryDropdownSelection &&
-              this.shouldRestrictDemographicSurvey() &&
-              enableCaptcha && (
-                <Section>
-                  <div style={{ paddingBottom: '1.5rem' }}>
-                    <ReCaptcha
-                      captchaRef={this.props.captchaRef}
-                      captureCaptchaResponse={(token) =>
-                        this.setState({ captchaToken: token, captcha: true })
-                      }
-                    />
-                  </div>
-                </Section>
-              )}
+            {this.shouldRestrictDemographicSurvey() && enableCaptcha && (
+              <Section>
+                <div style={{ paddingBottom: '1.5rem' }}>
+                  <ReCaptcha
+                    captchaRef={this.props.captchaRef}
+                    captureCaptchaResponse={(token) =>
+                      this.setState({ captchaToken: token, captcha: true })
+                    }
+                  />
+                </div>
+              </Section>
+            )}
 
             <FormSection style={{ marginTop: '6rem', paddingBottom: '1.5rem' }}>
               <Button
@@ -1078,22 +1074,20 @@ export class AccountCreation extends React.Component<
                       </BulletAlignedUnorderedList>
                     </React.Fragment>
                   ) : (
-                    this.shouldRestrictDemographicSurvey() &&
                     enableCaptcha &&
+                    this.shouldRestrictDemographicSurvey() &&
                     !this.state.captcha && <div>Please fill captcha</div>
                   )
                 }
                 disabled={
                   !errors &&
-                  this.state.countryDropdownSelection &&
-                  this.shouldRestrictDemographicSurvey() &&
                   enableCaptcha &&
+                  this.shouldRestrictDemographicSurvey() &&
                   this.state.captcha
                 }
               >
                 {/* After Nov-03, Show submit if user in international else Next to show Survey*/}
-                {!!this.state.countryDropdownSelection &&
-                this.shouldRestrictDemographicSurvey() ? (
+                {this.shouldRestrictDemographicSurvey() ? (
                   <Button
                     aria-label='Submit'
                     disabled={
