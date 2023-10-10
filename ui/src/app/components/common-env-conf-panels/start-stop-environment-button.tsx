@@ -20,18 +20,21 @@ import computeStarting from 'assets/icons/compute-starting.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeStopping from 'assets/icons/compute-stopping.svg';
 
+interface ImgProps {
+  alt: string;
+  src: string;
+  style?: CSSProperties;
+  'data-test-id': string;
+}
+interface ButtonProps extends ImgProps {
+  onClick?: () => void;
+}
+
 interface ComponentProps {
   status: AppStatus | RuntimeStatus;
   onPause: () => void;
   onResume: () => void;
   appType: UIAppType;
-}
-interface ButtonProps {
-  altText: string;
-  iconSrc: string;
-  dataTestId: string;
-  styleOverrides?: CSSProperties;
-  onClick?: () => void;
 }
 export const StartStopEnvironmentButton = ({
   status,
@@ -43,107 +46,104 @@ export const StartStopEnvironmentButton = ({
     toUserEnvironmentStatusByAppType(status, appType);
 
   const rotateStyle = { animation: 'rotation 2s infinite linear' };
-  const {
-    altText,
-    iconSrc,
-    dataTestId,
-    styleOverrides = {},
-    onClick = null,
-  } = switchCase<UserEnvironmentStatus, ButtonProps>(
+  const { onClick = null, ...imgProps } = switchCase<
+    UserEnvironmentStatus,
+    ButtonProps
+  >(
     userEnvironmentStatus,
     [
       UserEnvironmentStatus.CREATING,
       () => ({
-        altText: 'Environment creation in progress',
-        iconSrc: computeStarting,
-        dataTestId: 'environment-status-icon-starting',
-        styleOverrides: rotateStyle,
+        alt: 'Environment creation in progress',
+        src: computeStarting,
+        'data-test-id': 'environment-status-icon-starting',
+        style: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.RUNNING,
       () => ({
-        altText: 'Environment running, click to pause',
-        iconSrc: computeRunning,
-        dataTestId: 'environment-status-icon-running',
+        alt: 'Environment running, click to pause',
+        src: computeRunning,
+        'data-test-id': 'environment-status-icon-running',
         onClick: onPause,
       }),
     ],
     [
       UserEnvironmentStatus.UPDATING,
       () => ({
-        altText: 'Environment update in progress',
-        iconSrc: computeStarting,
-        dataTestId: 'environment-status-icon-starting',
-        styleOverrides: rotateStyle,
+        alt: 'Environment update in progress',
+        src: computeStarting,
+        'data-test-id': 'environment-status-icon-starting',
+        style: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.ERROR,
       () => ({
-        altText: 'Environment in error state',
-        iconSrc: computeError,
-        dataTestId: 'environment-status-icon-error',
+        alt: 'Environment in error state',
+        src: computeError,
+        'data-test-id': 'environment-status-icon-error',
       }),
     ],
     [
       UserEnvironmentStatus.PAUSING,
       () => ({
-        altText: 'Environment pause in progress',
-        iconSrc: computeStopping,
-        dataTestId: 'environment-status-icon-stopping',
-        styleOverrides: rotateStyle,
+        alt: 'Environment pause in progress',
+        src: computeStopping,
+        'data-test-id': 'environment-status-icon-stopping',
+        style: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.PAUSED,
       () => ({
-        altText: 'Environment paused, click to resume',
-        iconSrc: computeStopped,
-        dataTestId: 'environment-status-icon-stopped',
+        alt: 'Environment paused, click to resume',
+        src: computeStopped,
+        'data-test-id': 'environment-status-icon-stopped',
         onClick: onResume,
       }),
     ],
     [
       UserEnvironmentStatus.RESUMING,
       () => ({
-        altText: 'Environment resume in progress',
-        iconSrc: computeStarting,
-        dataTestId: 'environment-status-icon-starting',
-        styleOverrides: rotateStyle,
+        alt: 'Environment resume in progress',
+        src: computeStarting,
+        'data-test-id': 'environment-status-icon-starting',
+        style: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.DELETING,
       () => ({
-        altText: 'Environment deletion in progress',
-        iconSrc: computeStopping,
-        dataTestId: 'environment-status-icon-stopping',
-        styleOverrides: rotateStyle,
+        alt: 'Environment deletion in progress',
+        src: computeStopping,
+        'data-test-id': 'environment-status-icon-stopping',
+        style: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.DELETED,
       () => ({
-        altText: 'Environment has been deleted',
-        iconSrc: computeNone,
-        dataTestId: 'environment-status-icon-none',
+        alt: 'Environment has been deleted',
+        src: computeNone,
+        'data-test-id': 'environment-status-icon-none',
       }),
     ],
     [
       UserEnvironmentStatus.UNKNOWN,
       () => ({
-        altText: 'Environment status unknown',
-        iconSrc: computeNone,
-        dataTestId: 'environment-status-icon-none',
+        alt: 'Environment status unknown',
+        src: computeNone,
+        'data-test-id': 'environment-status-icon-none',
       }),
     ],
     [
       DEFAULT,
       () => ({
-        altText: 'No Environment found',
-        iconSrc: computeNone,
-        dataTestId: 'environment-status-icon-none',
+        alt: 'No Environment found',
+        src: computeNone,
+        'data-test-id': 'environment-status-icon-none',
       }),
     ]
   );
@@ -176,28 +176,18 @@ export const StartStopEnvironmentButton = ({
     >
       {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well. */}
       {onClick && (
-        <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <TooltipTrigger content={<div>{imgProps.alt}</div>} side='left'>
           <FlexRow style={iconWrapperStyle}>
             <Clickable {...{ onClick }} style={{ display: 'flex' }}>
-              <img
-                alt={altText}
-                src={iconSrc}
-                style={styleOverrides}
-                data-test-id={dataTestId}
-              />
+              <img {...imgProps} />
             </Clickable>
           </FlexRow>
         </TooltipTrigger>
       )}
       {!onClick && (
-        <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <TooltipTrigger content={<div>{imgProps.alt}</div>} side='left'>
           <FlexRow style={iconWrapperStyle}>
-            <img
-              alt={altText}
-              src={iconSrc}
-              style={styleOverrides}
-              data-test-id={dataTestId}
-            />
+            <img {...imgProps} />
           </FlexRow>
         </TooltipTrigger>
       )}
