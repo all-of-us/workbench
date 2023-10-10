@@ -407,10 +407,12 @@ jobs:
                 working_directory: ~/workbench/api
                 command: ls /tmp/workspace/api/build/jacoco
             - run:
-                name: Lint Java code
+                name: Generate Jacoco Coverage Report
                 working_directory: ~/workbench/api
                 command: |
                   ./gradlew jacocoTestReport
+            - store_artifacts:
+              path: ~/workbench/api/build/reports
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
