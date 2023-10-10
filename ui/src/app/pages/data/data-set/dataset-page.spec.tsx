@@ -590,7 +590,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    ).toBe(16);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -600,7 +600,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
+    ).toBe(15);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -611,7 +611,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(11);
+    ).toBe(12);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -622,7 +622,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(10);
+    ).toBe(11);
 
     // restore original CDR Version for other tests
     cdrVersionTiersResponse.tiers[0].versions[0] = originalCdrVersion;

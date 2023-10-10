@@ -984,6 +984,39 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void getValuesFromDomainPersonHasEhrData() {
+    List<DomainWithDomainValues> domainWithDomainValues =
+        Objects.requireNonNull(
+                controller
+                    .getValuesFromDomain(
+                        WORKSPACE_NAMESPACE,
+                        WORKSPACE_NAME,
+                        Domain.PERSON_HAS_EHR_DATA.toString(),
+                        1L)
+                    .getBody())
+            .getItems();
+
+    assertThat(
+            domainWithDomainValues.containsAll(
+                ImmutableList.of(
+                    new DomainWithDomainValues()
+                        .domain(Domain.PERSON_HAS_EHR_DATA.toString())
+                        .items(
+                            ImmutableList.of(
+                                new DomainValue().value("person_id"),
+                                new DomainValue().value("gender_concept_id"),
+                                new DomainValue().value("gender"),
+                                new DomainValue().value("date_of_birth"),
+                                new DomainValue().value("race_concept_id"),
+                                new DomainValue().value("race"),
+                                new DomainValue().value("ethnicity_concept_id"),
+                                new DomainValue().value("ethnicity"),
+                                new DomainValue().value("sex_at_birth_concept_id"),
+                                new DomainValue().value("sex_at_birth"))))))
+        .isEqualTo(true);
+  }
+
+  @Test
   public void previewDataSetByDomainCondition() {
     DataSetPreviewResponse dataSetPreviewResponse =
         Objects.requireNonNull(
