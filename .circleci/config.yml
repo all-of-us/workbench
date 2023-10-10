@@ -411,6 +411,15 @@ jobs:
                 working_directory: ~/workbench/api
                 command: |
                   ./gradlew jacocoTestReport --debug
+            - run:
+                working_directory: ~/workbench/api
+                command: ls .
+            - run:
+                working_directory: ~/workbench/api
+                command: ls ./build
+            - run:
+                working_directory: ~/workbench/api
+                command: ls ./build/jacoco
             - store_artifacts:
                 path: ~/workbench/api/build/reports
 
