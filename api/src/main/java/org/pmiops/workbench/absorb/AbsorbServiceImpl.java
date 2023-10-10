@@ -29,6 +29,13 @@ public class AbsorbServiceImpl implements AbsorbService {
     this.cloudStorageClient = cloudStorageClient;
   }
 
+  // This function returns false if the user has an account with absorb, even if they have never
+  // logged into Absorb. However, in our case, a users' account is created the first time they log
+  // in, and only then. We may be able to create accounts prior to a user logging in by using the
+  // API but have no plans to do so. Until we do that, the concepts of "logged in before" and "has
+  // account" should be equivalent. We should rename the function if that stops being true. This
+  // method name is clearer to use in other services since it describes the users' actions so far
+  // (domain logic) rather than relying on Absorb-specific state (implementation details).
   @Override
   public Boolean userHasLoggedIntoAbsorb(String email) throws ApiException {
     ensureAuthentication(email);
