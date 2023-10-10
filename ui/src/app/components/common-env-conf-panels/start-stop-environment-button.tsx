@@ -174,23 +174,13 @@ export const StartStopEnvironmentButton = ({
         borderRadius: '5px 0 0 5px',
       }}
     >
-      {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well. */}
-      {onClick && (
-        <TooltipTrigger content={<div>{imgProps.alt}</div>} side='left'>
-          <FlexRow style={iconWrapperStyle}>
-            <Clickable {...{ onClick }} style={{ display: 'flex' }}>
-              <img {...imgProps} />
-            </Clickable>
-          </FlexRow>
-        </TooltipTrigger>
-      )}
-      {!onClick && (
-        <TooltipTrigger content={<div>{imgProps.alt}</div>} side='left'>
-          <FlexRow style={iconWrapperStyle}>
+      <TooltipTrigger content={<div>{imgProps.alt}</div>} side='left'>
+        <FlexRow style={iconWrapperStyle}>
+          <Clickable {...{ onClick }} style={{ display: 'flex' }}>
             <img {...imgProps} />
-          </FlexRow>
-        </TooltipTrigger>
-      )}
+          </Clickable>
+        </FlexRow>
+      </TooltipTrigger>
     </FlexRow>
   );
 };
