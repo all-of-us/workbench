@@ -410,7 +410,7 @@ jobs:
                 name: Generate Jacoco Coverage Report
                 working_directory: ~/workbench/api
                 command: |
-                  ./gradlew jacocoTestReport
+                  ./gradlew jacocoTestReport --debug
             - store_artifacts:
                 path: ~/workbench/api/build/reports
 
