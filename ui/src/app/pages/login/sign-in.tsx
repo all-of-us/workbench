@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { Degree, Profile } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
@@ -22,6 +21,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
+import { ReCaptcha } from 'app/pages/login/account-creation/re-captcha';
 import { LoginReactComponent } from 'app/pages/login/login';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -414,26 +414,26 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   // This method is being used if user is international
-  private updateProfileAndCreateAccount = (profile: Profile) => {
-    this.setState({ profile: profile });
+  private updateProfileAndCreateAccount = (
+    profile: Profile,
+    captchaToken: string
+  ) => {
+    this.setState({ profile: profile, captchaToken: captchaToken });
     // setState is flaky, sometimes it is unable to set profile by the time submit happens
     // hence to be sure lets just pass profile to submit method
-    this.onSubmit(profile);
+    this.onSubmit(profile, captchaToken);
   };
-  private onSubmit = async (profileArg) => {
+  private onSubmit = async (updatedProfile: Profile, captchaToken: string) => {
     const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
       loading: true,
     });
     this.props.showSpinner();
 
-    const profileToSubmit =
-      !!profileArg && profileArg.address ? profileArg : this.state.profile;
-
     try {
       const newProfile = await profileApi().createAccount({
-        profile: profileToSubmit,
-        captchaVerificationToken: this.state.captchaToken,
+        profile: updatedProfile,
+        captchaVerificationToken: captchaToken,
         termsOfServiceVersion: this.state.termsOfServiceVersion,
       });
 
@@ -476,10 +476,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         >
           {enableCaptcha && (
             <div style={{ paddingBottom: '1.5rem' }}>
-              <ReCAPTCHA
-                sitekey={environment.captchaSiteKey}
-                ref={this.captchaRef}
-                onChange={(value) => this.captureCaptchaResponse(value)}
+              <ReCaptcha
+                captchaRef={this.captchaRef}
+                captureCaptchaResponse={(value) =>
+                  this.captureCaptchaResponse(value)
+                }
               />
             </div>
           )}
@@ -512,7 +513,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
-                onClick={() => this.onSubmit(this.state.profile)}
+                onClick={() =>
+                  this.onSubmit(this.state.profile, this.state.captchaToken)
+                }
               >
                 Submit
               </Button>

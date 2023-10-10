@@ -10,7 +10,6 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { FormSection } from 'app/components/forms';
@@ -35,6 +34,7 @@ import {
   Section,
   WhyWillSomeInformationBePublic,
 } from 'app/pages/login/account-creation/common';
+import { ReCaptcha } from 'app/pages/login/account-creation/re-captcha';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
@@ -132,7 +132,7 @@ export interface AccountCreationProps {
   onPreviousClick: (profile: Profile) => void;
   captureCaptchaResponse: (token) => void;
   captchaRef: ReCAPTCHA;
-  onSubmit: (updatedProfile) => void;
+  onSubmit: (updatedProfile, captchaToken) => void;
 }
 
 export interface AccountCreationState {
@@ -145,6 +145,7 @@ export interface AccountCreationState {
   usernameConflictError: boolean;
   countryDropdownSelection: Country | null;
   captcha: boolean;
+  captchaToken: string;
 }
 
 export class AccountCreation extends React.Component<
@@ -169,6 +170,7 @@ export class AccountCreation extends React.Component<
       usernameConflictError: false,
       countryDropdownSelection: null,
       captcha: false,
+      captchaToken: null,
     };
   }
 
@@ -1044,13 +1046,11 @@ export class AccountCreation extends React.Component<
               enableCaptcha && (
                 <Section>
                   <div style={{ paddingBottom: '1.5rem' }}>
-                    <ReCAPTCHA
-                      sitekey={environment.captchaSiteKey}
-                      ref={this.props.captchaRef}
-                      onChange={(value) => {
-                        this.setState({ captcha: !this.state.captcha });
-                        this.props.captureCaptchaResponse(value);
-                      }}
+                    <ReCaptcha
+                      captchaRef={this.props.captchaRef}
+                      captureCaptchaResponse={(token) =>
+                        this.setState({ captchaToken: token, captcha: true })
+                      }
                     />
                   </div>
                 </Section>
@@ -1105,7 +1105,10 @@ export class AccountCreation extends React.Component<
                     style={{ height: '3rem', width: '15rem' }}
                     onClick={() => {
                       AnalyticsTracker.Registration.CreateAccountPage();
-                      this.props.onSubmit(this.state.profile);
+                      this.props.onSubmit(
+                        this.state.profile,
+                        this.state.captchaToken
+                      );
                     }}
                   >
                     Submit
