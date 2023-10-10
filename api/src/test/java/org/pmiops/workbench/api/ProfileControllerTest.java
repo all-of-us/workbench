@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
+import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
@@ -142,6 +143,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ShibbolethService mockShibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
+  @MockBean private AbsorbService mockAbsorbService;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;

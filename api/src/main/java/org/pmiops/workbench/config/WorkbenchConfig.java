@@ -260,6 +260,8 @@ public class WorkbenchConfig {
     public String externalDepartmentId;
     public boolean externalDepartmentIdPopulatedForNewUsers;
     public boolean enabledForNewUsers;
+    public String rtTrainingCourseId;
+    public String ctTrainingCourseId;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
   }
