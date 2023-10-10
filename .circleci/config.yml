@@ -379,7 +379,7 @@ jobs:
                 name: Rename Jacoco exec file
                 working_directory: ~/workbench/api
                 command: |
-                  mv "test.exec" "test_$CIRCLE_NODE_INDEX.exec"
+                  mv "api/build/jacoco/test.exec" "api/build/jacoco/test_$CIRCLE_NODE_INDEX.exec"
             - run:
                 name: Lint Java code
                 working_directory: ~/workbench/api
