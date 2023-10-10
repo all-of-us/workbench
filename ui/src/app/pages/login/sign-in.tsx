@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { Degree, Profile } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { DemographicSurvey } from 'app/components/demographic-survey-v2';
 import { DemographicSurveyValidationMessage } from 'app/components/demographic-survey-v2-validation-message';
@@ -22,12 +21,14 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
+import { ReCaptcha } from 'app/pages/login/account-creation/re-captcha';
 import { LoginReactComponent } from 'app/pages/login/login';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError } from 'app/utils/errors';
+import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -263,7 +264,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     ];
   }
 
-  private getNextStep(currentStep: SignInStep) {
+  private getNextStep(currentStep: SignInStep, profile: Profile = null) {
     const steps = this.getAccountCreationSteps();
     const index = steps.indexOf(currentStep);
     if (index === -1) {
@@ -271,6 +272,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
     if (index === steps.length) {
       throw new Error('No sign-in steps remaining after step ' + currentStep);
+    }
+    if (
+      steps[index] === SignInStep.ACCOUNT_DETAILS &&
+      !showDemographicSurvey(profile.address.country, new Date())
+    ) {
+      return SignInStep.SUCCESS_PAGE;
     }
     return steps[index + 1];
   }
@@ -317,7 +324,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     const onComplete = (profile: Profile) => {
       this.setState({
         profile: profile,
-        currentStep: this.getNextStep(currentStep),
+        currentStep: this.getNextStep(currentStep, profile),
         isPreviousStep: false,
       });
     };
@@ -374,6 +381,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             profile={this.state.profile}
             onComplete={onComplete}
             onPreviousClick={onPrevious}
+            captchaRef={this.captchaRef}
+            captureCaptchaResponse={this.captureCaptchaResponse}
+            onSubmit={this.updateProfileAndCreateAccount}
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
@@ -403,7 +413,17 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
-  private onSubmit = async () => {
+  // This method is being used if user is international
+  private updateProfileAndCreateAccount = (
+    profile: Profile,
+    captchaToken: string
+  ) => {
+    this.setState({ profile: profile, captchaToken: captchaToken });
+    // setState is flaky, sometimes it is unable to set profile by the time submit happens
+    // hence to be sure lets just pass profile to submit method
+    this.onSubmit(profile, captchaToken);
+  };
+  private onSubmit = async (updatedProfile: Profile, captchaToken: string) => {
     const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
       loading: true,
@@ -412,14 +432,14 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
     try {
       const newProfile = await profileApi().createAccount({
-        profile: this.state.profile,
-        captchaVerificationToken: this.state.captchaToken,
+        profile: updatedProfile,
+        captchaVerificationToken: captchaToken,
         termsOfServiceVersion: this.state.termsOfServiceVersion,
       });
 
       this.setState({
         profile: newProfile,
-        currentStep: this.getNextStep(this.state.currentStep),
+        currentStep: this.getNextStep(this.state.currentStep, newProfile),
         loading: false,
         isPreviousStep: false,
       });
@@ -456,10 +476,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         >
           {enableCaptcha && (
             <div style={{ paddingBottom: '1.5rem' }}>
-              <ReCAPTCHA
-                sitekey={environment.captchaSiteKey}
-                ref={this.captchaRef}
-                onChange={(value) => this.captureCaptchaResponse(value)}
+              <ReCaptcha
+                captchaRef={this.captchaRef}
+                captureCaptchaResponse={(value) =>
+                  this.captureCaptchaResponse(value)
+                }
               />
             </div>
           )}
@@ -492,7 +513,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
-                onClick={this.onSubmit}
+                onClick={() =>
+                  this.onSubmit(this.state.profile, this.state.captchaToken)
+                }
               >
                 Submit
               </Button>

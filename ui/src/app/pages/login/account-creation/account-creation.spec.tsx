@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
@@ -26,10 +28,20 @@ import {
   stateCodeErrorMessage,
 } from './account-creation';
 
+export class MockDate extends Date {
+  constructor(arg) {
+    super(arg || '2023-12-03');
+  }
+}
 const createProps = (): AccountCreationProps => ({
   profile: createEmptyProfile(),
   onComplete: () => {},
   onPreviousClick: () => {},
+  onSubmit: () => {},
+  captureCaptchaResponse: (token) => {
+    console.log(token);
+  },
+  captchaRef: null,
 });
 
 const setup = (props = createProps()) => {
@@ -379,4 +391,23 @@ it('should reset "other" discovery source details to null if "other" is unselect
 
   expect(profile.generalDiscoverySourceOtherText).toBeNull();
   expect(profile.partnerDiscoverySourceOtherText).toBeNull();
+});
+
+// TODO: Clean up after 11-03, we would not need MockDate
+it('Should show submit button if country is not US', async () => {
+  const onSubmit = jest.fn();
+  global.Date = MockDate as DateConstructor;
+  const { user } = setup({
+    ...createProps(),
+    onSubmit,
+  });
+  // By default the Next Button will be displayed
+  expect(screen.getByText('Next')).toBeInTheDocument();
+  await user.click(getCountryDropdownField());
+  await user.paste(Country.AL);
+  await user.keyboard('{enter}');
+
+  // Updating the Country to ALbania and the fact the date has been mocked to 2023-dec, button will be Submit
+  expect(screen.getByText('Albania')).toBeInTheDocument();
+  expect(screen.getByText('Submit')).toBeInTheDocument();
 });

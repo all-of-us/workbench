@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import * as fp from 'lodash/fp';
 import { MultiSelect } from 'primereact/multiselect';
 import validate from 'validate.js';
@@ -33,12 +34,14 @@ import {
   Section,
   WhyWillSomeInformationBePublic,
 } from 'app/pages/login/account-creation/common';
+import { ReCaptcha } from 'app/pages/login/account-creation/re-captcha';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { STATE_CODE_MAPPING } from 'app/utils/constants';
 import { Country } from 'app/utils/constants';
+import { showDemographicSurvey } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -125,6 +128,9 @@ export interface AccountCreationProps {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
+  captureCaptchaResponse: (token) => void;
+  captchaRef: ReCAPTCHA;
+  onSubmit: (updatedProfile, captchaToken) => void;
 }
 
 export interface AccountCreationState {
@@ -136,6 +142,8 @@ export interface AccountCreationState {
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
   countryDropdownSelection: Country | null;
+  captcha: boolean;
+  captchaToken: string;
 }
 
 export class AccountCreation extends React.Component<
@@ -159,6 +167,8 @@ export class AccountCreation extends React.Component<
       usernameCheckInProgress: false,
       usernameConflictError: false,
       countryDropdownSelection: null,
+      captcha: false,
+      captchaToken: null,
     };
   }
 
@@ -415,7 +425,16 @@ export class AccountCreation extends React.Component<
     return fp.isEmpty(errors) ? undefined : errors;
   }
 
+  // We need to stop showing demographic survey only after Nov-03
+  shouldRestrictDemographicSurvey = () => {
+    return (
+      !!this.state.countryDropdownSelection &&
+      !showDemographicSurvey(this.state.countryDropdownSelection, new Date())
+    );
+  };
+
   render() {
+    const { enableCaptcha } = serverConfigStore.get().config;
     const {
       profile: {
         givenName,
@@ -482,7 +501,7 @@ export class AccountCreation extends React.Component<
         <FlexRow>
           <FlexColumn style={{ marginRight: '3rem' }}>
             <div style={{ ...styles.text, fontSize: 16, marginTop: '1.5rem' }}>
-              Please complete Step 2 of 3
+              Please complete Step 2
             </div>
             <div style={{ ...styles.text, fontSize: 12, marginTop: '0.45rem' }}>
               All fields required unless indicated as optional
@@ -1019,6 +1038,20 @@ export class AccountCreation extends React.Component<
                 }
               />
             </Section>
+            {/* After Nov-03, if the user is international, proceed to submit the account creation request at this stage.*/}
+            {this.shouldRestrictDemographicSurvey() && enableCaptcha && (
+              <Section>
+                <div style={{ paddingBottom: '1.5rem' }}>
+                  <ReCaptcha
+                    captchaRef={this.props.captchaRef}
+                    captureCaptchaResponse={(token) =>
+                      this.setState({ captchaToken: token, captcha: true })
+                    }
+                  />
+                </div>
+              </Section>
+            )}
+
             <FormSection style={{ marginTop: '6rem', paddingBottom: '1.5rem' }}>
               <Button
                 aria-label='Previous'
@@ -1028,9 +1061,10 @@ export class AccountCreation extends React.Component<
               >
                 Previous
               </Button>
+              {/* In case of internation user add a new error/check: captcha should be filled*/}
               <TooltipTrigger
                 content={
-                  errors && (
+                  errors ? (
                     <React.Fragment>
                       <div>Please review the following: </div>
                       <BulletAlignedUnorderedList>
@@ -1039,25 +1073,57 @@ export class AccountCreation extends React.Component<
                         ))}
                       </BulletAlignedUnorderedList>
                     </React.Fragment>
+                  ) : (
+                    enableCaptcha &&
+                    this.shouldRestrictDemographicSurvey() &&
+                    !this.state.captcha && <div>Please fill captcha</div>
                   )
                 }
-                disabled={!errors}
+                disabled={
+                  !errors &&
+                  enableCaptcha &&
+                  this.shouldRestrictDemographicSurvey() &&
+                  this.state.captcha
+                }
               >
-                <Button
-                  aria-label='Next'
-                  disabled={
-                    this.state.usernameCheckInProgress ||
-                    this.isUsernameValidationError() ||
-                    Boolean(errors)
-                  }
-                  style={{ height: '3rem', width: '15rem' }}
-                  onClick={() => {
-                    AnalyticsTracker.Registration.CreateAccountPage();
-                    this.props.onComplete(this.state.profile);
-                  }}
-                >
-                  Next
-                </Button>
+                {/* After Nov-03, Show submit if user in international else Next to show Survey*/}
+                {this.shouldRestrictDemographicSurvey() ? (
+                  <Button
+                    aria-label='Submit'
+                    disabled={
+                      this.state.usernameCheckInProgress ||
+                      this.isUsernameValidationError() ||
+                      (enableCaptcha && !this.state.captcha) ||
+                      Boolean(errors)
+                    }
+                    style={{ height: '3rem', width: '15rem' }}
+                    onClick={() => {
+                      AnalyticsTracker.Registration.CreateAccountPage();
+                      this.props.onSubmit(
+                        this.state.profile,
+                        this.state.captchaToken
+                      );
+                    }}
+                  >
+                    Submit
+                  </Button>
+                ) : (
+                  <Button
+                    aria-label='Next'
+                    disabled={
+                      this.state.usernameCheckInProgress ||
+                      this.isUsernameValidationError() ||
+                      Boolean(errors)
+                    }
+                    style={{ height: '3rem', width: '15rem' }}
+                    onClick={() => {
+                      AnalyticsTracker.Registration.CreateAccountPage();
+                      this.props.onComplete(this.state.profile);
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
               </TooltipTrigger>
             </FormSection>
           </FlexColumn>

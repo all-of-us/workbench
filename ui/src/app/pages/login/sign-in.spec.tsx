@@ -11,6 +11,7 @@ import {
   TermsOfService,
 } from 'app/components/terms-of-service';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
+import { MockDate } from 'app/pages/login/account-creation/account-creation.spec';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
 import LoginReactComponent from 'app/pages/login/login';
@@ -114,7 +115,9 @@ describe('SignIn', () => {
 
     // ACCOUNT_DETAILS
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
+    const profile = createEmptyProfile();
+    profile.address.country = 'United States';
+    wrapper.find(AccountCreation).props().onComplete(profile);
 
     // DEMOGRAPHIC_SURVEY
     expect(wrapper.exists(DemographicSurvey)).toBeTruthy();
@@ -127,6 +130,42 @@ describe('SignIn', () => {
       .props();
 
     await onClick();
+
+    // SUCCESS_PAGE
+    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
+  });
+
+  // TODO: Clean up after Nov 03 we do not need mock Data
+  it('should not show demographic survey of international user', async () => {
+    global.Date = MockDate as DateConstructor;
+    const wrapper = shallowComponent();
+
+    // the sign-up flow steps are enumerated by `SignInStep`:
+    // LANDING, TERMS_OF_SERVICE, INSTITUTIONAL_AFFILIATION, ACCOUNT_DETAILS, SUCCESS_PAGE,
+
+    // To start, the LANDING page / login component should be shown.
+    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
+    // Simulate the "create account" button being clicked by firing the callback method.
+    wrapper.find(LoginReactComponent).props().onCreateAccount();
+    await wrapper.update();
+
+    // TERMS_OF_SERVICE
+    expect(wrapper.exists(TermsOfService)).toBeTruthy();
+    wrapper.find(TermsOfService).props().onComplete(LATEST_TOS_VERSION);
+
+    // INSTITUTIONAL_AFFILIATION
+    expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
+    wrapper
+      .find(AccountCreationInstitution)
+      .props()
+      .onComplete(createEmptyProfile());
+
+    // ACCOUNT_DETAILS
+    expect(wrapper.exists(AccountCreation)).toBeTruthy();
+    const profile = createEmptyProfile();
+    // Updating the country to anything but US will make Account Details the last step for account creation
+    profile.address.country = 'Canada';
+    wrapper.find(AccountCreation).props().onComplete(profile);
 
     // SUCCESS_PAGE
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();

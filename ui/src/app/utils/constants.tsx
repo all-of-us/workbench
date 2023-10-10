@@ -343,3 +343,7 @@ export const R_SCRIPT_EXT = '.R';
 
 export const SAS_FILE_EXT = '.sas';
 export const GKE_APP_PROXY_PATH_SUFFIX = 'app';
+
+// https://precisionmedicineinitiative.atlassian.net/browse/RW-10698
+// We are restricting the demographic survey for international users only if they sign in after 11-03.x
+export const INTL_USER_SIGN_IN_CHECK = new Date('2023-11-03');

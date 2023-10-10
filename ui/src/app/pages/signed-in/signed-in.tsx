@@ -18,6 +18,7 @@ import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
 import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
+import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -125,6 +126,15 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     DEMOGRAPHIC_SURVEY_SESSION_KEY
   );
 
+  const shouldRedirectToDemographicSurveyPage = () => {
+    const { demographicSurveyV2 } = profileState.profile;
+    return (
+      shouldShowDemographicSurvey(profileState.profile) &&
+      !demographicSurveyV2 &&
+      !hasDismissedDemographicSurvey
+    );
+  };
+
   return (
     <FlexColumn
       style={{
@@ -150,8 +160,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {!profileState.profile.demographicSurveyV2 &&
-              !hasDismissedDemographicSurvey ? (
+              {shouldRedirectToDemographicSurveyPage() ? (
                 <DemographicSurveyPage
                   routeData={{ title: 'Demographic Survey' }}
                 />
