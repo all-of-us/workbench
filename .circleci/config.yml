@@ -407,6 +407,11 @@ jobs:
                 working_directory: ~/workbench/api
                 command: ls /tmp/workspace/api/build/jacoco
             - run:
+                name: Create Jacoco build directory
+                working_directory: ~/workbench/api
+                command: |
+                  mkdir "./build/jacoco";
+            - run:
                 name: Copy Jacoco exec files locally
                 working_directory: ~/workbench/api
                 command: |
