@@ -412,7 +412,7 @@ jobs:
                 command: |
                   ./gradlew jacocoTestReport
             - store_artifacts:
-              path: ~/workbench/api/build/reports
+                path: ~/workbench/api/build/reports
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
