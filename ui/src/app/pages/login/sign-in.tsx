@@ -161,6 +161,9 @@ export const createEmptyProfile = (): Profile => {
     // profile creation, this field is populated with the full email address.
     username: '',
     accessTierShortNames: [],
+    accessModules: {
+      modules: [],
+    },
     givenName: '',
     familyName: '',
     contactEmail: '',

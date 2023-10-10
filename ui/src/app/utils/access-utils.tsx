@@ -15,7 +15,7 @@ import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { AoU } from 'app/components/text-wrappers';
+import { ComplianceTrainingModuleCardTitle } from 'app/pages/access/compliance-training-module-card-title';
 import { IdentityHelpText } from 'app/pages/access/identity-help-text';
 import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { userIsDisabled } from 'app/routing/guards';
@@ -181,9 +181,13 @@ interface DARTitleComponentConfig {
   onClick?: Function;
 }
 
+interface AARTitleComponentConfig {
+  profile: Profile;
+}
+
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
-  AARTitleComponent: () => JSX.Element;
+  AARTitleComponent: (config: AARTitleComponentConfig) => JSX.Element;
   DARTitleComponent: (config: DARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
@@ -275,15 +279,17 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
-        AARTitleComponent: () => (
-          <div>
-            Complete <AoU /> research Registered Tier training
-          </div>
+        AARTitleComponent: (props: AARTitleComponentConfig) => (
+          <ComplianceTrainingModuleCardTitle
+            tier={AccessTierShortNames.Registered}
+            profile={props.profile}
+          />
         ),
-        DARTitleComponent: () => (
-          <div>
-            Complete <AoU /> research Registered Tier training
-          </div>
+        DARTitleComponent: (props: DARTitleComponentConfig) => (
+          <ComplianceTrainingModuleCardTitle
+            tier={AccessTierShortNames.Registered}
+            profile={props.profile}
+          />
         ),
         adminPageTitle: 'Registered Tier training',
         externalSyncAction: async () =>
@@ -299,15 +305,17 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
-        AARTitleComponent: () => (
-          <div>
-            Complete <AoU /> research Controlled Tier training
-          </div>
+        AARTitleComponent: (props: AARTitleComponentConfig) => (
+          <ComplianceTrainingModuleCardTitle
+            tier={AccessTierShortNames.Controlled}
+            profile={props.profile}
+          />
         ),
-        DARTitleComponent: () => (
-          <div>
-            Complete <AoU /> research Controlled Tier training
-          </div>
+        DARTitleComponent: (props: DARTitleComponentConfig) => (
+          <ComplianceTrainingModuleCardTitle
+            tier={AccessTierShortNames.Controlled}
+            profile={props.profile}
+          />
         ),
         adminPageTitle: 'Controlled Tier training',
         externalSyncAction: async () =>
