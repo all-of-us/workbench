@@ -120,8 +120,8 @@ const CreatePanel = ({
           analysisConfig,
           status,
         }}
-        onPause={async () => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-        onResume={async () => setRuntimeStatus(RuntimeStatusRequest.Start)}
+        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
         appType={UIAppType.JUPYTER}
       />
       <FlexRow

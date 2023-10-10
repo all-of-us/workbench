@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
@@ -19,19 +20,25 @@ import computeStarting from 'assets/icons/compute-starting.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeStopping from 'assets/icons/compute-stopping.svg';
 
-interface StatusInfo {
+interface ComponentProps {
   status: AppStatus | RuntimeStatus;
-  onPause: () => Promise<any>;
-  onResume: () => Promise<any>;
+  onPause: () => void;
+  onResume: () => void;
   appType: UIAppType;
 }
-
+interface ButtonProps {
+  altText: string;
+  iconSrc: string;
+  dataTestId: string;
+  styleOverrides?: CSSProperties;
+  onClick?: () => void;
+}
 export const StartStopEnvironmentButton = ({
   status,
   onPause,
   onResume,
   appType,
-}: StatusInfo) => {
+}: ComponentProps) => {
   const userEnvironmentStatus: UserEnvironmentStatus =
     toUserEnvironmentStatusByAppType(status, appType);
 
@@ -42,7 +49,7 @@ export const StartStopEnvironmentButton = ({
     dataTestId,
     styleOverrides = {},
     onClick = null,
-  } = switchCase<UserEnvironmentStatus, any>(
+  } = switchCase<UserEnvironmentStatus, ButtonProps>(
     userEnvironmentStatus,
     [
       UserEnvironmentStatus.CREATING,

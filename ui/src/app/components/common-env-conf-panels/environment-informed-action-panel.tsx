@@ -81,8 +81,8 @@ interface Props {
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
   status: AppStatus | RuntimeStatus;
-  onPause: () => Promise<void>;
-  onResume: () => Promise<void>;
+  onPause: () => void;
+  onResume: () => void;
   appType: UIAppType;
   environmentChanged?: boolean;
 }
