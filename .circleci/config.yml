@@ -410,7 +410,7 @@ jobs:
                 name: Copy Jacoco exec files locally
                 working_directory: ~/workbench/api
                 command: |
-                  cp "/tmp/workspace/api/build/jacoco/." "./build/jacoco"
+                  cp -r "/tmp/workspace/api/build/jacoco/." "./build/jacoco"
             - run:
                 name: Generate Jacoco Coverage Report
                 working_directory: ~/workbench/api
