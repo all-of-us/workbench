@@ -27,7 +27,7 @@ export const ComplianceTrainingModuleCardTitle = ({
   }, []);
 
   const { accessModule, trainingTitle, courseTitle } =
-    tier == AccessTierShortNames.Registered
+    tier === AccessTierShortNames.Registered
       ? {
           accessModule: AccessModule.COMPLIANCE_TRAINING,
           trainingTitle: 'Responsible Conduct of Research Training',
