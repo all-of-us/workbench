@@ -177,14 +177,14 @@ export const ACCESS_RENEWAL_PATH =
 
 interface DARTitleComponentConfig {
   profile: Profile;
-  afterInitialClick: boolean;
+  afterInitialClick?: boolean;
   onClick?: Function;
 }
 
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   AARTitleComponent: () => JSX.Element;
-  DARTitleComponent: (DARTitleComponentConfig) => JSX.Element;
+  DARTitleComponent: (config: DARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
