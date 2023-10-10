@@ -7,6 +7,8 @@ import {
   Workspace,
 } from 'generated/fetch';
 
+import { CdrVersionStore } from './stores';
+
 function getCdrVersionTier(
   accessTierShortName: string,
   cdrTiers: CdrVersionTiersResponse
@@ -39,9 +41,12 @@ function hasDefaultCdrVersion(
 // does not consider tier; IDs are globally unique, enforced by the API DB
 function findCdrVersion(
   cdrVersionId: string,
-  cdrTiers: CdrVersionTiersResponse
+  cdrTiers: CdrVersionTiersResponse | CdrVersionStore
 ): CdrVersion {
-  const allTiersVersions = fp.flatMap((tier) => tier.versions, cdrTiers.tiers);
+  const allTiersVersions = fp.flatMap(
+    (tier) => tier?.versions,
+    cdrTiers?.tiers
+  );
   return allTiersVersions.find((v) => v.cdrVersionId === cdrVersionId);
 }
 

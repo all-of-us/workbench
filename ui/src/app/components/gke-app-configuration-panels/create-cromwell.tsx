@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { AppType } from 'generated/fetch';
 
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { WarningMessage } from 'app/components/messages';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,

@@ -44,7 +44,7 @@ export const authStore = atom<AuthStore>({
   isSignedIn: false,
 });
 
-interface CdrVersionStore {
+export interface CdrVersionStore {
   tiers?: Array<CdrVersionTier>;
 }
 
@@ -287,10 +287,12 @@ export function useStore<T>(theStore: Atom<T>) {
  * HOC that injects the value of the given store as a prop. When the store changes, the wrapped
  * component will re-render
  */
-export const withStore = (theStore, name) => (WrappedComponent) => {
-  return (props) => {
-    const value = useStore(theStore);
-    const storeProp = { [name]: value };
-    return <WrappedComponent {...props} {...storeProp} />;
+export const withStore =
+  <T,>(theStore: Atom<T>, name: string) =>
+  (WrappedComponent) => {
+    return (props) => {
+      const value: T = useStore(theStore);
+      const storeProp = { [name]: value };
+      return <WrappedComponent {...props} {...storeProp} />;
+    };
   };
-};

@@ -1,16 +1,27 @@
 import * as React from 'react';
 
+import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
+
 import { UIAppType } from 'app/components/apps-panel/utils';
+import { FlexRow } from 'app/components/flex';
+import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatUsd } from 'app/utils/numbers';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
-import { FlexRow } from './flex';
-import { StartStopEnvironmentButton } from './runtime-configuration-panel/start-stop-environment-button';
-import { styles } from './runtime-configuration-panel/styles';
-import { Spinner } from './spinners';
+import { StartStopEnvironmentButton } from './start-stop-environment-button';
+import { styles } from './styles';
 
+interface CostInfoProps {
+  creatorFreeCreditsRemaining: number;
+  environmentChanged: boolean;
+  analysisConfig: AnalysisConfig;
+  currentUser: string;
+  workspace: Workspace;
+  isGKEApp: boolean;
+}
 const CostInfo = ({
   creatorFreeCreditsRemaining,
   environmentChanged,
@@ -18,7 +29,7 @@ const CostInfo = ({
   currentUser,
   workspace,
   isGKEApp,
-}) => {
+}: CostInfoProps) => {
   const remainingCredits =
     creatorFreeCreditsRemaining === null ? (
       <Spinner size={10} />
@@ -64,6 +75,17 @@ const CostInfo = ({
   );
 };
 
+interface PanelProps {
+  creatorFreeCreditsRemaining: number;
+  profile: Profile;
+  workspace: Workspace;
+  analysisConfig: AnalysisConfig;
+  status: AppStatus | RuntimeStatus;
+  onPause: () => void;
+  onResume: () => void;
+  appType: UIAppType;
+  environmentChanged?: boolean;
+}
 export const EnvironmentInformedActionPanel = ({
   creatorFreeCreditsRemaining,
   profile,
@@ -74,7 +96,7 @@ export const EnvironmentInformedActionPanel = ({
   onResume,
   appType,
   environmentChanged = false,
-}) => (
+}: PanelProps) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
     {appType === UIAppType.JUPYTER && (
       <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />

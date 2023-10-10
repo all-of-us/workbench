@@ -3,18 +3,30 @@ import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
+import { GpuConfig } from 'generated/fetch';
+
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CheckBox } from 'app/components/inputs';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { getValidGpuTypes, gpuTypeToDisplayName } from 'app/utils/machines';
+import {
+  getValidGpuTypes,
+  gpuTypeToDisplayName,
+  Machine,
+} from 'app/utils/machines';
 import { supportUrls } from 'app/utils/zendesk';
 
+interface Props {
+  disabled: boolean;
+  onChange: (gpuConfig: GpuConfig) => void;
+  selectedMachine: Machine;
+  gpuConfig: GpuConfig;
+}
 export const GpuConfigSelector = ({
   disabled,
   onChange,
   selectedMachine,
   gpuConfig,
-}) => {
+}: Props) => {
   const { gpuType = 'nvidia-tesla-t4', numOfGpus = 1 } = gpuConfig || {};
   const [selectedGpuType, setSelectedGpuType] = useState<string>(gpuType);
   const [selectedNumOfGpus, setSelectedNumOfGpus] = useState<number>(numOfGpus);

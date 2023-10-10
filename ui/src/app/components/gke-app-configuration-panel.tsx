@@ -10,13 +10,13 @@ import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 
 import { findApp, toUIAppType } from './apps-panel/utils';
+import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';
 import { CreateCromwell } from './gke-app-configuration-panels/create-cromwell';
 import { CreateGkeAppProps } from './gke-app-configuration-panels/create-gke-app';
 import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
 import { CreateSAS } from './gke-app-configuration-panels/create-sas';
-import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
-import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
 
 type InjectedProps =
   | 'app'

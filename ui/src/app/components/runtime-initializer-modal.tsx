@@ -10,7 +10,7 @@ import { toAnalysisConfig } from 'app/utils/runtime-utils';
 import { runtimeDiskStore, useStore } from 'app/utils/stores';
 
 import { Button, Clickable } from './buttons';
-import { EnvironmentCostEstimator } from './environment-cost-estimator';
+import { EnvironmentCostEstimator } from './common-env-conf-panels/environment-cost-estimator';
 import { ClrIcon } from './icons';
 import { WarningMessage } from './messages';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
