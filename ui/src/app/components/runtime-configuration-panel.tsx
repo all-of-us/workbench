@@ -5,37 +5,40 @@ import { validate } from 'validate.js';
 
 import {
   DataprocConfig,
+  Disk,
   GpuConfig,
+  Profile,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
+  Workspace,
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
-import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
+import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/common-env-conf-panels/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from 'app/components/common-env-conf-panels/confirm-delete-unattached-pd';
+import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
-import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
-import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
 import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
 import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   summarizeErrors,
+  WithCdrVersions,
   withCdrVersions,
+  WithCurrentWorkspace,
   withCurrentWorkspace,
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -78,10 +81,21 @@ import {
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
-import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
+import { DeletePersistentDiskButton } from './common-env-conf-panels/delete-persistent-disk-button';
+import { EnvironmentInformedActionPanel } from './common-env-conf-panels/environment-informed-action-panel';
+import { styles } from './common-env-conf-panels/styles';
 
 const { useState, useEffect, Fragment } = React;
 
+interface CreatePanelProps {
+  profile: Profile;
+  setPanelContent: (panelContent: PanelContent) => void;
+  workspace: Workspace;
+  analysisConfig: AnalysisConfig;
+  creatorFreeCreditsRemaining: number;
+  status: RuntimeStatus;
+  setRuntimeStatus: (runtimeStatusRequest: RuntimeStatusRequest) => void;
+}
 const CreatePanel = ({
   profile,
   setPanelContent,
@@ -90,7 +104,7 @@ const CreatePanel = ({
   creatorFreeCreditsRemaining,
   status,
   setRuntimeStatus,
-}) => {
+}: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
       ? runtimePresets.hailAnalysis.displayName
@@ -129,13 +143,19 @@ const CreatePanel = ({
   );
 };
 
+interface PresetSelectorProps {
+  allowDataproc: boolean;
+  setAnalysisConfig: (analysisConfig: AnalysisConfig) => void;
+  disabled: boolean;
+  gcePersistentDisk: Disk | null | undefined;
+}
 // Select a recommended preset configuration.
 export const PresetSelector = ({
   allowDataproc,
   setAnalysisConfig,
   disabled,
   gcePersistentDisk,
-}) => {
+}: PresetSelectorProps) => {
   return (
     <Dropdown
       id='runtime-presets-menu'
@@ -183,7 +203,9 @@ const PanelMain = fp.flow(
     onClose = () => {},
     initialPanelContent,
     creatorFreeCreditsRemaining,
-  }) => {
+  }: RuntimeConfigurationPanelProps &
+    WithCdrVersions &
+    WithCurrentWorkspace) => {
     const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
 
@@ -991,7 +1013,6 @@ export interface RuntimeConfigurationPanelProps {
   creatorFreeCreditsRemaining?: number;
   profileState: ProfileStore;
 }
-
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
   initialPanelContent = null,

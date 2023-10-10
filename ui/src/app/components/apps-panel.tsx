@@ -5,6 +5,7 @@ import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
+import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
@@ -12,7 +13,6 @@ import {
   sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
-import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';

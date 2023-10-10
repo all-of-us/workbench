@@ -11,18 +11,20 @@ import {
 import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  createAppRequestToAnalysisConfig,
   defaultCromwellConfig,
   defaultRStudioConfig,
   defaultSASConfig,
+  toUIAppType,
 } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
-import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
-import { EnvironmentInformedActionPanel } from 'app/components/environment-informed-action-panel';
+import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
+import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
+import { ComputeType, findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
@@ -94,12 +96,31 @@ export const CreateGkeApp = ({
 
   const persistentDiskRequest: PersistentDiskRequest =
     disk ?? defaultConfig.persistentDiskRequest;
+  const { kubernetesRuntimeConfig } = defaultConfig;
+  const machine: Machine = findMachineByName(
+    kubernetesRuntimeConfig.machineType
+  );
+  const analysisConfig: AnalysisConfig = {
+    machine,
+    diskConfig: {
+      size: persistentDiskRequest.size,
+      detachable: true,
+      detachableType: persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: kubernetesRuntimeConfig.numNodes,
+    // defaults
+    computeType: ComputeType.Standard,
+    dataprocConfig: undefined,
+    gpuConfig: undefined,
+    detachedDisk: undefined,
+    autopauseThreshold: undefined,
+  };
+
   const createAppRequest: CreateAppRequest = {
     ...defaultConfig,
     persistentDiskRequest,
   };
-  const analysisConfig = createAppRequestToAnalysisConfig(createAppRequest);
-  const { machine } = analysisConfig;
 
   return (
     <FlexColumn
@@ -110,15 +131,15 @@ export const CreateGkeApp = ({
       <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
-            appType,
             creatorFreeCreditsRemaining,
             profile,
             workspace,
             analysisConfig,
           }}
+          appType={toUIAppType[appType]}
           status={app?.status}
-          onPause={Promise.resolve()}
-          onResume={Promise.resolve()}
+          onPause={() => Promise.resolve()}
+          onResume={() => Promise.resolve()}
         />
         <CostNote />
       </div>

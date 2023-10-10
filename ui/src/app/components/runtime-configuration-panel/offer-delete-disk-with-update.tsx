@@ -4,26 +4,27 @@ import { Disk } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
+import { BackupFilesHelpSection } from 'app/components/common-env-conf-panels/backup-files-help-section';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
-import { BackupFilesHelpSection } from 'app/components/runtime-configuration-panel/backup-files-help-section';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import colors from 'app/styles/colors';
 import { detachableDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 
 const { useState, Fragment } = React;
 
+interface Props {
+  onNext: (deleteDetachedDisk: boolean) => void;
+  onCancel: () => void;
+  disk: Disk;
+}
 export const OfferDeleteDiskWithUpdate = ({
   onNext,
   onCancel,
   disk,
-}: {
-  onNext: (deleteDetachedDisk: boolean) => void;
-  onCancel: () => void;
-  disk: Disk;
-}) => {
+}: Props) => {
   const [deleteDetachedDisk, setDeleteDetachedDisk] = useState(false);
   return (
     <Fragment>

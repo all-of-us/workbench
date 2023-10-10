@@ -1,12 +1,26 @@
 import * as React from 'react';
-import { Fragment } from 'react';
+import { CSSProperties, Fragment } from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { DEFAULT_MACHINE_TYPE, findMachineByName } from 'app/utils/machines';
+import {
+  DEFAULT_MACHINE_TYPE,
+  findMachineByName,
+  Machine,
+} from 'app/utils/machines';
 
+interface Props {
+  selectedMachine: Machine;
+  machineType: string;
+  validMachineTypes: Machine[];
+  onChange: (machine: Machine) => void;
+  disabled: boolean;
+  idPrefix: string;
+  cpuLabelStyles?: CSSProperties;
+  ramLabelStyles?: CSSProperties;
+}
 export const MachineSelector = ({
   onChange,
   selectedMachine,
@@ -16,7 +30,7 @@ export const MachineSelector = ({
   validMachineTypes,
   cpuLabelStyles = {},
   ramLabelStyles = {},
-}) => {
+}: Props) => {
   const initialMachineType =
     findMachineByName(machineType) || DEFAULT_MACHINE_TYPE;
   const { cpu, memory } = selectedMachine || initialMachineType;

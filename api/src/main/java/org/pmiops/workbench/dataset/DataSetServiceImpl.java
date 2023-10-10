@@ -113,6 +113,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
+  private static final String PERSON_ID_HAS_EHR_QUERY =
+      "SELECT DISTINCT person_id \nFROM `${projectId}.${dataSetId}.cb_search_person` WHERE has_ehr_data = 1";
   private static final String MULTIPLE_DOMAIN_QUERY =
       "SELECT UPPER(domain) \nFROM `${projectId}.${dataSetId}.cb_search_all_events` se \nWHERE concept_id IN "
           + CHILD_LOOKUP_SQL
@@ -136,6 +138,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final ImmutableList<Domain> DOMAIN_WITHOUT_CONCEPT_SETS =
       ImmutableList.of(
           Domain.PERSON,
+          Domain.PERSON_HAS_EHR_DATA,
           Domain.FITBIT_ACTIVITY,
           Domain.FITBIT_HEART_RATE_LEVEL,
           Domain.FITBIT_HEART_RATE_SUMMARY,
@@ -358,15 +361,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public TableResult previewBigQueryJobConfig(DataSetPreviewRequest request) {
-    final Domain domain = request.getDomain();
+    final Domain domain =
+        Domain.PHYSICAL_MEASUREMENT_CSS == request.getDomain()
+            ? Domain.MEASUREMENT
+            : Domain.PERSON_HAS_EHR_DATA == request.getDomain()
+                ? Domain.PERSON
+                : request.getDomain();
     final List<String> values = request.getValues();
     Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
 
     final List<String> domainValues =
-        bigQueryService
-            .getTableFieldsFromDomain(
-                Domain.PHYSICAL_MEASUREMENT_CSS.equals(domain) ? Domain.MEASUREMENT : domain)
-            .stream()
+        bigQueryService.getTableFieldsFromDomain(domain).stream()
             .map(field -> field.getName().toLowerCase())
             .collect(Collectors.toList());
 
@@ -510,7 +515,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final ImmutableSet<Domain> domainSet =
         domainValuePairs.stream()
-            .map(DomainValuePair::getDomain)
+            .map(dvp -> dvp.getDomain())
             .collect(ImmutableSet.toImmutableSet());
 
     // now merge all the individual maps from each configuration
@@ -633,19 +638,38 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private QueryJobConfiguration buildQueryJobConfigForDomain(
-      Domain domain,
+      Domain domainMaybeOverloaded,
       List<DomainValuePair> domainValuePairs,
       Map<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
       List<DbConceptSet> conceptSetsSelected,
       String cohortQueries) {
+    // Adjust domain used in SQL
+    final Domain domain =
+        domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)
+            ? Domain.PERSON
+            : domainMaybeOverloaded;
+
     validateConceptSetSelection(domain, conceptSetsSelected);
 
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
+    // Adjust domain to PERSON if domain is PERSON_HAS_EHR_DATA
+    List<DomainValuePair> domainAdjustedDomainValuePairs = domainValuePairs;
+    if (domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)) {
+      domainAdjustedDomainValuePairs =
+          domainValuePairs.stream()
+              .map(
+                  dvp ->
+                      dvp.getDomain().equals(Domain.PERSON_HAS_EHR_DATA)
+                          ? new DomainValuePair().domain(Domain.PERSON).value(dvp.getValue())
+                          : dvp)
+              .collect(Collectors.toList());
+    }
+
     final List<DomainValuePair> domainValuePairsForCurrentDomain =
-        domainValuePairs.stream()
+        domainAdjustedDomainValuePairs.stream()
             .filter(dvp -> dvp.getDomain() == domain)
             .collect(Collectors.toList());
 
@@ -689,6 +713,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .append(" IN (")
           .append(cohortQueries)
           .append(")");
+    }
+
+    if (domainMaybeOverloaded.equals(Domain.PERSON_HAS_EHR_DATA)) {
+      if (queryBuilder.toString().contains("WHERE")) {
+        queryBuilder.append(" \nAND (");
+      } else {
+        queryBuilder.append(" \nWHERE (");
+      }
+      queryBuilder
+          .append(personIdQualified)
+          .append(" IN (")
+          .append(PERSON_ID_HAS_EHR_QUERY)
+          .append("))");
     }
 
     if (domain == Domain.FITBIT_HEART_RATE_LEVEL || domain == Domain.FITBIT_INTRADAY_STEPS) {
@@ -898,8 +935,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     validateDataSetRequestResources(
         dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
 
-    Map<String, QueryJobConfiguration> queriesByDomain =
+    Map<String, QueryJobConfiguration> queriesByDomainTemp =
         domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+
+    Map<String, QueryJobConfiguration> queriesByDomain =
+        queriesByDomainTemp.entrySet().stream()
+            .collect(
+                Collectors.toUnmodifiableMap(
+                    e ->
+                        e.getKey().equals(Domain.PERSON_HAS_EHR_DATA.toString())
+                            ? Domain.PERSON.toString()
+                            : e.getKey(),
+                    e -> e.getValue()));
 
     String qualifier = generateRandomEightCharacterQualifier();
 
@@ -1317,7 +1364,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     Domain domain =
         Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
             ? Domain.MEASUREMENT
-            : Domain.valueOf(domainValue);
+            : Domain.PERSON_HAS_EHR_DATA.equals(Domain.valueOf(domainValue))
+                ? Domain.PERSON
+                : Domain.valueOf(domainValue);
 
     // If the domain is Condition/Procedure and the concept set contains a source concept then
     // it may have multiple domains.
@@ -1328,7 +1377,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       FieldList fieldList = bigQueryService.getTableFieldsFromDomain(Domain.valueOf(d));
       returnList.add(
           new DomainWithDomainValues()
-              .domain(d)
+              .domain(
+                  Domain.PERSON_HAS_EHR_DATA.equals(Domain.valueOf(domainValue))
+                      ? Domain.PERSON_HAS_EHR_DATA.toString()
+                      : d)
               .items(
                   fieldList.stream()
                       .map(field -> new DomainValue().value(field.getName().toLowerCase()))

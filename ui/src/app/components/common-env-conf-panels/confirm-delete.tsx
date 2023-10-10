@@ -9,7 +9,11 @@ import { styles } from './styles';
 
 const { useState, Fragment } = React;
 
-export const ConfirmDelete = ({ onCancel, onConfirm }) => {
+interface Props {
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+export const ConfirmDelete = ({ onCancel, onConfirm }: Props) => {
   const [deleting, setDeleting] = useState(false);
   return (
     <Fragment>

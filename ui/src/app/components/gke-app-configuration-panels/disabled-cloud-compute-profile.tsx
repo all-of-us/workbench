@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { AppType, Disk, PersistentDiskRequest } from 'generated/fetch';
 
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { Machine } from 'app/utils/machines';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
