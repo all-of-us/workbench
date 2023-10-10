@@ -98,12 +98,21 @@ end
 
 def dev_up_tanagra(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.disable_auth_checks = false
+  op.opts.disable_auth = false
+  op.opts.drop_db = false
   op.add_option(
-    "--disable-auth-checks",
-    ->(opts, _) { opts.disable_auth_checks = true },
-    "If specified, disable authorization checks " +
-      " not yet tested cor what auth token to pass...")
+    "--disable-auth",
+    ->(opts, _) { opts.disable_auth = true },
+    "Disable Tanagra AuthZ")
+  op.add_option(
+    "--drop-db",
+    ->(opts, _) { opts.drop_db = true },
+    "Drop Tanagra db")
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Tanagra version"
+  )
   op.parse.validate
 
   ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path("sa-key.json")
@@ -116,19 +125,23 @@ def dev_up_tanagra(cmd_name, args)
   start_local_db_service()
 
   Dir.chdir('../tanagra-aou-utils') do
-    if File.directory?('/tanagra')
-      common.status "repo has been cloned"
-    else
+    unless File.directory?('tanagra')
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
-    if op.opts.disable_auth_checks
-      common.status "Starting tanagra-service authorization checks disabled"
-      common.run_inline %W{./run_tanagra_server.sh -a}
-    else
-      common.status "Starting tanagra-service authorization checks enabled"
-      common.run_inline %W{./run_tanagra_server.sh}
+    Dir.chdir('tanagra') do
+      if op.opts.version
+        common.status "Checkout specific Tanagra tag"
+        common.run_inline %W{git checkout tags/#{op.opts.version}}
+      else
+        common.status "Checkout main branch"
+        common.run_inline %W{git checkout main}
+      end
     end
+    dis_auth = op.opts.disable_auth ? '-a' : ''
+    d_db = op.opts.drop_db ? ' -d' : ''
+    common.status "Starting Tanagra API server"
+    common.run_inline %W{./run_tanagra_server.sh #{dis_auth} #{d_db}}
   end
 end
 
@@ -2498,15 +2511,24 @@ def deploy_tanagra(cmd_name, args)
   end
 
   common = Common.new
-  common.status "Update Tanagra submodule..."
-  common.run_inline("git submodule init && git submodule update --init --recursive")
 
-  Dir.chdir('../tanagra') do
+  Dir.chdir('../tanagra-aou-utils') do
+    unless File.directory?('tanagra')
+      common.status "Need to clone repo"
+      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
+    end
+    Dir.chdir('tanagra') do
+      common.status "Checkout specific Tanagra tag"
+      common.run_inline %W{git checkout tags/#{op.opts.version}}
+    end
+  end
+
+  Dir.chdir('../tanagra-aou-utils/tanagra') do
     common.status "Building Tanagra API..."
     common.run_inline("./gradlew -x test -PisMySQL clean service:build")
 
     common.status "Copying jar into appengine folder..."
-    common.run_inline("mkdir -p ../tanagra-aou-utils/appengine && cp ./service/build/libs/*SNAPSHOT.jar ../tanagra-aou-utils/appengine/tanagraapi.jar")
+    common.run_inline("mkdir -p ../appengine && cp ./service/build/libs/*SNAPSHOT.jar ../appengine/tanagraapi.jar")
   end
 
   Dir.chdir('../tanagra-aou-utils') do
@@ -2517,13 +2539,16 @@ def deploy_tanagra(cmd_name, args)
     common.run_inline("envsubst < tanagra_env_variables_template.yaml > appengine/tanagra_env_variables.yaml")
   end
 
+  deploy_version = "tanagra-" + op.opts.version
+  deploy_version.gsub!(".", "-")
+
   Dir.chdir('../tanagra-aou-utils/appengine') do
     common.status "Deploying Tanagra API to appengine..."
     run_inline_or_log(op.opts.dry_run, %W{
       gcloud app deploy tanagra-api.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+      (op.opts.version ? %W{--version #{deploy_version}} : []))
   end
 
 end
