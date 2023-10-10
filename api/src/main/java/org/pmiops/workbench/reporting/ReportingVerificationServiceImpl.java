@@ -95,12 +95,10 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 reportingQueryService.getWorkspaceCount()),
             Map.entry(
                 UserColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(
-                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 CohortColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(
-                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getTableRowCount(CohortColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
                 reportingQueryService.getTableRowCount(
