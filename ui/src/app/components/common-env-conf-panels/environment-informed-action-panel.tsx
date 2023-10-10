@@ -75,7 +75,7 @@ const CostInfo = ({
   );
 };
 
-interface Props {
+interface PanelProps {
   creatorFreeCreditsRemaining: number;
   profile: Profile;
   workspace: Workspace;
@@ -96,7 +96,7 @@ export const EnvironmentInformedActionPanel = ({
   onResume,
   appType,
   environmentChanged = false,
-}: Props) => (
+}: PanelProps) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
     {appType === UIAppType.JUPYTER && (
       <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
