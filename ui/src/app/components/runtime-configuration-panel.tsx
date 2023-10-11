@@ -1,39 +1,16 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { Dropdown } from 'primereact/dropdown';
 import { validate } from 'validate.js';
 
 import {
-  DataprocConfig,
-  Disk,
-  GpuConfig,
-  Profile,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
-  Workspace,
 } from 'generated/fetch';
 
-import { cond, switchCase } from '@terra-ui-packages/core-utils';
-import { Button, LinkButton } from 'app/components/buttons';
-import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/common-env-conf-panels/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/common-env-conf-panels/confirm-delete-unattached-pd';
-import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ErrorMessage, WarningMessage } from 'app/components/messages';
-import { TooltipTrigger } from 'app/components/popups';
-import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
-import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
-import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
-import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
-import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
-import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
-import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
-import { RuntimeSummary } from 'app/components/runtime-summary';
+import { cond } from '@terra-ui-packages/core-utils';
+import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
-import { disksApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   summarizeErrors,
   WithCdrVersions,
@@ -43,17 +20,14 @@ import {
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
-  AutopauseMinuteThresholds,
   ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
-  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
-  Machine,
   machineRunningCost,
   MIN_DISK_SIZE_GB,
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
+import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   AnalysisDiff,
@@ -64,7 +38,6 @@ import {
   isVisible,
   maybeWithPersistentDisk,
   PanelContent,
-  RuntimeStatusRequest,
   toAnalysisConfig,
   UpdateMessaging,
   useCustomRuntime,
@@ -80,132 +53,35 @@ import {
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
-import { UIAppType } from './apps-panel/utils';
-import { DeletePersistentDiskButton } from './common-env-conf-panels/delete-persistent-disk-button';
-import { EnvironmentInformedActionPanel } from './common-env-conf-panels/environment-informed-action-panel';
-import { styles } from './common-env-conf-panels/styles';
+import { RuntimeConfigurationPanelRenderer } from './runtime-configuration-panel-renderer';
 
-const { useState, useEffect, Fragment } = React;
+const { useState, useEffect } = React;
 
-interface CreatePanelProps {
-  profile: Profile;
-  setPanelContent: (panelContent: PanelContent) => void;
-  workspace: Workspace;
-  analysisConfig: AnalysisConfig;
-  creatorFreeCreditsRemaining: number;
-  status: RuntimeStatus;
-  setRuntimeStatus: (runtimeStatusRequest: RuntimeStatusRequest) => void;
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorFreeCreditsRemaining?: number;
+  profileState: ProfileStore;
 }
-const CreatePanel = ({
-  profile,
-  setPanelContent,
-  workspace,
-  analysisConfig,
-  creatorFreeCreditsRemaining,
-  status,
-  setRuntimeStatus,
-}: CreatePanelProps) => {
-  const displayName =
-    analysisConfig.computeType === ComputeType.Dataproc
-      ? runtimePresets.hailAnalysis.displayName
-      : runtimePresets.generalAnalysis.displayName;
-
-  return (
-    <div data-test-id='runtime-create-panel' style={styles.controlSection}>
-      <EnvironmentInformedActionPanel
-        {...{
-          creatorFreeCreditsRemaining,
-          profile,
-          workspace,
-          analysisConfig,
-          status,
-        }}
-        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
-        appType={UIAppType.JUPYTER}
-      />
-      <FlexRow
-        style={{ justifyContent: 'space-between', alignItems: 'center' }}
-      >
-        <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-          Recommended Environment for {displayName}
-        </h3>
-        <Button
-          type='secondarySmall'
-          onClick={() => setPanelContent(PanelContent.Customize)}
-          aria-label='Customize'
-        >
-          Customize
-        </Button>
-      </FlexRow>
-      <RuntimeSummary analysisConfig={analysisConfig} />
-    </div>
-  );
-};
-
-interface PresetSelectorProps {
-  allowDataproc: boolean;
-  setAnalysisConfig: (analysisConfig: AnalysisConfig) => void;
-  disabled: boolean;
-  gcePersistentDisk: Disk | null | undefined;
-}
-// Select a recommended preset configuration.
-export const PresetSelector = ({
-  allowDataproc,
-  setAnalysisConfig,
-  disabled,
-  gcePersistentDisk,
-}: PresetSelectorProps) => {
-  return (
-    <Dropdown
-      id='runtime-presets-menu'
-      appendTo='self'
-      disabled={disabled}
-      style={{
-        marginTop: '21px',
-        color: colors.primary,
-      }}
-      placeholder='Recommended environments'
-      options={fp.flow(
-        fp.values,
-        fp.filter(
-          ({ runtimeTemplate }) =>
-            allowDataproc || !runtimeTemplate.dataprocConfig
-        ),
-        fp.map(({ displayName, runtimeTemplate }) => ({
-          label: displayName,
-          value: runtimeTemplate,
-        }))
-      )(runtimePresets)}
-      onChange={({ value }) => {
-        setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
-
-        // Return false to skip the normal handling of the value selection. We're
-        // abusing the dropdown here to act as if it were a menu instead.
-        // Therefore, we never want the empty "placeholder" text to change to a
-        // selected value (it should always read "recommended environments"). The presets
-        // are not persistent state, they just snap the rest of the form to a particular configuration.
-        // See RW-5996 for more details.
-        return false;
-      }}
-    />
-  );
-};
-
-const PanelMain = fp.flow(
+export const RuntimeConfigurationPanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
   ({
+    onClose = () => {},
+    initialPanelContent = null,
+    creatorFreeCreditsRemaining = null,
+    profileState,
     cdrVersionTiersResponse,
     workspace,
-    profileState,
-    onClose = () => {},
-    initialPanelContent,
-    creatorFreeCreditsRemaining,
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
+    const { runtimeLoaded } = useStore(runtimeStore);
+    if (!runtimeLoaded) {
+      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+    }
+
     const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
 
@@ -574,465 +450,43 @@ const PanelMain = fp.flow(
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
 
     return (
-      <div id='runtime-panel'>
-        {cond<React.ReactNode>(
-          [
-            [PanelContent.Create, PanelContent.Customize].includes(
-              panelContent
-            ),
-            () => (
-              <div style={{ marginBottom: '1.5rem' }}>
-                Your analysis environment consists of an application and compute
-                resources. Your cloud environment is unique to this workspace
-                and not shared with other users.
-              </div>
-            ),
-          ],
-          () => null
-        )}
-        {switchCase(
+      <RuntimeConfigurationPanelRenderer
+        {...{
+          allowDataproc,
+          analysisConfig,
+          attachedPdExists,
+          creatorFreeCreditsRemaining,
+          currentRuntime,
+          dataprocExists,
+          disableControls,
+          disableDetachableReason,
+          environmentChanged,
+          existingAnalysisConfig,
+          gcePersistentDisk,
+          getErrorMessageContent,
+          getWarningMessageContent,
+          onClose,
           panelContent,
-          [
-            PanelContent.Create,
-            () => (
-              <Fragment>
-                <CreatePanel
-                  {...{
-                    analysisConfig,
-                    creatorFreeCreditsRemaining,
-                    profile,
-                    setPanelContent,
-                    setRuntimeStatus,
-                    status,
-                    workspace,
-                  }}
-                />
-                <FlexRow
-                  style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
-                >
-                  {renderCreateButton()}
-                </FlexRow>
-              </Fragment>
-            ),
-          ],
-          [
-            PanelContent.DeleteRuntime,
-            () => {
-              if (attachedPdExists) {
-                return (
-                  <ConfirmDeleteEnvironmentWithPD
-                    onConfirm={async (deletePDSelected) => {
-                      const runtimeStatusReq = cond(
-                        [
-                          !deletePDSelected,
-                          () => RuntimeStatusRequest.DeleteRuntime,
-                        ],
-                        [
-                          deletePDSelected && !usingDataproc,
-                          () => RuntimeStatusRequest.DeleteRuntimeAndPD,
-                        ],
-                        [
-                          // TODO: this configuration is not supported.  Remove?
-                          deletePDSelected && usingDataproc,
-                          () => RuntimeStatusRequest.DeletePD,
-                        ]
-                      );
-                      await setRuntimeStatus(runtimeStatusReq);
-                      onClose();
-                    }}
-                    onCancel={() => setPanelContent(PanelContent.Customize)}
-                    appType={UIAppType.JUPYTER}
-                    usingDataproc={usingDataproc}
-                    disk={gcePersistentDisk}
-                  />
-                );
-              } else {
-                return (
-                  <ConfirmDelete
-                    onConfirm={async () => {
-                      await setRuntimeStatus(
-                        RuntimeStatusRequest.DeleteRuntime
-                      );
-                      onClose();
-                    }}
-                    onCancel={() => setPanelContent(PanelContent.Customize)}
-                  />
-                );
-              }
-            },
-          ],
-          [
-            PanelContent.DeleteUnattachedPd,
-            () => (
-              <ConfirmDeleteUnattachedPD
-                appType={UIAppType.JUPYTER}
-                onConfirm={async () => {
-                  await disksApi().deleteDisk(
-                    namespace,
-                    gcePersistentDisk.name
-                  );
-                  onClose();
-                }}
-                onCancel={() => setPanelContent(PanelContent.Customize)}
-              />
-            ),
-          ],
-          [
-            PanelContent.DeleteUnattachedPdAndCreate,
-            () => (
-              <ConfirmDeleteUnattachedPD
-                appType={UIAppType.JUPYTER}
-                showCreateMessaging
-                onConfirm={async () => {
-                  await disksApi().deleteDisk(
-                    namespace,
-                    gcePersistentDisk.name
-                  );
-                  requestAnalysisConfig(analysisConfig);
-                  onClose();
-                }}
-                onCancel={() => setPanelContent(PanelContent.Customize)}
-              />
-            ),
-          ],
-          [
-            PanelContent.Customize,
-            () => (
-              <div style={{ marginBottom: '10px' }}>
-                <div style={styles.controlSection}>
-                  <EnvironmentInformedActionPanel
-                    {...{
-                      creatorFreeCreditsRemaining,
-                      profile,
-                      workspace,
-                      analysisConfig,
-                      status,
-                      environmentChanged,
-                    }}
-                    onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-                    onResume={() =>
-                      setRuntimeStatus(RuntimeStatusRequest.Start)
-                    }
-                    appType={UIAppType.JUPYTER}
-                  />
-                  {currentRuntime?.errors &&
-                    currentRuntime.errors.length > 0 && (
-                      <ErrorMessage iconPosition={'top'} iconSize={16}>
-                        <div>
-                          An error was encountered with your cloud environment.
-                          Please re-attempt creation of the environment and
-                          contact support if the error persists.
-                        </div>
-                        <div>Error details:</div>
-                        {currentRuntime.errors.map((err, idx) => {
-                          return (
-                            <div style={{ fontFamily: 'monospace' }} key={idx}>
-                              {err.errorMessage}
-                            </div>
-                          );
-                        })}
-                      </ErrorMessage>
-                    )}
-                  <PresetSelector
-                    {...{
-                      allowDataproc,
-                      setAnalysisConfig,
-                      gcePersistentDisk,
-                      disabled: disableControls,
-                    }}
-                  />
-                  {/* Runtime customization: change detailed machine configuration options. */}
-                  <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-                    Cloud compute profile
-                  </h3>
-                  <div style={styles.formGrid3}>
-                    <MachineSelector
-                      idPrefix='runtime'
-                      disabled={disableControls}
-                      selectedMachine={analysisConfig.machine}
-                      onChange={(machine: Machine) =>
-                        setAnalysisConfig({ ...analysisConfig, machine })
-                      }
-                      validMachineTypes={validMainMachineTypes}
-                      machineType={analysisConfig.machine.name}
-                    />
-                  </div>
-                  {analysisConfig.computeType === ComputeType.Standard && (
-                    <GpuConfigSelector
-                      disabled={disableControls}
-                      onChange={(gpuConfig: GpuConfig) =>
-                        setAnalysisConfig({ ...analysisConfig, gpuConfig })
-                      }
-                      selectedMachine={analysisConfig.machine}
-                      gpuConfig={analysisConfig.gpuConfig}
-                    />
-                  )}
-                  <FlexRow
-                    style={{
-                      marginTop: '1.5rem',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <FlexColumn>
-                      <label style={styles.label} htmlFor='runtime-compute'>
-                        Compute type
-                      </label>
-                      <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
-                        <Dropdown
-                          id='runtime-compute'
-                          appendTo='self'
-                          disabled={!allowDataproc || disableControls}
-                          style={{ width: '15rem' }}
-                          options={[ComputeType.Standard, ComputeType.Dataproc]}
-                          value={
-                            analysisConfig.computeType || ComputeType.Standard
-                          }
-                          onChange={({ value: computeType }) =>
-                            // When the compute type changes, we need to normalize the config and potentially restore defualts.
-                            setAnalysisConfig(
-                              withAnalysisConfigDefaults(
-                                { ...analysisConfig, computeType },
-                                gcePersistentDisk
-                              )
-                            )
-                          }
-                        />
-                        {analysisConfig.computeType ===
-                          ComputeType.Dataproc && (
-                          <TooltipTrigger
-                            content={
-                              status !== RuntimeStatus.RUNNING
-                                ? 'Start your Dataproc cluster to access the Spark console'
-                                : null
-                            }
-                          >
-                            <LinkButton
-                              data-test-id='manage-spark-console'
-                              disabled={
-                                status !== RuntimeStatus.RUNNING ||
-                                existingAnalysisConfig.computeType !==
-                                  ComputeType.Dataproc
-                              }
-                              onClick={() =>
-                                setPanelContent(PanelContent.SparkConsole)
-                              }
-                            >
-                              Manage and monitor Spark console
-                            </LinkButton>
-                          </TooltipTrigger>
-                        )}
-                      </FlexRow>
-                    </FlexColumn>
-                  </FlexRow>
-                  {analysisConfig.computeType === ComputeType.Dataproc && (
-                    <DataProcConfigSelector
-                      disabled={disableControls}
-                      runtimeStatus={status}
-                      dataprocExists={dataprocExists}
-                      onChange={(dataprocConfig: DataprocConfig) =>
-                        setAnalysisConfig({ ...analysisConfig, dataprocConfig })
-                      }
-                      dataprocConfig={analysisConfig.dataprocConfig}
-                    />
-                  )}
-                  <FlexRow
-                    style={{
-                      marginTop: '1.5rem',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <FlexColumn>
-                      <label style={styles.label} htmlFor='runtime-autopause'>
-                        Automatically pause after idle for
-                      </label>
-                      <Dropdown
-                        id='runtime-autopause'
-                        appendTo='self'
-                        disabled={disableControls}
-                        style={{ width: '15rem' }}
-                        options={Array.from(
-                          AutopauseMinuteThresholds.entries()
-                        ).map((entry) => ({
-                          label: entry[1],
-                          value: entry[0],
-                        }))}
-                        value={
-                          analysisConfig.autopauseThreshold ||
-                          DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES
-                        }
-                        onChange={({ value: autopauseThreshold }) =>
-                          setAnalysisConfig({
-                            ...analysisConfig,
-                            autopauseThreshold,
-                          })
-                        }
-                      />
-                    </FlexColumn>
-                  </FlexRow>
-                </div>
-                <DiskSelector
-                  diskConfig={analysisConfig.diskConfig}
-                  onChange={(diskConfig) =>
-                    setAnalysisConfig({
-                      ...analysisConfig,
-                      diskConfig,
-                      detachedDisk: diskConfig.detachable
-                        ? null
-                        : gcePersistentDisk,
-                    })
-                  }
-                  disabled={disableControls}
-                  disableDetachableReason={disableDetachableReason}
-                  existingDisk={gcePersistentDisk}
-                  computeType={analysisConfig.computeType}
-                />
-                {runtimeExists && updateMessaging.warn && (
-                  <WarningMessage iconSize={30} iconPosition={'center'}>
-                    <div>{updateMessaging.warn}</div>
-                  </WarningMessage>
-                )}
-                {getErrorMessageContent().length > 0 && (
-                  <ErrorMessage
-                    iconSize={16}
-                    iconPosition={'top'}
-                    data-test-id={'runtime-error-messages'}
-                  >
-                    {getErrorMessageContent()}
-                  </ErrorMessage>
-                )}
-                {getWarningMessageContent().length > 0 && (
-                  <WarningMessage
-                    iconSize={16}
-                    iconPosition={'top'}
-                    data-test-id={'runtime-warning-messages'}
-                  >
-                    {getWarningMessageContent()}
-                  </WarningMessage>
-                )}
-                {unattachedPdExists ? (
-                  <FlexRow
-                    style={{
-                      justifyContent: 'space-between',
-                      marginTop: '1.125rem',
-                    }}
-                  >
-                    <DeletePersistentDiskButton
-                      onClick={() =>
-                        setPanelContent(PanelContent.DeleteUnattachedPd)
-                      }
-                    />
-                    {unattachedDiskNeedsRecreate
-                      ? renderNextWithDiskDeleteButton()
-                      : renderCreateButton()}
-                  </FlexRow>
-                ) : (
-                  <FlexRow
-                    style={{
-                      justifyContent: 'space-between',
-                      marginTop: '1.125rem',
-                    }}
-                  >
-                    <LinkButton
-                      style={{
-                        ...styles.deleteLink,
-                        ...(disableControls || !runtimeExists
-                          ? { color: colorWithWhiteness(colors.dark, 0.4) }
-                          : {}),
-                      }}
-                      aria-label='Delete Environment'
-                      disabled={disableControls || !runtimeExists}
-                      onClick={() =>
-                        setPanelContent(PanelContent.DeleteRuntime)
-                      }
-                    >
-                      Delete Environment
-                    </LinkButton>
-                    {cond(
-                      [runtimeExists, () => renderNextUpdateButton()],
-                      [
-                        unattachedDiskNeedsRecreate,
-                        () => renderNextWithDiskDeleteButton(),
-                      ],
-                      [
-                        currentRuntime?.errors &&
-                          currentRuntime.errors.length > 0,
-                        () => renderTryAgainButton(),
-                      ],
-                      () => renderCreateButton()
-                    )}
-                  </FlexRow>
-                )}
-              </div>
-            ),
-          ],
-          [
-            PanelContent.ConfirmUpdate,
-            () => (
-              <ConfirmUpdatePanel
-                existingAnalysisConfig={existingAnalysisConfig}
-                newAnalysisConfig={analysisConfig}
-                onCancel={() => {
-                  setPanelContent(PanelContent.Customize);
-                }}
-                updateButton={renderUpdateButton()}
-              />
-            ),
-          ],
-          [
-            PanelContent.ConfirmUpdateWithDiskDelete,
-            () => (
-              <OfferDeleteDiskWithUpdate
-                onNext={(deleteDetachedDisk: boolean) => {
-                  if (deleteDetachedDisk) {
-                    setAnalysisConfig({
-                      ...analysisConfig,
-                      detachedDisk: null,
-                    });
-                  }
-                  setPanelContent(PanelContent.ConfirmUpdate);
-                }}
-                onCancel={() => setPanelContent(PanelContent.Customize)}
-                disk={gcePersistentDisk}
-              />
-            ),
-          ],
-          [PanelContent.Disabled, () => <DisabledPanel />],
-          [
-            PanelContent.SparkConsole,
-            () => <SparkConsolePanel {...workspace} />,
-          ]
-        )}
-      </div>
+          profile,
+          renderCreateButton,
+          renderNextUpdateButton,
+          renderNextWithDiskDeleteButton,
+          renderTryAgainButton,
+          renderUpdateButton,
+          requestAnalysisConfig,
+          runtimeExists,
+          setAnalysisConfig,
+          setPanelContent,
+          status,
+          unattachedDiskNeedsRecreate,
+          unattachedPdExists,
+          updateMessaging,
+          usingDataproc,
+          validMainMachineTypes,
+        }}
+        setRuntimeStatusRequest={setRuntimeStatus}
+        workspaceData={workspace}
+      />
     );
   }
 );
-
-export interface RuntimeConfigurationPanelProps {
-  onClose?: () => void;
-  initialPanelContent?: PanelContent;
-  creatorFreeCreditsRemaining?: number;
-  profileState: ProfileStore;
-}
-export const RuntimeConfigurationPanel = ({
-  onClose = () => {},
-  initialPanelContent = null,
-  creatorFreeCreditsRemaining = null,
-  profileState,
-}: RuntimeConfigurationPanelProps) => {
-  const { runtimeLoaded } = useStore(runtimeStore);
-  if (!runtimeLoaded) {
-    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
-  }
-
-  // TODO: can we remove this indirection?
-  return (
-    <PanelMain
-      {...{
-        onClose,
-        initialPanelContent,
-        creatorFreeCreditsRemaining,
-        profileState,
-      }}
-    />
-  );
-};
