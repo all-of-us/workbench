@@ -210,7 +210,7 @@ interface RenewalCardBodyProps {
   textStyle?: CSSProperties;
   radioButtonStyle?: CSSProperties;
   showTimeEstimate?: boolean;
-  duccSignedVersion: number;
+  profile: Profile;
 }
 
 export const RenewalCardBody = ({
@@ -219,7 +219,7 @@ export const RenewalCardBody = ({
   textStyle,
   radioButtonStyle,
   showTimeEstimate = false,
-  duccSignedVersion,
+  profile,
 }: RenewalCardBodyProps) => {
   const [, navigateByUrl] = useNavigation();
   const noReportId = useId();
@@ -227,6 +227,8 @@ export const RenewalCardBody = ({
   const [publications, setPublications] = useState<boolean>(null);
   const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
     useState(true);
+
+  const { duccSignedVersion } = profile;
 
   const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
     moduleStatus.moduleName
@@ -540,7 +542,7 @@ export const RenewalCardBody = ({
         )}
       </div>
       <div style={{ gridArea: 'title', fontWeight: 500 }}>
-        <AARTitleComponent />
+        <AARTitleComponent profile={profile} />
       </div>
       {module}
     </div>
@@ -580,7 +582,7 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
               textStyle={{ fontSize: '0.9rem' }}
               radioButtonStyle={{ marginRight: '0.5em' }}
               showTimeEstimate={true}
-              duccSignedVersion={profile.duccSignedVersion}
+              profile={profile}
             />
           </FlexColumn>
         );
