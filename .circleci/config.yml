@@ -404,9 +404,6 @@ jobs:
             - attach_workspace:
                   at: /tmp/workspace
             - run:
-                working_directory: ~/workbench/api
-                command: ls /tmp/workspace/api/build/jacoco
-            - run:
                 name: Create build directory
                 working_directory: ~/workbench/api
                 command: |
@@ -420,16 +417,7 @@ jobs:
                 name: Generate Jacoco Coverage Report
                 working_directory: ~/workbench/api
                 command: |
-                  ./gradlew jacocoTestReport --debug
-            - run:
-                working_directory: ~/workbench/api
-                command: ls .
-            - run:
-                working_directory: ~/workbench/api
-                command: ls ./build
-            - run:
-                working_directory: ~/workbench/api
-                command: ls ./build/jacoco
+                  ./gradlew jacocoTestReport
             - store_artifacts:
                 path: ~/workbench/api/build/reports
 
