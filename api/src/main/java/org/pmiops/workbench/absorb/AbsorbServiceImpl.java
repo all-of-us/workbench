@@ -74,10 +74,6 @@ public class AbsorbServiceImpl implements AbsorbService {
   // Obtains and stores a valid API key, access token, and user id for the given email address.
   // Tokens are valid for four hours, which is well under the expected lifetime of this service.
   private void ensureAuthentication(String email) throws ApiException {
-    if (apiKey != null && accessToken != null && userId != null) {
-      return;
-    }
-
     var config = cloudStorageClient.getAbsorbCredentials();
     apiKey = config.getString("apiKey");
 
