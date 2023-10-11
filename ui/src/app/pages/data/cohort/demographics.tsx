@@ -89,7 +89,7 @@ const ageNode = {
   code: '',
   domainId: Domain.PERSON,
   group: false,
-  isStandard: true,
+  standard: true,
   type: CriteriaType.AGE,
   value: '',
 };

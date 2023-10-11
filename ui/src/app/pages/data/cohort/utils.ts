@@ -320,7 +320,7 @@ export function parseCohortDefinition(json: string) {
             attributes,
             hasAttributes: attributes && attributes.length > 0,
             hasAncestorData: ancestorData,
-            isStandard: standard,
+            standard,
           };
         });
         if (!grp.temporal) {
