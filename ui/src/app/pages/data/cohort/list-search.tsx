@@ -586,7 +586,7 @@ export const ListSearch = fp.flow(
 
     showChildren = async (row: any) => {
       const { childNodes } = this.state;
-      const { conceptId, domainId, id: rowId, isStandard, type } = row;
+      const { conceptId, domainId, id: rowId, standard, type } = row;
       if (childNodes[rowId]) {
         if (childNodes[rowId].error) {
           childNodes[rowId] = undefined;
@@ -618,7 +618,7 @@ export const ListSearch = fp.flow(
                   id,
                   domainId,
                   type,
-                  isStandard,
+                  standard,
                   rowId
                 );
           childNodes[rowId] = {
@@ -649,7 +649,7 @@ export const ListSearch = fp.flow(
 
     getParamId(row: any) {
       return `param${row.conceptId ? row.conceptId + row.code : row.id}${
-        row.isStandard
+        row.standard
       }`;
     }
 
@@ -855,7 +855,7 @@ export const ListSearch = fp.flow(
               paddingRight: '0.75rem',
             }}
           >
-            {row.isStandard ? 'Standard' : 'Source'}
+            {row.standard ? 'Standard' : 'Source'}
           </td>
           <td style={{ ...columnBodyStyle }}>{!parent && row.type}</td>
           <td
