@@ -6,10 +6,6 @@ import bio.terra.workspace.api.WorkspaceApi;
 import bio.terra.workspace.client.ApiClient;
 import bio.terra.workspace.client.ApiException;
 import com.google.auth.oauth2.GoogleCredentials;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -60,11 +56,12 @@ public class WsmConfig {
       bearerToken = bearerToken.split("Bearer ")[1];
 
       // FIXME read token from file just for now...
-      try {
-        bearerToken = Files.readString(Path.of("/tmp/bearer_token.txt"), Charset.defaultCharset());
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      //      try {
+      //        bearerToken = Files.readString(Path.of("/tmp/bearer_token.txt"),
+      // Charset.defaultCharset());
+      //      } catch (IOException e) {
+      //        throw new RuntimeException(e);
+      //      }
 
       apiClient.setAccessToken(bearerToken.trim());
     } else {

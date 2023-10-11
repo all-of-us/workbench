@@ -176,8 +176,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     /*
     In case of AWS, create the workspace differently.
     */
-    boolean isAws = true;
-    if (isAws) {
+    if (workspace.isAws()) {
+      // Generate a project name similar to the gcp project name
       workspace.setNamespace(fireCloudService.createBillingProjectName());
       RawlsWorkspaceDetails fcWorkspace = awsWorkspaceService.createWorkspace(workspace);
 

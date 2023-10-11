@@ -8465,9 +8465,9 @@ components:
       - RSTUDIO
       - SAS
       - SAGEMAKER
-  DiskStatus:
-    type: string
-    enum:
+    DiskStatus:
+      type: string
+      enum:
       - Creating
       - Restoring
       - Failed

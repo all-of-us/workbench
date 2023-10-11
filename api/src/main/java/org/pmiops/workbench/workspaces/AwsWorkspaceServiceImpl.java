@@ -342,6 +342,6 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService {
   private static boolean filterToNonPublished(WorkspaceResponse response) {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
-        || !response.getWorkspace().getPublished();
+        || !response.getWorkspace().isPublished();
   }
 }

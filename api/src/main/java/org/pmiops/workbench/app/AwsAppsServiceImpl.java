@@ -140,38 +140,41 @@ public class AwsAppsServiceImpl implements AppsService {
       UserAppEnvironment userAppEnvironment = wsmMapper.toApiApp(notebook);
       userAppEnvironment.appType(AppType.SAGEMAKER);
 
-        setProxyURLs(dbWorkspace, notebook, userAppEnvironment);
+      setProxyURLs(dbWorkspace, notebook, userAppEnvironment);
 
-        return userAppEnvironment;
+      return userAppEnvironment;
     }
 
     return null;
   }
 
-    private void setProxyURLs(DbWorkspace dbWorkspace, ResourceDescription notebook, UserAppEnvironment userAppEnvironment) {
-        try {
-          AwsCredential awsCredential =
-              awsResourceApiProvider
-                  .get()
-                  .getAwsSageMakerNotebookCredential(
-                      UUID.fromString(dbWorkspace.getFirecloudUuid()),
-                      notebook.getMetadata().getResourceId(),
-                      AwsCredentialAccessScope.READ_ONLY,
-                      900);
-          URL awsSageMakerProxyURL =
-              awsSagemakerService.getAwsSageMakerProxyURL(
-                  notebook.getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),
-                  awsCredential);
-          userAppEnvironment.proxyUrls(Map.of("app", awsSageMakerProxyURL.toString()));
-        } catch (ApiException e) {
-          throw new WorkbenchException(e);
-        }
+  private void setProxyURLs(
+      DbWorkspace dbWorkspace,
+      ResourceDescription notebook,
+      UserAppEnvironment userAppEnvironment) {
+    try {
+      AwsCredential awsCredential =
+          awsResourceApiProvider
+              .get()
+              .getAwsSageMakerNotebookCredential(
+                  UUID.fromString(dbWorkspace.getFirecloudUuid()),
+                  notebook.getMetadata().getResourceId(),
+                  AwsCredentialAccessScope.READ_ONLY,
+                  900);
+      URL awsSageMakerProxyURL =
+          awsSagemakerService.getAwsSageMakerProxyURL(
+              notebook.getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),
+              awsCredential);
+      userAppEnvironment.proxyUrls(Map.of("app", awsSageMakerProxyURL.toString()));
+    } catch (ApiException e) {
+      throw new WorkbenchException(e);
     }
+  }
 
-    @Override
+  @Override
   public void updateApp(String appName, UserAppEnvironment app, DbWorkspace dbWorkspace) {
-      throw new UnsupportedOperationException("Not implemented");
-    }
+    throw new UnsupportedOperationException("Not implemented");
+  }
 
   @Override
   public List<UserAppEnvironment> listAppsInWorkspace(DbWorkspace dbWorkspace) {
@@ -187,13 +190,13 @@ public class AwsAppsServiceImpl implements AppsService {
                       ResourceType.AWS_SAGEMAKER_NOTEBOOK,
                       StewardshipType.CONTROLLED);
             });
-      List<ResourceDescription> resources = resourceList.getResources();
-      if (resources.isEmpty()) {
-          return Collections.emptyList();
-      }
-      UserAppEnvironment userAppEnvironment = wsmMapper.toApiApps(resourceList);
-      resources.forEach(resource -> setProxyURLs(dbWorkspace, resource, userAppEnvironment));
-      return List.of(userAppEnvironment);
+    List<ResourceDescription> resources = resourceList.getResources();
+    if (resources.isEmpty()) {
+      return Collections.emptyList();
+    }
+    UserAppEnvironment userAppEnvironment = wsmMapper.toApiApps(resourceList);
+    resources.forEach(resource -> setProxyURLs(dbWorkspace, resource, userAppEnvironment));
+    return List.of(userAppEnvironment);
   }
 
   private ControlledResourceCommonFields createCommonFields(

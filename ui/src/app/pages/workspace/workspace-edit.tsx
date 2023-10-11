@@ -103,7 +103,6 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
-import CloudCard from './workspace-cloud-select';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -229,6 +228,26 @@ export const styles = reactStyles({
   cdrVersionSpacing: {
     width: '30em',
   },
+  radioCardContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    padding: '0.9rem 0',
+    width: '95%',
+    justifyContent: 'flex-start',
+  },
+  
+radioCard: {
+    border: '2px solid #ccc', /* Add a border to the radio cards */
+    padding: '10px', /* Add padding to create space around the radio button and label */
+    width: '50%', /* Set the width of each radio card */
+    textAlign: 'center', /* Center-align text within the radio card */
+    cursor: 'pointer' /* Change cursor to pointer on hover */
+},
+
+radioCardActive: {
+    borderColor: '#007bff', 
+    backgroundColor: '#f0f0f0', 
+},
 });
 
 // default to creating workspaces in the Registered Tier
@@ -679,6 +698,7 @@ export const WorkspaceEdit = fp.flow(
         );
         workspace.cdrVersionId = cdrVersion.cdrVersionId;
       }
+      workspace.aws = false;
 
       return workspace;
     }
@@ -1072,6 +1092,15 @@ export const WorkspaceEdit = fp.flow(
     updateSpecificPopulation(populationDetails, value) {
       this.updateAttribute('populationDetails', populationDetails, value);
     }
+
+    updateCloudPlatform = (newValue) => {
+      this.setState({
+        workspace: {
+          ...this.state.workspace,
+          aws: newValue,
+        },
+      });
+    };
 
     specificPopulationCheckboxSelected(
       populationEnum: SpecificPopulationEnum
@@ -1733,7 +1762,27 @@ export const WorkspaceEdit = fp.flow(
             <hr style={{ marginTop: '1.5rem' }} />
             <WorkspaceEditSection header={"Cloud Technology"}>
               <FlexRow>
-                <CloudCard />
+
+              <div style={styles.radioCardContainer}>
+                <div style={styles.radioCard} className={`radio-card`}>
+                  <input
+                    type="radio"
+                    value="GCP"
+                    checked={!this.state.workspace.aws}
+                    onChange={() => this.updateCloudPlatform(false)}
+                  />
+                  <label className="radio-label">GCP</label>
+                </div>
+                <div style={styles.radioCard} className={`radio-card`}>
+                  <input
+                    type="radio"
+                    value="AWS"
+                    checked={this.state.workspace.aws}
+                    onChange={() => this.updateCloudPlatform(true)}
+                  />
+                  <label className="radio-label">AWS</label>
+                </div>
+              </div>
               </FlexRow>
             </WorkspaceEditSection>
             
