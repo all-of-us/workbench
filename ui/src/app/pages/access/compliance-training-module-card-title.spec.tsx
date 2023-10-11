@@ -42,7 +42,9 @@ const expectHelpTextToNotExist = async () => {
     await findHelpText();
     // The above throws an error if the element is not found
     expect(true).toBeFalsy();
-  } catch (e) {}
+  } catch (e) {
+    // Expected behavior, do nothing
+  }
 };
 
 const createProfileWithComplianceTraining = (
