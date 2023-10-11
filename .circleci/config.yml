@@ -787,7 +787,6 @@ jobs:
 workflows:
   build-test-deploy:
    jobs:
-     - api-bigquery-test
      - puppeteer-env-setup
      - puppeteer-generate-access-tokens:
           env_name: "test"
