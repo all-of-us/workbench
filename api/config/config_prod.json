@@ -92,7 +92,7 @@
   },
   "absorb": {
     "externalDepartmentId": "Researchers",
-    "externalDepartmentIdPopulatedForNewUsers": false,
+    "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": false,
     "rtTrainingCourseId": "TODO",
     "ctTrainingCourseId": "TODO",
