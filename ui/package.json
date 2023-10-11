@@ -6,6 +6,7 @@
     "build-terra-deps": "./src/terraui/build.sh",
     "deps": "yarn run codegen && yarn run build-terra-deps",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
+    "start-tanagra": "BROWSER='none' REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
     "dev-up": "yarn && yarn run deps && yarn start",
     "dev-up-test": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start",
     "dev-up-local": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start",
@@ -15,7 +16,7 @@
     "test": "react-app-rewired test --watchAll=false",
     "lint": "yarn eslint src --ext .ts,.tsx",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
-    "codegen-clean": "rm -rf src/generated src/notebooks-generated src/tanagra-generated",
+    "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "openapi-generator-cli generate -i ../api/src/main/resources/workbench-api.yaml -g typescript-fetch -p generateAliasAsModel=true --template-dir src/assets/generation --additional-properties=typeScriptThreePlus=true,enumPropertyNaming=UPPERCASE,useSingleRequestParameter=false,prefixParameterInterfaces=true -o src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch"
   },
