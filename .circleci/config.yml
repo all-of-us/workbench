@@ -410,7 +410,7 @@ jobs:
                 name: Create Jacoco build directory
                 working_directory: ~/workbench/api
                 command: |
-                  mkdir "./build/jacoco";
+                  mkdir -p "./build/jacoco";
             - run:
                 name: Copy Jacoco exec files locally
                 working_directory: ~/workbench/api
