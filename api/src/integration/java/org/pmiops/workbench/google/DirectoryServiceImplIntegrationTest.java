@@ -40,7 +40,6 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     String userPrefix = String.format("integration.test.%d", Clock.systemUTC().millis());
     String username = userPrefix + "@" + config.googleDirectoryService.gSuiteDomain;
     service.createUser("Integration", "Test", username, "notasecret@gmail.com");
-    config.absorb.externalDepartmentIdPopulatedForNewUsers = true;
     boolean userNameTaken = retryTemplate().execute(c -> service.isUsernameTaken(userPrefix));
     assertThat(userNameTaken).isTrue();
 
