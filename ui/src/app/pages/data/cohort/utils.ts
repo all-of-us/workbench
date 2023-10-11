@@ -355,7 +355,7 @@ export function mapParameter(sp: any) {
     attributes,
     conceptId,
     hasAncestorData,
-    isStandard,
+    standard,
     variantId,
   } = sp;
   const param = <SearchParameter>{
@@ -366,7 +366,7 @@ export function mapParameter(sp: any) {
     group,
     attributes: attributes ?? [],
     ancestorData: hasAncestorData,
-    standard: isStandard,
+    standard,
   };
   if (conceptId !== null && conceptId !== undefined) {
     param.conceptId = conceptId;
