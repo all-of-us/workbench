@@ -26,10 +26,10 @@ cd ../../ui
 yarn
 
 #generate openapi
-openapi-generator-cli generate -i ../tanagra-aou-utils/tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch  --additional-properties=typescriptThreePlus=true -o src/tanagra-generated
+rm -rf src/tanagra-generated && openapi-generator-cli generate -i ../tanagra-aou-utils/tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch  --additional-properties=typescriptThreePlus=true -o src/tanagra-generated
 
-#start Tanagra
-npm install --prefix ../tanagra-aou-utils/tanagra/ui && npm run codegen --prefix ../tanagra-aou-utils/tanagra/ui && BROWSER='none' REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui
+#generate Tanagra
+npm install --prefix ../tanagra-aou-utils/tanagra/ui && npm run codegen --prefix ../tanagra-aou-utils/tanagra/ui
 
-#start workbench ui
-yarn run dev-up-local
+#start workbench and tanagra ui
+concurrently "yarn run dev-up-local" "yarn run start-tanagra"
