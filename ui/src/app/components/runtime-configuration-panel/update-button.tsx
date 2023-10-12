@@ -10,7 +10,6 @@ interface Props {
   onClose: () => void;
   updateMessaging: UpdateMessaging;
 }
-
 export const UpdateButton = ({
   analysisConfig,
   requestAnalysisConfig,

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PropsWithChildren } from 'react';
 
 import { Button } from 'app/components/buttons';
 import { EnvironmentCostEstimator } from 'app/components/common-env-conf-panels/environment-cost-estimator';
@@ -12,26 +13,17 @@ import {
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-utils';
 
-import { UpdateButton } from './update-button';
-
 interface Props {
   existingAnalysisConfig: AnalysisConfig;
   newAnalysisConfig: AnalysisConfig;
-  requestAnalysisConfig: (ac: AnalysisConfig) => void;
-  runtimeCanBeCreated: boolean;
-  runtimeCanBeUpdated: boolean;
   onCancel: () => void;
-  onClose: () => void;
 }
 export const ConfirmUpdatePanel = ({
   existingAnalysisConfig,
   newAnalysisConfig,
-  requestAnalysisConfig,
-  runtimeCanBeCreated,
-  runtimeCanBeUpdated,
   onCancel,
-  onClose,
-}: Props) => {
+  children: updateButton,
+}: PropsWithChildren<Props>) => {
   const configDiffs = getAnalysisConfigDiffs(
     existingAnalysisConfig,
     newAnalysisConfig
@@ -115,16 +107,7 @@ export const ConfirmUpdatePanel = ({
         >
           Cancel
         </Button>
-        <UpdateButton
-          {...{
-            requestAnalysisConfig,
-            runtimeCanBeCreated,
-            onClose,
-            runtimeCanBeUpdated,
-            updateMessaging,
-          }}
-          analysisConfig={newAnalysisConfig}
-        />
+        {updateButton}
       </FlexRow>
     </React.Fragment>
   );

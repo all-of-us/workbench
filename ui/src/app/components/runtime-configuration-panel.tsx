@@ -64,6 +64,7 @@ import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
+import { UpdateButton } from './runtime-configuration-panel/update-button';
 
 const { useState, useEffect } = React;
 
@@ -528,7 +529,18 @@ export const RuntimeConfigurationPanel = fp.flow(
                 onCancel={() => {
                   setPanelContent(PanelContent.Customize);
                 }}
-              />
+              >
+                <UpdateButton
+                  {...{
+                    analysisConfig,
+                    requestAnalysisConfig,
+                    runtimeCanBeCreated,
+                    onClose,
+                    runtimeCanBeUpdated,
+                    updateMessaging,
+                  }}
+                />
+              </ConfirmUpdatePanel>
             ),
           ],
           [
