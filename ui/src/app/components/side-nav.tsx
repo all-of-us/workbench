@@ -278,7 +278,7 @@ export const SideNav = (props: SideNavProps) => {
       active: DARActive(),
     },
     {
-      label: 'Cloud Environments',
+      label: 'Cloud Environments (BETA)',
       href: '/runtimes',
       active: cloudEnvironmentsActive(),
     },
