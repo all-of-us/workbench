@@ -121,7 +121,7 @@ public class RasLinkService {
   private final IdentityVerificationService identityVerificationService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
-  private Provider<DbUser> userProvider;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   public RasLinkService(
@@ -173,7 +173,8 @@ public class RasLinkService {
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
       log.info(
           String.format(
-              "Successfully retrieved OIDC user information from RAS access token for user (%s), txn:  %s",
+              "Successfully retrieved OIDC user information "
+                  + "from RAS access token for user (%s), txn:  %s",
               aouUsername, txnClaim));
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
@@ -193,7 +194,9 @@ public class RasLinkService {
     } else {
       log.info(
           String.format(
-              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s, txn: %s",
+              "User has neither a valid id.me account "
+                  + "nor a valid login.gov account, "
+                  + "preferred_username: %s, txn: %s",
               rasUsername, txnClaim));
       throw new ForbiddenException(
           String.format(

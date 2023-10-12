@@ -7,6 +7,7 @@ import java.util.Set;
 public class RasLinkConstants {
   // The RAS tracer field in JWT
   static final String TXN_CLAIM = "txn";
+
   private RasLinkConstants() {}
 
   // The RAS url suffix for exchanging token using auth code.
