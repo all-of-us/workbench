@@ -3,10 +3,9 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
+import { WarningMessage } from 'app/components/messages';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
 import { getAccessToken } from 'app/utils/authentication';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -101,18 +100,6 @@ const css =
         display: none !important
     }`;
 
-const styles = reactStyles({
-  bannerStyle: {
-    textAlign: 'center',
-    background: colors.warning,
-    color: colorWithWhiteness(colors.warning, 0.9),
-    borderRadius: 4,
-    lineHeight: '130%',
-    padding: '4px 0',
-    border: '2px solid ' + colorWithWhiteness(colors.warning, -0.2),
-  },
-});
-
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -132,13 +119,13 @@ export const RuntimesList = fp.flow(
       return (
         <>
           <style>{css}</style>
-          <div style={styles.bannerStyle}>
-            This page was created as part of an experiment. We are currently
-            rewriting the page to bring it up to
+          <WarningMessage>
+            <b>Our Cloud Environments Page is a work in progress.</b>
             <br />
-            our project's standard of quality. In the meantime, please excuse
-            the mess.
-          </div>
+            Thank you for your patience and understanding as we make ongoing
+            improvements. Please use the "Contact Us" link at the bottom of this
+            page to provide feedback.
+          </WarningMessage>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
             <Environments
