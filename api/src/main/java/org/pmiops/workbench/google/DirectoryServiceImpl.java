@@ -234,14 +234,12 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     // variable.
     aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
 
-    if (configProvider.get().absorb.externalDepartmentIdPopulatedForNewUsers) {
-      // The value of this field must match one of the manually-configured values in the
-      // Absorb installation.
-      // See https://docs.google.com/document/d/1xgcvow0xPL6K4vxyM3PVlW-1E5Ye3X1Y5wZSD5rrPlc
-      aouCustomFields.put(
-          GSUITE_FIELD_ABSORB_EXTERNAL_DEPARTMENT_ID,
-          configProvider.get().absorb.externalDepartmentId);
-    }
+    // The value of this field must match one of the manually-configured values in the
+    // Absorb installation.
+    // See https://docs.google.com/document/d/1xgcvow0xPL6K4vxyM3PVlW-1E5Ye3X1Y5wZSD5rrPlc
+    aouCustomFields.put(
+        GSUITE_FIELD_ABSORB_EXTERNAL_DEPARTMENT_ID,
+        configProvider.get().absorb.externalDepartmentId);
 
     if (contactEmail != null) {
       // This gives us a structured place to store researchers' contact email addresses, in
