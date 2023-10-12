@@ -8,8 +8,6 @@ public class RasLinkConstants {
   // The RAS tracer field in JWT
   static final String TXN_CLAIM = "txn";
 
-  private RasLinkConstants() {}
-
   // The RAS url suffix for exchanging token using auth code.
   static final String TOKEN_URL_SUFFIX = "/auth/oauth/v2/token";
 
@@ -56,4 +54,6 @@ public class RasLinkConstants {
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
   static final Set<String> RAS_AUTH_CODE_SCOPES =
       ImmutableSet.of("openid", "profile", "federated_identities");
+
+  private RasLinkConstants() {}
 }
