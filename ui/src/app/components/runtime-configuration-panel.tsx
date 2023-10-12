@@ -8,9 +8,10 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
+import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
   summarizeErrors,
   WithCdrVersions,
@@ -38,6 +39,7 @@ import {
   isVisible,
   maybeWithPersistentDisk,
   PanelContent,
+  RuntimeStatusRequest,
   toAnalysisConfig,
   UpdateMessaging,
   useCustomRuntime,
@@ -53,7 +55,16 @@ import {
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
-import { RuntimeConfigurationPanelRenderer } from './runtime-configuration-panel-renderer';
+import { UIAppType } from './apps-panel/utils';
+import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';
+import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
+import { ConfirmUpdatePanel } from './runtime-configuration-panel/confirm-update-panel';
+import { CreatePanel } from './runtime-configuration-panel/create-panel';
+import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
+import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
+import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 
 const { useState, useEffect } = React;
 
@@ -104,7 +115,7 @@ export const RuntimeConfigurationPanel = fp.flow(
       );
     }
 
-    const [status, setRuntimeStatus] = useRuntimeStatus(
+    const [status, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
       googleProject
     );
@@ -450,43 +461,195 @@ export const RuntimeConfigurationPanel = fp.flow(
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
 
     return (
-      <RuntimeConfigurationPanelRenderer
-        {...{
-          allowDataproc,
-          analysisConfig,
-          attachedPdExists,
-          creatorFreeCreditsRemaining,
-          currentRuntime,
-          dataprocExists,
-          disableControls,
-          disableDetachableReason,
-          environmentChanged,
-          existingAnalysisConfig,
-          gcePersistentDisk,
-          getErrorMessageContent,
-          getWarningMessageContent,
-          onClose,
+      <div id='runtime-panel'>
+        {cond<React.ReactNode>(
+          [
+            [PanelContent.Create, PanelContent.Customize].includes(
+              panelContent
+            ),
+            () => (
+              <div style={{ marginBottom: '1.5rem' }}>
+                Your analysis environment consists of an application and compute
+                resources. Your cloud environment is unique to this workspace
+                and not shared with other users.
+              </div>
+            ),
+          ],
+          () => null
+        )}
+        {switchCase(
           panelContent,
-          profile,
-          renderCreateButton,
-          renderNextUpdateButton,
-          renderNextWithDiskDeleteButton,
-          renderTryAgainButton,
-          renderUpdateButton,
-          requestAnalysisConfig,
-          runtimeExists,
-          setAnalysisConfig,
-          setPanelContent,
-          status,
-          unattachedDiskNeedsRecreate,
-          unattachedPdExists,
-          updateMessaging,
-          usingDataproc,
-          validMainMachineTypes,
-        }}
-        setRuntimeStatusRequest={setRuntimeStatus}
-        workspaceData={workspace}
-      />
+          [
+            PanelContent.Create,
+            () => (
+              <CreatePanel
+                {...{
+                  profile,
+                  setPanelContent,
+                  analysisConfig,
+                  creatorFreeCreditsRemaining,
+                  status,
+                  setRuntimeStatusRequest,
+                  renderCreateButton,
+                  workspace,
+                }}
+              />
+            ),
+          ],
+          [
+            PanelContent.DeleteRuntime,
+            () => {
+              if (attachedPdExists) {
+                return (
+                  <ConfirmDeleteEnvironmentWithPD
+                    onConfirm={async (deletePDSelected) => {
+                      const runtimeStatusReq = cond(
+                        [
+                          !deletePDSelected,
+                          () => RuntimeStatusRequest.DeleteRuntime,
+                        ],
+                        [
+                          deletePDSelected && !usingDataproc,
+                          () => RuntimeStatusRequest.DeleteRuntimeAndPD,
+                        ],
+                        [
+                          // TODO: this configuration is not supported.  Remove?
+                          deletePDSelected && usingDataproc,
+                          () => RuntimeStatusRequest.DeletePD,
+                        ]
+                      );
+                      await setRuntimeStatusRequest(runtimeStatusReq);
+                      onClose();
+                    }}
+                    onCancel={() => setPanelContent(PanelContent.Customize)}
+                    appType={UIAppType.JUPYTER}
+                    usingDataproc={usingDataproc}
+                    disk={gcePersistentDisk}
+                  />
+                );
+              } else {
+                return (
+                  <ConfirmDelete
+                    onConfirm={async () => {
+                      await setRuntimeStatusRequest(
+                        RuntimeStatusRequest.DeleteRuntime
+                      );
+                      onClose();
+                    }}
+                    onCancel={() => setPanelContent(PanelContent.Customize)}
+                  />
+                );
+              }
+            },
+          ],
+          [
+            PanelContent.DeleteUnattachedPd,
+            () => (
+              <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
+                onConfirm={async () => {
+                  await disksApi().deleteDisk(
+                    workspace.namespace,
+                    gcePersistentDisk.name
+                  );
+                  onClose();
+                }}
+                onCancel={() => setPanelContent(PanelContent.Customize)}
+              />
+            ),
+          ],
+          [
+            PanelContent.DeleteUnattachedPdAndCreate,
+            () => (
+              <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
+                showCreateMessaging
+                onConfirm={async () => {
+                  await disksApi().deleteDisk(
+                    workspace.namespace,
+                    gcePersistentDisk.name
+                  );
+                  requestAnalysisConfig(analysisConfig);
+                  onClose();
+                }}
+                onCancel={() => setPanelContent(PanelContent.Customize)}
+              />
+            ),
+          ],
+          [
+            PanelContent.Customize,
+            () => (
+              <CustomizePanel
+                {...{
+                  allowDataproc,
+                  analysisConfig,
+                  creatorFreeCreditsRemaining,
+                  currentRuntime,
+                  dataprocExists,
+                  disableControls,
+                  disableDetachableReason,
+                  environmentChanged,
+                  existingAnalysisConfig,
+                  gcePersistentDisk,
+                  getErrorMessageContent,
+                  getWarningMessageContent,
+                  profile,
+                  renderCreateButton,
+                  renderNextUpdateButton,
+                  renderNextWithDiskDeleteButton,
+                  renderTryAgainButton,
+                  runtimeExists,
+                  setAnalysisConfig,
+                  setPanelContent,
+                  setRuntimeStatusRequest,
+                  status,
+                  unattachedDiskNeedsRecreate,
+                  unattachedPdExists,
+                  updateMessaging,
+                  validMainMachineTypes,
+                }}
+                workspaceData={workspace}
+              />
+            ),
+          ],
+          [
+            PanelContent.ConfirmUpdate,
+            () => (
+              <ConfirmUpdatePanel
+                existingAnalysisConfig={existingAnalysisConfig}
+                newAnalysisConfig={analysisConfig}
+                onCancel={() => {
+                  setPanelContent(PanelContent.Customize);
+                }}
+                updateButton={renderUpdateButton()}
+              />
+            ),
+          ],
+          [
+            PanelContent.ConfirmUpdateWithDiskDelete,
+            () => (
+              <OfferDeleteDiskWithUpdate
+                onNext={(deleteDetachedDisk: boolean) => {
+                  if (deleteDetachedDisk) {
+                    setAnalysisConfig({
+                      ...analysisConfig,
+                      detachedDisk: null,
+                    });
+                  }
+                  setPanelContent(PanelContent.ConfirmUpdate);
+                }}
+                onCancel={() => setPanelContent(PanelContent.Customize)}
+                disk={gcePersistentDisk}
+              />
+            ),
+          ],
+          [PanelContent.Disabled, () => <DisabledPanel />],
+          [
+            PanelContent.SparkConsole,
+            () => <SparkConsolePanel {...{ ...workspace }} />,
+          ]
+        )}
+      </div>
     );
   }
 );
