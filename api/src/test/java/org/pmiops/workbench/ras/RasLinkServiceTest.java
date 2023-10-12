@@ -222,7 +222,6 @@ public class RasLinkServiceTest {
             eq(institution), anyString(), eq(REGISTERED_TIER_SHORT_NAME)))
         .thenReturn(true);
 
-
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");
     currentUser.setDisabled(false);

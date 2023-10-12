@@ -153,7 +153,9 @@ public class RasLinkService {
               .getClaim(TXN_CLAIM)
               .asString();
 
-      log.info(String.format("User (%s) received a valid RAS access token, txn:  %s", aouUsername, txnClaim));
+      log.info(
+          String.format(
+              "User (%s) received a valid RAS access token, txn:  %s", aouUsername, txnClaim));
       // Validate IAL status.
       String acrClaim =
           decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString())
@@ -161,13 +163,18 @@ public class RasLinkService {
               .asString();
 
       if (!isIal2(acrClaim)) {
-        log.warning(String.format("User does not have IAL2 enabled, acrClaim: %s, txn: %s", acrClaim, txnClaim));
+        log.warning(
+            String.format(
+                "User does not have IAL2 enabled, acrClaim: %s, txn: %s", acrClaim, txnClaim));
         throw new ForbiddenException(
             String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
-      log.info(String.format("Successfully retrieved OIDC user information from RAS access token for user (%s), txn:  %s", aouUsername, txnClaim));
+      log.info(
+          String.format(
+              "Successfully retrieved OIDC user information from RAS access token for user (%s), txn:  %s",
+              aouUsername, txnClaim));
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
@@ -184,17 +191,20 @@ public class RasLinkService {
       identityVerificationService.updateIdentityVerificationSystem(
           user, DbIdentityVerificationSystem.LOGIN_GOV);
     } else {
-      log.info(String.format(
-          "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s, txn: %s",
-          rasUsername,
-          txnClaim));
+      log.info(
+          String.format(
+              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s, txn: %s",
+              rasUsername, txnClaim));
       throw new ForbiddenException(
           String.format(
               "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
               rasUsername));
     }
 
-    log.info(String.format("User (%s) successfully verified their identity with the following RAS username: %s, txn: %s", aouUsername, rasUsername, txnClaim));
+    log.info(
+        String.format(
+            "User (%s) successfully verified their identity with the following RAS username: %s, txn: %s",
+            aouUsername, rasUsername, txnClaim));
 
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.
