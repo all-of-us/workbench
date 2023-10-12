@@ -24,8 +24,8 @@ interface CreatePanelProps {
   creatorFreeCreditsRemaining: number;
   status: RuntimeStatus;
   setRuntimeStatusRequest: (runtimeStatusRequest: RuntimeStatusRequest) => void;
+  renderCreateButton: () => JSX.Element;
 }
-
 export const CreatePanel = ({
   profile,
   setPanelContent,
@@ -34,6 +34,7 @@ export const CreatePanel = ({
   creatorFreeCreditsRemaining,
   status,
   setRuntimeStatusRequest,
+  renderCreateButton,
 }: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
@@ -41,34 +42,39 @@ export const CreatePanel = ({
       : runtimePresets.generalAnalysis.displayName;
 
   return (
-    <div data-test-id='runtime-create-panel' style={styles.controlSection}>
-      <EnvironmentInformedActionPanel
-        {...{
-          creatorFreeCreditsRemaining,
-          profile,
-          workspace,
-          analysisConfig,
-          status,
-        }}
-        onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
-        onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
-        appType={UIAppType.JUPYTER}
-      />
-      <FlexRow
-        style={{ justifyContent: 'space-between', alignItems: 'center' }}
-      >
-        <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-          Recommended Environment for {displayName}
-        </h3>
-        <Button
-          type='secondarySmall'
-          onClick={() => setPanelContent(PanelContent.Customize)}
-          aria-label='Customize'
+    <>
+      <div data-test-id='runtime-create-panel' style={styles.controlSection}>
+        <EnvironmentInformedActionPanel
+          {...{
+            creatorFreeCreditsRemaining,
+            profile,
+            workspace,
+            analysisConfig,
+            status,
+          }}
+          onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
+          onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
+          appType={UIAppType.JUPYTER}
+        />
+        <FlexRow
+          style={{ justifyContent: 'space-between', alignItems: 'center' }}
         >
-          Customize
-        </Button>
+          <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
+            Recommended Environment for {displayName}
+          </h3>
+          <Button
+            type='secondarySmall'
+            onClick={() => setPanelContent(PanelContent.Customize)}
+            aria-label='Customize'
+          >
+            Customize
+          </Button>
+        </FlexRow>
+        <RuntimeSummary analysisConfig={analysisConfig} />
+      </div>
+      <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+        {renderCreateButton()}
       </FlexRow>
-      <RuntimeSummary analysisConfig={analysisConfig} />
-    </div>
+    </>
   );
 };

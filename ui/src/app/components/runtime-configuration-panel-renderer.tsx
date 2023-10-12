@@ -149,6 +149,7 @@ export const RuntimeConfigurationPanelRenderer = ({
                   creatorFreeCreditsRemaining,
                   status,
                   setRuntimeStatusRequest,
+                  renderCreateButton,
                 }}
                 workspace={workspaceData}
               />
