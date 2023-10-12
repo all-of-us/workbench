@@ -7,6 +7,7 @@ version: 2.1
 orbs:
   browser-tools: circleci/browser-tools@1.2.1
   queue: eddiewebb/queue@volatile
+  coverage-reporter: codacy/coverage-reporter@13.13.7
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -415,6 +416,39 @@ jobs:
                 working_directory: ~/workbench/api
                 command: |
                   ./gradlew jacocoTestReport
+            - run:
+                name: ls build
+                working_directory: ~/workbench/api
+                command: |
+                  ls build
+            - run:
+                name: ls build
+                working_directory: ~/workbench/api
+                command: |
+                  ls build
+            - run:
+                name: ls build/reports
+                working_directory: ~/workbench/api
+                command: |
+                  ls build/reports
+            - run:
+                name: ls build/reports/JunitTestResult
+                working_directory: ~/workbench/api
+                command: |
+                  ls build/reports/JunitTestResult
+            - run:
+                name: ls build/reports/JunitTestResult/jacoco
+                working_directory: ~/workbench/api
+                command: |
+                  ls build/reports/JunitTestResult/jacoco
+            - run:
+                name: ls build/reports/JunitTestResult/jacoco/test
+                working_directory: ~/workbench/api
+                command: |
+                  ls build/reports/JunitTestResult/jacoco/test
+            - coverage-reporter/send_report:
+                coverage-reports: ./build/reports/JunitTestResult/jacoco/test/jacocoTestReport.xml
+                project-token: $CODACY_PROJECT_TOKEN
             - store_artifacts:
                 path: ~/workbench/api/build/reports
 
