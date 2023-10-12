@@ -5,6 +5,8 @@ import java.util.Set;
 
 /** Constants used in to process RAS linkage. */
 public class RasLinkConstants {
+  // The RAS tracer field in JWT
+  static final String TXN_CLAIM = "txn";
   private RasLinkConstants() {}
 
   // The RAS url suffix for exchanging token using auth code.
@@ -21,9 +23,6 @@ public class RasLinkConstants {
 
   // The OIDC acr (Authentication Context Class Reference) claim name in JWT
   static final String ACR_CLAIM = "acr";
-
-  // The RAS tracer field in JWT
-  static final String TXN_CLAIM = "txn";
 
   // The Access Token field name from RAS's TokenResponse
   static final String ACCESS_TOKEN_FIELD_NAME = "access_token";
