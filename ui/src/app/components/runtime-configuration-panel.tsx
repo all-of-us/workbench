@@ -413,11 +413,16 @@ export const RuntimeConfigurationPanel = fp.flow(
                   creatorFreeCreditsRemaining,
                   profile,
                   setPanelContent,
-                  setRuntimeStatusRequest,
                   status,
                   workspace,
                   renderCreateButton,
                 }}
+                onPause={() =>
+                  setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
+                }
+                onResume={() =>
+                  setRuntimeStatusRequest(RuntimeStatusRequest.Start)
+                }
               />
             ),
           ],

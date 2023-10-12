@@ -23,7 +23,8 @@ interface CreatePanelProps {
   analysisConfig: AnalysisConfig;
   creatorFreeCreditsRemaining: number;
   status: RuntimeStatus;
-  setRuntimeStatusRequest: (runtimeStatusRequest: RuntimeStatusRequest) => void;
+  onPause: () => void;
+  onResume: () => void;
   renderCreateButton: () => JSX.Element;
 }
 export const CreatePanel = ({
@@ -33,7 +34,8 @@ export const CreatePanel = ({
   analysisConfig,
   creatorFreeCreditsRemaining,
   status,
-  setRuntimeStatusRequest,
+  onPause,
+  onResume,
   renderCreateButton,
 }: CreatePanelProps) => {
   const displayName =
@@ -51,9 +53,9 @@ export const CreatePanel = ({
             workspace,
             analysisConfig,
             status,
+            onPause,
+            onResume,
           }}
-          onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
-          onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
           appType={UIAppType.JUPYTER}
         />
         <FlexRow
