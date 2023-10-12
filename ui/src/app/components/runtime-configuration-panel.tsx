@@ -35,7 +35,6 @@ import {
   diffsToUpdateMessaging,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
-  isActionable,
   isVisible,
   maybeWithPersistentDisk,
   PanelContent,
@@ -95,11 +94,6 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
-
-    const { hasWgsData: allowDataproc } = findCdrVersion(
-      cdrVersionId,
-      cdrVersionTiersResponse
-    ) || { hasWgsData: false };
 
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
     let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
@@ -206,30 +200,11 @@ export const RuntimeConfigurationPanel = fp.flow(
     }, [analysisConfig.computeType]);
 
     const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
-    const disableControls = runtimeExists && !isActionable(status);
-
-    const dataprocExists =
-      runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
 
     const attachedPdExists =
       !!gcePersistentDisk &&
       runtimeExists &&
       existingAnalysisConfig.diskConfig.detachable;
-    const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
-    const unattachedDiskNeedsRecreate =
-      unattachedPdExists &&
-      analysisConfig.diskConfig.detachable &&
-      (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
-        gcePersistentDisk.diskType !==
-          analysisConfig.diskConfig.detachableType);
-
-    const disableDetachableReason = cond<string>(
-      [
-        analysisConfig.computeType === ComputeType.Dataproc,
-        () => 'Reattachable disks are unsupported for this compute type',
-      ],
-      () => null
-    );
 
     let configDiffs: AnalysisDiff[] = [];
     let updateMessaging: UpdateMessaging;
@@ -408,56 +383,6 @@ export const RuntimeConfigurationPanel = fp.flow(
       );
     };
 
-    const renderNextWithDiskDeleteButton = () => {
-      return (
-        <Button
-          aria-label='Next'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
-          }}
-        >
-          Next
-        </Button>
-      );
-    };
-
-    const renderTryAgainButton = () => {
-      return (
-        <Button
-          aria-label='Try Again'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          Try Again
-        </Button>
-      );
-    };
-
-    const updateYieldsUnusedDisk =
-      existingAnalysisConfig.diskConfig.detachable &&
-      !analysisConfig.diskConfig.detachable;
-    const renderNextUpdateButton = () => {
-      return (
-        <Button
-          aria-label='Next'
-          disabled={!runtimeCanBeUpdated}
-          onClick={() => {
-            if (updateYieldsUnusedDisk) {
-              setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-            } else {
-              setPanelContent(PanelContent.ConfirmUpdate);
-            }
-          }}
-        >
-          Next
-        </Button>
-      );
-    };
-
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
 
     return (
@@ -581,33 +506,33 @@ export const RuntimeConfigurationPanel = fp.flow(
             () => (
               <CustomizePanel
                 {...{
-                  allowDataproc,
                   analysisConfig,
+                  attachedPdExists,
                   creatorFreeCreditsRemaining,
                   currentRuntime,
-                  dataprocExists,
-                  disableControls,
-                  disableDetachableReason,
                   environmentChanged,
                   existingAnalysisConfig,
                   gcePersistentDisk,
                   getErrorMessageContent,
                   getWarningMessageContent,
+                  onClose,
                   profile,
                   renderCreateButton,
-                  renderNextUpdateButton,
-                  renderNextWithDiskDeleteButton,
-                  renderTryAgainButton,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
+                  runtimeCanBeUpdated,
                   runtimeExists,
                   setAnalysisConfig,
                   setPanelContent,
                   setRuntimeStatusRequest,
                   status,
-                  unattachedDiskNeedsRecreate,
-                  unattachedPdExists,
                   updateMessaging,
                   validMainMachineTypes,
                 }}
+                allowDataproc={
+                  findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
+                    ?.hasWgsData
+                }
                 workspaceData={workspace}
               />
             ),
