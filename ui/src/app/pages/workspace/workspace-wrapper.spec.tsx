@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
+import { Route } from 'react-router-dom';
 
 import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 
@@ -17,6 +18,22 @@ import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
+// HelpSidebar has very many dependencies, and we don't care about it here
+// so let's avoid getting distracted by HelpSidebar errors
+jest.mock('app/components/help-sidebar', () => {
+  return {
+    HelpSidebar: () => <div>Mock Help Sidebar</div>,
+  };
+});
+
+// WorkspaceRoutes is crashing when we set routes (unclear why) but we don't care about it here
+// so let's avoid getting distracted by WorkspaceRoutes errors
+jest.mock('app/routing/workspace-app-routing', () => {
+  return {
+    WorkspaceRoutes: () => <div>Mock Workspace Routes</div>,
+  };
+});
 
 describe(WorkspaceWrapper.name, () => {
   let workspaceData: typeof workspaceDataStub = null;
@@ -36,9 +53,18 @@ describe(WorkspaceWrapper.name, () => {
   });
 
   const createWrapperAndWaitForLoad = async () => {
+    // adding initialEntries and Route breaks the test, but how?
+    // this causes these route params to be populated, but why does this break the test?
+
     render(
-      <MemoryRouter>
-        <WorkspaceWrapper hideSpinner={() => {}} />
+      <MemoryRouter
+        initialEntries={[
+          `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}`,
+        ]}
+      >
+        <Route path='/workspaces/:ns/:wsid'>
+          <WorkspaceWrapper hideSpinner={() => {}} />
+        </Route>
       </MemoryRouter>
     );
 
