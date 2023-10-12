@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { PropsWithChildren } from 'react';
 
 import { Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
@@ -12,34 +13,27 @@ import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
 
-import { CreateButton } from './create-button';
-
-interface CreatePanelProps {
+interface Props {
   profile: Profile;
   setPanelContent: (panelContent: PanelContent) => void;
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
-  requestAnalysisConfig: (ac: AnalysisConfig) => void;
   creatorFreeCreditsRemaining: number;
   status: RuntimeStatus;
-  onClose: () => void;
   onPause: () => void;
   onResume: () => void;
-  runtimeCanBeCreated: boolean;
 }
 export const CreatePanel = ({
   profile,
   setPanelContent,
   workspace,
   analysisConfig,
-  requestAnalysisConfig,
   creatorFreeCreditsRemaining,
   status,
-  onClose,
   onPause,
   onResume,
-  runtimeCanBeCreated,
-}: CreatePanelProps) => {
+  children: createButton,
+}: PropsWithChildren<Props>) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
       ? runtimePresets.hailAnalysis.displayName
@@ -77,14 +71,7 @@ export const CreatePanel = ({
         <RuntimeSummary {...{ analysisConfig }} />
       </div>
       <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-        <CreateButton
-          {...{
-            analysisConfig,
-            requestAnalysisConfig,
-            runtimeCanBeCreated,
-            onClose,
-          }}
-        />
+        {createButton}
       </FlexRow>
     </>
   );

@@ -60,6 +60,7 @@ import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm
 import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';
 import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import { ConfirmUpdatePanel } from './runtime-configuration-panel/confirm-update-panel';
+import { CreateButton } from './runtime-configuration-panel/create-button';
 import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
@@ -381,14 +382,11 @@ export const RuntimeConfigurationPanel = fp.flow(
               <CreatePanel
                 {...{
                   analysisConfig,
-                  requestAnalysisConfig,
                   creatorFreeCreditsRemaining,
                   profile,
                   setPanelContent,
                   status,
                   workspace,
-                  onClose,
-                  runtimeCanBeCreated,
                 }}
                 onPause={() =>
                   setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
@@ -396,7 +394,16 @@ export const RuntimeConfigurationPanel = fp.flow(
                 onResume={() =>
                   setRuntimeStatusRequest(RuntimeStatusRequest.Start)
                 }
-              />
+              >
+                <CreateButton
+                  {...{
+                    analysisConfig,
+                    requestAnalysisConfig,
+                    runtimeCanBeCreated,
+                    onClose,
+                  }}
+                />
+              </CreatePanel>
             ),
           ],
           [
