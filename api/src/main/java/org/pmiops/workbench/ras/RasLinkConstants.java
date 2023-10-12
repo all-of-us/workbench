@@ -22,6 +22,12 @@ public class RasLinkConstants {
   // The OIDC acr (Authentication Context Class Reference) claim name in JWT
   static final String ACR_CLAIM = "acr";
 
+  // The RAS tracer field in JWT
+  static final String TXN_CLAIM = "txn";
+
+  // The Access Token field name from RAS's TokenResponse
+  static final String ACCESS_TOKEN_FIELD_NAME = "access_token";
+
   // The Id Token field name from RAS's TokenResponse
   static final String Id_TOKEN_FIELD_NAME = "id_token";
   // The login.gov's PREFERRED_USERNAME field from RAS UserInfo endpoint

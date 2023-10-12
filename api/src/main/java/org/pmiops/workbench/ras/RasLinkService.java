@@ -1,6 +1,7 @@
 package org.pmiops.workbench.ras;
 
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
+import static org.pmiops.workbench.ras.RasLinkConstants.ACCESS_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_2_IDENTIFIER;
 import static org.pmiops.workbench.ras.RasLinkConstants.ERA_COMMONS_PROVIDER_NAME;
@@ -12,6 +13,7 @@ import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
+import static org.pmiops.workbench.ras.RasLinkConstants.TXN_CLAIM;
 import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -119,27 +121,39 @@ public class RasLinkService {
   private final IdentityVerificationService identityVerificationService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
+  private Provider<DbUser> userProvider;
+
   @Autowired
   public RasLinkService(
       AccessModuleService accessModuleService,
       UserService userService,
       IdentityVerificationService identityVerificationService,
-      @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
+      @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider,
+      Provider<DbUser> userProvider) {
     this.accessModuleService = accessModuleService;
     this.userService = userService;
     this.identityVerificationService = identityVerificationService;
     this.rasOidcClientProvider = rasOidcClientProvider;
+    this.userProvider = userProvider;
   }
 
   /** Links RAS account with AoU account. */
   public DbUser linkRasAccount(String authCode, String redirectUrl) {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
+    String txnClaim;
+    String aouUsername = userProvider.get().getUsername();
     try {
       // Oauth dance to get id token and access token.
       TokenResponse tokenResponse =
           rasOidcClient.codeExchange(authCode, decodeUrl(redirectUrl), RAS_AUTH_CODE_SCOPES);
 
+      txnClaim =
+          decodedJwt(tokenResponse.get(ACCESS_TOKEN_FIELD_NAME).toString())
+              .getClaim(TXN_CLAIM)
+              .asString();
+
+      log.info(String.format("User (%s) received a valid RAS access token, txn:  %s", aouUsername, txnClaim));
       // Validate IAL status.
       String acrClaim =
           decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString())
@@ -147,33 +161,40 @@ public class RasLinkService {
               .asString();
 
       if (!isIal2(acrClaim)) {
-        log.warning(String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
+        log.warning(String.format("User does not have IAL2 enabled, acrClaim: %s, txn: %s", acrClaim, txnClaim));
         throw new ForbiddenException(
             String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
+      log.info(String.format("Successfully retrieved OIDC user information from RAS access token for user (%s), txn:  %s", aouUsername, txnClaim));
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
     }
 
-    String username = getUsername(userInfoResponse);
+    String rasUsername = getUsername(userInfoResponse);
     DbUser user;
-    if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateIdentityStatus(username);
+    if (rasUsername.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateIdentityStatus(rasUsername);
       identityVerificationService.updateIdentityVerificationSystem(
           user, DbIdentityVerificationSystem.ID_ME);
-    } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateRasLinkLoginGovStatus(username);
+    } else if (rasUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateRasLinkLoginGovStatus(rasUsername);
       identityVerificationService.updateIdentityVerificationSystem(
           user, DbIdentityVerificationSystem.LOGIN_GOV);
     } else {
+      log.info(String.format(
+          "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s, txn: %s",
+          rasUsername,
+          txnClaim));
       throw new ForbiddenException(
           String.format(
               "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
-              username));
+              rasUsername));
     }
+
+    log.info(String.format("User (%s) successfully verified their identity with the following RAS username: %s, txn: %s", aouUsername, rasUsername, txnClaim));
 
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.

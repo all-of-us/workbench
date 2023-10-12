@@ -144,6 +144,7 @@ public class RasLinkServiceTest {
 
   @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
+  @Mock private static Provider<DbUser> mockUserProvider;
   @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
@@ -213,17 +214,21 @@ public class RasLinkServiceTest {
             accessModuleService,
             userService,
             mockIdentityVerificationService,
-            mockOidcClientProvider);
+            mockOidcClientProvider,
+            mockUserProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
     when(mockInstitutionService.getByUser(any(DbUser.class))).thenReturn(Optional.of(institution));
     when(mockInstitutionService.validateInstitutionalEmail(
             eq(institution), anyString(), eq(REGISTERED_TIER_SHORT_NAME)))
         .thenReturn(true);
 
+
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");
     currentUser.setDisabled(false);
     currentUser = userDao.save(currentUser);
+
+    when(mockUserProvider.get()).thenReturn(currentUser);
     userId = currentUser.getUserId();
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
