@@ -571,7 +571,7 @@ export const RuntimeConfigurationPanel = fp.flow(
           [PanelContent.Disabled, () => <DisabledPanel />],
           [
             PanelContent.SparkConsole,
-            () => <SparkConsolePanel {...{ ...workspace }} />,
+            () => <SparkConsolePanel {...workspace} />,
           ]
         )}
       </div>
