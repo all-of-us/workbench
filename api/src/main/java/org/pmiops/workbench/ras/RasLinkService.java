@@ -148,6 +148,7 @@ public class RasLinkService {
       TokenResponse tokenResponse =
           rasOidcClient.codeExchange(authCode, decodeUrl(redirectUrl), RAS_AUTH_CODE_SCOPES);
 
+      // The txn claim is used by the RAS team in order to associate our logs with theirs.
       txnClaim =
           decodedJwt(tokenResponse.get(ACCESS_TOKEN_FIELD_NAME).toString())
               .getClaim(TXN_CLAIM)
