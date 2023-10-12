@@ -3,7 +3,7 @@ package org.pmiops.workbench.ras;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
-/** Constants used in to process RAS linkage. */
+/** Constants used in to process RAS linkage.  */
 public class RasLinkConstants {
   // The RAS tracer field in JWT
   static final String TXN_CLAIM = "txn";
