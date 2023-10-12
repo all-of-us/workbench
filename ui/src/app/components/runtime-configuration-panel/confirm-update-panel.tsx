@@ -12,17 +12,25 @@ import {
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-utils';
 
+import { UpdateButton } from './update-button';
+
 interface Props {
   existingAnalysisConfig: AnalysisConfig;
   newAnalysisConfig: AnalysisConfig;
+  requestAnalysisConfig: (ac: AnalysisConfig) => void;
+  runtimeCanBeCreated: boolean;
+  runtimeCanBeUpdated: boolean;
   onCancel: () => void;
-  updateButton: JSX.Element;
+  onClose: () => void;
 }
 export const ConfirmUpdatePanel = ({
   existingAnalysisConfig,
   newAnalysisConfig,
+  requestAnalysisConfig,
+  runtimeCanBeCreated,
+  runtimeCanBeUpdated,
   onCancel,
-  updateButton,
+  onClose,
 }: Props) => {
   const configDiffs = getAnalysisConfigDiffs(
     existingAnalysisConfig,
@@ -107,7 +115,16 @@ export const ConfirmUpdatePanel = ({
         >
           Cancel
         </Button>
-        {updateButton}
+        <UpdateButton
+          {...{
+            requestAnalysisConfig,
+            runtimeCanBeCreated,
+            onClose,
+            runtimeCanBeUpdated,
+            updateMessaging,
+          }}
+          analysisConfig={newAnalysisConfig}
+        />
       </FlexRow>
     </React.Fragment>
   );

@@ -353,36 +353,6 @@ export const RuntimeConfigurationPanel = fp.flow(
       ).includes(status as RuntimeStatus) &&
       runtimeCanBeCreated;
 
-    const renderUpdateButton = () => {
-      return (
-        <Button
-          aria-label='Update'
-          disabled={!runtimeCanBeUpdated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          {updateMessaging.applyAction}
-        </Button>
-      );
-    };
-
-    const renderCreateButton = () => {
-      return (
-        <Button
-          aria-label='Create'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          Create
-        </Button>
-      );
-    };
-
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
 
     return (
@@ -410,12 +380,14 @@ export const RuntimeConfigurationPanel = fp.flow(
               <CreatePanel
                 {...{
                   analysisConfig,
+                  requestAnalysisConfig,
                   creatorFreeCreditsRemaining,
                   profile,
                   setPanelContent,
                   status,
                   workspace,
-                  renderCreateButton,
+                  onClose,
+                  runtimeCanBeCreated,
                 }}
                 onPause={() =>
                   setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
@@ -522,7 +494,6 @@ export const RuntimeConfigurationPanel = fp.flow(
                   getWarningMessageContent,
                   onClose,
                   profile,
-                  renderCreateButton,
                   requestAnalysisConfig,
                   runtimeCanBeCreated,
                   runtimeCanBeUpdated,
@@ -546,12 +517,17 @@ export const RuntimeConfigurationPanel = fp.flow(
             PanelContent.ConfirmUpdate,
             () => (
               <ConfirmUpdatePanel
-                existingAnalysisConfig={existingAnalysisConfig}
+                {...{
+                  existingAnalysisConfig,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
+                  runtimeCanBeUpdated,
+                  onClose,
+                }}
                 newAnalysisConfig={analysisConfig}
                 onCancel={() => {
                   setPanelContent(PanelContent.Customize);
                 }}
-                updateButton={renderUpdateButton()}
               />
             ),
           ],

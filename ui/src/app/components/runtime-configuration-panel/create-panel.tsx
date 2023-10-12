@@ -10,33 +10,35 @@ import { FlexRow } from 'app/components/flex';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import {
-  AnalysisConfig,
-  PanelContent,
-  RuntimeStatusRequest,
-} from 'app/utils/runtime-utils';
+import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
+
+import { CreateButton } from './create-button';
 
 interface CreatePanelProps {
   profile: Profile;
   setPanelContent: (panelContent: PanelContent) => void;
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
+  requestAnalysisConfig: (ac: AnalysisConfig) => void;
   creatorFreeCreditsRemaining: number;
   status: RuntimeStatus;
+  onClose: () => void;
   onPause: () => void;
   onResume: () => void;
-  renderCreateButton: () => JSX.Element;
+  runtimeCanBeCreated: boolean;
 }
 export const CreatePanel = ({
   profile,
   setPanelContent,
   workspace,
   analysisConfig,
+  requestAnalysisConfig,
   creatorFreeCreditsRemaining,
   status,
+  onClose,
   onPause,
   onResume,
-  renderCreateButton,
+  runtimeCanBeCreated,
 }: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
@@ -72,10 +74,17 @@ export const CreatePanel = ({
             Customize
           </Button>
         </FlexRow>
-        <RuntimeSummary analysisConfig={analysisConfig} />
+        <RuntimeSummary {...{ analysisConfig }} />
       </div>
       <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-        {renderCreateButton()}
+        <CreateButton
+          {...{
+            analysisConfig,
+            requestAnalysisConfig,
+            runtimeCanBeCreated,
+            onClose,
+          }}
+        />
       </FlexRow>
     </>
   );

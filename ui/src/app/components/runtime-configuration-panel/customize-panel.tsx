@@ -12,7 +12,7 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
-import { Button, LinkButton } from 'app/components/buttons';
+import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
@@ -36,11 +36,15 @@ import {
 } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import { CreateButton } from './create-button';
 import { DataProcConfigSelector } from './dataproc-config-selector';
 import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
+import { NextUpdateButton } from './next-update-button';
+import { NextWithDiskDeleteButton } from './next-with-disk-delete-button';
 import { PresetSelector } from './preset-selector';
+import { TryAgainButton } from './try-again-button';
 
 interface Props {
   allowDataproc: boolean;
@@ -55,7 +59,6 @@ interface Props {
   getWarningMessageContent: () => JSX.Element[];
   onClose: () => void;
   profile: Profile;
-  renderCreateButton: () => JSX.Element;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
   runtimeCanBeUpdated: boolean;
@@ -81,7 +84,6 @@ export const CustomizePanel = ({
   getWarningMessageContent,
   onClose,
   profile,
-  renderCreateButton,
   requestAnalysisConfig,
   runtimeCanBeCreated,
   runtimeCanBeUpdated,
@@ -117,53 +119,6 @@ export const CustomizePanel = ({
   const updateYieldsUnusedDisk =
     existingAnalysisConfig.diskConfig.detachable &&
     !analysisConfig.diskConfig.detachable;
-
-  const renderNextWithDiskDeleteButton = () => {
-    return (
-      <Button
-        aria-label='Next'
-        disabled={!runtimeCanBeCreated}
-        onClick={() => {
-          setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
-        }}
-      >
-        Next
-      </Button>
-    );
-  };
-
-  const renderTryAgainButton = () => {
-    return (
-      <Button
-        aria-label='Try Again'
-        disabled={!runtimeCanBeCreated}
-        onClick={() => {
-          requestAnalysisConfig(analysisConfig);
-          onClose();
-        }}
-      >
-        Try Again
-      </Button>
-    );
-  };
-
-  const renderNextUpdateButton = () => {
-    return (
-      <Button
-        aria-label='Next'
-        disabled={!runtimeCanBeUpdated}
-        onClick={() => {
-          if (updateYieldsUnusedDisk) {
-            setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-          } else {
-            setPanelContent(PanelContent.ConfirmUpdate);
-          }
-        }}
-      >
-        Next
-      </Button>
-    );
-  };
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -377,9 +332,20 @@ export const CustomizePanel = ({
           <DeletePersistentDiskButton
             onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}
           />
-          {unattachedDiskNeedsRecreate
-            ? renderNextWithDiskDeleteButton()
-            : renderCreateButton()}
+          {unattachedDiskNeedsRecreate ? (
+            <NextWithDiskDeleteButton
+              {...{ runtimeCanBeCreated, setPanelContent }}
+            />
+          ) : (
+            <CreateButton
+              {...{
+                analysisConfig,
+                requestAnalysisConfig,
+                runtimeCanBeCreated,
+                onClose,
+              }}
+            />
+          )}
         </FlexRow>
       ) : (
         <FlexRow
@@ -402,16 +368,49 @@ export const CustomizePanel = ({
             Delete Environment
           </LinkButton>
           {cond<React.ReactNode>(
-            [runtimeExists, () => renderNextUpdateButton()],
+            [
+              runtimeExists,
+              () => (
+                <NextUpdateButton
+                  {...{
+                    runtimeCanBeUpdated,
+                    updateYieldsUnusedDisk,
+                    setPanelContent,
+                  }}
+                />
+              ),
+            ],
             [
               unattachedDiskNeedsRecreate,
-              () => renderNextWithDiskDeleteButton(),
+              () => (
+                <NextWithDiskDeleteButton
+                  {...{ runtimeCanBeCreated, setPanelContent }}
+                />
+              ),
             ],
             [
               currentRuntime?.errors && currentRuntime.errors.length > 0,
-              () => renderTryAgainButton(),
+              () => (
+                <TryAgainButton
+                  {...{
+                    runtimeCanBeCreated,
+                    analysisConfig,
+                    requestAnalysisConfig,
+                    onClose,
+                  }}
+                />
+              ),
             ],
-            () => renderCreateButton()
+            () => (
+              <CreateButton
+                {...{
+                  analysisConfig,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
+                  onClose,
+                }}
+              />
+            )
           )}
         </FlexRow>
       )}
