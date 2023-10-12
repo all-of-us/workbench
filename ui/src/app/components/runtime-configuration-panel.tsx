@@ -409,14 +409,14 @@ export const RuntimeConfigurationPanel = fp.flow(
             () => (
               <CreatePanel
                 {...{
-                  profile,
-                  setPanelContent,
                   analysisConfig,
                   creatorFreeCreditsRemaining,
-                  status,
+                  profile,
+                  setPanelContent,
                   setRuntimeStatusRequest,
-                  renderCreateButton,
+                  status,
                   workspace,
+                  renderCreateButton,
                 }}
               />
             ),
