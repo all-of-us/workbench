@@ -120,11 +120,12 @@ export const RuntimesList = fp.flow(
         <>
           <style>{css}</style>
           <WarningMessage>
-            <b>Our Cloud Environments Page is a work in progress.</b>
+            <b>About the Cloud Environments Page</b>
             <br />
-            Thank you for your patience and understanding as we make ongoing
-            improvements. Please use the "Contact Us" link at the bottom of this
-            page to provide feedback.
+            Below you can see resources (cloud environments and disks) that
+            you’ve created across all workspaces in the All of Us Researcher
+            Workbench. Please note that this feature is still in development.
+            Please use the "Contact Us" link to provide feedback.
           </WarningMessage>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
