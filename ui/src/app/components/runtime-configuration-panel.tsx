@@ -520,10 +520,6 @@ export const RuntimeConfigurationPanel = fp.flow(
               <ConfirmUpdatePanel
                 {...{
                   existingAnalysisConfig,
-                  requestAnalysisConfig,
-                  runtimeCanBeCreated,
-                  runtimeCanBeUpdated,
-                  onClose,
                 }}
                 newAnalysisConfig={analysisConfig}
                 onCancel={() => {
