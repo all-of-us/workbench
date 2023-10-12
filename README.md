@@ -222,14 +222,9 @@ yarn dev-up-tanagra-local
 
 ### Tanagra Deploy to test
 
-To deploy Tanagra api to test (run from `api` directory):
+To deploy Tanagra (api and ui) to test (run from `workbench` directory):
 ```
-./project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote --quiet
-```
-
-To deploy Tanagra UI to test (run from `ui` directory):
-```
-./project.rb deploy-tanagra-ui --project all-of-us-workbench-test --version my-version --promote --quiet
+deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote --quiet
 ```
 
 ## Building a new CDR Database

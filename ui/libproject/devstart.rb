@@ -56,6 +56,11 @@ def deploy_tanagra_ui(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
@@ -67,11 +72,6 @@ def deploy_tanagra_ui(cmd_name, args)
     "Version to deploy (e.g. your-username-test)"
   )
   op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
-  op.add_option(
-    "--key-file [keyfile]",
-    ->(opts, v) { opts.key_file = v},
-    "Service account key file to use for deployment authorization"
-  )
   op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
@@ -99,10 +99,6 @@ def deploy_tanagra_ui(cmd_name, args)
   op.parse.validate
   gcc.validate
 
-  if (op.opts.key_file)
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
-  end
-
   promote = "--no-promote"
   unless op.opts.promote.nil?
     promote = op.opts.promote ? "--promote" : "--no-promote"
@@ -111,10 +107,18 @@ def deploy_tanagra_ui(cmd_name, args)
   end
 
   common = Common.new
-  common.status "Update Tanagra submodule..."
-  common.run_inline("git submodule init && git submodule update --init --recursive")
+  Dir.chdir('../tanagra-aou-utils') do
+    unless File.directory?('tanagra')
+      common.status "Need to clone repo"
+      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
+    end
+    Dir.chdir('tanagra') do
+      common.status "Checkout specific Tanagra tag"
+      common.run_inline %W{git checkout tags/#{op.opts.version}}
+    end
+  end
 
-  Dir.chdir('../tanagra/ui') do
+  Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
     common.run_inline("npm ci")
     common.status "npm run codegen"
@@ -132,14 +136,18 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-ui.yaml > ./appengine/tanagra-ui.yaml")
   end
 
+  deploy_version = "tanagra-ui-" + op.opts.version
+  deploy_version.gsub!(".", "-")
+
   Dir.chdir('../tanagra-aou-utils/appengine') do
     common.status "Deploying Tanagra UI to appengine..."
     run_inline_or_log(op.opts.dry_run, %W{
       gcloud app deploy tanagra-ui.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+      (op.opts.version ? %W{--version #{deploy_version}} : []))
   end
+  common.status "Deployment of Tanagra UI complete!"
 end
 
 class DevStart
