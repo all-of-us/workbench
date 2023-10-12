@@ -2447,6 +2447,11 @@ def deploy_tanagra(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
@@ -2458,11 +2463,6 @@ def deploy_tanagra(cmd_name, args)
     "Version to deploy (e.g. your-username-test)"
   )
   op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
-  op.add_option(
-    "--key-file [keyfile]",
-    ->(opts, v) { opts.key_file = v},
-    "Service account key file to use for deployment authorization"
-  )
   op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
@@ -2498,10 +2498,6 @@ def deploy_tanagra(cmd_name, args)
   ENV.update({"TANAGRA_AUTH_DISABLE_CHECKS" => env_project.fetch(:tanagra_auth_disable_checks)})
   ENV.update({"TANAGRA_AUTH_BEARER_TOKEN" => env_project.fetch(:tanagra_auth_bearer_token)})
   ENV.update({"TANAGRA_UNDERLAY_FILES" => env_project.fetch(:tanagra_underlay_files)})
-
-  if (op.opts.key_file)
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
-  end
 
   promote = "--no-promote"
   unless op.opts.promote.nil?
@@ -2550,6 +2546,7 @@ def deploy_tanagra(cmd_name, args)
       (op.opts.quiet ? %W{--quiet} : []) +
       (op.opts.version ? %W{--version #{deploy_version}} : []))
   end
+  common.status "Deployment of Tanagra API complete!"
 
 end
 
