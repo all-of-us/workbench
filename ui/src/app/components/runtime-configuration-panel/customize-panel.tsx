@@ -94,10 +94,17 @@ export const CustomizePanel = ({
   validMainMachineTypes,
   workspaceData,
 }: Props) => {
+  const disableControls = runtimeExists && !isActionable(status);
+
   const dataprocExists =
     runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
 
-  const disableControls = runtimeExists && !isActionable(status);
+  const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
+  const unattachedDiskNeedsRecreate =
+    unattachedPdExists &&
+    analysisConfig.diskConfig.detachable &&
+    (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
+      gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
 
   const disableDetachableReason = cond<string>(
     [
@@ -110,24 +117,6 @@ export const CustomizePanel = ({
   const updateYieldsUnusedDisk =
     existingAnalysisConfig.diskConfig.detachable &&
     !analysisConfig.diskConfig.detachable;
-
-  const renderNextUpdateButton = () => {
-    return (
-      <Button
-        aria-label='Next'
-        disabled={!runtimeCanBeUpdated}
-        onClick={() => {
-          if (updateYieldsUnusedDisk) {
-            setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-          } else {
-            setPanelContent(PanelContent.ConfirmUpdate);
-          }
-        }}
-      >
-        Next
-      </Button>
-    );
-  };
 
   const renderNextWithDiskDeleteButton = () => {
     return (
@@ -158,12 +147,23 @@ export const CustomizePanel = ({
     );
   };
 
-  const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
-  const unattachedDiskNeedsRecreate =
-    unattachedPdExists &&
-    analysisConfig.diskConfig.detachable &&
-    (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
-      gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
+  const renderNextUpdateButton = () => {
+    return (
+      <Button
+        aria-label='Next'
+        disabled={!runtimeCanBeUpdated}
+        onClick={() => {
+          if (updateYieldsUnusedDisk) {
+            setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
+          } else {
+            setPanelContent(PanelContent.ConfirmUpdate);
+          }
+        }}
+      >
+        Next
+      </Button>
+    );
+  };
 
   return (
     <div style={{ marginBottom: '10px' }}>

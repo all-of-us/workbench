@@ -474,7 +474,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 appType={UIAppType.JUPYTER}
                 onConfirm={async () => {
                   await disksApi().deleteDisk(
-                    workspace.namespace,
+                    namespace,
                     gcePersistentDisk.name
                   );
                   onClose();
@@ -491,7 +491,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 showCreateMessaging
                 onConfirm={async () => {
                   await disksApi().deleteDisk(
-                    workspace.namespace,
+                    namespace,
                     gcePersistentDisk.name
                   );
                   requestAnalysisConfig(analysisConfig);
