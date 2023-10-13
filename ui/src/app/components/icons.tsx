@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
+import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import {
   faBan,
   faCaretRight,
@@ -9,11 +10,11 @@ import {
   faExclamationTriangle,
   faLongArrowAltRight,
   faMinusCircle,
+  faRepeat,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCircle } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleEllipsisVertical } from '@fortawesome/pro-regular-svg-icons';
-import { faAlarmExclamation, faRepeat } from '@fortawesome/pro-solid-svg-icons';
+import { faAlarmExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import colors, { addOpacity } from 'app/styles/colors';
