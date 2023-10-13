@@ -6,6 +6,7 @@ import { Route } from 'react-router-dom';
 
 import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 
+import { currentWorkspaceStore } from '../../utils/navigation';
 import { screen } from '@testing-library/dom';
 import { render, waitForElementToBeRemoved } from '@testing-library/react';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
@@ -50,6 +51,14 @@ describe(WorkspaceWrapper.name, () => {
     workspacesApi.getWorkspace = jest
       .fn()
       .mockResolvedValue({ workspace: workspaceData });
+
+    // this captures the behavior of a current bug (RW-11140) with this component:
+    // it doesn't work when the currentWorkspaceStore matches the route being served
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      namespace: 'something else',
+      id: 'some other ID',
+    });
   });
 
   const createWrapperAndWaitForLoad = async () => {

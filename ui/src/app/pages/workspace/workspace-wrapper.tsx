@@ -248,6 +248,8 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     setShowNewCtNotification(isControlled && isNew);
   }, [workspace]);
 
+  console.log('workspace', workspace);
+
   return (
     <>
       {workspace ? (
