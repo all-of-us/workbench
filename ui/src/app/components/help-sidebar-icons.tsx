@@ -9,10 +9,12 @@ import {
   faInfoCircle,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
-import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
-import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
+import {
+  faCircle,
+  faDna,
+  faSyncAlt,
+  faTerminal,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {

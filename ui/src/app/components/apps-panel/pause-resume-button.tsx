@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
+import { faPause, faPlay, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 

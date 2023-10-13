@@ -11,14 +11,12 @@ import {
   faLongArrowAltRight,
   faMinusCircle,
   faRepeat,
-  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCircleEllipsisVertical } from '@fortawesome/pro-regular-svg-icons';
 import { faAlarmExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import colors, { addOpacity } from 'app/styles/colors';
-import arrow from 'assets/icons/arrow-left-regular.svg';
 import { ReactComponent as controlledTierBadge } from 'assets/icons/controlled-tier-badge.svg';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
 import { ReactComponent as registeredTierBadge } from 'assets/icons/registered-tier-badge.svg';
@@ -189,16 +187,6 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   );
 };
 
-export const withCircleBackground =
-  (WrappedIcon) =>
-  ({ style = styles.defaultCircle }) => {
-    return (
-      <div style={{ ...style, ...styles.circleBackground }}>
-        <WrappedIcon />
-      </div>
-    );
-  };
-
 export const AlarmExclamation = (props) => (
   <Icon shape={faAlarmExclamation} {...props} />
 );
@@ -216,12 +204,10 @@ export const ExclamationTriangle = (props) => (
 );
 export const MinusCircle = (props) => <Icon shape={faMinusCircle} {...props} />;
 export const Repeat = (props) => <Icon shape={faRepeat} {...props} />;
-export const Times = (props) => <Icon shape={faTimes} {...props} />;
 
 const svgIcon =
   (src) =>
   ({ size = 25, ...props }) =>
     <img style={{ height: size, width: size }} src={src} {...props} />;
 
-export const Arrow = svgIcon(arrow);
 export const GoogleCloudLogoSvg = svgIcon(googleCloudLogo);
