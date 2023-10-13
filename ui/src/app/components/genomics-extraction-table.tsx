@@ -7,8 +7,8 @@ import {
   faBan,
   faCheckCircle,
   faExclamationTriangle,
+  faSyncAlt,
 } from '@fortawesome/free-solid-svg-icons';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
