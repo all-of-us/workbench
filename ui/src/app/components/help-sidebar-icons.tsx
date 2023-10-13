@@ -4,16 +4,14 @@ import * as fp from 'lodash/fp';
 import { faEdit } from '@fortawesome/free-regular-svg-icons';
 import {
   faBook,
+  faCircle,
+  faDna,
   faFolderOpen,
   faInbox,
   faInfoCircle,
-  IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
-import {
-  faCircle,
-  faDna,
   faSyncAlt,
   faTerminal,
+  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
