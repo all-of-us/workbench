@@ -48,7 +48,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
   @Test
   @Disabled("RW-11039")
-  public void testGetEnrollments_RTIncomplete() throws Exception {
+  public void testGetEnrollments_RtIncomplete() throws Exception {
     // Setup:
     // - The user has logged into Absorb
     // - The user has not completed RT training
@@ -71,7 +71,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
   @Test
   @Disabled("RW-11039")
-  public void testGetEnrollments_RTComplete() throws Exception {
+  public void testGetEnrollments_RtComplete() throws Exception {
     // Setup:
     // - The user has completed RT training in Absorb
     // - The user has not completed CT training in Absorb

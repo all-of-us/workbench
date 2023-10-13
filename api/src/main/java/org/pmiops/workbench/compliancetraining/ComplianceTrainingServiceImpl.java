@@ -243,7 +243,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
         if (accessModuleName == DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING) {
           log.severe(
               String.format(
-                  "User `%s` is not enrolled in RT compliance training. Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
+                  "User `%s` is not enrolled in RT compliance training. "
+                      + "Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
                   dbUser.getUsername()));
           throw new NotFoundException(
               String.format(
