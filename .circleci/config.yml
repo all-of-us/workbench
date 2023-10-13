@@ -418,20 +418,9 @@ jobs:
           name: What is in coverage directory
           command: |
             ls -la /tmp/workspace/ui/coverage
-      - run:
-          name: What is in ~ directory
-          command: |
-            ls -la .
-      - run:
-          name: What is in ui directory
-          working_directory: ~/workbench/ui
-          command: |
-            ls -la .
-      - run:
-          name: What is in coverage directory
-          working_directory: ~/workbench/ui
-          command: |
-            ls -la ./coverage
+      - coverage-reporter/send_report:
+          coverage-reports: /tmp/workspace/ui/coverage/lcov.info
+          project-token: $CODACY_PROJECT_TOKEN
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
