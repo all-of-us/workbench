@@ -403,6 +403,14 @@ jobs:
       - attach_workspace:
             at: /tmp/workspace
       - run:
+          name: What is in tmp directory
+          command: |
+            ls -la /tmp
+      - run:
+          name: What is in tmp directory
+          command: |
+            ls -la /tmp/workspace
+      - run:
           name: What is in ~ directory
           command: |
             ls -la .
