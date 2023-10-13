@@ -6,11 +6,11 @@ import { Route } from 'react-router-dom';
 
 import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 
-import { currentWorkspaceStore } from '../../utils/navigation';
 import { screen } from '@testing-library/dom';
 import { render, waitForElementToBeRemoved } from '@testing-library/react';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -62,9 +62,6 @@ describe(WorkspaceWrapper.name, () => {
   });
 
   const createWrapperAndWaitForLoad = async () => {
-    // adding initialEntries and Route breaks the test, but how?
-    // this causes these route params to be populated, but why does this break the test?
-
     render(
       <MemoryRouter
         initialEntries={[
