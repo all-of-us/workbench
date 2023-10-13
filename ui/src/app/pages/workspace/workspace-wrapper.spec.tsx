@@ -7,11 +7,7 @@ import { Route } from 'react-router-dom';
 import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
-import {
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
   registerApiClient,
@@ -47,10 +43,7 @@ jest.mock('app/routing/workspace-app-routing', () => {
 });
 
 describe(WorkspaceWrapper.name, () => {
-  let workspaceData: typeof workspaceDataStub = null;
-
   beforeEach(() => {
-    workspaceData = { ...workspaceDataStub };
     serverConfigStore.set({ config: defaultServerConfig });
     cdrVersionStore.set(cdrVersionTiersResponse);
     registerApiClient(RuntimeApi, new RuntimeApiStub());
@@ -60,14 +53,12 @@ describe(WorkspaceWrapper.name, () => {
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
     workspacesApiStub.getWorkspace = jest.fn().mockResolvedValue({
-      workspace: workspaceData,
-      accessLevel: workspaceData.accessLevel,
+      workspace: workspaceDataStub,
+      accessLevel: workspaceDataStub.accessLevel,
     });
   });
 
-  const createWrapperAndWaitForLoad = async (
-    expectingSpinner: boolean = false
-  ) => {
+  const createWrapperAndWaitForLoad = async () => {
     render(
       <MemoryRouter
         initialEntries={[
@@ -80,13 +71,7 @@ describe(WorkspaceWrapper.name, () => {
       </MemoryRouter>
     );
 
-    if (expectingSpinner) {
-      await waitForElementToBeRemoved(() =>
-        screen.getByTitle('loading workspaces spinner')
-      );
-    }
-
-    await waitFor(() =>
+    return waitFor(() =>
       expect(screen.queryByText('Mock Workspace Routes')).toBeInTheDocument()
     );
   };
@@ -103,7 +88,7 @@ describe(WorkspaceWrapper.name, () => {
     );
 
     // populated with the result of getWorkspace()
-    expect(currentWorkspaceStore.getValue()).toEqual(workspaceData);
+    expect(currentWorkspaceStore.getValue()).toEqual(workspaceDataStub);
     // unchanged
     expect(nextWorkspaceWarmupStore.getValue()).toBeUndefined();
   });
@@ -128,7 +113,7 @@ describe(WorkspaceWrapper.name, () => {
     );
 
     // populated with the result of getWorkspace()
-    expect(currentWorkspaceStore.getValue()).toEqual(workspaceData);
+    expect(currentWorkspaceStore.getValue()).toEqual(workspaceDataStub);
     // clears because invalid
     expect(nextWorkspaceWarmupStore.getValue()).toBeUndefined();
   });
@@ -143,8 +128,7 @@ describe(WorkspaceWrapper.name, () => {
     nextWorkspaceWarmupStore.next(nextWs);
 
     const spy = jest.spyOn(workspacesApi(), 'getWorkspace');
-    const expectingSpinner = false; // no spinner when loading from the store
-    await createWrapperAndWaitForLoad(expectingSpinner);
+    await createWrapperAndWaitForLoad();
     expect(spy).not.toHaveBeenCalled();
 
     // unchanged
@@ -157,8 +141,7 @@ describe(WorkspaceWrapper.name, () => {
     nextWorkspaceWarmupStore.next(workspaceDataStub);
 
     const spy = jest.spyOn(workspacesApi(), 'getWorkspace');
-    const expectingSpinner = false; // no spinner when loading from the store
-    await createWrapperAndWaitForLoad(expectingSpinner);
+    await createWrapperAndWaitForLoad();
     expect(spy).not.toHaveBeenCalled();
 
     // the nextWorkspaceWarmupStore is consumed/cleared
@@ -179,8 +162,7 @@ describe(WorkspaceWrapper.name, () => {
       nextWorkspaceWarmupStore.next(workspaceDataStub);
 
       const spy = jest.spyOn(workspacesApi(), 'getWorkspace');
-      const expectingSpinner = false; // no spinner when loading from the store
-      await createWrapperAndWaitForLoad(expectingSpinner);
+      await createWrapperAndWaitForLoad();
       expect(spy).not.toHaveBeenCalled();
 
       // the nextWorkspaceWarmupStore is consumed/cleared
@@ -191,8 +173,10 @@ describe(WorkspaceWrapper.name, () => {
   );
 
   it('should show the multi-region workspace notification for workspaces created before 6/15/2022', async () => {
-    currentWorkspaceStore.next(undefined);
-    workspaceData.creationTime = new Date(2022, 5, 14).getTime();
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creationTime: new Date(2022, 5, 14).getTime(),
+    });
     await createWrapperAndWaitForLoad();
     expect(
       screen.queryByText(
@@ -203,8 +187,10 @@ describe(WorkspaceWrapper.name, () => {
   });
 
   it('should not show the multi-region workspace notification for workspaces created during or after 6/15/2022', async () => {
-    currentWorkspaceStore.next(undefined);
-    workspaceData.creationTime = new Date(2022, 5, 15).getTime();
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      creationTime: new Date(2022, 5, 15).getTime(),
+    });
     await createWrapperAndWaitForLoad();
     expect(
       screen.queryByText(
