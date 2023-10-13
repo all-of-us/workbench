@@ -393,24 +393,25 @@ jobs:
           paths:
             - api
 
+
+
+
   ui-test-coverage:
     #Jest Coverage Generation
     executor: workbench-executor
     steps:
-      - run-api-test:
-          additional_steps:
-            - attach_workspace:
-                  at: /tmp/workspace
-            - run:
-                name: What is in ui directory
-                working_directory: ~/workbench/ui
-                command: |
-                  ls -la .
-            - run:
-                name: What is in coverage directory
-                working_directory: ~/workbench/ui
-                command: |
-                  ls -la ./coverage
+      - attach_workspace:
+            at: /tmp/workspace
+      - run:
+          name: What is in ui directory
+          working_directory: ~/workbench/ui
+          command: |
+            ls -la .
+      - run:
+          name: What is in coverage directory
+          working_directory: ~/workbench/ui
+          command: |
+            ls -la ./coverage
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
