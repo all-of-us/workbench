@@ -240,14 +240,20 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
           enrollments.stream().filter(e -> e.courseId.equals(courseId)).findFirst();
 
       if (maybeEnrollment.isEmpty()) {
-        log.severe(
-            String.format(
-                "User `%s` is not enrolled in Absorb course `%s` for access module `%s`. Users are expected to be automatically enrolled in all courses upon visiting Absorb.",
-                dbUser.getUsername(), courseId, accessModuleName));
-        throw new NotFoundException(
-            String.format(
-                "User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
+        if (accessModuleName == DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING) {
+          log.severe(
+              String.format(
+                  "User `%s` is not enrolled in RT compliance training. Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
+                  dbUser.getUsername()));
+          throw new NotFoundException(
+              String.format(
+                  "User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
+        }
+
+        // Users are not enrolled in CT training until they complete RT training
+        continue;
       }
+
       var enrollment = maybeEnrollment.get();
 
       // The course is incomplete, do not update the user access module

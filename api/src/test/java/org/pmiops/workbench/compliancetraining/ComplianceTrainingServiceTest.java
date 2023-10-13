@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -206,7 +205,7 @@ public class ComplianceTrainingServiceTest {
 
     // User completes RT training in Absorb
     var rtCompletionTime = currentInstant();
-    mockGetUserEnrollments(rtCompletionTime, null);
+    stubAbsorbOnlyRTComplete(rtCompletionTime);
 
     // User syncs training
     user = complianceTrainingService.syncComplianceTrainingStatus();
@@ -230,7 +229,7 @@ public class ComplianceTrainingServiceTest {
 
     // User completes CT training in Absorb
     var ctCompletionTime = currentInstant();
-    mockGetUserEnrollments(rtCompletionTime, ctCompletionTime);
+    stubAbsorbAllTrainingsComplete(rtCompletionTime, ctCompletionTime);
 
     // User syncs training
     user = complianceTrainingService.syncComplianceTrainingStatus();
@@ -280,7 +279,7 @@ public class ComplianceTrainingServiceTest {
 
     // Set up: The user completes ands syncs RT training
     var completionTime = currentInstant();
-    mockGetUserEnrollments(completionTime, null);
+    stubAbsorbOnlyRTComplete(completionTime);
     user = complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
@@ -337,12 +336,12 @@ public class ComplianceTrainingServiceTest {
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
     // Complete RT training
-    mockGetUserEnrollments(currentInstant(), null);
+    stubAbsorbOnlyRTComplete(currentInstant());
     user = complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
     // Complete CT training
-    mockGetUserEnrollments(currentInstant(), currentInstant());
+    stubAbsorbAllTrainingsComplete(currentInstant(), currentInstant());
     user = complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
@@ -383,7 +382,7 @@ public class ComplianceTrainingServiceTest {
   public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfNoCoursesComplete()
       throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
-    mockGetUserEnrollments(null, null);
+    stubAbsorbNoCoursesComplete();
 
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
@@ -530,7 +529,7 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testUseAbsorb_TrueWhenFeatureFlagEnabledAndAbsorbPreviouslyUsed() throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
-    mockGetUserEnrollments(currentInstant(), null);
+    stubAbsorbOnlyRTComplete(currentInstant());
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     assertThat(complianceTrainingService.useAbsorb()).isTrue();
@@ -568,7 +567,7 @@ public class ComplianceTrainingServiceTest {
 
     // A user uses Absorb to complete RT training.
     var rtCompletionTime = currentInstant();
-    mockGetUserEnrollments(rtCompletionTime, null);
+    stubAbsorbOnlyRTComplete(rtCompletionTime);
     user = complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
@@ -619,8 +618,23 @@ public class ComplianceTrainingServiceTest {
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
   }
 
-  private void mockGetUserEnrollments(
-      @Nullable Instant rtCompletionTime, @Nullable Instant ctCompletionTime)
+  private void stubAbsorbNoCoursesComplete() throws org.pmiops.workbench.absorb.ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+        .thenReturn(List.of(new Enrollment(RT_ABSORB_COURSE_ID, null)));
+  }
+
+  private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime)
+      throws org.pmiops.workbench.absorb.ApiException {
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+        .thenReturn(
+            List.of(
+                new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
+                new Enrollment(CT_ABSORB_COURSE_ID, null)));
+  }
+
+  private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
       throws org.pmiops.workbench.absorb.ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
