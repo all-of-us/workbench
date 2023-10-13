@@ -416,31 +416,6 @@ jobs:
                 working_directory: ~/workbench/api
                 command: |
                   ./gradlew jacocoTestReport
-            - run:
-                name: ls build
-                working_directory: ~/workbench/api
-                command: |
-                  ls build
-            - run:
-                name: ls build
-                working_directory: ~/workbench/api
-                command: |
-                  ls build
-            - run:
-                name: ls build/reports
-                working_directory: ~/workbench/api
-                command: |
-                  ls build/reports
-            - run:
-                name: ls build/reports/jacoco
-                working_directory: ~/workbench/api
-                command: |
-                  ls build/reports/jacoco
-            - run:
-                name: ls build/reports/jacoco/test
-                working_directory: ~/workbench/api
-                command: |
-                  ls build/reports/jacoco/test
             - coverage-reporter/send_report:
                 coverage-reports: api/build/reports/jacoco/test/jacocoTestReport.xml
                 project-token: $CODACY_PROJECT_TOKEN
