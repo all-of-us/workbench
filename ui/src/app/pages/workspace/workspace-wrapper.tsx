@@ -231,16 +231,13 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   }, []);
 
   useEffect(() => {
-    if (ns) {
-      maybeStartPollingForUserApps(ns);
-    }
-  }, [ns]);
-
-  useEffect(() => {
     // abort if the routing is invalid (though this should never happen)
     if (!ns || !wsid) {
       return;
     }
+
+    maybeStartPollingForUserApps(ns);
+    workspacesApi().updateRecentWorkspaces(ns, wsid);
 
     // avoid a redundant fetch if we can find the workspace in the currentWorkspaceStore or the
     // nextWorkspaceWarmupStore (as a result of creation or duplication)
@@ -288,10 +285,6 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
         });
       }
     }
-  }, [ns, wsid]);
-
-  useEffect(() => {
-    workspacesApi().updateRecentWorkspaces(ns, wsid);
   }, [ns, wsid]);
 
   useEffect(() => {
