@@ -403,6 +403,10 @@ jobs:
       - attach_workspace:
             at: /tmp/workspace
       - run:
+          name: What is in ~ directory
+          command: |
+            ls -la .
+      - run:
           name: What is in ui directory
           working_directory: ~/workbench/ui
           command: |
