@@ -58,9 +58,11 @@ describe(WorkspaceWrapper.name, () => {
 
     const workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
-    workspacesApiStub.getWorkspace = jest
-      .fn()
-      .mockResolvedValue({ workspace: workspaceData });
+
+    workspacesApiStub.getWorkspace = jest.fn().mockResolvedValue({
+      workspace: workspaceData,
+      accessLevel: workspaceData.accessLevel,
+    });
   });
 
   const createWrapperAndWaitForLoad = async (
@@ -101,10 +103,7 @@ describe(WorkspaceWrapper.name, () => {
     );
 
     // populated with the result of getWorkspace()
-    expect(currentWorkspaceStore.getValue()).toEqual({
-      ...workspaceData,
-      accessLevel: workspaceData.accessLevel,
-    });
+    expect(currentWorkspaceStore.getValue()).toEqual(workspaceData);
     // unchanged
     expect(nextWorkspaceWarmupStore.getValue()).toBeUndefined();
   });
@@ -129,10 +128,7 @@ describe(WorkspaceWrapper.name, () => {
     );
 
     // populated with the result of getWorkspace()
-    expect(currentWorkspaceStore.getValue()).toEqual({
-      ...workspaceData,
-      accessLevel: workspaceData.accessLevel,
-    });
+    expect(currentWorkspaceStore.getValue()).toEqual(workspaceData);
     // clears because invalid
     expect(nextWorkspaceWarmupStore.getValue()).toBeUndefined();
   });
