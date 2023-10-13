@@ -393,31 +393,12 @@ jobs:
           paths:
             - api
 
-
-
-
   ui-test-coverage:
-    #Jest Coverage Generation
+    #Jest Coverage Upload
     executor: workbench-executor
     steps:
       - attach_workspace:
             at: /tmp/workspace
-      - run:
-          name: What is in tmp directory
-          command: |
-            ls -la /tmp
-      - run:
-          name: What is in workspace directory
-          command: |
-            ls -la /tmp/workspace
-      - run:
-          name: What is in ui directory
-          command: |
-            ls -la /tmp/workspace/ui
-      - run:
-          name: What is in coverage directory
-          command: |
-            ls -la /tmp/workspace/ui/coverage
       - coverage-reporter/send_report:
           coverage-reports: /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
