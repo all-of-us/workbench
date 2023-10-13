@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 /** Constants used in to process RAS linkage. */
-//Sample comment
+// Sample comment
 public class RasLinkConstants {
   private RasLinkConstants() {}
 
