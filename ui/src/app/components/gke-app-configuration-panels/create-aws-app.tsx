@@ -9,15 +9,12 @@ import {
 
 import {
   canDeleteApp,
-  createAppRequestToAnalysisConfig,
 } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
-import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
-import { EnvironmentInformedActionPanel } from 'app/components/environment-informed-action-panel';
+import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { styles } from 'app/components/common-env-conf-panels/styles';import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
