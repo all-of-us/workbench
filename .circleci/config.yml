@@ -393,8 +393,8 @@ jobs:
           paths:
             - api
 
-  api-test-coverage:
-    #Jacoco runs against test results to get test coverage
+  ui-test-coverage:
+    #Jest Coverage Generation
     executor: workbench-executor
     steps:
       - run-api-test:
@@ -402,25 +402,44 @@ jobs:
             - attach_workspace:
                   at: /tmp/workspace
             - run:
-                name: Create build directory
-                working_directory: ~/workbench/api
+                name: What is in ui directory
+                working_directory: ~/workbench/ui
                 command: |
-                  mkdir "./build";
+                  ls -la .
             - run:
-                name: Copy Jacoco exec files locally
-                working_directory: ~/workbench/api
+                name: What is in coverage directory
+                working_directory: ~/workbench/ui
                 command: |
-                  cp -R "/tmp/workspace/api/build/jacoco/" "./build/jacoco/"
-            - run:
-                name: Generate Jacoco Coverage Report
-                working_directory: ~/workbench/api
-                command: |
-                  ./gradlew jacocoTestReport
-            - coverage-reporter/send_report:
-                coverage-reports: api/build/reports/jacoco/test/jacocoTestReport.xml
-                project-token: $CODACY_PROJECT_TOKEN
-            - store_artifacts:
-                path: ~/workbench/api/build/reports
+                  ls -la ./coverage
+
+  api-test-coverage:
+    #Jacoco runs against test results to get test coverage
+    executor: workbench-executor
+    steps:
+    - run-api-test:
+        additional_steps:
+        - attach_workspace:
+            at: /tmp/workspace
+        - run:
+            name: Create build directory
+            working_directory: ~/workbench/api
+            command: |
+              mkdir "./build";
+        - run:
+            name: Copy Jacoco exec files locally
+            working_directory: ~/workbench/api
+            command: |
+              cp -R "/tmp/workspace/api/build/jacoco/" "./build/jacoco/"
+        - run:
+            name: Generate Jacoco Coverage Report
+            working_directory: ~/workbench/api
+            command: |
+              ./gradlew jacocoTestReport
+        - coverage-reporter/send_report:
+            coverage-reports: api/build/reports/jacoco/test/jacocoTestReport.xml
+            project-token: $CODACY_PROJECT_TOKEN
+        - store_artifacts:
+            path: ~/workbench/api/build/reports
 
   api-local-test:
     # The local API server starts two Java processes (the API server and the cron emulator).
@@ -801,6 +820,9 @@ workflows:
       - api-test-coverage:
           requires:
           - api-unit-test
+      - ui-test-coverage:
+          requires:
+          - ui-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
