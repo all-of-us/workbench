@@ -121,6 +121,9 @@
   },
   "jest": {
     "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "src/terraui"
+    ],
     "coverageReporters": [
       "lcov",
       "text",
