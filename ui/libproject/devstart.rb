@@ -118,6 +118,12 @@ def deploy_tanagra_ui(cmd_name, args)
     end
   end
 
+  #Temp hack to pass the bearer token
+  #This needs to be removed at some point
+  Dir.chdir('../tanagra-aou-utils') do
+    common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
+  end
+
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
     common.run_inline("npm ci")
@@ -128,7 +134,7 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
-    common.run_inline("mkdir -p ../../tanagra-aou-utils/appengine && cp -av ./build ../../tanagra-aou-utils/appengine/")
+    common.run_inline("mkdir -p ../../appengine && cp -av ./build ../../appengine/")
   end
 
   Dir.chdir('../tanagra-aou-utils') do
