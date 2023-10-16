@@ -58,7 +58,10 @@ export const CustomFunnel = withCurrentWorkspace()(
           .filter((group) =>
             activeGroups.map((grp) => grp.id).includes(group.groupId)
           );
-        groupCounts.sort((a, b) => b.groupCount - a.groupCount);
+        // Sort group role reverse alphabetically and by count so the first element should be the 'includes' group with the highest count
+        groupCounts.sort(
+          (a, b) => b.role.localeCompare(a.role) || b.groupCount - a.groupCount
+        );
         if (groupCounts.length === 2) {
           setFunnelGroups(
             groupCounts.map(
