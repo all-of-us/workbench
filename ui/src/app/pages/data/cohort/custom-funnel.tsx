@@ -27,14 +27,20 @@ export const CustomFunnel = withCurrentWorkspace()(
     const [searchGroups, setSearchGroups] = useState<SearchGroup[]>([]);
 
     useEffect(() => {
-      if (
-        searchRequestStore
-          .getValue()
-          ?.includes?.filter((group) => group.status === 'active')?.length > 0
-      ) {
+      const activeGroups = [
+        ...searchRequestStore.getValue()?.includes,
+        ...searchRequestStore.getValue()?.excludes,
+      ]?.filter(
+        (group) =>
+          group.status === 'active' &&
+          group.items.some((item) => item.status === 'active')
+      );
+      if (activeGroups?.length > 0) {
         const groupCounts = currentGroupCountsStore
           .getValue()
-          .filter((group) => group.status === 'active');
+          .filter((group) =>
+            activeGroups.map((grp) => grp.id).includes(group.groupId)
+          );
         groupCounts.sort((a, b) => b.groupCount - a.groupCount);
         if (groupCounts.length === 2) {
           setFunnelGroups(
@@ -59,14 +65,7 @@ export const CustomFunnel = withCurrentWorkspace()(
             }))
           );
         }
-        setSearchGroups([
-          ...searchRequestStore
-            .getValue()
-            .includes.filter((group) => group.status === 'active'),
-          ...searchRequestStore
-            .getValue()
-            .excludes.filter((group) => group.status === 'active'),
-        ]);
+        setSearchGroups(activeGroups);
       }
     }, []);
 
