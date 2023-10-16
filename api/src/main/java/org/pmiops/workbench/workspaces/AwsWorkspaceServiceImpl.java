@@ -72,6 +72,8 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
+    logger.info("Getting AWS workspace with namespace: {}", workspaceNamespace);
+
     DbWorkspace dbWorkspace = workspaceDao.get(workspaceNamespace, workspaceId);
     if (dbWorkspace != null && isAws(dbWorkspace)) {
       WorkspaceDescription workspaceWithContext =
@@ -86,7 +88,8 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
           (workspaceWithContext.getGcpContext() == null)
               ? null
               : workspaceWithContext.getGcpContext().getProjectId();
-      logger.debug(
+
+      logger.info(
           "Workspace context: userFacingId {}, project id: {}",
           workspaceWithContext.getUserFacingId(),
           googleProjectId);
@@ -125,7 +128,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
       return workspaceResponse;
     }
-    // validateWorkspaceTierAccess(dbWorkspace);
+
     return null;
   }
 
@@ -136,9 +139,11 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
+    logger.info("Getting AWS workspaces");
     WorkspaceDescriptionList workspaceDescriptionList =
         wsmRetryHandler.run(
             context -> workspaceApi.get().listWorkspaces(0, 30, /*minimumHighestRole=*/ null));
+    logger.info("Got {} AWS workspaces", workspaceDescriptionList.getWorkspaces().size());
 
     return workspaceMapper
         .toApiWorkspaceResponses(
@@ -163,6 +168,8 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
   @Override
   @Transactional
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
+    logger.info("Deleting AWS workspace: {}", dbWorkspace.getFirecloudUuid());
+
     wsmRetryHandler.run(
         context ->
             workspaceApi
@@ -171,6 +178,8 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
                     new DeleteWorkspaceV2Request()
                         .jobControl(new JobControl().id(UUID.randomUUID().toString())),
                     UUID.fromString(dbWorkspace.getFirecloudUuid())));
+
+    logger.info("AWS  Workspace deleted: {}", dbWorkspace.getFirecloudUuid());
 
     workspaceDao.saveWithLastModified(
         dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
@@ -218,6 +227,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
   @Override
   public RawlsWorkspaceDetails createWorkspace(Workspace workspace) {
+    logger.info("Creating AWS workspace: {}", workspace.getNamespace());
 
     WorkspaceDescription workspaceDescription =
         wsmRetryHandler.run(
@@ -242,19 +252,17 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
               return workspaceApi.get().getWorkspace(workspaceId, null);
             });
 
-    // TODO, this should also accept the cloud context, depending on what gets passed from the
-    // caller
+    logger.info("AWS workspace created: {}", workspaceDescription.getId());
     try {
       Thread.sleep(10000);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
     if (workspaceDescription.getAwsContext() != null) {
+      logger.info("AWS context found, creating AWS bucket");
       CreatedControlledAwsS3StorageFolder awsBucket =
           createAwsBucket(workspace, workspaceDescription);
 
-      // logger.info("Workspace created, id: {}", workspaceDescription.getId());
-      // Map workspaceDescription to WorkspaceDetails
       // TODO Use MapStruct
       return getWorkspaceDetails(
           workspaceDescription, awsBucket.getAwsS3StorageFolder().getAttributes().getBucketName());
