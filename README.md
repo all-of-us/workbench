@@ -219,6 +219,8 @@ To deploy the Tanagra UI and the Workbench UI together locally:
 ```
 yarn dev-up-tanagra-local
 ```
+Optional arguments:
+* `-v` Deploy a tag (Ex: 0.0.252). Default is main
 
 ### Tanagra Deploy to test
 
