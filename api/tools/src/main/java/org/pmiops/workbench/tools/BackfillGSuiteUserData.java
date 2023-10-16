@@ -59,8 +59,8 @@ public class BackfillGSuiteUserData extends Tool {
         int skipCount = 0;
         int errorCount = 0;
 
-        // Using userDao.getUsers was very very slow on test, on PROD with ~13k it will be even more
-        // slower hence get ids and iterate on each one by one
+        // Using userDao.getUsers was very slow during testing; on PROD with ~13k records,
+        // it will be even slower. Hence, retrieve the IDs and iterate through them one by one
         List<Long> userIds = userDao.findUserIds();
         for (var userId : userIds) {
           DbUser user = userDao.findUserByUserId(userId);
