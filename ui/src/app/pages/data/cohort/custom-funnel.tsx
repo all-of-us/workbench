@@ -27,14 +27,31 @@ export const CustomFunnel = withCurrentWorkspace()(
     const [searchGroups, setSearchGroups] = useState<SearchGroup[]>([]);
 
     useEffect(() => {
+      const getActiveGroupsWithNames = (role: string) =>
+        searchRequestStore.getValue()?.[role]?.reduce((acc, group, index) => {
+          if (
+            group.status === 'active' &&
+            group.items.some((item) => item.status === 'active')
+          ) {
+            acc.push({
+              ...group,
+              name:
+                group.name ??
+                `Group ${
+                  index +
+                  1 +
+                  (role === 'excludes'
+                    ? searchRequestStore.getValue().includes.length + 1
+                    : 0)
+                }`,
+            });
+          }
+          return acc;
+        }, []);
       const activeGroups = [
-        ...searchRequestStore.getValue()?.includes,
-        ...searchRequestStore.getValue()?.excludes,
-      ]?.filter(
-        (group) =>
-          group.status === 'active' &&
-          group.items.some((item) => item.status === 'active')
-      );
+        ...getActiveGroupsWithNames('includes'),
+        ...getActiveGroupsWithNames('excludes'),
+      ];
       if (activeGroups?.length > 0) {
         const groupCounts = currentGroupCountsStore
           .getValue()
@@ -48,7 +65,9 @@ export const CustomFunnel = withCurrentWorkspace()(
               ({ groupCount, groupId, groupName, role }, index) => ({
                 loading: false,
                 count: index === 0 ? groupCount : totalCount,
-                name: groupName,
+                name:
+                  activeGroups.find((grp) => grp.id === groupId)?.name ??
+                  groupName,
                 groupId,
                 role,
               })
@@ -59,7 +78,11 @@ export const CustomFunnel = withCurrentWorkspace()(
             groupCounts.map((groupCount, index) => ({
               loading: index > 0,
               count: index === 0 ? groupCount.groupCount : null,
-              name: index === 0 ? groupCount.groupName : null,
+              name:
+                index === 0
+                  ? activeGroups.find((grp) => grp.id === groupCount.groupId)
+                      ?.name ?? groupCount.groupName
+                  : null,
               groupId: index === 0 ? groupCount.groupId : null,
               role: index === 0 ? groupCount.role : null,
             }))
@@ -68,11 +91,6 @@ export const CustomFunnel = withCurrentWorkspace()(
         setSearchGroups(activeGroups);
       }
     }, []);
-
-    const getGroupNameFromStore = (groupId: string) =>
-      currentGroupCountsStore
-        .getValue()
-        ?.find((group) => group.groupId === groupId)?.groupName;
 
     const getCounts = async () => {
       // Split search groups by those that have and have not been added to the funnelGroups array
@@ -125,9 +143,7 @@ export const CustomFunnel = withCurrentWorkspace()(
             {
               loading: false,
               count: intersectCounts[highestCountIndex],
-              name:
-                remainingGroups[highestCountIndex].name ??
-                getGroupNameFromStore(remainingGroups[highestCountIndex].id),
+              name: remainingGroups[highestCountIndex].name,
               groupId: remainingGroups[highestCountIndex].id,
             };
           return [...prevState];
@@ -138,9 +154,7 @@ export const CustomFunnel = withCurrentWorkspace()(
           prevState[prevState.length - 1] = {
             loading: false,
             count: totalCount,
-            name:
-              remainingGroups[0].name ??
-              getGroupNameFromStore(remainingGroups[0].id),
+            name: remainingGroups[0].name,
             groupId: remainingGroups[0].id,
           };
           return [...prevState];
