@@ -239,34 +239,31 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       var maybeEnrollment =
           enrollments.stream().filter(e -> e.courseId.equals(courseId)).findFirst();
 
-      if (maybeEnrollment.isEmpty()) {
-        if (accessModuleName == DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING) {
-          log.severe(
-              String.format(
-                  "User `%s` is not enrolled in RT compliance training. "
-                      + "Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
-                  dbUser.getUsername()));
-          throw new NotFoundException(
-              String.format(
-                  "User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
-        }
+      maybeEnrollment.ifPresentOrElse(
+          enrollment -> {
+            // If the course is incomplete, do not update the user access module
+            if (enrollment.completionTime != null) {
+              var updatedUserAccessModule =
+                  accessModuleService.updateCompletionTime(
+                      dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
 
-        // Users are not enrolled in CT training until they complete RT training
-        continue;
-      }
-
-      var enrollment = maybeEnrollment.get();
-
-      // The course is incomplete, do not update the user access module
-      if (enrollment.completionTime == null) {
-        continue;
-      }
-
-      var updatedUserAccessModule =
-          accessModuleService.updateCompletionTime(
-              dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
-
-      addVerificationSystem(updatedUserAccessModule, DbComplianceTrainingVerificationSystem.ABSORB);
+              addVerificationSystem(
+                  updatedUserAccessModule, DbComplianceTrainingVerificationSystem.ABSORB);
+            }
+          },
+          () -> {
+            if (accessModuleName == DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING) {
+              log.severe(
+                  String.format(
+                      "User `%s` is not enrolled in RT compliance training. "
+                          + "Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
+                      dbUser.getUsername()));
+              throw new NotFoundException(
+                  String.format(
+                      "User %s is not enrolled in Absorb course %s",
+                      dbUser.getUsername(), courseId));
+            }
+          });
     }
 
     return accessSyncService.updateUserAccessTiers(dbUser, agent);
