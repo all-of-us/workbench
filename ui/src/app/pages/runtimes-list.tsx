@@ -3,6 +3,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
+import { WarningMessage } from 'app/components/messages';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { getAccessToken } from 'app/utils/authentication';
@@ -118,6 +119,14 @@ export const RuntimesList = fp.flow(
       return (
         <>
           <style>{css}</style>
+          <WarningMessage>
+            <b>About the Cloud Environments Page</b>
+            <br />
+            Below you can see resources (cloud environments and disks) that
+            you’ve created across all workspaces in the All of Us Researcher
+            Workbench. Please note that this feature is still in development.
+            Please use the "Contact Us" link to provide feedback.
+          </WarningMessage>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
             <Environments

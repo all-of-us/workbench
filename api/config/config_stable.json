@@ -12,7 +12,7 @@
     "xAppIdValue": "stable-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.1",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.4",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-stable",
@@ -92,7 +92,6 @@
   },
   "absorb": {
     "externalDepartmentId": "Development",
-    "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": true,
     "rtTrainingCourseId": "9ad49c70-3b72-4789-8282-5794efcd4ce1",
     "ctTrainingCourseId": "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d",

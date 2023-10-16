@@ -492,7 +492,7 @@ export const SearchGroup = withCurrentWorkspace()(
         domain,
         type,
         searchTerms,
-        standard,
+        standard: standard ?? false,
         role,
         groupId,
         temporalGroup,

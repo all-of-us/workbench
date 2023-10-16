@@ -38,7 +38,7 @@ const ContactUs = (props: { profile: Profile }) => {
 
 export const IdentityHelpText = (props: {
   profile: Profile;
-  afterInitialClick: boolean;
+  afterInitialClick?: boolean;
   onClick?: Function;
 }) => {
   const { profile, afterInitialClick, onClick } = props;

@@ -33,7 +33,7 @@ const ContactUs = (props: { profile: Profile }) => {
 
 export const LoginGovHelpText = (props: {
   profile: Profile;
-  afterInitialClick: boolean;
+  afterInitialClick?: boolean;
 }) => {
   const { profile, afterInitialClick } = props;
 

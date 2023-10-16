@@ -258,7 +258,6 @@ public class WorkbenchConfig {
 
   public static class AbsorbConfig {
     public String externalDepartmentId;
-    public boolean externalDepartmentIdPopulatedForNewUsers;
     public boolean enabledForNewUsers;
     public String rtTrainingCourseId;
     public String ctTrainingCourseId;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faDna } from '@fortawesome/free-solid-svg-icons/faDna';
+import { faDna } from '@fortawesome/free-solid-svg-icons';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 

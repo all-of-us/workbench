@@ -12,6 +12,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
+import static org.pmiops.workbench.ras.RasLinkConstants.TXN_CLAIM;
 import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.auth0.jwt.JWT;
@@ -76,9 +77,12 @@ public class RasLinkServiceTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
+  private static final String TXN = "12345";
   private static final String AUTH_CODE = "code";
   private static final String REDIRECT_URL = "url";
-  private static final String ACCESS_TOKEN = "access_token_1";
+  private static final String ACCESS_TOKEN =
+      JWT.create().withClaim(TXN_CLAIM, TXN).sign(Algorithm.none());
+
   private static final String ID_ME_USERNAME = "foo@id.me";
   private static final String LOGIN_GOV_USERNAME = "foo@Login.Gov.com";
   private static final String ERA_COMMONS_USERNAME = "user2@eraCommons.com";
@@ -144,6 +148,7 @@ public class RasLinkServiceTest {
 
   @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
+  @Mock private static Provider<DbUser> mockUserProvider;
   @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
@@ -213,7 +218,8 @@ public class RasLinkServiceTest {
             accessModuleService,
             userService,
             mockIdentityVerificationService,
-            mockOidcClientProvider);
+            mockOidcClientProvider,
+            mockUserProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
     when(mockInstitutionService.getByUser(any(DbUser.class))).thenReturn(Optional.of(institution));
     when(mockInstitutionService.validateInstitutionalEmail(
@@ -224,6 +230,8 @@ public class RasLinkServiceTest {
     currentUser.setUsername("mock@mock.com");
     currentUser.setDisabled(false);
     currentUser = userDao.save(currentUser);
+
+    when(mockUserProvider.get()).thenReturn(currentUser);
     userId = currentUser.getUserId();
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);

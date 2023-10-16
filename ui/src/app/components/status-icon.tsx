@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
-import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
+import { faCircle, faLock, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import colors from 'app/styles/colors';
