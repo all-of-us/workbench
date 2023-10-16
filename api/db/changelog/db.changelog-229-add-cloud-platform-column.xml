@@ -4,9 +4,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="tarekahmed" id="db.changelog-229-add-is-aws-column">
+  <changeSet author="tarekahmed" id="db.changelog-229-add-cloud-platform-column">
     <addColumn tableName="workspace">
-      <column name="is_aws" type="boolean">
+      <column name="cloud_platform" type="ENUM('GCP','AWS', 'AZURE')">
         <constraints nullable="true"/>
       </column>
     </addColumn>

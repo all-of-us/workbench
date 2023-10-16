@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.CloudPlatform;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -276,7 +277,7 @@ public class FreeTierBillingService {
    */
   public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
     // FIXME skip for AWS workspaces
-    if (dbWorkspace.isAws()) {
+    if (!dbWorkspace.getCloudPlatform().equals(CloudPlatform.GCP)) {
       return 300;
     }
 

@@ -7,7 +7,5 @@ import { CreateAwsApp } from './create-aws-app';
 import { Button } from 'primereact/button';
 
 export const CreateSagemaker = (props: CommonCreateGkeAppProps) => (
-  
-  //<Button>Create</Button>
   <CreateAwsApp {...props} appType={AppType.SAGEMAKER} />
 );

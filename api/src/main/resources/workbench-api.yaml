@@ -6335,6 +6335,13 @@ paths:
                 $ref: '#/components/schemas/EmptyResponse'
 components:
   schemas:
+    CloudPlatform:
+      type: string
+      description: The cloud platform of the workspace
+      enum:
+        - AWS
+        - GCP
+        - AZURE
     ArchivalStatus:
       type: string
       description: CDR archival status; archived CDRs cannot be used for new workspaces.

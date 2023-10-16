@@ -4,10 +4,6 @@ import bio.terra.workspace.api.ControlledAwsResourceApi;
 import bio.terra.workspace.api.ResourceApi;
 import bio.terra.workspace.api.WorkspaceApi;
 import bio.terra.workspace.client.ApiClient;
-import bio.terra.workspace.client.ApiException;
-import com.google.auth.oauth2.GoogleCredentials;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -42,31 +38,9 @@ public class WsmConfig {
 
   @Bean(name = WSM_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient endUserApiClient(
-      HttpServletRequest request,
-      UserAuthentication userAuthentication,
-      GoogleCredentials credentials)
-      throws ApiException {
+  public ApiClient endUserApiClient(UserAuthentication userAuthentication) {
     ApiClient apiClient = newApiClient();
-    if (request.getHeader("authorization") != null) {
-      String bearerToken = request.getHeader("authorization");
-      if (StringUtils.isEmpty(bearerToken)) {
-        throw new ApiException("Unauthenticated requests are not allowed");
-      }
-      bearerToken = bearerToken.split("Bearer ")[1];
-
-      // FIXME read token from file just for now...
-      //      try {
-      //        bearerToken = Files.readString(Path.of("/tmp/bearer_token.txt"),
-      // Charset.defaultCharset());
-      //      } catch (IOException e) {
-      //        throw new RuntimeException(e);
-      //      }
-
-      apiClient.setAccessToken(bearerToken.trim());
-    } else {
-      apiClient.setAccessToken(userAuthentication.getCredentials());
-    }
+    apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 

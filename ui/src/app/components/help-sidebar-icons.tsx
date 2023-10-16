@@ -735,15 +735,15 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
         keys.push(sasConfigIconId);
       }
       keys.push('runtimeConfig', 'terminal');
+
+      if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
+        keys.push('genomicExtractions');
+      }
     }
     else {
       keys.push(sagemakerConfigIconId);
     }
 
-  }
-
-  if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
-    keys.push('genomicExtractions');
   }
 
   const icons = keys.map((iconId) =>

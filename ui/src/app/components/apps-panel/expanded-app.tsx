@@ -309,7 +309,8 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     [UIAppType.JUPYTER, () => onClickDeleteRuntime],
     [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
     [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
-    [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
+    [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)],
+    [UIAppType.SAGEMAKER, () => () => onClickDeleteGkeApp(sagemakerConfigIconId)]
   );
 
   return (

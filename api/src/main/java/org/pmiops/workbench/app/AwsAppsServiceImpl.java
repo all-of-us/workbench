@@ -18,6 +18,7 @@ import org.pmiops.workbench.wsm.WsmRetryHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.sagemaker.model.NotebookInstanceStatus;
 
 @Service("awsAppsService")
 public class AwsAppsServiceImpl implements AppsService {
@@ -58,12 +59,7 @@ public class AwsAppsServiceImpl implements AppsService {
                           new AwsSageMakerNotebookCreationParameters()
                               .instanceName("notebook-" + dbWorkspace.getName())
                               .region("us-east-1")
-                              .instanceType("ml.t2.medium")
-                          /*.defaultBucket(
-                          new AwsSagemakerNotebookDefaultBucket()
-                                  .bucketId(bucketId)
-                                  .accessScope(AwsCredentialAccessScope.WRITE_READ))*/
-                          )
+                              .instanceType("ml.t2.medium"))
                       .common(
                           createCommonFields(
                               dbWorkspace.getName() + "-sagemakernb",
@@ -85,55 +81,27 @@ public class AwsAppsServiceImpl implements AppsService {
 
   @Override
   public void deleteApp(String appName, DbWorkspace dbWorkspace, Boolean deleteDisk) {
+    Optional<ResourceDescription> notebookMaybe = getNotebookMaybe(appName, dbWorkspace);
 
-    ResourceList resourceList =
-        wsmRetryHandler.run(
-            context -> {
-              return resourceApiProvider
-                  .get()
-                  .enumerateResources(
-                      UUID.fromString(dbWorkspace.getFirecloudUuid()),
-                      0,
-                      1,
-                      ResourceType.AWS_SAGEMAKER_NOTEBOOK,
-                      StewardshipType.CONTROLLED);
-            });
-    if (resourceList.getResources().isEmpty()) {
+    if (!notebookMaybe.isPresent()) {
       return;
     }
 
-    ResourceDescription resourceDescription = resourceList.getResources().get(0);
-    final UUID resourceId = resourceDescription.getMetadata().getResourceId();
+    final UUID resourceId = notebookMaybe.get().getMetadata().getResourceId();
     wsmRetryHandler.run(
-        context -> {
-          return awsResourceApiProvider
-              .get()
-              .deleteAwsSageMakerNotebook(
-                  new DeleteControlledAwsResourceRequestBody()
-                      .jobControl(new JobControl().id(UUID.randomUUID().toString())),
-                  UUID.fromString(dbWorkspace.getFirecloudUuid()),
-                  resourceId);
-        });
+        context ->
+            awsResourceApiProvider
+                .get()
+                .deleteAwsSageMakerNotebook(
+                    new DeleteControlledAwsResourceRequestBody()
+                        .jobControl(new JobControl().id(UUID.randomUUID().toString())),
+                    UUID.fromString(dbWorkspace.getFirecloudUuid()),
+                    resourceId));
   }
 
   @Override
   public UserAppEnvironment getApp(String appName, DbWorkspace dbWorkspace) {
-    Optional<ResourceDescription> notebookMaybe =
-        wsmRetryHandler.run(
-            context -> {
-              ResourceList resourceList =
-                  resourceApiProvider
-                      .get()
-                      .enumerateResources(
-                          UUID.fromString(dbWorkspace.getFirecloudUuid()),
-                          0,
-                          10,
-                          ResourceType.AWS_SAGEMAKER_NOTEBOOK,
-                          StewardshipType.CONTROLLED);
-              return resourceList.getResources().stream()
-                  .filter(resource -> resource.getMetadata().getName().equals(appName))
-                  .findFirst();
-            });
+    Optional<ResourceDescription> notebookMaybe = getNotebookMaybe(appName, dbWorkspace);
 
     if (notebookMaybe.isPresent()) {
       ResourceDescription notebook = notebookMaybe.get();
@@ -146,6 +114,24 @@ public class AwsAppsServiceImpl implements AppsService {
     }
 
     return null;
+  }
+
+  private Optional<ResourceDescription> getNotebookMaybe(String appName, DbWorkspace dbWorkspace) {
+    return wsmRetryHandler.run(
+        context -> {
+          ResourceList resourceList =
+              resourceApiProvider
+                  .get()
+                  .enumerateResources(
+                      UUID.fromString(dbWorkspace.getFirecloudUuid()),
+                      0,
+                      10,
+                      ResourceType.AWS_SAGEMAKER_NOTEBOOK,
+                      StewardshipType.CONTROLLED);
+          return resourceList.getResources().stream()
+              .filter(resource -> resource.getMetadata().getName().equals(appName))
+              .findFirst();
+        });
   }
 
   private void setProxyURLs(
@@ -161,6 +147,13 @@ public class AwsAppsServiceImpl implements AppsService {
                   notebook.getMetadata().getResourceId(),
                   AwsCredentialAccessScope.READ_ONLY,
                   900);
+      NotebookInstanceStatus sageMakerNotebookInstanceStatus =
+          awsSagemakerService.getSageMakerNotebookInstanceStatus(
+              notebook.getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),
+              awsCredential);
+      if (!sageMakerNotebookInstanceStatus.equals(NotebookInstanceStatus.IN_SERVICE)) {
+        return;
+      }
       URL awsSageMakerProxyURL =
           awsSagemakerService.getAwsSageMakerProxyURL(
               notebook.getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),

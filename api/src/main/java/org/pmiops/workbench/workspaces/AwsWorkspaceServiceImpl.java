@@ -6,6 +6,7 @@ import bio.terra.workspace.api.WorkspaceApi;
 import bio.terra.workspace.model.*;
 import bio.terra.workspace.model.Properties;
 import bio.terra.workspace.model.ResourceType;
+import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +18,11 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CloudPlatform;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.tanagra.ApiException;
@@ -29,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AwsWorkspaceServiceImpl implements AwsWorkspaceService {
+public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCollector {
 
   private static final Logger logger = LoggerFactory.getLogger(AwsWorkspaceServiceImpl.class);
 
@@ -67,7 +73,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService {
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.get(workspaceNamespace, workspaceId);
-    if (dbWorkspace != null && dbWorkspace.isAws()) {
+    if (dbWorkspace != null && isAws(dbWorkspace)) {
       WorkspaceDescription workspaceWithContext =
           wsmRetryHandler.run(
               context ->
@@ -227,7 +233,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService {
                       .stage(WorkspaceStageModel.MC_WORKSPACE)
                       .properties(stringMapToProperties(Collections.emptyMap()))
                       .spendProfile("wm-default-spend-profile")
-                      .cloudPlatform(CloudPlatform.AWS)
+                      .cloudPlatform(bio.terra.workspace.model.CloudPlatform.AWS)
                       .jobControl(new JobControl().id(UUID.randomUUID().toString()));
 
               workspaceApi.get().createWorkspaceV2(workspaceV2Request);
@@ -343,5 +349,23 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
         || !response.getWorkspace().isPublished();
+  }
+
+  private boolean isAws(DbWorkspace workspace) {
+    return workspace.getCloudPlatform().equals(CloudPlatform.AWS);
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+    return workspaceDao.getWorkspaceCountGaugeData().stream()
+        .map(
+            row ->
+                MeasurementBundle.builder()
+                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .addTag(
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS, row.getActiveStatusEnum().toString())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, row.getTier().getShortName())
+                    .build())
+        .collect(ImmutableList.toImmutableList());
   }
 }

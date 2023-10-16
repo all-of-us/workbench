@@ -29,15 +29,18 @@ export const AppStatusIndicator = (props: {
         switch (appStatus) {
           case AppStatus.STARTING:
           case AppStatus.PROVISIONING:
+          case AppStatus.CREATING:
             return <UpdatingIcon />;
           case AppStatus.STOPPED:
             return <StoppedIcon />;
           case AppStatus.RUNNING:
+          case AppStatus.READY:
             return <RunningIcon />;
           case AppStatus.STOPPING:
           case AppStatus.DELETING:
             return <StoppingIcon />;
           case AppStatus.ERROR:
+          case AppStatus.BROKEN:
             return <ErrorIcon />;
         }
       })()}

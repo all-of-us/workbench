@@ -40,29 +40,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.RecentWorkspaceResponse;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceBillingUsageResponse;
-import org.pmiops.workbench.model.WorkspaceCreatorFreeCreditsRemainingResponse;
-import org.pmiops.workbench.model.WorkspaceOperation;
-import org.pmiops.workbench.model.WorkspaceResourceResponse;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.AwsWorkspaceService;
@@ -182,7 +160,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       RawlsWorkspaceDetails fcWorkspace = awsWorkspaceService.createWorkspace(workspace);
 
       final Workspace createdWorkspace =
-          createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, true);
+          createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, CloudPlatform.AWS);
       return ResponseEntity.ok(createdWorkspace);
     }
 
@@ -195,7 +173,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             billingProject, firecloudName, accessTier.getAuthDomainName());
 
     final Workspace createdWorkspace =
-        createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, false);
+        createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, CloudPlatform.GCP);
 
     if (cdrVersion.getTanagraEnabled()) {
       try {
@@ -219,7 +197,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       DbCdrVersion cdrVersion,
       DbUser user,
       RawlsWorkspaceDetails fcWorkspace,
-      boolean isAws) {
+      CloudPlatform cloudPlatform) {
     DbWorkspace dbWorkspace =
         createDbWorkspace(
             workspace,
@@ -230,7 +208,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             fcWorkspace.getWorkspaceId(),
             fcWorkspace.getGoogleProject());
     try {
-      dbWorkspace.setAws(isAws);
+      dbWorkspace.setCloudPlatform(cloudPlatform);
       dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace
@@ -326,7 +304,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
               if (activeByWorkspaceId.isPresent()) {
                 DbWorkspace dbWorkspace = activeByWorkspaceId.get();
-                if (dbWorkspace.isAws()) {
+                if (isAws(dbWorkspace)) {
                   return Optional.of(
                           awsWorkspaceService.getWorkspace(
                               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
@@ -354,6 +332,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             })
         .map(modelWithWorkspace -> ResponseEntity.ok().body(modelWithWorkspace))
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  private Boolean isAws(DbWorkspace workspace) {
+    return workspace.getCloudPlatform().equals(CloudPlatform.AWS);
   }
 
   private Optional<Workspace> getFirecloudWorkspaceMaybe(
@@ -525,7 +507,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    if (dbWorkspace.isAws()) {
+    if (isAws(dbWorkspace)) {
       awsWorkspaceService.deleteWorkspace(dbWorkspace);
       return ResponseEntity.ok(new EmptyResponse());
     }
@@ -954,7 +936,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.updateRecentWorkspaces(dbWorkspace);
     final WorkspaceAccessLevel workspaceAccessLevel;
 
-    if (!dbWorkspace.isAws()) {
+    if (!isAws(dbWorkspace)) {
       try {
         workspaceAccessLevel =
             workspaceAuthService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
@@ -1000,7 +982,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    if (!dbWorkspace.isAws()) { // FIXME for AWS
+    if (!isAws(dbWorkspace)) { // FIXME for AWS
       workspaceAuthService.enforceWorkspaceAccessLevel(
           workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     }

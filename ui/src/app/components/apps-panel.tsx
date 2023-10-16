@@ -81,13 +81,16 @@ export const AppsPanel = (props: {
   const { userApps } = useStore(userAppsStore);
 
   // in display order
-  const appsToDisplay = [
-    ...(!workspace.aws ? [UIAppType.JUPYTER]: []),
-    ...((config.enableRStudioGKEApp && !workspace.aws)  ? [UIAppType.RSTUDIO] : []),
-    ...((config.enableSasGKEApp && !workspace.aws) ? [UIAppType.SAS] : []),
-    ...(!workspace.aws ? [UIAppType.CROMWELL] : []),
-    ...(workspace.aws ? [UIAppType.SAGEMAKER] : []),
+  const appConfigurations = [
+    { app: UIAppType.JUPYTER, condition: !workspace.aws },
+    { app: UIAppType.RSTUDIO, condition: config.enableRStudioGKEApp && !workspace.aws },
+    { app: UIAppType.SAS, condition: config.enableSasGKEApp && !workspace.aws },
+    { app: UIAppType.CROMWELL, condition: !workspace.aws },
+    { app: UIAppType.SAGEMAKER, condition: workspace.aws },
   ];
+  
+  const appsToDisplay = appConfigurations.filter((config) => config.condition).map((config) => config.app);
+  
 
   useEffect(() => {
     maybeStartPollingForUserApps(workspace.namespace);

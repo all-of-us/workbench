@@ -27,7 +27,9 @@ public class MulticloudDiskService implements DiskService {
   public void deleteDisk(String workspaceNamespace, String diskName) {
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    diskServiceFactory.getDiskService(dbWorkspace).deleteDisk(workspaceNamespace, diskName);
+    diskServiceFactory
+        .getDiskService(dbWorkspace.getCloudPlatform())
+        .deleteDisk(workspaceNamespace, diskName);
   }
 
   @Override
@@ -35,7 +37,7 @@ public class MulticloudDiskService implements DiskService {
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     diskServiceFactory
-        .getDiskService(dbWorkspace)
+        .getDiskService(dbWorkspace.getCloudPlatform())
         .deleteDiskAsService(workspaceNamespace, diskName);
   }
 
@@ -43,21 +45,23 @@ public class MulticloudDiskService implements DiskService {
   public List<Disk> getAllDisksInWorkspaceNamespace(String workspaceNamespace) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     return diskServiceFactory
-        .getDiskService(dbWorkspace)
+        .getDiskService(dbWorkspace.getCloudPlatform())
         .getAllDisksInWorkspaceNamespace(workspaceNamespace);
   }
 
   @Override
   public Disk getDisk(String workspaceNamespace, String diskName) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    return diskServiceFactory.getDiskService(dbWorkspace).getDisk(workspaceNamespace, diskName);
+    return diskServiceFactory
+        .getDiskService(dbWorkspace.getCloudPlatform())
+        .getDisk(workspaceNamespace, diskName);
   }
 
   @Override
   public List<Disk> getOwnedDisksInWorkspace(String workspaceNamespace) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     return diskServiceFactory
-        .getDiskService(dbWorkspace)
+        .getDiskService(dbWorkspace.getCloudPlatform())
         .getOwnedDisksInWorkspace(workspaceNamespace);
   }
 
@@ -65,7 +69,7 @@ public class MulticloudDiskService implements DiskService {
   public void updateDisk(String workspaceNamespace, String diskName, Integer diskSize) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     diskServiceFactory
-        .getDiskService(dbWorkspace)
+        .getDiskService(dbWorkspace.getCloudPlatform())
         .updateDisk(workspaceNamespace, diskName, diskSize);
   }
 }

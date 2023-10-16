@@ -12,12 +12,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.CdrVersion;
-import org.pmiops.workbench.model.RecentWorkspace;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
@@ -44,6 +39,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
+  @Mapping(target = "aws", source = "dbWorkspace.cloudPlatform")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
@@ -57,6 +53,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "aws", source = "dbWorkspace.cloudPlatform")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(
@@ -161,11 +158,15 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
-  @Mapping(target = "aws", ignore = true)
+  @Mapping(target = "aws", source = "dbWorkspace.cloudPlatform")
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
+  }
+
+  default Boolean aws(CloudPlatform cloudPlatform) {
+    return CloudPlatform.AWS.equals(cloudPlatform);
   }
 }

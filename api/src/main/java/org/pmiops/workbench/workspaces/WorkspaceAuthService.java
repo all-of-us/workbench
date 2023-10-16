@@ -17,6 +17,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.CloudPlatform;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -65,7 +66,7 @@ public class WorkspaceAuthService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
       throws IllegalArgumentException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    if (workspace.isAws()) {
+    if (isAws(workspace)) {
       return WorkspaceAccessLevel.OWNER;
     }
     String userAccess =
@@ -181,5 +182,9 @@ public class WorkspaceAuthService {
         getFirecloudWorkspaceAcl(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace, userProvider.get());
+  }
+
+  private boolean isAws(DbWorkspace workspace) {
+    return workspace.getCloudPlatform().equals(CloudPlatform.AWS);
   }
 }

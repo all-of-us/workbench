@@ -6,28 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+import javax.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DisseminateResearchEnum;
-import org.pmiops.workbench.model.ResearchOutcomeEnum;
-import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.*;
 
 @Entity
 @Table(name = "workspace")
@@ -84,7 +66,7 @@ public class DbWorkspace {
   private boolean adminLocked;
   private String adminLockedReason;
 
-  private Boolean isAws;
+  private CloudPlatform cloudPlatform;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -667,13 +649,14 @@ public class DbWorkspace {
     return this;
   }
 
-  @Column(name = "is_aws")
-  public Boolean isAws() {
-    return Optional.ofNullable(isAws).orElse(false);
+  @Column(name = "cloud_platform")
+  @Enumerated(EnumType.STRING)
+  public CloudPlatform getCloudPlatform() {
+    return Optional.ofNullable(cloudPlatform).orElse(CloudPlatform.GCP);
   }
 
-  public DbWorkspace setAws(Boolean aws) {
-    isAws = aws;
+  public DbWorkspace setCloudPlatform(CloudPlatform cloudPlatform) {
+    this.cloudPlatform = cloudPlatform;
     return this;
   }
 
