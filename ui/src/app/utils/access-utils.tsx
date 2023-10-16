@@ -77,8 +77,6 @@ const redirectToTrainingAbsorb = async () => {
   url.searchParams.set('spid', absorbSamlServiceProviderId);
   url.searchParams.set('forceauthn', 'false');
   url.searchParams.set('hd', gsuiteDomain);
-  url.searchParams.set('RelayState', "https://aoudev.myabsorb.com/#/online-courses/3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d");
-  console.warn(url.toString())
   window.open(url.toString(), '_blank');
 };
 
