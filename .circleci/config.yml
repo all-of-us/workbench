@@ -400,9 +400,9 @@ jobs:
       - attach_workspace:
             at: /tmp/workspace
       - store_artifacts:
-          path: /tmp/workspace/ui/coverage
+          path: /tmp/workspace/ui/coverage/lcov-report
       - coverage-reporter/send_report:
-          coverage-reports: /tmp/workspace/ui/coverage/lcov.info
+          coverage-reports: /tmp/workspace/ui/coverage/lcov.info, /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
 
   api-test-coverage:
