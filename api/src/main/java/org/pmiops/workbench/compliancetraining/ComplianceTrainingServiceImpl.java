@@ -263,6 +263,10 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                       "User %s is not enrolled in Absorb course %s",
                       dbUser.getUsername(), courseId));
             }
+
+            // Else: The user is not enrolled in CT training.
+            // This is expected behavior. Users are not enrolled in CT training in Absorb until
+            // they complete RT training.
           });
     }
 
