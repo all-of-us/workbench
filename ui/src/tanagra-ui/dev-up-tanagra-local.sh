@@ -20,13 +20,14 @@ else
   git checkout tags/"$version"
 fi
 
+#Temp hack to pass the bearer token
+#This needs to be removed at some point
+cp -av ../apiContext.ts ./ui/src
+
 cd ../../ui
 
 #update yarn
 yarn
-
-#generate openapi
-rm -rf src/tanagra-generated && openapi-generator-cli generate -i ../tanagra-aou-utils/tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch  --additional-properties=typescriptThreePlus=true -o src/tanagra-generated
 
 #generate Tanagra
 npm install --prefix ../tanagra-aou-utils/tanagra/ui && npm run codegen --prefix ../tanagra-aou-utils/tanagra/ui
