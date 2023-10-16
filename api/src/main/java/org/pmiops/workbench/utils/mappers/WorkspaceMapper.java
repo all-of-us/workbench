@@ -158,7 +158,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
-  @Mapping(target = "aws", source = "dbWorkspace.cloudPlatform")
+  @Mapping(target = "cloudPlatform", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
