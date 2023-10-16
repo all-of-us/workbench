@@ -226,7 +226,7 @@ Optional arguments:
 
 To deploy Tanagra (api and ui) to test (run from `workbench` directory):
 ```
-deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote --quiet
+deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote
 ```
 
 ## Building a new CDR Database
