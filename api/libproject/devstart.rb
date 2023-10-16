@@ -2821,3 +2821,54 @@ Common.register_command({
     :description => "Delete a user's workspaces in AoU as well as any in Terra-Rawls which are no longer in AoU",
     :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })
+
+def backfill_gsuite_user_data(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+    '--project [project]',
+    String,
+    ->(opts, v) { opts.project = v },
+    'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+    '--dry-run [dryrun]',
+    TrueClass,
+    ->(opts, v) { opts.dry_run = v },
+    'If true, no modifications will be made')
+
+
+  op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  gradle_args = ([
+    ["--project", op.opts.project],
+    ["--dry-run", op.opts.dry_run],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  ENV.update(read_db_vars(gcc))
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew backfillGSuiteUserData -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "backfill-absorb",
+    :description => "Backfills the Absorb External Department ID field in GSuite.\n",
+    :fn => ->(*args) {backfill_gsuite_user_data("backfill_gsuite_user_data", *args)}
+})

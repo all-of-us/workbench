@@ -224,6 +224,15 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
                         .get(GSUITE_FIELD_CONTACT_EMAIL));
   }
 
+  @Override
+  public User updateUser(User user) {
+    retryHandler.run(
+        (context) ->
+            getGoogleDirectoryService().users().update(user.getPrimaryEmail(), user).execute());
+    return user;
+  }
+
+  @Override
   public void addCustomSchemaAndEmails(User user, String username, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
