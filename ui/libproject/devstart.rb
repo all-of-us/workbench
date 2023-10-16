@@ -142,7 +142,7 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-ui.yaml > ./appengine/tanagra-ui.yaml")
   end
 
-  deploy_version = "tanagra-ui-" + op.opts.version
+  deploy_version = "tanagra-" + op.opts.version
   deploy_version.gsub!(".", "-")
 
   Dir.chdir('../tanagra-aou-utils/appengine') do
