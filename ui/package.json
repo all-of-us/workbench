@@ -118,5 +118,16 @@
     "nth-check": "^2.0.1",
     "postcss": "^8.4.31",
     "semver": "^7.5.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "src/terraui"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "text",
+      "html"
+    ]
   }
 }
