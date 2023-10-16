@@ -29,13 +29,13 @@ public class BackfillGSuiteUserData extends Tool {
           .hasArg()
           .build();
 
-  private static final Option LIMIT_OPT =
+  private static final Option DRY_OPT =
       Option.builder()
           .longOpt("dry-run")
           .desc("If specified, the tool runs in dry run mode; no modifications are made")
           .hasArg()
           .build();
-  private static final Options OPTIONS = new Options().addOption(RW_PROJ_OPT).addOption(LIMIT_OPT);
+  private static final Options OPTIONS = new Options().addOption(RW_PROJ_OPT).addOption(DRY_OPT);
 
   @Bean
   public IamCredentialsClient iamCredentialsClient() throws IOException {
@@ -47,7 +47,7 @@ public class BackfillGSuiteUserData extends Tool {
     return (args) -> {
       final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
       final String rwEnvOpt = opts.getOptionValue(RW_PROJ_OPT.getLongOpt());
-      String dryRun_arg = opts.getOptionValue(LIMIT_OPT.getLongOpt());
+      String dryRun_arg = opts.getOptionValue(DRY_OPT.getLongOpt());
       boolean dry_run = false;
       if (dryRun_arg.isEmpty() || dryRun_arg.equals("true")) {
         dry_run = true;
