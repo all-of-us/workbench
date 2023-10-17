@@ -27,22 +27,50 @@ export const CustomFunnel = withCurrentWorkspace()(
     const [searchGroups, setSearchGroups] = useState<SearchGroup[]>([]);
 
     useEffect(() => {
-      if (
-        searchRequestStore
-          .getValue()
-          ?.includes?.filter((group) => group.status === 'active')?.length > 0
-      ) {
+      const getActiveGroupsWithNames = (role: string) =>
+        searchRequestStore.getValue()?.[role]?.reduce((acc, group, index) => {
+          if (
+            group.status === 'active' &&
+            group.items.some((item) => item.status === 'active')
+          ) {
+            acc.push({
+              ...group,
+              name:
+                group.name ??
+                `Group ${
+                  index +
+                  1 +
+                  (role === 'excludes'
+                    ? searchRequestStore.getValue().includes.length + 1
+                    : 0)
+                }`,
+            });
+          }
+          return acc;
+        }, []);
+      const activeGroups = [
+        ...getActiveGroupsWithNames('includes'),
+        ...getActiveGroupsWithNames('excludes'),
+      ];
+      if (activeGroups?.length > 0) {
         const groupCounts = currentGroupCountsStore
           .getValue()
-          .filter((group) => group.status === 'active');
-        groupCounts.sort((a, b) => b.groupCount - a.groupCount);
+          .filter((group) =>
+            activeGroups.map((grp) => grp.id).includes(group.groupId)
+          );
+        // Sort group role reverse alphabetically and by count so the first element should be the 'includes' group with the highest count
+        groupCounts.sort(
+          (a, b) => b.role.localeCompare(a.role) || b.groupCount - a.groupCount
+        );
         if (groupCounts.length === 2) {
           setFunnelGroups(
             groupCounts.map(
               ({ groupCount, groupId, groupName, role }, index) => ({
                 loading: false,
                 count: index === 0 ? groupCount : totalCount,
-                name: groupName,
+                name:
+                  activeGroups.find((grp) => grp.id === groupId)?.name ??
+                  groupName,
                 groupId,
                 role,
               })
@@ -53,27 +81,19 @@ export const CustomFunnel = withCurrentWorkspace()(
             groupCounts.map((groupCount, index) => ({
               loading: index > 0,
               count: index === 0 ? groupCount.groupCount : null,
-              name: index === 0 ? groupCount.groupName : null,
+              name:
+                index === 0
+                  ? activeGroups.find((grp) => grp.id === groupCount.groupId)
+                      ?.name ?? groupCount.groupName
+                  : null,
               groupId: index === 0 ? groupCount.groupId : null,
               role: index === 0 ? groupCount.role : null,
             }))
           );
         }
-        setSearchGroups([
-          ...searchRequestStore
-            .getValue()
-            .includes.filter((group) => group.status === 'active'),
-          ...searchRequestStore
-            .getValue()
-            .excludes.filter((group) => group.status === 'active'),
-        ]);
+        setSearchGroups(activeGroups);
       }
     }, []);
-
-    const getGroupNameFromStore = (groupId: string) =>
-      currentGroupCountsStore
-        .getValue()
-        ?.find((group) => group.groupId === groupId)?.groupName;
 
     const getCounts = async () => {
       // Split search groups by those that have and have not been added to the funnelGroups array
@@ -126,9 +146,7 @@ export const CustomFunnel = withCurrentWorkspace()(
             {
               loading: false,
               count: intersectCounts[highestCountIndex],
-              name:
-                remainingGroups[highestCountIndex].name ??
-                getGroupNameFromStore(remainingGroups[highestCountIndex].id),
+              name: remainingGroups[highestCountIndex].name,
               groupId: remainingGroups[highestCountIndex].id,
             };
           return [...prevState];
@@ -139,9 +157,7 @@ export const CustomFunnel = withCurrentWorkspace()(
           prevState[prevState.length - 1] = {
             loading: false,
             count: totalCount,
-            name:
-              remainingGroups[0].name ??
-              getGroupNameFromStore(remainingGroups[0].id),
+            name: remainingGroups[0].name,
             groupId: remainingGroups[0].id,
           };
           return [...prevState];
