@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.absorb.AbsorbService;
+import org.pmiops.workbench.absorb.Credentials;
 import org.pmiops.workbench.absorb.Enrollment;
 import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -66,6 +67,7 @@ public class ComplianceTrainingServiceTest {
 
   private static final String RT_ABSORB_COURSE_ID = "1234";
   private static final String CT_ABSORB_COURSE_ID = "5678";
+  private static final Credentials FAKE_CREDENTIALS = new Credentials("fake", "fake", "fake");
 
   private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -119,7 +121,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws org.pmiops.workbench.absorb.ApiException {
     user = PresetData.createDbUser();
     user.setUsername(USERNAME);
     when(userService.isServiceAccount(user)).thenReturn(false);
@@ -133,6 +135,8 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.absorb.ctTrainingCourseId = CT_ABSORB_COURSE_ID;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+
+    when(mockAbsorbService.fetchCredentials(USERNAME)).thenReturn(FAKE_CREDENTIALS);
   }
 
   @Test
@@ -358,7 +362,7 @@ public class ComplianceTrainingServiceTest {
   public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfUserHasntSignedIntoAbsorb()
       throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
-    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(false);
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(false);
 
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
@@ -619,15 +623,15 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void stubAbsorbNoCoursesComplete() throws org.pmiops.workbench.absorb.ApiException {
-    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
-    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(List.of(new Enrollment(RT_ABSORB_COURSE_ID, null)));
   }
 
   private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime)
       throws org.pmiops.workbench.absorb.ApiException {
-    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
-    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
                 new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
@@ -636,8 +640,8 @@ public class ComplianceTrainingServiceTest {
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
       throws org.pmiops.workbench.absorb.ApiException {
-    when(mockAbsorbService.userHasLoggedIntoAbsorb(USERNAME)).thenReturn(true);
-    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+    when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
+    when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
                 new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),

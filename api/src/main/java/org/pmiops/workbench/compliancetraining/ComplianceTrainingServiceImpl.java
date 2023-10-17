@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
+import org.pmiops.workbench.absorb.Credentials;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
@@ -218,7 +219,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Transactional
   public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
-    if (!absorbService.userHasLoggedIntoAbsorb(dbUser.getUsername())) {
+    Credentials credentials = absorbService.fetchCredentials(dbUser.getUsername());
+
+    if (!absorbService.userHasLoggedIntoAbsorb(credentials)) {
       return dbUser;
     }
 
@@ -229,7 +232,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
             configProvider.get().absorb.ctTrainingCourseId,
             DbAccessModule.DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
-    var enrollments = absorbService.getActiveEnrollmentsForUser(dbUser.getUsername());
+    var enrollments = absorbService.getActiveEnrollmentsForUser(credentials);
 
     for (Map.Entry<String, DbAccessModule.DbAccessModuleName> entry :
         courseToAccessModuleMap.entrySet()) {

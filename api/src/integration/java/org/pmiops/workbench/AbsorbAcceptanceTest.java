@@ -35,7 +35,10 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
   public void testUserHasLoggedIntoAbsorb_True() throws Exception {
     // Setup:
     // - The user has logged into Absorb
-    assertThat(absorbService.userHasLoggedIntoAbsorb(loggedInRTIncompleteUserEmail)).isTrue();
+    assertThat(
+            absorbService.userHasLoggedIntoAbsorb(
+                absorbService.fetchCredentials(loggedInRTIncompleteUserEmail)))
+        .isTrue();
   }
 
   @Test
@@ -43,7 +46,10 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
   public void testUserHasLoggedIntoAbsorb_False() throws Exception {
     // Setup:
     // - A user with this email does not exist, therefore they have not logged into Absorb
-    assertThat(absorbService.userHasLoggedIntoAbsorb(nonexistantUserEmail)).isFalse();
+    assertThat(
+            absorbService.userHasLoggedIntoAbsorb(
+                absorbService.fetchCredentials(nonexistantUserEmail)))
+        .isFalse();
   }
 
   @Test
@@ -52,7 +58,9 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
     // Setup:
     // - The user has logged into Absorb
     // - The user has not completed RT training
-    var enrollments = absorbService.getActiveEnrollmentsForUser(loggedInRTIncompleteUserEmail);
+    var enrollments =
+        absorbService.getActiveEnrollmentsForUser(
+            absorbService.fetchCredentials(loggedInRTIncompleteUserEmail));
     assertThat(enrollments.size()).isEqualTo(1);
 
     var rtTrainingEnrollment =
@@ -75,11 +83,14 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
     // Setup:
     // - The user has completed RT training in Absorb
     // - The user has not completed CT training in Absorb
-    var enrollments = absorbService.getActiveEnrollmentsForUser(loggedInRTCompleteUserEmail);
 
     // After completing RT training, it may take a few minutes to be auto-enrolled
     // in CT training. In that case, this line fails.
     // See https://docs.google.com/document/d/1ByiB1UVQDWHtRR2LOeNmvjEBbmqT7IRX2MVcwwRKA68
+    var enrollments =
+        absorbService.getActiveEnrollmentsForUser(
+            absorbService.fetchCredentials(loggedInRTCompleteUserEmail));
+
     assertThat(enrollments.size()).isEqualTo(2);
 
     var rtTrainingEnrollment =

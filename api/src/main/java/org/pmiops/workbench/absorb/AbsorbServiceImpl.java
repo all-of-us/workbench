@@ -20,10 +20,6 @@ import org.springframework.stereotype.Service;
 public class AbsorbServiceImpl implements AbsorbService {
   private final CloudStorageClient cloudStorageClient;
 
-  private String apiKey = null;
-  private String accessToken = null;
-  private String userId = null;
-
   @Autowired
   public AbsorbServiceImpl(CloudStorageClient cloudStorageClient) {
     this.cloudStorageClient = cloudStorageClient;
@@ -37,24 +33,21 @@ public class AbsorbServiceImpl implements AbsorbService {
   // method name is clearer to use in other services since it describes the users' actions so far
   // (domain logic) rather than relying on Absorb-specific state (implementation details).
   @Override
-  public Boolean userHasLoggedIntoAbsorb(String email) throws ApiException {
-    ensureAuthentication(email);
-
-    return this.userId != null;
+  public Boolean userHasLoggedIntoAbsorb(Credentials credentials) {
+    return credentials.userId != null;
   }
 
   @Override
-  public List<Enrollment> getActiveEnrollmentsForUser(String email) throws ApiException {
-    ensureAuthentication(email);
-
-    if (this.userId == null) {
+  public List<Enrollment> getActiveEnrollmentsForUser(Credentials credentials) throws ApiException {
+    if (credentials.userId == null) {
       throw new ApiException(404, "User not found");
     }
 
     // Fetch enrollments for the user
     var enrollmentsResponse =
         new EnrollmentsApi()
-            .enrollmentsGetUserEnrollments(apiKey, accessToken, this.userId, "isActive")
+            .enrollmentsGetUserEnrollments(
+                credentials.apiKey, credentials.accessToken, credentials.userId, "isActive")
             .getEnrollments();
 
     // Convert enrollments to our simplified and serialized model
@@ -71,14 +64,16 @@ public class AbsorbServiceImpl implements AbsorbService {
     }
   }
 
-  // Obtains and stores a valid API key, access token, and user id for the given email address.
-  // Tokens are valid for four hours, which is well under the expected lifetime of this service.
-  private void ensureAuthentication(String email) throws ApiException {
+  // Obtains a valid API key, access token, and user id for the given email address.
+  // Tokens are valid for four hours, which is well under the expected lifetime of clients of this
+  // service.
+  @Override
+  public Credentials fetchCredentials(String email) throws ApiException {
     var config = cloudStorageClient.getAbsorbCredentials();
-    apiKey = config.getString("apiKey");
+    var apiKey = config.getString("apiKey");
 
     // Obtain an access token
-    accessToken =
+    var accessToken =
         new AuthenticateApi()
             .restAuthenticationAuthenticate(
                 new AuthenticationRequest()
@@ -92,11 +87,12 @@ public class AbsorbServiceImpl implements AbsorbService {
 
     if (users.getUsers().size() > 1) {
       throw new ApiException(500, "Multiple users found");
-    } else if (users.getUsers().size() == 1) {
-      userId = users.getUsers().get(0).getId();
-    } else if (users.getUsers().size() == 0) {
-      // No user found. This indicates the user has not logged in to Absorb yet.
-      userId = null;
     }
+
+    // Size == 0 means that no user was found. This is a valid state. It indicates
+    // the user has not logged in to Absorb yet.
+    var userId = users.getUsers().size() == 1 ? users.getUsers().get(0).getId() : null;
+
+    return new Credentials(apiKey, accessToken, userId);
   }
 }
