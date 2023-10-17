@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.logging.Logger;
 import org.pmiops.workbench.absorb.api.AuthenticateApi;
 import org.pmiops.workbench.absorb.api.EnrollmentsApi;
 import org.pmiops.workbench.absorb.api.UsersApi;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AbsorbServiceImpl implements AbsorbService {
   private final CloudStorageClient cloudStorageClient;
+  private static final Logger log = Logger.getLogger(AbsorbServiceImpl.class.getName());
 
   @Autowired
   public AbsorbServiceImpl(CloudStorageClient cloudStorageClient) {
@@ -39,6 +41,9 @@ public class AbsorbServiceImpl implements AbsorbService {
 
   @Override
   public List<Enrollment> getActiveEnrollmentsForUser(Credentials credentials) throws ApiException {
+    log.info(
+        String.format("Fetching Absorb enrollments for Absorb user id `%s`", credentials.userId));
+
     if (credentials.userId == null) {
       throw new ApiException(404, "User not found");
     }
@@ -51,7 +56,13 @@ public class AbsorbServiceImpl implements AbsorbService {
             .getEnrollments();
 
     // Convert enrollments to our simplified and serialized model
-    return enrollmentsResponse.stream().map(this::convertToEnrollment).collect(toList());
+    var result = enrollmentsResponse.stream().map(this::convertToEnrollment).collect(toList());
+
+    log.info(
+        String.format(
+            "Fetched Absorb enrollments for Absorb user id `%s`: %s", credentials.userId, result));
+
+    return result;
   }
 
   private Enrollment convertToEnrollment(UserCourseEnrollmentResource e) {
@@ -69,6 +80,8 @@ public class AbsorbServiceImpl implements AbsorbService {
   // service.
   @Override
   public Credentials fetchCredentials(String email) throws ApiException {
+    log.info(String.format("Fetching Absorb credentials for workbench user `%s`", email));
+
     var config = cloudStorageClient.getAbsorbCredentials();
     var apiKey = config.getString("apiKey");
 
@@ -89,9 +102,16 @@ public class AbsorbServiceImpl implements AbsorbService {
       throw new ApiException(500, "Multiple users found");
     }
 
-    // Size == 0 means that no user was found. This is a valid state. It indicates
-    // the user has not logged in to Absorb yet.
-    var userId = users.getUsers().size() == 1 ? users.getUsers().get(0).getId() : null;
+    String userId;
+    if (users.getUsers().size() == 1) {
+      userId = users.getUsers().get(0).getId();
+      log.info(String.format("Fetched Absorb user id `%s` for workbench user `%s`", userId, email));
+    } else {
+      // Size == 0 means that no user was found. This is a valid state. It indicates
+      // the user has not logged in to Absorb yet.
+      userId = null;
+      log.info(String.format("No Absorb user found for workbench user `%s`", email));
+    }
 
     return new Credentials(apiKey, accessToken, userId);
   }
