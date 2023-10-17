@@ -10,16 +10,13 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
-import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   AutopauseMinuteThresholds,
   ComputeType,
@@ -36,15 +33,12 @@ import {
 } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { CreateButton } from './create-button';
+import { CustomizePanelFooter } from './customize-panel-footer';
 import { DataProcConfigSelector } from './dataproc-config-selector';
 import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
-import { NextUpdateButton } from './next-update-button';
-import { NextWithDiskDeleteButton } from './next-with-disk-delete-button';
 import { PresetSelector } from './preset-selector';
-import { TryAgainButton } from './try-again-button';
 
 interface Props {
   allowDataproc: boolean;
@@ -191,7 +185,7 @@ export const CustomizePanel = ({
                 options={[ComputeType.Standard, ComputeType.Dataproc]}
                 value={analysisConfig.computeType || ComputeType.Standard}
                 onChange={({ value: computeType }) =>
-                  // When the compute type changes, we need to normalize the config and potentially restore defualts.
+                  // When the compute type changes, we need to normalize the config and potentially restore defaults.
                   setAnalysisConfig(
                     withAnalysisConfigDefaults(
                       { ...analysisConfig, computeType },
@@ -308,101 +302,22 @@ export const CustomizePanel = ({
           {getWarningMessageContent()}
         </WarningMessage>
       )}
-      {unattachedPdExists ? (
-        <FlexRow
-          style={{
-            justifyContent: 'space-between',
-            marginTop: '1.125rem',
-          }}
-        >
-          <DeletePersistentDiskButton
-            onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}
-          />
-          {unattachedDiskNeedsRecreate ? (
-            <NextWithDiskDeleteButton
-              {...{ runtimeCanBeCreated, setPanelContent }}
-            />
-          ) : (
-            <CreateButton
-              {...{
-                analysisConfig,
-                requestAnalysisConfig,
-                runtimeCanBeCreated,
-                onClose,
-              }}
-            />
-          )}
-        </FlexRow>
-      ) : (
-        <FlexRow
-          style={{
-            justifyContent: 'space-between',
-            marginTop: '1.125rem',
-          }}
-        >
-          <LinkButton
-            style={{
-              ...styles.deleteLink,
-              ...(disableControls || !runtimeExists
-                ? { color: colorWithWhiteness(colors.dark, 0.4) }
-                : {}),
-            }}
-            aria-label='Delete Environment'
-            disabled={disableControls || !runtimeExists}
-            onClick={() => setPanelContent(PanelContent.DeleteRuntime)}
-          >
-            Delete Environment
-          </LinkButton>
-          {cond<React.ReactNode>(
-            [
-              runtimeExists,
-              () => (
-                <NextUpdateButton
-                  {...{
-                    runtimeCanBeUpdated,
-                    setPanelContent,
-                  }}
-                  updateYieldsUnusedDisk={
-                    existingAnalysisConfig.diskConfig.detachable &&
-                    !analysisConfig.diskConfig.detachable
-                  }
-                />
-              ),
-            ],
-            [
-              unattachedDiskNeedsRecreate,
-              () => (
-                <NextWithDiskDeleteButton
-                  {...{ runtimeCanBeCreated, setPanelContent }}
-                />
-              ),
-            ],
-            [
-              currentRuntime?.errors && currentRuntime.errors.length > 0,
-              () => (
-                <TryAgainButton
-                  {...{
-                    runtimeCanBeCreated,
-                    analysisConfig,
-                    requestAnalysisConfig,
-                    onClose,
-                  }}
-                />
-              ),
-            ],
-            () => (
-              <CreateButton
-                {...{
-                  analysisConfig,
-                  requestAnalysisConfig,
-                  runtimeCanBeCreated,
-                  onClose,
-                }}
-              />
-            )
-          )}
-        </FlexRow>
-      )}
+      <CustomizePanelFooter
+        {...{
+          analysisConfig,
+          currentRuntime,
+          disableControls,
+          existingAnalysisConfig,
+          onClose,
+          requestAnalysisConfig,
+          runtimeCanBeCreated,
+          runtimeCanBeUpdated,
+          runtimeExists,
+          setPanelContent,
+          unattachedDiskNeedsRecreate,
+          unattachedPdExists,
+        }}
+      />
     </div>
   );
 };
