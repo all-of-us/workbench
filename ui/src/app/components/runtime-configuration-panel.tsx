@@ -382,7 +382,10 @@ export const RuntimeConfigurationPanel = fp.flow(
                 {...{
                   analysisConfig,
                   creatorFreeCreditsRemaining,
+                  onClose,
                   profile,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
                   setPanelContent,
                   status,
                   workspace,
@@ -393,16 +396,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 onResume={() =>
                   setRuntimeStatusRequest(RuntimeStatusRequest.Start)
                 }
-              >
-                <CreateButton
-                  {...{
-                    analysisConfig,
-                    requestAnalysisConfig,
-                    runtimeCanBeCreated,
-                    onClose,
-                  }}
-                />
-              </CreatePanel>
+              />
             ),
           ],
           [
