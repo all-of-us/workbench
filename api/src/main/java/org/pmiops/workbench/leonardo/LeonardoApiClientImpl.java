@@ -143,7 +143,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
-      String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
+      String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables, String workspaceNamespace, String workspaceName) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     String assetsBaseUrl = config.server.apiAssetsBaseUrl + "/static";
 
@@ -161,6 +161,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userEmail)
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace)
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, workspaceName)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
@@ -231,7 +233,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           runtimesApi.createRuntime(
               runtime.getGoogleProject(),
               runtime.getRuntimeName(),
-              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
+              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables, workspaceNamespace, workspace.getName()));
           return null;
         });
   }
