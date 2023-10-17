@@ -1,11 +1,19 @@
 import * as React from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
+import Nouislider from 'nouislider-react';
 
-import { CriteriaType, Domain, Variant } from 'generated/fetch';
+import {
+  CriteriaType,
+  Domain,
+  Variant,
+  VariantFilterRequest,
+  VariantFilterResponse,
+} from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
-import { Clickable } from 'app/components/buttons';
+import { Button, Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
@@ -20,7 +28,7 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 
-const { useState } = React;
+const { useEffect, useState } = React;
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -101,7 +109,7 @@ const styles = reactStyles({
   },
 });
 
-const pageSize = 25;
+const pageSize = 100;
 const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
@@ -123,6 +131,285 @@ const searchTooltip = (
   </div>
 );
 
+const VariantFilters = ({
+  filters,
+  formState,
+  checkboxFn,
+  sliderFn,
+  sortFn,
+  clearFn,
+  submitFn,
+}: {
+  filters: VariantFilterResponse;
+  formState: VariantFilterRequest;
+  checkboxFn: Function;
+  sliderFn: Function;
+  sortFn: Function;
+  clearFn: Function;
+  submitFn: Function;
+}) => {
+  const [expanded, setExpanded] = useState([]);
+
+  const toggleExpanded = (section: string) =>
+    setExpanded((prevState) =>
+      prevState.includes(section)
+        ? prevState.filter((sec) => sec !== section)
+        : [...prevState, section]
+    );
+
+  return (
+    <div
+      style={{
+        background: 'white',
+        border: borderStyle,
+        borderRadius: '2px',
+        paddingBottom: '4rem',
+        position: 'absolute',
+        top: '100%',
+        width: '15rem',
+        zIndex: 2,
+      }}
+    >
+      <div
+        style={{
+          height: '20rem',
+          overflow: 'auto',
+          padding: '0.5rem',
+        }}
+      >
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Gene</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('geneList')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={expanded.includes('geneList') ? 'down' : 'right'}
+            />
+          </Clickable>
+          {expanded.includes('geneList') && (
+            <div>
+              {filters.geneList?.map((checkboxName, index) => (
+                <div style={{ display: 'flex' }}>
+                  <input
+                    key={index}
+                    style={{ marginRight: '0.25rem' }}
+                    type='checkbox'
+                    name={checkboxName}
+                    checked={formState.geneList.includes(checkboxName)}
+                    onChange={(e) =>
+                      checkboxFn('geneList', checkboxName, e.target.checked)
+                    }
+                  />
+                  {checkboxName}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Consequence</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('consequenceList')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={expanded.includes('consequenceList') ? 'down' : 'right'}
+            />
+          </Clickable>
+          {expanded.includes('consequenceList') && (
+            <div>
+              {filters.consequenceList?.map((checkboxName, index) => (
+                <div style={{ display: 'flex' }}>
+                  <input
+                    key={index}
+                    style={{ marginRight: '0.25rem' }}
+                    type='checkbox'
+                    name={checkboxName}
+                    checked={formState.consequenceList.includes(checkboxName)}
+                    onChange={(e) =>
+                      checkboxFn(
+                        'consequenceList',
+                        checkboxName,
+                        e.target.checked
+                      )
+                    }
+                  />
+                  {checkboxName}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>ClinVar Significance</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('clinicalSignificanceList')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={
+                expanded.includes('clinicalSignificanceList') ? 'down' : 'right'
+              }
+            />
+          </Clickable>
+          {expanded.includes('clinicalSignificanceList') && (
+            <div>
+              {filters.clinicalSignificanceList?.map((checkboxName, index) => (
+                <div style={{ display: 'flex' }}>
+                  <input
+                    key={index}
+                    style={{ marginRight: '0.25rem' }}
+                    type='checkbox'
+                    name={checkboxName}
+                    checked={formState.clinicalSignificanceList.includes(
+                      checkboxName
+                    )}
+                    onChange={(e) =>
+                      checkboxFn(
+                        'clinicalSignificanceList',
+                        checkboxName,
+                        e.target.checked
+                      )
+                    }
+                  />
+                  {checkboxName}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Allele Count</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('alleleCount')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={expanded.includes('alleleCount') ? 'down' : 'right'}
+            />
+          </Clickable>
+          {expanded.includes('alleleCount') && (
+            <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+              <Nouislider
+                style={{ marginTop: '3rem' }}
+                behaviour='drag'
+                onEnd={(value) =>
+                  sliderFn(
+                    ['countMin', 'countMax'],
+                    value.map((val) => +val)
+                  )
+                }
+                range={{ min: filters.countMin, max: filters.countMax }}
+                start={[
+                  formState.countMin ?? filters.countMin,
+                  formState.countMin ?? filters.countMax,
+                ]}
+                tooltips
+                connect
+              />
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Allele Number</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('alleleNumber')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={expanded.includes('alleleNumber') ? 'down' : 'right'}
+            />
+          </Clickable>
+          {expanded.includes('alleleNumber') && (
+            <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+              <Nouislider
+                style={{ marginTop: '3rem' }}
+                behaviour='drag'
+                onEnd={(value) =>
+                  sliderFn(
+                    ['numberMin', 'numberMax'],
+                    value.map((val) => +val)
+                  )
+                }
+                range={{ min: filters.numberMin, max: filters.numberMax }}
+                start={[
+                  formState.numberMin ?? filters.numberMin,
+                  formState.numberMax ?? filters.numberMax,
+                ]}
+                tooltips
+                connect
+              />
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Allele Frequency</span>
+          <Clickable
+            style={{ float: 'right' }}
+            onClick={() => toggleExpanded('alleleFrequency')}
+          >
+            <ClrIcon
+              shape='angle'
+              dir={expanded.includes('alleleFrequency') ? 'down' : 'right'}
+            />
+          </Clickable>
+          {expanded.includes('alleleFrequency') && (
+            <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+              <Nouislider
+                style={{ marginTop: '3rem' }}
+                behaviour='drag'
+                onEnd={(value) =>
+                  sliderFn(
+                    ['frequencyMin', 'frequencyMax'],
+                    value.map((val) => +val)
+                  )
+                }
+                range={{ min: filters.frequencyMin, max: filters.frequencyMax }}
+                start={[
+                  formState.frequencyMin ?? filters.frequencyMin,
+                  formState.frequencyMax ?? filters.frequencyMax,
+                ]}
+                tooltips
+                connect
+              />
+            </div>
+          )}
+        </div>
+        <div style={{ color: colors.primary, fontSize: '12px' }}>
+          <span style={{ fontWeight: 500 }}>Sort by</span>
+          <Dropdown
+            style={{ width: '100%' }}
+            value={formState.sortBy}
+            options={filters.sortByList.map((option) => ({
+              label: option,
+              value: option,
+            }))}
+            onChange={(e) => sortFn(e.value)}
+          />
+        </div>
+      </div>
+      <div style={{ position: 'absolute', bottom: '0.5rem' }}>
+        <Button
+          type='secondary'
+          style={{ marginLeft: '0.75rem' }}
+          onClick={() => clearFn()}
+        >
+          Clear
+        </Button>
+        <Button style={{ marginLeft: '0.75rem' }} onClick={() => submitFn()}>
+          Apply
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const VariantSearch = withCurrentWorkspace()(
   ({ select, selectedIds, workspace: { id, namespace } }) => {
     const [first, setFirst] = useState(0);
@@ -134,14 +421,45 @@ export const VariantSearch = withCurrentWorkspace()(
     const [searchResults, setSearchResults] = useState<Variant[]>([]);
     const [searchTerms, setSearchTerms] = useState('');
     const [totalCount, setTotalCount] = useState(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] =
+      useState<VariantFilterRequest>({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
+      });
+    const [variantFilters, setVariantFilters] = useState(null);
+    const [resetFilters, setResetFilters] = useState(0);
 
-    const searchVariants = async (searchString: string, firstPage?: number) => {
+    const searchVariants = async (firstPage?: number) => {
       try {
         const { items, nextPageToken, totalSize } =
           await cohortBuilderApi().findVariants(namespace, id, {
-            searchTerm: searchString,
-            pageToken: pageToken,
+            ...selectedFilters,
+            searchTerm: searchTerms.trim(),
+            pageSize,
+            pageToken: !!firstPage ? pageToken : null,
           });
+        if (!firstPage && items.length > 1) {
+          const filters = await cohortBuilderApi().findVariantFilters(
+            namespace,
+            id,
+            {
+              ...selectedFilters,
+              searchTerm: searchTerms.trim(),
+              pageSize,
+            }
+          );
+          setVariantFilters(filters);
+        }
         setPageToken(nextPageToken);
         setSearchResults((prevState) =>
           firstPage ? [...prevState, ...items] : items
@@ -155,6 +473,13 @@ export const VariantSearch = withCurrentWorkspace()(
         setLoadingMore(false);
       }
     };
+
+    useEffect(() => {
+      if (resetFilters > 0) {
+        setLoading(true);
+        searchVariants();
+      }
+    }, [resetFilters]);
 
     const handleInput = (event: any) => {
       const {
@@ -173,7 +498,7 @@ export const VariantSearch = withCurrentWorkspace()(
           } else {
             setLoading(true);
             setSearching(true);
-            searchVariants(value.trim());
+            searchVariants();
           }
         }
       }
@@ -190,13 +515,44 @@ export const VariantSearch = withCurrentWorkspace()(
         return;
       }
       setLoadingMore(true);
-      searchVariants(searchTerms, firstPage);
+      searchVariants(firstPage);
     };
 
     const clearSearch = () => {
       setSearching(false);
       setSearchTerms('');
       setSearchResults([]);
+      setSelectedFilters({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
+      });
+    };
+
+    const clearFilters = () => {
+      setSelectedFilters({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
+      });
+      setFiltersOpen(false);
+      setResetFilters((prevState) => prevState + 1);
     };
 
     const getParamId = (row: Variant) => `param${row.vid}`;
@@ -224,6 +580,31 @@ export const VariantSearch = withCurrentWorkspace()(
       );
       select(param);
     };
+
+    const handleCheckboxChange = (
+      filter: string,
+      name: string,
+      checked: boolean
+    ) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        [filter]: checked
+          ? [...prevState[filter], name]
+          : prevState[filter].filter((val) => val !== name),
+      }));
+
+    const handleSliderChange = (filters: string[], range: number[]) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        [filters[0]]: range[0],
+        [filters[1]]: range[1],
+      }));
+
+    const handleSortByChange = (value: string) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        sortBy: value,
+      }));
 
     const displayResults = searchResults?.slice(first, first + pageSize);
     return (
@@ -269,6 +650,32 @@ export const VariantSearch = withCurrentWorkspace()(
           SNP/Indel Variant search is currently a proof of concept and only
           contains data for chromosome 20
         </div>
+        {searchResults.length > 1 && variantFilters && (
+          <div style={{ position: 'relative' }}>
+            <Clickable
+              style={{ color: colors.primary }}
+              onClick={() => setFiltersOpen((prevState) => !prevState)}
+            >
+              <ClrIcon shape='filter-2' className='is-solid' size={30} />
+              Filter & Sort
+            </Clickable>
+            {filtersOpen && (
+              <VariantFilters
+                filters={variantFilters}
+                formState={selectedFilters}
+                checkboxFn={handleCheckboxChange}
+                sliderFn={handleSliderChange}
+                sortFn={handleSortByChange}
+                clearFn={() => clearFilters()}
+                submitFn={() => {
+                  setFiltersOpen(false);
+                  setLoading(true);
+                  searchVariants();
+                }}
+              />
+            )}
+          </div>
+        )}
         {loading ? (
           <SpinnerOverlay />
         ) : (
@@ -278,7 +685,7 @@ export const VariantSearch = withCurrentWorkspace()(
                 displayResults.length > 0
                   ? `${first + 1} - ${
                       first + displayResults.length
-                    } of ${totalCount}`
+                    } of ${totalCount.toLocaleString()}`
                   : ''
               }
               first={first}

@@ -6205,7 +6205,7 @@ paths:
       requestBody:
         description: request body for getting VariantListResponse.
         content:
-          application/json':
+          application/json:
             schema:
               "$ref": "#/components/schemas/VariantFilterRequest"
         required: true
