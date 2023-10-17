@@ -24,6 +24,7 @@ import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
@@ -160,7 +161,11 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                     getUploadResult(
                         snapshot,
                         DatasetConceptSetColumnValueExtractor.TABLE_NAME,
-                        ReportingSnapshot::getDatasetConceptSets)));
+                        ReportingSnapshot::getDatasetConceptSets),
+                    getUploadResult(
+                        snapshot,
+                        LeonardoAppUsageColumnValueExtractor.TABLE_NAME,
+                        ReportingSnapshot::getLeonardoAppUsage)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;

@@ -149,7 +149,8 @@
   },
   "reporting": {
     "dataset": "reporting_local",
-    "maxRowsPerInsert": 500
+    "maxRowsPerInsert": 500,
+    "exportTerraDataWarehouse": false
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
