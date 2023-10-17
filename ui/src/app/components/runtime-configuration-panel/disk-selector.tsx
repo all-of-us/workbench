@@ -3,7 +3,6 @@ import { Dropdown } from 'primereact/dropdown';
 
 import { Disk, DiskType } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
 import { StyledExternalLink } from 'app/components/buttons';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
