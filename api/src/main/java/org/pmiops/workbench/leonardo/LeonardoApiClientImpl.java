@@ -143,7 +143,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
-      String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables, String workspaceNamespace, String workspaceName) {
+      String userEmail,
+      Runtime runtime,
+      Map<String, String> customEnvironmentVariables,
+      String workspaceNamespace,
+      String workspaceName) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     String assetsBaseUrl = config.server.apiAssetsBaseUrl + "/static";
 
@@ -233,7 +237,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           runtimesApi.createRuntime(
               runtime.getGoogleProject(),
               runtime.getRuntimeName(),
-              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables, workspaceNamespace, workspace.getName()));
+              buildCreateRuntimeRequest(
+                  user.getUsername(),
+                  runtime,
+                  customEnvironmentVariables,
+                  workspaceNamespace,
+                  workspace.getName()));
           return null;
         });
   }

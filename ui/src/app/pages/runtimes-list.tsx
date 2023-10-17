@@ -36,7 +36,10 @@ const ajax = (signal) => {
     }).then((r) => r.json());
   return {
     Workspaces: {
-      list: () => workspacesApi().getWorkspaces().then(res => res.items),
+      list: () =>
+        workspacesApi()
+          .getWorkspaces()
+          .then((res) => res.items),
     },
     Runtimes: {
       listV2: () => jsonLeoFetch('/api/v2/runtimes?role=creator'),
@@ -100,7 +103,7 @@ const css =
         display: none !important
     }`;
 
-const stringToSlug = s => s.toLowerCase().replace(/\s+/g, '')
+const stringToSlug = (s) => s.toLowerCase().replace(/\s+/g, '');
 
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
@@ -134,7 +137,8 @@ export const RuntimesList = fp.flow(
             <Environments
               {...{
                 nav: {
-                  getLink: (_, { namespace, name }) => `/workspaces/${namespace}/${stringToSlug(name)}/data`,
+                  getLink: (_, { namespace, name }) =>
+                    `/workspaces/${namespace}/${stringToSlug(name)}/data`,
                 },
               }}
             />
