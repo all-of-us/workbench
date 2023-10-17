@@ -98,27 +98,12 @@ export const CustomizePanel = ({
 }: Props) => {
   const disableControls = runtimeExists && !isActionable(status);
 
-  const dataprocExists =
-    runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
-
   const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
   const unattachedDiskNeedsRecreate =
     unattachedPdExists &&
     analysisConfig.diskConfig.detachable &&
     (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
       gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
-
-  const disableDetachableReason = cond<string>(
-    [
-      analysisConfig.computeType === ComputeType.Dataproc,
-      () => 'Reattachable disks are unsupported for this compute type',
-    ],
-    () => null
-  );
-
-  const updateYieldsUnusedDisk =
-    existingAnalysisConfig.diskConfig.detachable &&
-    !analysisConfig.diskConfig.detachable;
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -243,7 +228,9 @@ export const CustomizePanel = ({
           <DataProcConfigSelector
             disabled={disableControls}
             runtimeStatus={status}
-            dataprocExists={dataprocExists}
+            dataprocExists={
+              runtimeExists && existingAnalysisConfig.dataprocConfig !== null
+            }
             onChange={(dataprocConfig: DataprocConfig) =>
               setAnalysisConfig({ ...analysisConfig, dataprocConfig })
             }
@@ -295,7 +282,6 @@ export const CustomizePanel = ({
           })
         }
         disabled={disableControls}
-        disableDetachableReason={disableDetachableReason}
         existingDisk={gcePersistentDisk}
         computeType={analysisConfig.computeType}
       />
@@ -374,9 +360,12 @@ export const CustomizePanel = ({
                 <NextUpdateButton
                   {...{
                     runtimeCanBeUpdated,
-                    updateYieldsUnusedDisk,
                     setPanelContent,
                   }}
+                  updateYieldsUnusedDisk={
+                    existingAnalysisConfig.diskConfig.detachable &&
+                    !analysisConfig.diskConfig.detachable
+                  }
                 />
               ),
             ],
