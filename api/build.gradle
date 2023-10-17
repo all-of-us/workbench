@@ -414,7 +414,7 @@ dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'io.netty:netty-common:4.1.82.Final'
-    implementation 'org.json:json:20230227'
+    implementation 'org.json:json:20231013'
 
     // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
 
