@@ -207,7 +207,7 @@ commands:
     - run:
         command: |
           if [ ! -f "<< parameters.file_name >>" ]; then
-            echo "Dependent file '<< << parameters.file_name >> >>' does not exist. Exiting job."
+            echo "Dependent file '<< parameters.file_name >>' does not exist. Exiting job."
             circleci-agent step halt
           fi
         name: "Halt job if dependant file '<< parameters.file_name >>' does not exist"
