@@ -20,25 +20,24 @@ export const PresetSelector = ({
   disabled,
   gcePersistentDisk,
 }: PresetSelectorProps) => {
+  const options = Object.values(runtimePresets)
+    .filter(
+      ({ runtimeTemplate }) => allowDataproc || !runtimeTemplate.dataprocConfig
+    )
+    .map(({ displayName, runtimeTemplate }) => ({
+      label: displayName,
+      value: runtimeTemplate,
+    }));
   return (
     <Dropdown
+      {...{ options, disabled }}
       id='runtime-presets-menu'
       appendTo='self'
-      disabled={disabled}
       style={{
         marginTop: '21px',
         color: colors.primary,
       }}
       placeholder='Recommended environments'
-      options={Object.values(runtimePresets)
-        .filter(
-          ({ runtimeTemplate }) =>
-            allowDataproc || !runtimeTemplate.dataprocConfig
-        )
-        .map(({ displayName, runtimeTemplate }) => ({
-          label: displayName,
-          value: runtimeTemplate,
-        }))}
       onChange={({ value }) => {
         setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
 
