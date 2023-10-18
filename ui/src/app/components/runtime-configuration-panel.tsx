@@ -73,9 +73,9 @@ import { DeletePersistentDiskButton } from './common-env-conf-panels/delete-pers
 import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import { EnvironmentInformedActionPanel } from './common-env-conf-panels/environment-informed-action-panel';
 import { styles } from './common-env-conf-panels/styles';
-import { CreatePanel } from './runtime-configuration/create-panel';
 import { CommonButton } from './runtime-configuration-panel/common-button';
 import { ConfirmUpdatePanel } from './runtime-configuration-panel/confirm-update-panel';
+import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { DataProcConfigSelector } from './runtime-configuration-panel/dataproc-config-selector';
 import { DiskSelector } from './runtime-configuration-panel/disk-selector';
 import { GpuConfigSelector } from './runtime-configuration-panel/gpu-config-selector';

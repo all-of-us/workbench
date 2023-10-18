@@ -16,7 +16,7 @@ import {
   RuntimeStatusRequest,
 } from 'app/utils/runtime-utils';
 
-interface Props {
+export interface CreatePanelProps {
   profile: Profile;
   setPanelContent: (panelContent: PanelContent) => void;
   workspace: Workspace;
@@ -33,7 +33,7 @@ export const CreatePanel = ({
   creatorFreeCreditsRemaining,
   status,
   setRuntimeStatus,
-}: Props) => {
+}: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
       ? runtimePresets.hailAnalysis.displayName
