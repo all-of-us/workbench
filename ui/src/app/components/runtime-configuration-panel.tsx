@@ -192,6 +192,23 @@ export const PresetSelector = ({
   );
 };
 
+interface CommonButtonProps {
+  label: string;
+  buttonText?: string;
+  onClick: () => void;
+  disabled: boolean;
+}
+const CommonButton = ({
+  label,
+  buttonText = label,
+  onClick,
+  disabled,
+}: CommonButtonProps) => (
+  <Button {...{ onClick, disabled }} aria-label={label}>
+    {buttonText}
+  </Button>
+);
+
 const PanelMain = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
@@ -496,16 +513,13 @@ const PanelMain = fp.flow(
       disabled: boolean,
       buttonText?: string
     ) => (
-      <Button
-        {...{ disabled }}
-        aria-label={label}
+      <CommonButton
+        {...{ label, buttonText, disabled }}
         onClick={() => {
           requestAnalysisConfig(analysisConfig);
           onClose();
         }}
-      >
-        {buttonText ?? label}
-      </Button>
+      />
     );
 
     const renderUpdateButton = () =>
@@ -521,28 +535,33 @@ const PanelMain = fp.flow(
     const renderTryAgainButton = () =>
       renderCreateOrUpdateButton('Try Again', !runtimeCanBeCreated);
 
-    const renderNextButton = (onClick: () => void, disabled: boolean) => (
-      <Button {...{ onClick, disabled }} aria-label='Next'>
-        Next
-      </Button>
+    const renderNextWithDiskDeleteButton = () => (
+      <CommonButton
+        label='Next'
+        onClick={() => {
+          setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
+        }}
+        disabled={!runtimeCanBeCreated}
+      />
     );
-
-    const renderNextWithDiskDeleteButton = () =>
-      renderNextButton(() => {
-        setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
-      }, !runtimeCanBeCreated);
 
     const renderNextUpdateButton = () => {
       const updateYieldsUnusedDisk =
         existingAnalysisConfig.diskConfig.detachable &&
         !analysisConfig.diskConfig.detachable;
-      return renderNextButton(() => {
-        if (updateYieldsUnusedDisk) {
-          setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-        } else {
-          setPanelContent(PanelContent.ConfirmUpdate);
-        }
-      }, !runtimeCanBeUpdated);
+      return (
+        <CommonButton
+          label='Next'
+          onClick={() => {
+            if (updateYieldsUnusedDisk) {
+              setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
+            } else {
+              setPanelContent(PanelContent.ConfirmUpdate);
+            }
+          }}
+          disabled={!runtimeCanBeUpdated}
+        />
+      );
     };
 
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
