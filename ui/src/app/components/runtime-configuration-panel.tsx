@@ -521,39 +521,28 @@ const PanelMain = fp.flow(
     const renderTryAgainButton = () =>
       renderCreateOrUpdateButton('Try Again', !runtimeCanBeCreated);
 
-    const renderNextWithDiskDeleteButton = () => {
-      return (
-        <Button
-          aria-label='Next'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
-          }}
-        >
-          Next
-        </Button>
-      );
-    };
+    const renderNextButton = (onClick: () => void, disabled: boolean) => (
+      <Button {...{ onClick, disabled }} aria-label='Next'>
+        Next
+      </Button>
+    );
 
-    const updateYieldsUnusedDisk =
-      existingAnalysisConfig.diskConfig.detachable &&
-      !analysisConfig.diskConfig.detachable;
+    const renderNextWithDiskDeleteButton = () =>
+      renderNextButton(() => {
+        setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
+      }, !runtimeCanBeCreated);
+
     const renderNextUpdateButton = () => {
-      return (
-        <Button
-          aria-label='Next'
-          disabled={!runtimeCanBeUpdated}
-          onClick={() => {
-            if (updateYieldsUnusedDisk) {
-              setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-            } else {
-              setPanelContent(PanelContent.ConfirmUpdate);
-            }
-          }}
-        >
-          Next
-        </Button>
-      );
+      const updateYieldsUnusedDisk =
+        existingAnalysisConfig.diskConfig.detachable &&
+        !analysisConfig.diskConfig.detachable;
+      return renderNextButton(() => {
+        if (updateYieldsUnusedDisk) {
+          setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
+        } else {
+          setPanelContent(PanelContent.ConfirmUpdate);
+        }
+      }, !runtimeCanBeUpdated);
     };
 
     const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
