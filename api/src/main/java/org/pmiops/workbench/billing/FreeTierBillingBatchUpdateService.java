@@ -61,7 +61,7 @@ public class FreeTierBillingBatchUpdateService {
     logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
 
     Set<DbUser> userSet =
-        userId.stream().map(id -> userDao.findUserByUserId(id)).collect(Collectors.toSet());
+        userId.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
     freeTierBillingService.checkFreeTierBillingUsageForUsers(userSet, allBQCosts);
   }
 
