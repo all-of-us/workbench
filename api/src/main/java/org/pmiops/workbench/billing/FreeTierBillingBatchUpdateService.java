@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -79,6 +81,16 @@ public class FreeTierBillingBatchUpdateService {
     }
 
     logger.info("Checking Free Tier Billing usage - finish");
+  }
+
+  public void checkAndAlertFreeTierBillingUsage(List<Long> userId) {
+    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
+
+    logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
+
+    Set<DbUser> userSet =
+        userId.stream().map(id -> userDao.findUserByUserId(id)).collect(Collectors.toSet());
+    freeTierBillingService.checkFreeTierBillingUsageForUsers(userSet, allBQCosts);
   }
 
   private Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
-import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.db.dao.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,16 +9,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final FreeTierBillingBatchUpdateService freeTierBillingService;
+  private TaskQueueService taskQueueService;
+
+  private final UserService userService;
 
   @Autowired
-  OfflineBillingController(FreeTierBillingBatchUpdateService freeTierBillingService) {
-    this.freeTierBillingService = freeTierBillingService;
+  OfflineBillingController(TaskQueueService taskQueueService, UserService userService) {
+    this.taskQueueService = taskQueueService;
+    this.userService = userService;
   }
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
-    freeTierBillingService.checkFreeTierBillingUsage();
+    taskQueueService.groupAndPushFreeTierBilling(userService.getAllUserIds());
     return ResponseEntity.noContent().build();
   }
 }

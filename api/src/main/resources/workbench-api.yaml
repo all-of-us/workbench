@@ -4289,6 +4289,27 @@ paths:
           description: Workspaces deleted
           content: {}
       x-codegen-request-body-name: request
+  /v1/cloudTask/checkAndAlertFreeTierBillingUsage:
+    post:
+      tags:
+        - cloudTaskUser
+        - cloudTask
+      description: |
+        Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
+      operationId: checkAndAlertFreeTierBillingUsage
+      security: [ ]
+      requestBody:
+        description: A batch of users needs to be checked, and alerted need to be sent regarding the excessive costs incurred in their workspaces.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserListRequest'
+        required: true
+      responses:
+        200:
+          description: Users alerted
+          content: { }
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
@@ -11331,6 +11352,15 @@ components:
         userIds:
           type: array
           description: List of users to synchronize
+          items:
+            type: integer
+            format: int64
+    UserListRequest:
+      type: object
+      properties:
+        userIds:
+          type: array
+          description: List of users return from cloud task
           items:
             type: integer
             format: int64
