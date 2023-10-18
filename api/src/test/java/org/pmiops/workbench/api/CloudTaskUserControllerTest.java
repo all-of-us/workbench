@@ -9,7 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.Optional;
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
+import org.pmiops.workbench.model.UserListRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -45,6 +48,8 @@ public class CloudTaskUserControllerTest {
 
   @Autowired private AccessModuleService mockAccessModuleService;
   @Autowired private UserService mockUserService;
+
+  @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
@@ -110,5 +115,15 @@ public class CloudTaskUserControllerTest {
     verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
 
     verifyNoMoreInteractions(mockUserService);
+  }
+
+  @Test
+  public void testCheckAndAlertFreeTierBillingUsage() {
+    long[] userIds = {1, 2, 3};
+    List userIdsList = Arrays.asList(userIds);
+    UserListRequest userListRequest = new UserListRequest();
+    userListRequest.userIds(userIdsList);
+    controller.checkAndAlertFreeTierBillingUsage(userListRequest);
+    verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdsList);
   }
 }
