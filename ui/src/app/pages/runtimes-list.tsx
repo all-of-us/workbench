@@ -140,7 +140,7 @@ export const RuntimesList = fp.flow(
                   // called from, for example:
                   // https://github.com/DataBiosphere/terra-ui/blob/4333c7b94d6ce10a6fe079361e98c2b6cc71f83a/src/pages/Environments.js#L420
                   getLink: (_, { namespace, name }) =>
-                    `/workspaces/${namespace}/${stringToSlug(name)}/data`,
+                    `/workspaces/${namespace}/${stringToSlug(name)}/analysis`,
                 },
               }}
             />
