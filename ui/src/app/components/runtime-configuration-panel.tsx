@@ -491,35 +491,35 @@ const PanelMain = fp.flow(
       ).includes(status as RuntimeStatus) &&
       runtimeCanBeCreated;
 
-    const renderUpdateButton = () => {
-      return (
-        <Button
-          aria-label='Update'
-          disabled={!runtimeCanBeUpdated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          {updateMessaging.applyAction}
-        </Button>
-      );
-    };
+    const renderCreateOrUpdateButton = (
+      label: string,
+      disabled: boolean,
+      buttonText?: string
+    ) => (
+      <Button
+        {...{ disabled }}
+        aria-label={label}
+        onClick={() => {
+          requestAnalysisConfig(analysisConfig);
+          onClose();
+        }}
+      >
+        {buttonText ?? label}
+      </Button>
+    );
 
-    const renderCreateButton = () => {
-      return (
-        <Button
-          aria-label='Create'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          Create
-        </Button>
+    const renderUpdateButton = () =>
+      renderCreateOrUpdateButton(
+        'Update',
+        !runtimeCanBeUpdated,
+        updateMessaging.applyAction
       );
-    };
+
+    const renderCreateButton = () =>
+      renderCreateOrUpdateButton('Create', !runtimeCanBeCreated);
+
+    const renderTryAgainButton = () =>
+      renderCreateOrUpdateButton('Try Again', !runtimeCanBeCreated);
 
     const renderNextWithDiskDeleteButton = () => {
       return (
@@ -531,21 +531,6 @@ const PanelMain = fp.flow(
           }}
         >
           Next
-        </Button>
-      );
-    };
-
-    const renderTryAgainButton = () => {
-      return (
-        <Button
-          aria-label='Try Again'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
-        >
-          Try Again
         </Button>
       );
     };
