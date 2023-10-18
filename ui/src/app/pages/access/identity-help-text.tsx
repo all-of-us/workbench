@@ -115,7 +115,7 @@ export const IdentityHelpText = (props: {
           <FlexRow style={{ gap: '1rem' }}>
             <img src={hhsLogo} alt='HHS logo' style={{ height: '3rem' }} />
             <div>
-              During the ID.ME verification process, you will be directed to a
+              During the ID.me verification process, you will be directed to a
               secure webpage hosted by the U.S.. Department of Health and Human
               Services external management system (<b>HHS XMS</b>). To proceed
               with data access, click on the <b>'Allow'</b> button to grant the
