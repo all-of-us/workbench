@@ -13,6 +13,9 @@ public enum LeonardoAppUsageColumnValueExtractor
     implements ColumnValueExtractor<ReportingLeonardoAppUsage> {
   APP_ID("app_id", ReportingLeonardoAppUsage::getAppId),
   APP_NAME("app_name", ReportingLeonardoAppUsage::getAppName),
+
+  APP_TYPE("app_type", ReportingLeonardoAppUsage::getAppType),
+
   STATUS("status", ReportingLeonardoAppUsage::getStatus),
   CREATOR("creator", ReportingLeonardoAppUsage::getCreator),
   START_TIME("start_time", v -> toInsertRowString(v.getStartTime())),

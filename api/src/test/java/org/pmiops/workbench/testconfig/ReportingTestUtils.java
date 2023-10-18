@@ -331,6 +331,7 @@ public class ReportingTestUtils {
         .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
         .workspaceFreeTierUsage(new ArrayList<>())
-        .newUserSatisfactionSurveys(new ArrayList<>());
+        .newUserSatisfactionSurveys(new ArrayList<>())
+        .leonardoAppUsage(new ArrayList<>());
   }
 }

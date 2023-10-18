@@ -11,6 +11,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
+import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
@@ -20,6 +21,7 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -609,11 +611,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     + "` a on a.id = au.appId where STARTS_WITH(appName, \"all-of-us-\")")
             .build();
 
+    System.out.println("~~~~~~~~~");
+    System.out.println(queryConfig.getQuery());
     List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();
     for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {
       ReportingLeonardoAppUsage res = new ReportingLeonardoAppUsage();
       FieldValues.getLong(row, "appId").ifPresent(res::setAppId);
-      FieldValues.getString(row, "appName").ifPresent(res::setAppName);
       FieldValues.getString(row, "status").ifPresent(res::setStatus);
       FieldValues.getString(row, "creator").ifPresent(res::setCreator);
       FieldValues.getDateTime(row, "createdDate").ifPresent(res::setCreatedDate);
@@ -622,6 +625,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
       FieldValues.getDateTime(row, "stopTime").ifPresent(res::setStopTime);
       FieldValues.getString(row, "customEnvironmentVariables")
           .ifPresent(res::setEnvironmentVariables);
+      Optional<String> appName = FieldValues.getString(row, "appName");
+      if (appName.isPresent()) {
+        res.setAppName(appName.get());
+        res.setAppType(appServiceNameToAppType(appName.get()).get().toString());
+      }
       queryResults.add(res);
     }
 

@@ -12386,6 +12386,9 @@ components:
         appName:
           type: string
           description: App name, e.g. all-of-us-sas-123
+        appType:
+          type: string
+          description: App type in AoU, e.g. SAS, Cromwell, RStudio, this is extracted from app_name
         createdDate:
           type: string
           description: App creation time

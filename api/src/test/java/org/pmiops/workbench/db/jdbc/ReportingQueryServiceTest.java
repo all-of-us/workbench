@@ -2,6 +2,8 @@ package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USER_CODE_OF_CONDUCT_AGREEMENT_BYPASS_TIME;
@@ -19,10 +21,20 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
+import com.google.cloud.PageImpl;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValue.Attribute;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,6 +48,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -72,6 +86,7 @@ import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
@@ -86,9 +101,13 @@ import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,6 +121,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportingQueryServiceTest {
 
   public static final int BATCH_SIZE = 2;
+
+  private static WorkbenchConfig workbenchConfig;
+
   @Autowired private ReportingQueryService reportingQueryService;
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
@@ -127,6 +149,8 @@ public class ReportingQueryServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
+  @MockBean private BigQueryService bigQueryService;
+
   @Import({
     FakeClockConfiguration.class,
     ReportingQueryServiceImpl.class,
@@ -134,7 +158,13 @@ public class ReportingQueryServiceTest {
     ReportingTestConfig.class
   })
   @TestConfiguration
-  public static class config {}
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
+  }
 
   private DbInstitution dbInstitution;
   private DbAccessTier registeredTier;
@@ -658,6 +688,91 @@ public class ReportingQueryServiceTest {
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(ids).hasSize(numNewUserSatisfactionSurveys);
+  }
+
+  @Test
+  public void testQueryLeonardoAppUsage() {
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.reporting.exportTerraDataWarehouse = true;
+    workbenchConfig.reporting.terraWarehouseLeoAppUsageTableId = "app_usage_table";
+    workbenchConfig.reporting.terraWarehouseLeoAppTableId = "app_table";
+
+    Instant now = Instant.now();
+
+    Field idField = Field.of("appId", LegacySQLTypeName.STRING);
+    FieldValue idValue = FieldValue.of(Attribute.PRIMITIVE, "123");
+
+    Field appNameField = Field.of("appName", LegacySQLTypeName.STRING);
+    FieldValue appNameValue = FieldValue.of(Attribute.PRIMITIVE, "all-of-us-123-sas-esdw");
+
+    Field statusField = Field.of("status", LegacySQLTypeName.STRING);
+    FieldValue statusValue = FieldValue.of(Attribute.PRIMITIVE, "DELETED");
+
+    Field creatorField = Field.of("creator", LegacySQLTypeName.STRING);
+    FieldValue creatorValue = FieldValue.of(Attribute.PRIMITIVE, "user@email.com");
+
+    Field customEnvironmentVariablesField =
+        Field.of("customEnvironmentVariables", LegacySQLTypeName.STRING);
+    FieldValue customEnvironmentVariablesValue = FieldValue.of(Attribute.PRIMITIVE, "env vars");
+
+    Field createdDateField = Field.of("createdDate", LegacySQLTypeName.TIMESTAMP);
+    FieldValue createdDateValue =
+        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(1).getEpochSecond()));
+
+    Field destroyedDateDateField = Field.of("destroyedDate", LegacySQLTypeName.TIMESTAMP);
+    FieldValue destroyedDateValue =
+        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(2).getEpochSecond()));
+
+    Field startTimeField = Field.of("startTime", LegacySQLTypeName.TIMESTAMP);
+    FieldValue startTimeValue =
+        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(3).getEpochSecond()));
+
+    Field stopTimeField = Field.of("stopTime", LegacySQLTypeName.TIMESTAMP);
+    FieldValue stopTimeValue =
+        FieldValue.of(Attribute.PRIMITIVE, String.valueOf(now.plusSeconds(4).getEpochSecond()));
+
+    Schema s =
+        Schema.of(
+            idField,
+            appNameField,
+            statusField,
+            creatorField,
+            customEnvironmentVariablesField,
+            createdDateField,
+            destroyedDateDateField,
+            startTimeField,
+            stopTimeField);
+
+    List<FieldValueList> tableRows =
+        List.of(
+            FieldValueList.of(
+                Arrays.asList(
+                    idValue,
+                    appNameValue,
+                    statusValue,
+                    creatorValue,
+                    customEnvironmentVariablesValue,
+                    createdDateValue,
+                    destroyedDateValue,
+                    startTimeValue,
+                    stopTimeValue)));
+
+    TableResult tableResult =
+        new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
+    when(bigQueryService.executeQuery(any(QueryJobConfiguration.class))).thenReturn(tableResult);
+    assertThat(reportingQueryService.getLeonardoAppUsage())
+        .containsExactly(
+            new ReportingLeonardoAppUsage()
+                .appId(123l)
+                .appName("all-of-us-123-sas-esdw")
+                .appType("SAS")
+                .creator("user@email.com")
+                .status("DELETED")
+                .createdDate(now.plusSeconds(1).atOffset(ZoneOffset.UTC).withNano(0))
+                .destroyedDate(now.plusSeconds(2).atOffset(ZoneOffset.UTC).withNano(0))
+                .startTime(now.plusSeconds(3).atOffset(ZoneOffset.UTC).withNano(0))
+                .stopTime(now.plusSeconds(4).atOffset(ZoneOffset.UTC).withNano(0))
+                .environmentVariables("env vars"));
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
