@@ -24,7 +24,7 @@ export const InitialCreditsPanel = (props: Props) => (
       <div style={{ marginTop: '0.6rem', fontWeight: 600 }}>
         {formatInitialCreditsUSD(props.freeTierUsage)}
       </div>
-      <div style={{ fontWeight: 600 }}>
+      <div style={{ fontWeight: 600, backgroundColor: 'black' }}>
         {formatInitialCreditsUSD(
           props.freeTierDollarQuota - (props.freeTierUsage ?? 0)
         )}
