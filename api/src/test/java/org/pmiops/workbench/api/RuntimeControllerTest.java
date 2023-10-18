@@ -365,6 +365,7 @@ public class RuntimeControllerTest {
       WorkspaceAccessLevel accessLevel) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(workspaceNamespace);
+    w.setName(firecloudName);
     w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
     w.setGoogleProject(googleProject);

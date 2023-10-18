@@ -23,6 +23,9 @@ public class LeonardoLabelHelper {
   public static final String LEONARDO_DISK_LABEL_KEYS =
       LEONARDO_LABEL_APP_TYPE + "," + LEONARDO_LABEL_IS_RUNTIME;
 
+  public static final String LEONARDO_LABEL_WORKSPACE_NAMESPACE = "saturnWorkspaceNamespace";
+  public static final String LEONARDO_LABEL_WORKSPACE_NAME = "saturnWorkspaceName";
+
   public static String appTypeToLabelValue(AppType appType) {
     return appType.toString().toLowerCase();
   }

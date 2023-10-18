@@ -19,7 +19,7 @@ const pdStatus = 5;
 const hiddenTableColumns = [
   {
     tableName: 'cloud environments',
-    columnIndexesToHide: [workspace, deleteCloudEnvironment],
+    columnIndexesToHide: [deleteCloudEnvironment],
   },
   {
     tableName: 'persistent disks',
@@ -36,7 +36,10 @@ const ajax = (signal) => {
     }).then((r) => r.json());
   return {
     Workspaces: {
-      list: () => workspacesApi().getWorkspaces(),
+      list: () =>
+        workspacesApi()
+          .getWorkspaces()
+          .then((res) => res.items),
     },
     Runtimes: {
       listV2: () => jsonLeoFetch('/api/v2/runtimes?role=creator'),
@@ -100,6 +103,8 @@ const css =
         display: none !important
     }`;
 
+const stringToSlug = (s) => s.toLowerCase().replace(/\s+/g, '');
+
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -132,7 +137,10 @@ export const RuntimesList = fp.flow(
             <Environments
               {...{
                 nav: {
-                  getLink: (_, { namespace }) => `/workspaces/${namespace}`,
+                  // called from, for example:
+                  // https://github.com/DataBiosphere/terra-ui/blob/4333c7b94d6ce10a6fe079361e98c2b6cc71f83a/src/pages/Environments.js#L420
+                  getLink: (_, { namespace, name }) =>
+                    `/workspaces/${namespace}/${stringToSlug(name)}/analysis`,
                 },
               }}
             />
