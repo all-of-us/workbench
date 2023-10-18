@@ -20,7 +20,6 @@ buildscript {
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.4'
         SPRING_FRAMEWORK_VERSION = '5.3.23'
-        SWAGGER_2_CODEGEN_VERSION = '2.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
 
@@ -104,14 +103,10 @@ configurations {
 // Shared variables for Swagger codegen. Use "ext" rather than "def" to allow
 // access globally, including from within helper functions.
 ext.SWAGGER_CODEGEN_BASE_PKG = 'org.pmiops.workbench'
-ext.SWAGGER_2_CODEGEN_DIR = "$buildDir/swagger2"
 ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
 
-// This path is the Java sources root for finding any overridden Swagger-codegen
-// templates we may be using.
-ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
 // Raw options passed to the Swagger codegen CLI.
-ext.SWAGGER_2_RAW_OPTS = [
+ext.SWAGGER_RAW_OPTS = [
         // By default, the ignore file within the output directory is used. Override
         // as we don't track the output directory in source.
         '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
@@ -198,7 +193,7 @@ swaggerSources {
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
             wipeOutputDir = false
-            rawOptions = SWAGGER_2_RAW_OPTS
+            rawOptions = SWAGGER_RAW_OPTS
             additionalProperties = [
                     'sourceFolder'   : '',
                     'modelPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.model",
@@ -278,7 +273,6 @@ sourceSets {
     generated {
         compileClasspath = configurations.generatedCompileClasspath
         java {
-            srcDir SWAGGER_2_CODEGEN_DIR
             srcDir SWAGGER_3_CODEGEN_DIR
         }
     }
@@ -368,7 +362,6 @@ project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
-    delete(SWAGGER_2_CODEGEN_DIR)
     delete(SWAGGER_3_CODEGEN_DIR)
 }
 
@@ -384,7 +377,6 @@ repositories {
 dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-    __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
     implementation 'ch.qos.logback:logback-classic:1.2.11'
