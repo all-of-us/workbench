@@ -612,7 +612,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     + "` a on a.id = au.appId where STARTS_WITH(appName, \"all-of-us-\")")
             .build();
 
-
     List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();
     for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {
       ReportingLeonardoAppUsage res = new ReportingLeonardoAppUsage();
