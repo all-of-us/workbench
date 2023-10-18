@@ -5,32 +5,17 @@ import { validate } from 'validate.js';
 
 import {
   DataprocConfig,
-  Disk,
   GpuConfig,
-  Profile,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
-  Workspace,
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
-import { Button, LinkButton } from 'app/components/buttons';
-import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/common-env-conf-panels/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/common-env-conf-panels/confirm-delete-unattached-pd';
-import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
+import { LinkButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
-import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
-import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
-import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
-import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
-import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
-import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
-import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
-import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -53,7 +38,7 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
+import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   AnalysisDiff,
@@ -81,133 +66,25 @@ import {
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
+import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';
 import { DeletePersistentDiskButton } from './common-env-conf-panels/delete-persistent-disk-button';
+import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import { EnvironmentInformedActionPanel } from './common-env-conf-panels/environment-informed-action-panel';
 import { styles } from './common-env-conf-panels/styles';
+import { CreatePanel } from './runtime-configuration/create-panel';
+import { CommonButton } from './runtime-configuration-panel/common-button';
+import { ConfirmUpdatePanel } from './runtime-configuration-panel/confirm-update-panel';
+import { DataProcConfigSelector } from './runtime-configuration-panel/dataproc-config-selector';
+import { DiskSelector } from './runtime-configuration-panel/disk-selector';
+import { GpuConfigSelector } from './runtime-configuration-panel/gpu-config-selector';
+import { MachineSelector } from './runtime-configuration-panel/machine-selector';
+import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
+import { PresetSelector } from './runtime-configuration-panel/preset-selector';
+import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 
 const { useState, useEffect, Fragment } = React;
-
-interface CreatePanelProps {
-  profile: Profile;
-  setPanelContent: (panelContent: PanelContent) => void;
-  workspace: Workspace;
-  analysisConfig: AnalysisConfig;
-  creatorFreeCreditsRemaining: number;
-  status: RuntimeStatus;
-  setRuntimeStatus: (runtimeStatusRequest: RuntimeStatusRequest) => void;
-}
-const CreatePanel = ({
-  profile,
-  setPanelContent,
-  workspace,
-  analysisConfig,
-  creatorFreeCreditsRemaining,
-  status,
-  setRuntimeStatus,
-}: CreatePanelProps) => {
-  const displayName =
-    analysisConfig.computeType === ComputeType.Dataproc
-      ? runtimePresets.hailAnalysis.displayName
-      : runtimePresets.generalAnalysis.displayName;
-
-  return (
-    <div data-test-id='runtime-create-panel' style={styles.controlSection}>
-      <EnvironmentInformedActionPanel
-        {...{
-          creatorFreeCreditsRemaining,
-          profile,
-          workspace,
-          analysisConfig,
-          status,
-        }}
-        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
-        appType={UIAppType.JUPYTER}
-      />
-      <FlexRow
-        style={{ justifyContent: 'space-between', alignItems: 'center' }}
-      >
-        <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-          Recommended Environment for {displayName}
-        </h3>
-        <Button
-          type='secondarySmall'
-          onClick={() => setPanelContent(PanelContent.Customize)}
-          aria-label='Customize'
-        >
-          Customize
-        </Button>
-      </FlexRow>
-      <RuntimeSummary analysisConfig={analysisConfig} />
-    </div>
-  );
-};
-
-interface PresetSelectorProps {
-  allowDataproc: boolean;
-  setAnalysisConfig: (analysisConfig: AnalysisConfig) => void;
-  disabled: boolean;
-  gcePersistentDisk: Disk | null | undefined;
-}
-// Select a recommended preset configuration.
-export const PresetSelector = ({
-  allowDataproc,
-  setAnalysisConfig,
-  disabled,
-  gcePersistentDisk,
-}: PresetSelectorProps) => {
-  return (
-    <Dropdown
-      id='runtime-presets-menu'
-      appendTo='self'
-      disabled={disabled}
-      style={{
-        marginTop: '21px',
-        color: colors.primary,
-      }}
-      placeholder='Recommended environments'
-      options={fp.flow(
-        fp.values,
-        fp.filter(
-          ({ runtimeTemplate }) =>
-            allowDataproc || !runtimeTemplate.dataprocConfig
-        ),
-        fp.map(({ displayName, runtimeTemplate }) => ({
-          label: displayName,
-          value: runtimeTemplate,
-        }))
-      )(runtimePresets)}
-      onChange={({ value }) => {
-        setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
-
-        // Return false to skip the normal handling of the value selection. We're
-        // abusing the dropdown here to act as if it were a menu instead.
-        // Therefore, we never want the empty "placeholder" text to change to a
-        // selected value (it should always read "recommended environments"). The presets
-        // are not persistent state, they just snap the rest of the form to a particular configuration.
-        // See RW-5996 for more details.
-        return false;
-      }}
-    />
-  );
-};
-
-interface CommonButtonProps {
-  label: string;
-  buttonText?: string;
-  onClick: () => void;
-  disabled: boolean;
-}
-const CommonButton = ({
-  label,
-  buttonText = label,
-  onClick,
-  disabled,
-}: CommonButtonProps) => (
-  <Button {...{ onClick, disabled }} aria-label={label}>
-    {buttonText}
-  </Button>
-);
 
 const PanelMain = fp.flow(
   withCdrVersions(),
