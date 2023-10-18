@@ -92,7 +92,6 @@ configurations {
     __tools__Implementation.extendsFrom implementation
     __tools__RuntimeOnly.extendsFrom runtimeOnly
 
-    __swaggerCodegenV2__
     __swaggerCodegenV3__
 
     generatedCompile {
@@ -106,10 +105,10 @@ ext.SWAGGER_CODEGEN_BASE_PKG = 'org.pmiops.workbench'
 ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
 
 // Raw options passed to the Swagger codegen CLI.
-ext.SWAGGER_RAW_OPTS = [
+ext.SWAGGER_3_RAW_OPTS = [
         // By default, the ignore file within the output directory is used. Override
         // as we don't track the output directory in source.
-        '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
 ]
 
 def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
@@ -193,7 +192,7 @@ swaggerSources {
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
             wipeOutputDir = false
-            rawOptions = SWAGGER_RAW_OPTS
+            rawOptions = SWAGGER_3_RAW_OPTS
             additionalProperties = [
                     'sourceFolder'   : '',
                     'modelPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.model",
@@ -492,7 +491,7 @@ dependencies {
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
     // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
     generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
-    generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
+    //generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
