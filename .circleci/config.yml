@@ -197,6 +197,21 @@ commands:
             fi
           name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
 
+  halt-file-check:
+    description: "Exiting job because following dependent file does not exist: << parameters.file_name >>"
+    parameters:
+      file_name:
+        type: string
+        default: ""
+    steps:
+    - run:
+        command: |
+          if [ ! -f "<< parameters.file_name >>" ]; then
+            echo "Dependent file '<< << parameters.file_name >> >>' does not exist. Exiting job."
+            circleci-agent step halt
+          fi
+        name: "Halt job if dependant file '<< parameters.file_name >>' does not exist"
+
   launch-local-api:
     description: "Launch local API server"
     steps:
@@ -399,6 +414,9 @@ jobs:
     steps:
       - attach_workspace:
             at: /tmp/workspace
+      - halt-file-check:
+          # Stop running ui-test-coverage if coverage report (lcov.info) is missing
+          file_name: "/tmp/workspace/ui/coverage/lcov.info"
       - store_artifacts:
           path: /tmp/workspace/ui/coverage/lcov-report
       - coverage-reporter/send_report:
@@ -413,6 +431,9 @@ jobs:
         additional_steps:
         - attach_workspace:
             at: /tmp/workspace
+        - halt-file-check:
+            # Stop running api-test-coverage if jacoco exec file is missing.
+            file_name: "/tmp/workspace/api/build/jacoco/test_0.exec"
         - run:
             name: Create build directory
             working_directory: ~/workbench/api
