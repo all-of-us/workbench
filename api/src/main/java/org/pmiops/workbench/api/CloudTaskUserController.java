@@ -128,7 +128,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   @Override
   public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(UserListRequest body) {
     freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(body.getUserIds());
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    return ResponseEntity.noContent().build();
   }
 
   @Override
