@@ -291,7 +291,6 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
     workspaceDetails.setNamespace(workspaceDescription.getUserFacingId());
     workspaceDetails.setCreatedBy(workspaceDescription.getCreatedBy());
     workspaceDetails.setCompletedCloneWorkspaceFileTransfer(OffsetDateTime.now());
-    // workspaceDetails.setBucketName(awsBucket.getMetadata().getName());
     return workspaceDetails;
   }
 
@@ -306,9 +305,9 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
                       new AwsS3StorageFolderCreationParameters().region("us-east-1"))
                   .common(
                       createCommonFields(
-                          workspace.getName(),
+                          workspace.getName().replaceAll("\\s", "-"),
                           workspace.getNamespace(),
-                          AccessScope.SHARED_ACCESS,
+                          AccessScope.PRIVATE_ACCESS,
                           CloningInstructionsEnum.RESOURCE));
           return awsResourceApiProvider
               .get()
