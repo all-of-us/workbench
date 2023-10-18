@@ -602,7 +602,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     }
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
-                "SELECT appId, appName, status, createdDate, destroyedDate, startTime, stopTime, creator, customEnvironmentVariables "
+                "SELECT appId, appName, status, createdDate, destroyedDate, "
+                    + "startTime, stopTime, creator, customEnvironmentVariables "
                     + "FROM `"
                     + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
                     + "` au "
