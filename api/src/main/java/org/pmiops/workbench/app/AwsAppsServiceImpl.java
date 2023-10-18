@@ -62,7 +62,7 @@ public class AwsAppsServiceImpl implements AppsService {
                               .instanceType("ml.t2.medium"))
                       .common(
                           createCommonFields(
-                              dbWorkspace.getName() + "-sagemakernb",
+                              dbWorkspace.getName().replaceAll("\\s", "-") + "-sagemakernb",
                               dbWorkspace.getWorkspaceNamespace(),
                               AccessScope.PRIVATE_ACCESS,
                               CloningInstructionsEnum.NOTHING));
