@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
 import { Disk } from 'generated/fetch';
@@ -31,18 +30,15 @@ export const PresetSelector = ({
         color: colors.primary,
       }}
       placeholder='Recommended environments'
-      options={fp.flow(
-        fp.values,
-        fp.filter(
+      options={Object.values(runtimePresets)
+        .filter(
           ({ runtimeTemplate }) =>
             allowDataproc || !runtimeTemplate.dataprocConfig
-        ),
-
-        fp.map(({ displayName, runtimeTemplate }) => ({
+        )
+        .map(({ displayName, runtimeTemplate }) => ({
           label: displayName,
           value: runtimeTemplate,
-        }))
-      )(runtimePresets)}
+        }))}
       onChange={({ value }) => {
         setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
 
