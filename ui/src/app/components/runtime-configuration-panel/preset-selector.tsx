@@ -8,20 +8,19 @@ import colors from 'app/styles/colors';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/runtime-utils';
 
-interface PresetSelectorProps {
+interface Props {
   allowDataproc: boolean;
   setAnalysisConfig: (analysisConfig: AnalysisConfig) => void;
   disabled: boolean;
   gcePersistentDisk: Disk | null | undefined;
 }
-
 // Select a recommended preset configuration.
 export const PresetSelector = ({
   allowDataproc,
   setAnalysisConfig,
   disabled,
   gcePersistentDisk,
-}: PresetSelectorProps) => {
+}: Props) => {
   return (
     <Dropdown
       id='runtime-presets-menu'
