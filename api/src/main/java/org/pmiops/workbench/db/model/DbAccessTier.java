@@ -11,7 +11,7 @@ import javax.persistence.Table;
 public class DbAccessTier {
 
   private long accessTierId; // primary opaque key for DB use only
-  private String shortName; // unique key exposed to our API
+  private String shortName; // unique key exposed to API
   private String displayName;
   private String servicePerimeter;
   private String authDomainName;
