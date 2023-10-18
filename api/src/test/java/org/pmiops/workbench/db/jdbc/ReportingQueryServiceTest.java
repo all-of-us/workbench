@@ -188,6 +188,8 @@ public class ReportingQueryServiceTest {
     eRACommonsModule = accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
     identityModule = accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get();
     duccModule = accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.reporting.maxRowsPerInsert = BATCH_SIZE;
   }
 
   @Test
@@ -692,7 +694,6 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testQueryLeonardoAppUsage() {
-    workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.exportTerraDataWarehouse = true;
     workbenchConfig.reporting.terraWarehouseLeoAppUsageTableId = "app_usage_table";
     workbenchConfig.reporting.terraWarehouseLeoAppTableId = "app_table";
