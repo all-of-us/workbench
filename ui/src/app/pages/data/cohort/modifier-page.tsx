@@ -74,15 +74,14 @@ const styles = reactStyles({
     display: 'inline-block',
   },
   count: {
-    display: 'inline-flex',
-    height: '0.9375rem',
+    height: '1rem',
+    lineHeight: '1rem',
     background: '#0079b8',
     color: '#ffffff',
     fontSize: '10px',
     padding: '0 0.25rem',
     borderRadius: '10px',
-    verticalAlign: 'middle',
-    alignItems: 'center',
+    marginTop: '0.25rem',
   },
   info: {
     color: '#0077b7',
@@ -556,12 +555,21 @@ export const ModifierPage = fp.flow(
         return opt.label;
       }
       return (
-        <div className='p-clearfix'>
-          {opt.label}
+        <div className='p-clearfix' style={{ display: 'flex', width: '100%' }}>
+          <div
+            style={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={opt.label}
+          >
+            {opt.label}
+          </div>
           &nbsp;
-          <span style={styles.count}>
+          <div style={styles.count}>
             {visitCounts[opt.value].toLocaleString()}
-          </span>
+          </div>
         </div>
       );
     };
@@ -654,6 +662,10 @@ export const ModifierPage = fp.flow(
                       onChange={(e) => selectChange(e.value, i)}
                       options={options}
                       optionValue='value'
+                      panelStyle={
+                        name === ModifierType.ENCOUNTERS && { width: '400px' }
+                      }
+                      placeholder='Any'
                       itemTemplate={(e) => optionTemplate(e, name)}
                     />
                     {operator &&
