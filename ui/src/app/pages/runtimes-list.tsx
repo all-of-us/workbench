@@ -23,7 +23,7 @@ const hiddenTableColumns = [
   },
   {
     tableName: 'persistent disks',
-    columnIndexesToHide: [workspace, pdStatus],
+    columnIndexesToHide: [pdStatus],
   },
 ];
 
@@ -51,7 +51,7 @@ const ajax = (signal) => {
     Metrics: { captureEvent: () => undefined },
     Disks: {
       disksV1: () => ({
-        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator'),
+        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'),
         disk: (googleProject, name) => ({
           delete: () =>
             jsonLeoFetch(
