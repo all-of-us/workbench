@@ -205,7 +205,7 @@ public class LeonardoApiClientTest {
   }
 
   @Test
-  public void testCreateAppSuccess_exisingPd() throws Exception {
+  public void testCreateAppSuccess_existingPd() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
     leonardoApiClient.createApp(
         createAppRequest.persistentDiskRequest(persistentDiskRequest.name("pd-name")),
@@ -220,10 +220,14 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
+    diskLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
+    diskLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_NAME);
 
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
+    appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_NAME);
     customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
     customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
     customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
