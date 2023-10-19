@@ -12,7 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
-import { LinkButton } from 'app/components/buttons';
+import { Button, LinkButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
@@ -73,7 +73,6 @@ import { DeletePersistentDiskButton } from './common-env-conf-panels/delete-pers
 import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import { EnvironmentInformedActionPanel } from './common-env-conf-panels/environment-informed-action-panel';
 import { styles } from './common-env-conf-panels/styles';
-import { CommonButton } from './runtime-configuration-panel/common-button';
 import { ConfirmUpdatePanel } from './runtime-configuration-panel/confirm-update-panel';
 import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { DataProcConfigSelector } from './runtime-configuration-panel/dataproc-config-selector';
@@ -85,6 +84,23 @@ import { PresetSelector } from './runtime-configuration-panel/preset-selector';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 
 const { useState, useEffect, Fragment } = React;
+
+interface CommonButtonProps {
+  label: string;
+  buttonText?: string;
+  onClick: () => void;
+  disabled: boolean;
+}
+const CommonButton = ({
+  label,
+  buttonText = label,
+  onClick,
+  disabled,
+}: CommonButtonProps) => (
+  <Button {...{ onClick, disabled }} aria-label={label}>
+    {buttonText}
+  </Button>
+);
 
 const PanelMain = fp.flow(
   withCdrVersions(),
