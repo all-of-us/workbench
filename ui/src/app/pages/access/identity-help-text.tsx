@@ -63,7 +63,7 @@ export const IdentityHelpText = (props: {
         <>
           <div>
             <a
-              href='https://support.researchallofus.org/hc/en-us/articles/18278298730644--Placeholder-ID-me-Article-'
+              href='https://support.researchallofus.org/hc/en-us/articles/4407442809876-Login-gov-Identification-Verification'
               target='blank'
             >
               Click here
