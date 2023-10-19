@@ -41,10 +41,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "user")
 @EntityListeners(AuditingEntityListener.class)
 public class DbUser {
-
+  public static final String USER_APP_NAME_PREFIX = "all-of-us-";
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
-  private static final String USER_APP_NAME_PREFIX = "all-of-us-";
   // The UUID for user managed resources. Currently, it is used by PD and User Apps.
   @VisibleForTesting static final int UUID_SUFFIX_SIZE = 4;
 
