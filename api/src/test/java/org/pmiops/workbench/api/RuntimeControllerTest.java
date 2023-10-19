@@ -955,6 +955,16 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testCreateRuntime_gceWithPD_noPDRequest() {
+    // don't add the required persistentDisk field
+    var gceWithPdConfig_lacksPD =
+        new Runtime().gceWithPdConfig(new GceWithPdConfig().machineType("standard"));
+    assertThrows(
+        BadRequestException.class,
+        () -> runtimeController.createRuntime(WORKSPACE_NS, gceWithPdConfig_lacksPD));
+  }
+
+  @Test
   public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
