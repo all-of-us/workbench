@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtr
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.LeonardoAppUsageColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
@@ -79,6 +81,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final InsertAllRequestPayloadTransformer<ReportingUserPartnerDiscoverySource>
       userPartnerDiscoverySourceRequestBuilder =
           UserPartnerDiscoverySourceColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingLeonardoAppUsage>
+      leonardoAppUsageInsertAllRequestBuilder = LeonardoAppUsageColumnValueExtractor::values;
 
   /**
    * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
@@ -287,6 +291,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
         workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
             getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getWorkspaceFreeTierUsage(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        leonardoAppUsageInsertAllRequestBuilder.buildBatchedRequests(
+            getTableId(LeonardoAppUsageColumnValueExtractor.TABLE_NAME),
+            reportingSnapshot.getLeonardoAppUsage(),
             fixedValues,
             batchSize));
 

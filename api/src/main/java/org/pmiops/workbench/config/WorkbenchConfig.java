@@ -383,6 +383,14 @@ public class WorkbenchConfig {
     // possible is 10000, though around 2500 may be the most Workspace rows we can load into memory
     // on the smallest App Engine machine.
     public Integer maxRowsPerInsert;
+
+    // Whether to export Tera Data Warehouse into reporting BQ. This should be enabled on dev and
+    // prod
+    public Boolean exportTerraDataWarehouse;
+    // Terra Data Warehouse leonardo_app BQ table id.
+    public String terraWarehouseLeoAppTableId;
+    // Terra Data Warehouse leonardo_app_usage BQ table id.
+    public String terraWarehouseLeoAppUsageTableId;
   }
 
   /** RAS(Researcher Auth Service) configurations. */

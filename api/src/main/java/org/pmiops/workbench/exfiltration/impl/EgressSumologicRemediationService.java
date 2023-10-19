@@ -1,7 +1,7 @@
 package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
-import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gkeServiceNameToAppType;
+import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -110,8 +110,8 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   private boolean isCromwellApp(DbEgressEvent event) {
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     return StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())
-        && gkeServiceNameToAppType(originalEvent.getSrcGkeServiceName()).isPresent()
-        && gkeServiceNameToAppType(originalEvent.getSrcGkeServiceName())
+        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).isPresent()
+        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName())
             .get()
             .equals(AppType.CROMWELL);
   }

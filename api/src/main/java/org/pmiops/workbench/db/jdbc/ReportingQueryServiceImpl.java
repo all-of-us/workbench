@@ -11,16 +11,23 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
+import static org.pmiops.workbench.db.model.DbUser.USER_APP_NAME_PREFIX;
+import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
@@ -32,6 +39,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
@@ -39,6 +47,7 @@ import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -47,11 +56,15 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   private static final long MAX_ROWS_PER_INSERT_ALL_REQUEST = 10_000;
   private final JdbcTemplate jdbcTemplate;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final BigQueryService bigQueryService;
 
   public ReportingQueryServiceImpl(
-      JdbcTemplate jdbcTemplate, Provider<WorkbenchConfig> workbenchConfigProvider) {
+      JdbcTemplate jdbcTemplate,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      BigQueryService bigQueryService) {
     this.jdbcTemplate = jdbcTemplate;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.bigQueryService = bigQueryService;
   }
 
   public long getQueryBatchSize() {
@@ -582,6 +595,48 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         Integer.class);
   }
 
+  @Override
+  public List<ReportingLeonardoAppUsage> getLeonardoAppUsage() {
+    if (!workbenchConfigProvider.get().reporting.exportTerraDataWarehouse) {
+      // Skip querying data if not enabled, and just return empty list instead.
+      return new ArrayList<>();
+    }
+    final QueryJobConfiguration queryConfig =
+        QueryJobConfiguration.newBuilder(
+                "SELECT appId, appName, status, createdDate, destroyedDate, "
+                    + "startTime, stopTime, creator, customEnvironmentVariables "
+                    + "FROM `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                    + "` au "
+                    + "JOIN `"
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
+                    + "` a on a.id = au.appId where STARTS_WITH(appName, \""
+                    + USER_APP_NAME_PREFIX
+                    + "\")")
+            .build();
+
+    List<ReportingLeonardoAppUsage> queryResults = new ArrayList<>();
+    for (FieldValueList row : bigQueryService.executeQuery(queryConfig).getValues()) {
+      ReportingLeonardoAppUsage res = new ReportingLeonardoAppUsage();
+      FieldValues.getLong(row, "appId").ifPresent(res::setAppId);
+      FieldValues.getString(row, "status").ifPresent(res::setStatus);
+      FieldValues.getString(row, "creator").ifPresent(res::setCreator);
+      FieldValues.getDateTime(row, "createdDate").ifPresent(res::setCreatedDate);
+      FieldValues.getDateTime(row, "destroyedDate").ifPresent(res::setDestroyedDate);
+      FieldValues.getDateTime(row, "startTime").ifPresent(res::setStartTime);
+      FieldValues.getDateTime(row, "stopTime").ifPresent(res::setStopTime);
+      FieldValues.getString(row, "customEnvironmentVariables")
+          .ifPresent(res::setEnvironmentVariables);
+      Optional<String> appName = FieldValues.getString(row, "appName");
+      if (appName.isPresent()) {
+        res.setAppName(appName.get());
+        res.setAppType(appServiceNameToAppType(appName.get()).get().toString());
+      }
+      queryResults.add(res);
+    }
+
+    return queryResults;
+  }
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {
