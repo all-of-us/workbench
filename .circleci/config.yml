@@ -399,6 +399,9 @@ jobs:
     steps:
       - attach_workspace:
             at: /tmp/workspace
+      - checkout-code
+      - halt-test-check:
+          dir_names: "ui"
       - store_artifacts:
           path: /tmp/workspace/ui/coverage/lcov-report
       - coverage-reporter/send_report:
