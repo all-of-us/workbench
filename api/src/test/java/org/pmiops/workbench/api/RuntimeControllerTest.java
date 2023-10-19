@@ -955,6 +955,43 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testCreateRuntime_gceWithPD_noPDRequest() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS, new Runtime().gceWithPdConfig(new GceWithPdConfig().machineType("standard")));
+
+    Map<String, String> diskLabels = new HashMap<>();
+    diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+    diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
+    diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_NAME);
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+
+    assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk()).isNull();
+  }
+
+  @Test
   public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
