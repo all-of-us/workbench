@@ -4299,7 +4299,7 @@ paths:
       operationId: checkAndAlertFreeTierBillingUsage
       security: [ ]
       requestBody:
-        description: A batch of users needs to be checked, and alerted need to be sent regarding the excessive costs incurred in their workspaces.
+        description: A batch of users needs to be checked, and alerts need to be sent regarding the excessive costs incurred in their workspaces.
         content:
           application/json:
             schema:

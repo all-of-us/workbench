@@ -9,9 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
