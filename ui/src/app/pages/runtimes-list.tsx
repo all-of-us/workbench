@@ -40,7 +40,9 @@ const ajax = (signal) => {
     },
     Apps: {
       listWithoutProject: () =>
-        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'),
+        jsonLeoFetch(
+          '/api/google/v1/apps?role=creator&includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+        ),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {

@@ -538,27 +538,26 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
             .put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, dbWorkspace.getWorkspaceNamespace())
+            .put(
+                LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
+                dbWorkspace.getWorkspaceNamespace())
             .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName())
             .build();
 
     var pdLabels = persistentDiskRequest.getLabels();
-    pdLabels = upsertLeonardoLabel(
-        pdLabels,
-        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
-        appTypeToLabelValue(appType));
-    pdLabels = upsertLeonardoLabel(
-        pdLabels,
-        LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
-        dbWorkspace.getWorkspaceNamespace());
-    pdLabels = upsertLeonardoLabel(
-        pdLabels,
-        LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME,
-        dbWorkspace.getName());
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels,
+            LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
+            dbWorkspace.getWorkspaceNamespace());
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
     LeonardoPersistentDiskRequest diskRequest =
-        leonardoMapper
-            .toLeonardoPersistentDiskRequest(persistentDiskRequest)
-            .labels(pdLabels);
+        leonardoMapper.toLeonardoPersistentDiskRequest(persistentDiskRequest).labels(pdLabels);
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
       // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
