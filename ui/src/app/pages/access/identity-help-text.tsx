@@ -85,7 +85,7 @@ export const IdentityHelpText = (props: {
                   style={{ height: '16px' }}
                 />
                 <div>
-                  For <b>U.S. residents only</b>
+                  For <b>U.S. residents and U.S. citizens</b>
                 </div>
                 <a
                   href='https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/'
@@ -101,7 +101,7 @@ export const IdentityHelpText = (props: {
                   style={{ height: '16px' }}
                 />
                 <div>
-                  For <b>U.S. residents and international users</b>
+                  For <b>all users</b>
                 </div>
                 <a
                   href='https://help.id.me/hc/en-us/articles/4415460350871-Documents-to-verify-your-identity'
