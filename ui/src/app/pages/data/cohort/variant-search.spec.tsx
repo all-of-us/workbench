@@ -2,10 +2,10 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
 
-import {CohortBuilderApi} from 'generated/fetch';
+import { CohortBuilderApi } from 'generated/fetch';
 
 import { VariantSearch } from 'app/pages/data/cohort/variant-search';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
@@ -17,7 +17,6 @@ describe('VariantSearch', () => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
   const component = () => {
-
     return mount(
       <MemoryRouter>
         <VariantSearch select={() => {}} selectedIds={[]} />
