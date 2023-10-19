@@ -519,7 +519,6 @@ export const CriteriaSearch = fp.flow(
             {!this.initTree &&
             cohortContext.domain === Domain.SNP_INDEL_VARIANT ? (
               <VariantSearch
-                searchTerms={conceptSearchTerms}
                 select={this.addSelection}
                 selectedIds={this.getListSearchSelectedIds()}
               />
