@@ -12,7 +12,6 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
 // Indexes of hidden columns
-const workspace = 2;
 const deleteCloudEnvironment = 11;
 const pdStatus = 5;
 
@@ -23,7 +22,7 @@ const hiddenTableColumns = [
   },
   {
     tableName: 'persistent disks',
-    columnIndexesToHide: [workspace, pdStatus],
+    columnIndexesToHide: [pdStatus],
   },
 ];
 
@@ -51,7 +50,10 @@ const ajax = (signal) => {
     Metrics: { captureEvent: () => undefined },
     Disks: {
       disksV1: () => ({
-        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator'),
+        list: () =>
+          jsonLeoFetch(
+            '/api/google/v1/disks?role=creator&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+          ),
         disk: (googleProject, name) => ({
           delete: () =>
             jsonLeoFetch(

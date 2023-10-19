@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
@@ -188,11 +190,12 @@ public class RuntimeController implements RuntimeApiDelegate {
         }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }
-      persistentDiskRequest.labels(
-          upsertLeonardoLabel(
-              persistentDiskRequest.getLabels(),
-              LEONARDO_LABEL_IS_RUNTIME,
-              LEONARDO_LABEL_IS_RUNTIME_TRUE));
+      var labels = persistentDiskRequest.getLabels();
+      labels =
+          upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
+      persistentDiskRequest.labels(labels);
     }
     long configCount =
         Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
