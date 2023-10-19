@@ -609,7 +609,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
                     + "` au "
                     + "JOIN `"
-                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppUsageTableId
+                    + workbenchConfigProvider.get().reporting.terraWarehouseLeoAppTableId
                     + "` a on a.id = au.appId where STARTS_WITH(appName, \""
                     + USER_APP_NAME_PREFIX
                     + "\")")
