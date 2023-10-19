@@ -9,11 +9,12 @@ import {
   MIN_DISK_SIZE_GB,
 } from './machines';
 
+interface RuntimePreset {
+  displayName: string;
+  runtimeTemplate: Runtime;
+}
 export const runtimePresets: {
-  [runtimePresetName: string]: {
-    displayName: string;
-    runtimeTemplate: Runtime;
-  };
+  [runtimePresetName: string]: RuntimePreset;
 } = {
   generalAnalysis: {
     displayName: 'General Analysis',
