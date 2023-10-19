@@ -63,7 +63,7 @@ export const IdentityHelpText = (props: {
         <>
           <div>
             <a
-              href='https://support.researchallofus.org/hc/en-us/articles/18278298730644--Placeholder-ID-me-Article-'
+              href='https://support.researchallofus.org/hc/en-us/articles/4407442809876-Login-gov-Identification-Verification'
               target='blank'
             >
               Click here
@@ -85,7 +85,7 @@ export const IdentityHelpText = (props: {
                   style={{ height: '16px' }}
                 />
                 <div>
-                  For <b>U.S. residents only</b>
+                  For <b>U.S. residents and U.S. citizens</b>
                 </div>
                 <a
                   href='https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/'
@@ -101,7 +101,7 @@ export const IdentityHelpText = (props: {
                   style={{ height: '16px' }}
                 />
                 <div>
-                  For <b>U.S. residents and international users</b>
+                  For <b>all users</b>
                 </div>
                 <a
                   href='https://help.id.me/hc/en-us/articles/4415460350871-Documents-to-verify-your-identity'
@@ -115,7 +115,7 @@ export const IdentityHelpText = (props: {
           <FlexRow style={{ gap: '1rem' }}>
             <img src={hhsLogo} alt='HHS logo' style={{ height: '3rem' }} />
             <div>
-              During the ID.ME verification process, you will be directed to a
+              During the ID.me verification process, you will be directed to a
               secure webpage hosted by the U.S.. Department of Health and Human
               Services external management system (<b>HHS XMS</b>). To proceed
               with data access, click on the <b>'Allow'</b> button to grant the

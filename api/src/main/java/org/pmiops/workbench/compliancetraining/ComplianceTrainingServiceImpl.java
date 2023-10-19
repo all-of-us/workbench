@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
+import org.pmiops.workbench.absorb.Credentials;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
@@ -80,6 +81,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException {
     DbUser user = userProvider.get();
 
+    log.info(String.format("Syncing compliance training status for user %s", user.getUsername()));
+
     // Skip sync for service account user rows.
     if (userService.isServiceAccount(user)) {
       return user;
@@ -125,6 +128,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   @Transactional
   public DbUser syncComplianceTrainingStatusMoodle(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    log.info("Using Moodle to sync compliance training status.");
+
     try {
       Map<MoodleService.BadgeName, BadgeDetailsV2> userBadgesByName =
           moodleService.getUserBadgesByBadgeName(dbUser.getUsername());
@@ -218,7 +223,11 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Transactional
   public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
-    if (!absorbService.userHasLoggedIntoAbsorb(dbUser.getUsername())) {
+    log.info("Using Absorb to sync compliance training status.");
+
+    Credentials credentials = absorbService.fetchCredentials(dbUser.getUsername());
+
+    if (!absorbService.userHasLoggedIntoAbsorb(credentials)) {
       return dbUser;
     }
 
@@ -229,7 +238,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
             configProvider.get().absorb.ctTrainingCourseId,
             DbAccessModule.DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
-    var enrollments = absorbService.getActiveEnrollmentsForUser(dbUser.getUsername());
+    var enrollments = absorbService.getActiveEnrollmentsForUser(credentials);
 
     for (Map.Entry<String, DbAccessModule.DbAccessModuleName> entry :
         courseToAccessModuleMap.entrySet()) {
@@ -239,27 +248,35 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       var maybeEnrollment =
           enrollments.stream().filter(e -> e.courseId.equals(courseId)).findFirst();
 
-      if (maybeEnrollment.isEmpty()) {
-        log.severe(
-            String.format(
-                "User `%s` is not enrolled in Absorb course `%s` for access module `%s`. Users are expected to be automatically enrolled in all courses upon visiting Absorb.",
-                dbUser.getUsername(), courseId, accessModuleName));
-        throw new NotFoundException(
-            String.format(
-                "User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
-      }
-      var enrollment = maybeEnrollment.get();
+      maybeEnrollment.ifPresentOrElse(
+          enrollment -> {
+            // If the course is incomplete, do not update the user access module
+            if (enrollment.completionTime != null) {
+              var updatedUserAccessModule =
+                  accessModuleService.updateCompletionTime(
+                      dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
 
-      // The course is incomplete, do not update the user access module
-      if (enrollment.completionTime == null) {
-        continue;
-      }
+              addVerificationSystem(
+                  updatedUserAccessModule, DbComplianceTrainingVerificationSystem.ABSORB);
+            }
+          },
+          () -> {
+            if (accessModuleName == DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING) {
+              log.severe(
+                  String.format(
+                      "User `%s` is not enrolled in RT compliance training. "
+                          + "Users are expected to be automatically enrolled in RT training upon logging into Absorb.",
+                      dbUser.getUsername()));
+              throw new NotFoundException(
+                  String.format(
+                      "User %s is not enrolled in Absorb course %s",
+                      dbUser.getUsername(), courseId));
+            }
 
-      var updatedUserAccessModule =
-          accessModuleService.updateCompletionTime(
-              dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
-
-      addVerificationSystem(updatedUserAccessModule, DbComplianceTrainingVerificationSystem.ABSORB);
+            // Else: The user is not enrolled in CT training.
+            // This is expected behavior. Users are not enrolled in CT training in Absorb until
+            // they complete RT training.
+          });
     }
 
     return accessSyncService.updateUserAccessTiers(dbUser, agent);

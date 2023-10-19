@@ -153,8 +153,8 @@
     "exportTerraDataWarehouse": false
   },
   "ras": {
-    "host": "https:\/\/stsstg.nih.gov",
-    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9",
+    "host": "https:\/\/stsprep.nih.gov",
+    "clientId": "989e7869-12f4-4129-9930-a1091d208c94",
     "logoutUrl": "https:\/\/authtest.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "offlineBatch": {

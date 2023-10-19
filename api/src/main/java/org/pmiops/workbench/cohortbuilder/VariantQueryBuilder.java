@@ -50,7 +50,8 @@ public final class VariantQueryBuilder {
     CLINVAR_SIGNIFICANCE("ClinVar Significance", "clinical_significance_string"),
     ALLELE_COUNT("Allele Count", "allele_count"),
     ALLELE_NUMBER("Allele Number", "allele_number"),
-    ALLELE_FREQUENCY("Allele Frequency", "allele_frequency");
+    ALLELE_FREQUENCY("Allele Frequency", "allele_frequency"),
+    PARTICIPANT_COUNT("Participant Count", "participant_count");
     private final String displayName;
     private final String columnName;
 

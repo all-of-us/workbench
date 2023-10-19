@@ -143,7 +143,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
-      String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
+      String userEmail,
+      Runtime runtime,
+      Map<String, String> customEnvironmentVariables,
+      String workspaceNamespace,
+      String workspaceName) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     String assetsBaseUrl = config.server.apiAssetsBaseUrl + "/static";
 
@@ -161,6 +165,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userEmail)
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace)
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, workspaceName)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
@@ -231,7 +237,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           runtimesApi.createRuntime(
               runtime.getGoogleProject(),
               runtime.getRuntimeName(),
-              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
+              buildCreateRuntimeRequest(
+                  user.getUsername(),
+                  runtime,
+                  customEnvironmentVariables,
+                  workspaceNamespace,
+                  workspace.getName()));
           return null;
         });
   }
@@ -527,16 +538,26 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
             .put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
+            .put(
+                LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
+                dbWorkspace.getWorkspaceNamespace())
+            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName())
             .build();
 
+    var pdLabels = persistentDiskRequest.getLabels();
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels,
+            LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
+            dbWorkspace.getWorkspaceNamespace());
+    pdLabels =
+        upsertLeonardoLabel(
+            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
     LeonardoPersistentDiskRequest diskRequest =
-        leonardoMapper
-            .toLeonardoPersistentDiskRequest(persistentDiskRequest)
-            .labels(
-                upsertLeonardoLabel(
-                    persistentDiskRequest.getLabels(),
-                    LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
-                    appTypeToLabelValue(appType)));
+        leonardoMapper.toLeonardoPersistentDiskRequest(persistentDiskRequest).labels(pdLabels);
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
       // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.

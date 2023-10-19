@@ -48,6 +48,14 @@ public interface DirectoryService {
    */
   User createUser(String givenName, String familyName, String username, String contactEmail);
 
+  // This has been added to backfill user data for Absorb. It can be deleted once the script is
+  // successfully run on Prod.
+  User updateUser(User user);
+
+  // This has been added to backfill user data for Absorb. It can be made private once the script is
+  // successfully run on Prod
+  void addCustomSchemaAndEmails(User user, String username, String contactEmail);
+
   User resetUserPassword(String username);
 
   void deleteUser(String username);

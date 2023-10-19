@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.logging.Logger;
 import org.pmiops.workbench.absorb.api.AuthenticateApi;
 import org.pmiops.workbench.absorb.api.EnrollmentsApi;
 import org.pmiops.workbench.absorb.api.UsersApi;
@@ -19,10 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AbsorbServiceImpl implements AbsorbService {
   private final CloudStorageClient cloudStorageClient;
-
-  private String apiKey = null;
-  private String accessToken = null;
-  private String userId = null;
+  private static final Logger log = Logger.getLogger(AbsorbServiceImpl.class.getName());
 
   @Autowired
   public AbsorbServiceImpl(CloudStorageClient cloudStorageClient) {
@@ -37,28 +35,34 @@ public class AbsorbServiceImpl implements AbsorbService {
   // method name is clearer to use in other services since it describes the users' actions so far
   // (domain logic) rather than relying on Absorb-specific state (implementation details).
   @Override
-  public Boolean userHasLoggedIntoAbsorb(String email) throws ApiException {
-    ensureAuthentication(email);
-
-    return this.userId != null;
+  public Boolean userHasLoggedIntoAbsorb(Credentials credentials) {
+    return credentials.userId != null;
   }
 
   @Override
-  public List<Enrollment> getActiveEnrollmentsForUser(String email) throws ApiException {
-    ensureAuthentication(email);
+  public List<Enrollment> getActiveEnrollmentsForUser(Credentials credentials) throws ApiException {
+    log.info(
+        String.format("Fetching Absorb enrollments for Absorb user id `%s`", credentials.userId));
 
-    if (this.userId == null) {
+    if (credentials.userId == null) {
       throw new ApiException(404, "User not found");
     }
 
     // Fetch enrollments for the user
     var enrollmentsResponse =
         new EnrollmentsApi()
-            .enrollmentsGetUserEnrollments(apiKey, accessToken, this.userId, "isActive")
+            .enrollmentsGetUserEnrollments(
+                credentials.apiKey, credentials.accessToken, credentials.userId, "isActive")
             .getEnrollments();
 
     // Convert enrollments to our simplified and serialized model
-    return enrollmentsResponse.stream().map(this::convertToEnrollment).collect(toList());
+    var result = enrollmentsResponse.stream().map(this::convertToEnrollment).collect(toList());
+
+    log.info(
+        String.format(
+            "Fetched Absorb enrollments for Absorb user id `%s`: %s", credentials.userId, result));
+
+    return result;
   }
 
   private Enrollment convertToEnrollment(UserCourseEnrollmentResource e) {
@@ -71,14 +75,18 @@ public class AbsorbServiceImpl implements AbsorbService {
     }
   }
 
-  // Obtains and stores a valid API key, access token, and user id for the given email address.
-  // Tokens are valid for four hours, which is well under the expected lifetime of this service.
-  private void ensureAuthentication(String email) throws ApiException {
+  // Obtains a valid API key, access token, and user id for the given email address.
+  // Tokens are valid for four hours, which is well under the expected lifetime of clients of this
+  // service.
+  @Override
+  public Credentials fetchCredentials(String email) throws ApiException {
+    log.info(String.format("Fetching Absorb credentials for workbench user `%s`", email));
+
     var config = cloudStorageClient.getAbsorbCredentials();
-    apiKey = config.getString("apiKey");
+    var apiKey = config.getString("apiKey");
 
     // Obtain an access token
-    accessToken =
+    var accessToken =
         new AuthenticateApi()
             .restAuthenticationAuthenticate(
                 new AuthenticationRequest()
@@ -92,11 +100,19 @@ public class AbsorbServiceImpl implements AbsorbService {
 
     if (users.getUsers().size() > 1) {
       throw new ApiException(500, "Multiple users found");
-    } else if (users.getUsers().size() == 1) {
-      userId = users.getUsers().get(0).getId();
-    } else if (users.getUsers().size() == 0) {
-      // No user found. This indicates the user has not logged in to Absorb yet.
-      userId = null;
     }
+
+    String userId;
+    if (users.getUsers().size() == 1) {
+      userId = users.getUsers().get(0).getId();
+      log.info(String.format("Fetched Absorb user id `%s` for workbench user `%s`", userId, email));
+    } else {
+      // Size == 0 means that no user was found. This is a valid state. It indicates
+      // the user has not logged in to Absorb yet.
+      userId = null;
+      log.info(String.format("No Absorb user found for workbench user `%s`", email));
+    }
+
+    return new Credentials(apiKey, accessToken, userId);
   }
 }

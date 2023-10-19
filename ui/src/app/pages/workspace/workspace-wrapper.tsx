@@ -134,9 +134,92 @@ const MultiRegionWorkspaceNotification = () => {
   );
 };
 
+interface UpdateRuntimeStoresProps {
+  workspaceNamespace: string;
+  pollAborter: AbortController;
+  setPollAborter: (ac: AbortController) => void;
+}
+const updateRuntimeStores = async ({
+  workspaceNamespace,
+  pollAborter,
+  setPollAborter,
+}: UpdateRuntimeStoresProps) => {
+  runtimeDiskStore.set({
+    workspaceNamespace,
+    gcePersistentDisk: undefined,
+  });
+  runtimeStore.set({
+    workspaceNamespace,
+    runtime: undefined,
+    runtimeLoaded: false,
+  });
+  pollAborter.abort();
+  const newPollAborter = new AbortController();
+  setPollAborter(newPollAborter);
+
+  try {
+    await LeoRuntimeInitializer.initialize({
+      workspaceNamespace,
+      pollAbortSignal: newPollAborter.signal,
+      maxCreateCount: 0,
+      maxResumeCount: 0,
+    });
+  } catch {
+    // Ignore InitialRuntimeNotFoundError.
+    // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+    // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+    // initialization here.
+    // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
+    // away from a page during a poll.
+    // Ideally, we would handle or log errors except the ones listed above.
+  }
+};
+
+interface GetWorkspaceProps {
+  wsid: string;
+  setWorkspace: (w: Workspace) => void;
+  navigate: (path: string[]) => void;
+}
+const getWorkspaceAndUpdateStores = async ({
+  workspaceNamespace,
+  wsid,
+  setWorkspace,
+  navigate,
+  pollAborter,
+  setPollAborter,
+}: GetWorkspaceProps & UpdateRuntimeStoresProps) => {
+  try {
+    const { workspace, accessLevel } = await workspacesApi().getWorkspace(
+      workspaceNamespace,
+      wsid
+    );
+    currentWorkspaceStore.next({
+      ...workspace,
+      accessLevel,
+    });
+    updateRuntimeStores({
+      workspaceNamespace: workspace.namespace,
+      pollAborter,
+      setPollAborter,
+    });
+    setWorkspace(workspace);
+  } catch (ex) {
+    if (ex.status === 403) {
+      navigate(['/workspaces']);
+    }
+  }
+};
+
 export const WorkspaceWrapper = ({ hideSpinner }) => {
   const params = useParams<MatchParams>();
   const { ns, wsid } = params;
+  const routeData = useStore(routeDataStore);
+  const [navigate] = useNavigation();
+
+  const [pollAborter, setPollAborter] = useState(new AbortController());
+  const [workspace, setWorkspace] = useState<Workspace>(undefined);
+  const [showNewCtNotification, setShowNewCtNotification] = useState(false);
+
   useEffect(() => {
     hideSpinner();
     return () => {
@@ -148,96 +231,60 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
   }, []);
 
   useEffect(() => {
-    if (ns) {
-      maybeStartPollingForUserApps(ns);
+    // abort if the routing is invalid (though this should never happen)
+    if (!ns || !wsid) {
+      return;
     }
-  }, [ns]);
 
-  const routeData = useStore(routeDataStore);
-  const [navigate] = useNavigation();
-
-  const [pollAborter, setPollAborter] = useState(new AbortController());
-
-  const [workspace, setWorkspace] = useState<Workspace>(undefined);
-
-  const [showNewCtNotification, setShowNewCtNotification] = useState(false);
-
-  useEffect(() => {
-    const updateStores = async (namespace) => {
-      runtimeDiskStore.set({
-        workspaceNamespace: namespace,
-        gcePersistentDisk: undefined,
-      });
-      runtimeStore.set({
-        workspaceNamespace: namespace,
-        runtime: undefined,
-        runtimeLoaded: false,
-      });
-      pollAborter.abort();
-      const newPollAborter = new AbortController();
-      setPollAborter(newPollAborter);
-
-      try {
-        await LeoRuntimeInitializer.initialize({
-          workspaceNamespace: namespace,
-          pollAbortSignal: newPollAborter.signal,
-          maxCreateCount: 0,
-          maxResumeCount: 0,
-        });
-      } catch {
-        // Ignore InitialRuntimeNotFoundError.
-        // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-        // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-        // initialization here.
-        // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
-        // away from a page during a poll.
-        // Ideally, we would handle or log errors except the ones listed above.
-      }
-    };
-    const getWorkspaceAndUpdateStores = async (namespace, id) => {
-      try {
-        // No destructuring because otherwise it shadows the workspace in props
-        const wsResponse = await workspacesApi().getWorkspace(namespace, id);
-        currentWorkspaceStore.next({
-          ...wsResponse.workspace,
-          accessLevel: wsResponse.accessLevel,
-        });
-        updateStores(wsResponse.workspace.namespace);
-        setWorkspace(wsResponse.workspace);
-      } catch (ex) {
-        if (ex.status === 403) {
-          navigate(['/workspaces']);
-        }
-      }
-    };
-
-    if (
-      !currentWorkspaceStore.getValue() ||
-      currentWorkspaceStore.getValue().namespace !== ns ||
-      currentWorkspaceStore.getValue().id !== wsid
-    ) {
-      currentWorkspaceStore.next(null);
-      // In a handful of situations - namely on workspace creation/clone,
-      // the application will preload the next workspace to avoid a redundant
-      // refetch here.
-      const nextWs = nextWorkspaceWarmupStore.getValue();
-      nextWorkspaceWarmupStore.next(undefined);
-      if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-        currentWorkspaceStore.next(nextWs);
-        updateStores(ns);
-        setWorkspace(nextWs);
-      } else {
-        getWorkspaceAndUpdateStores(ns, wsid);
-      }
-    }
-  }, [ns, wsid]);
-
-  const showMultiRegionWorkspaceNotification =
-    workspace &&
-    new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
-
-  useEffect(() => {
+    maybeStartPollingForUserApps(ns);
     workspacesApi().updateRecentWorkspaces(ns, wsid);
+
+    // avoid a redundant fetch if we can find the workspace in the currentWorkspaceStore or the
+    // nextWorkspaceWarmupStore (as a result of creation or duplication)
+
+    const wsInCurrentStore = currentWorkspaceStore.getValue();
+    if (
+      wsInCurrentStore &&
+      // can't use ?. here because we don't want to match against undefined
+      wsInCurrentStore.namespace === ns &&
+      wsInCurrentStore.id === wsid
+    ) {
+      updateRuntimeStores({
+        workspaceNamespace: ns,
+        pollAborter,
+        setPollAborter,
+      });
+      setWorkspace(wsInCurrentStore);
+    } else {
+      // if the current workspace store is set to something besides where the routing indicates, it's invalid
+      currentWorkspaceStore.next(null);
+
+      const wsInNextStore = nextWorkspaceWarmupStore.getValue();
+      nextWorkspaceWarmupStore.next(undefined);
+      if (
+        wsInNextStore &&
+        // can't use ?. here because we don't want to match against undefined
+        wsInNextStore.namespace === ns &&
+        wsInNextStore.id === wsid
+      ) {
+        currentWorkspaceStore.next(wsInNextStore);
+        updateRuntimeStores({
+          workspaceNamespace: ns,
+          pollAborter,
+          setPollAborter,
+        });
+        setWorkspace(wsInNextStore);
+      } else {
+        getWorkspaceAndUpdateStores({
+          workspaceNamespace: ns,
+          wsid,
+          setWorkspace,
+          navigate,
+          pollAborter,
+          setPollAborter,
+        });
+      }
+    }
   }, [ns, wsid]);
 
   useEffect(() => {
@@ -247,6 +294,10 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
     const isNew = workspace?.creationTime > tenMinutesAgo;
     setShowNewCtNotification(isControlled && isNew);
   }, [workspace]);
+
+  const showMultiRegionWorkspaceNotification =
+    workspace &&
+    new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
 
   return (
     <>
