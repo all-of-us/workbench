@@ -191,7 +191,8 @@ public class RuntimeController implements RuntimeApiDelegate {
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }
       var labels = persistentDiskRequest.getLabels();
-      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+      labels =
+          upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
       labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
       labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
       persistentDiskRequest.labels(labels);
