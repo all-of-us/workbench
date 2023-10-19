@@ -13,16 +13,11 @@ import { ajaxContext, Environments } from 'terraui/out/Environments';
 
 // Indexes of hidden columns
 const deleteCloudEnvironment = 11;
-const pdStatus = 5;
 
 const hiddenTableColumns = [
   {
     tableName: 'cloud environments',
     columnIndexesToHide: [deleteCloudEnvironment],
-  },
-  {
-    tableName: 'persistent disks',
-    columnIndexesToHide: [pdStatus],
   },
 ];
 
@@ -45,7 +40,7 @@ const ajax = (signal) => {
     },
     Apps: {
       listWithoutProject: () =>
-        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false'),
+        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
