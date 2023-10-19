@@ -9,6 +9,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLa
 import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -160,8 +161,15 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
-    if (runtime == null) {
-      runtime = new Runtime();
+    long configCount =
+        Stream.ofNullable(runtime)
+            .flatMap(
+                r -> Stream.of(r.getGceConfig(), r.getDataprocConfig(), r.getGceWithPdConfig()))
+            .filter(Objects::nonNull)
+            .count();
+    if (configCount != 1) {
+      throw new BadRequestException(
+          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
@@ -169,41 +177,36 @@ public class RuntimeController implements RuntimeApiDelegate {
     GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
-      if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
-        // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
-        // Check with Leo again see if user have READY disk, if so, block this request or logging
-        List<Disk> diskList =
-            PersistentDiskUtils.findTheMostRecentActiveDisks(
-                leonardoNotebooksClient
-                    .listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
-                    .stream()
-                    .map(leonardoMapper::toApiListDisksResponse)
-                    .collect(Collectors.toList()));
-        List<Disk> runtimeDisks =
-            diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());
-        if (!runtimeDisks.isEmpty()) {
-          // Find active disks for runtime VM. Block user from creating new disk.
-          throw new BadRequestException(
-              String.format(
-                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
-                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+      if (persistentDiskRequest != null) {
+        if (Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
+          // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
+          // Check with Leo again see if user have READY disk, if so, block this request or logging
+          List<Disk> diskList =
+              PersistentDiskUtils.findTheMostRecentActiveDisks(
+                  leonardoNotebooksClient
+                      .listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
+                      .stream()
+                      .map(leonardoMapper::toApiListDisksResponse)
+                      .collect(Collectors.toList()));
+          List<Disk> runtimeDisks =
+              diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());
+          if (!runtimeDisks.isEmpty()) {
+            // Find active disks for runtime VM. Block user from creating new disk.
+            throw new BadRequestException(
+                String.format(
+                    "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
+                    PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+          }
+          persistentDiskRequest.name(userProvider.get().generatePDName());
         }
-        persistentDiskRequest.name(userProvider.get().generatePDName());
+        var labels = persistentDiskRequest.getLabels();
+        labels =
+            upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+        labels =
+            upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
+        labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
+        persistentDiskRequest.labels(labels);
       }
-      var labels = persistentDiskRequest.getLabels();
-      labels =
-          upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
-      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
-      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
-      persistentDiskRequest.labels(labels);
-    }
-    long configCount =
-        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
-            .filter(c -> c != null)
-            .count();
-    if (configCount != 1) {
-      throw new BadRequestException(
-          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     DbUser user = userProvider.get();

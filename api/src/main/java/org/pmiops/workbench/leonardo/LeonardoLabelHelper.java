@@ -46,7 +46,7 @@ public class LeonardoLabelHelper {
   /** Insert or update disk labels. */
   @SuppressWarnings("unchecked")
   public static Map<String, String> upsertLeonardoLabel(
-      Object rawLabelObject, String labelKey, String labelValue) {
+      @Nullable Object rawLabelObject, String labelKey, String labelValue) {
     Map<String, String> labels =
         (Map<String, String>)
             Optional.ofNullable(rawLabelObject).orElse(new HashMap<String, String>());
