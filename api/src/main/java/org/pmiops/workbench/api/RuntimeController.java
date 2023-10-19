@@ -190,21 +190,11 @@ public class RuntimeController implements RuntimeApiDelegate {
         }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }
-      persistentDiskRequest.labels(
-          upsertLeonardoLabel(
-              persistentDiskRequest.getLabels(),
-              LEONARDO_LABEL_IS_RUNTIME,
-              LEONARDO_LABEL_IS_RUNTIME_TRUE));
-      persistentDiskRequest.labels(
-          upsertLeonardoLabel(
-              persistentDiskRequest.getLabels(),
-              LEONARDO_LABEL_WORKSPACE_NAMESPACE,
-              workspaceNamespace));
-      persistentDiskRequest.labels(
-          upsertLeonardoLabel(
-              persistentDiskRequest.getLabels(),
-              LEONARDO_LABEL_WORKSPACE_NAME,
-              dbWorkspace.getName()));
+      var labels = persistentDiskRequest.getLabels();
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
+      persistentDiskRequest.labels(labels);
     }
     long configCount =
         Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
