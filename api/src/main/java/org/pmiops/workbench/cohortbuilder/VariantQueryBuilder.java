@@ -294,9 +294,13 @@ public final class VariantQueryBuilder {
     sqlBuilder.append(PARTICIPANT_COUNT);
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
       if (StringUtils.isNotEmpty(filters.getSortBy())) {
-        sqlBuilder.append(
-            ORDER_BY.replace(
-                "@orderBy", VatColumns.getColumnNameFromDisplayName(filters.getSortBy())));
+        if (filters.getSortBy().equals(VatColumns.PARTICIPANT_COUNT.getDisplayName())) {
+          sqlBuilder.append(DEFAULT_ORDER_BY);
+        } else {
+          sqlBuilder.append(
+              ORDER_BY.replace(
+                  "@orderBy", VatColumns.getColumnNameFromDisplayName(filters.getSortBy())));
+        }
         sqlBuilder.append(LIMIT_OFFSET);
       } else {
         sqlBuilder.append(DEFAULT_ORDER_BY);
