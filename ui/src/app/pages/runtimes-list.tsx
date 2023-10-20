@@ -12,18 +12,12 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
 // Indexes of hidden columns
-const workspace = 2;
 const deleteCloudEnvironment = 11;
-const pdStatus = 5;
 
 const hiddenTableColumns = [
   {
     tableName: 'cloud environments',
-    columnIndexesToHide: [workspace, deleteCloudEnvironment],
-  },
-  {
-    tableName: 'persistent disks',
-    columnIndexesToHide: [workspace, pdStatus],
+    columnIndexesToHide: [deleteCloudEnvironment],
   },
 ];
 
@@ -36,19 +30,27 @@ const ajax = (signal) => {
     }).then((r) => r.json());
   return {
     Workspaces: {
-      list: () => workspacesApi().getWorkspaces(),
+      list: () =>
+        workspacesApi()
+          .getWorkspaces()
+          .then((res) => res.items),
     },
     Runtimes: {
       listV2: () => jsonLeoFetch('/api/v2/runtimes?role=creator'),
     },
     Apps: {
       listWithoutProject: () =>
-        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false'),
+        jsonLeoFetch(
+          '/api/google/v1/apps?role=creator&includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+        ),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
       disksV1: () => ({
-        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator'),
+        list: () =>
+          jsonLeoFetch(
+            '/api/google/v1/disks?role=creator&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+          ),
         disk: (googleProject, name) => ({
           delete: () =>
             jsonLeoFetch(
@@ -100,6 +102,8 @@ const css =
         display: none !important
     }`;
 
+const stringToSlug = (s) => s.toLowerCase().replace(/\s+/g, '');
+
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -132,7 +136,10 @@ export const RuntimesList = fp.flow(
             <Environments
               {...{
                 nav: {
-                  getLink: (_, { namespace }) => `/workspaces/${namespace}`,
+                  // called from, for example:
+                  // https://github.com/DataBiosphere/terra-ui/blob/4333c7b94d6ce10a6fe079361e98c2b6cc71f83a/src/pages/Environments.js#L420
+                  getLink: (_, { namespace, name }) =>
+                    `/workspaces/${namespace}/${stringToSlug(name)}/analysis`,
                 },
               }}
             />

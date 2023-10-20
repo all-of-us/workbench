@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingLeonardoAppUsage;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
@@ -144,4 +145,6 @@ public interface ReportingQueryService {
   int getTableRowCount(String tableName);
 
   int getWorkspaceCount();
+
+  List<ReportingLeonardoAppUsage> getLeonardoAppUsage();
 }

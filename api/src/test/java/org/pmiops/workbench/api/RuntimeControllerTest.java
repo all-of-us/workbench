@@ -12,6 +12,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.cloud.Date;
@@ -365,6 +367,7 @@ public class RuntimeControllerTest {
       WorkspaceAccessLevel accessLevel) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(workspaceNamespace);
+    w.setName(firecloudName);
     w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
     w.setGoogleProject(googleProject);
@@ -921,6 +924,8 @@ public class RuntimeControllerTest {
 
     Map<String, String> diskLabels = new HashMap<>();
     diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+    diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
+    diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_NAME);
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -947,6 +952,16 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
     assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
+  }
+
+  @Test
+  public void testCreateRuntime_gceWithPD_noPDRequest() {
+    // don't add the required persistentDisk field
+    var gceWithPdConfig_lacksPD =
+        new Runtime().gceWithPdConfig(new GceWithPdConfig().machineType("standard"));
+    assertThrows(
+        BadRequestException.class,
+        () -> runtimeController.createRuntime(WORKSPACE_NS, gceWithPdConfig_lacksPD));
   }
 
   @Test

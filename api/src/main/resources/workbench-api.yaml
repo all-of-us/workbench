@@ -11777,6 +11777,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReportingWorkspaceFreeTierUsage'
+        leonardoAppUsage:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportingLeonardoAppUsage'
       description: |
         Payload for upload to BigQuery reporting dataset. Internal use only (not part of the API).
     ReportingUploadDetails:
@@ -12399,6 +12403,44 @@ components:
         This code was generated using reporting-wizard.rb at 2020-11-23T10:38:23-05:00.
         Manual modification should be avoided if possible as this is a one-time generation
         and does not run on every build and updates must be merged manually for now.
+    ReportingLeonardoAppUsage:
+      type: object
+      properties:
+        appId:
+          type: integer
+          format: int64
+          description: App ID in Leonardo DB
+        status:
+          type: string
+          description: App status in Leonardo DB
+        appName:
+          type: string
+          description: App name, e.g. all-of-us-sas-123
+        appType:
+          type: string
+          description: App type in AoU, e.g. SAS, Cromwell, RStudio, this is extracted from app_name
+        createdDate:
+          type: string
+          description: App creation time
+          format: date-time
+        startTime:
+          type: string
+          description: App start time
+          format: date-time
+        stopTime:
+          type: string
+          description: App stop time
+          format: date-time
+        destroyedDate:
+          type: string
+          description: App deletion time
+          format: date-time
+        creator:
+          type: string
+          description: App creator username
+        environmentVariables:
+          type: string
+          description: All environment variables AoU passes to Leo when creating App.
     GenomicExtractionJobListResponse:
       type: object
       properties:

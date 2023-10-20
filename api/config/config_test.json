@@ -149,7 +149,10 @@
   },
   "reporting": {
     "dataset": "reporting_test",
-    "maxRowsPerInsert": 500
+    "maxRowsPerInsert": 500,
+    "exportTerraDataWarehouse": true,
+    "terraWarehouseLeoAppTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app_dev",
+    "terraWarehouseLeoAppUsageTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app_usage_dev"
   },
   "ras": {
     "host": "https:\/\/stsprep.nih.gov",

@@ -109,7 +109,7 @@ const styles = reactStyles({
   },
 });
 
-const pageSize = 100;
+const pageSize = 25;
 const searchTrigger = 2;
 const searchTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
@@ -441,24 +441,29 @@ export const VariantSearch = withCurrentWorkspace()(
 
     const searchVariants = async (firstPage?: number) => {
       try {
-        const { items, nextPageToken, totalSize } =
-          await cohortBuilderApi().findVariants(namespace, id, {
-            ...selectedFilters,
-            searchTerm: searchTerms.trim(),
-            pageSize,
-            pageToken: !!firstPage ? pageToken : null,
-          });
-        if (!firstPage && items.length > 1) {
-          const filters = await cohortBuilderApi().findVariantFilters(
-            namespace,
-            id,
-            {
-              ...selectedFilters,
-              searchTerm: searchTerms.trim(),
-              pageSize,
-            }
-          );
-          setVariantFilters(filters);
+        const variantFilterRequest: VariantFilterRequest = {
+          ...selectedFilters,
+          searchTerm: searchTerms.trim(),
+          pageSize,
+          pageToken: !!firstPage ? pageToken : null,
+        };
+        const [{ items, nextPageToken, totalSize }, filterResponse] =
+          await Promise.all([
+            cohortBuilderApi().findVariants(
+              namespace,
+              id,
+              variantFilterRequest
+            ),
+            !firstPage
+              ? cohortBuilderApi().findVariantFilters(
+                  namespace,
+                  id,
+                  variantFilterRequest
+                )
+              : null,
+          ]);
+        if (filterResponse) {
+          setVariantFilters(filterResponse);
         }
         setPageToken(nextPageToken);
         setSearchResults((prevState) =>
@@ -650,11 +655,12 @@ export const VariantSearch = withCurrentWorkspace()(
           SNP/Indel Variant search is currently a proof of concept and only
           contains data for chromosome 20
         </div>
-        {searchResults.length > 1 && variantFilters && (
+        {!loading && searchResults.length > 1 && variantFilters && (
           <div style={{ position: 'relative' }}>
             <Clickable
               style={{ color: colors.primary }}
               onClick={() => setFiltersOpen((prevState) => !prevState)}
+              disabled={loadingMore}
             >
               <ClrIcon shape='filter-2' className='is-solid' size={30} />
               Filter & Sort

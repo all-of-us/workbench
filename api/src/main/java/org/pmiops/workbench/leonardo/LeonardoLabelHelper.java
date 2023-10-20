@@ -23,6 +23,9 @@ public class LeonardoLabelHelper {
   public static final String LEONARDO_DISK_LABEL_KEYS =
       LEONARDO_LABEL_APP_TYPE + "," + LEONARDO_LABEL_IS_RUNTIME;
 
+  public static final String LEONARDO_LABEL_WORKSPACE_NAMESPACE = "saturnWorkspaceNamespace";
+  public static final String LEONARDO_LABEL_WORKSPACE_NAME = "saturnWorkspaceName";
+
   public static String appTypeToLabelValue(AppType appType) {
     return appType.toString().toLowerCase();
   }
@@ -43,7 +46,7 @@ public class LeonardoLabelHelper {
   /** Insert or update disk labels. */
   @SuppressWarnings("unchecked")
   public static Map<String, String> upsertLeonardoLabel(
-      Object rawLabelObject, String labelKey, String labelValue) {
+      @Nullable Object rawLabelObject, String labelKey, String labelValue) {
     Map<String, String> labels =
         (Map<String, String>)
             Optional.ofNullable(rawLabelObject).orElse(new HashMap<String, String>());

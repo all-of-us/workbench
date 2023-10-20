@@ -149,7 +149,8 @@
   },
   "reporting": {
     "dataset": "reporting_stable",
-    "maxRowsPerInsert": 500
+    "maxRowsPerInsert": 500,
+    "exportTerraDataWarehouse": false
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
