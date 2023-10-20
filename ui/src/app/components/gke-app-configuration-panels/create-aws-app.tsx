@@ -7,14 +7,13 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import {
-  canDeleteApp,
-} from 'app/components/apps-panel/utils';
+import { canDeleteApp } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
-import { styles } from 'app/components/common-env-conf-panels/styles';import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
@@ -57,7 +56,6 @@ export type CommonCreateGkeAppProps = Omit<CreateAwsAppProps, ToOmit>;
 export const CreateAwsApp = ({
   appType,
   onClose,
-  creatorFreeCreditsRemaining,
   workspace,
   profileState,
   app,
@@ -65,7 +63,6 @@ export const CreateAwsApp = ({
   onClickDeleteGkeApp,
   onClickDeleteUnattachedPersistentDisk,
   introText = defaultIntroText,
-  CostNote = () => null,
   SupportNote = () => null,
   CreateAppText = () => null,
 }: CreateAwsAppProps) => {
@@ -76,13 +73,12 @@ export const CreateAwsApp = ({
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
   };
 
- 
   const createAppRequest: CreateAppRequest = {
     appType,
     kubernetesRuntimeConfig: undefined,
-    persistentDiskRequest: undefined
+    persistentDiskRequest: undefined,
   };
-  //const analysisConfig = createAppRequestToAnalysisConfig(createAppRequest);
+  // const analysisConfig = createAppRequestToAnalysisConfig(createAppRequest);
 
   return (
     <FlexColumn
@@ -90,8 +86,7 @@ export const CreateAwsApp = ({
       style={{ height: '100%', rowGap: '1rem' }}
     >
       <div>{introText}</div>
-     
-      
+
       <SupportNote />
       <FlexRow
         style={{

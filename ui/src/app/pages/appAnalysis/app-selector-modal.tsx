@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
+import { Workspace } from 'generated/fetch/models/Workspace';
+
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import {
@@ -12,7 +14,6 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore, useStore } from 'app/utils/stores';
-import { Workspace } from 'generated/fetch/models/Workspace';
 
 const styles = reactStyles({
   appsLabel: {
@@ -35,11 +36,13 @@ export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose, workspace } = props;
   const { config } = useStore(serverConfigStore);
   // in display order
-  const appList = workspace.aws ? [UIAppType.SAGEMAKER] : [
-    UIAppType.JUPYTER,
-    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
-    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
-  ] ;
+  const appList = workspace.aws
+    ? [UIAppType.SAGEMAKER]
+    : [
+        UIAppType.JUPYTER,
+        ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+        ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
+      ];
 
   return (
     <Modal

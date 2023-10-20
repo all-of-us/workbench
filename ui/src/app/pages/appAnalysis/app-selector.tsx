@@ -13,8 +13,8 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { userAppsStore, useStore } from 'app/utils/stores';
 import {
   openRStudioOrConfigPanel,
+  openSagemakerOrConfigPanel,
   openSASOrConfigPanel,
-  openSagemakerOrConfigPanel
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';

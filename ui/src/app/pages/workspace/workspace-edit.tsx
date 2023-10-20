@@ -235,19 +235,20 @@ export const styles = reactStyles({
     width: '95%',
     justifyContent: 'flex-start',
   },
-  
-radioCard: {
-    border: '2px solid #ccc', /* Add a border to the radio cards */
-    padding: '10px', /* Add padding to create space around the radio button and label */
-    width: '50%', /* Set the width of each radio card */
-    textAlign: 'center', /* Center-align text within the radio card */
-    cursor: 'pointer' /* Change cursor to pointer on hover */
-},
 
-radioCardActive: {
-    borderColor: '#007bff', 
-    backgroundColor: '#f0f0f0', 
-},
+  radioCard: {
+    border: '2px solid #ccc' /* Add a border to the radio cards */,
+    padding:
+      '10px' /* Add padding to create space around the radio button and label */,
+    width: '50%' /* Set the width of each radio card */,
+    textAlign: 'center' /* Center-align text within the radio card */,
+    cursor: 'pointer' /* Change cursor to pointer on hover */,
+  },
+
+  radioCardActive: {
+    borderColor: '#007bff',
+    backgroundColor: '#f0f0f0',
+  },
 });
 
 // default to creating workspaces in the Registered Tier
@@ -1760,32 +1761,31 @@ export const WorkspaceEdit = fp.flow(
               </WorkspaceEditSection>
             )}
             <hr style={{ marginTop: '1.5rem' }} />
-            <WorkspaceEditSection header={"Cloud Technology"}>
+            <WorkspaceEditSection header={'Cloud Technology'}>
               <FlexRow>
-
-              <div style={styles.radioCardContainer}>
-                <div style={styles.radioCard} className={`radio-card`}>
-                  <input
-                    type="radio"
-                    value="GCP"
-                    checked={!this.state.workspace.aws}
-                    onChange={() => this.updateCloudPlatform(false)}
-                  />
-                  <label className="radio-label">GCP</label>
+                <div style={styles.radioCardContainer}>
+                  <div style={styles.radioCard} className={`radio-card`}>
+                    <input
+                      type='radio'
+                      value='GCP'
+                      checked={!this.state.workspace.aws}
+                      onChange={() => this.updateCloudPlatform(false)}
+                    />
+                    <label className='radio-label'>GCP</label>
+                  </div>
+                  <div style={styles.radioCard} className={`radio-card`}>
+                    <input
+                      type='radio'
+                      value='AWS'
+                      checked={this.state.workspace.aws}
+                      onChange={() => this.updateCloudPlatform(true)}
+                    />
+                    <label className='radio-label'>AWS</label>
+                  </div>
                 </div>
-                <div style={styles.radioCard} className={`radio-card`}>
-                  <input
-                    type="radio"
-                    value="AWS"
-                    checked={this.state.workspace.aws}
-                    onChange={() => this.updateCloudPlatform(true)}
-                  />
-                  <label className="radio-label">AWS</label>
-                </div>
-              </div>
               </FlexRow>
             </WorkspaceEditSection>
-            
+
             <hr style={{ marginTop: '1.5rem' }} />
             <WorkspaceEditSection
               header={

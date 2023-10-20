@@ -10,8 +10,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
-  sasConfigIconId,
   sagemakerConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import colors from 'app/styles/colors';
@@ -83,14 +83,18 @@ export const AppsPanel = (props: {
   // in display order
   const appConfigurations = [
     { app: UIAppType.JUPYTER, condition: !workspace.aws },
-    { app: UIAppType.RSTUDIO, condition: config.enableRStudioGKEApp && !workspace.aws },
+    {
+      app: UIAppType.RSTUDIO,
+      condition: config.enableRStudioGKEApp && !workspace.aws,
+    },
     { app: UIAppType.SAS, condition: config.enableSasGKEApp && !workspace.aws },
     { app: UIAppType.CROMWELL, condition: !workspace.aws },
     { app: UIAppType.SAGEMAKER, condition: workspace.aws },
   ];
-  
-  const appsToDisplay = appConfigurations.filter((config) => config.condition).map((config) => config.app);
-  
+
+  const appsToDisplay = appConfigurations
+    .filter((config1) => config1.condition)
+    .map((config1) => config1.app);
 
   useEffect(() => {
     maybeStartPollingForUserApps(workspace.namespace);
@@ -172,8 +176,9 @@ export const AppsPanel = (props: {
                       () => setSidebarActiveIconStore.next(sasConfigIconId),
                     ],
                     [
-                        UIAppType.SAGEMAKER,
-                      () => setSidebarActiveIconStore.next(sagemakerConfigIconId)
+                      UIAppType.SAGEMAKER,
+                      () =>
+                        setSidebarActiveIconStore.next(sagemakerConfigIconId),
                     ],
                     () => addToExpandedApps(availableApp.appType)
                   )

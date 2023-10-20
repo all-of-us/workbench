@@ -19,10 +19,10 @@ import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
 import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
 import rStudioBanner from 'assets/user-apps/RStudio-banner.png';
 import rStudioIcon from 'assets/user-apps/RStudio-icon.png';
-import sasBanner from 'assets/user-apps/SAS-banner.png';
-import sasIcon from 'assets/user-apps/SAS-icon.png';
 import sageMakerBanner from 'assets/user-apps/sagemaker-banner.png';
 import sagemakerIcon from 'assets/user-apps/sagemaker-icon.jpeg';
+import sasBanner from 'assets/user-apps/SAS-banner.png';
+import sasIcon from 'assets/user-apps/SAS-icon.png';
 
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
@@ -140,7 +140,7 @@ export const toAppType: Record<UIAppType, AppType | null> = {
   [UIAppType.RSTUDIO]: AppType.RSTUDIO,
   [UIAppType.SAS]: AppType.SAS,
   [UIAppType.JUPYTER]: null,
-  [UIAppType.SAGEMAKER]: AppType.SAGEMAKER
+  [UIAppType.SAGEMAKER]: AppType.SAGEMAKER,
 };
 
 export const toUIAppType: Record<AppType, UIAppType> = {

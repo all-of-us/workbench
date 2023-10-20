@@ -1,17 +1,14 @@
 package org.pmiops.workbench.disks;
 
-import bio.terra.workspace.api.ResourceApi;
 import bio.terra.workspace.model.ResourceList;
 import bio.terra.workspace.model.ResourceType;
-import bio.terra.workspace.model.StewardshipType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import javax.inject.Provider;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,13 +18,13 @@ import org.springframework.stereotype.Service;
 public class AwsDiskService implements DiskService {
 
   private final WorkspaceService workspaceService;
-  private final Provider<ResourceApi> resourceApiProvider;
+
+  private final WsmClient wsmClient;
 
   @Autowired
-  public AwsDiskService(
-      WorkspaceService workspaceService, Provider<ResourceApi> resourceApiProvider) {
+  public AwsDiskService(WorkspaceService workspaceService, WsmClient wsmClient) {
     this.workspaceService = workspaceService;
-    this.resourceApiProvider = resourceApiProvider;
+    this.wsmClient = wsmClient;
   }
 
   @Override
@@ -53,14 +50,9 @@ public class AwsDiskService implements DiskService {
     List<Disk> disks = new ArrayList<>();
     try {
       resourceList =
-          resourceApiProvider
-              .get()
-              .enumerateResources(
-                  UUID.fromString(dbWorkspace.getFirecloudUuid()),
-                  0,
-                  10,
-                  ResourceType.AWS_S3_STORAGE_FOLDER,
-                  StewardshipType.CONTROLLED);
+          wsmClient.getResourcesInWorkspace(
+              dbWorkspace.getFirecloudUuid(), 10, ResourceType.AWS_S3_STORAGE_FOLDER);
+
     } catch (bio.terra.workspace.client.ApiException e) {
       throw new WorkbenchException(e);
     }

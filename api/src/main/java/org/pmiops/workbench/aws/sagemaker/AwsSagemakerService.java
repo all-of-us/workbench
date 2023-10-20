@@ -69,7 +69,7 @@ public class AwsSagemakerService {
 
   private SageMakerClient getSageMakerClient(AwsCredential awsCredential) {
     return SageMakerClient.builder()
-        .region(Region.of("us-east-1"))
+        .region(Region.US_EAST_1)
         .credentialsProvider(
             StaticCredentialsProvider.create(
                 AwsSessionCredentials.create(

@@ -1,11 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import bio.terra.workspace.api.ControlledAwsResourceApi;
-import bio.terra.workspace.api.ResourceApi;
-import bio.terra.workspace.api.WorkspaceApi;
 import bio.terra.workspace.model.*;
-import bio.terra.workspace.model.Properties;
-import bio.terra.workspace.model.ResourceType;
 import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -16,7 +11,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.CloudPlatform;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
@@ -28,7 +22,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.model.Study;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.wsm.WsmRetryHandler;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +33,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
   private static final Logger logger = LoggerFactory.getLogger(AwsWorkspaceServiceImpl.class);
 
-  private final Provider<WorkspaceApi> workspaceApi;
-  private final Provider<ResourceApi> resourceApiProvider;
-
-  private final Provider<ControlledAwsResourceApi> awsResourceApiProvider;
-
-  private final WsmRetryHandler wsmRetryHandler;
+  private final WsmClient wsmClient;
 
   private final WorkspaceDao workspaceDao;
 
@@ -54,17 +43,11 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
 
   @Autowired
   public AwsWorkspaceServiceImpl(
-      Provider<WorkspaceApi> workspaceApi,
-      Provider<ResourceApi> resourceApiProvider,
-      Provider<ControlledAwsResourceApi> awsResourceApiProvider,
-      WsmRetryHandler wsmRetryHandler,
+      WsmClient wsmClient,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       Provider<DbUser> userProvider) {
-    this.workspaceApi = workspaceApi;
-    this.resourceApiProvider = resourceApiProvider;
-    this.awsResourceApiProvider = awsResourceApiProvider;
-    this.wsmRetryHandler = wsmRetryHandler;
+    this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.userProvider = userProvider;
@@ -77,12 +60,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
     DbWorkspace dbWorkspace = workspaceDao.get(workspaceNamespace, workspaceId);
     if (dbWorkspace != null && isAws(dbWorkspace)) {
       WorkspaceDescription workspaceWithContext =
-          wsmRetryHandler.run(
-              context ->
-                  workspaceApi
-                      .get()
-                      .getWorkspaceByUserFacingId(
-                          workspaceNamespace, /*minimumHighestRole=*/ null));
+          wsmClient.getWorkspaceByNamespace(workspaceNamespace);
 
       String googleProjectId =
           (workspaceWithContext.getGcpContext() == null)
@@ -94,28 +72,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
           workspaceWithContext.getUserFacingId(),
           googleProjectId);
 
-      ResourceList resourceList;
-      try {
-        resourceList =
-            resourceApiProvider
-                .get()
-                .enumerateResources(
-                    workspaceWithContext.getId(),
-                    0,
-                    10,
-                    ResourceType.AWS_S3_STORAGE_FOLDER,
-                    StewardshipType.CONTROLLED);
-      } catch (bio.terra.workspace.client.ApiException e) {
-        throw new WorkbenchException(e);
-      }
-
-      String awsS3StorageFolder =
-          resourceList
-              .getResources()
-              .get(0)
-              .getResourceAttributes()
-              .getAwsS3StorageFolder()
-              .getBucketName();
+      String awsS3StorageFolder = wsmClient.getAwsS3StorageFolder(workspaceWithContext.getId());
 
       WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
@@ -140,9 +97,14 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
     logger.info("Getting AWS workspaces");
-    WorkspaceDescriptionList workspaceDescriptionList =
-        wsmRetryHandler.run(
-            context -> workspaceApi.get().listWorkspaces(0, 30, /*minimumHighestRole=*/ null));
+    WorkspaceDescriptionList workspaceDescriptionList = null;
+    try {
+      workspaceDescriptionList = wsmClient.listWorkspaces();
+    } catch (bio.terra.workspace.client.ApiException e) {
+      logger.error("Error getting AWS workspaces", e);
+      return Collections.emptyList();
+    }
+
     logger.info("Got {} AWS workspaces", workspaceDescriptionList.getWorkspaces().size());
 
     return workspaceMapper
@@ -168,18 +130,8 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
   @Override
   @Transactional
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
-    logger.info("Deleting AWS workspace: {}", dbWorkspace.getFirecloudUuid());
 
-    wsmRetryHandler.run(
-        context ->
-            workspaceApi
-                .get()
-                .deleteWorkspaceV2(
-                    new DeleteWorkspaceV2Request()
-                        .jobControl(new JobControl().id(UUID.randomUUID().toString())),
-                    UUID.fromString(dbWorkspace.getFirecloudUuid())));
-
-    logger.info("AWS  Workspace deleted: {}", dbWorkspace.getFirecloudUuid());
+    wsmClient.deleteWorkspace(dbWorkspace.getFirecloudUuid());
 
     workspaceDao.saveWithLastModified(
         dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
@@ -229,28 +181,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
   public RawlsWorkspaceDetails createWorkspace(Workspace workspace) {
     logger.info("Creating AWS workspace: {}", workspace.getNamespace());
 
-    WorkspaceDescription workspaceDescription =
-        wsmRetryHandler.run(
-            context -> {
-              UUID workspaceId = UUID.randomUUID();
-              // logger.info("Workspace creation in progress, id: {}", workspaceId);
-              CreateWorkspaceV2Request workspaceV2Request =
-                  new CreateWorkspaceV2Request()
-                      .id(workspaceId)
-                      .userFacingId(workspace.getNamespace())
-                      .displayName(workspace.getName())
-                      .description(workspace.getNamespace())
-                      .stage(WorkspaceStageModel.MC_WORKSPACE)
-                      .properties(stringMapToProperties(Collections.emptyMap()))
-                      .spendProfile("wm-default-spend-profile")
-                      .cloudPlatform(bio.terra.workspace.model.CloudPlatform.AWS)
-                      .jobControl(new JobControl().id(UUID.randomUUID().toString()));
-
-              workspaceApi.get().createWorkspaceV2(workspaceV2Request);
-
-              // call the get workspace endpoint to get the full description object
-              return workspaceApi.get().getWorkspace(workspaceId, null);
-            });
+    WorkspaceDescription workspaceDescription = wsmClient.createWorkspace(workspace);
 
     logger.info("AWS workspace created: {}", workspaceDescription.getId());
     try {
@@ -261,7 +192,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
     if (workspaceDescription.getAwsContext() != null) {
       logger.info("AWS context found, creating AWS bucket");
       CreatedControlledAwsS3StorageFolder awsBucket =
-          createAwsBucket(workspace, workspaceDescription);
+          wsmClient.createAwsFolder(workspace, workspaceDescription);
 
       // TODO Use MapStruct
       return getWorkspaceDetails(
@@ -292,52 +223,6 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
     workspaceDetails.setCreatedBy(workspaceDescription.getCreatedBy());
     workspaceDetails.setCompletedCloneWorkspaceFileTransfer(OffsetDateTime.now());
     return workspaceDetails;
-  }
-
-  private CreatedControlledAwsS3StorageFolder createAwsBucket(
-      Workspace workspace, WorkspaceDescription workspaceDescription) {
-
-    return wsmRetryHandler.run(
-        context -> {
-          CreateControlledAwsS3StorageFolderRequestBody body =
-              new CreateControlledAwsS3StorageFolderRequestBody()
-                  .awsS3StorageFolder(
-                      new AwsS3StorageFolderCreationParameters().region("us-east-1"))
-                  .common(
-                      createCommonFields(
-                          workspace.getName().replaceAll("\\s", "-"),
-                          workspace.getNamespace(),
-                          AccessScope.PRIVATE_ACCESS,
-                          CloningInstructionsEnum.RESOURCE));
-          return awsResourceApiProvider
-              .get()
-              .createAwsS3StorageFolder(body, workspaceDescription.getId());
-        });
-  }
-
-  private ControlledResourceCommonFields createCommonFields(
-      String name,
-      String description,
-      AccessScope accessScope,
-      CloningInstructionsEnum cloningInstructions) {
-    return new ControlledResourceCommonFields()
-        .name(name)
-        .description(description)
-        .cloningInstructions(cloningInstructions)
-        .accessScope(accessScope)
-        .managedBy(ManagedBy.USER);
-  }
-
-  private static Properties stringMapToProperties(Map<String, String> map) {
-    Properties properties = new Properties();
-    if (map == null) {
-      return properties;
-    }
-    for (Map.Entry<String, String> entry : map.entrySet()) {
-      Property property = new Property().key(entry.getKey()).value(entry.getValue());
-      properties.add(property);
-    }
-    return properties;
   }
 
   private List<RawlsWorkspaceListResponse> workspaceResponseListFromWorkspaceDescriptionList(

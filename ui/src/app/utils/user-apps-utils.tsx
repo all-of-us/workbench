@@ -26,7 +26,7 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
   [AppType.SAS]: 'SAS',
-  [AppType.SAGEMAKER] : 'Sagemaker',
+  [AppType.SAGEMAKER]: 'Sagemaker',
 };
 
 const appStatusesRequiringUpdates: Array<AppStatus> = [
@@ -145,18 +145,17 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
-
 export const openSagemaker = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
-  localizeUserApp(
-    workspaceNamespace,
-    userApp.appName,
-    userApp.appType,
-    [],
-    false
-  );
+  // localizeUserApp(
+  //   workspaceNamespace,
+  //   userApp.appName,
+  //   userApp.appType,
+  //   [],
+  //   false
+  // );
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 

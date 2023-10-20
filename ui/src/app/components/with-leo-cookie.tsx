@@ -25,12 +25,12 @@ const LeoCookieWrapper = ({ children }) => {
             return;
           }
 
-          notificationStore.set({
-            title: 'Authentication Error',
-            message:
-              'There was an error authenticating with the environments server. Please refresh the page.',
-            showBugReportLink: true,
-          });
+          // notificationStore.set({
+          //   title: 'Authentication Error',
+          //   message:
+          //     'There was an error authenticating with the environments server. Please refresh the page.',
+          //   showBugReportLink: true,
+          // });
         })
         .finally(() => {
           setLoading(false);

@@ -18,8 +18,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
-  sasConfigIconId,
   sagemakerConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -35,8 +35,8 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   openRStudio,
-  openSAS,
   openSagemaker,
+  openSAS,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -310,7 +310,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
     [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
     [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)],
-    [UIAppType.SAGEMAKER, () => () => onClickDeleteGkeApp(sagemakerConfigIconId)]
+    [
+      UIAppType.SAGEMAKER,
+      () => () => onClickDeleteGkeApp(sagemakerConfigIconId),
+    ]
   );
 
   return (

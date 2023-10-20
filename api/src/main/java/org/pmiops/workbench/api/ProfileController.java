@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.sam.SamConfig.SAM_USERS_CLIENT;
+
 import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
 import jakarta.mail.MessagingException;
@@ -11,6 +13,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.sam.api.UsersApi;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -54,6 +57,7 @@ import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -90,6 +94,8 @@ public class ProfileController implements ProfileApiDelegate {
   private final RasLinkService rasLinkService;
   private final ComplianceTrainingService complianceTrainingService;
 
+  private final Provider<UsersApi> usersApiProvider;
+
   @Autowired
   ProfileController(
       AddressMapper addressMapper,
@@ -111,7 +117,8 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService,
-      ComplianceTrainingService complianceTrainingService) {
+      ComplianceTrainingService complianceTrainingService,
+      @Qualifier(SAM_USERS_CLIENT) Provider<UsersApi> usersApiProvider) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -132,6 +139,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rasLinkService = rasLinkService;
     this.complianceTrainingService = complianceTrainingService;
+    this.usersApiProvider = usersApiProvider;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -158,6 +166,13 @@ public class ProfileController implements ProfileApiDelegate {
       // This call should be idempotent. If the user is already registered, their profile will get
       // updated.
       fireCloudService.registerUser();
+
+      // Register user in VWB SAM.
+      try {
+        usersApiProvider.get().createUserV2(null);
+      } catch (org.broadinstitute.dsde.workbench.client.sam.ApiException e) {
+        log.log(Level.WARNING, "Unable to register user in VWB SAM", e);
+      }
 
       // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos

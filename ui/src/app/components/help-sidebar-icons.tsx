@@ -449,11 +449,11 @@ const DisplayIcon = (props: DisplayIconProps) => {
     [
       sagemakerConfigIconId,
       () => (
-          <UserAppIcon
-              {...{ userSuspended }}
-              iconConfig={icon}
-              appType={UIAppType.SAGEMAKER}
-          />
+        <UserAppIcon
+          {...{ userSuspended }}
+          iconConfig={icon}
+          appType={UIAppType.SAGEMAKER}
+        />
       ),
     ],
     [
@@ -725,7 +725,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
     keys.push('apps');
-    if(!workspace.aws) {
+    if (!workspace.aws) {
       keys.push(cromwellConfigIconId);
 
       if (config.enableRStudioGKEApp) {
@@ -739,11 +739,9 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
       if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
         keys.push('genomicExtractions');
       }
-    }
-    else {
+    } else {
       keys.push(sagemakerConfigIconId);
     }
-
   }
 
   const icons = keys.map((iconId) =>

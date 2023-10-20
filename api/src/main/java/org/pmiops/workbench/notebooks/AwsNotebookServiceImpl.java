@@ -1,10 +1,8 @@
 package org.pmiops.workbench.notebooks;
 
-import bio.terra.workspace.api.ResourceApi;
 import com.google.cloud.storage.Blob;
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.model.FileDetail;
@@ -15,14 +13,10 @@ import org.springframework.stereotype.Service;
 @Service("awsNotebookService")
 public class AwsNotebookServiceImpl implements NotebooksService {
 
-  private final Provider<ResourceApi> resourceApiProvider;
-
   private final WorkspaceDao workspaceDao;
 
   @Autowired
-  public AwsNotebookServiceImpl(
-      Provider<ResourceApi> resourceApiProvider, WorkspaceDao workspaceDao) {
-    this.resourceApiProvider = resourceApiProvider;
+  public AwsNotebookServiceImpl(WorkspaceDao workspaceDao) {
     this.workspaceDao = workspaceDao;
   }
 
@@ -30,6 +24,7 @@ public class AwsNotebookServiceImpl implements NotebooksService {
   public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
 
     List<FileDetail> fileDetails = new ArrayList<>();
+    // s3CloudStorageClient.getFilesFromS3()
     // FIXME get files from S3 bucket
     /*DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceName);
     try {

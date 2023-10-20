@@ -267,12 +267,19 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 </FlexColumn>
                 <FlexRow style={{ justifyContent: 'space-between' }}>
                   <FlexColumn>
-                  <div>{aws && <div  style={{
-                        ...styles.permissionBox,
-                        backgroundColor:
-                          colors.accent,
-                      }}>AWS</div>}</div>
-                      
+                    <div>
+                      {aws && (
+                        <div
+                          style={{
+                            ...styles.permissionBox,
+                            backgroundColor: colors.accent,
+                          }}
+                        >
+                          AWS
+                        </div>
+                      )}
+                    </div>
+
                     <div
                       style={{
                         ...styles.permissionBox,
@@ -282,9 +289,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       data-test-id='workspace-access-level'
                     >
                       {accessLevel}
-                      
                     </div>
-                    
+
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
                     </div>
