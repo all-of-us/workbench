@@ -498,7 +498,7 @@ jobs:
       - run:
           name: Yarn deps
           working_directory: ~/workbench/ui
-          command: yarn deps
+          command: yarn deps test
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui

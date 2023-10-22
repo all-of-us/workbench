@@ -40,15 +40,15 @@ Other useful helper scripts are available. To get a list of all available script
 $ yarn run
 ...
    - deps
-      yarn run codegen && yarn run build-terra-deps
+      ./src/deps/deps.sh
    - dev-up
-      yarn && yarn run deps && yarn start
+       yarn && yarn run deps test && yarn start
    - dev-up-local
-      yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start
+      yarn && yarn run deps local && REACT_APP_ENVIRONMENT=local yarn start
    - dev-up-tanagra-local
-      yarn && concurrently "yarn run start-tanagra" "yarn run dev-up-local"
+      ./src/tanagra-ui/dev-up-tanagra-local.sh
    - dev-up-test
-      yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start
+      yarn && yarn run deps test && REACT_APP_ENVIRONMENT=localtest yarn start
 ...
 ```
 

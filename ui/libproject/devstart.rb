@@ -36,7 +36,7 @@ def build(cmd_name, args)
   fontawesomeCredsLineFilePath = "gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt"
   common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
-  common.run_inline %W{yarn run deps}
+  common.run_inline %W{yarn run deps #{options.env}}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
@@ -158,6 +158,7 @@ def tanagra_dep(cmd_name, args)
   op.parse.validate
 
   environment_names_to_project_names = {
+      "dev" => "local",
       "local" => "local",
       "test" => "all-of-us-workbench-test",
       "staging" => "all-of-us-rw-staging",
@@ -320,7 +321,7 @@ class DeployUI
     }
     environment_name = project_names_to_environment_names[@opts.project]
 
-    common.run_inline(%W{yarn deps})
+    common.run_inline(%W{yarn deps #{environment_name}})
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
