@@ -7,24 +7,7 @@ do
   esac
 done
 
-cd ../tanagra-aou-utils
-if [ ! -d "tanagra" ]; then
-  echo "Cloning Tanagra repo"
-  git clone https://github.com/DataBiosphere/tanagra.git
-fi
-
-cd tanagra
-if [ -z "$version" ]; then
-  git checkout main
-else
-  git checkout tags/"$version"
-fi
-
-#Temp hack to pass the bearer token
-#This needs to be removed at some point
-cp -av ../apiContext.ts ./ui/src
-
-cd ../../ui
+./project.rb tanagra-dep --env local --version "$version"
 
 #update yarn
 yarn

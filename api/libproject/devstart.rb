@@ -2462,7 +2462,6 @@ def deploy_tanagra(cmd_name, args)
     ->(opts, v) { opts.version = v},
     "Version to deploy (e.g. your-username-test)"
   )
-  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
   op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
@@ -2508,16 +2507,9 @@ def deploy_tanagra(cmd_name, args)
 
   common = Common.new
 
-  Dir.chdir('../tanagra-aou-utils') do
-    unless File.directory?('tanagra')
-      common.status "Need to clone repo"
-      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
-    end
-    Dir.chdir('tanagra') do
-      common.status "Checkout specific Tanagra tag"
-      common.run_inline %W{git checkout tags/#{op.opts.version}}
-    end
-  end
+  env_project = ENVIRONMENTS[op.opts.project]
+  env = env_project.fetch(:env_name)
+  common.run_inline("../ui/project.rb tanagra-dep --env #{env} --version #{op.opts.version}")
 
   Dir.chdir('../tanagra-aou-utils/tanagra') do
     common.status "Building Tanagra API..."

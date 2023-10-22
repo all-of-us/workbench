@@ -71,7 +71,6 @@ def deploy_tanagra_ui(cmd_name, args)
     ->(opts, v) { opts.version = v},
     "Version to deploy (e.g. your-username-test)"
   )
-  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
   op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
@@ -107,22 +106,9 @@ def deploy_tanagra_ui(cmd_name, args)
   end
 
   common = Common.new
-  Dir.chdir('../tanagra-aou-utils') do
-    unless File.directory?('tanagra')
-      common.status "Need to clone repo"
-      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
-    end
-    Dir.chdir('tanagra') do
-      common.status "Checkout specific Tanagra tag"
-      common.run_inline %W{git checkout tags/#{op.opts.version}}
-    end
-  end
-
-  #Temp hack to pass the bearer token
-  #This needs to be removed at some point
-  Dir.chdir('../tanagra-aou-utils') do
-    common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
-  end
+  env_project = ENVIRONMENTS[op.opts.project]
+  env = env_project.fetch(:env_name)
+  tanagra_dep("tanagra-dep", ["--env", "#{env}", "--version", "#{op.opts.version}"])
 
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
@@ -156,6 +142,58 @@ def deploy_tanagra_ui(cmd_name, args)
   common.status "Deployment of Tanagra UI complete!"
 end
 
+def tanagra_dep(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--env [env]",
+    ->(opts, v) { opts.env = v},
+    "The environment we are building deps for"
+  )
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Version to deploy (e.g. your-username-test)"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("env required") unless opts.env }
+  op.parse.validate
+
+  environment_names_to_project_names = {
+      "local" => "local",
+      "test" => "all-of-us-workbench-test",
+      "staging" => "all-of-us-rw-staging",
+      "stable" => "all-of-us-rw-stabl",
+      "preprod" => "all-of-us-rw-preprod",
+      "prod" => "all-of-us-rw-prod",
+  }
+  project = environment_names_to_project_names[op.opts.env]
+
+  common = Common.new
+  Dir.chdir('../tanagra-aou-utils') do
+    unless File.directory?('tanagra')
+      common.status "Need to clone repo"
+      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
+    end
+    env_project = ENVIRONMENTS[project]
+    Dir.chdir('tanagra') do
+      if op.opts.version.nil? || op.opts.version.empty?
+        common.status "Using project specified tag from environment variables."
+        deploy_version = env_project.fetch(:tanagra_tag)
+      else
+        common.status "Checkout specified Tanagra tag"
+        deploy_version = op.opts.version
+      end
+      common.run_inline %W{git checkout tags/#{deploy_version}}
+    end
+  end
+
+  #Temp hack to pass the bearer token
+  #This needs to be removed at some point
+  Dir.chdir('../tanagra-aou-utils') do
+    common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
+  end
+  common.status "Pulling Tanagra deps complete!"
+end
+
 class DevStart
   def deploy_ui(cmd_name, args)
     DeployUI.new(cmd_name, args).run
@@ -176,6 +214,11 @@ class DevStart
                                 :invocation => "deploy-tanagra-ui",
                                 :description => "Deploys the Tanagra UI.",
                                 :fn => ->(*args) { deploy_tanagra_ui("deploy-tanagra-ui", args) }
+                            })
+    Common.register_command({
+                                :invocation => "tanagra-dep",
+                                :description => "Build Tanagra deps",
+                                :fn => ->(*args) { tanagra_dep("tanagra-dep", args) }
                             })
   end
 end

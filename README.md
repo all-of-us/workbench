@@ -220,14 +220,16 @@ To deploy the Tanagra UI and the Workbench UI together locally:
 yarn dev-up-tanagra-local
 ```
 Optional arguments:
-* `-v` Deploy a tag (Ex: 0.0.252). Default is main
+* `-v` Deploy a tag (Ex: 0.0.252). Default is :tanagra_tag in environments.rb
 
 ### Tanagra Deploy to test
 
 To deploy Tanagra (api and ui) to test (run from `workbench` directory):
 ```
-deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --version 0.0.219 --promote
+deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --promote
 ```
+Optional arguments:
+* `--version` Deploy a tag (Ex: 0.0.252). Default is :tanagra_tag in environments.rb
 
 ## Building a new CDR Database
 [Documented here](https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#)
