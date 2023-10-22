@@ -330,11 +330,6 @@ def deploy_tanagra(cmd_name, args)
     "executed on a real invocation."
   )
   op.add_option(
-    "--version [version]",
-    ->(opts, v) { opts.version = v},
-    "Version to deploy (e.g. 0.0.219)"
-  )
-  op.add_option(
     "--promote",
     ->(opts, _) { opts.promote = true},
     "Promote this version to immediately begin serving traffic"
@@ -355,7 +350,6 @@ def deploy_tanagra(cmd_name, args)
     ../api/project.rb deploy-tanagra
       --project #{op.opts.project}
       --account #{op.opts.account}
-      --version #{op.opts.version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   }
@@ -364,7 +358,6 @@ def deploy_tanagra(cmd_name, args)
     ../ui/project.rb deploy-tanagra-ui
       --project #{op.opts.project}
       --account #{op.opts.account}
-      --version #{op.opts.version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   }

@@ -125,19 +125,7 @@ def dev_up_tanagra(cmd_name, args)
   start_local_db_service()
 
   Dir.chdir('../tanagra-aou-utils') do
-    unless File.directory?('tanagra')
-      common.status "Need to clone repo"
-      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
-    end
-    Dir.chdir('tanagra') do
-      if op.opts.version
-        common.status "Checkout specific Tanagra tag"
-        common.run_inline %W{git checkout tags/#{op.opts.version}}
-      else
-        common.status "Checkout main branch"
-        common.run_inline %W{git checkout main}
-      end
-    end
+    common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
     dis_auth = op.opts.disable_auth ? '-a' : ''
     d_db = op.opts.drop_db ? ' -d' : ''
     common.status "Starting Tanagra API server"
@@ -2458,11 +2446,6 @@ def deploy_tanagra(cmd_name, args)
     "default service account."
   )
   op.add_option(
-    "--version [version]",
-    ->(opts, v) { opts.version = v},
-    "Version to deploy (e.g. your-username-test)"
-  )
-  op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
     "Don't actually deploy, just log the command lines which would be " +
@@ -2509,7 +2492,7 @@ def deploy_tanagra(cmd_name, args)
 
   env_project = ENVIRONMENTS[op.opts.project]
   env = env_project.fetch(:env_name)
-  common.run_inline("../ui/project.rb tanagra-dep --env #{env} --version #{op.opts.version}")
+  common.run_inline("../ui/project.rb tanagra-dep --env #{env}")
 
   Dir.chdir('../tanagra-aou-utils/tanagra') do
     common.status "Building Tanagra API..."

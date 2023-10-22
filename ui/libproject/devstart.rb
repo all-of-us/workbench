@@ -67,11 +67,6 @@ def deploy_tanagra_ui(cmd_name, args)
     "default service account."
   )
   op.add_option(
-    "--version [version]",
-    ->(opts, v) { opts.version = v},
-    "Version to deploy (e.g. your-username-test)"
-  )
-  op.add_option(
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
     "Don't actually deploy, just log the command lines which would be " +
@@ -108,7 +103,7 @@ def deploy_tanagra_ui(cmd_name, args)
   common = Common.new
   env_project = ENVIRONMENTS[op.opts.project]
   env = env_project.fetch(:env_name)
-  tanagra_dep("tanagra-dep", ["--env", "#{env}", "--version", "#{op.opts.version}"])
+  tanagra_dep("tanagra-dep", ["--env", "#{env}"])
 
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
