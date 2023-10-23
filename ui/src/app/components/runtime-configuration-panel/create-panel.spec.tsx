@@ -27,7 +27,7 @@ const defaultAnalysisConfig = toAnalysisConfig(
 );
 
 const setPanelContent = jest.fn();
-const setRuntimeStatus = jest.fn();
+const setRuntimeStatusRequest = jest.fn();
 
 const defaultProps: CreatePanelProps = {
   profile: ProfileStubVariables.PROFILE_STUB,
@@ -36,7 +36,7 @@ const defaultProps: CreatePanelProps = {
   creatorFreeCreditsRemaining: 0,
   runtimeStatus: RuntimeStatus.RUNNING,
   setPanelContent,
-  setRuntimeStatusRequest: setRuntimeStatus,
+  setRuntimeStatusRequest,
 };
 
 describe(CreatePanel.name, () => {
