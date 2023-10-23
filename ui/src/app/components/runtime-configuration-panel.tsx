@@ -264,17 +264,11 @@ const PanelMain = fp.flow(
       };
     };
 
-    const currentRunningCost = machineRunningCost(analysisConfig);
-
-    const runningCostValidator = {
-      currentRunningCost: runningCostValidatorWithMessage(),
-    };
-
-    const { masterDiskSize, workerDiskSize, numberOfWorkers } =
-      analysisConfig.dataprocConfig || {};
     const runningCostErrors = validate(
-      { currentRunningCost },
-      runningCostValidator
+      { currentRunningCost: machineRunningCost(analysisConfig) },
+      {
+        currentRunningCost: runningCostValidatorWithMessage(),
+      }
     );
 
     const getErrorMessageContent = () => {
@@ -285,6 +279,8 @@ const PanelMain = fp.flow(
         }
       );
 
+      const { masterDiskSize, workerDiskSize, numberOfWorkers } =
+        analysisConfig.dataprocConfig || {};
       const dataprocErrors =
         analysisConfig.computeType === ComputeType.Dataproc &&
         validate(
