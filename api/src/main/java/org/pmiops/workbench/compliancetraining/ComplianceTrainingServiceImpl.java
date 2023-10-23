@@ -37,6 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
+  public static final String rtTrainingCourseId = "9ad49c70-3b72-4789-8282-5794efcd4ce1";
+  public static final String ctTrainingCourseId = "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d";
+
   private static final Logger log = Logger.getLogger(ComplianceTrainingServiceImpl.class.getName());
   private final MoodleService moodleService;
   private final Provider<WorkbenchConfig> configProvider;
@@ -233,9 +236,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
     Map<String, DbAccessModule.DbAccessModuleName> courseToAccessModuleMap =
         Map.of(
-            configProvider.get().absorb.rtTrainingCourseId,
+            rtTrainingCourseId,
             DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING,
-            configProvider.get().absorb.ctTrainingCourseId,
+            ctTrainingCourseId,
             DbAccessModule.DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
     var enrollments = absorbService.getActiveEnrollmentsForUser(credentials);

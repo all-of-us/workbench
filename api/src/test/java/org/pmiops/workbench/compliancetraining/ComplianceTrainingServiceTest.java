@@ -65,8 +65,6 @@ public class ComplianceTrainingServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
-  private static final String RT_ABSORB_COURSE_ID = "1234";
-  private static final String CT_ABSORB_COURSE_ID = "5678";
   private static final Credentials FAKE_CREDENTIALS = new Credentials("fake", "fake", "fake");
 
   private static DbUser user;
@@ -130,9 +128,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
-
-    providedWorkbenchConfig.absorb.rtTrainingCourseId = RT_ABSORB_COURSE_ID;
-    providedWorkbenchConfig.absorb.ctTrainingCourseId = CT_ABSORB_COURSE_ID;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
@@ -625,7 +620,8 @@ public class ComplianceTrainingServiceTest {
   private void stubAbsorbNoCoursesComplete() throws org.pmiops.workbench.absorb.ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
-        .thenReturn(List.of(new Enrollment(RT_ABSORB_COURSE_ID, null)));
+        .thenReturn(
+            List.of(new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null)));
   }
 
   private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime)
@@ -634,8 +630,8 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
-                new Enrollment(CT_ABSORB_COURSE_ID, null)));
+                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime),
+                new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null)));
   }
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
@@ -644,8 +640,9 @@ public class ComplianceTrainingServiceTest {
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(
-                new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
-                new Enrollment(CT_ABSORB_COURSE_ID, ctCompletionTime)));
+                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, rtCompletionTime),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime)));
   }
 
   private Optional<DbComplianceTrainingVerification> getVerification(
