@@ -126,7 +126,7 @@
     "enableRStudioGKEApp": true,
     "enableSasGKEApp": false,
     "enableDataExplorer": false,
-    "enableHasEhrData": false
+    "enableHasEhrData": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
