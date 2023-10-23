@@ -265,52 +265,53 @@ const PanelMain = fp.flow(
 
     const currentRunningCost = machineRunningCost(analysisConfig);
 
-    const diskValidator = {
-      diskSize: diskSizeValidatorWithMessage('standard'),
-    };
-
     const runningCostValidator = {
       currentRunningCost: runningCostValidatorWithMessage(),
-    };
-    // We don't clear dataproc config when we change compute type so we can't combine this with the
-    // above or else we can end up with phantom validation fails
-    const dataprocValidators = {
-      masterDiskSize: diskSizeValidatorWithMessage('master'),
-      workerDiskSize: diskSizeValidatorWithMessage('worker'),
-      numberOfWorkers: {
-        numericality: {
-          greaterThanOrEqualTo: 2,
-          message: 'Dataproc requires at least 2 worker nodes',
-        },
-      },
     };
 
     const { masterDiskSize, workerDiskSize, numberOfWorkers } =
       analysisConfig.dataprocConfig || {};
-    const diskErrors = validate(
-      { diskSize: analysisConfig.diskConfig.size },
-      diskValidator
-    );
     const runningCostErrors = validate(
       { currentRunningCost },
       runningCostValidator
     );
-    const dataprocErrors =
-      analysisConfig.computeType === ComputeType.Dataproc
-        ? validate(
-            { masterDiskSize, workerDiskSize, numberOfWorkers },
-            dataprocValidators
-          )
-        : undefined;
 
     const getErrorMessageContent = () => {
       const errorDivs = [];
+
+      const diskValidator = {
+        diskSize: diskSizeValidatorWithMessage('standard'),
+      };
+      const diskErrors = validate(
+        { diskSize: analysisConfig.diskConfig.size },
+        diskValidator
+      );
       if (diskErrors) {
         errorDivs.push(summarizeErrors(diskErrors));
       }
+
+      // We don't clear dataproc config when we change compute type so we can't combine this with the
+      // runningCostValidator or else we can end up with phantom validation fails
+      const dataprocValidators = {
+        masterDiskSize: diskSizeValidatorWithMessage('master'),
+        workerDiskSize: diskSizeValidatorWithMessage('worker'),
+        numberOfWorkers: {
+          numericality: {
+            greaterThanOrEqualTo: 2,
+            message: 'Dataproc requires at least 2 worker nodes',
+          },
+        },
+      };
+      const dataprocErrors =
+        analysisConfig.computeType === ComputeType.Dataproc &&
+        validate(
+          { masterDiskSize, workerDiskSize, numberOfWorkers },
+          dataprocValidators
+        );
       if (dataprocErrors) {
         errorDivs.push(summarizeErrors(dataprocErrors));
       }
+
       if (!costErrorsAsWarnings && runningCostErrors) {
         errorDivs.push(summarizeErrors(runningCostErrors));
       }
