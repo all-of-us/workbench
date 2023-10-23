@@ -390,10 +390,7 @@ const PanelMain = fp.flow(
                         ],
                         [
                           deletePDSelected &&
-                            !(
-                              analysisConfig.computeType ===
-                              ComputeType.Dataproc
-                            ),
+                            analysisConfig.computeType !== ComputeType.Dataproc,
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
                         ],
                         [
