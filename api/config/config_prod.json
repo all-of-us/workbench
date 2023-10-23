@@ -93,10 +93,8 @@
   "absorb": {
     "externalDepartmentId": "Researchers",
     "enabledForNewUsers": false,
-    "rtTrainingCourseId": "TODO",
-    "ctTrainingCourseId": "TODO",
-    "samlIdentityProviderId": "TODO",
-    "samlServiceProviderId": "TODO"
+    "samlIdentityProviderId": "C02celxus",
+    "samlServiceProviderId": "638082479253"
   },
   "moodle": {
     "host": "aou.nnlm.gov",
