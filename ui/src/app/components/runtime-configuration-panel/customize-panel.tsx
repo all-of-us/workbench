@@ -49,10 +49,9 @@ interface Props {
   creatorFreeCreditsRemaining: number;
   currentRuntime: Runtime;
   environmentChanged: boolean;
+  errorMessageContent: JSX.Element[];
   existingAnalysisConfig: AnalysisConfig;
   gcePersistentDisk: Disk;
-  getErrorMessageContent: () => JSX.Element[];
-  getWarningMessageContent: () => JSX.Element[];
   onClose: () => void;
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
@@ -65,6 +64,7 @@ interface Props {
   status: RuntimeStatus;
   updateMessaging: UpdateMessaging;
   validMainMachineTypes: Machine[];
+  warningMessageContent: JSX.Element[];
   workspaceData: WorkspaceData;
 }
 export const CustomizePanel = ({
@@ -74,10 +74,9 @@ export const CustomizePanel = ({
   creatorFreeCreditsRemaining,
   currentRuntime,
   environmentChanged,
+  errorMessageContent,
   existingAnalysisConfig,
   gcePersistentDisk,
-  getErrorMessageContent,
-  getWarningMessageContent,
   onClose,
   profile,
   requestAnalysisConfig,
@@ -90,6 +89,7 @@ export const CustomizePanel = ({
   status,
   updateMessaging,
   validMainMachineTypes,
+  warningMessageContent,
   workspaceData,
 }: Props) => {
   const disableControls = runtimeExists && !isActionable(status);
@@ -286,22 +286,22 @@ export const CustomizePanel = ({
           <div>{updateMessaging.warn}</div>
         </WarningMessage>
       )}
-      {getErrorMessageContent().length > 0 && (
+      {errorMessageContent.length > 0 && (
         <ErrorMessage
           iconSize={16}
           iconPosition={'top'}
           data-test-id={'runtime-error-messages'}
         >
-          {getErrorMessageContent()}
+          {errorMessageContent}
         </ErrorMessage>
       )}
-      {getWarningMessageContent().length > 0 && (
+      {warningMessageContent.length > 0 && (
         <WarningMessage
           iconSize={16}
           iconPosition={'top'}
           data-test-id={'runtime-warning-messages'}
         >
-          {getWarningMessageContent()}
+          {warningMessageContent}
         </WarningMessage>
       )}
       {unattachedPdExists ? (

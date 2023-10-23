@@ -317,14 +317,6 @@ const PanelMain = fp.flow(
       return errorDivs;
     };
 
-    const getWarningMessageContent = () => {
-      const warningDivs = [];
-      if (costErrorsAsWarnings && runningCostErrors) {
-        warningDivs.push(summarizeErrors(runningCostErrors));
-      }
-      return warningDivs;
-    };
-
     // For computeType Standard: We are moving away from storage disk as Standard
     // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
     // Eventually we will be removing this option altogether
@@ -342,8 +334,6 @@ const PanelMain = fp.flow(
         [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
       ).includes(status as RuntimeStatus) &&
       runtimeCanBeCreated;
-
-    const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
 
     return (
       <div id='runtime-panel'>
@@ -409,12 +399,17 @@ const PanelMain = fp.flow(
                           () => RuntimeStatusRequest.DeleteRuntime,
                         ],
                         [
-                          deletePDSelected && !usingDataproc,
+                          deletePDSelected &&
+                            !(
+                              analysisConfig.computeType ===
+                              ComputeType.Dataproc
+                            ),
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
                         ],
                         [
                           // TODO: this configuration is not supported.  Remove?
-                          deletePDSelected && usingDataproc,
+                          deletePDSelected &&
+                            analysisConfig.computeType === ComputeType.Dataproc,
                           () => RuntimeStatusRequest.DeletePD,
                         ]
                       );
@@ -423,7 +418,9 @@ const PanelMain = fp.flow(
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
                     appType={UIAppType.JUPYTER}
-                    usingDataproc={usingDataproc}
+                    usingDataproc={
+                      analysisConfig.computeType === ComputeType.Dataproc
+                    }
                     disk={gcePersistentDisk}
                   />
                 );
@@ -488,8 +485,6 @@ const PanelMain = fp.flow(
                   environmentChanged,
                   existingAnalysisConfig,
                   gcePersistentDisk,
-                  getErrorMessageContent,
-                  getWarningMessageContent,
                   onClose,
                   profile,
                   requestAnalysisConfig,
@@ -506,6 +501,12 @@ const PanelMain = fp.flow(
                 allowDataproc={
                   findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
                     ?.hasWgsData
+                }
+                errorMessageContent={getErrorMessageContent()}
+                warningMessageContent={
+                  costErrorsAsWarnings && runningCostErrors
+                    ? summarizeErrors(runningCostErrors)
+                    : []
                 }
                 workspaceData={workspace}
               />
