@@ -211,16 +211,16 @@ To deploy the Tanagra api locally (NOTE: the Tanagra api is dependent on the wor
 ./project.rb dev-up-tanagra
 ```
 Optional arguments:
-* `--disable-auth` Disable authZ
-* `--version` Deploy a tag (Ex: 0.0.252). Default is main
-* `--drop-db` Drop the Tanagra database and recreate
+*  `--disable-auth` Disable authZ
+*  `--version` Deploy a tag (Ex: 0.0.252). Default is :tanagra_tag in environments.rb
+*  `--drop-db` Drop the Tanagra database and recreate
 
 To deploy the Tanagra UI and the Workbench UI together locally:
 ```
 yarn dev-up-tanagra-local
 ```
 Optional arguments:
-* `-v` Deploy a tag (Ex: 0.0.252). Default is :tanagra_tag in environments.rb
+*  `-v` Deploy a tag (Ex: 0.0.252). Default is :tanagra_tag in environments.rb
 
 ### Tanagra Deploy to test
 
