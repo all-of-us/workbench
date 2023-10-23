@@ -34,9 +34,9 @@ const defaultProps: CreatePanelProps = {
   workspace: buildWorkspaceStub(),
   analysisConfig: defaultAnalysisConfig,
   creatorFreeCreditsRemaining: 0,
-  status: RuntimeStatus.RUNNING,
+  runtimeStatus: RuntimeStatus.RUNNING,
   setPanelContent,
-  setRuntimeStatus,
+  setRuntimeStatusRequest: setRuntimeStatus,
 };
 
 describe(CreatePanel.name, () => {

@@ -99,7 +99,7 @@ const PanelMain = fp.flow(
       );
     }
 
-    const [status, setRuntimeStatusRequest] = useRuntimeStatus(
+    const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
       googleProject
     );
@@ -145,7 +145,7 @@ const PanelMain = fp.flow(
         [
           currentRuntime === null ||
             currentRuntime === undefined ||
-            status === RuntimeStatus.UNKNOWN,
+            runtimeStatus === RuntimeStatus.UNKNOWN,
           () => PanelContent.Create,
         ],
         [
@@ -189,7 +189,8 @@ const PanelMain = fp.flow(
       }
     }, [analysisConfig.computeType]);
 
-    const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
+    const runtimeExists =
+      (runtimeStatus && isVisible(runtimeStatus)) || !!pendingRuntime;
 
     const attachedPdExists =
       !!gcePersistentDisk &&
@@ -323,13 +324,11 @@ const PanelMain = fp.flow(
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
           !analysisConfig.diskConfig.detachable));
-    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-    // where we get 'status' from
     const runtimeCanBeUpdated =
       environmentChanged &&
       (
         [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
-      ).includes(status as RuntimeStatus) &&
+      ).includes(runtimeStatus) &&
       runtimeCanBeCreated;
 
     return (
@@ -361,8 +360,8 @@ const PanelMain = fp.flow(
                     creatorFreeCreditsRemaining,
                     profile,
                     setPanelContent,
-                    setRuntimeStatus: setRuntimeStatusRequest,
-                    status,
+                    setRuntimeStatusRequest,
+                    runtimeStatus,
                     workspace,
                   }}
                 />
@@ -488,10 +487,10 @@ const PanelMain = fp.flow(
                   runtimeCanBeCreated,
                   runtimeCanBeUpdated,
                   runtimeExists,
+                  runtimeStatus,
                   setAnalysisConfig,
                   setPanelContent,
                   setRuntimeStatusRequest,
-                  status,
                   updateMessaging,
                   validMainMachineTypes,
                 }}

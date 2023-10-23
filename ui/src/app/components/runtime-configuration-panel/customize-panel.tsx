@@ -58,10 +58,10 @@ interface Props {
   runtimeCanBeCreated: boolean;
   runtimeCanBeUpdated: boolean;
   runtimeExists: boolean;
+  runtimeStatus: RuntimeStatus;
   setAnalysisConfig: (config: AnalysisConfig) => void;
   setPanelContent: (pc: PanelContent) => void;
   setRuntimeStatusRequest: (rs: RuntimeStatusRequest) => Promise<void>;
-  status: RuntimeStatus;
   updateMessaging: UpdateMessaging;
   validMainMachineTypes: Machine[];
   warningMessageContent: JSX.Element[];
@@ -83,16 +83,16 @@ export const CustomizePanel = ({
   runtimeCanBeCreated,
   runtimeCanBeUpdated,
   runtimeExists,
+  runtimeStatus,
   setAnalysisConfig,
   setPanelContent,
   setRuntimeStatusRequest,
-  status,
   updateMessaging,
   validMainMachineTypes,
   warningMessageContent,
   workspaceData,
 }: Props) => {
-  const disableControls = runtimeExists && !isActionable(status);
+  const disableControls = runtimeExists && !isActionable(runtimeStatus);
 
   const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
   const unattachedDiskNeedsRecreate =
@@ -109,9 +109,9 @@ export const CustomizePanel = ({
             creatorFreeCreditsRemaining,
             profile,
             analysisConfig,
-            status,
             environmentChanged,
           }}
+          status={runtimeStatus}
           workspace={workspaceData}
           onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
           onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -199,7 +199,7 @@ export const CustomizePanel = ({
               {analysisConfig.computeType === ComputeType.Dataproc && (
                 <TooltipTrigger
                   content={
-                    status !== RuntimeStatus.RUNNING
+                    runtimeStatus !== RuntimeStatus.RUNNING
                       ? 'Start your Dataproc cluster to access the Spark console'
                       : null
                   }
@@ -207,7 +207,7 @@ export const CustomizePanel = ({
                   <LinkButton
                     data-test-id='manage-spark-console'
                     disabled={
-                      status !== RuntimeStatus.RUNNING ||
+                      runtimeStatus !== RuntimeStatus.RUNNING ||
                       existingAnalysisConfig.computeType !==
                         ComputeType.Dataproc
                     }
@@ -223,7 +223,7 @@ export const CustomizePanel = ({
         {analysisConfig.computeType === ComputeType.Dataproc && (
           <DataProcConfigSelector
             disabled={disableControls}
-            runtimeStatus={status}
+            runtimeStatus={runtimeStatus}
             dataprocExists={
               runtimeExists && existingAnalysisConfig.dataprocConfig !== null
             }
