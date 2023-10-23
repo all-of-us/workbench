@@ -284,7 +284,6 @@ const PanelMain = fp.flow(
           diskSize: diskSizeValidatorWithMessage('standard'),
         }
       );
-      const diskErrorDivs = diskErrors ? summarizeErrors(diskErrors) : [];
 
       const dataprocErrors =
         analysisConfig.computeType === ComputeType.Dataproc &&
@@ -303,16 +302,15 @@ const PanelMain = fp.flow(
             },
           }
         );
-      const dataprocErrorDivs = dataprocErrors
-        ? summarizeErrors(dataprocErrors)
-        : [];
 
-      const runningCostErrorDivs =
-        !costErrorsAsWarnings && runningCostErrors
+      return [
+        ...(diskErrors ? summarizeErrors(diskErrors) : []),
+        ...(dataprocErrors ? summarizeErrors(dataprocErrors) : []),
+        // only report cost errors -as errors- if costErrorsAsWarnings is false
+        ...(!costErrorsAsWarnings && runningCostErrors
           ? summarizeErrors(runningCostErrors)
-          : [];
-
-      return [...diskErrorDivs, ...dataprocErrorDivs, ...runningCostErrorDivs];
+          : []),
+      ];
     };
 
     // For computeType Standard: We are moving away from storage disk as Standard
@@ -500,6 +498,7 @@ const PanelMain = fp.flow(
                 }
                 errorMessageContent={getErrorMessageContent()}
                 warningMessageContent={
+                  // if costErrorsAsWarnings is false, we report them as errors.  See getErrorMessageContent()
                   costErrorsAsWarnings && runningCostErrors
                     ? summarizeErrors(runningCostErrors)
                     : []
