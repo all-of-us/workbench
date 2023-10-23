@@ -277,45 +277,41 @@ const PanelMain = fp.flow(
     );
 
     const getErrorMessageContent = () => {
-      const errorDivs = [];
-
-      const diskValidator = {
-        diskSize: diskSizeValidatorWithMessage('standard'),
-      };
       const diskErrors = validate(
         { diskSize: analysisConfig.diskConfig.size },
-        diskValidator
+        {
+          diskSize: diskSizeValidatorWithMessage('standard'),
+        }
       );
-      if (diskErrors) {
-        errorDivs.push(summarizeErrors(diskErrors));
-      }
+      const diskErrorDivs = diskErrors ? summarizeErrors(diskErrors) : [];
 
-      // We don't clear dataproc config when we change compute type so we can't combine this with the
-      // runningCostValidator or else we can end up with phantom validation fails
-      const dataprocValidators = {
-        masterDiskSize: diskSizeValidatorWithMessage('master'),
-        workerDiskSize: diskSizeValidatorWithMessage('worker'),
-        numberOfWorkers: {
-          numericality: {
-            greaterThanOrEqualTo: 2,
-            message: 'Dataproc requires at least 2 worker nodes',
-          },
-        },
-      };
       const dataprocErrors =
         analysisConfig.computeType === ComputeType.Dataproc &&
         validate(
           { masterDiskSize, workerDiskSize, numberOfWorkers },
-          dataprocValidators
+          // We don't clear dataproc config when we change compute type so we can't combine this with the
+          // runningCostValidator or else we can end up with phantom validation fails
+          {
+            masterDiskSize: diskSizeValidatorWithMessage('master'),
+            workerDiskSize: diskSizeValidatorWithMessage('worker'),
+            numberOfWorkers: {
+              numericality: {
+                greaterThanOrEqualTo: 2,
+                message: 'Dataproc requires at least 2 worker nodes',
+              },
+            },
+          }
         );
-      if (dataprocErrors) {
-        errorDivs.push(summarizeErrors(dataprocErrors));
-      }
+      const dataprocErrorDivs = dataprocErrors
+        ? summarizeErrors(dataprocErrors)
+        : [];
 
-      if (!costErrorsAsWarnings && runningCostErrors) {
-        errorDivs.push(summarizeErrors(runningCostErrors));
-      }
-      return errorDivs;
+      const runningCostErrorDivs =
+        !costErrorsAsWarnings && runningCostErrors
+          ? summarizeErrors(runningCostErrors)
+          : [];
+
+      return [...diskErrorDivs, ...dataprocErrorDivs, ...runningCostErrorDivs];
     };
 
     // For computeType Standard: We are moving away from storage disk as Standard
