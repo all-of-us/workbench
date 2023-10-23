@@ -187,7 +187,7 @@ export const CustomizePanel = ({
                 options={[ComputeType.Standard, ComputeType.Dataproc]}
                 value={analysisConfig.computeType || ComputeType.Standard}
                 onChange={({ value: computeType }) =>
-                  // When the compute type changes, we need to normalize the config and potentially restore defualts.
+                  // When the compute type changes, we need to normalize the config and potentially restore defaults.
                   setAnalysisConfig(
                     withAnalysisConfigDefaults(
                       { ...analysisConfig, computeType },
