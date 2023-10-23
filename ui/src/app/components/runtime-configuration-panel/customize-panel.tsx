@@ -42,7 +42,7 @@ import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
 import { PresetSelector } from './preset-selector';
 
-interface Props {
+export interface CustomizePanelProps {
   allowDataproc: boolean;
   analysisConfig: AnalysisConfig;
   attachedPdExists: boolean;
@@ -91,7 +91,7 @@ export const CustomizePanel = ({
   validMainMachineTypes,
   warningMessageContent,
   workspaceData,
-}: Props) => {
+}: CustomizePanelProps) => {
   const disableControls = runtimeExists && !isActionable(runtimeStatus);
 
   const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
