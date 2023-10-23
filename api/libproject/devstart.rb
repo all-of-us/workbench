@@ -127,7 +127,7 @@ def dev_up_tanagra(cmd_name, args)
   Dir.chdir('../tanagra-aou-utils') do
     common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
     dis_auth = op.opts.disable_auth ? '-a' : ''
-    d_db = op.opts.drop_db ? ' -d' : ''
+    d_db = op.opts.drop_db ? '-d' : ''
     common.status "Starting Tanagra API server"
     common.run_inline %W{./run_tanagra_server.sh #{dis_auth} #{d_db}}
   end
