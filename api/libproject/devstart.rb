@@ -2490,7 +2490,6 @@ def deploy_tanagra(cmd_name, args)
 
   common = Common.new
 
-  env_project = ENVIRONMENTS[op.opts.project]
   env = env_project.fetch(:env_name)
   common.run_inline("../ui/project.rb tanagra-dep --env #{env}")
 
@@ -2510,7 +2509,7 @@ def deploy_tanagra(cmd_name, args)
     common.run_inline("envsubst < tanagra_env_variables_template.yaml > appengine/tanagra_env_variables.yaml")
   end
 
-  deploy_version = "tanagra-" + op.opts.version
+  deploy_version = "tanagra-" + env_project.fetch(:tanagra_tag)
   deploy_version.gsub!(".", "-")
 
   Dir.chdir('../tanagra-aou-utils/appengine') do
