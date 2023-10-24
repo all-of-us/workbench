@@ -58,13 +58,15 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
+  // Get all google project ids associated with user
+  // Filter out the map entries from freeTierForAllWorkspace for all the google project ids/user
   private UserBQCost getAllWorkspaceCostPerUser(
       long userId, Map<String, Double> freeTierForAllWorkspace) {
     List<String> googleProjectForUser = workspaceDao.getGoogleProjectForUser(userId);
-    Map<String, Double> freeTierForUserWorkspace =
+    Map<String, Double> bqCostForAllUserWorkspaces =
         freeTierForAllWorkspace.entrySet().stream()
             .filter((entry) -> googleProjectForUser.contains(entry.getKey()))
             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-    return new UserBQCost().userId(userId).workspaceBQCost(freeTierForUserWorkspace);
+    return new UserBQCost().userId(userId).workspaceBQCost(bqCostForAllUserWorkspaces);
   }
 }

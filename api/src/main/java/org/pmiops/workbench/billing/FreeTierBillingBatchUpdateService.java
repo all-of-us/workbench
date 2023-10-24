@@ -5,15 +5,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
-import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.UserBQCost;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +12,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.UserBQCost;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Class to call the {@link FreeTierBillingService} with batches of users. This ensures that
