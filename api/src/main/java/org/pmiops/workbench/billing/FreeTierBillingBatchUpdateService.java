@@ -63,6 +63,7 @@ public class FreeTierBillingBatchUpdateService {
   public void checkAndAlertFreeTierBillingUsage(List<UserBQCost> userBQCostReq) {
     Map<String, Double> userWorkspaceBQCosts = new HashMap<String, Double>();
 
+    // Aggregate the BQ cost for all users in the batch
     userBQCostReq.forEach(
         userBQCost -> userWorkspaceBQCosts.putAll(userBQCost.getWorkspaceBQCost()));
 
