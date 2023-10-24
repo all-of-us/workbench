@@ -21,6 +21,11 @@ cron:
   schedule: every 30 minutes
   timezone: UTC
   target: api
+- description: Find and alert users that have exceeded their free tier billing usage using cloud task
+  url: "/v1/cron/checkFreeTierBillingUsageCloudTask"
+  schedule: every 30 minutes
+  timezone: UTC
+  target: api
 - description: >
     Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
     the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
