@@ -19,16 +19,16 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   private final UserService userService;
 
-  private final FreeTierBillingBatchUpdateService freeTierBillingBatchUpdateService;
+  private final FreeTierBillingBatchUpdateService freeTierBillingService;
   private final WorkspaceDao workspaceDao;
 
   @Autowired
   OfflineBillingController(
-      FreeTierBillingBatchUpdateService freeTierBillingBatchUpdateService,
+      FreeTierBillingBatchUpdateService freeTierBillingService,
       TaskQueueService taskQueueService,
       UserService userService,
       WorkspaceDao workspaceDao) {
-    this.freeTierBillingBatchUpdateService = freeTierBillingBatchUpdateService;
+    this.freeTierBillingService = freeTierBillingService;
     this.taskQueueService = taskQueueService;
     this.userService = userService;
     this.workspaceDao = workspaceDao;
@@ -36,9 +36,15 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
+    freeTierBillingService.checkFreeTierBillingUsage();
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> checkFreeTierBillingUsageCloudTask() {
     // Get cost for all workspace from BQ
     Map<String, Double> freeTierForAllWorkspace =
-        freeTierBillingBatchUpdateService.getFreeTierWorkspaceCostsFromBQ();
+        freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
 
     // Get all user IDS and then set BQ cost for all workspace user has
     List<Long> allUserIds = userService.getAllUserIds();

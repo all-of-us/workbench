@@ -2448,6 +2448,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/cron/checkFreeTierBillingUsageCloudTask:
+    get:
+      tags:
+        - offlineBilling
+        - cron
+      description: Find and alert users that have exceeded their free tier billing
+        usage
+      operationId: checkFreeTierBillingUsageCloudTask
+      security: [ ]
+      responses:
+        204:
+          description: No Error
+          content: { }
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cron/groupAndPushSynchronizeAccessTasks:
     get:
       tags:

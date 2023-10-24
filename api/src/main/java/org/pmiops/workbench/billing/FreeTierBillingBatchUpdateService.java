@@ -2,14 +2,9 @@ package org.pmiops.workbench.billing;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -17,6 +12,15 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.UserBQCost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Provider;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Class to call the {@link FreeTierBillingService} with batches of users. This ensures that
@@ -53,8 +57,9 @@ public class FreeTierBillingBatchUpdateService {
   }
 
   /**
-   * 1- Get users who have active free tier workspaces 2- Iterate over these users in batches of X
-   * and find the cost of their workspaces before/after
+   * Takes in List of : user and all BQ cost of workspace for the user
+   *
+   * @param userBQCostReq
    */
   public void checkAndAlertFreeTierBillingUsage(List<UserBQCost> userBQCostReq) {
     Map<String, Double> userWorkspaceBQCosts = new HashMap<String, Double>();
@@ -68,6 +73,35 @@ public class FreeTierBillingBatchUpdateService {
             .collect(Collectors.toSet());
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
+  }
+
+  /**
+   * 1- Get users who have active free tier workspaces 2- Iterate over these users in batches of X
+   * and find the cost of their workspaces before/after
+   */
+  public void checkFreeTierBillingUsage() {
+    logger.info("Checking Free Tier Billing usage - start");
+
+    Iterable<DbUser> freeTierActiveWorkspaceCreators = userDao.findAll();
+    long numberOfUsers = Iterators.size(freeTierActiveWorkspaceCreators.iterator());
+    int count = 0;
+
+    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
+
+    logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
+
+    for (List<DbUser> usersPartition :
+        Iterables.partition(
+            freeTierActiveWorkspaceCreators, freeTierCronUserBatchSizeFromConfig())) {
+      logger.info(
+          String.format(
+              "Processing users batch of size/total: %d/%d. Current iteration is: %d",
+              usersPartition.size(), numberOfUsers, count++));
+      freeTierBillingService.checkFreeTierBillingUsageForUsers(
+          new HashSet<>(usersPartition), allBQCosts);
+    }
+
+    logger.info("Checking Free Tier Billing usage - finish");
   }
 
   public Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
