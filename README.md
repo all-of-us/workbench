@@ -228,7 +228,8 @@ Optional arguments:
 
 ### Tanagra Deploy to test
 
-To deploy Tanagra (api and ui) to test (run from `workbench` directory):
+To deploy Tanagra (api and ui) to test (run from `workbench` directory). 
+Test deployments will only use tag :tanagra_tag in the envirionments.rb:
 ```
 deploy/project.rb deploy-tanagra --project all-of-us-workbench-test --promote
 ```
