@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -62,7 +63,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   // Filter out the map entries from freeTierForAllWorkspace for all the google project ids/user
   private UserBQCost getAllWorkspaceCostPerUser(
       long userId, Map<String, Double> freeTierForAllWorkspace) {
-    List<String> googleProjectForUser = workspaceDao.getGoogleProjectForUser(userId);
+    Set<String> googleProjectForUser = workspaceDao.getGoogleProjectForUser(userId);
+
     Map<String, Double> bqCostForAllUserWorkspaces =
         freeTierForAllWorkspace.entrySet().stream()
             .filter((entry) -> googleProjectForUser.contains(entry.getKey()))
