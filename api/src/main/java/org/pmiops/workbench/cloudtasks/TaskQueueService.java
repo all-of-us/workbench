@@ -26,7 +26,8 @@ import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
-import org.pmiops.workbench.model.UserListRequest;
+import org.pmiops.workbench.model.UserBQCost;
+import org.pmiops.workbench.model.UserWorkspaceBQCostRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
 
@@ -115,16 +116,16 @@ public class TaskQueueService {
                     new AuditProjectAccessRequest().userIds(batch)));
   }
 
-  public void groupAndPushFreeTierBilling(List<Long> userIds) {
+  public void groupAndPushFreeTierBilling(List<UserBQCost> userCostList) {
     Integer freeTierCronUserBatchSize =
         workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
-    CloudTasksUtils.partitionList(userIds, freeTierCronUserBatchSize)
+    CloudTasksUtils.partitionList(userCostList, freeTierCronUserBatchSize)
         .forEach(
             batch ->
                 createAndPushTask(
                     FREE_TIER_BILLING_QUEUE,
                     CHECK_AND_ALERT_FREE_TIER_USAGE,
-                    new UserListRequest().userIds(batch)));
+                    new UserWorkspaceBQCostRequest().userCostList(batch)));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {

@@ -14,6 +14,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.UserBQCost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,17 +56,21 @@ public class FreeTierBillingBatchUpdateService {
    * 1- Get users who have active free tier workspaces 2- Iterate over these users in batches of X
    * and find the cost of their workspaces before/after
    */
-  public void checkAndAlertFreeTierBillingUsage(List<Long> userId) {
-    Map<String, Double> allBQCosts = getFreeTierWorkspaceCostsFromBQ();
+  public void checkAndAlertFreeTierBillingUsage(List<UserBQCost> userBQCostReq) {
+    Map<String, Double> userWorkspaceBQCosts = new HashMap<String, Double>();
 
-    logger.info(String.format("Retrieved all BQ costs, size is: %d", allBQCosts.size()));
+    userBQCostReq.forEach(
+        userBQCost -> userWorkspaceBQCosts.putAll(userBQCost.getWorkspaceBQCost()));
 
-    Set<DbUser> userSet =
-        userId.stream().map(userDao::findUserByUserId).collect(Collectors.toSet());
-    freeTierBillingService.checkFreeTierBillingUsageForUsers(userSet, allBQCosts);
+    Set<DbUser> dbUserSet =
+        userBQCostReq.stream()
+            .map((userCost) -> userDao.findUserByUserId(userCost.getUserId()))
+            .collect(Collectors.toSet());
+
+    freeTierBillingService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);
   }
 
-  private Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
+  public Map<String, Double> getFreeTierWorkspaceCostsFromBQ() {
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT id, SUM(cost) cost FROM `"

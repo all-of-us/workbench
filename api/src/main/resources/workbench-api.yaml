@@ -4303,7 +4303,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserListRequest'
+              $ref: '#/components/schemas/UserWorkspaceBQCostRequest'
         required: true
       responses:
         200:
@@ -11355,15 +11355,27 @@ components:
           items:
             type: integer
             format: int64
-    UserListRequest:
+    UserWorkspaceBQCostRequest:
       type: object
       properties:
-        userIds:
+        userCostList:
           type: array
           description: List of users return from cloud task
           items:
-            type: integer
-            format: int64
+            $ref: '#/components/schemas/UserBQCost'
+    UserBQCost:
+      type: object
+      properties:
+        userId:
+          description: user id
+          type: integer
+          format: int64
+        workspaceBQCost:
+          description: Map with google project key and cost as value
+          type: object
+          additionalProperties:
+            type: number
+            format: double
     ProcessEgressEventRequest:
       required:
       - eventId

@@ -185,4 +185,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + "WHERE w.creator IS NOT NULL "
           + "AND w.creator in (:creators)")
   List<WorkspaceCostView> getWorkspaceCostViews(@Param("creators") Set<DbUser> creators);
+
+  @Query(
+      "SELECT w.googleProject AS googleProject "
+          + "FROM DbWorkspace w "
+          + "WHERE w.creator.userId = (:creatorid)")
+  List<String> getGoogleProjectForUser(@Param("creatorid") long creatorId);
 }
