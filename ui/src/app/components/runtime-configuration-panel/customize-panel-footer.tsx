@@ -10,7 +10,7 @@ import { FlexRow } from 'app/components/flex';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
 
-interface CustomizePanelFooterProps {
+export interface CustomizePanelFooterProps {
   analysisConfig: AnalysisConfig;
   currentRuntime: Runtime;
   disableControls: boolean;

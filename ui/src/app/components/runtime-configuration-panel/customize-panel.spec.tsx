@@ -4,14 +4,9 @@ import * as React from 'react';
 
 import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { runtimePresets } from '../../utils/runtime-presets';
 import { render, screen, waitFor } from '@testing-library/react';
 import { allMachineTypes, ComputeType } from 'app/utils/machines';
-import {
-  PanelContent,
-  toAnalysisConfig,
-  UpdateMessaging,
-} from 'app/utils/runtime-utils';
+import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
