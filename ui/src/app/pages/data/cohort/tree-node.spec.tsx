@@ -1,8 +1,16 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { CohortBuilderApi, Domain } from 'generated/fetch';
 
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortCriteriaStore,
@@ -50,7 +58,7 @@ describe('TreeNode', () => {
     });
   });
   it('should create', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TreeNode
         autocompleteSelection={undefined}
         groupSelections={[]}
@@ -64,10 +72,10 @@ describe('TreeNode', () => {
         domain={Domain.OBSERVATION}
       />
     );
-    expect(wrapper).toBeTruthy();
+    expect(container).not.toBeEmpty();
   });
   it('should display Versioned if SURVEY is COPE', async () => {
-    const wrapper = mount(
+    const { container } = render(
       <TreeNode
         autocompleteSelection={undefined}
         groupSelections={[]}
@@ -81,8 +89,7 @@ describe('TreeNode', () => {
         versionedSurveyIds={VersionedSurveyStubVariables.map(({ id }) => id)}
       />
     );
-    expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="displayName"]').text()).toContain(
+    expect(container.textContent).toContain(
       'COVID-19 Participant Experience (COPE) Survey -  Versioned'
     );
   });
