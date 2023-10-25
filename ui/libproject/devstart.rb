@@ -183,12 +183,6 @@ def tanagra_dep(cmd_name, args)
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
-#     if File.directory?('tanagra')
-#       common.status "Cleaning tanagra folder"
-#       common.run_inline %W{rm -rf tanagra}
-#     end
-#     common.status "Need to clone repo"
-#     common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
       if (op.opts.version)

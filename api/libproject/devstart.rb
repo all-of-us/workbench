@@ -113,7 +113,17 @@ def dev_up_tanagra(cmd_name, args)
     ->(opts, v) { opts.version = v},
     "Tanagra version"
   )
+  op.add_option(
+    "--branch [branch]",
+    ->(opts, v) { opts.branch = v},
+    "Tanagra branch"
+  )
   op.parse.validate
+
+  if (op.opts.version && op.opts.branch)
+    puts "Please only provide version or branch as an arg"
+    exit 1
+  end
 
   ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path("sa-key.json")
 
@@ -125,7 +135,12 @@ def dev_up_tanagra(cmd_name, args)
   start_local_db_service()
 
   Dir.chdir('../tanagra-aou-utils') do
-    common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
+    if op.opts.version
+      common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
+    end
+    if op.opts.branch
+      common.run_inline("../ui/project.rb tanagra-dep --env local --branch #{op.opts.branch}")
+    end
     dis_auth = op.opts.disable_auth ? '-a' : ''
     d_db = op.opts.drop_db ? '-d' : ''
     common.status "Starting Tanagra API server"
