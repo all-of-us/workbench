@@ -17,16 +17,19 @@ import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 
 import { CustomizePanel, CustomizePanelProps } from './customize-panel';
 
-class MockGpuConfigSelector extends React.Component {
-  render() {
-    return <div>Mock GpuConfigSelector</div>;
-  }
-}
 jest.mock(
   'app/components/runtime-configuration-panel/gpu-config-selector',
   () => {
     return {
-      GpuConfigSelector: () => <MockGpuConfigSelector />,
+      GpuConfigSelector: () => <div>Mock GpuConfigSelector</div>,
+    };
+  }
+);
+jest.mock(
+  'app/components/runtime-configuration-panel/dataproc-config-selector',
+  () => {
+    return {
+      DataProcConfigSelector: () => <div>Mock DataProcConfigSelector</div>,
     };
   }
 );
@@ -185,5 +188,27 @@ describe(CustomizePanel.name, () => {
       name: 'Manage and monitor Spark console',
     });
     expect(sparkButton).not.toBeInTheDocument();
+  });
+
+  it('renders a DataProcConfigSelector for ComputeType.Dataproc', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    await component({ analysisConfig });
+    expect(
+      screen.queryByText(/Mock DataProcConfigSelector/)
+    ).toBeInTheDocument();
+  });
+
+  it('does not render a DataProcConfigSelector for ComputeType.Standard', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({ analysisConfig });
+    expect(
+      screen.queryByText(/Mock DataProcConfigSelector/)
+    ).not.toBeInTheDocument();
   });
 });
