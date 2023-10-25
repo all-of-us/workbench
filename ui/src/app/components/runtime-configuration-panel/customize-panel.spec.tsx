@@ -6,7 +6,11 @@ import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { allMachineTypes, ComputeType } from 'app/utils/machines';
-import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
+import {
+  PanelContent,
+  toAnalysisConfig,
+  UpdateMessaging,
+} from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -210,5 +214,45 @@ describe(CustomizePanel.name, () => {
     expect(
       screen.queryByText(/Mock DataProcConfigSelector/)
     ).not.toBeInTheDocument();
+  });
+
+  it('shows an updateMessaging.warn message if it exists and the runtime does', async () => {
+    const warn = 'You Have Been Warned!';
+    const updateMessaging = {
+      applyAction: 'not relevant for this test',
+      warn,
+    };
+    await component({ runtimeExists: true, updateMessaging });
+    expect(screen.queryByText(warn)).toBeInTheDocument();
+  });
+
+  it('does not show an updateMessaging.warn message if the runtime does not exist', async () => {
+    const warn = 'You Have Been Warned AGAIN';
+    const updateMessaging = {
+      applyAction: 'not relevant for this test',
+      warn,
+    };
+    await component({ runtimeExists: false, updateMessaging });
+    expect(screen.queryByText(warn)).not.toBeInTheDocument();
+  });
+
+  it('shows errorMessageContent messages if they exist', async () => {
+    const errorMessageContent = [
+      <div>Error Number One</div>,
+      <div>Error Number Two</div>,
+    ];
+    await component({ errorMessageContent });
+    expect(screen.queryByText(/Error Number One/)).toBeInTheDocument();
+    expect(screen.queryByText(/Error Number Two/)).toBeInTheDocument();
+  });
+
+  it('shows warningMessageContent messages if they exist', async () => {
+    const warningMessageContent = [
+      <div>Warning Number One</div>,
+      <div>Warning Number Two</div>,
+    ];
+    await component({ warningMessageContent });
+    expect(screen.queryByText(/Warning Number One/)).toBeInTheDocument();
+    expect(screen.queryByText(/Warning Number Two/)).toBeInTheDocument();
   });
 });
