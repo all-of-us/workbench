@@ -5,8 +5,8 @@ import * as React from 'react';
 import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { allMachineTypes } from 'app/utils/machines';
-import { toAnalysisConfig } from 'app/utils/runtime-utils';
+import { allMachineTypes, ComputeType } from 'app/utils/machines';
+import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -16,6 +16,20 @@ import { defaultGceRuntimeWithPd } from 'testing/stubs/runtime-api-stub';
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 
 import { CustomizePanel, CustomizePanelProps } from './customize-panel';
+
+class MockGpuConfigSelector extends React.Component {
+  render() {
+    return <div>Mock GpuConfigSelector</div>;
+  }
+}
+jest.mock(
+  'app/components/runtime-configuration-panel/gpu-config-selector',
+  () => {
+    return {
+      GpuConfigSelector: () => <MockGpuConfigSelector />,
+    };
+  }
+);
 
 const defaultAnalysisConfig = toAnalysisConfig(
   defaultGceRuntimeWithPd(),
@@ -69,8 +83,88 @@ describe(CustomizePanel.name, () => {
     });
   });
 
-  it('should render', async () => {
-    await component();
-    expect(screen.queryByText(/Cloud compute profile/)).toBeInTheDocument();
+  it('displays runtime errors if they exist', async () => {
+    const currentRuntime = {
+      ...defaultGceRuntimeWithPd(),
+      errors: [{ errorMessage: 'the runtime failed' }],
+    };
+    await component({ currentRuntime });
+    expect(
+      screen.queryByText(/An error was encountered with your cloud environment/)
+    ).toBeInTheDocument();
+  });
+
+  test.each([undefined, null, []])(
+    'it does not display runtime errors if the error object is %s',
+    async (errors) => {
+      const currentRuntime = {
+        ...defaultGceRuntimeWithPd(),
+        errors,
+      };
+      await component({ currentRuntime });
+      expect(
+        screen.queryByText(
+          /An error was encountered with your cloud environment/
+        )
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it('renders a GpuConfigSelector for ComputeType.Standard', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({ analysisConfig });
+    expect(screen.queryByText(/Mock GpuConfigSelector/)).toBeInTheDocument();
+  });
+
+  it('does not render a GpuConfigSelector for ComputeType.Dataproc', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    await component({ analysisConfig });
+    expect(
+      screen.queryByText(/Mock GpuConfigSelector/)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should allow access to the Spark console for ComputeType.Dataproc', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    const existingAnalysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    // TODO why do we need both analysisConfig and existingAnalysisConfig here?
+    await component({ analysisConfig, existingAnalysisConfig });
+    const sparkButton = screen.queryByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    await waitFor(() => expect(sparkButton).toBeInTheDocument());
+    screen.debug();
+    sparkButton.click();
+    await waitFor(() =>
+      expect(setPanelContent).toHaveBeenCalledWith(PanelContent.SparkConsole)
+    );
+  });
+
+  it('should not allow access to the Spark console for ComputeType.Standard', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    const existingAnalysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({ analysisConfig, existingAnalysisConfig });
+    const sparkButton = screen.queryByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    expect(sparkButton).not.toBeInTheDocument();
   });
 });
