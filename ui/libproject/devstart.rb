@@ -149,6 +149,11 @@ def tanagra_dep(cmd_name, args)
     ->(opts, v) { opts.version = v},
     "Version to deploy (e.g. your-username-test)"
   )
+  op.add_option(
+    "--branch [branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch to deploy (e.g. freemabd/DT-549)"
+  )
   op.add_validator ->(opts) { raise ArgumentError.new("env required") unless opts.env }
   op.parse.validate
 
@@ -163,22 +168,42 @@ def tanagra_dep(cmd_name, args)
   }
   project = environment_names_to_project_names[op.opts.env]
 
+  if (op.opts.version && op.opts.branch)
+    puts "Please only provide version or branch as an arg"
+    exit 1
+  end
+  if (project != "local" && (op.opts.branch || op.opts.version))
+    puts "Branch or version args are only allowed with local deployments"
+    exit 1
+  end
+
   common = Common.new
   Dir.chdir('../tanagra-aou-utils') do
     unless File.directory?('tanagra')
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
+#     if File.directory?('tanagra')
+#       common.status "Cleaning tanagra folder"
+#       common.run_inline %W{rm -rf tanagra}
+#     end
+#     common.status "Need to clone repo"
+#     common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
-      if op.opts.version.nil? || op.opts.version.empty?
-        common.status "Using project specified tag from environment variables."
-        deploy_version = env_project.fetch(:tanagra_tag)
-      else
+      if (op.opts.version)
         common.status "Checkout specified Tanagra tag"
         deploy_version = op.opts.version
+        common.run_inline %W{git checkout tags/#{deploy_version}}
+      elsif (op.opts.branch)
+        common.status "Checkout specified Tanagra branch"
+        deploy_branch = op.opts.branch
+        common.run_inline %W{git checkout #{deploy_branch}}
+      else
+        common.status "Using project specified tag from environment variables."
+        deploy_version = env_project.fetch(:tanagra_tag)
+        common.run_inline %W{git checkout tags/#{deploy_version}}
       end
-      common.run_inline %W{git checkout tags/#{deploy_version}}
     end
   end
 

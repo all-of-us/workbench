@@ -1,13 +1,32 @@
 #!/usr/bin/env bash
 
-while getopts v: flag
-do
+while getopts ":v:b:" flag; do
   case "${flag}" in
-    v) version=${OPTARG};;
+    v) # Deploy using tag
+      version=${OPTARG}
+      ;;
+    b) # Deploy using branch
+      branch=${OPTARG}
+      ;;
+    *) # Display help
+      usage
+      exit 0
+      ;;
   esac
 done
 
-./project.rb tanagra-dep --env local --version "$version"
+if [[ -n "${version}" && -n "${branch}" ]]; then
+  echo "Please only provide version or branch as an arg"
+  exit 0
+fi
+
+if [[ -n "${version}" ]]; then
+  ./project.rb tanagra-dep --env local --version "$version"
+elif [[ -n "${branch}" ]] ; then
+  ./project.rb tanagra-dep --env local --branch "$branch"
+else
+  ./project.rb tanagra-dep --env local
+fi
 
 #update yarn
 yarn

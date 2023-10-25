@@ -103,7 +103,7 @@ def dev_up_tanagra(cmd_name, args)
   op.add_option(
     "--disable-auth",
     ->(opts, _) { opts.disable_auth = true },
-    "Disable Tanagra AuthZ")
+    "Disable Tanagra AuthN/AuthZ")
   op.add_option(
     "--drop-db",
     ->(opts, _) { opts.drop_db = true },
