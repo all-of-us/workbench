@@ -4,7 +4,7 @@ import { mount } from 'enzyme';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
-import { AlarmExclamation } from 'app/components/icons';
+import { ExclamationTriangle } from 'app/components/icons';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { nowPlusDays } from 'app/utils/dates';
@@ -325,7 +325,7 @@ describe('Access Renewal Notification', () => {
       expect(banner.exists()).toEqual(expected);
       if (expected) {
         expect(banner.first().props().style.backgroundColor).toBe(bannerColor);
-        expect(wrapper.find(AlarmExclamation).prop('style').color).toBe(
+        expect(wrapper.find(ExclamationTriangle).prop('style').color).toBe(
           iconColor
         );
       }
