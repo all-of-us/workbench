@@ -162,7 +162,7 @@ def tanagra_dep(cmd_name, args)
       "local" => "local",
       "test" => "all-of-us-workbench-test",
       "staging" => "all-of-us-rw-staging",
-      "stable" => "all-of-us-rw-stabl",
+      "stable" => "all-of-us-rw-stable",
       "preprod" => "all-of-us-rw-preprod",
       "prod" => "all-of-us-rw-prod",
   }
@@ -183,6 +183,7 @@ def tanagra_dep(cmd_name, args)
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
+    puts "#{project}"
     env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
       if (op.opts.version)
