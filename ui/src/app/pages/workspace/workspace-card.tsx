@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
@@ -290,7 +290,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         >
                           <TooltipTrigger content='Workspace compliance action is required'>
                             <FontAwesomeIcon
-                              icon={faLockAlt}
+                              icon={faLock}
                               style={styles.lockWorkspace}
                             />
                           </TooltipTrigger>

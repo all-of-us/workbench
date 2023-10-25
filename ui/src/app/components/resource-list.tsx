@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -153,7 +153,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
         <FontAwesomeIcon
           style={{ color: colors.warning, marginRight: '0.75rem' }}
           size={'sm'}
-          icon={faLockAlt}
+          icon={faLock}
         />
       </TooltipTrigger>
     );
