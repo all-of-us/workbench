@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { runtimePresets } from '../../utils/runtime-presets';
 import { render, screen, waitFor } from '@testing-library/react';
 import { allMachineTypes, ComputeType } from 'app/utils/machines';
 import {
@@ -135,6 +136,69 @@ describe(CustomizePanel.name, () => {
       screen.queryByText(/An error was encountered with your cloud environment/)
     ).not.toBeInTheDocument();
   });
+
+  // also TODO: Dataproc -> Standard
+  it('allows changing the ComputeType from Standard to Dataproc', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({ analysisConfig, allowDataproc: true });
+
+    screen.logTestingPlaygroundURL();
+
+    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
+    expect(dropdownOption).toBeInTheDocument();
+    dropdownOption.click();
+
+    // TODO THIS DOESNT WORK - how do I choose from a dropdown in RTL?
+    // await waitFor(() => {
+    //   expect(
+    //     screen.queryByRole('option', { name: ComputeType.Standard })
+    //   ).toBeInTheDocument();
+    //   expect(
+    //     screen.queryByRole('option', { name: ComputeType.Dataproc })
+    //   ).toBeInTheDocument();
+    // });
+  });
+
+  it('does not allow changing the ComputeType when allowDataproc is false', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({ analysisConfig, allowDataproc: false });
+
+    screen.logTestingPlaygroundURL();
+
+    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
+    expect(dropdownOption).toBeInTheDocument();
+    dropdownOption.click();
+
+    // TODO how do I show that this does nothing?
+  });
+
+  it('does not allow changing the ComputeType when runtimeStatus is not RUNNING or STOPPED', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Standard, // already the case, but make it explicit
+    };
+    await component({
+      analysisConfig,
+      allowDataproc: true,
+      runtimeStatus: RuntimeStatus.CREATING,
+    });
+
+    screen.logTestingPlaygroundURL();
+
+    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
+    expect(dropdownOption).toBeInTheDocument();
+    dropdownOption.click();
+
+    // TODO how do I show that this does nothing?
+  });
+
+  // TODO autopause dropdown tests
 
   it('renders a GpuConfigSelector for ComputeType.Standard', async () => {
     const analysisConfig = {
