@@ -3,6 +3,8 @@ package org.pmiops.workbench.aws.s3;
 import java.util.ArrayList;
 import java.util.List;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.wsm.WsmClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -13,9 +15,16 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Service
 public class AwsS3CloudStorageClient {
 
+  private final WsmClient wsmClient;
+
+  @Autowired
+  public AwsS3CloudStorageClient(WsmClient wsmClient) {
+    this.wsmClient = wsmClient;
+  }
+
   public List<FileDetail> getFilesFromS3(String bucketName, String prefix) {
 
-    // awsResourceApiProvider.get().getAwsS3StorageFolderCredential();
+    // wsmClient.getAwsSageMakerNotebookCredential();
 
     List<FileDetail> files = new ArrayList<>();
 

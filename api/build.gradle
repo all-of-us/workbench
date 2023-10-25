@@ -526,6 +526,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
+    // Amazon AWS SDK
     implementation platform('software.amazon.awssdk:bom:2.20.22')
     implementation 'software.amazon.awssdk:regions'
     implementation 'software.amazon.awssdk:s3'

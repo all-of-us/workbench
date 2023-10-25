@@ -44,6 +44,19 @@ public class AwsSagemakerService {
     }
   }
 
+  public void stopSageMakerNotebookInstance(String instanceName, AwsCredential awsCredential) {
+    StopNotebookInstanceResponse stopNotebookInstanceResponse =
+        getSageMakerClient(awsCredential)
+            .stopNotebookInstance(
+                StopNotebookInstanceRequest.builder().notebookInstanceName(instanceName).build());
+    SdkHttpResponse httpResponse = stopNotebookInstanceResponse.sdkHttpResponse();
+    if (!httpResponse.isSuccessful()) {
+      throw new WorkbenchException(
+          "Error getting notebook instance, "
+              + httpResponse.statusText().orElse(String.valueOf(httpResponse.statusCode())));
+    }
+  }
+
   public NotebookInstanceStatus getSageMakerNotebookInstanceStatus(
       String instanceName, AwsCredential awsCredential) {
     try {

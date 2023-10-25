@@ -9,6 +9,7 @@ import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -159,6 +160,22 @@ public class ProfileController implements ProfileApiDelegate {
       return dbUser;
     }
 
+    // FIXME we need a last sign in time to determine if we need to do this, current model doesn't
+    // ... have that
+    // if the user never signed in or first signed in before October 20th 2023. This will call SAM
+    // with every login afterwards but I don't see other options
+    if (dbUser.getFirstSignInTime() == null
+        || dbUser
+            .getFirstSignInTime()
+            .before(Timestamp.from(Instant.ofEpochMilli(1663674914326l)))) {
+      // Register user in VWB SAM.
+      try {
+        usersApiProvider.get().createUserV2(null);
+      } catch (org.broadinstitute.dsde.workbench.client.sam.ApiException e) {
+        log.log(Level.WARNING, "Unable to register user in VWB SAM", e);
+      }
+    }
+
     // On first sign-in register with Terra, submit the Terra ToS (if user accepted latest), and set
     // the first sign in time. All actions taken here must be idempotent to avoid improper user
     // initialization.
@@ -166,13 +183,6 @@ public class ProfileController implements ProfileApiDelegate {
       // This call should be idempotent. If the user is already registered, their profile will get
       // updated.
       fireCloudService.registerUser();
-
-      // Register user in VWB SAM.
-      try {
-        usersApiProvider.get().createUserV2(null);
-      } catch (org.broadinstitute.dsde.workbench.client.sam.ApiException e) {
-        log.log(Level.WARNING, "Unable to register user in VWB SAM", e);
-      }
 
       // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos

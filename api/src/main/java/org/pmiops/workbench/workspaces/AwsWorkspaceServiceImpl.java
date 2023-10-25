@@ -72,7 +72,7 @@ public class AwsWorkspaceServiceImpl implements AwsWorkspaceService, GaugeDataCo
           workspaceWithContext.getUserFacingId(),
           googleProjectId);
 
-      String awsS3StorageFolder = wsmClient.getAwsS3StorageFolder(workspaceWithContext.getId());
+      String awsS3StorageFolder = wsmClient.getAwsS3Folder(workspaceWithContext.getId());
 
       WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 

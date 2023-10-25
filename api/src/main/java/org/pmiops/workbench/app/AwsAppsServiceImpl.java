@@ -4,6 +4,7 @@ import bio.terra.workspace.client.ApiException;
 import bio.terra.workspace.model.*;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.aws.sagemaker.AwsSagemakerService;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -43,6 +44,45 @@ public class AwsAppsServiceImpl implements AppsService {
 
   @Override
   public void deleteApp(String appName, DbWorkspace dbWorkspace, Boolean deleteDisk) {
+    Optional<ResourceDescription> notebookMaybe =
+        wsmClient.getSagemakerNotebookMaybe(appName, dbWorkspace.getFirecloudUuid());
+    if (!notebookMaybe.isPresent()) {
+      return;
+    }
+    try {
+      AwsCredential awsCredential =
+          wsmClient.getAwsSageMakerNotebookCredential(
+              dbWorkspace.getFirecloudUuid(), notebookMaybe.get().getMetadata().getResourceId());
+      String instanceName =
+          notebookMaybe.get().getResourceAttributes().getAwsSageMakerNotebook().getInstanceName();
+
+      NotebookInstanceStatus status =
+          awsSagemakerService.getSageMakerNotebookInstanceStatus(instanceName, awsCredential);
+
+      if (!NotebookInstanceStatus.STOPPED.equals(status)) {
+        awsSagemakerService.stopSageMakerNotebookInstance(
+            notebookMaybe.get().getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),
+            awsCredential);
+        int attempts = 0;
+        while (attempts < 5) {
+          status =
+              awsSagemakerService.getSageMakerNotebookInstanceStatus(instanceName, awsCredential);
+          if (status.equals(NotebookInstanceStatus.STOPPED)) {
+            break;
+          }
+          TimeUnit.SECONDS.sleep(5); // Wait for 5 seconds before checking the status again
+          attempts++;
+        }
+        if (!status.equals(NotebookInstanceStatus.STOPPED)) {
+          return;
+        }
+      }
+
+    } catch (ApiException e) {
+      throw new WorkbenchException("Unable to stop sagemaker notebook in AWS", e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     wsmClient.deleteSagemakerNotebook(appName, dbWorkspace.getFirecloudUuid());
   }
 
@@ -70,7 +110,8 @@ public class AwsAppsServiceImpl implements AppsService {
       UserAppEnvironment userAppEnvironment) {
     try {
       AwsCredential awsCredential =
-          wsmClient.getAwsSageMakerNotebookCredential(dbWorkspace.getFirecloudUuid(), notebook);
+          wsmClient.getAwsSageMakerNotebookCredential(
+              dbWorkspace.getFirecloudUuid(), notebook.getMetadata().getResourceId());
       NotebookInstanceStatus sageMakerNotebookInstanceStatus =
           awsSagemakerService.getSageMakerNotebookInstanceStatus(
               notebook.getResourceAttributes().getAwsSageMakerNotebook().getInstanceName(),

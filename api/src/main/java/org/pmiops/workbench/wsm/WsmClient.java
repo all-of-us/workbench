@@ -40,6 +40,7 @@ public class WsmClient {
     this.wsmRetryHandler = wsmRetryHandler;
   }
 
+  // ---------------- Workspaces ----------------
   /**
    * Creates a new workspace and returns its description.
    *
@@ -111,6 +112,8 @@ public class WsmClient {
     logger.info("AWS  Workspace deleted: {}", workspaceUUID);
   }
 
+  // ---------------- Storage folders ----------------
+
   /**
    * Creates an AWS folder within the specified workspace and returns the created controlled AWS S3
    * storage folder.
@@ -147,7 +150,7 @@ public class WsmClient {
    * @param id The UUID of the resource.
    * @return The name of the AWS S3 storage folder corresponding to the provided UUID.
    */
-  public String getAwsS3StorageFolder(UUID id) {
+  public String getAwsS3Folder(UUID id) {
     ResourceList resourceList;
     try {
       resourceList = getResourcesInWorkspace(id, 10, ResourceType.AWS_S3_STORAGE_FOLDER);
@@ -162,6 +165,8 @@ public class WsmClient {
         .getAwsS3StorageFolder()
         .getBucketName();
   }
+
+  // ---------------- General Resources ----------------
 
   /**
    * Retrieves the list of resources in the workspace with retries.
@@ -187,6 +192,8 @@ public class WsmClient {
       String workspaceUUID, int limit, ResourceType resourceType) throws ApiException {
     return getResourcesInWorkspace(UUID.fromString(workspaceUUID), limit, resourceType);
   }
+
+  // ---------------- Notebooks ----------------
 
   /**
    * Retrieves an optional Sagemaker notebook resource based on the provided application name and
@@ -276,21 +283,21 @@ public class WsmClient {
   }
 
   /**
-   * Retrieves the AWS Sagemaker notebook credential based on the provided workspace UUID and
-   * notebook description.
+   * Retrieves the AWS Sagemaker notebookResourceUUID credential based on the provided workspace
+   * UUID and notebookResourceUUID description.
    *
    * @param workspaceUUID The UUID of the workspace.
-   * @param notebook The description of the notebook.
-   * @return The AWS Sagemaker notebook credential.
+   * @param notebookResourceUUID The description of the notebookResourceUUID.
+   * @return The AWS Sagemaker notebookResourceUUID credential.
    * @throws ApiException if there is an error while retrieving the credential.
    */
   public AwsCredential getAwsSageMakerNotebookCredential(
-      String workspaceUUID, ResourceDescription notebook) throws ApiException {
+      String workspaceUUID, UUID notebookResourceUUID) throws ApiException {
     return awsResourceApiProvider
         .get()
         .getAwsSageMakerNotebookCredential(
             UUID.fromString(workspaceUUID),
-            notebook.getMetadata().getResourceId(),
+            notebookResourceUUID,
             AwsCredentialAccessScope.READ_ONLY,
             900);
   }

@@ -29,17 +29,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.GceWithPdConfig;
-import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeLocalizeRequest;
-import org.pmiops.workbench.model.RuntimeLocalizeResponse;
-import org.pmiops.workbench.model.RuntimeStatus;
-import org.pmiops.workbench.model.UpdateRuntimeRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -85,6 +76,9 @@ public class RuntimeController implements RuntimeApiDelegate {
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    if (!CloudPlatform.GCP.equals(dbWorkspace.getCloudPlatform())) {
+      return ResponseEntity.ok(new Runtime());
+    }
     String googleProject = dbWorkspace.getGoogleProject();
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
