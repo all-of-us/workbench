@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -307,7 +307,7 @@ export const WorkspaceAbout = fp.flow(
               <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
                 <FlexRow>
                   <div style={{ marginRight: '1.5rem', color: colors.warning }}>
-                    <FontAwesomeIcon size={'2x'} icon={faLockAlt} />
+                    <FontAwesomeIcon size={'2x'} icon={faLock} />
                   </div>
                   <div>
                     <b>

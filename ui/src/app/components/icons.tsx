@@ -13,7 +13,6 @@ import {
   faRepeat,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCircleEllipsisVertical } from '@fortawesome/pro-regular-svg-icons';
-import { faAlarmExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import colors, { addOpacity } from 'app/styles/colors';
@@ -187,9 +186,6 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   );
 };
 
-export const AlarmExclamation = (props) => (
-  <Icon shape={faAlarmExclamation} {...props} />
-);
 export const ArrowRight = (props) => (
   <Icon shape={faLongArrowAltRight} {...props} />
 );
