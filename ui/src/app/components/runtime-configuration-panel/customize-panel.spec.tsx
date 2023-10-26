@@ -110,40 +110,21 @@ describe(CustomizePanel.name, () => {
     ).toBeInTheDocument();
   });
 
-  // for some reason I was unable to get this to work as a test.each()
-
-  it('does not display runtime errors if the error object is undefined', async () => {
-    const currentRuntime = {
-      ...defaultGceRuntimeWithPd(),
-      errors: undefined,
-    };
-    await component({ currentRuntime });
-    expect(
-      screen.queryByText(/An error was encountered with your cloud environment/)
-    ).not.toBeInTheDocument();
-  });
-
-  it('does not display runtime errors if the error object is null', async () => {
-    const currentRuntime = {
-      ...defaultGceRuntimeWithPd(),
-      errors: null,
-    };
-    await component({ currentRuntime });
-    expect(
-      screen.queryByText(/An error was encountered with your cloud environment/)
-    ).not.toBeInTheDocument();
-  });
-
-  it('does not display runtime errors if the error object is empty', async () => {
-    const currentRuntime = {
-      ...defaultGceRuntimeWithPd(),
-      errors: [],
-    };
-    await component({ currentRuntime });
-    expect(
-      screen.queryByText(/An error was encountered with your cloud environment/)
-    ).not.toBeInTheDocument();
-  });
+  test.each([[undefined], [null], [[]]])(
+    'it does not display runtime errors if the errors object is %s',
+    async (errors) => {
+      const currentRuntime = {
+        ...defaultGceRuntimeWithPd(),
+        errors,
+      };
+      await component({ currentRuntime });
+      expect(
+        screen.queryByText(
+          /An error was encountered with your cloud environment/
+        )
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it('allows changing the ComputeType from Standard to Dataproc', async () => {
     const analysisConfig = {
