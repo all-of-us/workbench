@@ -2,18 +2,15 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { DiskType } from '../../../generated/fetch';
-import { stubDisk } from '../../../testing/stubs/disks-api-stub';
-import { defaultGceRuntimeWithPd } from '../../../testing/stubs/runtime-api-stub';
-import {
-  AnalysisConfig,
-  PanelContent,
-  toAnalysisConfig,
-} from '../../utils/runtime-utils';
+import { DiskType } from 'generated/fetch';
+
 import { render, screen, waitFor } from '@testing-library/react';
+import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { stubDisk } from 'testing/stubs/disks-api-stub';
+import { defaultGceRuntimeWithPd } from 'testing/stubs/runtime-api-stub';
 
 import {
   CustomizePanelFooter,
