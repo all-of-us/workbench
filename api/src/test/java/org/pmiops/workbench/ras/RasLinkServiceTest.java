@@ -102,6 +102,8 @@ public class RasLinkServiceTest {
       "{\"preferred_username\":\""
           + LOGIN_GOV_USERNAME
           + "\",\"email\":\"foo@gmail.com\","
+          + "\"first_name\":\"Mister\","
+          + "\"last_name\":\"Test\","
           + "\"federated_identities\":"
           + "{\"identities\":"
           + "{\"login.gov\":"
