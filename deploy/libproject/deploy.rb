@@ -309,6 +309,66 @@ Common.register_command({
   :fn => ->(*args) { deploy("deploy", args) }
 })
 
+def deploy_tanagra(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
+    "--account [account]",
+    ->(opts, v) { opts.account = v},
+    "Service account to act as for deployment, if any. Defaults to the GAE " +
+    "default service account."
+  )
+  op.opts.dry_run = false
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
+  op.add_option(
+    "--promote",
+    ->(opts, _) { opts.promote = true},
+    "Promote this version to immediately begin serving traffic"
+  )
+  op.add_option(
+    "--no-promote",
+    ->(opts, _) { opts.promote = false},
+    "Deploy, but do not yet serve traffic from this version - DB migrations " +
+    "are still applied"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
+
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{
+    ../api/project.rb deploy-tanagra
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  }
+
+  common.run_inline %W{
+    ../ui/project.rb deploy-tanagra-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  }
+end
+
+Common.register_command({
+  :invocation => "deploy-tanagra",
+  :description => "Deploy Tanagra API and UI",
+  :fn => ->(*args) { deploy_tanagra("deploy-tanagra", args) }
+})
+
 def docker_clean()
   common = Common.new
   common.run_inline %W{docker-compose down --volumes}

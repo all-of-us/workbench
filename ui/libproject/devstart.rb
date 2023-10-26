@@ -36,7 +36,7 @@ def build(cmd_name, args)
   fontawesomeCredsLineFilePath = "gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt"
   common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
-  common.run_inline %W{yarn run deps}
+  common.run_inline %W{yarn run deps #{options.env}}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
@@ -56,21 +56,15 @@ def deploy_tanagra_ui(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
     "default service account."
-  )
-  op.add_option(
-    "--version [version]",
-    ->(opts, v) { opts.version = v},
-    "Version to deploy (e.g. your-username-test)"
-  )
-  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
-  op.add_option(
-    "--key-file [keyfile]",
-    ->(opts, v) { opts.key_file = v},
-    "Service account key file to use for deployment authorization"
   )
   op.add_option(
     "--dry-run",
@@ -99,10 +93,6 @@ def deploy_tanagra_ui(cmd_name, args)
   op.parse.validate
   gcc.validate
 
-  if (op.opts.key_file)
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
-  end
-
   promote = "--no-promote"
   unless op.opts.promote.nil?
     promote = op.opts.promote ? "--promote" : "--no-promote"
@@ -111,10 +101,11 @@ def deploy_tanagra_ui(cmd_name, args)
   end
 
   common = Common.new
-  common.status "Update Tanagra submodule..."
-  common.run_inline("git submodule init && git submodule update --init --recursive")
+  env_project = ENVIRONMENTS[op.opts.project]
+  env = env_project.fetch(:env_name)
+  tanagra_dep("tanagra-dep", ["--env", "#{env}"])
 
-  Dir.chdir('../tanagra/ui') do
+  Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
     common.run_inline("npm ci")
     common.status "npm run codegen"
@@ -124,7 +115,7 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
-    common.run_inline("mkdir -p ../../tanagra-aou-utils/appengine && cp -av ./build ../../tanagra-aou-utils/appengine/")
+    common.run_inline("mkdir -p ../../appengine && cp -av ./build ../../appengine/")
   end
 
   Dir.chdir('../tanagra-aou-utils') do
@@ -132,13 +123,94 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-ui.yaml > ./appengine/tanagra-ui.yaml")
   end
 
+  deploy_version = "tanagra-" + env_project.fetch(:tanagra_tag)
+  deploy_version.gsub!(".", "-")
+
   Dir.chdir('../tanagra-aou-utils/appengine') do
     common.status "Deploying Tanagra UI to appengine..."
     run_inline_or_log(op.opts.dry_run, %W{
       gcloud app deploy tanagra-ui.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+      (deploy_version ? %W{--version #{deploy_version}} : []))
+  end
+  common.status "Deployment of Tanagra UI complete!"
+end
+
+def tanagra_dep(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--env [env]",
+    ->(opts, v) { opts.env = v},
+    "The environment we are building deps for"
+  )
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Version to deploy (e.g. your-username-test)"
+  )
+  op.add_option(
+    "--branch [branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch to deploy (e.g. freemabd/DT-549)"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("env required") unless opts.env }
+  op.parse.validate
+
+  validate_proper_env_args(op)
+
+  common = Common.new
+  Dir.chdir('../tanagra-aou-utils') do
+    unless File.directory?('tanagra')
+      common.status "Need to clone repo"
+      common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
+    end
+    Dir.chdir('tanagra') do
+      checkout_branch_or_tag(op, common)
+    end
+  end
+
+  #Temp hack to pass the bearer token
+  #This needs to be removed at some point
+  Dir.chdir('../tanagra-aou-utils') do
+    common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
+  end
+  common.status "Pulling Tanagra deps complete!"
+end
+
+def checkout_branch_or_tag(op, common)
+  if (op.opts.branch)
+    common.status "Checkout specified Tanagra branch"
+    common.run_inline %W{git fetch}
+    common.run_inline %W{git checkout #{op.opts.branch}}
+  else
+    env_project = ENVIRONMENTS[environment_name_to_project_name(op.opts.env)]
+    common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."
+    deploy_version = op.opts.version ? op.opts.version : env_project.fetch(:tanagra_tag)
+    common.run_inline %W{git checkout tags/#{deploy_version}}
+  end
+end
+
+def environment_name_to_project_name(env)
+  environment_names_to_project_names = {
+      "dev" => "local",
+      "local" => "local",
+      "test" => "all-of-us-workbench-test",
+      "staging" => "all-of-us-rw-staging",
+      "stable" => "all-of-us-rw-stable",
+      "preprod" => "all-of-us-rw-preprod",
+      "prod" => "all-of-us-rw-prod",
+  }
+  environment_names_to_project_names[env]
+end
+
+def validate_proper_env_args(op)
+  if (op.opts.version && op.opts.branch)
+    puts "Please only provide version or branch as an arg"
+    exit 1
+  elsif (environment_name_to_project_name(op.opts.env) != "local" && (op.opts.branch || op.opts.version))
+    puts "Branch or version args are only allowed with local deployments"
+    exit 1
   end
 end
 
@@ -162,6 +234,11 @@ class DevStart
                                 :invocation => "deploy-tanagra-ui",
                                 :description => "Deploys the Tanagra UI.",
                                 :fn => ->(*args) { deploy_tanagra_ui("deploy-tanagra-ui", args) }
+                            })
+    Common.register_command({
+                                :invocation => "tanagra-dep",
+                                :description => "Build Tanagra deps",
+                                :fn => ->(*args) { tanagra_dep("tanagra-dep", args) }
                             })
   end
 end
@@ -263,7 +340,7 @@ class DeployUI
     }
     environment_name = project_names_to_environment_names[@opts.project]
 
-    common.run_inline(%W{yarn deps})
+    common.run_inline(%W{yarn deps #{environment_name}})
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []

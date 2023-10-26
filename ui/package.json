@@ -4,13 +4,13 @@
   "license": "BSD",
   "scripts": {
     "build-terra-deps": "./src/terraui/build.sh",
-    "deps": "yarn run codegen && yarn run build-terra-deps",
+    "deps": "./src/deps/deps.sh",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
-    "start-tanagra": "npm install --prefix ../tanagra/ui && npm run codegen --prefix ../tanagra/ui && BROWSER='none' REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra/ui",
-    "dev-up": "yarn && yarn run deps && yarn start",
-    "dev-up-test": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start",
-    "dev-up-local": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start",
-    "dev-up-tanagra-local": "yarn && concurrently \"yarn run start-tanagra\" \"yarn run dev-up-local\"",
+    "start-tanagra": "BROWSER='none' REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
+    "dev-up": "yarn && yarn run deps test && yarn start",
+    "dev-up-test": "yarn && yarn run deps test && REACT_APP_ENVIRONMENT=localtest yarn start",
+    "dev-up-local": "yarn && yarn run deps local && REACT_APP_ENVIRONMENT=local yarn start",
+    "dev-up-tanagra-local": "./src/tanagra-ui/dev-up-tanagra-local.sh",
     "build": "react-app-rewired build",
     "test:debug": "react-app-rewired --inspect-brk test --watchAll=false --run-in-band",
     "test": "react-app-rewired test --watchAll=false",
@@ -19,7 +19,7 @@
     "codegen-clean": "rm -rf src/generated src/notebooks-generated src/tanagra-generated",
     "codegen-swagger": "openapi-generator-cli generate -i ../api/src/main/resources/workbench-api.yaml -g typescript-fetch -p generateAliasAsModel=true --template-dir src/assets/generation --additional-properties=typeScriptThreePlus=true,enumPropertyNaming=UPPERCASE,useSingleRequestParameter=false,prefixParameterInterfaces=true -o src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",
-    "tanagra-codegen-openapi": "openapi-generator-cli generate -i ../tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch  --additional-properties=typescriptThreePlus=true -o src/tanagra-generated"
+    "tanagra-codegen-openapi": "openapi-generator-cli generate -i ../tanagra-aou-utils/tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch --additional-properties=typescriptThreePlus=true -o src/tanagra-generated"
   },
   "browserslist": [
     "chrome >= 67"

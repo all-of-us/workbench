@@ -98,13 +98,32 @@ end
 
 def dev_up_tanagra(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.disable_auth_checks = false
+  op.opts.disable_auth = false
+  op.opts.drop_db = false
   op.add_option(
-    "--disable-auth-checks",
-    ->(opts, _) { opts.disable_auth_checks = true },
-    "If specified, disable authorization checks " +
-      " not yet tested cor what auth token to pass...")
+    "--disable-auth",
+    ->(opts, _) { opts.disable_auth = true },
+    "Disable Tanagra AuthN/AuthZ")
+  op.add_option(
+    "--drop-db",
+    ->(opts, _) { opts.drop_db = true },
+    "Drop Tanagra db")
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Tanagra version"
+  )
+  op.add_option(
+    "--branch [branch]",
+    ->(opts, v) { opts.branch = v},
+    "Tanagra branch"
+  )
   op.parse.validate
+
+  if (op.opts.version && op.opts.branch)
+    puts "Please only provide version or branch as an arg"
+    exit 1
+  end
 
   ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path("sa-key.json")
 
@@ -116,13 +135,16 @@ def dev_up_tanagra(cmd_name, args)
   start_local_db_service()
 
   Dir.chdir('../tanagra-aou-utils') do
-    if op.opts.disable_auth_checks
-      common.status "Starting tanagra-service authorization checks disabled"
-      common.run_inline %W{./run_tanagra_server.sh -a}
-    else
-      common.status "Starting tanagra-service authorization checks enabled"
-      common.run_inline %W{./run_tanagra_server.sh}
+    if op.opts.version
+      common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
     end
+    if op.opts.branch
+      common.run_inline("../ui/project.rb tanagra-dep --env local --branch #{op.opts.branch}")
+    end
+    dis_auth = op.opts.disable_auth ? '-a' : ''
+    d_db = op.opts.drop_db ? '-d' : ''
+    common.status "Starting Tanagra API server"
+    common.run_inline %W{./run_tanagra_server.sh #{dis_auth} #{d_db}}
   end
 end
 
@@ -2428,21 +2450,15 @@ def deploy_tanagra(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
     "default service account."
-  )
-  op.add_option(
-    "--version [version]",
-    ->(opts, v) { opts.version = v},
-    "Version to deploy (e.g. your-username-test)"
-  )
-  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
-  op.add_option(
-    "--key-file [keyfile]",
-    ->(opts, v) { opts.key_file = v},
-    "Service account key file to use for deployment authorization"
   )
   op.add_option(
     "--dry-run",
@@ -2480,10 +2496,6 @@ def deploy_tanagra(cmd_name, args)
   ENV.update({"TANAGRA_AUTH_BEARER_TOKEN" => env_project.fetch(:tanagra_auth_bearer_token)})
   ENV.update({"TANAGRA_UNDERLAY_FILES" => env_project.fetch(:tanagra_underlay_files)})
 
-  if (op.opts.key_file)
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
-  end
-
   promote = "--no-promote"
   unless op.opts.promote.nil?
     promote = op.opts.promote ? "--promote" : "--no-promote"
@@ -2492,15 +2504,16 @@ def deploy_tanagra(cmd_name, args)
   end
 
   common = Common.new
-  common.status "Update Tanagra submodule..."
-  common.run_inline("git submodule init && git submodule update --init --recursive")
 
-  Dir.chdir('../tanagra') do
+  env = env_project.fetch(:env_name)
+  common.run_inline("../ui/project.rb tanagra-dep --env #{env}")
+
+  Dir.chdir('../tanagra-aou-utils/tanagra') do
     common.status "Building Tanagra API..."
     common.run_inline("./gradlew -x test -PisMySQL clean service:build")
 
     common.status "Copying jar into appengine folder..."
-    common.run_inline("mkdir -p ../tanagra-aou-utils/appengine && cp ./service/build/libs/*SNAPSHOT.jar ../tanagra-aou-utils/appengine/tanagraapi.jar")
+    common.run_inline("mkdir -p ../appengine && cp ./service/build/libs/*SNAPSHOT.jar ../appengine/tanagraapi.jar")
   end
 
   Dir.chdir('../tanagra-aou-utils') do
@@ -2511,14 +2524,18 @@ def deploy_tanagra(cmd_name, args)
     common.run_inline("envsubst < tanagra_env_variables_template.yaml > appengine/tanagra_env_variables.yaml")
   end
 
+  deploy_version = "tanagra-" + env_project.fetch(:tanagra_tag)
+  deploy_version.gsub!(".", "-")
+
   Dir.chdir('../tanagra-aou-utils/appengine') do
     common.status "Deploying Tanagra API to appengine..."
     run_inline_or_log(op.opts.dry_run, %W{
       gcloud app deploy tanagra-api.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+      (deploy_version ? %W{--version #{deploy_version}} : []))
   end
+  common.status "Deployment of Tanagra API complete!"
 
 end
 

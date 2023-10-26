@@ -8,6 +8,6 @@ gsutil cat gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds
   >> ~/.npmrc
 
 yarn install
-yarn deps
+yarn deps test
 REACT_APP_ENVIRONMENT=test yarn run build --aot --no-watch --no-progress
 
