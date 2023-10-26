@@ -57,6 +57,7 @@ import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.ResourceTypeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -396,8 +397,8 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
-      Long id, String workspaceNamespace, String workspaceId, String resourceTypeEnumString) {
-    final ResourceType resourceType = ResourceType.fromValue(resourceTypeEnumString);
+      Long id, String workspaceNamespace, String workspaceId, ResourceTypeRequest request) {
+    final ResourceType resourceType = ResourceType.fromValue(request.getResourceType().toString());
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
