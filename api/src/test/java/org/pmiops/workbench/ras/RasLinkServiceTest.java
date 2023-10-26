@@ -89,6 +89,11 @@ public class RasLinkServiceTest {
 
   private static final String USER_INFO_JSON_ID_ME =
       "{\"preferred_username\":\"" + ID_ME_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
+
+  private static final String USER_INFO_JSON_ID_ME_FAKE_IDENTITY =
+      "{\"preferred_username\":\""
+          + ID_ME_USERNAME
+          + "\",\"email\":\"foo@gmail.com\",\"first_name\":\"Smooth\",\"last_name\":\"Operator\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV =
       "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_ERA =
@@ -229,6 +234,8 @@ public class RasLinkServiceTest {
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");
     currentUser.setDisabled(false);
+    currentUser.setGivenName("Mister");
+    currentUser.setFamilyName("Test");
     currentUser = userDao.save(currentUser);
 
     when(mockUserProvider.get()).thenReturn(currentUser);
@@ -315,6 +322,18 @@ public class RasLinkServiceTest {
     verify(mockIdentityVerificationService, never()).updateIdentityVerificationSystem(any(), any());
     assertThrows(
         ForbiddenException.class, () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
+  }
+
+  @Test
+  public void testLinkRasFail_mismatchIdentity() throws Exception {
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ID_ME_FAKE_IDENTITY);
+
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
+    assertThrows(
+        ForbiddenException.class,
+        () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL),
+        "Fake ID");
   }
 
   private void assertModuleCompletionTime(DbAccessModuleName moduleName, Timestamp timestamp) {
