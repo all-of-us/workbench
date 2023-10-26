@@ -352,6 +352,7 @@ def deploy_tanagra(cmd_name, args)
       --account #{op.opts.account}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
+      #{op.opts.dry_run ? "--dry-run" : ""}
   }
 
   common.run_inline %W{
@@ -360,6 +361,7 @@ def deploy_tanagra(cmd_name, args)
       --account #{op.opts.account}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
+      #{op.opts.dry_run ? "--dry-run" : ""}
   }
 end
 
