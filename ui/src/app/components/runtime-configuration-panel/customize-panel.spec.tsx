@@ -5,11 +5,24 @@ import * as React from 'react';
 import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { allMachineTypes, ComputeType } from 'app/utils/machines';
-import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
+import userEvent from '@testing-library/user-event';
+import {
+  allMachineTypes,
+  AutopauseMinuteThresholds,
+  ComputeType,
+} from 'app/utils/machines';
+import {
+  PanelContent,
+  toAnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import {
+  expectDropdownDisabled,
+  getDropdownOption,
+} from 'testing/react-test-helpers';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { defaultGceRuntimeWithPd } from 'testing/stubs/runtime-api-stub';
@@ -132,68 +145,144 @@ describe(CustomizePanel.name, () => {
     ).not.toBeInTheDocument();
   });
 
-  // also TODO: Dataproc -> Standard
   it('allows changing the ComputeType from Standard to Dataproc', async () => {
     const analysisConfig = {
       ...defaultAnalysisConfig,
       computeType: ComputeType.Standard, // already the case, but make it explicit
     };
-    await component({ analysisConfig, allowDataproc: true });
-
-    screen.logTestingPlaygroundURL();
-
-    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
-    expect(dropdownOption).toBeInTheDocument();
-    dropdownOption.click();
-
-    // TODO THIS DOESNT WORK - how do I choose from a dropdown in RTL?
-    // await waitFor(() => {
-    //   expect(
-    //     screen.queryByRole('option', { name: ComputeType.Standard })
-    //   ).toBeInTheDocument();
-    //   expect(
-    //     screen.queryByRole('option', { name: ComputeType.Dataproc })
-    //   ).toBeInTheDocument();
-    // });
-  });
-
-  it('does not allow changing the ComputeType when allowDataproc is false', async () => {
-    const analysisConfig = {
-      ...defaultAnalysisConfig,
-      computeType: ComputeType.Standard, // already the case, but make it explicit
-    };
-    await component({ analysisConfig, allowDataproc: false });
-
-    screen.logTestingPlaygroundURL();
-
-    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
-    expect(dropdownOption).toBeInTheDocument();
-    dropdownOption.click();
-
-    // TODO how do I show that this does nothing?
-  });
-
-  it('does not allow changing the ComputeType when runtimeStatus is not RUNNING or STOPPED', async () => {
-    const analysisConfig = {
-      ...defaultAnalysisConfig,
-      computeType: ComputeType.Standard, // already the case, but make it explicit
-    };
-    await component({
+    const user = userEvent.setup();
+    const { container } = await component({
       analysisConfig,
       allowDataproc: true,
-      runtimeStatus: RuntimeStatus.CREATING,
     });
 
-    screen.logTestingPlaygroundURL();
-
-    const dropdownOption = screen.getByDisplayValue(ComputeType.Standard);
-    expect(dropdownOption).toBeInTheDocument();
-    dropdownOption.click();
-
-    // TODO how do I show that this does nothing?
+    const dataprocOption = getDropdownOption(
+      container,
+      'runtime-compute',
+      ComputeType.Dataproc,
+      2
+    );
+    user.click(dataprocOption);
+    await waitFor(() => {
+      expect(setAnalysisConfig).toHaveBeenCalledWith(
+        withAnalysisConfigDefaults(
+          { ...analysisConfig, computeType: ComputeType.Dataproc },
+          stubDisk()
+        )
+      );
+    });
   });
 
-  // TODO autopause dropdown tests
+  it('allows changing the ComputeType from Dataproc to Standard', async () => {
+    const analysisConfig = {
+      ...defaultAnalysisConfig,
+      computeType: ComputeType.Dataproc,
+    };
+    const user = userEvent.setup();
+    const { container } = await component({
+      analysisConfig,
+      allowDataproc: true,
+    });
+
+    const standardOption = getDropdownOption(
+      container,
+      'runtime-compute',
+      ComputeType.Standard,
+      2
+    );
+    user.click(standardOption);
+    await waitFor(() => {
+      expect(setAnalysisConfig).toHaveBeenCalledWith(
+        withAnalysisConfigDefaults(
+          { ...analysisConfig, computeType: ComputeType.Standard },
+          stubDisk()
+        )
+      );
+    });
+  });
+
+  test.each([
+    [
+      'computeType is Standard and allowDataproc is false',
+      {
+        analysisConfig: {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Standard, // already the case, but make it explicit
+        },
+        allowDataproc: false,
+      },
+    ],
+    [
+      'computeType is Dataproc and allowDataproc is false',
+      {
+        analysisConfig: {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Dataproc,
+        },
+        allowDataproc: false,
+      },
+    ],
+    [
+      'computeType is Standard and runtimeStatus is not RUNNING or STOPPED',
+      {
+        analysisConfig: {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Standard, // already the case, but make it explicit
+        },
+        allowDataproc: true,
+        runtimeStatus: RuntimeStatus.CREATING,
+      },
+    ],
+    [
+      'computeType is Dataproc and runtimeStatus is not RUNNING or STOPPED',
+      {
+        analysisConfig: {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Dataproc,
+        },
+        allowDataproc: true,
+        runtimeStatus: RuntimeStatus.CREATING,
+      },
+    ],
+  ])(
+    'does not allow changing the ComputeType when %s',
+    async (_, propOverrides: Partial<CustomizePanelProps>) => {
+      const { container } = await component(propOverrides);
+      expectDropdownDisabled(container, 'runtime-compute');
+    }
+  );
+
+  it('allows changing autopause values', async () => {
+    const user = userEvent.setup();
+
+    // arbitrary - can be anything but the first (default) value
+    const [secondValue, secondLabel] = Array.from(AutopauseMinuteThresholds)[1];
+
+    const { container } = await component();
+
+    const secondOptionOf4 = getDropdownOption(
+      container,
+      'runtime-autopause',
+      secondLabel,
+      AutopauseMinuteThresholds.size
+    );
+    user.click(secondOptionOf4);
+    await waitFor(() => {
+      expect(setAnalysisConfig).toHaveBeenCalledWith(
+        withAnalysisConfigDefaults(
+          { ...defaultAnalysisConfig, autopauseThreshold: secondValue },
+          stubDisk()
+        )
+      );
+    });
+  });
+
+  it('does not allow changing the autopause when runtimeStatus is not RUNNING or STOPPED', async () => {
+    const { container } = await component({
+      runtimeStatus: RuntimeStatus.CREATING,
+    });
+    expectDropdownDisabled(container, 'runtime-autopause');
+  });
 
   it('renders a GpuConfigSelector for ComputeType.Standard', async () => {
     const analysisConfig = {
