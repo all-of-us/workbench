@@ -157,24 +157,7 @@ def tanagra_dep(cmd_name, args)
   op.add_validator ->(opts) { raise ArgumentError.new("env required") unless opts.env }
   op.parse.validate
 
-  environment_names_to_project_names = {
-      "dev" => "local",
-      "local" => "local",
-      "test" => "all-of-us-workbench-test",
-      "staging" => "all-of-us-rw-staging",
-      "stable" => "all-of-us-rw-stable",
-      "preprod" => "all-of-us-rw-preprod",
-      "prod" => "all-of-us-rw-prod",
-  }
-  project = environment_names_to_project_names[op.opts.env]
-
-  if (op.opts.version && op.opts.branch)
-    puts "Please only provide version or branch as an arg"
-    exit 1
-  elsif (project != "local" && (op.opts.branch || op.opts.version))
-    puts "Branch or version args are only allowed with local deployments"
-    exit 1
-  end
+  validate_proper_env_args(op)
 
   common = Common.new
   Dir.chdir('../tanagra-aou-utils') do
@@ -182,18 +165,8 @@ def tanagra_dep(cmd_name, args)
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
-    env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
-      if (op.opts.branch)
-        common.status "Checkout specified Tanagra branch"
-        deploy_branch = op.opts.branch
-        common.run_inline %W{git fetch}
-        common.run_inline %W{git checkout #{deploy_branch}}
-      else
-        common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."
-        deploy_version = op.opts.version ? op.opts.version : env_project.fetch(:tanagra_tag)
-        common.run_inline %W{git checkout tags/#{deploy_version}}
-      end
+      checkout_branch_or_tag(op, common)
     end
   end
 
@@ -203,6 +176,42 @@ def tanagra_dep(cmd_name, args)
     common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
   end
   common.status "Pulling Tanagra deps complete!"
+end
+
+def checkout_branch_or_tag(op, common)
+  if (op.opts.branch)
+    common.status "Checkout specified Tanagra branch"
+    common.run_inline %W{git fetch}
+    common.run_inline %W{git checkout #{op.opts.branch}}
+  else
+    env_project = ENVIRONMENTS[environment_name_to_project_name(op.opts.env)]
+    common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."
+    deploy_version = op.opts.version ? op.opts.version : env_project.fetch(:tanagra_tag)
+    common.run_inline %W{git checkout tags/#{deploy_version}}
+  end
+end
+
+def environment_name_to_project_name(env)
+  environment_names_to_project_names = {
+      "dev" => "local",
+      "local" => "local",
+      "test" => "all-of-us-workbench-test",
+      "staging" => "all-of-us-rw-staging",
+      "stable" => "all-of-us-rw-stable",
+      "preprod" => "all-of-us-rw-preprod",
+      "prod" => "all-of-us-rw-prod",
+  }
+  environment_names_to_project_names[env]
+end
+
+def validate_proper_env_args(op)
+  if (op.opts.version && op.opts.branch)
+    puts "Please only provide version or branch as an arg"
+    exit 1
+  elsif (environment_name_to_project_name(op.opts.env) != "local" && (op.opts.branch || op.opts.version))
+    puts "Branch or version args are only allowed with local deployments"
+    exit 1
+  end
 end
 
 class DevStart
