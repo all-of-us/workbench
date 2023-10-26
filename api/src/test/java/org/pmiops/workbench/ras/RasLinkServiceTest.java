@@ -88,7 +88,7 @@ public class RasLinkServiceTest {
   private static final String ERA_COMMONS_USERNAME = "user2@eraCommons.com";
 
   private static final String USER_INFO_JSON_ID_ME =
-      "{\"preferred_username\":\"" + ID_ME_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
+      "{\"preferred_username\":\"" + ID_ME_USERNAME + "\",\"email\":\"foo@gmail.com\",\"first_name\":\"Mister\",\"last_name\":\"Test\"}";
 
   private static final String USER_INFO_JSON_ID_ME_FAKE_IDENTITY =
       "{\"preferred_username\":\""
