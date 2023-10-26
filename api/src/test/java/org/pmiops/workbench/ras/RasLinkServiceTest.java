@@ -95,7 +95,7 @@ public class RasLinkServiceTest {
           + ID_ME_USERNAME
           + "\",\"email\":\"foo@gmail.com\",\"first_name\":\"Smooth\",\"last_name\":\"Operator\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV =
-      "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
+      "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\",\"first_name\":\"Mister\",\"last_name\":\"Test\"}";
   private static final String USER_INFO_JSON_ERA =
       "{\"preferred_username\":\"" + ERA_COMMONS_USERNAME + "\",\"email\":\"foo2@gmail.com\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV_WITH_ERA =
