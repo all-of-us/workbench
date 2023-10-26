@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Runtime } from 'generated/fetch';
+import { PersistentDiskRequest, Runtime } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
@@ -11,33 +11,39 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
 
 export interface CustomizePanelFooterProps {
-  analysisConfig: AnalysisConfig;
-  currentRuntime: Runtime;
   disableControls: boolean;
-  existingAnalysisConfig: AnalysisConfig;
-  onClose: () => void;
-  requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
   runtimeCanBeUpdated: boolean;
   runtimeExists: boolean;
-  setPanelContent: (pc: PanelContent) => void;
-  unattachedDiskNeedsRecreate: boolean;
   unattachedPdExists: boolean;
+  analysisConfig: AnalysisConfig;
+  currentRuntime: Runtime;
+  existingAnalysisConfig: AnalysisConfig;
+  gcePersistentDisk: PersistentDiskRequest;
+  onClose: () => void;
+  requestAnalysisConfig: (ac: AnalysisConfig) => void;
+  setPanelContent: (pc: PanelContent) => void;
 }
 export const CustomizePanelFooter = ({
-  analysisConfig,
-  currentRuntime,
   disableControls,
-  existingAnalysisConfig,
-  onClose,
-  requestAnalysisConfig,
   runtimeCanBeCreated,
   runtimeCanBeUpdated,
   runtimeExists,
-  setPanelContent,
-  unattachedDiskNeedsRecreate,
   unattachedPdExists,
+  analysisConfig,
+  currentRuntime,
+  existingAnalysisConfig,
+  gcePersistentDisk,
+  onClose,
+  requestAnalysisConfig,
+  setPanelContent,
 }: CustomizePanelFooterProps) => {
+  const unattachedDiskNeedsRecreate =
+    unattachedPdExists &&
+    analysisConfig.diskConfig.detachable &&
+    (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
+      gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
+
   return unattachedPdExists ? (
     <FlexRow
       style={{

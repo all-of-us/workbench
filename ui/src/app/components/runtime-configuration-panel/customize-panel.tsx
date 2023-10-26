@@ -92,13 +92,6 @@ export const CustomizePanel = ({
 }: CustomizePanelProps) => {
   const disableControls = runtimeExists && !isActionable(runtimeStatus);
 
-  const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
-  const unattachedDiskNeedsRecreate =
-    unattachedPdExists &&
-    analysisConfig.diskConfig.detachable &&
-    (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
-      gcePersistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
-
   return (
     <div style={{ marginBottom: '10px' }}>
       <div style={styles.controlSection}>
@@ -314,9 +307,9 @@ export const CustomizePanel = ({
           runtimeCanBeUpdated,
           runtimeExists,
           setPanelContent,
-          unattachedDiskNeedsRecreate,
-          unattachedPdExists,
+          gcePersistentDisk,
         }}
+        unattachedPdExists={!!gcePersistentDisk && !attachedPdExists}
       />
     </div>
   );

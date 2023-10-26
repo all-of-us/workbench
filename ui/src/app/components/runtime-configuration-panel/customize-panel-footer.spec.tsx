@@ -2,6 +2,14 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
+import { DiskType } from '../../../generated/fetch';
+import { stubDisk } from '../../../testing/stubs/disks-api-stub';
+import { defaultGceRuntimeWithPd } from '../../../testing/stubs/runtime-api-stub';
+import {
+  AnalysisConfig,
+  PanelContent,
+  toAnalysisConfig,
+} from '../../utils/runtime-utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -12,19 +20,24 @@ import {
   CustomizePanelFooterProps,
 } from './customize-panel-footer';
 
+const onClose = jest.fn();
+const requestAnalysisConfig = jest.fn();
+const setPanelContent = jest.fn();
+const analysisConfig = toAnalysisConfig(defaultGceRuntimeWithPd(), stubDisk());
+const gcePersistentDisk = stubDisk();
 const defaultProps: CustomizePanelFooterProps = {
-  analysisConfig: undefined,
+  disableControls: false,
+  runtimeCanBeCreated: false,
+  runtimeCanBeUpdated: false,
+  runtimeExists: false,
+  unattachedPdExists: false,
+  onClose,
+  requestAnalysisConfig,
+  setPanelContent,
+  analysisConfig,
   currentRuntime: undefined,
-  disableControls: undefined,
   existingAnalysisConfig: undefined,
-  onClose: undefined,
-  requestAnalysisConfig: undefined,
-  runtimeCanBeCreated: undefined,
-  runtimeCanBeUpdated: undefined,
-  runtimeExists: undefined,
-  setPanelContent: undefined,
-  unattachedDiskNeedsRecreate: undefined,
-  unattachedPdExists: undefined,
+  gcePersistentDisk,
 };
 
 describe(CustomizePanelFooter.name, () => {
@@ -39,8 +52,170 @@ describe(CustomizePanelFooter.name, () => {
     });
   });
 
-  it('renders', async () => {
-    await component({});
-    expect(screen.queryByText(/Delete Environment/)).toBeInTheDocument();
+  it('allows deleting a PD when one exists', async () => {
+    await component({ unattachedPdExists: true });
+    const deletePDButton = screen.queryByRole('button', {
+      name: 'Delete Persistent Disk',
+    });
+    expect(deletePDButton).toBeInTheDocument();
+    deletePDButton.click();
+    await waitFor(() =>
+      expect(setPanelContent).toHaveBeenCalledWith(
+        PanelContent.DeleteUnattachedPd
+      )
+    );
+  });
+
+  it('does not allow deleting a PD when none exists', async () => {
+    await component({ unattachedPdExists: false });
+    const deletePDButton = screen.queryByRole('button', {
+      name: 'Delete Persistent Disk',
+    });
+    expect(deletePDButton).not.toBeInTheDocument();
+  });
+
+  const recreatePdTooBigConfig = {
+    unattachedPdExists: true,
+    runtimeCanBeCreated: true,
+    analysisConfig: {
+      ...analysisConfig,
+      diskConfig: { ...analysisConfig.diskConfig, detachable: true }, // pretty sure this is already true but be explicit
+    },
+    gcePersistentDisk: {
+      ...gcePersistentDisk,
+      size: gcePersistentDisk.size + 1, // the existing PD is bigger than requested
+    },
+  };
+  it('should recreate the attached PD when too big', async () => {
+    await component(recreatePdTooBigConfig);
+    const nextButton = screen.queryByRole('button', { name: 'Next' });
+    expect(nextButton).toBeInTheDocument();
+    nextButton.click();
+    await waitFor(() =>
+      expect(setPanelContent).toHaveBeenCalledWith(
+        PanelContent.DeleteUnattachedPdAndCreate
+      )
+    );
+  });
+
+  it('should disable PD recreation when the attached PD is too big but !runtimeCanBeCreated', async () => {
+    await component({ ...recreatePdTooBigConfig, runtimeCanBeCreated: false });
+    const nextButton = screen.queryByRole('button', { name: 'Next' });
+    expect(nextButton).toBeInTheDocument();
+    nextButton.click();
+    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
+  });
+
+  it('should create the analysisConfig without PD recreation when the PD is too big but !unattachedPdExists', async () => {
+    await component({ ...recreatePdTooBigConfig, unattachedPdExists: false });
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should create the analysisConfig without PD recreation when the PD is too big but !detachable', async () => {
+    const newAnalysisConfig = {
+      ...analysisConfig,
+      diskConfig: { ...analysisConfig.diskConfig, detachable: false },
+    };
+    await component({
+      ...recreatePdTooBigConfig,
+      analysisConfig: newAnalysisConfig,
+    });
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(newAnalysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  const recreatePdWrongTypeConfig = {
+    unattachedPdExists: true,
+    runtimeCanBeCreated: true,
+    analysisConfig: {
+      ...analysisConfig,
+      diskConfig: { ...analysisConfig.diskConfig, detachable: true }, // pretty sure this is already true but be explicit
+    },
+    gcePersistentDisk: {
+      ...gcePersistentDisk,
+      diskType: DiskType.SSD,
+    },
+  };
+  it('should recreate the attached PD when the disk is of the wrong type', async () => {
+    // sanity check test validity
+    expect(gcePersistentDisk.diskType).not.toEqual(
+      recreatePdWrongTypeConfig.gcePersistentDisk.diskType
+    );
+
+    await component(recreatePdWrongTypeConfig);
+    const nextButton = screen.queryByRole('button', { name: 'Next' });
+    expect(nextButton).toBeInTheDocument();
+    nextButton.click();
+    await waitFor(() =>
+      expect(setPanelContent).toHaveBeenCalledWith(
+        PanelContent.DeleteUnattachedPdAndCreate
+      )
+    );
+  });
+
+  it('should disable PD recreation when the attached PD is the wrong type but !runtimeCanBeCreated', async () => {
+    await component({
+      ...recreatePdWrongTypeConfig,
+      runtimeCanBeCreated: false,
+    });
+    const nextButton = screen.queryByRole('button', { name: 'Next' });
+    expect(nextButton).toBeInTheDocument();
+    nextButton.click();
+    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
+  });
+
+  it('should create the analysisConfig without PD recreation when the PD is the wrong type but !unattachedPdExists', async () => {
+    await component({
+      ...recreatePdWrongTypeConfig,
+      unattachedPdExists: false,
+    });
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should create the analysisConfig without PD recreation when the PD is the wrong type but !detachable', async () => {
+    const newAnalysisConfig = {
+      ...analysisConfig,
+      diskConfig: { ...analysisConfig.diskConfig, detachable: false },
+    };
+    await component({
+      ...recreatePdWrongTypeConfig,
+      analysisConfig: newAnalysisConfig,
+    });
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(newAnalysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('allows deleting the environment when a runtime exists and no detached PD exists', async () => {
+    await component({ runtimeExists: true, unattachedPdExists: false });
+    const deleteButton = screen.queryByRole('button', {
+      name: 'Delete Environment',
+    });
+    expect(deleteButton).toBeInTheDocument();
+    deleteButton.click();
+    await waitFor(() =>
+      expect(setPanelContent).toHaveBeenCalledWith(PanelContent.DeleteRuntime)
+    );
   });
 });
