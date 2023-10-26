@@ -119,20 +119,23 @@ export const CustomizePanelFooter = ({
             </Button>
           ),
         ],
-        [
-          unattachedDiskNeedsRecreate,
-          () => (
-            <Button
-              aria-label='Next'
-              disabled={!runtimeCanBeCreated}
-              onClick={() => {
-                setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
-              }}
-            >
-              Next
-            </Button>
-          ),
-        ],
+        // TODO remove
+        // this is unreachable because it requires a logical contradiction: !unattachedPdExists && unattachedDiskNeedsRecreate
+
+        // [
+        //   unattachedDiskNeedsRecreate,
+        //   () => (
+        //     <Button
+        //       aria-label='Next'
+        //       disabled={!runtimeCanBeCreated}
+        //       onClick={() => {
+        //         setPanelContent(PanelContent.DeleteUnattachedPdAndCreate);
+        //       }}
+        //     >
+        //       Next
+        //     </Button>
+        //   ),
+        // ],
         [
           currentRuntime?.errors && currentRuntime.errors.length > 0,
           () => (

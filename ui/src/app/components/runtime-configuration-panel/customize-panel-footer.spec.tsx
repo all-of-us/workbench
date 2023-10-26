@@ -20,8 +20,10 @@ import {
 const onClose = jest.fn();
 const requestAnalysisConfig = jest.fn();
 const setPanelContent = jest.fn();
-const analysisConfig = toAnalysisConfig(defaultGceRuntimeWithPd(), stubDisk());
+const currentRuntime = defaultGceRuntimeWithPd();
 const gcePersistentDisk = stubDisk();
+const analysisConfig = toAnalysisConfig(currentRuntime, gcePersistentDisk);
+const existingAnalysisConfig = analysisConfig;
 const defaultProps: CustomizePanelFooterProps = {
   disableControls: false,
   runtimeCanBeCreated: false,
@@ -31,10 +33,10 @@ const defaultProps: CustomizePanelFooterProps = {
   onClose,
   requestAnalysisConfig,
   setPanelContent,
-  analysisConfig,
-  currentRuntime: undefined,
-  existingAnalysisConfig: undefined,
+  currentRuntime,
   gcePersistentDisk,
+  analysisConfig,
+  existingAnalysisConfig,
 };
 
 describe(CustomizePanelFooter.name, () => {
@@ -215,4 +217,199 @@ describe(CustomizePanelFooter.name, () => {
       expect(setPanelContent).toHaveBeenCalledWith(PanelContent.DeleteRuntime)
     );
   });
+
+  it('does not allow deleting the environment when controls are disabled', async () => {
+    await component({
+      runtimeExists: true,
+      unattachedPdExists: false,
+      disableControls: true,
+    });
+    const deleteButton = screen.queryByRole('button', {
+      name: 'Delete Environment',
+    });
+    expect(deleteButton).toBeInTheDocument();
+    deleteButton.click();
+    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
+  });
+
+  it('does not allow deleting the environment when there is no runtime', async () => {
+    await component({
+      runtimeExists: false,
+      unattachedPdExists: false,
+    });
+    const deleteButton = screen.queryByRole('button', {
+      name: 'Delete Environment',
+    });
+    expect(deleteButton).toBeInTheDocument();
+    deleteButton.click();
+    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
+  });
+
+  it.each([
+    [
+      'Next',
+      'allows',
+      'the runtime exists and we are not removing the disk',
+      {
+        unattachedPdExists: false,
+        runtimeExists: true,
+        runtimeCanBeUpdated: true,
+        analysisConfig: {
+          ...analysisConfig,
+          diskConfig: { ...analysisConfig.diskConfig, detachable: true }, // pretty sure this is already true but be explicit
+        },
+      },
+      () =>
+        expect(setPanelContent).toHaveBeenCalledWith(
+          PanelContent.ConfirmUpdate
+        ),
+    ],
+    [
+      'Next',
+      'disallows',
+      'the runtime exists and we are not removing the disk, but the runtime cannot be updated',
+      {
+        unattachedPdExists: false,
+        runtimeExists: true,
+        runtimeCanBeUpdated: false,
+        analysisConfig: {
+          ...analysisConfig,
+          diskConfig: { ...analysisConfig.diskConfig, detachable: true }, // pretty sure this is already true but be explicit
+        },
+      },
+      () => expect(setPanelContent).not.toHaveBeenCalled(),
+    ],
+    [
+      'Next',
+      'allows',
+      'the runtime exists and we are removing the disk',
+      {
+        unattachedPdExists: false,
+        runtimeExists: true,
+        runtimeCanBeUpdated: true,
+        analysisConfig: {
+          ...analysisConfig,
+          diskConfig: {
+            ...analysisConfig.diskConfig,
+            // existing config has detachable: true so this is a removal
+            detachable: false,
+          },
+        },
+      },
+      () =>
+        expect(setPanelContent).toHaveBeenCalledWith(
+          PanelContent.ConfirmUpdateWithDiskDelete
+        ),
+    ],
+    [
+      'Next',
+      'disallows',
+      'the runtime exists and we are removing the disk, but the runtime cannot be updated',
+      {
+        unattachedPdExists: false,
+        runtimeExists: true,
+        runtimeCanBeUpdated: false,
+        analysisConfig: {
+          ...analysisConfig,
+          diskConfig: {
+            ...analysisConfig.diskConfig,
+            // existing config has detachable: true so this is a removal
+            detachable: false,
+          },
+        },
+      },
+      () => expect(setPanelContent).not.toHaveBeenCalled(),
+    ],
+    [
+      'Try Again',
+      'allows',
+      'the runtime does not exist and the currentRuntime has errors', // TODO better names for these!
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: true,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [{ errorMessage: 'oops!' }],
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+        expect(onClose).toHaveBeenCalled();
+      },
+    ],
+    [
+      'Try Again',
+      'disallows',
+      'the runtime does not exist and the currentRuntime has errors, but the runtime cannot be created',
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: false,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [{ errorMessage: 'oops!' }],
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+      },
+    ],
+    [
+      'Create',
+      'allows',
+      'the runtime does not exist and the currentRuntime has no errors', // TODO better names for these!
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: true,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [], // be explicit about the lack of errors
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+        expect(onClose).toHaveBeenCalled();
+      },
+    ],
+    [
+      'Create',
+      'disallows',
+      'the runtime does not exist and the currentRuntime has no errors, but the runtime cannot be created', // TODO better names for these!
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: false,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [], // be explicit about the lack of errors
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+      },
+    ],
+  ])(
+    'renders the %s button and %s clicking when %s ',
+    async (
+      name: string,
+      allowsDisallows: string,
+      description: string,
+      config: Partial<CustomizePanelFooterProps>,
+      expectation: () => void
+    ) => {
+      await component(config);
+      const button = screen.queryByRole('button', { name });
+      expect(button).toBeInTheDocument();
+      button.click();
+      await waitFor(expectation);
+    }
+  );
 });
