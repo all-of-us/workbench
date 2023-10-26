@@ -184,18 +184,14 @@ def tanagra_dep(cmd_name, args)
     end
     env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
-      if (op.opts.version)
-        common.status "Checkout specified Tanagra tag"
-        deploy_version = op.opts.version
-        common.run_inline %W{git checkout tags/#{deploy_version}}
-      elsif (op.opts.branch)
+      if (op.opts.branch)
         common.status "Checkout specified Tanagra branch"
         deploy_branch = op.opts.branch
         common.run_inline %W{git fetch}
         common.run_inline %W{git checkout #{deploy_branch}}
       else
-        common.status "Using project specified tag from environment variables."
-        deploy_version = env_project.fetch(:tanagra_tag)
+        common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."
+        deploy_version = op.opts.version ? op.opts.version : env_project.fetch(:tanagra_tag)
         common.run_inline %W{git checkout tags/#{deploy_version}}
       end
     end
