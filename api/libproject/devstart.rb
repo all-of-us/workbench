@@ -2533,7 +2533,7 @@ def deploy_tanagra(cmd_name, args)
       gcloud app deploy tanagra-api.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{deploy_version}} : []))
+      (deploy_version ? %W{--version #{deploy_version}} : []))
   end
   common.status "Deployment of Tanagra API complete!"
 

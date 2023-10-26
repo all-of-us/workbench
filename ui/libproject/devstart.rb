@@ -132,7 +132,7 @@ def deploy_tanagra_ui(cmd_name, args)
       gcloud app deploy tanagra-ui.yaml
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
-      (op.opts.version ? %W{--version #{deploy_version}} : []))
+      (deploy_version ? %W{--version #{deploy_version}} : []))
   end
   common.status "Deployment of Tanagra UI complete!"
 end
@@ -171,8 +171,7 @@ def tanagra_dep(cmd_name, args)
   if (op.opts.version && op.opts.branch)
     puts "Please only provide version or branch as an arg"
     exit 1
-  end
-  if (project != "local" && (op.opts.branch || op.opts.version))
+  elsif (project != "local" && (op.opts.branch || op.opts.version))
     puts "Branch or version args are only allowed with local deployments"
     exit 1
   end
@@ -183,7 +182,6 @@ def tanagra_dep(cmd_name, args)
       common.status "Need to clone repo"
       common.run_inline %W{git clone https://github.com/DataBiosphere/tanagra.git}
     end
-    puts "#{project}"
     env_project = ENVIRONMENTS[project]
     Dir.chdir('tanagra') do
       if (op.opts.version)
@@ -193,6 +191,7 @@ def tanagra_dep(cmd_name, args)
       elsif (op.opts.branch)
         common.status "Checkout specified Tanagra branch"
         deploy_branch = op.opts.branch
+        common.run_inline %W{git fetch}
         common.run_inline %W{git checkout #{deploy_branch}}
       else
         common.status "Using project specified tag from environment variables."
