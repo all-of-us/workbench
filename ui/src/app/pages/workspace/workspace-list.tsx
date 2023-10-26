@@ -96,9 +96,9 @@ export const WorkspaceList = fp.flow(withUserProfile())(
 
       // Maps each "Filter by" dropdown element to a set of access levels to display.
       const filters = [
-        { label: 'Owner', value: ['OWNER'] },
-        { label: 'Writer', value: ['WRITER'] },
-        { label: 'Reader', value: ['READER'] },
+        { label: 'Owner', value: [WorkspaceAccessLevel.OWNER] },
+        { label: 'Writer', value: [WorkspaceAccessLevel.WRITER] },
+        { label: 'Reader', value: [WorkspaceAccessLevel.READER] },
         { label: 'All', value: null },
       ];
       const defaultFilter = filters.find((f) => f.label === 'All');
