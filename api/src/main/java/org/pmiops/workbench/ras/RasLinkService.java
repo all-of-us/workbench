@@ -142,7 +142,11 @@ public class RasLinkService {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
     String txnClaim;
-    String aouUsername = userProvider.get().getUsername();
+    DbUser user = userProvider.get();
+    String givenName = user.getGivenName();
+    String familyName = user.getFamilyName();
+    String aouUsername = user.getUsername();
+
     try {
       // Oauth dance to get id token and access token.
       TokenResponse tokenResponse =
@@ -172,6 +176,7 @@ public class RasLinkService {
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
+
       log.info(
           String.format(
               "Successfully retrieved OIDC user information "
@@ -181,9 +186,15 @@ public class RasLinkService {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
     }
+    String oidcGivenName = userInfoResponse.get("first_name").asText();
+    String oidcFamilyName = userInfoResponse.get("last_name").asText();
+
+    if(!givenName.toLowerCase().equals(oidcGivenName.toLowerCase()) || !familyName.toLowerCase().equals(oidcFamilyName.toLowerCase())){
+      throw new ForbiddenException(
+          String.format("Fake ID"));
+    }
 
     String rasUsername = getUsername(userInfoResponse);
-    DbUser user;
     if (rasUsername.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
       user = userService.updateIdentityStatus(rasUsername);
       identityVerificationService.updateIdentityVerificationSystem(

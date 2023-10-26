@@ -329,7 +329,6 @@ public class RasLinkServiceTest {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_ID_ME_FAKE_IDENTITY);
 
-    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
     assertThrows(
         ForbiddenException.class,
         () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL),
