@@ -96,6 +96,7 @@ insertCriteriaMenu "
 ($((++ID)),0,'Domains','VISIT','VISIT','Visits',0,$ID),
 ($((++ID)),0,'Domains','OBSERVATION','','Observations',0,$ID),
 ($((++ID)),0,'Domains','DEVICE','','Devices',0,$ID),
+($((++ID)),0,'Domains','PERSON','HAS_EHR_DATA','Has EHR data',0,$ID),
 ($((++ID)),0,'Concepts','CONCEPT_SET','','Concept Set',0,$ID),
 ($((++ID)),0,'Concepts','CONCEPT_QUICK_ADD','','Concept Quick Add',0,$ID),
 ($((++ID)),1,'Program Data','PERSON','AGE','Age',0,1),
@@ -104,7 +105,6 @@ insertCriteriaMenu "
 ($((++ID)),1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
 ($((++ID)),1,'Program Data','PERSON','RACE','Race',0,5),
 ($((++ID)),1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
-($((++ID)),1,'Program Data','PERSON','HAS_EHR_DATA','Has EHR data',0,7),
 ($((++ID)),2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
 
 echo "Adding surveys"
