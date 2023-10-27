@@ -81,9 +81,9 @@ then
   insertCriteriaMenu "($((++ID)),0,'Program Data','STRUCTURAL_VARIANT_DATA','','Structural Variant Data',0,$ID)"
 fi
 
-if [[ "$TABLE_LIST" == *"cb_variant_attribute"* ]]
+if [[ "$TABLE_LIST" == *"prep_vat"* ]]
 then
-  echo "Insert SNP/Indel Variants data into cb_criteria_menu"
+  echo "Insert SNP/Indel Variants data into cb_criteria_menu."
   insertCriteriaMenu "($((++ID)),0,'Program Data','SNP_INDEL_VARIANT','','SNP/Indel Variants',0,$ID)"
 fi
 
