@@ -122,10 +122,9 @@ describe(GenomicsExtractionMenu.name, () => {
 
     user.click(menuIcon);
     await waitFor(async () => {
-      const viewPathMenuItem = screen
+      const viewPathMenuItem: HTMLElement = screen
         .getByText('View Path')
         .closest('[role~=button]');
-      expect(viewPathMenuItem).toBeInTheDocument();
       expectMenuItemElementDisabled(viewPathMenuItem);
     });
   });
@@ -146,7 +145,7 @@ describe(GenomicsExtractionMenu.name, () => {
 
       user.click(menuIcon);
       await waitFor(async () => {
-        const viewPathMenuItem = screen
+        const viewPathMenuItem: HTMLElement = screen
           .getByText('View Path')
           .closest('[role~=button]');
         expect(viewPathMenuItem).toBeInTheDocument();
