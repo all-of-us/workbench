@@ -27,7 +27,7 @@ import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
-  isActionable,
+  canDeleteRuntime,
   RuntimeStatusRequest,
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
@@ -256,7 +256,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
-      ? isActionable(runtime?.status)
+      ? canDeleteRuntime(runtime?.status)
       : canDeleteApp(initialUserAppInfo);
 
   const displayCromwellDeleteModal = () => {

@@ -1265,7 +1265,6 @@ export enum PanelContent {
   DeleteRuntime = 'DeleteRuntime',
   DeleteUnattachedPd = 'DeleteUnattachedPd',
   DeleteUnattachedPdAndCreate = 'DeleteUnattachedPdAndCreate',
-  DeleteUnattachedPdAndUpdate = 'DeleteUnattachedPdAndUpdate',
   Disabled = 'Disabled',
   ConfirmUpdate = 'ConfirmUpdate',
   ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
@@ -1283,6 +1282,16 @@ export const isVisible = (status: RuntimeStatus) =>
 export const isActionable = (status: RuntimeStatus) =>
   (
     [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+  ).includes(status);
+
+// can the user delete the runtime?
+export const canDeleteRuntime = (status: RuntimeStatus) =>
+  (
+    [
+      RuntimeStatus.RUNNING,
+      RuntimeStatus.STOPPED,
+      RuntimeStatus.ERROR,
+    ] as Array<RuntimeStatus>
   ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>

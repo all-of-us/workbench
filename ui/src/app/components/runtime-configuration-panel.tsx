@@ -33,6 +33,7 @@ import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   AnalysisDiff,
+  canDeleteRuntime,
   diffsToUpdateMessaging,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
