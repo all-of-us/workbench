@@ -1271,17 +1271,12 @@ export enum PanelContent {
   SparkConsole = 'SparkConsole',
 }
 
-// should we show the runtime in the UI?
+// should we show the runtime in the UI (in most situations)?
+// Note: we do make users aware of ERROR runtimes in some situations
 export const isVisible = (status: RuntimeStatus) =>
   status &&
   !(
     [RuntimeStatus.DELETED, RuntimeStatus.ERROR] as Array<RuntimeStatus>
-  ).includes(status);
-
-// is the runtime in a state where the user can take action?
-export const isActionable = (status: RuntimeStatus) =>
-  (
-    [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
   ).includes(status);
 
 // can the user delete the runtime?
