@@ -116,7 +116,8 @@ public class MulticloudNotebookService implements NotebooksService {
 
   private NotebooksService getNotebooksService(String workspaceNamespace, String workspaceName) {
     DbWorkspace dbWorkspace = workspaceDao.get(workspaceNamespace, workspaceName);
-    NotebooksService notebooksService = notebooksServiceFactory.getNotebookService(dbWorkspace);
+    NotebooksService notebooksService =
+        notebooksServiceFactory.getNotebookService(dbWorkspace.getCloudPlatform());
     return notebooksService;
   }
 }

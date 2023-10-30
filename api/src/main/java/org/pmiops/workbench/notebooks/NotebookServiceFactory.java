@@ -1,7 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.CloudPlatform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,12 +19,12 @@ public class NotebookServiceFactory {
       NotebooksService gcpNotebookService) {
     defaultNotebookService = gcpNotebookService;
     notebooksServices =
-        Map.of(
+        ImmutableMap.of(
             CloudPlatform.GCP, gcpNotebookService,
             CloudPlatform.AWS, awsNotebookService);
   }
 
-  public NotebooksService getNotebookService(DbWorkspace workspace) {
-    return notebooksServices.getOrDefault(workspace.getCloudPlatform(), defaultNotebookService);
+  public NotebooksService getNotebookService(CloudPlatform cloudPlatform) {
+    return notebooksServices.getOrDefault(cloudPlatform, defaultNotebookService);
   }
 }

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.disks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.pmiops.workbench.model.CloudPlatform;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,7 @@ public class DiskServiceFactory {
       DiskService gcpDiskService, @Qualifier("awsDiskService") DiskService awsDiskService) {
     defaultDiskService = gcpDiskService;
     this.diskServices =
-        Map.of(CloudPlatform.GCP, gcpDiskService, CloudPlatform.AWS, awsDiskService);
+        ImmutableMap.of(CloudPlatform.GCP, gcpDiskService, CloudPlatform.AWS, awsDiskService);
   }
 
   public DiskService getDiskService(CloudPlatform cloudPlatform) {

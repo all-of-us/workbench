@@ -237,11 +237,21 @@ export const styles = reactStyles({
   },
 
   radioCard: {
-    border: '2px solid #ccc' /* Add a border to the radio cards */,
+    border: '1.5px solid #ccc' /* Add a border to the radio cards */,
     padding:
       '10px' /* Add padding to create space around the radio button and label */,
     width: '50%' /* Set the width of each radio card */,
     textAlign: 'center' /* Center-align text within the radio card */,
+    verticalAlign: 'center',
+    cursor: 'pointer' /* Change cursor to pointer on hover */,
+  },
+
+  radioLabel: {
+    padding:
+      '5px' /* Add padding to create space around the radio button and label */,
+    width: '50%' /* Set the width of each radio card */,
+    textAlign: 'center' /* Center-align text within the radio card */,
+    verticalAlign: 'center',
     cursor: 'pointer' /* Change cursor to pointer on hover */,
   },
 
@@ -1771,7 +1781,9 @@ export const WorkspaceEdit = fp.flow(
                       checked={!this.state.workspace.aws}
                       onChange={() => this.updateCloudPlatform(false)}
                     />
-                    <label className='radio-label'>GCP</label>
+                    <label style={styles.radioLabel} className='radio-label'>
+                      GCP
+                    </label>
                   </div>
                   <div style={styles.radioCard} className={`radio-card`}>
                     <input
@@ -1780,7 +1792,9 @@ export const WorkspaceEdit = fp.flow(
                       checked={this.state.workspace.aws}
                       onChange={() => this.updateCloudPlatform(true)}
                     />
-                    <label className='radio-label'>AWS</label>
+                    <label style={styles.radioLabel} className='radio-label'>
+                      AWS
+                    </label>
                   </div>
                 </div>
               </FlexRow>

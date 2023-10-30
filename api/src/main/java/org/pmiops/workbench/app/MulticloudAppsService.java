@@ -21,26 +21,30 @@ public class MulticloudAppsService implements AppsService {
 
   @Override
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace) {
-    appsServiceFactory.getAppsService(dbWorkspace).createApp(createAppRequest, dbWorkspace);
+    getAppsService(dbWorkspace).createApp(createAppRequest, dbWorkspace);
   }
 
   @Override
   public void deleteApp(String appName, DbWorkspace dbWorkspace, Boolean deleteDisk) {
-    appsServiceFactory.getAppsService(dbWorkspace).deleteApp(appName, dbWorkspace, deleteDisk);
+    getAppsService(dbWorkspace).deleteApp(appName, dbWorkspace, deleteDisk);
   }
 
   @Override
   public UserAppEnvironment getApp(String appName, DbWorkspace dbWorkspace) {
-    return appsServiceFactory.getAppsService(dbWorkspace).getApp(appName, dbWorkspace);
+    return getAppsService(dbWorkspace).getApp(appName, dbWorkspace);
   }
 
   @Override
   public void updateApp(String appName, UserAppEnvironment app, DbWorkspace dbWorkspace) {
-    appsServiceFactory.getAppsService(dbWorkspace).updateApp(appName, app, dbWorkspace);
+    getAppsService(dbWorkspace).updateApp(appName, app, dbWorkspace);
   }
 
   @Override
   public List<UserAppEnvironment> listAppsInWorkspace(DbWorkspace dbWorkspace) {
-    return appsServiceFactory.getAppsService(dbWorkspace).listAppsInWorkspace(dbWorkspace);
+    return getAppsService(dbWorkspace).listAppsInWorkspace(dbWorkspace);
+  }
+
+  private AppsService getAppsService(DbWorkspace dbWorkspace) {
+    return appsServiceFactory.getAppsService(dbWorkspace.getCloudPlatform());
   }
 }

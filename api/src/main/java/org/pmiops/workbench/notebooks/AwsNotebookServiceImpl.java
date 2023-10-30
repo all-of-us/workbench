@@ -1,57 +1,56 @@
 package org.pmiops.workbench.notebooks;
 
+import bio.terra.workspace.client.ApiException;
+import bio.terra.workspace.model.AwsCredential;
+import bio.terra.workspace.model.ResourceDescription;
 import com.google.cloud.storage.Blob;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONObject;
+import org.pmiops.workbench.aws.s3.AwsS3CloudStorageClient;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.wsm.WsmClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("awsNotebookService")
 public class AwsNotebookServiceImpl implements NotebooksService {
 
+  private final WsmClient wsmClient;
   private final WorkspaceDao workspaceDao;
 
+  private final AwsS3CloudStorageClient s3CloudStorageClient;
+
   @Autowired
-  public AwsNotebookServiceImpl(WorkspaceDao workspaceDao) {
+  public AwsNotebookServiceImpl(
+      WsmClient wsmClient,
+      WorkspaceDao workspaceDao,
+      AwsS3CloudStorageClient s3CloudStorageClient) {
+    this.wsmClient = wsmClient;
     this.workspaceDao = workspaceDao;
+    this.s3CloudStorageClient = s3CloudStorageClient;
   }
 
   @Override
   public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
 
-    List<FileDetail> fileDetails = new ArrayList<>();
-    // s3CloudStorageClient.getFilesFromS3()
-    // FIXME get files from S3 bucket
-    /*DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceName);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceName);
+    ResourceDescription awsS3Folder =
+        wsmClient.getAwsS3Folder(UUID.fromString(workspace.getFirecloudUuid()));
     try {
-      ResourceList resourceList =
-          resourceApiProvider
-              .get()
-              .enumerateResources(
-                  UUID.fromString(workspace.getFirecloudUuid()),
-                  0,
-                  10,
-                  ResourceType.AWS_SAGEMAKER_NOTEBOOK,
-                  StewardshipType.CONTROLLED);
-      resourceList
-          .getResources()
-          .forEach(
-              resource -> {
-                ResourceMetadata metadata = resource.getMetadata();
-                fileDetails.add(
-                    new FileDetail()
-                        .name(metadata.getName())
-                        //.lastModifiedTime(metadata.getLastUpdatedDate().toOffsetTime())
-                        .lastModifiedBy(metadata.getLastUpdatedBy()));
-              });
+      AwsCredential awsS3Credential =
+          wsmClient.getAwsS3Credential(
+              workspace.getFirecloudUuid(), awsS3Folder.getMetadata().getResourceId());
+      return s3CloudStorageClient.getFilesFromS3(
+          awsS3Folder.getResourceAttributes().getAwsS3StorageFolder(), awsS3Credential);
+
     } catch (ApiException e) {
       throw new WorkbenchException(e);
-    }*/
-    return fileDetails;
+    }
   }
 
   @Override

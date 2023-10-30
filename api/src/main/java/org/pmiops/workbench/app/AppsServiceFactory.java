@@ -1,7 +1,7 @@
 package org.pmiops.workbench.app;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.CloudPlatform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,12 +18,12 @@ public class AppsServiceFactory {
       AppsService gcpAppsService, @Qualifier("awsAppsService") AppsService awsAppsService) {
     defaultAppsService = gcpAppsService;
     appsServices =
-        Map.of(
+        ImmutableMap.of(
             CloudPlatform.GCP, gcpAppsService,
             CloudPlatform.AWS, awsAppsService);
   }
 
-  public AppsService getAppsService(DbWorkspace dbWorkspace) {
-    return appsServices.getOrDefault(dbWorkspace.getCloudPlatform(), defaultAppsService);
+  public AppsService getAppsService(CloudPlatform cloudPlatform) {
+    return appsServices.getOrDefault(cloudPlatform, defaultAppsService);
   }
 }

@@ -145,15 +145,15 @@ public class WsmClient {
   }
 
   /**
-   * Retrieves the AWS S3 storage folder for the provided UUID.
+   * Retrieves the AWS S3 storage folder name for the provided UUID.
    *
-   * @param id The UUID of the resource.
+   * @param workspaceUUID The UUID of the workspace.
    * @return The name of the AWS S3 storage folder corresponding to the provided UUID.
    */
-  public String getAwsS3Folder(UUID id) {
+  public String getAwsS3FolderName(UUID workspaceUUID) {
     ResourceList resourceList;
     try {
-      resourceList = getResourcesInWorkspace(id, 10, ResourceType.AWS_S3_STORAGE_FOLDER);
+      resourceList = getResourcesInWorkspace(workspaceUUID, 10, ResourceType.AWS_S3_STORAGE_FOLDER);
     } catch (bio.terra.workspace.client.ApiException e) {
       throw new WorkbenchException(e);
     }
@@ -164,6 +164,34 @@ public class WsmClient {
         .getResourceAttributes()
         .getAwsS3StorageFolder()
         .getBucketName();
+  }
+
+  /**
+   * Retrieves the AWS S3 storage folder for the provided UUID.
+   *
+   * @param workspaceUUID The UUID of the workspace.
+   * @return The AWS S3 storage folder corresponding to the provided UUID.
+   */
+  public ResourceDescription getAwsS3Folder(UUID workspaceUUID) {
+    ResourceList resourceList;
+    try {
+      resourceList = getResourcesInWorkspace(workspaceUUID, 10, ResourceType.AWS_S3_STORAGE_FOLDER);
+    } catch (bio.terra.workspace.client.ApiException e) {
+      throw new WorkbenchException(e);
+    }
+
+    return resourceList.getResources().get(0);
+  }
+
+  public AwsCredential getAwsS3Credential(String workspaceUUID, UUID folderResourceUUID)
+      throws ApiException {
+    return awsResourceApiProvider
+        .get()
+        .getAwsS3StorageFolderCredential(
+            UUID.fromString(workspaceUUID),
+            folderResourceUUID,
+            AwsCredentialAccessScope.READ_ONLY,
+            900);
   }
 
   // ---------------- General Resources ----------------
