@@ -146,7 +146,7 @@
     "useTestCaptcha": false
   },
   "reporting": {
-    "dataset": "reporting_test",
+    "dataset": "reporting_prod",
     "maxRowsPerInsert": 500,
     "exportTerraDataWarehouse": true,
     "terraWarehouseLeoAppTableId": "broad-dsde-prod-analytics-dev.warehouse.leonardo_app",
