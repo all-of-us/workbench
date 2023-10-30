@@ -300,7 +300,6 @@ describe(CustomizePanel.name, () => {
       name: 'Manage and monitor Spark console',
     });
     await waitFor(() => expect(sparkButton).toBeInTheDocument());
-    screen.debug();
     sparkButton.click();
     await waitFor(() =>
       expect(setPanelContent).toHaveBeenCalledWith(PanelContent.SparkConsole)
