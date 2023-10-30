@@ -92,7 +92,7 @@
   },
   "absorb": {
     "externalDepartmentId": "Researchers",
-    "enabledForNewUsers": false,
+    "enabledForNewUsers": true,
     "samlIdentityProviderId": "C02celxus",
     "samlServiceProviderId": "638082479253"
   },
