@@ -9,11 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Interactive as TerraUIInteractive } from '@terra-ui-packages/components';
 import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
-import {
-  ClrIcon,
-  KebabCircleMenuIcon,
-  SnowmanIcon,
-} from 'app/components/icons';
+import { CircleEllipsisIcon, ClrIcon, SnowmanIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -452,7 +448,14 @@ export const SnowmanButton = ({ ...props }) => (
 );
 
 export const KebabCircleButton = ({ ...props }) => (
-  <IconButton icon={KebabCircleMenuIcon} {...props} />
+  <IconButton
+    icon={CircleEllipsisIcon}
+    style={{
+      width: 21,
+      height: 21,
+    }}
+    {...props}
+  />
 );
 
 const cardButtonBase = {
