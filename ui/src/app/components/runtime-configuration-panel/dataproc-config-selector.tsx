@@ -7,7 +7,6 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_MACHINE_NAME,
@@ -17,6 +16,7 @@ import {
 } from 'app/utils/machines';
 
 import { DiskSizeSelector } from './disk-size-selector';
+import { MachineSelector } from './machine-selector';
 
 const { useState, useEffect } = React;
 

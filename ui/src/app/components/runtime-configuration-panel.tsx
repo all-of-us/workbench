@@ -70,7 +70,13 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-const PanelMain = fp.flow(
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorFreeCreditsRemaining?: number;
+  profileState: ProfileStore;
+}
+export const RuntimeConfigurationPanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )(
@@ -79,11 +85,16 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     onClose = () => {},
-    initialPanelContent,
-    creatorFreeCreditsRemaining,
+    initialPanelContent = null,
+    creatorFreeCreditsRemaining = null,
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
+    const { runtimeLoaded } = useStore(runtimeStore);
+    if (!runtimeLoaded) {
+      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+    }
+
     const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
 
@@ -492,7 +503,9 @@ const PanelMain = fp.flow(
             PanelContent.ConfirmUpdate,
             () => (
               <ConfirmUpdatePanel
-                existingAnalysisConfig={existingAnalysisConfig}
+                {...{
+                  existingAnalysisConfig,
+                }}
                 newAnalysisConfig={analysisConfig}
                 onCancel={() => {
                   setPanelContent(PanelContent.Customize);
@@ -540,33 +553,3 @@ const PanelMain = fp.flow(
     );
   }
 );
-
-export interface RuntimeConfigurationPanelProps {
-  onClose?: () => void;
-  initialPanelContent?: PanelContent;
-  creatorFreeCreditsRemaining?: number;
-  profileState: ProfileStore;
-}
-export const RuntimeConfigurationPanel = ({
-  onClose = () => {},
-  initialPanelContent = null,
-  creatorFreeCreditsRemaining = null,
-  profileState,
-}: RuntimeConfigurationPanelProps) => {
-  const { runtimeLoaded } = useStore(runtimeStore);
-  if (!runtimeLoaded) {
-    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
-  }
-
-  // TODO: can we remove this indirection?
-  return (
-    <PanelMain
-      {...{
-        onClose,
-        initialPanelContent,
-        creatorFreeCreditsRemaining,
-        profileState,
-      }}
-    />
-  );
-};
