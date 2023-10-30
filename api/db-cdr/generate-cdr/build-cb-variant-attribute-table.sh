@@ -96,7 +96,7 @@ then
    JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_variant_attribute\` pva ON pva.vid = pv.vid
    GROUP BY pv.vid, rs_number"
 
-   echo "Updating cb_variant_attribute table with participant counts."
+   echo "Updating cb_variant_attribute table with correct participant counts."
    bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
    "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_variant_attribute\` x
     SET x.participant_count = y.size
