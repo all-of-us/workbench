@@ -1285,6 +1285,16 @@ export const isActionable = (status: RuntimeStatus) =>
     [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
   ).includes(status);
 
+// can the user delete the runtime?
+export const canDeleteRuntime = (status: RuntimeStatus) =>
+  (
+    [
+      RuntimeStatus.RUNNING,
+      RuntimeStatus.STOPPED,
+      RuntimeStatus.ERROR,
+    ] as Array<RuntimeStatus>
+  ).includes(status);
+
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
   // eslint-disable-next-line @typescript-eslint/dot-notation
   runtime?.labels?.['creator'];

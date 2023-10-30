@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { DiskType } from 'generated/fetch';
+import { DiskType, RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
@@ -11,6 +11,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { defaultGceRuntimeWithPd } from 'testing/stubs/runtime-api-stub';
+import { ALL_RUNTIME_STATUSES, minus } from 'testing/utils';
 
 import {
   CustomizePanelFooter,
@@ -206,36 +207,52 @@ describe(CustomizePanelFooter.name, () => {
     });
   });
 
-  it('allows deleting the environment when a runtime exists and no detached PD exists', async () => {
-    await component({ runtimeExists: true, unattachedPdExists: false });
-    const deleteButton = screen.queryByRole('button', {
-      name: 'Delete Environment',
-    });
-    expect(deleteButton).toBeInTheDocument();
-    deleteButton.click();
-    await waitFor(() =>
-      expect(setPanelContent).toHaveBeenCalledWith(PanelContent.DeleteRuntime)
-    );
-  });
+  const canDeleteStatuses = [
+    RuntimeStatus.RUNNING,
+    RuntimeStatus.STOPPED,
+    RuntimeStatus.ERROR,
+  ];
+  test.each(canDeleteStatuses)(
+    'it allows deleting the environment when a runtime is %s and no detached PD exists',
+    async (status) => {
+      await component({
+        currentRuntime: { ...currentRuntime, status },
+        unattachedPdExists: false,
+        runtimeExists: false, // the previous logic relied on this value - show that it no longer applies
+      });
+      const deleteButton = screen.queryByRole('button', {
+        name: 'Delete Environment',
+      });
+      expect(deleteButton).toBeInTheDocument();
+      deleteButton.click();
+      await waitFor(() =>
+        expect(setPanelContent).toHaveBeenCalledWith(PanelContent.DeleteRuntime)
+      );
+    }
+  );
+
+  test.each(minus(ALL_RUNTIME_STATUSES, canDeleteStatuses))(
+    'it does not allow deleting the environment when a runtime is %s and no detached PD exists',
+    async (status) => {
+      await component({
+        currentRuntime: { ...currentRuntime, status },
+        unattachedPdExists: false,
+        runtimeExists: true, // the previous logic relied on this value - show that it no longer applies
+      });
+      const deleteButton = screen.queryByRole('button', {
+        name: 'Delete Environment',
+      });
+      expect(deleteButton).toBeInTheDocument();
+      deleteButton.click();
+      await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
+    }
+  );
 
   it('does not allow deleting the environment when controls are disabled', async () => {
     await component({
       runtimeExists: true,
       unattachedPdExists: false,
       disableControls: true,
-    });
-    const deleteButton = screen.queryByRole('button', {
-      name: 'Delete Environment',
-    });
-    expect(deleteButton).toBeInTheDocument();
-    deleteButton.click();
-    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
-  });
-
-  it('does not allow deleting the environment when there is no runtime', async () => {
-    await component({
-      runtimeExists: false,
-      unattachedPdExists: false,
     });
     const deleteButton = screen.queryByRole('button', {
       name: 'Delete Environment',
