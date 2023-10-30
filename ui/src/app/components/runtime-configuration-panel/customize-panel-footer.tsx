@@ -8,7 +8,11 @@ import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panel
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
+import {
+  AnalysisConfig,
+  canDeleteRuntime,
+  PanelContent,
+} from 'app/utils/runtime-utils';
 
 export interface CustomizePanelFooterProps {
   disableControls: boolean;
@@ -87,12 +91,12 @@ export const CustomizePanelFooter = ({
       <LinkButton
         style={{
           ...styles.deleteLink,
-          ...(disableControls || !runtimeExists
+          ...(disableControls || !canDeleteRuntime(currentRuntime?.status)
             ? { color: colorWithWhiteness(colors.dark, 0.4) }
             : {}),
         }}
         aria-label='Delete Environment'
-        disabled={disableControls || !runtimeExists}
+        disabled={disableControls || !canDeleteRuntime(currentRuntime?.status)}
         onClick={() => setPanelContent(PanelContent.DeleteRuntime)}
       >
         Delete Environment

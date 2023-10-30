@@ -44,7 +44,11 @@ import {
   workspaceDataStub,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
-import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
+import {
+  ALL_GKE_APP_STATUSES,
+  ALL_RUNTIME_STATUSES,
+  minus,
+} from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
 import { toAppType, UIAppType } from './utils';
@@ -165,7 +169,12 @@ describe('ExpandedApp', () => {
       }
     );
 
-    test.each([RuntimeStatus.RUNNING, RuntimeStatus.STOPPED])(
+    const canDeleteStatuses = [
+      RuntimeStatus.RUNNING,
+      RuntimeStatus.STOPPED,
+      RuntimeStatus.ERROR,
+    ];
+    test.each(canDeleteStatuses)(
       'should allow deletion when the Jupyter app status is %s',
       async (status) => {
         runtimeStub.runtime.status = status;
@@ -183,14 +192,7 @@ describe('ExpandedApp', () => {
       }
     );
 
-    test.each([
-      RuntimeStatus.STOPPING,
-      RuntimeStatus.STARTING,
-      RuntimeStatus.ERROR,
-      RuntimeStatus.UNKNOWN,
-      undefined,
-      null,
-    ])(
+    test.each(minus(ALL_RUNTIME_STATUSES, canDeleteStatuses))(
       'should not allow deletion when the Jupyter app status is %s',
       async (status) => {
         runtimeStub.runtime.status = status;
