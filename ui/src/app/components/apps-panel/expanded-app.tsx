@@ -89,13 +89,16 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
     workspace: { namespace, googleProject },
   } = props;
 
-  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+  const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
+    namespace,
+    googleProject
+  );
 
   return (
     <PauseResumeButton
-      externalStatus={fromRuntimeStatus(status)}
-      onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-      onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+      externalStatus={fromRuntimeStatus(runtimeStatus)}
+      onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
+      onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
     />
   );
 };

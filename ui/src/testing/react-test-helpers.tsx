@@ -140,3 +140,44 @@ export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
 export const renderModal = <C,>(
   component: React.ReactElement<C, string | React.JSXElementConstructor<C>>
 ): RenderResult => render(<div id='popup-root'>{component}</div>);
+
+// seems to be the best we can do with Primereact Dropdown
+// based on runtime-configuration-panel.spec pickDropdownOption
+export const getDropdownOption = (
+  container: HTMLElement,
+  dropDownId: string,
+  optionText: string,
+  expectedCount?: number
+): Element => {
+  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
+  expect(dropdown).toBeInTheDocument();
+  dropdown.click();
+
+  const allOptions = container.querySelectorAll(
+    `#${dropDownId} .p-dropdown-item`
+  );
+  if (expectedCount) {
+    expect(allOptions).toHaveLength(expectedCount);
+  }
+
+  // TODO: can we include this check in the querySelector step?
+  const option = Array.from(allOptions).find(
+    (di) => di.textContent === optionText
+  );
+  expect(option).toBeInTheDocument();
+  expect(option).toHaveTextContent(optionText);
+  return option;
+};
+
+export const expectDropdownDisabled = (
+  container: HTMLElement,
+  dropDownId: string
+) => {
+  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
+  expect(dropdown).toBeInTheDocument();
+  dropdown.click();
+
+  expect(
+    container.querySelector(`#${dropDownId} .p-dropdown-item`)
+  ).not.toBeInTheDocument();
+};

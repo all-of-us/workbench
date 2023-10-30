@@ -24,7 +24,6 @@ interface Props {
   diskConfig: DiskConfig;
   onChange: (c: DiskConfig) => void;
   disabled: boolean;
-  disableDetachableReason: string | null;
   existingDisk: Disk | null;
   computeType: string | null;
 }
@@ -32,10 +31,12 @@ export const DiskSelector = ({
   diskConfig,
   onChange,
   disabled,
-  disableDetachableReason,
   existingDisk,
   computeType,
 }: Props) => {
+  const disableDetachableReason: string | undefined =
+    computeType === ComputeType.Dataproc &&
+    'Reattachable disks are unsupported for this compute type';
   return (
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
