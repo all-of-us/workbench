@@ -1,11 +1,16 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
+
+import { render } from '@testing-library/react';
 
 import { Scroll } from './scroll';
 
 describe('ScrollComponent', () => {
   it('should render', () => {
-    const wrapper = mount(<Scroll dir='left' shade='light' />);
-    expect(wrapper.exists()).toBeTruthy();
+    const { container } = render(
+      <Scroll dir='left' shade='light' className='scrollClass' />
+    );
+    expect(container.querySelector('.scrollClass')).toBeInTheDocument();
   });
 });

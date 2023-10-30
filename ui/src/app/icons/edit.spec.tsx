@@ -1,5 +1,14 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
+
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 
 import { EditComponentProps, EditComponentReact } from './edit';
 
@@ -8,45 +17,51 @@ describe('EditIconComponent', () => {
   let props: EditComponentProps;
 
   const component = () => {
-    return mount(<EditComponentReact {...props} />);
+    return render(<EditComponentReact {...props} />);
   };
+
+  const getRoot = () => screen.getByTitle('Edit').closest('svg');
 
   beforeEach(() => {
     props = {
       disabled: false,
       enableHoverEffect: true,
-      style: {},
+      style: { backgroundColor: 'antiquewhite' },
     };
   });
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(getRoot()).toBeInTheDocument();
   });
 
   it('should change style if disabled', () => {
-    const wrapper = component();
-    const style = wrapper.find('svg').props().style;
+    component();
+    const style = getRoot().style;
     props.disabled = true;
-    const disabledWrapper = component();
-    const disabledStyle = disabledWrapper.find('svg').props().style;
+    cleanup();
+    component();
+    const disabledStyle = getRoot().style;
     expect(style).not.toEqual(disabledStyle);
   });
 
-  it('should change style on mouse over', () => {
-    const wrapper = component();
-    const style = wrapper.find('svg').props().style;
-    wrapper.simulate('mouseover');
-    const hoverStyle = wrapper.find('svg').props().style;
-    expect(style).not.toEqual(hoverStyle);
+  it('should change style on mouse over', async () => {
+    component();
+    const element = getRoot();
+    const initialFillColor = element.style.fill;
+    fireEvent.mouseOver(element);
+    const finalFillColor = element.style.fill;
+    await waitFor(() => expect(initialFillColor).not.toEqual(finalFillColor));
   });
 
-  it('should change style on mouse out', () => {
-    const wrapper = component();
-    wrapper.simulate('mouseover');
-    const hoverStyle = wrapper.find('svg').props().style;
-    wrapper.simulate('mouseleave');
-    const mouseOutStyle = wrapper.find('svg').props().style;
-    expect(mouseOutStyle).not.toEqual(hoverStyle);
+  it('should change style on mouse out', async () => {
+    component();
+    const element = getRoot();
+
+    fireEvent.mouseOver(element);
+    const initialFillColor = element.style.fill;
+    fireEvent.mouseLeave(element);
+    const finalFillColor = element.style.fill;
+    await waitFor(() => expect(initialFillColor).not.toEqual(finalFillColor));
   });
 });
