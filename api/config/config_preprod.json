@@ -105,7 +105,7 @@
     "enableEraCommons": false,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableRasIdMeLinking": false,
+    "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": false,
     "currentDuccVersions": [4, 5, 6],
     "renewal": {
@@ -148,7 +148,7 @@
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
-    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0",
+    "clientId": "6f2a4655-37e4-4afe-a0d3-3da4482b225d",
     "logoutUrl": "https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "offlineBatch": {
