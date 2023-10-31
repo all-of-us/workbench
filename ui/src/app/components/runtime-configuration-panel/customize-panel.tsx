@@ -25,7 +25,6 @@ import {
 } from 'app/utils/machines';
 import {
   AnalysisConfig,
-  isActionable,
   PanelContent,
   RuntimeStatusRequest,
   UpdateMessaging,
@@ -90,7 +89,11 @@ export const CustomizePanel = ({
   warningMessageContent,
   workspaceData,
 }: CustomizePanelProps) => {
-  const disableControls = runtimeExists && !isActionable(runtimeStatus);
+  const disableControls =
+    runtimeExists &&
+    !(
+      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+    ).includes(runtimeStatus);
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -130,8 +133,8 @@ export const CustomizePanel = ({
             allowDataproc,
             setAnalysisConfig,
             gcePersistentDisk,
-            disabled: disableControls,
           }}
+          disabled={disableControls}
         />
         {/* Runtime customization: change detailed machine configuration options. */}
         <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>

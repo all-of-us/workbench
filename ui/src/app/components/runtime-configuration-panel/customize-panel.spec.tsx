@@ -11,6 +11,7 @@ import {
   AutopauseMinuteThresholds,
   ComputeType,
 } from 'app/utils/machines';
+import { runtimePresets } from 'app/utils/runtime-presets';
 import {
   PanelContent,
   toAnalysisConfig,
@@ -27,6 +28,7 @@ import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { defaultGceRuntimeWithPd } from 'testing/stubs/runtime-api-stub';
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
+import { ALL_RUNTIME_STATUSES, minus } from 'testing/utils';
 
 import { CustomizePanel, CustomizePanelProps } from './customize-panel';
 
@@ -383,4 +385,70 @@ describe(CustomizePanel.name, () => {
     expect(screen.queryByText(/Warning Number One/)).toBeInTheDocument();
     expect(screen.queryByText(/Warning Number Two/)).toBeInTheDocument();
   });
+
+  // many subcomponents are enabled/disabled by the same logic.  PresetSelector can act as a stand-in here for:
+  // MachineSelector, GpuConfigSelector, DataProcConfigSelector, the autopause Dropdown, DiskSelector, and
+  // Delete Environment in CustomizePanelFooter.
+  // The runtime-compute Dropdown has similar logic, but only when allowDataproc is also true
+
+  it('enables the PresetSelector when no runtimeExists, regardless of runtimeStatus', async () => {
+    await component({
+      runtimeExists: false,
+      runtimeStatus: RuntimeStatus.DELETED,
+    });
+    const dropdown = screen.queryByLabelText('Recommended environments');
+    expect(dropdown).toBeInTheDocument();
+    dropdown.click();
+    await waitFor(() => {
+      expect(
+        screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+      ).toBeInTheDocument();
+    });
+  });
+
+  const enabledStatuses = [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED];
+  test.each(enabledStatuses)(
+    'it enables the PresetSelector for a %s runtime when runtimeExists',
+    async (runtimeStatus) => {
+      await component({
+        runtimeExists: true,
+        runtimeStatus,
+      });
+      const dropdown = screen.queryByLabelText('Recommended environments');
+      expect(dropdown).toBeInTheDocument();
+      dropdown.click();
+      await waitFor(() => {
+        expect(
+          screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+        ).toBeInTheDocument();
+      });
+    }
+  );
+
+  test.each(minus(ALL_RUNTIME_STATUSES, enabledStatuses))(
+    'it disables the PresetSelector for a %s runtime when runtimeExists',
+    async (runtimeStatus) => {
+      await component({
+        runtimeExists: true,
+        runtimeStatus,
+      });
+      const dropdown = screen.queryByLabelText('Recommended environments');
+      expect(dropdown).toBeInTheDocument();
+      dropdown.click();
+      await waitFor(() => {
+        expect(
+          screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+        ).not.toBeInTheDocument();
+      });
+    }
+  );
 });
