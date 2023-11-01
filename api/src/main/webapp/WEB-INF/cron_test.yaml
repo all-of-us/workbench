@@ -1,6 +1,6 @@
 cron:
 - url: /v1/cron/checkObjectNameSize
   schedule: every 24 hours
-- url: /v1/cron/checkFreeTierBillingUsage
+- url: /v1/cron/checkFreeTierBillingUsageCloudTask
   schedule: every 24 hours
 
