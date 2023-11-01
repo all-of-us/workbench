@@ -895,11 +895,3 @@ compileGeneratedKotlin {
 explodeWar {
   dependsOn(bootWar)
 }
-
-dependencyCheck {
-    analyzers {
-        retirejs {
-            enabled = false
-        }
-    }
-}
