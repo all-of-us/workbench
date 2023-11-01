@@ -26,6 +26,8 @@ import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
+import org.pmiops.workbench.model.UserBQCost;
+import org.pmiops.workbench.model.UserWorkspaceBQCostRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,8 @@ public class TaskQueueService {
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
 
+  private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
+      BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
@@ -53,6 +57,7 @@ public class TaskQueueService {
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
 
+  private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
   private WorkbenchLocationConfigService locationConfigService;
@@ -109,6 +114,18 @@ public class TaskQueueService {
                     AUDIT_PROJECTS_QUEUE_NAME,
                     AUDIT_PROJECTS_PATH,
                     new AuditProjectAccessRequest().userIds(batch)));
+  }
+
+  public void groupAndPushFreeTierBilling(List<UserBQCost> userCostList) {
+    Integer freeTierCronUserBatchSize =
+        workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
+    CloudTasksUtils.partitionList(userCostList, freeTierCronUserBatchSize)
+        .forEach(
+            batch ->
+                createAndPushTask(
+                    FREE_TIER_BILLING_QUEUE,
+                    CHECK_AND_ALERT_FREE_TIER_USAGE,
+                    new UserWorkspaceBQCostRequest().userCostList(batch)));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {

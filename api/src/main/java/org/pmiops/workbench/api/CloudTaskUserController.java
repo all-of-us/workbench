@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
+import org.pmiops.workbench.model.UserWorkspaceBQCostRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,16 +55,19 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final AccessModuleService accessModuleService;
+  private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
-      AccessModuleService accessModuleService) {
+      AccessModuleService accessModuleService,
+      FreeTierBillingBatchUpdateService freeTierBillingUpdateService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
+    this.freeTierBillingUpdateService = freeTierBillingUpdateService;
   }
 
   @Override
@@ -110,6 +115,19 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     log.info(String.format("successfully audited %d users", request.getUserIds().size()));
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
+   * workspaces to trigger alerts due to passing thresholds or exceeding limits
+   *
+   * @param body : Batch of user IDs from cloud task queue: freeTierBillingQueue
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(UserWorkspaceBQCostRequest body) {
+    freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(body.getUserCostList());
     return ResponseEntity.noContent().build();
   }
 
