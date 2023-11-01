@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { faBan, faEllipsisV, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { faLocationCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
@@ -14,6 +13,9 @@ import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+
+import { FlexRow } from './flex';
+import { LocationArrowIcon } from './icons';
 
 const styles = {
   hr: {
@@ -62,14 +64,22 @@ export const GenomicsExtractionMenu = ({
         content={
           <React.Fragment>
             <MenuItem
-              style={styles.menuItem}
-              faIcon={faLocationCircle}
+              style={{ padding: '0.375rem 0.5rem' }} // different styling because we use a different icon type here
               disabled={
                 !(job.status === TerraJobStatus.SUCCEEDED && job.outputDir)
               }
               onClick={() => setShowModal(true)}
             >
-              View Path
+              <FlexRow>
+                <LocationArrowIcon
+                  style={{
+                    height: '13px',
+                    marginTop: '5px',
+                    marginRight: '3px',
+                  }}
+                />
+                <div>View Path</div>
+              </FlexRow>
             </MenuItem>
             <hr style={styles.hr} />
             <MenuItem

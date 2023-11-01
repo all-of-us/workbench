@@ -30,11 +30,11 @@ export TANAGRA_FEATURE_ARTIFACT_STORAGE_ENABLED=true
 export TANAGRA_AUTH_IAP_GKE_JWT=false
 
 if [[ ${disableAuthChecks} ]]; then
-  echo "Disabling auth checks."
+  echo "Disabling AuthN"
   export TANAGRA_AUTH_DISABLE_CHECKS=true
   export TANAGRA_AUTH_BEARER_TOKEN=false
 else
-  echo "Enabling auth checks."
+  echo "Enabling AuthN"
   export TANAGRA_AUTH_DISABLE_CHECKS=false
   export TANAGRA_AUTH_BEARER_TOKEN=true
 fi
@@ -48,7 +48,7 @@ fi
 echo "Using default application credentials from:"
 env | grep GOOGLE_APPLICATION_CREDENTIALS
 
-# run from tanagra sub-module under workbench
-cd ../tanagra
+# run from tanagra folder
+cd tanagra
 # deploy service
 ./gradlew -PisMySQL service:bootRun

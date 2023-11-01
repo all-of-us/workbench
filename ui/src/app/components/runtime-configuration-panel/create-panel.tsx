@@ -22,8 +22,8 @@ export interface CreatePanelProps {
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
   creatorFreeCreditsRemaining: number;
-  status: RuntimeStatus;
-  setRuntimeStatus: (runtimeStatusRequest: RuntimeStatusRequest) => void;
+  runtimeStatus: RuntimeStatus;
+  setRuntimeStatusRequest: (runtimeStatusRequest: RuntimeStatusRequest) => void;
 }
 export const CreatePanel = ({
   profile,
@@ -31,8 +31,8 @@ export const CreatePanel = ({
   workspace,
   analysisConfig,
   creatorFreeCreditsRemaining,
-  status,
-  setRuntimeStatus,
+  runtimeStatus,
+  setRuntimeStatusRequest,
 }: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
@@ -47,10 +47,10 @@ export const CreatePanel = ({
           profile,
           workspace,
           analysisConfig,
-          status,
         }}
-        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+        status={runtimeStatus}
+        onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
+        onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
         appType={UIAppType.JUPYTER}
       />
       <FlexRow

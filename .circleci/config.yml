@@ -211,7 +211,7 @@ commands:
           background: true
       - run:
           name: Wait for local API server to start
-          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 5m
+          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 6m
 
   launch-local-ui:
     description: "Launch local UI server"
@@ -282,13 +282,6 @@ commands:
           name: "Restore UI cache"
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - gcloud-auth-login
-      - run:
-          name: "Download Fontawesome Pro license key"
-          working_directory: ~/workbench
-          command: |
-            gsutil cat \
-              gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt \
-              >> ~/.npmrc
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
@@ -498,7 +491,7 @@ jobs:
       - run:
           name: Yarn deps
           working_directory: ~/workbench/ui
-          command: yarn deps
+          command: yarn deps test
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui

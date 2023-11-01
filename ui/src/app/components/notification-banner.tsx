@@ -6,7 +6,7 @@ import { reactStyles } from 'app/utils';
 
 import { Button, ButtonWithLocationState } from './buttons';
 import { FlexRow } from './flex';
-import { AlarmExclamation } from './icons';
+import { ExclamationTriangle } from './icons';
 
 const styles = reactStyles({
   box: {
@@ -93,7 +93,7 @@ export const NotificationBanner = ({
 }: NotificationProps) => {
   return (
     <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
-      <AlarmExclamation style={{ ...styles.icon, ...iconStyle }} />
+      <ExclamationTriangle style={{ ...styles.icon, ...iconStyle }} />
       <div style={{ ...styles.text, ...textStyle, width: bannerTextWidth }}>
         {text}
       </div>

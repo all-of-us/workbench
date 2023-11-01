@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.AbsorbServiceImpl;
+import org.pmiops.workbench.compliancetraining.ComplianceTrainingServiceImpl;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,14 +66,14 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
     var rtTrainingEnrollment =
         enrollments.stream()
-            .filter(e -> e.courseId.equals(config.absorb.rtTrainingCourseId))
+            .filter(e -> e.courseId.equals(ComplianceTrainingServiceImpl.rtTrainingCourseId))
             .findFirst();
     assertThat(rtTrainingEnrollment.isPresent()).isTrue();
     assertThat(rtTrainingEnrollment.get().completionTime).isNull();
 
     var ctTrainingEnrollment =
         enrollments.stream()
-            .filter(e -> e.courseId.equals(config.absorb.ctTrainingCourseId))
+            .filter(e -> e.courseId.equals(ComplianceTrainingServiceImpl.ctTrainingCourseId))
             .findFirst();
     assertThat(ctTrainingEnrollment.isPresent()).isFalse();
   }
@@ -95,7 +96,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
     var rtTrainingEnrollment =
         enrollments.stream()
-            .filter(e -> e.courseId.equals(config.absorb.rtTrainingCourseId))
+            .filter(e -> e.courseId.equals(ComplianceTrainingServiceImpl.rtTrainingCourseId))
             .findFirst();
     assertThat(rtTrainingEnrollment.isPresent()).isTrue();
     // Completed at 2:56PM EST on 2023-10-13
@@ -104,7 +105,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
 
     var ctTrainingEnrollment =
         enrollments.stream()
-            .filter(e -> e.courseId.equals(config.absorb.ctTrainingCourseId))
+            .filter(e -> e.courseId.equals(ComplianceTrainingServiceImpl.ctTrainingCourseId))
             .findFirst();
     assertThat(ctTrainingEnrollment.isPresent()).isTrue();
     assertThat(ctTrainingEnrollment.get().completionTime).isNull();

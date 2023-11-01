@@ -12,16 +12,18 @@ import {
   faMinusCircle,
   faRepeat,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCircleEllipsisVertical } from '@fortawesome/pro-regular-svg-icons';
-import { faAlarmExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import colors, { addOpacity } from 'app/styles/colors';
+import { ReactComponent as circleEllipsis } from 'assets/icons/circle-ellipsis.svg';
 import { ReactComponent as controlledTierBadge } from 'assets/icons/controlled-tier-badge.svg';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
+import { ReactComponent as locationArrow } from 'assets/icons/location-arrow.svg';
 import { ReactComponent as registeredTierBadge } from 'assets/icons/registered-tier-badge.svg';
 
+export const CircleEllipsisIcon = circleEllipsis;
 export const ControlledTierBadge = controlledTierBadge;
+export const LocationArrowIcon = locationArrow;
 export const RegisteredTierBadge = registeredTierBadge;
 
 export const styles = {
@@ -48,12 +50,6 @@ export const styles = {
     marginLeft: -9,
     width: '21px',
     height: '21px',
-  },
-
-  kebabCircleIcon: {
-    width: 21,
-    height: 21,
-    marginLeft: 8,
   },
 
   circleBackground: {
@@ -127,16 +123,6 @@ export const SnowmanIcon = ({ style = {}, ...props }) => {
   );
 };
 
-export const KebabCircleMenuIcon = ({ style = {}, ...props }) => {
-  return (
-    <FontAwesomeIcon
-      icon={faCircleEllipsisVertical}
-      {...props}
-      style={{ ...styles.kebabCircleIcon, ...style }}
-    />
-  );
-};
-
 export const InfoIcon = ({ style = {}, ...props }) => (
   <ClrIcon
     shape='info-standard'
@@ -187,9 +173,6 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   );
 };
 
-export const AlarmExclamation = (props) => (
-  <Icon shape={faAlarmExclamation} {...props} />
-);
 export const ArrowRight = (props) => (
   <Icon shape={faLongArrowAltRight} {...props} />
 );

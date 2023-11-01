@@ -42,3 +42,6 @@ build/swagger3/gradlew.bat
 build/swagger3/src/main/resources
 build/swagger3/gradle
 build/swagger3/gradle/**
+# This gets rid of files related to swagger API documentation.
+# If we find a flag that handles this better, please remove this.
+build/swagger3/io/swagger/**

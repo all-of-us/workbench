@@ -975,7 +975,8 @@ export const useRuntimeStatus = (
   RuntimeStatus | undefined,
   (statusRequest: RuntimeStatusRequest) => Promise<void>
 ] => {
-  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
+  const [runtimeStatusRequest, setRuntimeStatusRequest] =
+    useState<RuntimeStatusRequest>();
   const { runtime } = useStore(runtimeStore);
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
@@ -983,7 +984,7 @@ export const useRuntimeStatus = (
   useEffect(() => {
     // Additional status changes can be put here
     const resolutionCondition: (r: Runtime) => boolean = switchCase(
-      runtimeStatus,
+      runtimeStatusRequest,
       [
         RuntimeStatusRequest.DeleteRuntime,
         () => (r) => r === null || r.status === RuntimeStatus.DELETED,
@@ -1008,7 +1009,7 @@ export const useRuntimeStatus = (
       ]
     );
     const initializePolling = async () => {
-      if (!!runtimeStatus) {
+      if (!!runtimeStatusRequest) {
         try {
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
@@ -1029,9 +1030,9 @@ export const useRuntimeStatus = (
       }
     };
     initializePolling();
-  }, [runtimeStatus]);
+  }, [runtimeStatusRequest]);
 
-  const setStatusRequest = async (req) => {
+  const setStatusRequest = async (req: RuntimeStatusRequest) => {
     await switchCase<RuntimeStatusRequest, Promise<Response | EmptyResponse>>(
       req,
       [
@@ -1074,7 +1075,7 @@ export const useRuntimeStatus = (
         },
       ]
     );
-    setRuntimeStatus(req);
+    setRuntimeStatusRequest(req);
   };
 
   // runtimeStore may be outdated in certain scenarios; ensure we only return the
@@ -1264,24 +1265,28 @@ export enum PanelContent {
   DeleteRuntime = 'DeleteRuntime',
   DeleteUnattachedPd = 'DeleteUnattachedPd',
   DeleteUnattachedPdAndCreate = 'DeleteUnattachedPdAndCreate',
-  DeleteUnattachedPdAndUpdate = 'DeleteUnattachedPdAndUpdate',
   Disabled = 'Disabled',
   ConfirmUpdate = 'ConfirmUpdate',
   ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
   SparkConsole = 'SparkConsole',
 }
 
-// should we show the runtime in the UI?
+// should we show the runtime in the UI (in most situations)?
+// Note: we do make users aware of ERROR runtimes in some situations
 export const isVisible = (status: RuntimeStatus) =>
   status &&
   !(
     [RuntimeStatus.DELETED, RuntimeStatus.ERROR] as Array<RuntimeStatus>
   ).includes(status);
 
-// is the runtime in a state where the user can take action?
-export const isActionable = (status: RuntimeStatus) =>
+// can the user delete the runtime?
+export const canDeleteRuntime = (status: RuntimeStatus) =>
   (
-    [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+    [
+      RuntimeStatus.RUNNING,
+      RuntimeStatus.STOPPED,
+      RuntimeStatus.ERROR,
+    ] as Array<RuntimeStatus>
   ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>

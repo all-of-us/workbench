@@ -92,11 +92,9 @@
   },
   "absorb": {
     "externalDepartmentId": "Researchers",
-    "enabledForNewUsers": false,
-    "rtTrainingCourseId": "TODO",
-    "ctTrainingCourseId": "TODO",
-    "samlIdentityProviderId": "TODO",
-    "samlServiceProviderId": "TODO"
+    "enabledForNewUsers": true,
+    "samlIdentityProviderId": "C02celxus",
+    "samlServiceProviderId": "638082479253"
   },
   "moodle": {
     "host": "aou.nnlm.gov",
@@ -107,9 +105,9 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableRasIdMeLinking": false,
+    "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
-    "currentDuccVersions": [3, 4, 5],
+    "currentDuccVersions": [4, 5, 6],
     "renewal": {
       "expiryDays": 365,
       "expiryDaysWarningThresholds": [1, 7, 15],
@@ -148,7 +146,7 @@
     "useTestCaptcha": false
   },
   "reporting": {
-    "dataset": "reporting_test",
+    "dataset": "reporting_prod",
     "maxRowsPerInsert": 500,
     "exportTerraDataWarehouse": true,
     "terraWarehouseLeoAppTableId": "broad-dsde-prod-analytics-dev.warehouse.leonardo_app",
@@ -156,7 +154,7 @@
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
-    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0",
+    "clientId": "6f2a4655-37e4-4afe-a0d3-3da4482b225d",
     "logoutUrl": "https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "offlineBatch": {

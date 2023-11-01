@@ -3778,7 +3778,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/ResourceType'
+              $ref: '#/components/schemas/ResourceTypeRequest'
         required: true
       responses:
         200:
@@ -3787,7 +3787,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataSetListResponse'
-      x-codegen-request-body-name: resourceType
+      x-codegen-request-body-name: ResourceTypeRequest
   /v1/{cdrVersionId}/dataDictionaryEntry/{domain}/{value}:
     get:
       tags:
@@ -7804,6 +7804,11 @@ components:
         id:
           type: integer
           format: int64
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+    ResourceTypeRequest:
+      type: object
+      properties:
         resourceType:
           $ref: '#/components/schemas/ResourceType'
     ResourceType:
