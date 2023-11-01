@@ -137,9 +137,10 @@ def dev_up_tanagra(cmd_name, args)
   Dir.chdir('../tanagra-aou-utils') do
     if op.opts.version
       common.run_inline("../ui/project.rb tanagra-dep --env local --version #{op.opts.version}")
-    end
-    if op.opts.branch
+    elsif op.opts.branch
       common.run_inline("../ui/project.rb tanagra-dep --env local --branch #{op.opts.branch}")
+    else
+      common.run_inline("../ui/project.rb tanagra-dep --env local")
     end
     dis_auth = op.opts.disable_auth ? '-a' : ''
     d_db = op.opts.drop_db ? '-d' : ''
