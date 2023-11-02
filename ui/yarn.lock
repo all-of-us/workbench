@@ -9320,12 +9320,12 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-stackdriver-errors-js@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/stackdriver-errors-js/-/stackdriver-errors-js-0.4.0.tgz#1642d110b11b3e40489a31ce470ada955125fec7"
-  integrity sha512-aUPQKwgcFXKbvxyl5PKALnSd+Q4+V8fxRpm2MKYy9iYmdctTmudAE896Qi+qWVBRxLbmdgBIFoQSP2OuTk8ERA==
+stackdriver-errors-js@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/stackdriver-errors-js/-/stackdriver-errors-js-0.12.0.tgz#13cc9fcf8a01e90984dd08733fa7b6519f21b46b"
+  integrity sha512-yhPh40TfgyxF2wS7TvL5N18tSZDWenmVMJ+tcb2sUMCX022QVpYvwDLlNIfInU2S/xjQ1bT/WAkfoc5XhQxz0g==
   dependencies:
-    stacktrace-js "^2.0.0"
+    stacktrace-js "^2.0.2"
 
 stackframe@^1.1.1:
   version "1.2.0"
@@ -9345,7 +9345,7 @@ stacktrace-gps@^3.0.4:
     source-map "0.5.6"
     stackframe "^1.3.4"
 
-stacktrace-js@^2.0.0:
+stacktrace-js@^2.0.0, stacktrace-js@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/stacktrace-js/-/stacktrace-js-2.0.2.tgz#4ca93ea9f494752d55709a081d400fdaebee897b"
   integrity sha512-Je5vBeY4S1r/RnLydLl0TBTi3F2qdfWmYsGvtfZgEI+SCprPppaIhQf5nGcal4gI4cGpCV/duLcAzT1np6sQqg==

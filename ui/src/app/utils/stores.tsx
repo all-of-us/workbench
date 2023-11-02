@@ -16,7 +16,7 @@ import {
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { dataSetApi, profileApi } from 'app/services/swagger-fetch-clients';
 import { Atom, atom } from 'app/utils/subscribable';
-import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import StackdriverErrorReporter from 'stackdriver-errors-js';
 import useSWR from 'swr';
 
 const { useEffect, useState } = React;

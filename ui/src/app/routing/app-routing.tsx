@@ -50,7 +50,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { Configuration as NotebookConfiguration } from 'notebooks-generated/fetch';
-import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Configuration as TanagraConfiguration } from 'tanagra-generated';
 
 const CookiePolicyPage = fp.flow(
