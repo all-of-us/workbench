@@ -55,7 +55,7 @@
     "moment": "^2.29.4",
     "nouislider": "^14.1.1",
     "nouislider-react": "^3.3.7",
-    "oidc-client-ts": "^2.2.0",
+    "oidc-client-ts": "^2.3.0",
     "outdated-browser-rework": "^2.8.0",
     "portable-fetch": "^3.0.0",
     "primeicons": "^5.0.0",
