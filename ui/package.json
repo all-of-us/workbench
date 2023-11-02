@@ -40,7 +40,7 @@
     "@types/js-cookie": "^2.2.2",
     "@types/lodash": "^4.14.179",
     "@types/node": "^10.12.11",
-    "@types/react": "^17.0.68",
+    "@types/react": "^17",
     "@types/react-dom": "^17",
     "@types/react-modal": "^3.13.1",
     "@types/react-onclickoutside": "^6.7.0",
