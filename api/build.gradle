@@ -378,6 +378,7 @@ dependencies {
 
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
+    implementation 'com.github.tomakehurst:wiremock:2.27.2'
     implementation 'ch.qos.logback:logback-classic:1.2.11'
     implementation "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
