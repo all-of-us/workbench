@@ -48,7 +48,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "classnames": "^2.2.6",
     "color": "^3.1.1",
-    "highcharts": "^9.0.0",
+    "highcharts": "^9.3.3",
     "highcharts-react-official": "3.0.0",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
