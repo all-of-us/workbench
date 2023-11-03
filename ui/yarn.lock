@@ -1147,10 +1147,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@clr/icons@^0.11.12":
-  version "0.11.34"
-  resolved "https://registry.yarnpkg.com/@clr/icons/-/icons-0.11.34.tgz#e9372745bebc83dc306b3a8794b5ae7de48bf8fb"
-  integrity sha512-5NzcaDpM9+X74mcqsY4lr4p6w8TugE6XeymsO2b1wPO1tPWHAqLKJm9vn05+Q2iufG3MGrNNpVz5YbaKRy3AKQ==
+"@clr/icons@^0.13.11":
+  version "0.13.11"
+  resolved "https://registry.yarnpkg.com/@clr/icons/-/icons-0.13.11.tgz#135e8de787e1d3cbe7743c2f447b5f12a3bc0149"
+  integrity sha512-Ax2eOQ7QUFexvV3HXwFNv3381AsiXELJza0YZQqK9+I0dC09ILDDx9PnX7IKOv6enxClrwlAys+OhqTuRn91zg==
 
 "@csstools/normalize.css@*":
   version "12.0.0"
