@@ -18,8 +18,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install --global yarn n
-# Upgrade to Node 14, above installs 10.
-RUN n 14
+# Upgrade to Node 18, above installs 10.
+RUN n 18
 
 RUN npm install @openapitools/openapi-generator-cli -g
 
