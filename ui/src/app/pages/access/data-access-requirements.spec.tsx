@@ -60,7 +60,6 @@ describe('DataAccessRequirements', () => {
     const path = pageMode
       ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
       : DATA_ACCESS_REQUIREMENTS_PATH;
-
     delete window.location;
     // @ts-ignore
     window.location = Object.assign(new URL('https://example.org' + path), {
