@@ -35,7 +35,11 @@ git clone -n --shallow-since='2023-05-01T00:00' \
 # Apply patches. See comments in individual files.
 
 sh patches/removenodeversioncheck.sh $REPODIR/.yarnrc.yml
-(cd $REPODIR; yarn install)
+sh patches/rm-tests.sh
+
+# the change in rm-tests causes yarn.lock to change - i.e. not immutable
+(cd $REPODIR; YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install)
+
 bash patches/commentoutbadimportline.sh
 sh patches/removereactcomponentfromsvgimports.sh $REPODIR/src/components/CloudProviderIcon.ts
 sh patches/removereactcomponentfromsvgimports.sh $REPODIR/src/libs/icon-dict.js
