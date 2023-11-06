@@ -22,18 +22,19 @@ import {
   AnalysisDiff,
   AnalysisDiffState,
   applyUpdate,
+  canUseExistingDisk,
   compareGpu,
   diffsToUpdateMessaging,
   DiskConfig,
   findMostSevereDiffState,
   fromAnalysisConfig,
   getCreator,
+  isVisible,
   maybeWithPersistentDisk,
   rebootUpdate,
   recreateEnvAndPDUpdate,
   recreateEnvUpdate,
   toAnalysisConfig,
-  useCustomRuntime,
   withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
@@ -59,6 +60,14 @@ import {
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
 } from './machines';
+import { runtimePresets } from './runtime-presets';
+import {
+  allMachineTypes,
+  ComputeType,
+  DEFAULT_DISK_SIZE,
+  DEFAULT_MACHINE_TYPE,
+} from './machines';
+import { useCustomRuntime } from './runtime-hooks';
 import { runtimePresets } from './runtime-presets';
 
 describe('runtime-utils', () => {
@@ -1164,3 +1173,13 @@ describe(withAnalysisConfigDefaults.name, () => {
 
   // TODO: tests to replace machine and autopause threshold
 });
+
+// TODO
+describe(diffsToUpdateMessaging.name, () => {});
+describe(compareGpu.name, () => {});
+describe(fromAnalysisConfig.name, () => {});
+describe(maybeWithExistingDiskName.name, () => {});
+describe(withAnalysisConfigDefaults.name, () => {});
+describe(toAnalysisConfig.name, () => {});
+describe(isVisible.name, () => {});
+describe(canUseExistingDisk.name, () => {});

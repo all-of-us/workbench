@@ -28,13 +28,13 @@ import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { fetchAbortableRetry } from 'app/utils/retry';
+import { withRuntimeStore } from 'app/utils/runtime-hooks';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
   RuntimeStatusError,
   SparkConsolePath,
-  withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
