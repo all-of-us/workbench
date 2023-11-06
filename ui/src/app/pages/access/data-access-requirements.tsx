@@ -721,7 +721,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
-        console.error('Kyle');
         handleRasCallback(code, spinnerProps, reload);
       }
     }, [code]);
