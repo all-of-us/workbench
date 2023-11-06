@@ -32,6 +32,7 @@ import {
   maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
@@ -360,27 +361,17 @@ const handleRasCallback = (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
 ) => {
-  const handler = withErrorModal({
-    title: 'Error saving identity verification status.',
-    message:
-      'An error occurred trying to save your identity verification status. Please try again.',
-    onDismiss: () => {
-      spinnerProps.hideSpinner();
-    },
-  })(async () => {
-    spinnerProps.showSpinner();
-    await profileApi().linkRasAccount({
-      authCode: code,
-      redirectUrl: buildRasRedirectUrl(),
-    });
-    spinnerProps.hideSpinner();
-    reloadProfile();
+  const handler = () =>
+    fetchWithErrorModal(() =>
+      profileApi().linkRasAccount({
+        authCode: code,
+        redirectUrl: buildRasRedirectUrl(),
+      })
+    );
 
-    // Cleanup parameter from URL after linking.
-    window.history.replaceState({}, '', '/');
-  });
-
-  return handler();
+  return handler()
+    .then(() => reloadProfile())
+    .finally(() => window.history.replaceState({}, '', '/'));
 };
 
 const selfBypass = async (
@@ -730,6 +721,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
+        console.error('Kyle');
         handleRasCallback(code, spinnerProps, reload);
       }
     }, [code]);
