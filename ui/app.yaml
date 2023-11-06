@@ -1,4 +1,4 @@
-runtime: nodejs16
+runtime: nodejs18
 default_expiration: "2m"
 
 handlers:
