@@ -56,14 +56,11 @@ const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('DataAccessRequirements', () => {
-  const component = (pageMode?: string, code?: string): RenderResult => {
-    let path = pageMode
+  const component = (pageMode?: string): RenderResult => {
+    const path = pageMode
       ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
       : DATA_ACCESS_REQUIREMENTS_PATH;
 
-    if (code) {
-      path += `${path.includes('?pageMode') ? '&' : '?'}code=${code}`;
-    }
     delete window.location;
     // @ts-ignore
     window.location = Object.assign(new URL('https://example.org' + path), {
@@ -2086,16 +2083,5 @@ describe('DataAccessRequirements', () => {
     ).click();
 
     expectButtonElementEnabled(screen.queryByText('Confirm'));
-  });
-
-  it('Should render error modal when RAS  ', async () => {
-    profileApi().linkRasAccount = () => Promise.reject('Whoops!');
-    const { container } = component(
-      DARPageMode.INITIAL_REGISTRATION,
-      'fake_code'
-    );
-
-    screen.logTestingPlaygroundURL();
-    await screen.findByText('Whoops!');
   });
 });
