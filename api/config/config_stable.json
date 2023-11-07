@@ -92,7 +92,6 @@
   },
   "absorb": {
     "externalDepartmentId": "Development",
-    "enabledForNewUsers": true,
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028"
   },
