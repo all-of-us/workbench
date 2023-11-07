@@ -173,7 +173,7 @@ describe('fetchWithErrorModal', () => {
       message: 'An API error occurred.',
       title: FALLBACK_ERROR_TITLE,
     };
-    fetchWithErrorModal(() => Promise.reject('Nope')).catch((e) => {
+    fetchWithErrorModal(() => Promise.reject('Nope')).catch(() => {
       const notification = notificationStore.get();
       expect(notification).toEqual(expectedNotification);
     });
