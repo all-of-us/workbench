@@ -167,7 +167,8 @@ public class RasLinkService {
             String.format(
                 "User does not have IAL2 enabled, acrClaim: %s, txn: %s", acrClaim, txnClaim));
         throw new ForbiddenException(
-            String.format("User does not have IAL2 enabled (acrClaim: %s, txn: %s).", acrClaim, txnClaim));
+            String.format(
+                "User does not have IAL2 enabled (acrClaim: %s, txn: %s).", acrClaim, txnClaim));
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
@@ -177,8 +178,13 @@ public class RasLinkService {
                   + "from RAS access token for user (%s), txn:  %s",
               aouUsername, txnClaim));
     } catch (IOException e) {
-      log.warning(String.format("Unable to retrieve user information from RAS access token, txn: %s", txnClaim));
-      throw new ServerErrorException(String.format("Unable to retrieve user information from RAS access token (txn: %s).", txnClaim),e);
+      log.warning(
+          String.format(
+              "Unable to retrieve user information from RAS access token, txn: %s", txnClaim));
+      throw new ServerErrorException(
+          String.format(
+              "Unable to retrieve user information from RAS access token (txn: %s).", txnClaim),
+          e);
     }
 
     String rasUsername = getUsername(userInfoResponse);
