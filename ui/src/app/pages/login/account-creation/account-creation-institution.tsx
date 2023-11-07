@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
+import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
 
 import {
@@ -397,7 +398,7 @@ export class AccountCreationInstitution extends React.Component<
                       label: inst.displayName,
                     }))}
                     value={institutionShortName}
-                    onChange={(e) => this.onInstitutionChange(e.value)}
+                    onChange={(e) => this.onInstitutionChange(e)}
                   />
                 </div>
                 {this.state.institutionLoadError && (
@@ -464,22 +465,25 @@ export class AccountCreationInstitution extends React.Component<
                     </label>
                     <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
-                  <div style={styles.wideInputSize}>
-                    <Select
-                      ariaLabel='Role'
-                      style={styles.wideInputSize}
-                      placeholder={'Select Role'}
-                      options={AccountCreationOptions.institutionalRoleOptions}
-                      value={institutionalRoleEnum}
-                      appendTo='self'
-                      onChange={(e) =>
-                        this.updateAffiliationValue(
-                          'institutionalRoleEnum',
-                          e.value
-                        )
-                      }
-                    />
-                  </div>
+                  <Dropdown
+                    ariaLabel='Role'
+                    data-test-id='role-dropdown'
+                    style={styles.wideInputSize}
+                    placeholder={
+                      institutionShortName
+                        ? 'Select Role'
+                        : 'First select an institution above'
+                    }
+                    options={AccountCreationOptions.institutionalRoleOptions}
+                    value={institutionalRoleEnum}
+                    appendTo='self'
+                    onChange={(e) =>
+                      this.updateAffiliationValue(
+                        'institutionalRoleEnum',
+                        e.value
+                      )
+                    }
+                  />
                 </div>
                 {institutionalRoleEnum === InstitutionalRole.OTHER && (
                   <div style={{ marginTop: '.75rem' }}>
