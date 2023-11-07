@@ -68,7 +68,7 @@
     "react-iframe": "^1.8.0",
     "react-interactive": "^0.9.1",
     "react-modal": "^3.16.1",
-    "react-oidc-context": "^2.2.2",
+    "react-oidc-context": "^2.3.1",
     "react-onclickoutside": "^6.13.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
