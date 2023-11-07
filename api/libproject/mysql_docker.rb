@@ -7,6 +7,7 @@ def maybe_dockerize_mysql_cmd(cmd, interactive=false, tty=false)
   if Workbench.in_docker?
     return cmd
   end
+
   # Otherwise, containerize mysql usage. This avoids the requirement for devs to
   # have mysql installed on their workstations.
   return "docker run " +

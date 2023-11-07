@@ -139,8 +139,8 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
+        .values()
+        .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
@@ -168,11 +168,8 @@ public class RuntimeController implements RuntimeApiDelegate {
             .filter(Objects::nonNull)
             .count();
     if (configCount != 1) {
-      String errorMsg = String.format(
-          "Fail to create runtime: exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided. Actual runtime config: %s", runtime.toString());
-      log.warning(errorMsg);
       throw new BadRequestException(
-          errorMsg);
+          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
@@ -197,12 +194,11 @@ public class RuntimeController implements RuntimeApiDelegate {
         List<Disk> runtimeDisks =
             diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());
         if (!runtimeDisks.isEmpty()) {
-          String errorMsg = String.format(
-              "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
-              PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks));
-          log.warning(errorMsg);
           // Find active disks for runtime VM. Block user from creating new disk.
-          throw new BadRequestException(errorMsg);
+          throw new BadRequestException(
+              String.format(
+                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
+                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
         }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }

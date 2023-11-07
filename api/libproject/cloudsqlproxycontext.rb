@@ -14,7 +14,6 @@ class CloudSqlProxyContext < ServiceAccountContext
       ps = nil
       docker_container_id = nil
       instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
-      print instance
       if Workbench.in_docker?
         ps = fork do
           exec(*%W{
