@@ -16,8 +16,8 @@ cron:
   schedule: every 24 hours
   timezone: UTC
   target: api
-- description: 'Find and alert users that have exceeded their free tier billing usage'
-  url: /v1/cron/checkFreeTierBillingUsage
+- description: Find and alert users that have exceeded their free tier billing usage using cloud task
+  url: "/v1/cron/checkFreeTierBillingUsage"
   schedule: every 30 minutes
   timezone: UTC
   target: api

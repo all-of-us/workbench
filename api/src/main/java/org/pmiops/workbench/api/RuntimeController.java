@@ -168,8 +168,11 @@ public class RuntimeController implements RuntimeApiDelegate {
             .filter(Objects::nonNull)
             .count();
     if (configCount != 1) {
+      String errorMsg = String.format(
+          "Fail to create runtime: exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided. Actual runtime config: %s", runtime.toString());
+      log.warning(errorMsg);
       throw new BadRequestException(
-          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+          errorMsg);
     }
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
@@ -194,11 +197,12 @@ public class RuntimeController implements RuntimeApiDelegate {
         List<Disk> runtimeDisks =
             diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());
         if (!runtimeDisks.isEmpty()) {
+          String errorMsg = String.format(
+              "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
+              PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks));
+          log.warning(errorMsg);
           // Find active disks for runtime VM. Block user from creating new disk.
-          throw new BadRequestException(
-              String.format(
-                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
-                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+          throw new BadRequestException(errorMsg);
         }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }

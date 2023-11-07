@@ -19,5 +19,5 @@ export const environment: Environment = {
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: false,
   showNewAnalysisTab: false,
-  showCBFunnelPlot: false,
+  showCBFunnelPlot: true,
 };

@@ -51,15 +51,3 @@ $ yarn run
       yarn && yarn run deps test && REACT_APP_ENVIRONMENT=localtest yarn start
 ...
 ```
-
-## Fontawesome
-
-We use some [Fontawesome](https://fontawesome.com/) Pro icons. Fontawesome requires a license during a fresh `yarn install`. Delete `node_modules` and `yarn.lock` before running `yarn install` to test. If a license isn't found, `yarn install` will fail with the error message:
-```
-error An unexpected error occurred: "https://npm.fontawesome.com/@fortawesome%2ffontawesome-free: authentication required".
-```
-To obtain the license:
-```
-gsutil cat gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt
-  >> ~/.npmrc
-```

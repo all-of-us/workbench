@@ -9,12 +9,16 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -23,6 +27,8 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
+import org.pmiops.workbench.model.UserBQCost;
+import org.pmiops.workbench.model.UserWorkspaceBQCostRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -45,11 +51,14 @@ public class CloudTaskUserControllerTest {
   @Autowired private AccessModuleService mockAccessModuleService;
   @Autowired private UserService mockUserService;
 
+  @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
+
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({
     AccessModuleService.class,
     CloudResourceManagerService.class,
+    FreeTierBillingBatchUpdateService.class,
     UserService.class,
   })
   static class Configuration {}
@@ -108,5 +117,17 @@ public class CloudTaskUserControllerTest {
     verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
 
     verifyNoMoreInteractions(mockUserService);
+  }
+
+  @Test
+  public void testCheckAndAlertFreeTierBillingUsage() {
+    Map<String, Double> googleBQCost = new HashMap<String, Double>();
+    googleBQCost.put("googleProject", 1.2);
+    UserBQCost userBQCost = new UserBQCost().userId(1L).workspaceBQCost(googleBQCost);
+    UserWorkspaceBQCostRequest request =
+        new UserWorkspaceBQCostRequest().userCostList(Arrays.asList(userBQCost));
+    controller.checkAndAlertFreeTierBillingUsage(request);
+    verify(mockFreeTierBillingUpdateService)
+        .checkAndAlertFreeTierBillingUsage(request.getUserCostList());
   }
 }

@@ -34,7 +34,7 @@ import {
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { diskTypeLabels, isActionable } from 'app/utils/runtime-utils';
+import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -478,30 +478,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     // Kicks off a deletion to first clear the error status runtime.
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
-  });
-
-  it('should disable controls when runtime has a non-actionable status', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.STOPPING,
-    });
-
-    // sanity check
-    expect(isActionable(runtimeApiStub.runtime.status)).toBeFalsy();
-
-    const wrapper = await component();
-
-    expect(
-      wrapper.find('#runtime-presets-menu').first().prop('disabled')
-    ).toBeTruthy();
-    expect(wrapper.find('#runtime-cpu').first().prop('disabled')).toBeTruthy();
-    expect(
-      wrapper
-        .find(Button)
-        .find({ 'aria-label': 'Next' })
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
   });
 
   it('should allow creation with GCE with PD config', async () => {

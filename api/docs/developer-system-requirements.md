@@ -29,7 +29,7 @@ We currently only support MacOS and Linux for development and testing.
 For local development, also install:
 
   * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
-  * [Node.js](https://nodejs.org/en/) >= 14.  Currently known to work up to 18.12.1
+  * [Node.js](https://nodejs.org/en/) >= 18.  Currently known to work up to 20.9.0
   * `envsubst` which is part of [gettext](https://www.gnu.org/software/gettext/)
     * Mac: `brew install gettext`
 

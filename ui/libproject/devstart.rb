@@ -33,8 +33,6 @@ def build(cmd_name, args)
 
   common = Common.new
 
-  fontawesomeCredsLineFilePath = "gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt"
-  common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
   common.run_inline %W{yarn run deps #{options.env}}
 
@@ -185,9 +183,9 @@ def tanagra_dep(cmd_name, args)
 end
 
 def checkout_branch_or_tag(op, common)
+  common.run_inline %W{git fetch}
   if (op.opts.branch)
     common.status "Checkout specified Tanagra branch"
-    common.run_inline %W{git fetch}
     common.run_inline %W{git checkout #{op.opts.branch}}
   else
     env_project = ENVIRONMENTS[environment_name_to_project_name(op.opts.env)]

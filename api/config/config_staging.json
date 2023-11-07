@@ -105,9 +105,9 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableRasIdMeLinking": false,
+    "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
-    "currentDuccVersions": [3, 4, 5],
+    "currentDuccVersions": [4, 5, 6],
     "renewal": {
       "expiryDays": 365,
       "expiryDaysWarningThresholds": [1, 7, 15],
@@ -122,7 +122,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": true,
-    "enableSasGKEApp": false,
+    "enableSasGKEApp": true,
     "enableDataExplorer": false,
     "enableHasEhrData": true
   },
@@ -148,7 +148,7 @@
   },
   "ras": {
     "host": "https:\/\/sts.nih.gov",
-    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0",
+    "clientId": "6f2a4655-37e4-4afe-a0d3-3da4482b225d",
     "logoutUrl": "https:\/\/auth.nih.gov\/siteminderagent\/smlogoutredirector.asp?TARGET="
   },
   "offlineBatch": {

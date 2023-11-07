@@ -2448,6 +2448,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/cron/checkFreeTierBillingUsageCloudTask:
+    get:
+      tags:
+        - offlineBilling
+        - cron
+      description: Find and alert users that have exceeded their free tier billing
+        usage
+      operationId: checkFreeTierBillingUsageCloudTask
+      security: [ ]
+      responses:
+        204:
+          description: No Error
+          content: { }
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/cron/groupAndPushSynchronizeAccessTasks:
     get:
       tags:
@@ -4288,6 +4307,27 @@ paths:
         200:
           description: Workspaces deleted
           content: {}
+      x-codegen-request-body-name: request
+  /v1/cloudTask/checkAndAlertFreeTierBillingUsage:
+    post:
+      tags:
+        - cloudTaskUser
+        - cloudTask
+      description: |
+        Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to passing thresholds or exceeding limits
+      operationId: checkAndAlertFreeTierBillingUsage
+      security: [ ]
+      requestBody:
+        description: A batch of users needs to be checked, and alerts need to be sent regarding the excessive costs incurred in their workspaces.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWorkspaceBQCostRequest'
+        required: true
+      responses:
+        200:
+          description: Users alerted
+          content: { }
       x-codegen-request-body-name: request
   /v1/institutions:
     get:
@@ -11339,6 +11379,27 @@ components:
           items:
             type: integer
             format: int64
+    UserWorkspaceBQCostRequest:
+      type: object
+      properties:
+        userCostList:
+          type: array
+          description: List of users return from cloud task
+          items:
+            $ref: '#/components/schemas/UserBQCost'
+    UserBQCost:
+      type: object
+      properties:
+        userId:
+          description: user id
+          type: integer
+          format: int64
+        workspaceBQCost:
+          description: Map with google project key and cost as value
+          type: object
+          additionalProperties:
+            type: number
+            format: double
     ProcessEgressEventRequest:
       required:
       - eventId
