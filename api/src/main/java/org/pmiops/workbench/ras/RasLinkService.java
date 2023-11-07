@@ -206,7 +206,8 @@ public class RasLinkService {
               rasUsername, txnClaim));
       throw new ForbiddenException(
           String.format(
-              "User has neither a valid id.me account nor a valid login.gov account (preferred_username: %s, , txn: %s).",
+              "User has neither a valid id.me account nor a valid login.gov account "
+                  + "(preferred_username: %s, , txn: %s).",
               rasUsername, txnClaim));
     }
 
