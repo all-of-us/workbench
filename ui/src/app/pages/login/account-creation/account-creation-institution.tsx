@@ -465,25 +465,27 @@ export class AccountCreationInstitution extends React.Component<
                     </label>
                     <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
-                  <Dropdown
-                    ariaLabel='Role'
-                    data-test-id='role-dropdown'
-                    style={styles.wideInputSize}
-                    placeholder={
-                      institutionShortName
-                        ? 'Select Role'
-                        : 'First select an institution above'
-                    }
-                    options={AccountCreationOptions.institutionalRoleOptions}
-                    value={institutionalRoleEnum}
-                    appendTo='self'
-                    onChange={(e) =>
-                      this.updateAffiliationValue(
-                        'institutionalRoleEnum',
-                        e.value
-                      )
-                    }
-                  />
+                  <div>
+                    <Dropdown
+                      ariaLabel='Role'
+                      data-test-id='role-dropdown'
+                      style={styles.wideInputSize}
+                      placeholder={
+                        institutionShortName
+                          ? 'Select Role'
+                          : 'First select an institution above'
+                      }
+                      options={AccountCreationOptions.institutionalRoleOptions}
+                      value={institutionalRoleEnum}
+                      appendTo='self'
+                      onChange={(e) =>
+                        this.updateAffiliationValue(
+                          'institutionalRoleEnum',
+                          e.value
+                        )
+                      }
+                    />
+                  </div>
                 </div>
                 {institutionalRoleEnum === InstitutionalRole.OTHER && (
                   <div style={{ marginTop: '.75rem' }}>
