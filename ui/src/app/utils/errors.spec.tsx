@@ -5,9 +5,13 @@ import {
   defaultApiErrorFormatter,
   errorHandlerWithFallback,
   FALLBACK_ERROR_TITLE,
+  fetchWithErrorModal,
 } from './errors';
-import { NotificationStore } from './stores';
+import { NotificationStore, notificationStore } from './stores';
 
+afterEach(() => {
+  notificationStore.reset();
+});
 describe('defaultErrorResponseFormatter', () => {
   test.each([
     ['the error response is empty', {}, 'An API error occurred.'],
@@ -155,4 +159,23 @@ describe('errorHandlerWithFallback', () => {
       ).toStrictEqual(expected);
     }
   );
+});
+
+describe('fetchWithErrorModal', () => {
+  it('Should pass along rejected promise', () => {
+    fetchWithErrorModal(() => Promise.reject('Nope')).catch((e) => {
+      expect(e).toEqual('Nope');
+    });
+  });
+
+  it('Should pass errorHandlerWithFallback response to notificationStore', () => {
+    const expectedNotification = {
+      message: 'An API error occurred.',
+      title: FALLBACK_ERROR_TITLE,
+    };
+    fetchWithErrorModal(() => Promise.reject('Nope')).catch(() => {
+      const notification = notificationStore.get();
+      expect(notification).toEqual(expectedNotification);
+    });
+  });
 });
