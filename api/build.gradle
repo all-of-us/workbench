@@ -542,6 +542,8 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
+
+    implementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
 }
 
 tasks.compileJava {
@@ -858,7 +860,11 @@ compileTestKotlin {
 }
 
 dependencies {
-  modules {
+  implementation 'au.com.dius:pact-jvm-consumer-junit5_2.12:3.6.15'
+    implementation 'au.com.dius:pact-jvm-consumer-junit5_2.11:3.5.24'
+    implementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
+    implementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
+    modules {
     module("com.sun.activation:jakarta.activation") {
       replacedBy("jakarta.annotation:jakarta.annotation-api")
     }
