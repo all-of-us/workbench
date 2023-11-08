@@ -100,7 +100,6 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public boolean useAbsorb() {
-    var featureFlagEnabled = configProvider.get().absorb.enabledForNewUsers;
     var userHasUsedMoodle =
         userAccessModuleDao.getAllByUser(userProvider.get()).stream()
             .anyMatch(
@@ -112,7 +111,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                                     ::getComplianceTrainingVerificationSystem)
                             .orElse(null)
                         == DbComplianceTrainingVerificationSystem.MOODLE);
-    return featureFlagEnabled && !userHasUsedMoodle;
+    return !userHasUsedMoodle;
   }
 
   /**
