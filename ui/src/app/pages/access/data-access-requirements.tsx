@@ -361,25 +361,24 @@ const handleRasCallback = (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
 ) => {
-  const handler = () =>
-    fetchWithErrorModal(
-      () =>
-        profileApi().linkRasAccount({
-          authCode: code,
-          redirectUrl: buildRasRedirectUrl(),
-        }),
-      {
-        customErrorResponseFormatter: (apiErrorResponse) => {
-          return {
-            title: 'Error Finalizing Identity Verification',
-            message: `Error reading identity provider (ID.me or Login.gov) response: ${apiErrorResponse.responseJson.message}`,
-            showBugReportLink: true,
-          };
-        },
-      }
-    );
+  const profilePromise = fetchWithErrorModal(
+    () =>
+      profileApi().linkRasAccount({
+        authCode: code,
+        redirectUrl: buildRasRedirectUrl(),
+      }),
+    {
+      customErrorResponseFormatter: (apiErrorResponse) => {
+        return {
+          title: 'Error Finalizing Identity Verification',
+          message: `Error reading identity provider (ID.me or Login.gov) response: ${apiErrorResponse.responseJson.message}`,
+          showBugReportLink: true,
+        };
+      },
+    }
+  );
 
-  return handler()
+  return profilePromise
     .then(() => reloadProfile())
     .finally(() => window.history.replaceState({}, '', '/'));
 };
