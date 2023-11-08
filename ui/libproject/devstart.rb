@@ -187,6 +187,7 @@ def checkout_branch_or_tag(op, common)
   if (op.opts.branch)
     common.status "Checkout specified Tanagra branch"
     common.run_inline %W{git checkout #{op.opts.branch}}
+    common.run_inline %W{git pull origin #{op.opts.branch}}
   else
     env_project = ENVIRONMENTS[environment_name_to_project_name(op.opts.env)]
     common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."

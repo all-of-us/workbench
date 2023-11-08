@@ -6470,7 +6470,6 @@ components:
       - ARRAY_DATA
       - CONCEPT_SET
       - CONCEPT_QUICK_ADD
-      - PERSON_HAS_EHR_DATA
     Surveys:
       type: string
       description: a survey for concepts
@@ -7752,7 +7751,6 @@ components:
       enum:
       - NONE
       - PERSON
-      - PERSON_HAS_EHR_DATA
       - SURVEY
       - SURVEY_BASICS
       - SURVEY_LIFESTYLE
