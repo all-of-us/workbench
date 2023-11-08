@@ -40,6 +40,10 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public JSONObject getAbsorbCredentials() {
+    // Our Absorb credentials are for an "Admin" user, as outlined here:
+    // https://support.absorblms.com/hc/en-us/articles/360053227673-Admin-Roles-Permissions
+    // However, since the user is not a "System Admin" we cannot view "portal settings" such as SSO
+    // configuration.
     return getCredentialsBucketJSON("absorb-credentials.json");
   }
 
