@@ -3,6 +3,8 @@ package org.pmiops.workbench.impersonation;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.broadinstitute.dsde.workbench.client.sam.model.FullyQualifiedResourceId;
+import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 
@@ -27,4 +29,12 @@ public interface ImpersonatedFirecloudService {
   /** Deletes SAM Kubernetes within a Google project. */
   void deleteSamKubernetesResourcesInWorkspace(@Nonnull DbUser dbUser, String googleProjectId)
       throws IOException;
+
+  List<UserResourcesResponse> getSamWorkspaceResources(@Nonnull DbUser dbUser) throws IOException;
+
+  void deleteSamWorkspaceResource(@Nonnull DbUser dbUser, String workspaceResourceId)
+      throws IOException;
+
+  List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(
+      @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException;
 }

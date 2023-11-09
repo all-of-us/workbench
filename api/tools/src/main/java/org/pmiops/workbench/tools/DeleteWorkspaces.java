@@ -1,6 +1,7 @@
 package org.pmiops.workbench.tools;
 
 import com.google.common.primitives.Ints;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -137,6 +138,14 @@ public class DeleteWorkspaces extends Tool {
           deleteOpt,
           this::listRawlsWorkspaces,
           this::deleteRawlsWorkspace);
+      // Sam
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listSamWorkspaces,
+          this::deleteSamWorkspace);
     };
   }
 
@@ -148,16 +157,32 @@ public class DeleteWorkspaces extends Tool {
       BiFunction<String, String, List<T>> listWorkspaces,
       BiConsumer<T, String> deleteWorkspace) {
     List<T> workspaces = listWorkspaces.apply(usernameOpt, rwEnvOpt);
+    if (workspaces.isEmpty()) {
+      return;
+    }
 
     if (deleteOpt) {
-      limitOpt
-          .map(
-              l -> {
-                LOG.info(String.format("Limiting to the first %d workspaces.", l));
-                return workspaces.stream().limit(l);
-              })
-          .orElse(workspaces.stream())
-          .forEach(ws -> deleteWorkspace.accept(ws, usernameOpt));
+      List<T> toDelete =
+          limitOpt
+              .map(
+                  l -> {
+                    LOG.info(String.format("Limiting to a random sample of %d workspaces.", l));
+                    Collections.shuffle(workspaces);
+                    return workspaces.subList(0, l);
+                  })
+              .orElse(workspaces);
+
+      int deleted = 0, failed = 0;
+      for (T workspace : toDelete) {
+        try {
+          deleteWorkspace.accept(workspace, usernameOpt);
+          deleted++;
+        } catch (Exception ignored) {
+          failed++;
+        }
+      }
+
+      LOG.info(String.format("Successful deletions: %d, failed deletions: %d", deleted, failed));
     } else {
       LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
     }
@@ -165,7 +190,7 @@ public class DeleteWorkspaces extends Tool {
 
   private List<WorkspaceResponse> listAouWorkspaces(String username, String rwEnv) {
     var workspaces = workspaceService.getOwnedWorkspaces(username);
-    LOG.info(String.format("Found %d AoU workspaces in %s", workspaces.size(), rwEnv));
+    LOG.info(String.format("Found %d owned AoU workspace(s) in %s", workspaces.size(), rwEnv));
     return workspaces;
   }
 
@@ -173,7 +198,16 @@ public class DeleteWorkspaces extends Tool {
     var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(username);
     LOG.info(
         String.format(
-            "Found %d Rawls workspaces which are not present in the %s DB",
+            "Found %d owned Rawls workspace(s) which are not present in the %s AoU DB",
+            workspaces.size(), rwEnv));
+    return workspaces;
+  }
+
+  private List<String> listSamWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(username);
+    LOG.info(
+        String.format(
+            "Found %d owned Sam workspace(s) which are not present in the %s Rawls DB",
             workspaces.size(), rwEnv));
     return workspaces;
   }
@@ -192,5 +226,10 @@ public class DeleteWorkspaces extends Tool {
     LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
     workspaceService.deleteOrphanedRawlsWorkspace(
         username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
+  }
+
+  private void deleteSamWorkspace(String resourceId, String username) {
+    LOG.info(String.format("Deleting Sam workspace resource %s", resourceId));
+    workspaceService.deleteOrphanedSamWorkspace(username, resourceId);
   }
 }

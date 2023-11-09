@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
+import org.broadinstitute.dsde.workbench.client.sam.model.FullyQualifiedResourceId;
+import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
@@ -33,6 +35,9 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   private static final String SAM_GOOGLE_PROJECT_RESOURCE_NAME = "google-project";
   // https://github.com/broadinstitute/sam/blob/30931bde56a6ffcea2040086503ade37378dfffc/src/main/resources/reference.conf#L782
   private static final String SAM_KUBERNETES_RESOURCE_NAME = "kubernetes-app";
+  // https://github.com/broadinstitute/sam/blob/30931bde56a6ffcea2040086503ade37378dfffc/src/main/resources/reference.conf#L49
+  private static final String SAM_WORKSPACE_RESOURCE_NAME = "workspace";
+  public static final String SAM_RESOURCE_OWNER_NAME = "owner";
   private final FirecloudApiClientFactory firecloudApiClientFactory;
   private final RawlsApiClientFactory rawlsApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;
@@ -107,6 +112,34 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
           workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
           return null;
         });
+  }
+
+  @Override
+  public List<UserResourcesResponse> getSamWorkspaceResources(@Nonnull DbUser dbUser)
+      throws IOException {
+    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    return samRetryHandler.run(
+        (context) -> resourcesApi.listResourcesAndPoliciesV2(SAM_WORKSPACE_RESOURCE_NAME));
+  }
+
+  @Override
+  public void deleteSamWorkspaceResource(@Nonnull DbUser dbUser, String workspaceResourceId)
+      throws IOException {
+    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    samRetryHandler.run(
+        (context) -> {
+          resourcesApi.deleteResourceV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId);
+          return null;
+        });
+  }
+
+  @Override
+  public List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(
+      @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException {
+    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    return samRetryHandler.run(
+        (context) ->
+            resourcesApi.listResourceChildren(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
   }
 
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {
