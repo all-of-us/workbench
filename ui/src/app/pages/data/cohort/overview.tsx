@@ -35,7 +35,7 @@ import {
   genderSexRaceOrEthTypeToText,
   mapRequest,
 } from 'app/pages/data/cohort/utils';
-import { analysisTabName, workspacePath } from 'app/routing/utils';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import {
   cohortBuilderApi,
   cohortsApi,
@@ -450,15 +450,15 @@ export const ListOverview = fp.flow(
           params: { ns, wsid },
         },
       } = this.props;
-      let url = workspacePath(ns, wsid);
+      let url: string;
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');
-          url += analysisTabName;
+          url = analysisTabPath(ns, wsid);
           break;
         case 'review':
           AnalyticsTracker.CohortBuilder.CohortAction('Review cohort');
-          url += `data/cohorts/${cohort.id}/reviews`;
+          url = `${dataTabPath(ns, wsid)}/cohorts/${cohort.id}/reviews`;
           break;
       }
       this.props.navigateByUrl(url);

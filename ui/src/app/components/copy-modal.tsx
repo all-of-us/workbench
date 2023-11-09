@@ -20,7 +20,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { Spinner } from 'app/components/spinners';
-import { analysisTabName, workspacePath } from 'app/routing/utils';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -37,12 +37,6 @@ enum RequestState {
   COPY_ERROR,
   SUCCESS,
 }
-
-const ResourceTypeHomeTabs = new Map()
-  .set(ResourceType.NOTEBOOK, analysisTabName)
-  .set(ResourceType.COHORT, 'data')
-  .set(ResourceType.CONCEPT_SET, 'data')
-  .set(ResourceType.DATASET, 'data');
 
 export interface CopyModalProps {
   fromWorkspaceNamespace: string;
@@ -351,9 +345,11 @@ const CopyModal = withCdrVersions()(
         const { namespace, id } = this.state.destination;
         return (
           <Button
-            path={`${workspacePath(namespace, id)}/${ResourceTypeHomeTabs.get(
-              this.props.resourceType
-            )}`}
+            path={
+              resourceType === ResourceType.NOTEBOOK
+                ? analysisTabPath(namespace, id)
+                : dataTabPath(namespace, id)
+            }
             style={{ marginLeft: '0.75rem' }}
           >
             Go to Copied {resourceType}
