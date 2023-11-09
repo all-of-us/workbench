@@ -5,6 +5,7 @@ import { withErrorModal } from 'app/components/modals';
 import { InactivityModal } from 'app/pages/signed-in/inactivity-modal';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
+import { authStore, useStore } from 'app/utils/stores';
 
 const { useState, useEffect } = React;
 
@@ -59,12 +60,16 @@ const getInactivityElapsedMs = () => {
   return Date.now() - parseInt(lastActive, 10);
 };
 
-const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
-  AnalyticsTracker.User.InactivitySignOut();
+const invalidateInactivityCookie = (): void => {
   window.localStorage.setItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     null
   );
+};
+
+const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
+  AnalyticsTracker.User.InactivitySignOut();
+  invalidateInactivityCookie();
   withErrorModal(
     {
       title: 'Sign Out Error',
@@ -78,6 +83,7 @@ const getDefaultSignOutForInactivityTimeMs = () =>
   Date.now() + getInactivityTimeoutMs();
 
 export const InactivityMonitor = () => {
+  const { authLoaded, isSignedIn } = useStore(authStore);
   const [signOutForInactivityTimeMs, setSignOutForInactivityTimeMs] =
     useState<number>(getDefaultSignOutForInactivityTimeMs());
 
@@ -102,6 +108,15 @@ export const InactivityMonitor = () => {
 
   // Signal user activity.
   useEffect(() => {
+    if (!authLoaded) {
+      return;
+    }
+
+    if (!isSignedIn) {
+      invalidateInactivityCookie();
+      return;
+    }
+
     let getUserActivityTimer: () => NodeJS.Timeout;
     let inactivityInterval: NodeJS.Timeout;
     let logoutTimer: NodeJS.Timeout;
@@ -196,13 +211,17 @@ export const InactivityMonitor = () => {
       clearInterval(inactivityInterval);
       [getUserActivityTimer(), logoutTimer].forEach((t) => clearTimeout(t));
     };
-  }, []);
+  }, [authLoaded, isSignedIn]);
 
   const onCloseInactivityModal = () => {
     resetSignOutForInactivityTime();
     // todo: clicking to close the modal will fire a click event, which will reset the timer,
     // however, we should still reset the timers here so we don't rely on that implicit behavior
   };
+
+  if (!authLoaded || !isSignedIn) {
+    return null;
+  }
 
   return (
     <InactivityModal

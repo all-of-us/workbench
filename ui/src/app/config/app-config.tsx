@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { AuthProvider } from 'react-oidc-context';
 
+import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import { AppRoutingComponent } from 'app/routing/app-routing';
 import { configApi } from 'app/services/swagger-fetch-clients';
 import { makeOIDC } from 'app/utils/authentication';
@@ -27,6 +28,7 @@ export const AppConfigComponent = () => {
       {/* TODO: Change config in the serverConfigStore to be non-undefined to simplify downstream components.*/}
       {config && (
         <AuthProvider {...makeOIDC(config)}>
+          <InactivityMonitor />
           <AppRoutingComponent />
         </AuthProvider>
       )}
