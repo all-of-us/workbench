@@ -77,14 +77,14 @@ export const AddAnnotationDefinitionModal = withRouter(
         const {
           onCreate,
           cohortId,
-          workspace: { namespace, id },
+          workspace: { namespace, terraName },
         } = this.props;
         const { name, annotationType, enumValues } = this.state;
         this.setState({ saving: true });
         const newDef =
           await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
             namespace,
-            id,
+            terraName,
             cohortId,
             {
               cohortId: cohortId,

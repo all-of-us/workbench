@@ -1145,7 +1145,7 @@ export const WorkspaceEdit = fp.flow(
         async () =>
           await workspacesApi().duplicateWorkspaceAsync(
             this.props.workspace.namespace,
-            this.props.workspace.id,
+            this.props.workspace.terraName,
             {
               includeUserRoles: this.state.cloneUserRole,
               workspace: this.state.workspace,
@@ -1170,14 +1170,14 @@ export const WorkspaceEdit = fp.flow(
         } else {
           workspace = await workspacesApi().updateWorkspace(
             this.state.workspace.namespace,
-            this.state.workspace.id,
+            this.state.workspace.terraName,
             { workspace: this.state.workspace }
           );
           // TODO: Investigate removing this GET call, the response from Update should suffice here.
           await workspacesApi()
             .getWorkspace(
               this.state.workspace.namespace,
-              this.state.workspace.id
+              this.state.workspace.terraName
             )
             .then((ws) =>
               currentWorkspaceStore.next({
@@ -1188,20 +1188,23 @@ export const WorkspaceEdit = fp.flow(
           this.props.navigate([
             'workspaces',
             workspace.namespace,
-            workspace.id,
+            workspace.terraName,
             'data',
           ]);
           return;
         }
 
         const { workspace: updatedWorkspace, accessLevel: updatedAccessLevel } =
-          await workspacesApi().getWorkspace(workspace.namespace, workspace.id);
+          await workspacesApi().getWorkspace(
+            workspace.namespace,
+            workspace.terraName
+          );
 
         const navigateToWorkspace = () => {
           this.props.navigate([
             'workspaces',
             updatedWorkspace.namespace,
-            updatedWorkspace.id,
+            updatedWorkspace.terraName,
             'data',
           ]);
         };

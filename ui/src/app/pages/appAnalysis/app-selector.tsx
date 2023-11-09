@@ -63,7 +63,7 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.None);
         openAppOrConfigPanel(
           workspace.namespace,
-          workspace.id,
+          workspace.terraName,
           userApps,
           selectedApp,
           navigate

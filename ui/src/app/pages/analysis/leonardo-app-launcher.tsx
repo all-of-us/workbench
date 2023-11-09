@@ -507,7 +507,7 @@ export const LeonardoAppLauncher = fp.flow(
         this.props.navigate([
           'workspaces',
           workspace.namespace,
-          workspace.id,
+          workspace.terraName,
           // navigate will encode the notebook name automatically
           analysisTabName,
           ...(this.props.leoAppType === LeoApplicationType.JupyterNotebook
@@ -570,7 +570,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private async connectToRunningRuntime(runtime: Runtime) {
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       this.incrementProgress(Progress.Authenticating);
 
       const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
@@ -578,7 +578,7 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          `${analysisTabPath(namespace, id)}/${encodeURIComponent(
+          `${analysisTabPath(namespace, terraName)}/${encodeURIComponent(
             this.getFullJupyterNotebookName()
           )}`
         );

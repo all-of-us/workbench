@@ -211,7 +211,10 @@ export const WorkspaceAbout = fp.flow(
 
     loadInitialCreditsUsage(workspace: WorkspaceData) {
       fetchWithErrorModal(() =>
-        workspacesApi().getBillingUsage(workspace.namespace, workspace.id)
+        workspacesApi().getBillingUsage(
+          workspace.namespace,
+          workspace.terraName
+        )
       ).then((usage: WorkspaceBillingUsageResponse) =>
         this.setState({ workspaceInitialCreditsUsage: usage.cost })
       );
@@ -244,7 +247,7 @@ export const WorkspaceAbout = fp.flow(
       fetchWithErrorModal(() =>
         workspacesApi().getFirecloudWorkspaceUserRoles(
           workspace.namespace,
-          workspace.id
+          workspace.terraName
         )
       ).then((resp: WorkspaceUserRolesResponse) =>
         this.setState({
@@ -298,12 +301,12 @@ export const WorkspaceAbout = fp.flow(
 
     publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
       this.setState({ publishing: true });
       fetchWithErrorModal(() =>
         publish
-          ? workspaceAdminApi().publishWorkspace(namespace, id)
-          : workspaceAdminApi().unpublishWorkspace(namespace, id)
+          ? workspaceAdminApi().publishWorkspace(namespace, terraName)
+          : workspaceAdminApi().unpublishWorkspace(namespace, terraName)
       )
         .then(() =>
           this.updateWorkspaceState({ ...workspace, published: publish })

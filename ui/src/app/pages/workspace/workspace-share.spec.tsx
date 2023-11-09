@@ -28,7 +28,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceShare, WorkspaceShareProps } from './workspace-share';
 
-describe('WorkspaceShare', () => {
+describe(WorkspaceShare.name, () => {
   let props: WorkspaceShareProps;
   let user;
 
@@ -76,13 +76,13 @@ describe('WorkspaceShare', () => {
     role: WorkspaceAccessLevel.NO_ACCESS,
   };
 
-  const tomRiddleDiary = {
+  const tomRiddleDiary: WorkspaceData = {
     namespace: 'Horcrux',
     name: 'The Diary of Tom Marvolo Riddle',
+    terraName: 'diary',
     etag: '1',
-    id: 'The Diary of Tom Marvolo Riddle',
     accessLevel: WorkspaceAccessLevel.OWNER,
-  } as WorkspaceData;
+  };
   const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
   const getUserRoleDropdownLabel = (desiredUser: User) => {
@@ -264,7 +264,7 @@ describe('WorkspaceShare', () => {
     );
     expect(spy).toHaveBeenCalledWith(
       tomRiddleDiary.namespace,
-      tomRiddleDiary.name,
+      tomRiddleDiary.terraName,
       {
         workspaceEtag: tomRiddleDiary.etag,
         items: [

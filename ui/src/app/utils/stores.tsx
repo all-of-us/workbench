@@ -52,14 +52,14 @@ export const cdrVersionStore = atom<CdrVersionStore>({});
 
 export const useGenomicExtractionJobs = (
   workspaceNamespace: string,
-  workspaceId: string,
+  terraName: string,
   pollWhileNonTerminal = true
 ) =>
   useSWR(
-    `/api/workspaces/${workspaceNamespace}/${workspaceId}/genomicExtractionJobs`,
+    `/api/workspaces/${workspaceNamespace}/${terraName}/genomicExtractionJobs`,
     () =>
       dataSetApi()
-        .getGenomicExtractionJobs(workspaceNamespace, workspaceId)
+        .getGenomicExtractionJobs(workspaceNamespace, terraName)
         .then(({ jobs }) => jobs),
     {
       // Genomic jobs will rarely change without user interaction. Avoid some extraneous revalidation.
@@ -88,7 +88,7 @@ export const useGenomicExtractionJobs = (
 export const withGenomicExtractionJobs = (WrappedComponent) => (props) => {
   const { data } = useGenomicExtractionJobs(
     props.workspace.namespace,
-    props.workspace.id
+    props.workspace.terraName
   );
   return <WrappedComponent genomicExtractionJobs={data} {...props} />;
 };

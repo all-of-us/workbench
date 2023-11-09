@@ -149,18 +149,18 @@ export const ParticipantsCharts = withCurrentWorkspace()(
         cohortReviewId,
         domain,
         searchRequest,
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
       } = this.props;
       const chartResponse = !!cohortReviewId
         ? await cohortReviewApi().getCohortReviewChartData(
             namespace,
-            id,
+            terraName,
             cohortReviewId,
             domain
           )
         : await cohortBuilderApi().getCohortChartData(
             namespace,
-            id,
+            terraName,
             domain,
             searchRequest
           );

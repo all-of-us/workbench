@@ -115,7 +115,7 @@ const mapTanagraWorkspaceResource = ({
   workspace: WorkspaceData;
 }): TanagraWorkspaceResource => ({
   workspaceNamespace: workspace.namespace,
-  workspaceFirecloudName: workspace.id, // TODO verify this is the correct value to set
+  workspaceFirecloudName: workspace.terraName, // TODO verify this is the correct value to set
   workspaceBillingStatus: workspace.billingStatus,
   cdrVersionId: workspace.cdrVersionId,
   accessTierShortName: workspace.accessTierShortName,
@@ -210,7 +210,7 @@ export const DataComponentTanagra = fp.flow(
 
   useEffect(() => {
     loadResources();
-  }, [workspace.namespace, workspace.id]);
+  }, [workspace.namespace, workspace.terraName]);
 
   const writePermission =
     workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
@@ -243,7 +243,7 @@ export const DataComponentTanagra = fp.flow(
     navigate([
       'workspaces',
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       'data',
       'tanagra',
       'cohorts',
@@ -308,7 +308,7 @@ export const DataComponentTanagra = fp.flow(
                 navigate([
                   'workspaces',
                   workspace.namespace,
-                  workspace.id,
+                  workspace.terraName,
                   'data',
                   'tanagra',
                   'export',

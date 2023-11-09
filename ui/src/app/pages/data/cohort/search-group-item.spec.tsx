@@ -16,8 +16,8 @@ const itemStub = {
 };
 
 const workspaceStub = {
-  id: 'workspace_id',
   namespace: 'namespace',
+  terraName: 'terraName',
 };
 
 describe('SearchGroupItem', () => {

@@ -88,7 +88,7 @@ describe('DataSetPage', () => {
         initialEntries={[
           `${dataTabPath(
             workspaceDataStub.namespace,
-            workspaceDataStub.id
+            workspaceDataStub.terraName
           )}/data-sets/${stubDataSet().id}`,
         ]}
       >
@@ -99,7 +99,7 @@ describe('DataSetPage', () => {
             match={{
               params: {
                 ns: workspaceDataStub.namespace,
-                wsid: workspaceDataStub.id,
+                wsid: workspaceDataStub.terraName,
                 dataSetId: stubDataSet().id,
               },
             }}
@@ -328,7 +328,7 @@ describe('DataSetPage', () => {
     componentAlt();
     const pathPrefix = dataTabPath(
       workspaceDataStub.namespace,
-      workspaceDataStub.id
+      workspaceDataStub.terraName
     );
 
     // Check Cohorts "+" link

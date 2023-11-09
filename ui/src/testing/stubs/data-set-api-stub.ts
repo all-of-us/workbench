@@ -59,8 +59,8 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   previewDataSetByDomain(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     dataSetPreviewRequest: DataSetPreviewRequest
   ): Promise<DataSetPreviewResponse> {
     return Promise.resolve({
@@ -82,8 +82,8 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   public getValuesFromDomain(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     domain: string
   ): Promise<DomainValuesResponse> {
     const domainValueItems = [];

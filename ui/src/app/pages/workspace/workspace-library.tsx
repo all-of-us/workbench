@@ -102,7 +102,7 @@ const libraryTabs = {
         (workspace) =>
           !!featuredWorkspaces.find(
             (featuredWorkspace) =>
-              workspace.workspace.id === featuredWorkspace.id &&
+              workspace.workspace.terraName === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
                 FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY
@@ -129,7 +129,7 @@ const libraryTabs = {
         (workspace) =>
           !!featuredWorkspaces.find(
             (featuredWorkspace) =>
-              workspace.workspace.id === featuredWorkspace.id &&
+              workspace.workspace.terraName === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
                 FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES
@@ -159,7 +159,7 @@ const libraryTabs = {
         (workspace) =>
           !!featuredWorkspaces.find(
             (featuredWorkspace) =>
-              workspace.workspace.id === featuredWorkspace.id &&
+              workspace.workspace.terraName === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
                 FeaturedWorkspaceCategory.DEMO_PROJECTS

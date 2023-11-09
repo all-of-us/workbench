@@ -63,14 +63,18 @@ export const NewJupyterNotebookModal = (props: Props) => {
   };
 
   const create = () => {
-    userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: appendJupyterNotebookFileSuffix(name),
-    });
+    userMetricsApi().updateRecentResource(
+      workspace.namespace,
+      workspace.terraName,
+      {
+        notebookName: appendJupyterNotebookFileSuffix(name),
+      }
+    );
     navigate(
       [
         'workspaces',
         workspace.namespace,
-        workspace.id,
+        workspace.terraName,
         analysisTabName,
         encodeURIComponent(name),
       ],

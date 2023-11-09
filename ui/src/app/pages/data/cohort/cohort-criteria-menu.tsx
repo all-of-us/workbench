@@ -210,9 +210,9 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
     const menuRef = useRef(null);
 
     const getDomainCounts = () => {
-      const { id, namespace } = workspace;
+      const { namespace, terraName } = workspace;
       cohortBuilderApi()
-        .findUniversalDomainCounts(namespace, id, searchTerms)
+        .findUniversalDomainCounts(namespace, terraName, searchTerms)
         .then((response) => {
           setDomainCounts(response.items);
           setDomainCountsLoading(false);

@@ -181,11 +181,11 @@ export class Demographics extends React.Component<Props, State> {
 
   async loadNodesFromApi() {
     const { criteriaType, selections } = this.props;
-    const { id, namespace } = currentWorkspaceStore.getValue();
+    const { namespace, terraName } = currentWorkspaceStore.getValue();
     this.setState({ loading: true });
     const response = await cohortBuilderApi().findCriteriaBy(
       namespace,
-      id,
+      terraName,
       Domain.PERSON.toString(),
       criteriaType.toString()
     );
@@ -203,13 +203,16 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   async loadAgeNodesFromApi() {
-    const { id, namespace } = currentWorkspaceStore.getValue();
+    const { namespace, terraName } = currentWorkspaceStore.getValue();
     const initialValue = {
       [AttrName.AGE]: [],
       [AttrName.AGE_AT_CONSENT]: [],
       [AttrName.AGE_AT_CDR]: [],
     };
-    const response = await cohortBuilderApi().findAgeTypeCounts(namespace, id);
+    const response = await cohortBuilderApi().findAgeTypeCounts(
+      namespace,
+      terraName
+    );
     const ageTypeNodes = response.items.reduce((acc, item) => {
       acc[item.ageType].push(item);
       return acc;

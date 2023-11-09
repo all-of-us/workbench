@@ -133,7 +133,7 @@ export function convertToResource(
 ): WorkspaceResource {
   const {
     namespace,
-    id,
+    terraName,
     accessLevel,
     accessTierShortName,
     adminLocked,
@@ -142,7 +142,7 @@ export function convertToResource(
   } = workspace;
   return {
     workspaceNamespace: namespace,
-    workspaceFirecloudName: id,
+    workspaceFirecloudName: terraName,
     permission: WorkspaceAccessLevel[accessLevel],
     accessTierShortName,
     cdrVersionId,

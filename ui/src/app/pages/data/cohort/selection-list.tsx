@@ -255,12 +255,12 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
     }
 
     async getVariantFilterBuckets() {
-      const { namespace, id } = currentWorkspaceStore.getValue();
+      const { namespace, terraName } = currentWorkspaceStore.getValue();
       try {
         const filterBucketResponse =
           await cohortBuilderApi().findVariantFilterInfo(
             namespace,
-            id,
+            terraName,
             this.props.selection.variantFilter
           );
         this.setState({ variantFilterInfoResponse: filterBucketResponse });

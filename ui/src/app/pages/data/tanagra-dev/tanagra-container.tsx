@@ -21,7 +21,7 @@ export const TanagraContainer = fp.flow(
 )(({ cdrVersionTiersResponse, hideSpinner, workspace }) => {
   const [navigate] = useNavigation();
   const { 0: splat } = useParams<{ 0: string }>();
-  const { cdrVersionId, id, namespace } = workspace;
+  const { cdrVersionId, namespace, terraName } = workspace;
   const { bigqueryDataset } = findCdrVersion(
     cdrVersionId,
     cdrVersionTiersResponse
@@ -35,7 +35,7 @@ export const TanagraContainer = fp.flow(
 
   useExitActionListener(() => {
     // Navigate to Data tab when exiting Tanagra iframe
-    navigate(['workspaces', namespace, id, 'data']);
+    navigate(['workspaces', namespace, terraName, 'data']);
   });
 
   useExportListener((exportResourceIds) => {

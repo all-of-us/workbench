@@ -180,7 +180,7 @@ export const VariantSearch = fp.flow(
     criteria,
     select,
     selectedIds,
-    workspace: { id, namespace },
+    workspace: { namespace, terraName },
   }) => {
     const [first, setFirst] = useState(0);
     const [inputErrors, setInputErrors] = useState([]);
@@ -216,14 +216,14 @@ export const VariantSearch = fp.flow(
       try {
         const [{ items, nextPageToken, totalSize }, filterResponse] =
           await Promise.all([
-            cohortBuilderApi().findVariants(namespace, id, {
+            cohortBuilderApi().findVariants(namespace, terraName, {
               ...selectedFilters,
               searchTerm: searchTerms.trim(),
               pageSize,
               pageToken: !!firstPage ? pageToken : null,
             }),
             newSearch
-              ? cohortBuilderApi().findVariantFilters(namespace, id, {
+              ? cohortBuilderApi().findVariantFilters(namespace, terraName, {
                   searchTerm: searchTerms.trim(),
                 })
               : null,

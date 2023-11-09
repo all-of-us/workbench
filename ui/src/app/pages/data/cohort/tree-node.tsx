@@ -196,7 +196,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     cohortBuilderApi()
       .findCriteriaBy(
         workspace.namespace,
-        workspace.id,
+        workspace.terraName,
         domain.toString(),
         criteriaType,
         standard,
@@ -207,7 +207,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           cohortBuilderApi()
             .findCriteriaBy(
               workspace.namespace,
-              workspace.id,
+              workspace.terraName,
               domain.toString(),
               CriteriaType[CriteriaType.RXNORM],
               standard,
