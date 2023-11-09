@@ -212,7 +212,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
       data: jobs,
       error,
       mutate,
-    } = useGenomicExtractionJobs(workspace.namespace, workspace.id);
+    } = useGenomicExtractionJobs(workspace.namespace, workspace.terraName);
 
     return (
       <div

@@ -18,7 +18,7 @@ export const NewJupyterNotebookButton = (props: { workspace: Workspace }) => {
 
   useEffect(() => {
     notebooksApi()
-      .getNoteBookList(workspace.namespace, workspace.id)
+      .getNoteBookList(workspace.namespace, workspace.terraName)
       .then((nbl) =>
         setNotebookNameList(
           nbl.map((fd) => dropJupyterNotebookFileSuffix(fd.name))

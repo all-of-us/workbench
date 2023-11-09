@@ -130,7 +130,7 @@ export const ConceptListPage = fp.flow(
       const {
         concept,
         conceptSet,
-        workspace: { namespace, id },
+        workspace: { namespace, terraName },
       } = this.props;
       conceptSetUpdating.next(true);
       this.setState({ updating: true });
@@ -153,7 +153,7 @@ export const ConceptListPage = fp.flow(
         const updatedConceptSet =
           await conceptSetsApi().updateConceptSetConcepts(
             namespace,
-            id,
+            terraName,
             conceptSet.id,
             updateConceptSetReq
           );
@@ -161,7 +161,7 @@ export const ConceptListPage = fp.flow(
         this.props.navigate([
           'workspaces',
           namespace,
-          id,
+          terraName,
           'data',
           'concepts',
           'sets',
@@ -185,11 +185,11 @@ export const ConceptListPage = fp.flow(
     }
 
     afterConceptsSaved(conceptSet: ConceptSet) {
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       this.props.navigate([
         'workspaces',
         namespace,
-        id,
+        terraName,
         'data',
         'concepts',
         'sets',

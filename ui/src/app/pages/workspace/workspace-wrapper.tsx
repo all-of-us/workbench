@@ -248,7 +248,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       wsInCurrentStore &&
       // can't use ?. here because we don't want to match against undefined
       wsInCurrentStore.namespace === ns &&
-      wsInCurrentStore.id === terraName
+      wsInCurrentStore.terraName === terraName
     ) {
       updateRuntimeStores({
         workspaceNamespace: ns,
@@ -266,7 +266,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
         wsInNextStore &&
         // can't use ?. here because we don't want to match against undefined
         wsInNextStore.namespace === ns &&
-        wsInNextStore.id === terraName
+        wsInNextStore.terraName === terraName
       ) {
         currentWorkspaceStore.next(wsInNextStore);
         updateRuntimeStores({

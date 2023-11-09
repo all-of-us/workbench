@@ -89,7 +89,7 @@ export const GenomicsExtractionMenu = ({
               onClick={async () => {
                 await dataSetApi().abortGenomicExtractionJob(
                   workspace.namespace,
-                  workspace.id,
+                  workspace.terraName,
                   job.genomicExtractionJobId.toString()
                 );
                 onMutate();

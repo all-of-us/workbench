@@ -87,9 +87,9 @@ const CdrVersion = (props: {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
 }) => {
   const { workspace, cdrVersionTiersResponse } = props;
-  const { namespace, id } = workspace;
+  const { namespace, terraName } = workspace;
 
-  const localStorageKey = `${namespace}-${id}-user-dismissed-cdr-version-update-alert`;
+  const localStorageKey = `${namespace}-${terraName}-user-dismissed-cdr-version-update-alert`;
 
   const dismissedInLocalStorage = () =>
     localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE;
@@ -134,7 +134,9 @@ const CdrVersion = (props: {
             ).name
           }
           onClose={() => setShowModal(false)}
-          upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
+          upgrade={() =>
+            navigate(['workspaces', namespace, terraName, 'duplicate'])
+          }
         />
       )}
     </FlexRow>

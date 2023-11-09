@@ -108,9 +108,9 @@ describe('WorkspaceList', () => {
       workspaceOwn,
     ];
     workspacesApiStub.workspaceAccess = new Map([
-      [workspaceRead.id, WorkspaceAccessLevel.READER],
-      [workspaceWrite.id, WorkspaceAccessLevel.WRITER],
-      [workspaceOwn.id, WorkspaceAccessLevel.OWNER],
+      [workspaceRead.terraName, WorkspaceAccessLevel.READER],
+      [workspaceWrite.terraName, WorkspaceAccessLevel.WRITER],
+      [workspaceOwn.terraName, WorkspaceAccessLevel.OWNER],
     ]);
 
     component();

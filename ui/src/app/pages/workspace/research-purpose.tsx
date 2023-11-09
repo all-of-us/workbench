@@ -109,7 +109,12 @@ export const ResearchPurpose = fp.flow(
           }}
           data-test-id='edit-workspace'
           onClick={() =>
-            navigate(['workspaces', workspace.namespace, workspace.id, 'edit'])
+            navigate([
+              'workspaces',
+              workspace.namespace,
+              workspace.terraName,
+              'edit',
+            ])
           }
         >
           <EditComponentReact

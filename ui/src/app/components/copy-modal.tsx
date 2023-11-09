@@ -176,7 +176,7 @@ const CopyModal = withCdrVersions()(
     isDestinationSameWorkspace(workspace: Workspace): boolean {
       const { fromWorkspaceFirecloudName, fromWorkspaceNamespace } = this.props;
       return (
-        workspace.id === fromWorkspaceFirecloudName &&
+        workspace.terraName === fromWorkspaceFirecloudName &&
         workspace.namespace === fromWorkspaceNamespace
       );
     }
@@ -255,7 +255,7 @@ const CopyModal = withCdrVersions()(
       const { saveFunction, resourceType } = this.props;
 
       saveFunction({
-        toWorkspaceName: this.state.destination.id,
+        toWorkspaceName: this.state.destination.terraName,
         toWorkspaceNamespace: this.state.destination.namespace,
         newName: this.state.newName,
       })
@@ -344,13 +344,13 @@ const CopyModal = withCdrVersions()(
           </Button>
         );
       } else if (this.state.requestState === RequestState.SUCCESS) {
-        const { namespace, id } = this.state.destination;
+        const { namespace, terraName } = this.state.destination;
         return (
           <Button
             path={
               resourceType === ResourceType.NOTEBOOK
-                ? analysisTabPath(namespace, id)
-                : dataTabPath(namespace, id)
+                ? analysisTabPath(namespace, terraName)
+                : dataTabPath(namespace, terraName)
             }
             style={{ marginLeft: '0.75rem' }}
           >

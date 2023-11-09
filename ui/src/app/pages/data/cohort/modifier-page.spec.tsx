@@ -54,7 +54,7 @@ describe('ModifierPage', () => {
         initialEntries={[
           `${dataTabPath(
             workspaceDataStub.namespace,
-            workspaceDataStub.id
+            workspaceDataStub.terraName
           )}/cohorts/build`,
         ]}
       >

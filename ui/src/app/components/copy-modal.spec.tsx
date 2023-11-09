@@ -38,7 +38,7 @@ import { CopyModal, CopyModalProps } from './copy-modal';
 interface TestWorkspace {
   namespace: string;
   name: string;
-  id: string;
+  terraName: string;
   cdrVersionId: string;
   accessTierShortName: string;
 }
@@ -92,42 +92,42 @@ describe(CopyModal.name, () => {
     {
       namespace: defaultNamespace,
       name: 'Freerider',
-      id: 'freerider',
+      terraName: 'freerider',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
       name: 'Dawn Wall',
-      id: 'dawn wall',
+      terraName: 'dawn wall',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
       name: 'Zodiac',
-      id: 'zodiac',
+      terraName: 'zodiac',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
       name: 'The Nose',
-      id: 'the nose',
+      terraName: 'the nose',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: altNamespace,
       name: 'Sesame Street',
-      id: 'sesame-street',
+      terraName: 'sesame-street',
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: controlledNamespace,
       name: 'A tightly controlled workspace',
-      id: 'controlled-ws-1',
+      terraName: 'controlled-ws-1',
       cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Controlled,
     },
@@ -141,7 +141,7 @@ describe(CopyModal.name, () => {
   const controlledCdrWorkspace = workspaces[5];
 
   const fromWorkspaceNamespace = ownerWorkspace.namespace;
-  const fromWorkspaceFirecloudName = ownerWorkspace.id;
+  const fromWorkspaceFirecloudName = ownerWorkspace.terraName;
   const fromCdrVersionId = ownerWorkspace.cdrVersionId;
   const fromAccessTierShortName = ownerWorkspace.accessTierShortName;
   const fromResourceName = 'notebook';
@@ -185,27 +185,27 @@ describe(CopyModal.name, () => {
       saveFunction: notebookSaveFunction,
     };
     wsApiStub.workspaceAccess.set(
-      ownerWorkspace.id,
+      ownerWorkspace.terraName,
       WorkspaceAccessLevel.OWNER
     );
     wsApiStub.workspaceAccess.set(
-      readerWorkspace.id,
+      readerWorkspace.terraName,
       WorkspaceAccessLevel.READER
     );
     wsApiStub.workspaceAccess.set(
-      writerWorkspace.id,
+      writerWorkspace.terraName,
       WorkspaceAccessLevel.WRITER
     );
     wsApiStub.workspaceAccess.set(
-      noAccessWorkspace.id,
+      noAccessWorkspace.terraName,
       WorkspaceAccessLevel.NO_ACCESS
     );
     wsApiStub.workspaceAccess.set(
-      altCdrWorkspace.id,
+      altCdrWorkspace.terraName,
       WorkspaceAccessLevel.WRITER
     );
     wsApiStub.workspaceAccess.set(
-      controlledCdrWorkspace.id,
+      controlledCdrWorkspace.terraName,
       WorkspaceAccessLevel.OWNER
     );
 
@@ -242,7 +242,7 @@ describe(CopyModal.name, () => {
   it('should list workspaces with the same CDR version first', async () => {
     // choose a workspace with an alternative CDR version instead of the default
     props.fromWorkspaceNamespace = altCdrWorkspace.namespace;
-    props.fromWorkspaceFirecloudName = altCdrWorkspace.id;
+    props.fromWorkspaceFirecloudName = altCdrWorkspace.terraName;
     props.fromCdrVersionId = altCdrWorkspace.cdrVersionId;
 
     component();
@@ -296,7 +296,7 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
-        toWorkspaceName: writerWorkspace.id,
+        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceNamespace: writerWorkspace.namespace,
         newName,
       }
@@ -335,7 +335,7 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
-        toWorkspaceName: altCdrWorkspace.id,
+        toWorkspaceName: altCdrWorkspace.terraName,
         toWorkspaceNamespace: altCdrWorkspace.namespace,
         newName,
       }
@@ -398,7 +398,7 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
-        toWorkspaceName: writerWorkspace.id,
+        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceNamespace: writerWorkspace.namespace,
         newName,
       }

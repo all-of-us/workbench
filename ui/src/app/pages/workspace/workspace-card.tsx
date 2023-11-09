@@ -121,7 +121,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         AnalyticsTracker.Workspaces.Delete();
         await workspacesApi().deleteWorkspace(
           this.props.workspace.namespace,
-          this.props.workspace.id
+          this.props.workspace.terraName
         );
         await this.props.reload();
       }
@@ -154,7 +154,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     render() {
       const {
         workspace,
-        workspace: { accessTierShortName, adminLocked, namespace, id },
+        workspace: { accessTierShortName, adminLocked, namespace, terraName },
         accessLevel,
         tierAccessDisabled,
         navigate,
@@ -183,11 +183,21 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             : AnalyticsTracker.Workspaces.OpenDuplicatePage(
                                 'Card'
                               );
-                          navigate(['workspaces', namespace, id, 'duplicate']);
+                          navigate([
+                            'workspaces',
+                            namespace,
+                            terraName,
+                            'duplicate',
+                          ]);
                         }}
                         onEdit={() => {
                           AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                          navigate(['workspaces', namespace, id, 'edit']);
+                          navigate([
+                            'workspaces',
+                            namespace,
+                            terraName,
+                            'edit',
+                          ]);
                         }}
                         onDelete={() => {
                           AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
@@ -232,7 +242,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       analyticsFn={() => this.trackWorkspaceNavigation()}
                       data-test-id={'workspace-card-link'}
                       propagateDataTestId
-                      path={dataTabPath(namespace, id)}
+                      path={dataTabPath(namespace, terraName)}
                     >
                       <TooltipTrigger
                         content={

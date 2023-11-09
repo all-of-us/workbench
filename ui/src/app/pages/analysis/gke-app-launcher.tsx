@@ -31,8 +31,8 @@ export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
     props.hideSpinner();
     // In case app is deleted redirect user to the analysis tab.
     if (!!userApp && userApp.status === AppStatus.DELETING) {
-      const { namespace, id } = currentWorkspaceStore.getValue();
-      navigate([analysisTabPath(namespace, id)]);
+      const { namespace, terraName } = currentWorkspaceStore.getValue();
+      navigate([analysisTabPath(namespace, terraName)]);
     }
   }, [userApp]);
 

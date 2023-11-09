@@ -110,7 +110,7 @@ export const AppFilesList = withCurrentWorkspace()(
       },
       () =>
         workspacesApi()
-          .notebookTransferComplete(workspace.namespace, workspace.id)
+          .notebookTransferComplete(workspace.namespace, workspace.terraName)
           .then((isComplete) => {
             setIsTransferComplete(isComplete);
 
@@ -166,10 +166,10 @@ export const AppFilesList = withCurrentWorkspace()(
 
     const displayName = (row: FileDetail) => {
       const {
-        workspace: { namespace, id },
+        workspace: { namespace, terraName },
       } = props;
       const { name } = row;
-      const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
+      const url = `${analysisTabPath(namespace, terraName)}/preview/${name}`;
       return row.sizeInBytes <= notebookSizeThreshold ? (
         <StyledRouterLink path={url} data-test-id='notebook-navigation'>
           {row.name}
@@ -273,7 +273,7 @@ export const AppFilesList = withCurrentWorkspace()(
         {showNotebookSizeWarningModal && (
           <NotebookSizeWarningModal
             namespace={workspace.namespace}
-            firecloudName={workspace.id}
+            firecloudName={workspace.terraName}
             notebookName={activeNotebookName}
             handleClose={() => {
               setShowNotebookSizeWarningModal(false);

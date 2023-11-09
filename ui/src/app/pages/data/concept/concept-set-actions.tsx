@@ -126,9 +126,9 @@ export const ConceptSetActions = fp.flow(
         this.setState({ conceptSet });
       } else {
         this.setState({ conceptSetLoading: true });
-        const { namespace, id } = this.props.workspace;
+        const { namespace, terraName } = this.props.workspace;
         conceptSetsApi()
-          .getConceptSet(namespace, id, +csid)
+          .getConceptSet(namespace, terraName, +csid)
           .then((cs) => {
             if (cs) {
               this.setState({ conceptSet: cs, conceptSetLoading: false });
@@ -136,7 +136,7 @@ export const ConceptSetActions = fp.flow(
               this.props.navigate([
                 'workspaces',
                 namespace,
-                id,
+                terraName,
                 'data',
                 'concepts',
               ]);
@@ -146,9 +146,9 @@ export const ConceptSetActions = fp.flow(
     }
 
     getNavigationPath(action: string): string {
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       const { conceptSet } = this.state;
-      let url = workspacePath(namespace, id) + '/';
+      let url = workspacePath(namespace, terraName) + '/';
       switch (action) {
         case 'conceptSet':
           url += `data/concepts/sets/${conceptSet.id}`;

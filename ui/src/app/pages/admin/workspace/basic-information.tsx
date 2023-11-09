@@ -32,7 +32,7 @@ export const BasicInformation = ({
           {workspace.name}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Terra Name (often incorrectly called "id")'>
-          {workspace.id}
+          {workspace.terraName}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Workspace Namespace'>
           {workspace.namespace}

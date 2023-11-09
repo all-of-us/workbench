@@ -7,18 +7,20 @@ import {
 
 import { WorkspaceStubVariables } from './workspaces';
 
-const phenotypeWorkspace = {
+const phenotypeWorkspace: FeaturedWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Phenotype Library',
   namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Phenotype Library',
-  id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Phenotype Library',
+  id:
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME + ' Phenotype Library',
   category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
 };
 
-const tutorialWorkspace = {
+const tutorialWorkspace: FeaturedWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Tutorial Workspace',
   namespace:
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Tutorial Workspace',
-  id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Tutorial Workspace',
+  id:
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME + ' Tutorial Workspace',
   category: FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
 };
 

@@ -168,8 +168,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public getConceptSet(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     conceptSetId: number
   ): Promise<ConceptSet> {
     return new Promise<ConceptSet>((resolve) => {
@@ -178,8 +178,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public updateConceptSet(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     conceptSetId: number,
     req: ConceptSet
   ): Promise<ConceptSet> {
@@ -192,8 +192,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public deleteConceptSet(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     conceptSetId: number
   ): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
@@ -207,8 +207,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public createConceptSet(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     conceptSetRequest: CreateConceptSetRequest
   ): Promise<ConceptSet> {
     return new Promise<ConceptSet>((resolve) => {
@@ -218,8 +218,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public updateConceptSetConcepts(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     conceptSetId: number,
     req: UpdateConceptSetRequest
   ): Promise<ConceptSet> {

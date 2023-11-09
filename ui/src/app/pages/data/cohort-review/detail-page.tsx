@@ -52,7 +52,7 @@ export const DetailPage = fp.flow(
 
     async componentDidMount() {
       const {
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
         hideSpinner,
       } = this.props;
       hideSpinner();
@@ -77,7 +77,7 @@ export const DetailPage = fp.flow(
         });
       }
       if (!vocabOptions.getValue()) {
-        getVocabOptions(namespace, id);
+        getVocabOptions(namespace, terraName);
       }
       this.updateParticipantStore();
       this.subscription = participantStore.subscribe((participant) =>

@@ -318,9 +318,9 @@ export const AttributesPage = fp.flow(
 
   const getAttributes = () => {
     const { conceptId } = node;
-    const { id, namespace } = workspace;
+    const { namespace, terraName } = workspace;
     cohortBuilderApi()
-      .findCriteriaAttributeByConceptId(namespace, id, conceptId)
+      .findCriteriaAttributeByConceptId(namespace, terraName, conceptId)
       .then((resp) => {
         const newAttributes = { numAttributes: [], catAttributes: [] };
         resp.items.forEach((attr) => {
@@ -359,7 +359,7 @@ export const AttributesPage = fp.flow(
 
   const getSurveyAttributes = async () => {
     const { conceptId, parentId, path, subtype, value } = node;
-    const { namespace, id } = workspace;
+    const { namespace, terraName } = workspace;
     const { cdrVersionId } = currentWorkspaceStore.getValue();
     const surveyId = path.split('.')[0];
     let surveyNode = ppiSurveys
@@ -369,7 +369,7 @@ export const AttributesPage = fp.flow(
       await cohortBuilderApi()
         .findCriteriaBy(
           namespace,
-          id,
+          terraName,
           Domain.SURVEY.toString(),
           CriteriaType.PPI.toString(),
           false,
@@ -396,7 +396,7 @@ export const AttributesPage = fp.flow(
         promises.push(
           cohortBuilderApi().findSurveyVersionByQuestionConceptId(
             namespace,
-            id,
+            terraName,
             conceptId
           )
         );
@@ -404,7 +404,7 @@ export const AttributesPage = fp.flow(
         promises.push(
           cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
             namespace,
-            id,
+            terraName,
             ppiQuestions.getValue()[parentId].conceptId,
             +value
           )
@@ -414,7 +414,7 @@ export const AttributesPage = fp.flow(
         promises.push(
           cohortBuilderApi().findCriteriaAttributeByConceptId(
             namespace,
-            id,
+            terraName,
             conceptId
           )
         );
@@ -851,7 +851,7 @@ export const AttributesPage = fp.flow(
   };
 
   const requestPreview = () => {
-    const { id, namespace } = workspace;
+    const { namespace, terraName } = workspace;
     setCalculating(true);
     setAttributeCount(null);
     setCountError(false);
@@ -877,7 +877,7 @@ export const AttributesPage = fp.flow(
       dataFilters: [],
     };
     cohortBuilderApi()
-      .countParticipants(namespace, id, request)
+      .countParticipants(namespace, terraName, request)
       .then(
         (response) => {
           setCalculating(false);

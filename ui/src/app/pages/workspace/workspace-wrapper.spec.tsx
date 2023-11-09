@@ -63,7 +63,10 @@ describe(WorkspaceWrapper.name, () => {
     render(
       <MemoryRouter
         initialEntries={[
-          workspacePath(workspaceDataStub.namespace, workspaceDataStub.id),
+          workspacePath(
+            workspaceDataStub.namespace,
+            workspaceDataStub.terraName
+          ),
         ]}
       >
         <Route path='/workspaces/:ns/:terraName'>
@@ -85,7 +88,7 @@ describe(WorkspaceWrapper.name, () => {
     await createWrapperAndWaitForLoad();
     expect(spy).toHaveBeenCalledWith(
       workspaceDataStub.namespace,
-      workspaceDataStub.id
+      workspaceDataStub.terraName
     );
 
     // populated with the result of getWorkspace()
@@ -98,19 +101,19 @@ describe(WorkspaceWrapper.name, () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       namespace: 'something else',
-      id: 'some other ID',
+      terraName: 'some other ID',
     });
     nextWorkspaceWarmupStore.next({
       ...workspaceDataStub,
       namespace: 'another one',
-      id: 'definitely not a match',
+      terraName: 'definitely not a match',
     });
 
     const spy = jest.spyOn(workspacesApi(), 'getWorkspace');
     await createWrapperAndWaitForLoad();
     expect(spy).toHaveBeenCalledWith(
       workspaceDataStub.namespace,
-      workspaceDataStub.id
+      workspaceDataStub.terraName
     );
 
     // populated with the result of getWorkspace()
@@ -124,7 +127,7 @@ describe(WorkspaceWrapper.name, () => {
     const nextWs = {
       ...workspaceDataStub,
       namespace: 'something else',
-      id: 'some other ID',
+      terraName: 'some other ID',
     };
     nextWorkspaceWarmupStore.next(nextWs);
 
@@ -158,7 +161,7 @@ describe(WorkspaceWrapper.name, () => {
       currentWorkspaceStore.next({
         ...workspaceDataStub,
         namespace: 'something else',
-        id: 'some other ID',
+        terraName: 'some other ID',
       });
       nextWorkspaceWarmupStore.next(workspaceDataStub);
 
