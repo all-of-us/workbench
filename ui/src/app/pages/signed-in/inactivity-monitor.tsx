@@ -78,7 +78,6 @@ const getDefaultSignOutForInactivityTimeMs = () =>
   Date.now() + getInactivityTimeoutMs();
 
 export const InactivityMonitor = () => {
-  // todo: use this value in non-modal logic
   const [signOutForInactivityTimeMs, setSignOutForInactivityTimeMs] =
     useState<number>(getDefaultSignOutForInactivityTimeMs());
 
@@ -123,15 +122,16 @@ export const InactivityMonitor = () => {
     };
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
+      const newSignOutForInactivityTimeMs =
+        getDefaultSignOutForInactivityTimeMs() - elapsedMs;
+
       clearTimeout(logoutTimer);
       logoutTimer = global.setTimeout(
         () => invalidateInactivityCookieAndSignOut('/session-expired'),
-        Math.max(0, getInactivityTimeoutMs() - elapsedMs)
+        Math.max(0, newSignOutForInactivityTimeMs - Date.now())
       );
 
-      setSignOutForInactivityTimeMs(
-        Date.now() + getInactivityTimeoutMs() - elapsedMs
-      );
+      setSignOutForInactivityTimeMs(newSignOutForInactivityTimeMs);
     };
 
     const startInactivityMonitoring = () => {
