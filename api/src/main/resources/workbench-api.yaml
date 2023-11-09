@@ -3861,7 +3861,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenomicExtractionJob'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/genomicExtractionJobs/{jobId}/abort:
     post:
       tags:
       - dataSet
@@ -3875,9 +3875,9 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: workspaceId
+        description: the workspace name as stored in Terra and displayed in the URL
         required: true
         schema:
           type: string
