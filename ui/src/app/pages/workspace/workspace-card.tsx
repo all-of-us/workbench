@@ -13,7 +13,7 @@ import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
-import { dataTabPath, workspacePath } from 'app/routing/utils';
+import { dataTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';

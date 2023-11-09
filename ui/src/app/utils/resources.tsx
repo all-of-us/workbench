@@ -11,7 +11,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { analysisTabPath, dataTabPath, workspacePath } from 'app/routing/utils';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';

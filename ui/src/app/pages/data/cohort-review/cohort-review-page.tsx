@@ -22,7 +22,7 @@ import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review
 import { CohortReviewOverview } from 'app/pages/data/cohort-review/cohort-review-overview';
 import { CohortReviewParticipantsTable } from 'app/pages/data/cohort-review/cohort-review-participants-table';
 import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
-import { dataTabPath, workspacePath } from 'app/routing/utils';
+import { dataTabPath } from 'app/routing/utils';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
   cohortBuilderApi,
