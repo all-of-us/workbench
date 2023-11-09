@@ -44,6 +44,14 @@ export const INACTIVITY_CONFIG = {
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
 };
 
+const getInactivityTimeoutMs = () => {
+  return environment.inactivityTimeoutSeconds * 1000;
+};
+
+const getInactivityWarningBeforeMs = () => {
+  return environment.inactivityWarningBeforeSeconds * 1000;
+};
+
 const getInactivityElapsedMs = () => {
   const lastActive = window.localStorage.getItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
@@ -80,7 +88,7 @@ export const InactivityMonitor = () => {
 
   function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = getInactivityElapsedMs();
-    if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
+    if (elapsedMs && elapsedMs > getInactivityTimeoutMs()) {
       invalidateInactivityCookieAndSignOut(continuePath);
     }
   }
@@ -111,7 +119,7 @@ export const InactivityMonitor = () => {
       clearTimeout(logoutTimer);
       logoutTimer = global.setTimeout(
         () => invalidateInactivityCookieAndSignOut('/session-expired'),
-        Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs)
+        Math.max(0, getInactivityTimeoutMs() - elapsedMs)
       );
 
       clearTimeout(inactivityModalTimer);
@@ -119,10 +127,7 @@ export const InactivityMonitor = () => {
         () => setShowModal(true),
         Math.max(
           0,
-          1000 *
-            (environment.inactivityTimeoutSeconds -
-              environment.inactivityWarningBeforeSeconds) -
-            elapsedMs
+          getInactivityTimeoutMs() - getInactivityWarningBeforeMs() - elapsedMs
         )
       );
     };
