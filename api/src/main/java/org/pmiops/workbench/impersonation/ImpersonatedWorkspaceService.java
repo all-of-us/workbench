@@ -1,6 +1,7 @@
 package org.pmiops.workbench.impersonation;
 
 import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 
@@ -18,6 +19,10 @@ public interface ImpersonatedWorkspaceService {
   // but not present (or deleted) in the AoU RW DB
   List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username);
 
+  // return workspaces which are present in Sam as owned by the user but not present in Rawls,
+  // as a map of [Billing Project Resource ID : Workspace Resource ID]
+  Map<String, String> getOwnedWorkspacesOrphanedInSam(String username);
+
   void deleteWorkspace(
       String username, String wsNamespace, String wsId, boolean deleteBillingProjects);
 
@@ -26,5 +31,11 @@ public interface ImpersonatedWorkspaceService {
       String wsNamespace,
       String googleProject,
       String wsId,
+      boolean deleteBillingProjects);
+
+  public void deleteOrphanedSamWorkspace(
+      String username,
+      String wsNamespace,
+      String workspaceResourceId,
       boolean deleteBillingProjects);
 }

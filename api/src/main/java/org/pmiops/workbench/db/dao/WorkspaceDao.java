@@ -69,9 +69,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 
-  @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
-  Set<String> findAllWorkspaceNamespaces();
-
   @Query(
       "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
           + " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)"
