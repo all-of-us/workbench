@@ -3,11 +3,29 @@ import * as React from 'react';
 import { environment } from 'environments/environment';
 import { withErrorModal } from 'app/components/modals';
 import { TextModal } from 'app/components/text-modal';
-import { debouncer } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
 
 const { useState, useEffect } = React;
+
+// Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
+// if the returned function has been invoked within the last `sensitivityMs` milliseconds
+export function debouncer(action, sensitivityMs) {
+  let t = Date.now();
+
+  const timer = global.setInterval(() => {
+    if (Date.now() - t < sensitivityMs) {
+      action();
+    }
+  }, sensitivityMs);
+
+  return {
+    invoke: () => {
+      t = Date.now();
+    },
+    getTimer: () => timer,
+  };
+}
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
