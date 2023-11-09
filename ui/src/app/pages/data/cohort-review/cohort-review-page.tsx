@@ -22,7 +22,7 @@ import { CohortReviewListItem } from 'app/pages/data/cohort-review/cohort-review
 import { CohortReviewOverview } from 'app/pages/data/cohort-review/cohort-review-overview';
 import { CohortReviewParticipantsTable } from 'app/pages/data/cohort-review/cohort-review-participants-table';
 import { CreateCohortReviewModal } from 'app/pages/data/cohort-review/create-cohort-review-modal';
-import { workspacePath } from 'app/routing/utils';
+import { dataTabPath, workspacePath } from 'app/routing/utils';
 import { visitsFilterOptions } from 'app/services/review-state.service';
 import {
   cohortBuilderApi,
@@ -162,9 +162,7 @@ export const CohortReviewPage = fp.flow(
   // sets the cohort review id as a url param or removes it if no id is passed
   const updateUrlWithCohortReviewId = (cohortReviewId?: number) =>
     history.push(
-      `${workspacePath(ns, wsid)}/data/cohorts/${cid}/reviews/${
-        cohortReviewId || ''
-      }`
+      `${dataTabPath(ns, wsid)}/cohorts/${cid}/reviews/${cohortReviewId || ''}`
     );
 
   const loadCohortAndReviews = async () => {
@@ -266,7 +264,7 @@ export const CohortReviewPage = fp.flow(
               style={styles.backBtn}
               type='button'
               onClick={() =>
-                navigateByUrl(`workspaces/${ns}/${wsid}/data/cohorts/build`, {
+                navigateByUrl(`${dataTabPath(ns, wsid)}/cohorts/build`, {
                   queryParams: { cohortId: cid },
                 })
               }

@@ -23,7 +23,7 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
-import { analysisTabName, workspacePath } from 'app/routing/utils';
+import { analysisTabName, dataTabPath, workspacePath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -234,7 +234,8 @@ export const TanagraResourceList = fp.flow(
     } = rowData;
     let displayName = '';
     let url = '';
-    const urlPrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/data/tanagra`;
+    const urlPrefix =
+      dataTabPath(workspaceNamespace, workspaceFirecloudName) + 'tanagra';
     if (cohortV2) {
       displayName = cohortV2.displayName;
       url = `${urlPrefix}/cohorts/${cohortV2.id}/${

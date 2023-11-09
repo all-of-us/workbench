@@ -1,7 +1,7 @@
 import { WorkspacesApi } from 'generated/fetch';
 
 import { getTrail } from 'app/components/breadcrumb';
-import { workspacePath } from 'app/routing/utils';
+import { dataTabPath, workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -35,8 +35,8 @@ describe('getTrail', () => {
       'Participant 77',
     ]);
     expect(trail[3].url).toEqual(
-      workspacePath('testns', 'testwsid') +
-        '/data/cohorts/88/reviews/99/participants/77'
+      dataTabPath('testns', 'testwsid') +
+        '/cohorts/88/reviews/99/participants/77'
     );
   });
 

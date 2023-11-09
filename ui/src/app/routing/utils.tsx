@@ -10,3 +10,6 @@ export const analysisTabName = environment.showNewAnalysisTab
 
 export const analysisTabPath = (namespace: string, id: string): string =>
   `${workspacePath(namespace, id)}/${analysisTabName}`;
+
+export const dataTabPath = (namespace: string, id: string): string =>
+  `${workspacePath(namespace, id)}/data}`;

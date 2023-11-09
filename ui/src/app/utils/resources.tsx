@@ -11,7 +11,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { analysisTabPath, workspacePath } from 'app/routing/utils';
+import { analysisTabPath, dataTabPath, workspacePath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';
@@ -73,7 +73,8 @@ export function getId(resource: WorkspaceResource): number {
 
 export function getResourceUrl(resource: WorkspaceResource): UrlObj {
   const { workspaceNamespace, workspaceFirecloudName } = resource;
-  const workspacePrefix = workspacePath(
+  const dataTabPrefix = dataTabPath(workspaceNamespace, workspaceFirecloudName);
+  const analysisTabPrefix = analysisTabPath(
     workspaceNamespace,
     workspaceFirecloudName
   );
@@ -82,33 +83,29 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isCohort,
       (r) => ({
-        url: `${workspacePrefix}/data/cohorts/build`,
+        url: `${dataTabPrefix}/cohorts/build`,
         queryParams: { cohortId: r.cohort.id },
       }),
     ],
     [
       isCohortReview,
       (r) => ({
-        url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
+        url: `${dataTabPrefix}/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
       }),
     ],
     [
       isConceptSet,
       (r) => ({
-        url: `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`,
+        url: `${dataTabPrefix}/concepts/sets/${r.conceptSet.id}`,
       }),
     ],
-    [
-      isDataSet,
-      (r) => ({ url: `${workspacePrefix}/data/data-sets/${r.dataSet.id}` }),
-    ],
+    [isDataSet, (r) => ({ url: `${dataTabPrefix}/data-sets/${r.dataSet.id}` })],
     [
       isNotebook,
       (r) => ({
-        url: `${analysisTabPath(
-          workspaceNamespace,
-          workspaceFirecloudName
-        )}/preview/${encodeURIComponentStrict(r.notebook.name)}`,
+        url: `${analysisTabPrefix}/preview/${encodeURIComponentStrict(
+          r.notebook.name
+        )}`,
       }),
     ],
   ])(resource);

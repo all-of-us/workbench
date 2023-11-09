@@ -18,7 +18,7 @@ import {
 } from 'app/pages/data/cohort/search-state.service';
 import { mapRequest, parseCohortDefinition } from 'app/pages/data/cohort/utils';
 import { LOCAL_STORAGE_KEY_COHORT_CONTEXT } from 'app/pages/data/criteria-search';
-import { workspacePath } from 'app/routing/utils';
+import { dataTabPath } from 'app/routing/utils';
 import { cohortsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -253,7 +253,7 @@ export const CohortPage = fp.flow(
         () => {
           // Clear cohortId query param if exists in url
           if (search.indexOf('cohortId') > -1) {
-            history.push(`${workspacePath(ns, wsid)}/data/cohorts/build`);
+            history.push(`${dataTabPath(ns, wsid)}/cohorts/build`);
           }
         }
       );

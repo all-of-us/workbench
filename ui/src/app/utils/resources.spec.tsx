@@ -8,7 +8,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { analysisTabName, workspacePath } from 'app/routing/utils';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
@@ -183,15 +183,19 @@ describe('resources.tsx', () => {
   it('should return resource URLs', () => {
     const { DEFAULT_WORKSPACE_NS, DEFAULT_WORKSPACE_ID } =
       WorkspaceStubVariables;
-    const WORKSPACE_URL_PREFIX = workspacePath(
+    const dataTabPrefix = dataTabPath(
       DEFAULT_WORKSPACE_NS,
       DEFAULT_WORKSPACE_ID
     );
-    const EXPECTED_COHORT_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/build?cohortId=${COHORT_ID}`;
-    const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/reviews/${COHORT_REVIEW_ID}`;
-    const EXPECTED_CONCEPT_SET_URL = `${WORKSPACE_URL_PREFIX}/data/concepts/sets/${CONCEPT_SET_ID}`;
-    const EXPECTED_DATA_SET_URL = `${WORKSPACE_URL_PREFIX}/data/data-sets/${DATA_SET_ID}`;
-    const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/${analysisTabName}/preview/${NOTEBOOK_NAME}`;
+    const analysisTabPrefix = analysisTabPath(
+      DEFAULT_WORKSPACE_NS,
+      DEFAULT_WORKSPACE_ID
+    );
+    const EXPECTED_COHORT_URL = `${dataTabPrefix}/cohorts/build?cohortId=${COHORT_ID}`;
+    const EXPECTED_COHORT_REVIEW_URL = `${dataTabPrefix}/cohorts/${COHORT_REVIEW_COHORT_ID}/reviews/${COHORT_REVIEW_ID}`;
+    const EXPECTED_CONCEPT_SET_URL = `${dataTabPrefix}/concepts/sets/${CONCEPT_SET_ID}`;
+    const EXPECTED_DATA_SET_URL = `${dataTabPrefix}/data-sets/${DATA_SET_ID}`;
+    const EXPECTED_NOTEBOOK_URL = `${analysisTabPrefix}/preview/${NOTEBOOK_NAME}`;
 
     expect(stringifyUrl(getResourceUrl(testCohort))).toBe(EXPECTED_COHORT_URL);
     expect(stringifyUrl(getResourceUrl(testCohortReview))).toBe(

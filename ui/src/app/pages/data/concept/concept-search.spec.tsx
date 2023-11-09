@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
-import { workspacePath } from 'app/routing/utils';
+import { dataTabPath, workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentConceptSetStore,
@@ -40,10 +40,10 @@ describe('ConceptSearch', () => {
     return mount(
       <MemoryRouter
         initialEntries={[
-          `${workspacePath(
+          `${dataTabPath(
             workspaceDataStub.namespace,
             workspaceDataStub.id
-          )}/data/concepts/sets/${conceptSet.id}`,
+          )}/concepts/sets/${conceptSet.id}`,
         ]}
       >
         <Route path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'>
