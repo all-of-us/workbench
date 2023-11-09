@@ -12,6 +12,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
+import { AouTitle } from 'app/components/text-wrappers';
+import { WorkspaceMenu } from 'app/pages/workspace/workspace-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -157,55 +159,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         <React.Fragment>
           <WorkspaceCardBase>
             <FlexRow style={{ height: '100%' }}>
-              <FlexColumn style={styles.workspaceMenuWrapper}>
-                {!tierAccessDisabled && (
-                  <PopupTrigger
-                    side='bottom'
-                    closeOnClick
-                    content={
-                      <WorkspaceActionsMenu
-                        workspaceData={{ ...workspace, accessLevel }}
-                        onDuplicate={() => {
-                          // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
-                          // this on the workspace object once users are able to publish their own workspaces
-                          workspace.published
-                            ? AnalyticsTracker.Workspaces.DuplicateFeatured(
-                                workspace.name
-                              )
-                            : AnalyticsTracker.Workspaces.OpenDuplicatePage(
-                                'Card'
-                              );
-                          navigate(['workspaces', namespace, id, 'duplicate']);
-                        }}
-                        onEdit={() => {
-                          AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                          navigate(['workspaces', namespace, id, 'edit']);
-                        }}
-                        onDelete={() => {
-                          AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
-                          triggerEvent(
-                            EVENT_CATEGORY,
-                            'delete',
-                            'Card menu - click delete'
-                          );
-                          this.setState({ confirmDeleting: true });
-                        }}
-                        onShare={() => {
-                          AnalyticsTracker.Workspaces.OpenShareModal('Card');
-                          triggerEvent(
-                            EVENT_CATEGORY,
-                            'share',
-                            'Card menu - click share'
-                          );
-                          this.setState({ showShareModal: true });
-                        }}
-                      />
-                    }
-                  >
-                    <SnowmanButton style={{ marginLeft: 0 }} />
-                  </PopupTrigger>
-                )}
-              </FlexColumn>
+              <WorkspaceMenu
+                tierAccessDisabled={tierAccessDisabled}
+                workspace={workspace}
+                accessLevel={accessLevel}
+              />
               <FlexColumn
                 style={{
                   ...styles.workspaceCard,

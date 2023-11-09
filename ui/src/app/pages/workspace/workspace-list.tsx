@@ -13,6 +13,7 @@ import { Spinner } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NewWorkspaceButton } from 'app/pages/workspace/new-workspace-button';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
+import { WorkspaceLists } from 'app/pages/workspace/workspace-lists';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
@@ -145,27 +146,34 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     }}
                   >
                     <NewWorkspaceButton />
-                    {workspaceList
-                      .filter(
+                    {/* {workspaceList*/}
+                    {/*  .filter(*/}
+                    {/*    ({ accessLevel }) =>*/}
+                    {/*      !filterLevels || filterLevels.includes(accessLevel)*/}
+                    {/*  )*/}
+                    {/*  .map((wp) => {*/}
+                    {/*    return (*/}
+                    {/*      <WorkspaceCard*/}
+                    {/*        key={wp.workspace.namespace}*/}
+                    {/*        workspace={wp.workspace}*/}
+                    {/*        accessLevel={wp.accessLevel}*/}
+                    {/*        reload={() => this.reloadWorkspaces()}*/}
+                    {/*        tierAccessDisabled={*/}
+                    {/*          !hasTierAccess(*/}
+                    {/*            profile,*/}
+                    {/*            wp.workspace.accessTierShortName*/}
+                    {/*          )*/}
+                    {/*        }*/}
+                    {/*      />*/}
+                    {/*    );*/}
+                    {/*  })}*/}
+                    <WorkspaceLists
+                      profile={profile}
+                      list={workspaceList.filter(
                         ({ accessLevel }) =>
                           !filterLevels || filterLevels.includes(accessLevel)
-                      )
-                      .map((wp) => {
-                        return (
-                          <WorkspaceCard
-                            key={wp.workspace.namespace}
-                            workspace={wp.workspace}
-                            accessLevel={wp.accessLevel}
-                            reload={() => this.reloadWorkspaces()}
-                            tierAccessDisabled={
-                              !hasTierAccess(
-                                profile,
-                                wp.workspace.accessTierShortName
-                              )
-                            }
-                          />
-                        );
-                      })}
+                      )}
+                    />
                   </div>
                 )}
               </div>

@@ -23,6 +23,8 @@ export const DEMOGRAPHIC_SURVEY_COMMENTS = 'surveyComments';
 // Resource table
 export const ROWS_PER_PAGE_RESOURCE_TABLE = 10;
 
+export const EVENT_CATEGORY = 'Workspace list';
+
 // source: https://www.faa.gov/air_traffic/publications/atpubs/cnt_html/appendix_a.html
 export const STATE_CODE_MAPPING = {
   ALASKA: 'AK',
