@@ -8,7 +8,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
@@ -29,7 +29,6 @@ import {
   isNotebook,
   toDisplay,
 } from './resources';
-import { analysisTabName } from './user-apps-utils';
 
 const COHORT_NAME = exampleCohortStubs[0].name;
 const COHORT_DESCRIPTION = exampleCohortStubs[0].description;

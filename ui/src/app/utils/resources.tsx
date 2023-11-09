@@ -11,10 +11,9 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabPath, workspacePath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
-import { analysisTabName } from './user-apps-utils';
 import { WorkspaceData } from './workspace-data';
 
 export const isCohort = (resource: WorkspaceResource): boolean =>
@@ -106,9 +105,10 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isNotebook,
       (r) => ({
-        url: `${workspacePrefix}/${analysisTabName}/preview/${encodeURIComponentStrict(
-          r.notebook.name
-        )}`,
+        url: `${analysisTabPath(
+          workspaceNamespace,
+          workspaceFirecloudName
+        )}/preview/${encodeURIComponentStrict(r.notebook.name)}`,
       }),
     ],
   ])(resource);

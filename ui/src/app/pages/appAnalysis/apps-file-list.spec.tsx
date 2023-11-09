@@ -5,11 +5,10 @@ import { mount } from 'enzyme';
 import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -86,10 +85,10 @@ describe('AppsList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `${workspacePath(
+    const expected = `${analysisTabPath(
       workspaceDataStub.namespace,
       workspaceDataStub.id
-    )}/${analysisTabName}/preview/mockFile.ipynb`;
+    )}/preview/mockFile.ipynb`;
     expect(
       appsFilesTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)

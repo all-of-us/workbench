@@ -21,7 +21,7 @@ import {
   ResourceNavigation,
   StyledResourceType,
 } from 'app/components/resource-card';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -33,7 +33,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({

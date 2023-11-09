@@ -23,7 +23,11 @@ import {
   Progress,
   ProgressCardState,
 } from 'app/pages/analysis/leonardo-app-launcher';
-import { workspacePath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  analysisTabPath,
+  workspacePath,
+} from 'app/routing/utils';
 import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -33,7 +37,6 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import {
   JupyterApi,
   ProxyApi,
@@ -74,10 +77,7 @@ describe('NotebookLauncher', () => {
 
   let runtimeStub;
 
-  const notebookInitialUrl = `${workspacePath(
-    'namespace',
-    'id'
-  )}/${analysisTabName}/wharrgarbl`;
+  const notebookInitialUrl = `${analysisTabPath('namespace', 'id')}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = async () => {

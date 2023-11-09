@@ -32,7 +32,7 @@ import {
   dropJupyterNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabPath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
@@ -40,7 +40,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -129,10 +128,7 @@ export const ExportDatasetModal = ({
         createExportDatasetRequest()
       );
       const notebookUrl =
-        `${workspacePath(
-          workspace.namespace,
-          workspace.id
-        )}/${analysisTabName}/preview/` +
+        `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );

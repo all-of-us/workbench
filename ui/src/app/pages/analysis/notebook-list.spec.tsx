@@ -11,11 +11,10 @@ import {
   RESOURCE_TYPE_COLUMN_NUMBER,
   resourceTableColumns,
 } from 'app/components/resource-list.spec';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -75,10 +74,10 @@ describe('NotebookList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `${workspacePath(
+    const expected = `${analysisTabPath(
       workspaceDataStub.namespace,
       workspaceDataStub.id
-    )}/${analysisTabName}/preview/mockFile.ipynb`;
+    )}/preview/mockFile.ipynb`;
     expect(
       resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)

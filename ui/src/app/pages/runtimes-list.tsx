@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { environment } from 'environments/environment';
 import { WarningMessage } from 'app/components/messages';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { getAccessToken } from 'app/utils/authentication';
 import { NavigationProps } from 'app/utils/navigation';
@@ -140,7 +140,7 @@ export const RuntimesList = fp.flow(
                   // called from, for example:
                   // https://github.com/DataBiosphere/terra-ui/blob/4333c7b94d6ce10a6fe079361e98c2b6cc71f83a/src/pages/Environments.js#L420
                   getLink: (_, { namespace, name }) =>
-                    `${workspacePath(namespace, stringToSlug(name))}/analysis`,
+                    analysisTabPath(namespace, stringToSlug(name)),
                 },
               }}
             />

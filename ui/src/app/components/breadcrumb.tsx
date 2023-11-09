@@ -11,7 +11,11 @@ import {
 
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
-import { workspacePath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  analysisTabPath,
+  workspacePath,
+} from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -25,7 +29,6 @@ import {
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';
@@ -118,11 +121,11 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          `${wsPath}/${analysisTabName}`
+          analysisTabPath(ns, wsid)
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${wsPath}/${analysisTabName}/${nbName}`
+          `${analysisTabPath(ns, wsid)}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:

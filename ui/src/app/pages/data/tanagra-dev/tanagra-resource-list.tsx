@@ -23,7 +23,7 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -39,7 +39,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({

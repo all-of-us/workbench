@@ -20,14 +20,13 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { Spinner } from 'app/components/spinners';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { FlexRow } from './flex';

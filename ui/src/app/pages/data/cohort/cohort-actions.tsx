@@ -12,7 +12,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { workspacePath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import { cohortsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -22,7 +22,6 @@ import {
 } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
