@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
-import { dataTabPath, workspacePath } from 'app/routing/utils';
+import { dataTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentConceptSetStore,

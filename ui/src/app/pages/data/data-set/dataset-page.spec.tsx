@@ -22,7 +22,7 @@ import {
 } from 'app/pages/data/data-set/dataset-page';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
-import { dataTabPath, workspacePath } from 'app/routing/utils';
+import { dataTabPath } from 'app/routing/utils';
 import {
   dataSetApi,
   registerApiClient,
