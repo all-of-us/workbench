@@ -35,6 +35,7 @@ import {
   genderSexRaceOrEthTypeToText,
   mapRequest,
 } from 'app/pages/data/cohort/utils';
+import { workspacePath } from 'app/routing/utils';
 import {
   cohortBuilderApi,
   cohortsApi,
@@ -450,7 +451,7 @@ export const ListOverview = fp.flow(
           params: { ns, wsid },
         },
       } = this.props;
-      let url = `/workspaces/${ns}/${wsid}/`;
+      let url = workspacePath(ns, wsid);
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');

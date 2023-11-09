@@ -22,6 +22,7 @@ import {
 } from 'app/pages/data/data-set/dataset-page';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import { workspacePath } from 'app/routing/utils';
 import {
   dataSetApi,
   registerApiClient,
@@ -78,9 +79,10 @@ describe('DataSetPage', () => {
     return mount(
       <MemoryRouter
         initialEntries={[
-          `/workspaces/${workspaceDataStub.namespace}/${
+          `${workspacePath(
+            workspaceDataStub.namespace,
             workspaceDataStub.id
-          }/data/data-sets/${stubDataSet().id}`,
+          )}/data/data-sets/${stubDataSet().id}`,
         ]}
       >
         <Route exact path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'>

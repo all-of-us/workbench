@@ -23,6 +23,7 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
+import { workspacePath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -79,7 +80,7 @@ const WorkspaceNavigation = (props: NavProps) => {
     style,
   } = props;
   const tab = isNotebook(resource) ? analysisTabName : 'data';
-  const url = `/workspaces/${namespace}/${id}/${tab}`;
+  const url = `${workspacePath(namespace, id)}/${tab}`;
 
   return (
     <Clickable>

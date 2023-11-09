@@ -12,6 +12,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { workspacePath } from 'app/routing/utils';
 import { cohortsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -150,7 +151,7 @@ export const CohortActions = fp.flow(
     getNavigationPath(action: string): string {
       const { cohort } = this.state;
       const { namespace, id } = this.props.workspace;
-      let url = `/workspaces/${namespace}/${id}/`;
+      let url = workspacePath(namespace, id);
       let queryParams: any = null;
 
       switch (action) {

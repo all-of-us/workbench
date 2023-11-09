@@ -15,6 +15,7 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
+import { workspacePath } from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
@@ -60,7 +61,10 @@ const renderInteractiveNotebook = (pathParameters: { params: MatchParams }) =>
   render(
     <MemoryRouter
       initialEntries={[
-        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/${pathParameters.params.nbName}`,
+        `${workspacePath(
+          'sampleNameSpace',
+          'sampleWorkspace'
+        )}/${analysisTabName}/preview/${pathParameters.params.nbName}`,
       ]}
     >
       <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>

@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
+import { workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -85,7 +86,10 @@ describe('AppsList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${analysisTabName}/preview/mockFile.ipynb`;
+    const expected = `${workspacePath(
+      workspaceDataStub.namespace,
+      workspaceDataStub.id
+    )}/${analysisTabName}/preview/mockFile.ipynb`;
     expect(
       appsFilesTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)

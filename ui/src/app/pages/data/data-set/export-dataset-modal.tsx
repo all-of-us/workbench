@@ -32,6 +32,7 @@ import {
   dropJupyterNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
+import { workspacePath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
@@ -128,7 +129,10 @@ export const ExportDatasetModal = ({
         createExportDatasetRequest()
       );
       const notebookUrl =
-        `/workspaces/${workspace.namespace}/${workspace.id}/${analysisTabName}/preview/` +
+        `${workspacePath(
+          workspace.namespace,
+          workspace.id
+        )}/${analysisTabName}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );

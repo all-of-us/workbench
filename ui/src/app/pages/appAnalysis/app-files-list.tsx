@@ -15,6 +15,7 @@ import { withErrorModal } from 'app/components/modals';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
+import { workspacePath } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
@@ -112,7 +113,10 @@ export const AppFilesList = withCurrentWorkspace()(
         workspace: { namespace, id },
       } = props;
       const { name } = row;
-      const url = `/workspaces/${namespace}/${id}/${analysisTabName}/preview/${name}`;
+      const url = `${workspacePath(
+        namespace,
+        id
+      )}/${analysisTabName}/preview/${name}`;
       return (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>

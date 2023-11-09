@@ -20,6 +20,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { Spinner } from 'app/components/spinners';
+import { workspacePath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -351,7 +352,7 @@ const CopyModal = withCdrVersions()(
         const { namespace, id } = this.state.destination;
         return (
           <Button
-            path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(
+            path={`${workspacePath(namespace, id)}/${ResourceTypeHomeTabs.get(
               this.props.resourceType
             )}`}
             style={{ marginLeft: '0.75rem' }}

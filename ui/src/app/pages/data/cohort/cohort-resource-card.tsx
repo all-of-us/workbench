@@ -26,6 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
+import { workspacePath } from 'app/routing/utils';
 import { cohortsApi, dataSetApi } from 'app/services/swagger-fetch-clients';
 import { NavigationProps } from 'app/utils/navigation';
 import {
@@ -73,7 +74,7 @@ export const CohortResourceCard = fp.flow(
         this.props.resource;
 
       return (
-        `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
+        workspacePath(workspaceNamespace, workspaceFirecloudName) +
         `/data/cohorts/${cohort.id}/reviews`
       );
     }

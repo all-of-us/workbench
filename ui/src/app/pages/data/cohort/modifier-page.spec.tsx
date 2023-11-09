@@ -9,6 +9,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortSearchContextStore,
@@ -50,7 +51,10 @@ describe('ModifierPage', () => {
     return mount(
       <MemoryRouter
         initialEntries={[
-          `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/cohorts/build`,
+          `${workspacePath(
+            workspaceDataStub.namespace,
+            workspaceDataStub.id
+          )}/data/cohorts/build`,
         ]}
       >
         <Route exact path='/workspaces/:ns/:wsid/data/cohorts/build'>

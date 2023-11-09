@@ -11,6 +11,8 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { workspacePath } from 'app/routing/utils';
+
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { analysisTabName } from './user-apps-utils';
 import { WorkspaceData } from './workspace-data';
@@ -72,7 +74,10 @@ export function getId(resource: WorkspaceResource): number {
 
 export function getResourceUrl(resource: WorkspaceResource): UrlObj {
   const { workspaceNamespace, workspaceFirecloudName } = resource;
-  const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
+  const workspacePrefix = workspacePath(
+    workspaceNamespace,
+    workspaceFirecloudName
+  );
 
   return fp.cond([
     [

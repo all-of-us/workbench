@@ -11,6 +11,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { workspacePath } from 'app/routing/utils';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -148,7 +149,7 @@ export const ConceptSetActions = fp.flow(
     getNavigationPath(action: string): string {
       const { namespace, id } = this.props.workspace;
       const { conceptSet } = this.state;
-      let url = `/workspaces/${namespace}/${id}/`;
+      let url = workspacePath(namespace, id);
       switch (action) {
         case 'conceptSet':
           url += `data/concepts/sets/${conceptSet.id}`;

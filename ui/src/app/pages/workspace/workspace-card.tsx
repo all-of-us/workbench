@@ -13,6 +13,7 @@ import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
+import { workspacePath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -224,7 +225,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       analyticsFn={() => this.trackWorkspaceNavigation()}
                       data-test-id={'workspace-card-link'}
                       propagateDataTestId
-                      path={`/workspaces/${namespace}/${id}/data`}
+                      path={`${workspacePath(namespace, id)}/data`}
                     >
                       <TooltipTrigger
                         content={

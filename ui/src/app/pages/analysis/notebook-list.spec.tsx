@@ -11,6 +11,7 @@ import {
   RESOURCE_TYPE_COLUMN_NUMBER,
   resourceTableColumns,
 } from 'app/components/resource-list.spec';
+import { workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -74,7 +75,10 @@ describe('NotebookList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${analysisTabName}/preview/mockFile.ipynb`;
+    const expected = `${workspacePath(
+      workspaceDataStub.namespace,
+      workspaceDataStub.id
+    )}/${analysisTabName}/preview/mockFile.ipynb`;
     expect(
       resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)

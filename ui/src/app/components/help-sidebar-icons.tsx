@@ -23,6 +23,7 @@ import {
 } from 'generated/fetch';
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
+import { workspacePath } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
@@ -448,7 +449,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
       'terminal',
       () => (
         <RouteLink
-          path={`/workspaces/${workspace.namespace}/${workspace.id}/terminals`}
+          path={`${workspacePath(workspace.namespace, workspace.id)}/terminals`}
         >
           <FontAwesomeIcon
             data-test-id={'help-sidebar-icon-' + icon.id}

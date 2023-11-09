@@ -47,6 +47,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CircleWithText } from 'app/icons/circleWithText';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import { workspacePath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -369,7 +370,10 @@ const ImmutableWorkspaceCohortListItem = ({
         </TooltipTrigger>
         <div style={{ marginLeft: 'auto', paddingRight: '1.5rem' }}>
           <StyledRouterLink
-            path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/reviews/cohort-description`}
+            path={`${workspacePath(
+              namespace,
+              wid
+            )}/data/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
           >
             <ClrIcon size='20' shape='bar-chart' />

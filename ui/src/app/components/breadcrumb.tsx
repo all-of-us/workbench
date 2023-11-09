@@ -11,6 +11,7 @@ import {
 
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import { workspacePath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -62,7 +63,7 @@ export const getTrail = (
   params: MatchParams
 ): Array<BreadcrumbData> => {
   const { ns, wsid, cid, crid, csid, pid, nbName } = params;
-  const prefix = `/workspaces/${ns}/${wsid}`;
+  const wsPath = workspacePath(ns, wsid);
   switch (type) {
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
@@ -78,7 +79,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          `${prefix}/data`
+          `${wsPath}/data`
         ),
       ];
     case BreadcrumbType.WorkspaceEdit:
@@ -91,7 +92,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Edit Workspace', `${prefix}/edit`),
+        new BreadcrumbData('Edit Workspace', `${wsPath}/edit`),
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
@@ -103,7 +104,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
+        new BreadcrumbData('Duplicate Workspace', `${wsPath}/duplicate`),
       ];
     case BreadcrumbType.Analysis:
       return [
@@ -117,11 +118,11 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          `${prefix}/${analysisTabName}`
+          `${wsPath}/${analysisTabName}`
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/${analysisTabName}/${nbName}`
+          `${wsPath}/${analysisTabName}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -136,7 +137,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           conceptSet ? conceptSet.name : '...',
-          `${prefix}/data/concepts/sets/${csid}`
+          `${wsPath}/data/concepts/sets/${csid}`
         ),
       ];
     case BreadcrumbType.Cohort:
@@ -151,7 +152,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohort ? cohort.name : '...',
-          `${prefix}/data/cohorts/${cid}`
+          `${wsPath}/data/cohorts/${cid}`
         ),
       ];
     case BreadcrumbType.CohortReview:
@@ -166,7 +167,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohortReview ? cohortReview.cohortName : '...',
-          `${prefix}/data/cohorts/${cid}/reviews/${crid}`
+          `${wsPath}/data/cohorts/${cid}/reviews/${crid}`
         ),
       ];
     case BreadcrumbType.Participant:
@@ -181,7 +182,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           `Participant ${pid}`,
-          `${prefix}/data/cohorts/${cid}/reviews/${crid}/participants/${pid}`
+          `${wsPath}/data/cohorts/${cid}/reviews/${crid}/participants/${pid}`
         ),
       ];
     case BreadcrumbType.CohortAdd:
@@ -196,7 +197,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           'Build Cohort Criteria',
-          `${prefix}/data/cohorts/build`
+          `${wsPath}/data/cohorts/build`
         ),
       ];
     case BreadcrumbType.SearchConcepts:
@@ -209,7 +210,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Search Concepts', `${prefix}/data/concepts`),
+        new BreadcrumbData('Search Concepts', `${wsPath}/data/concepts`),
       ];
     case BreadcrumbType.Dataset:
       return [
@@ -221,7 +222,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Dataset', `${prefix}/data/datasets`),
+        new BreadcrumbData('Dataset', `${wsPath}/data/datasets`),
       ];
     case BreadcrumbType.Data:
       return [
@@ -235,7 +236,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          `${prefix}/data`
+          `${wsPath}/data`
         ),
       ];
     default:
