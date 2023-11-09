@@ -11,17 +11,18 @@ const { useState, useEffect } = React;
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 export function debouncer(action, sensitivityMs) {
-  let t = Date.now();
+  let lastInvokeTimeMs = Date.now();
 
   const timer = global.setInterval(() => {
-    if (Date.now() - t < sensitivityMs) {
+    const timeSinceLastInvokeMs = Date.now() - lastInvokeTimeMs;
+    if (timeSinceLastInvokeMs < sensitivityMs) {
       action();
     }
   }, sensitivityMs);
 
   return {
     invoke: () => {
-      t = Date.now();
+      lastInvokeTimeMs = Date.now();
     },
     getTimer: () => timer,
   };
