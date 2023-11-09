@@ -374,20 +374,6 @@ export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
   return false;
 }
 
-// Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
-// Calling the returned function will reset the timer to zero
-// Example : Call a logout function after 30 seconds of the returned function not being invoked
-export function resettableTimeout(f, timeoutInSeconds) {
-  let timeout;
-  return {
-    reset: () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(f, timeoutInSeconds);
-    },
-    getTimer: () => timeout,
-  };
-}
-
 export function highlightSearchTerm(
   searchTerm: string,
   stringToHighlight: string,
