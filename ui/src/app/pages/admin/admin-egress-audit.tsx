@@ -7,15 +7,22 @@ import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
 import { TabPanel, TabView } from 'primereact/tabview';
 
-import {AuditEgressEventResponse, EgressEvent, Profile} from 'generated/fetch';
+import {
+  AuditEgressEventResponse,
+  EgressEvent,
+  Profile,
+} from 'generated/fetch';
 
+import { AdminUserComponent } from 'app/components/admin/admin-user-component';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import {egressEventsAdminApi, userAdminApi} from 'app/services/swagger-fetch-clients';
+import {
+  egressEventsAdminApi,
+  userAdminApi,
+} from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
 import { MatchParams } from 'app/utils/stores';
-import {AdminUserComponent} from "app/components/admin/admin-user-component";
 
 const DetailRow = ({
   label,
@@ -141,7 +148,10 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
           {new Date(timeWindowEndEpochMillis).toLocaleString()}
         </DetailRow>
         <DetailRow label='Source user'>
-          <AdminUserComponent userWithDomain={sourceUserEmail} {...{username}}></AdminUserComponent>
+          <AdminUserComponent
+            userWithDomain={sourceUserEmail}
+            {...{ username }}
+          ></AdminUserComponent>
         </DetailRow>
         <DetailRow label='Source workspace'>
           <StyledRouterLink
