@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import {adminGetProfile} from "app/pages/admin/admin-egress-audit";
-import {AdminUserLink} from "./admin-user-link";
+import React, { useEffect, useState } from 'react';
 
-export const AdminUserComponent = ({username, userWithDomain}) => {
+import { adminGetProfile } from 'app/pages/admin/admin-egress-audit';
+
+import { AdminUserLink } from './admin-user-link';
+
+export const AdminUserComponent = ({ username, userWithDomain }) => {
   const [userDisabled, setUserDisabled] = useState(false);
   const [sourceUserEmail, setSourceUserEmail] = useState('');
 
