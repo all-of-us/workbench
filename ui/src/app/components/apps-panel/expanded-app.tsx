@@ -31,7 +31,7 @@ import {
   RuntimeStatusRequest,
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
-import { runtimeStore, useStore } from 'app/utils/stores';
+import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {
   openRStudio,
   openSAS,
@@ -122,6 +122,7 @@ const PauseUserAppButton = (props: {
   workspaceNamespace: string;
 }) => {
   const { googleProject, appName, status } = props.userApp || {};
+  const { config } = useStore(serverConfigStore);
 
   return (
     <PauseResumeButton
@@ -132,7 +133,7 @@ const PauseUserAppButton = (props: {
       onResume={() =>
         resumeUserApp(googleProject, appName, props.workspaceNamespace)
       }
-      disabled
+      disabled={!config.enableAppPausing}
       disabledTooltip='Pause and resume are not currently available.'
     />
   );

@@ -165,7 +165,7 @@ describe('ExpandedApp', () => {
         expect(container).toBeInTheDocument();
 
         const actionButton = screen.getByRole('button', { name });
-        expectButtonElementEnabled(actionButton);
+        expectButtonElementDisabled(actionButton);
       }
     );
 
@@ -210,10 +210,26 @@ describe('ExpandedApp', () => {
 
   const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO, UIAppType.SAS];
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
-    test.each([
-      [AppStatus.RUNNING, 'Pause'],
-      [AppStatus.STOPPED, 'Resume'],
+    test.each([[AppStatus.RUNNING, 'Pause']])(
+      'should not allow clicking pause/resume when the app status is %s and enableAppPausing is false',
+      async (status, name) => {
+        const appName = 'my-app';
 
+        const { container } = await component(appType, {
+          appName,
+          googleProject,
+          status,
+        });
+        expect(container).toBeInTheDocument();
+
+        screen.logTestingPlaygroundURL();
+        const actionButton = screen.getByRole('button', { name });
+        screen.logTestingPlaygroundURL();
+        expectButtonElementDisabled(actionButton);
+      }
+    );
+
+    test.each([
       [AppStatus.STARTING, 'Resuming'],
       [AppStatus.STOPPING, 'Pausing'],
 
@@ -226,9 +242,12 @@ describe('ExpandedApp', () => {
       [undefined, 'Pause'],
       [null, 'Pause'],
     ])(
-      'should not allow clicking pause/resume when the app status is %s',
+      'should not allow clicking pause/resume when the app status is %s and enableAppPausing is true',
       async (status, name) => {
         const appName = 'my-app';
+        serverConfigStore.set({
+          config: { ...defaultServerConfig, enableAppPausing: true },
+        });
 
         const { container } = await component(appType, {
           appName,
@@ -238,6 +257,27 @@ describe('ExpandedApp', () => {
         expect(container).toBeInTheDocument();
 
         const actionButton = screen.getByRole('button', { name });
+        expectButtonElementDisabled(actionButton);
+      }
+    );
+
+    test.each([[AppStatus.RUNNING, 'Pause']])(
+      'should allow clicking pause/resume when the app status is %s and enableAppPausing is true',
+      async (status, name) => {
+        const appName = 'my-app';
+        serverConfigStore.set({
+          config: { ...defaultServerConfig, enableAppPausing: true },
+        });
+
+        const { container } = await component(appType, {
+          appName,
+          googleProject,
+          status,
+        });
+        expect(container).toBeInTheDocument();
+
+        const actionButton = screen.getByRole('button', { name });
+        screen.logTestingPlaygroundURL();
         expectButtonElementEnabled(actionButton);
       }
     );
