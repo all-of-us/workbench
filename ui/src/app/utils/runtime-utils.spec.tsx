@@ -29,7 +29,6 @@ import {
   findMostSevereDiffState,
   fromAnalysisConfig,
   getCreator,
-  isVisible,
   maybeWithPersistentDisk,
   rebootUpdate,
   recreateEnvAndPDUpdate,
