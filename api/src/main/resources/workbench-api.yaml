@@ -6894,6 +6894,10 @@ components:
         tanagraBaseUrl:
           type: string
           description: The tanagra base url
+        enableAppPausing:
+          type: boolean
+          default: false
+          description: Whether users are allowed to pause applications.
     RuntimeImage:
       type: object
       properties:
