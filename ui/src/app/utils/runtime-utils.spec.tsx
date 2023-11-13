@@ -1308,6 +1308,46 @@ describe(withAnalysisConfigDefaults.name, () => {
   });
 });
 
-// TODO
-describe(isVisible.name, () => {});
-describe(canUseExistingDisk.name, () => {});
+describe(canUseExistingDisk.name, () => {
+  it('returns true when everything matches', () => {
+    const existingDisk = stubDisk();
+    const { size, diskType: detachableType } = existingDisk;
+
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeTruthy();
+  });
+
+  it('returns true when a larger disk than the existingDisk is chosen', () => {
+    const existingDisk = stubDisk();
+    const { diskType: detachableType } = existingDisk;
+    const size = existingDisk.size + 1;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeTruthy();
+  });
+
+  it('returns flase when a smaller disk than the existingDisk is chosen', () => {
+    const existingDisk = stubDisk();
+    const { diskType: detachableType } = existingDisk;
+    const size = existingDisk.size - 1;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeFalsy();
+  });
+
+  it('returns false when the diskType mismatches', () => {
+    const existingDisk = { ...stubDisk(), diskType: DiskType.STANDARD };
+    const { size } = existingDisk;
+    const detachableType = DiskType.SSD;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeFalsy();
+  });
+
+  it('returns false when existingDisk is undefined', () => {
+    expect(
+      canUseExistingDisk({ detachableType: DiskType.SSD, size: 5 }, undefined)
+    ).toBeFalsy();
+  });
+});
