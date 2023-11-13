@@ -35,12 +35,7 @@ import {
   genderSexRaceOrEthTypeToText,
   mapRequest,
 } from 'app/pages/data/cohort/utils';
-import {
-  analysisTabName,
-  analysisTabPath,
-  dataTabPath,
-  workspacePath,
-} from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import {
   cohortBuilderApi,
   cohortsApi,

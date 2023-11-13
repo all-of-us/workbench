@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { ConceptSet } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { RouteLink } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { ActionCardBase } from 'app/components/card';
@@ -12,7 +11,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { analysisTabPath, dataTabPath } from 'app/routing/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import { conceptSetsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -149,16 +148,22 @@ export const ConceptSetActions = fp.flow(
     getNavigationPath(action: string): string {
       const { namespace, id } = this.props.workspace;
       const { conceptSet } = this.state;
-      return switchCase(
-        action,
-        [
-          'conceptSet',
-          () => `${dataTabPath(namespace, id)}/concepts/sets/${conceptSet.id}`,
-        ],
-        ['newConceptSet', () => `${dataTabPath(namespace, id)}/concepts`],
-        ['notebook', () => analysisTabPath(namespace, id)],
-        ['dataSet', () => `${dataTabPath(namespace, id)}/data-sets`]
-      );
+      let url = workspacePath(namespace, id) + '/';
+      switch (action) {
+        case 'conceptSet':
+          url += `data/concepts/sets/${conceptSet.id}`;
+          break;
+        case 'newConceptSet':
+          url += 'data/concepts';
+          break;
+        case 'notebook':
+          url += analysisTabName;
+          break;
+        case 'dataSet':
+          url += 'data/data-sets';
+          break;
+      }
+      return url;
     }
 
     render() {
