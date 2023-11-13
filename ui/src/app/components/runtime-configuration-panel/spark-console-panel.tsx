@@ -3,6 +3,7 @@ import * as React from 'react';
 import { RouteLink } from 'app/components/app-router';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn } from 'app/components/flex';
+import { workspacePath } from 'app/routing/utils';
 import { SparkConsolePath } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -53,7 +54,7 @@ export const SparkConsolePanel = ({ namespace, id }: WorkspaceData) => {
           <div>{description}</div>
           <div>
             <RouteLink
-              path={`/workspaces/${namespace}/${id}/spark/${path}`}
+              path={`${workspacePath(namespace, id)}/spark/${path}`}
               style={styles.sparkConsoleLaunchButton}
             >
               Launch

@@ -24,6 +24,7 @@ import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import { authStore, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
+import { workspacePath } from './utils';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -90,7 +91,7 @@ export const getAccessModuleGuard = (): Guard => {
 export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
-    redirectPath: `/workspaces/${ns}/${wsid}/about`,
+    redirectPath: `${workspacePath(ns, wsid)}/about`,
   };
 };
 

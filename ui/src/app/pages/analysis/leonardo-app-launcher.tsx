@@ -16,6 +16,7 @@ import { Spinner } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookIcon } from 'app/icons/notebook-icon';
 import { ReminderIcon } from 'app/icons/reminder';
+import { analysisTabName, analysisTabPath } from 'app/routing/utils';
 import {
   leoJupyterApi,
   leoProxyApi,
@@ -36,7 +37,6 @@ import {
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -578,7 +578,7 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          `workspaces/${namespace}/${id}/${analysisTabName}/${encodeURIComponent(
+          `${analysisTabPath(namespace, id)}/${encodeURIComponent(
             this.getFullJupyterNotebookName()
           )}`
         );

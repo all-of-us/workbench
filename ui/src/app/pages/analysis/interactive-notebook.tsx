@@ -15,6 +15,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EditComponentReact } from 'app/icons/edit';
 import { ConfirmPlaygroundModeModal } from 'app/pages/analysis/confirm-playground-mode-modal';
 import { NotebookInUseModal } from 'app/pages/analysis/notebook-in-use-modal';
+import { analysisTabName } from 'app/routing/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
@@ -37,7 +38,6 @@ import {
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import {
-  analysisTabName,
   openRStudioOrConfigPanel,
   openSASOrConfigPanel,
 } from 'app/utils/user-apps-utils';
