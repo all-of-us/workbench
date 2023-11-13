@@ -48,7 +48,8 @@ public class ExceptionAdvice {
     }
 
     // only log error if it's a server error
-    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR.value()
+        || statusCode == HttpStatus.BAD_REQUEST.value()) {
       final String logMessage =
           String.format("ErrorId %s: %s", errorResponse.getErrorUniqueId(), e.getClass().getName());
       log.log(Level.SEVERE, logMessage, e);
