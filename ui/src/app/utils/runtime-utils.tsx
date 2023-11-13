@@ -198,21 +198,21 @@ export const diffsToUpdateMessaging = (
     diffs.map(({ diskDiff }) => diskDiff)
   );
 
-    return cond(
-        [
-            diffType === AnalysisDiffState.NEEDS_DELETE &&
-            diskDiffType === AnalysisDiffState.NEEDS_DELETE,
-            recreateEnvAndPDUpdate,
-        ],
-        [
-            diffType === AnalysisDiffState.NEEDS_DELETE &&
-            diskDiffType !== AnalysisDiffState.NEEDS_DELETE,
-            recreateEnvUpdate,
-        ],
-        [diffType === AnalysisDiffState.CAN_UPDATE_WITH_REBOOT, rebootUpdate],
-        // All other cases can be applied without user disruption.
-        applyUpdate
-    );
+  return cond(
+    [
+      diffType === AnalysisDiffState.NEEDS_DELETE &&
+        diskDiffType === AnalysisDiffState.NEEDS_DELETE,
+      recreateEnvAndPDUpdate,
+    ],
+    [
+      diffType === AnalysisDiffState.NEEDS_DELETE &&
+        diskDiffType !== AnalysisDiffState.NEEDS_DELETE,
+      recreateEnvUpdate,
+    ],
+    [diffType === AnalysisDiffState.CAN_UPDATE_WITH_REBOOT, rebootUpdate],
+    // All other cases can be applied without user disruption.
+    applyUpdate
+  );
 };
 
 const compareComputeTypes = (

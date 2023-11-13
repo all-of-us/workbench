@@ -60,13 +60,6 @@ import {
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
 } from './machines';
-import { runtimePresets } from './runtime-presets';
-import {
-  allMachineTypes,
-  ComputeType,
-  DEFAULT_DISK_SIZE,
-  DEFAULT_MACHINE_TYPE,
-} from './machines';
 import { useCustomRuntime } from './runtime-hooks';
 import { runtimePresets } from './runtime-presets';
 
@@ -1175,11 +1168,5 @@ describe(withAnalysisConfigDefaults.name, () => {
 });
 
 // TODO
-describe(diffsToUpdateMessaging.name, () => {});
-describe(compareGpu.name, () => {});
-describe(fromAnalysisConfig.name, () => {});
-describe(maybeWithExistingDiskName.name, () => {});
-describe(withAnalysisConfigDefaults.name, () => {});
-describe(toAnalysisConfig.name, () => {});
 describe(isVisible.name, () => {});
 describe(canUseExistingDisk.name, () => {});
