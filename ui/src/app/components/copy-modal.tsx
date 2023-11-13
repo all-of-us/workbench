@@ -326,7 +326,8 @@ const CopyModal = withCdrVersions()(
     }
 
     renderActionButton() {
-      const resourceType = toDisplay(this.props.resourceType);
+      const { resourceType } = this.props;
+      const resourceString = toDisplay(resourceType);
       if (
         this.state.requestState === RequestState.UNSENT ||
         this.state.requestState === RequestState.COPY_ERROR
@@ -338,7 +339,7 @@ const CopyModal = withCdrVersions()(
             onClick={() => this.save()}
             data-test-id='copy-button'
           >
-            Copy {resourceType}
+            Copy {resourceString}
           </Button>
         );
       } else if (this.state.requestState === RequestState.SUCCESS) {
@@ -352,7 +353,7 @@ const CopyModal = withCdrVersions()(
             }
             style={{ marginLeft: '0.75rem' }}
           >
-            Go to Copied {resourceType}
+            Go to Copied {resourceString}
           </Button>
         );
       }
