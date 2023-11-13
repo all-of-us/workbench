@@ -10,7 +10,6 @@ import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { ZendeskWidget } from 'app/components/zendesk-widget';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
-import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import { NavBar } from 'app/pages/signed-in/nav-bar';
 import { SignedInRoutes } from 'app/routing/signed-in-app-routing';
 import { cdrVersionsApi } from 'app/services/swagger-fetch-clients';
@@ -171,7 +170,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
           )}
       </FlexRow>
       {!hideFooter && <Footer type={FooterTypeEnum.Workbench} />}
-      <InactivityMonitor />
       <ZendeskWidget />
     </FlexColumn>
   );
