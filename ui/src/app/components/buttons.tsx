@@ -239,13 +239,21 @@ const computeStyle = (
   };
 };
 
+interface ClickableProps {
+  as?: string | React.ReactElement<any, any> | React.FC;
+  disabled?: boolean;
+  onClick?: any;
+  propagateDataTestId?: boolean;
+  [key: string]: any;
+}
+
 export const Clickable = ({
   as = 'div',
   disabled = false,
   onClick = null,
   propagateDataTestId = false,
   ...props
-}) => {
+}: ClickableProps) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   const childProps = propagateDataTestId
     ? props
