@@ -6,7 +6,6 @@ import { TextModal } from 'app/components/text-modal';
 export interface InactivityModalProps {
   currentTimeMs: number;
   signOutForInactivityTimeMs: number;
-  inactivityWarningBeforeMs: number;
   closeFunction: () => void;
 }
 
@@ -19,10 +18,12 @@ const secondsToText = (seconds: number) => {
 export function InactivityModal({
   currentTimeMs,
   signOutForInactivityTimeMs,
-  inactivityWarningBeforeMs,
   closeFunction,
 }: InactivityModalProps) {
   const msUntilSignOut = signOutForInactivityTimeMs - currentTimeMs;
+
+  const inactivityWarningBeforeMs =
+    environment.inactivityWarningBeforeSeconds * 1000;
 
   if (msUntilSignOut > inactivityWarningBeforeMs) {
     return null;

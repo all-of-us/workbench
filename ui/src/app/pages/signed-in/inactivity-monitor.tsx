@@ -227,9 +227,6 @@ export const InactivityMonitor = () => {
     <InactivityModal
       closeFunction={onCloseInactivityModal}
       currentTimeMs={currentTimeMs}
-      inactivityWarningBeforeMs={
-        environment.inactivityWarningBeforeSeconds * 1000
-      }
       signOutForInactivityTimeMs={signOutForInactivityTimeMs}
     />
   );
