@@ -171,6 +171,37 @@ export const findMostSevereDiffState = (
   );
 };
 
+export const applyUpdate: UpdateMessaging = {
+  applyAction: 'APPLY',
+};
+export const rebootUpdate: UpdateMessaging = {
+  applyAction: 'APPLY & REBOOT',
+  warn: 'These changes require a reboot of your cloud environment to take effect.',
+  warnMore:
+    'Any in-memory state will be erased, but local file ' +
+    'modifications will be preserved. Data stored in workspace ' +
+    'buckets is never affected by changes to your cloud environment.',
+};
+export const recreateEnvUpdate: UpdateMessaging = {
+  applyAction: 'APPLY & RECREATE',
+  warn:
+    'These changes require deletion and re-creation of your cloud ' +
+    'environment to take effect.',
+  warnMore:
+    'Any in-memory state and local file modifications will be ' +
+    'erased. Data stored in workspace buckets is never affected ' +
+    'by changes to your cloud environment.',
+};
+export const recreateEnvAndPDUpdate: UpdateMessaging = {
+  applyAction: 'APPLY & RECREATE',
+  warn:
+    'These changes require deletion and re-creation of your persistent disk and cloud environment to take ' +
+    'effect. This will delete all files on the disk.',
+  warnMore:
+    'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, ' +
+    'move them to the workspace bucket. \nNote: Jupyter notebooks are autosaved to the workspace bucket, and deleting ' +
+    'your disk will not delete your notebooks.',
+};
 export const diffsToUpdateMessaging = (
   diffs: AnalysisDiff[]
 ): UpdateMessaging => {
@@ -180,41 +211,14 @@ export const diffsToUpdateMessaging = (
   );
   if (diffType === AnalysisDiffState.NEEDS_DELETE) {
     if (diskDiffType === AnalysisDiffState.NEEDS_DELETE) {
-      return {
-        applyAction: 'APPLY & RECREATE',
-        warn:
-          'These changes require deletion and re-creation of your persistent disk and cloud environment to take ' +
-          'effect. This will delete all files on the disk.',
-        warnMore:
-          'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, ' +
-          'move them to the workspace bucket. \nNote: Jupyter notebooks are autosaved to the workspace bucket, and deleting ' +
-          'your disk will not delete your notebooks.',
-      };
+      return recreateEnvAndPDUpdate;
     }
-    return {
-      applyAction: 'APPLY & RECREATE',
-      warn:
-        'These changes require deletion and re-creation of your cloud ' +
-        'environment to take effect.',
-      warnMore:
-        'Any in-memory state and local file modifications will be ' +
-        'erased. Data stored in workspace buckets is never affected ' +
-        'by changes to your cloud environment.',
-    };
+    return recreateEnvUpdate;
   } else if (diffType === AnalysisDiffState.CAN_UPDATE_WITH_REBOOT) {
-    return {
-      applyAction: 'APPLY & REBOOT',
-      warn: 'These changes require a reboot of your cloud environment to take effect.',
-      warnMore:
-        'Any in-memory state will be erased, but local file ' +
-        'modifications will be preserved. Data stored in workspace ' +
-        'buckets is never affected by changes to your cloud environment.',
-    };
+    return rebootUpdate;
   } else {
     // All other cases can be applied without user disruption.
-    return {
-      applyAction: 'APPLY',
-    };
+    return applyUpdate;
   }
 };
 
