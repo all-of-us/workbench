@@ -155,20 +155,20 @@ export const CohortActions = fp.flow(
 
       switch (action) {
         case 'cohort':
-          url += 'data/cohorts/build';
+          url += '/data/cohorts/build';
           queryParams = { cohortId: cohort.id };
           break;
         case 'review':
-          url += `data/cohorts/${cohort.id}/reviews`;
+          url += `/data/cohorts/${cohort.id}/reviews`;
           break;
         case 'notebook':
           url += analysisTabName;
           break;
         case 'dataSet':
-          url += 'data/data-sets';
+          url += '/data/data-sets';
           break;
         case 'newCohort':
-          url += 'data/cohorts/build';
+          url += '/data/cohorts/build';
       }
       if (queryParams) {
         url += '?' + querystring.stringify(queryParams);
