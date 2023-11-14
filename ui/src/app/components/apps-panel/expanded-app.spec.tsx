@@ -210,7 +210,12 @@ describe('ExpandedApp', () => {
 
   const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO, UIAppType.SAS];
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
-    test.each([[AppStatus.RUNNING, 'Pause']])(
+    test.each([
+      [AppStatus.RUNNING, 'Pause'],
+      [AppStatus.STOPPED, 'Resume'],
+      [AppStatus.STARTING, 'Resuming'],
+      [AppStatus.STOPPING, 'Pausing'],
+    ])(
       'should not allow clicking pause/resume when the app status is %s and enableAppPausing is false',
       async (status, name) => {
         const appName = 'my-app';
