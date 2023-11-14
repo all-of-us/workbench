@@ -1326,7 +1326,7 @@ describe(canUseExistingDisk.name, () => {
     ).toBeTruthy();
   });
 
-  it('returns flase when a smaller disk than the existingDisk is chosen', () => {
+  it('returns false when a smaller disk than the existingDisk is chosen', () => {
     const existingDisk = stubDisk();
     const { diskType: detachableType } = existingDisk;
     const size = existingDisk.size - 1;
