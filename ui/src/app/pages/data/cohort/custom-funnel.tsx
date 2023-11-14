@@ -202,6 +202,13 @@ export const CustomFunnel = withCurrentWorkspace()(
             {funnelGroups.map((funnelGroup, index) => {
               const percentage =
                 (funnelGroup.count / funnelGroups[0].count) * 100;
+              const displayText =
+                funnelGroup.count +
+                ' (' +
+                (percentage < 1
+                  ? Math.round(percentage * 100) / 100
+                  : Math.round(percentage)) +
+                '%)';
               return (
                 <div
                   key={index}
@@ -223,7 +230,7 @@ export const CustomFunnel = withCurrentWorkspace()(
                             top: '0.5rem',
                           }}
                         >
-                          {funnelGroup.count.toLocaleString()}
+                          {displayText}
                         </div>
                       )}
                       <div
@@ -237,7 +244,7 @@ export const CustomFunnel = withCurrentWorkspace()(
                           width: `${percentage}%`,
                         }}
                       >
-                        {percentage >= 10 && funnelGroup.count.toLocaleString()}
+                        {percentage >= 10 && displayText}
                       </div>
                     </>
                   )}
