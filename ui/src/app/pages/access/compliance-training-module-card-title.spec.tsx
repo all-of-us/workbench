@@ -87,6 +87,14 @@ const setup = (
   };
 };
 
+export const queryForRTTitle = () => {
+  return screen.queryByText(/responsible conduct of research training/i);
+};
+
+export const queryForCTTitle = () => {
+  return screen.queryByText(/controlled tier training/i);
+};
+
 describe(ComplianceTrainingModuleCardTitle.name, () => {
   it('renders registered tier training title', () => {
     setup({
@@ -94,9 +102,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       tier: AccessTierShortNames.Registered,
     });
 
-    expect(
-      screen.queryByText(/responsible conduct of research training/i)
-    ).not.toBeNull();
+    expect(queryForRTTitle()).not.toBeNull();
   });
 
   it('renders controlled tier training title', () => {
@@ -105,7 +111,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       tier: AccessTierShortNames.Controlled,
     });
 
-    expect(screen.queryByText(/controlled tier training/i)).not.toBeNull();
+    expect(queryForCTTitle()).not.toBeNull();
   });
 
   it('shows help text if module is incomplete', async () => {
