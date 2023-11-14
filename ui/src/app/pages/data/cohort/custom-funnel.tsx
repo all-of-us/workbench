@@ -203,7 +203,7 @@ export const CustomFunnel = withCurrentWorkspace()(
               const percentage =
                 (funnelGroup.count / funnelGroups[0].count) * 100;
               const displayText =
-                funnelGroup.count +
+                Number(funnelGroup.count).toLocaleString() +
                 ' (' +
                 (percentage < 1
                   ? Math.round(percentage * 100) / 100
@@ -222,17 +222,28 @@ export const CustomFunnel = withCurrentWorkspace()(
                     <Spinner size={30} style={{ marginTop: '0.25rem' }} />
                   ) : (
                     <>
-                      {percentage < 10 && (
+                      {(percentage < 1 && (
                         <div
                           style={{
                             position: 'absolute',
-                            left: `calc(${47 - percentage}% - 0.5rem)`,
+                            left: `calc(${42 - percentage}% - 0.5rem)`,
                             top: '0.5rem',
                           }}
                         >
                           {displayText}
                         </div>
-                      )}
+                      )) ||
+                        (percentage < 10 && (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              left: `calc(${47 - percentage}% - 0.5rem)`,
+                              top: '0.5rem',
+                            }}
+                          >
+                            {displayText}
+                          </div>
+                        ))}
                       <div
                         style={{
                           background: colors.chartColors[index],
