@@ -124,7 +124,7 @@
     "enableSasGKEApp": false,
     "enableDataExplorer": false,
     "enableHasEhrData": true,
-    "enableAppPausing": false
+    "enableGKEAppPausing": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

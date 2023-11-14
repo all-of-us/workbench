@@ -133,7 +133,7 @@ const PauseUserAppButton = (props: {
       onResume={() =>
         resumeUserApp(googleProject, appName, props.workspaceNamespace)
       }
-      disabled={!config.enableAppPausing}
+      disabled={!config.enableGKEAppPausing}
       disabledTooltip='Pause and resume are not currently available.'
     />
   );

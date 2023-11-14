@@ -334,7 +334,7 @@ public class WorkbenchConfig {
     // If true, enable has EHR data
     public boolean enableHasEhrData;
     // If true, allow users to pause their GKE apps
-    public boolean enableAppPausing;
+    public boolean enableGKEAppPausing;
   }
 
   public static class ActionAuditConfig {

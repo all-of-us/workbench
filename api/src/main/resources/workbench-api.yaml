@@ -6894,10 +6894,10 @@ components:
         tanagraBaseUrl:
           type: string
           description: The tanagra base url
-        enableAppPausing:
+        enableGKEAppPausing:
           type: boolean
           default: false
-          description: Whether users are allowed to pause applications.
+          description: Whether users are allowed to pause GKE applications.
     RuntimeImage:
       type: object
       properties:

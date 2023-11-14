@@ -216,7 +216,7 @@ describe('ExpandedApp', () => {
       [AppStatus.STARTING, 'Resuming'],
       [AppStatus.STOPPING, 'Pausing'],
     ])(
-      'should not allow clicking pause/resume when the app status is %s and enableAppPausing is false',
+      'should not allow clicking pause/resume when the app status is %s and enableGKEAppPausing is false',
       async (status, name) => {
         const appName = 'my-app';
 
@@ -247,11 +247,11 @@ describe('ExpandedApp', () => {
       [undefined, 'Pause'],
       [null, 'Pause'],
     ])(
-      'should not allow clicking pause/resume when the app status is %s and enableAppPausing is true',
+      'should not allow clicking pause/resume when the app status is %s and enableGKEAppPausing is true',
       async (status, name) => {
         const appName = 'my-app';
         serverConfigStore.set({
-          config: { ...defaultServerConfig, enableAppPausing: true },
+          config: { ...defaultServerConfig, enableGKEAppPausing: true },
         });
 
         const { container } = await component(appType, {
@@ -267,11 +267,11 @@ describe('ExpandedApp', () => {
     );
 
     test.each([[AppStatus.RUNNING, 'Pause']])(
-      'should allow clicking pause/resume when the app status is %s and enableAppPausing is true',
+      'should allow clicking pause/resume when the app status is %s and enableGKEAppPausing is true',
       async (status, name) => {
         const appName = 'my-app';
         serverConfigStore.set({
-          config: { ...defaultServerConfig, enableAppPausing: true },
+          config: { ...defaultServerConfig, enableGKEAppPausing: true },
         });
 
         const { container } = await component(appType, {
