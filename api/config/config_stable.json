@@ -121,7 +121,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": false,
-    "enableSasGKEApp": false,
+    "enableSasGKEApp": true,
     "enableDataExplorer": false,
     "enableHasEhrData": true
   },
