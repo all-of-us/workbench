@@ -78,8 +78,6 @@ export const DARTitle = (props: DARTitleProps) => {
       AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => <div>Sign Data User Code of Conduct</div>,
     ],
-    [AccessModule.PROFILE_CONFIRMATION, () => null],
-    [AccessModule.PUBLICATION_CONFIRMATION, () => null],
     [DEFAULT, () => null]
   );
 };

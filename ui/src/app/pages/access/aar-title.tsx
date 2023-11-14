@@ -14,9 +14,6 @@ export interface AARTitleProps {
 export const AARTitle = (props: AARTitleProps) => {
   return switchCase<AccessModule, React.ReactElement>(
     props.moduleName,
-    [AccessModule.TWO_FACTOR_AUTH, () => null],
-    [AccessModule.IDENTITY, () => null],
-    [AccessModule.ERA_COMMONS, () => null],
     [
       AccessModule.COMPLIANCE_TRAINING,
       () => (
