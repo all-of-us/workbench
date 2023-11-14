@@ -282,7 +282,6 @@ describe('ExpandedApp', () => {
         expect(container).toBeInTheDocument();
 
         const actionButton = screen.getByRole('button', { name });
-        screen.logTestingPlaygroundURL();
         expectButtonElementEnabled(actionButton);
       }
     );
