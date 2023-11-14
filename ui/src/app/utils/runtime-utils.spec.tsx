@@ -22,6 +22,7 @@ import {
   AnalysisDiff,
   AnalysisDiffState,
   applyUpdate,
+  canUseExistingDisk,
   compareGpu,
   diffsToUpdateMessaging,
   DiskConfig,
@@ -33,7 +34,6 @@ import {
   recreateEnvAndPDUpdate,
   recreateEnvUpdate,
   toAnalysisConfig,
-  useCustomRuntime,
   withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
@@ -56,9 +56,12 @@ import {
 import {
   allMachineTypes,
   ComputeType,
+  DATAPROC_MIN_DISK_SIZE_GB,
+  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
 } from './machines';
+import { useCustomRuntime } from './runtime-hooks';
 import { runtimePresets } from './runtime-presets';
 
 describe('runtime-utils', () => {
@@ -1116,6 +1119,24 @@ describe(withAnalysisConfigDefaults.name, () => {
 
       expect(outConfig.diskConfig.detachableType).toEqual(DiskType.STANDARD);
     });
+
+    // the code *looks* like the input `diskConfig.detachable` matters, but it doesn't
+    test.each([true, false])(
+      'sets `detachedDisk` to null when detachable is %s',
+      (detachable) => {
+        const inputConfig = {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Standard,
+          diskConfig: { ...defaultAnalysisConfig.diskConfig, detachable },
+        };
+        const inputDisk = stubDisk();
+        const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
+
+        // always for Standard, regardless of input
+        expect(outConfig.diskConfig.detachable).toBeTruthy();
+        expect(outConfig.detachedDisk).toBeNull();
+      }
+    );
   });
 
   describe(ComputeType.Dataproc, () => {
@@ -1159,8 +1180,173 @@ describe(withAnalysisConfigDefaults.name, () => {
       );
     });
 
-    // TODO: tests for Dataproc with replacements
+    const replaceableFields = [
+      'numberOfWorkers',
+      'workerMachineType',
+      'workerDiskSize',
+      'numberOfPreemptibleWorkers',
+    ];
+    it('replaces the replaceableFields with their defaults when dataprocConfig is missing', () => {
+      const inputConfig = {
+        ...defaultAnalysisConfig,
+        computeType: ComputeType.Dataproc,
+        dataprocConfig: undefined,
+      };
+
+      const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
+
+      replaceableFields.forEach((field: string) =>
+        expect(outConfig.dataprocConfig[field]).toEqual(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+        )
+      );
+    });
+
+    test.each(replaceableFields)(
+      "it replaces %s with the default when it's missing",
+      (field: string) => {
+        const inputConfig = {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Dataproc,
+          dataprocConfig: {
+            ...defaultAnalysisConfig.dataprocConfig,
+            [field]: undefined,
+          },
+        };
+
+        const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
+
+        expect(outConfig.dataprocConfig[field]).toEqual(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+        );
+      }
+    );
+
+    // same as Standard VM
+    it("should replace a missing diskConfig size with the persistent disk's when it exists", () => {
+      const inputConfig = {
+        ...defaultAnalysisConfig,
+        computeType: ComputeType.Dataproc,
+        diskConfig: { ...defaultAnalysisConfig.diskConfig, size: undefined },
+      };
+      const size = 789;
+      const inputDisk: Disk = {
+        size,
+        diskType: defaultAnalysisConfig.detachedDisk.diskType,
+        blockSize: 0,
+        name: 'whatever',
+      };
+
+      const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
+
+      expect(outConfig.diskConfig.size).toEqual(size);
+    });
+
+    // differs from Standard VM: uses a different constant
+    it('should replace a missing diskConfig size with DATAPROC_MIN_DISK_SIZE_GB when the persistent disk is missing size', () => {
+      const inputConfig = {
+        ...defaultAnalysisConfig,
+        computeType: ComputeType.Dataproc,
+        diskConfig: { ...defaultAnalysisConfig.diskConfig, size: undefined },
+      };
+      const inputDisk: Disk = {
+        size: undefined,
+        diskType: defaultAnalysisConfig.detachedDisk.diskType,
+        blockSize: 0,
+        name: 'whatever',
+      };
+
+      const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
+
+      expect(outConfig.diskConfig.size).toEqual(DATAPROC_MIN_DISK_SIZE_GB);
+    });
+
+    // the code *looks* like the input `diskConfig.detachable` matters, but it doesn't
+    test.each([true, false])(
+      'populates `detachedDisk` to equal the inputDisk when detachable is %s',
+      (detachable) => {
+        const inputConfig = {
+          ...defaultAnalysisConfig,
+          computeType: ComputeType.Dataproc,
+          diskConfig: { ...defaultAnalysisConfig.diskConfig, detachable },
+        };
+        const inputDisk = stubDisk();
+        const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
+
+        // always for Dataproc, regardless of input
+        expect(outConfig.diskConfig.detachable).toBeFalsy();
+        expect(outConfig.detachedDisk).toEqual(inputDisk);
+      }
+    );
   });
 
-  // TODO: tests to replace machine and autopause threshold
+  // same for Standard and Dataproc
+  it('replaces `machine` with the default when it is missing', () => {
+    const inputConfig = {
+      ...defaultAnalysisConfig,
+      machine: undefined,
+    };
+
+    const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
+
+    expect(outConfig.machine).toEqual(DEFAULT_MACHINE_TYPE);
+  });
+
+  // same for Standard and Dataproc
+  it('replaces `autopauseThreshold` with the default when it is missing', () => {
+    const inputConfig = {
+      ...defaultAnalysisConfig,
+      autopauseThreshold: undefined,
+    };
+
+    const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
+
+    expect(outConfig.autopauseThreshold).toEqual(
+      DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES
+    );
+  });
+});
+
+describe(canUseExistingDisk.name, () => {
+  it('returns true when everything matches', () => {
+    const existingDisk = stubDisk();
+    const { size, diskType: detachableType } = existingDisk;
+
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeTruthy();
+  });
+
+  it('returns true when a larger disk than the existingDisk is chosen', () => {
+    const existingDisk = stubDisk();
+    const { diskType: detachableType } = existingDisk;
+    const size = existingDisk.size + 1;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeTruthy();
+  });
+
+  it('returns false when a smaller disk than the existingDisk is chosen', () => {
+    const existingDisk = stubDisk();
+    const { diskType: detachableType } = existingDisk;
+    const size = existingDisk.size - 1;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeFalsy();
+  });
+
+  it('returns false when the diskType mismatches', () => {
+    const existingDisk = { ...stubDisk(), diskType: DiskType.STANDARD };
+    const { size } = existingDisk;
+    const detachableType = DiskType.SSD;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeFalsy();
+  });
+
+  it('returns false when existingDisk is undefined', () => {
+    expect(
+      canUseExistingDisk({ detachableType: DiskType.SSD, size: 5 }, undefined)
+    ).toBeFalsy();
+  });
 });
