@@ -203,7 +203,7 @@ export const CustomFunnel = withCurrentWorkspace()(
               const percentage =
                 (funnelGroup.count / funnelGroups[0].count) * 100;
               const displayText =
-                Number(funnelGroup.count).toLocaleString() +
+                funnelGroup.count?.toLocaleString() +
                 ' (' +
                 (percentage < 1
                   ? Math.round(percentage * 100) / 100
