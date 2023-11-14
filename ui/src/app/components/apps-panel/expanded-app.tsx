@@ -26,10 +26,10 @@ import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator'
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
   RuntimeStatusRequest,
-  useRuntimeStatus,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {

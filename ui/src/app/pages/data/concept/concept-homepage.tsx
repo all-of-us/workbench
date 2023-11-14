@@ -17,6 +17,7 @@ import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { dataTabPath } from 'app/routing/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -409,7 +410,7 @@ export const ConceptHomepage = fp.flow(
         searchTerms: this.state.currentSearchString,
         surveyName,
       });
-      const url = `workspaces/${namespace}/${id}/data/concepts/${domain}`;
+      const url = `${dataTabPath(namespace, id)}/concepts/${domain}`;
 
       this.props.navigateByUrl(
         url,

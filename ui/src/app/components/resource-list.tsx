@@ -21,6 +21,7 @@ import {
   ResourceNavigation,
   StyledResourceType,
 } from 'app/components/resource-card';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -32,7 +33,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -72,9 +72,9 @@ const WorkspaceNavigation = (props: NavProps) => {
     resource,
     style,
   } = props;
-  const tab = isNotebook(resource) ? analysisTabName : 'data';
-  const url = `/workspaces/${namespace}/${id}/${tab}`;
-
+  const url = isNotebook(resource)
+    ? analysisTabPath(namespace, id)
+    : dataTabPath(namespace, id);
   return (
     <Clickable>
       <RouterLink to={url} style={style} data-test-id='workspace-navigation'>

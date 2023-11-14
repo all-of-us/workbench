@@ -35,6 +35,7 @@ import {
   genderSexRaceOrEthTypeToText,
   mapRequest,
 } from 'app/pages/data/cohort/utils';
+import { analysisTabName, workspacePath } from 'app/routing/utils';
 import {
   cohortBuilderApi,
   cohortsApi,
@@ -45,7 +46,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -450,7 +450,7 @@ export const ListOverview = fp.flow(
           params: { ns, wsid },
         },
       } = this.props;
-      let url = `/workspaces/${ns}/${wsid}/`;
+      let url = workspacePath(ns, wsid) + '/';
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');

@@ -29,6 +29,7 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
+import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
@@ -42,8 +43,6 @@ import {
   RuntimeStatusRequest,
   toAnalysisConfig,
   UpdateMessaging,
-  useCustomRuntime,
-  useRuntimeStatus,
   withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {

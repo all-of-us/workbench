@@ -7,7 +7,6 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
@@ -166,8 +165,3 @@ export const openSASOrConfigPanel = (
     setSidebarActiveIconStore.next(sasConfigIconId);
   }
 };
-
-// internal name of the analysis tab, also used to construct URLs
-export const analysisTabName = environment.showNewAnalysisTab
-  ? 'analysis'
-  : 'notebooks';

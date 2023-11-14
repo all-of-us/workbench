@@ -2,12 +2,32 @@ import * as React from 'react';
 
 import { environment } from 'environments/environment';
 import { withErrorModal } from 'app/components/modals';
-import { TextModal } from 'app/components/text-modal';
-import { debouncer } from 'app/utils';
+import { InactivityModal } from 'app/pages/signed-in/inactivity-modal';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
+import { authStore, useStore } from 'app/utils/stores';
 
 const { useState, useEffect } = React;
+
+// Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
+// if the returned function has been invoked within the last `sensitivityMs` milliseconds
+export function debouncer(action, sensitivityMs) {
+  let lastInvokeTimeMs = Date.now();
+
+  const timer = global.setInterval(() => {
+    const timeSinceLastInvokeMs = Date.now() - lastInvokeTimeMs;
+    if (timeSinceLastInvokeMs < sensitivityMs) {
+      action();
+    }
+  }, sensitivityMs);
+
+  return {
+    invoke: () => {
+      lastInvokeTimeMs = Date.now();
+    },
+    getTimer: () => timer,
+  };
+}
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
@@ -26,6 +46,10 @@ export const INACTIVITY_CONFIG = {
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
 };
 
+const getInactivityTimeoutMs = () => {
+  return environment.inactivityTimeoutSeconds * 1000;
+};
+
 const getInactivityElapsedMs = () => {
   const lastActive = window.localStorage.getItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
@@ -36,18 +60,16 @@ const getInactivityElapsedMs = () => {
   return Date.now() - parseInt(lastActive, 10);
 };
 
-const secondsToText = (seconds: number) => {
-  return seconds % 60 === 0 && seconds > 60
-    ? `${seconds / 60} minutes`
-    : `${seconds} seconds`;
-};
-
-const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
-  AnalyticsTracker.User.InactivitySignOut();
+const invalidateInactivityCookie = (): void => {
   window.localStorage.setItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     null
   );
+};
+
+const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
+  AnalyticsTracker.User.InactivitySignOut();
+  invalidateInactivityCookie();
   withErrorModal(
     {
       title: 'Sign Out Error',
@@ -57,22 +79,47 @@ const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
   )();
 };
 
+const getDefaultSignOutForInactivityTimeMs = () =>
+  Date.now() + getInactivityTimeoutMs();
+
 export const InactivityMonitor = () => {
-  const [showModal, setShowModal] = useState(false);
+  const { authLoaded, isSignedIn } = useStore(authStore);
+  const [signOutForInactivityTimeMs, setSignOutForInactivityTimeMs] =
+    useState<number>(getDefaultSignOutForInactivityTimeMs());
+
+  // Using Date.now() will not trigger a re-render, so we use React state
+  const [currentTimeMs, setCurrentTimeMs] = useState<number>(Date.now());
+  useEffect(() => {
+    setInterval(() => {
+      setCurrentTimeMs(Date.now());
+    }, 1000);
+  }, []);
+
+  const resetSignOutForInactivityTime = () => {
+    setSignOutForInactivityTimeMs(getDefaultSignOutForInactivityTimeMs());
+  };
 
   function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = getInactivityElapsedMs();
-    if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
+    if (elapsedMs && elapsedMs > getInactivityTimeoutMs()) {
       invalidateInactivityCookieAndSignOut(continuePath);
     }
   }
 
   // Signal user activity.
   useEffect(() => {
+    if (!authLoaded) {
+      return;
+    }
+
+    if (!isSignedIn) {
+      invalidateInactivityCookie();
+      return;
+    }
+
     let getUserActivityTimer: () => NodeJS.Timeout;
     let inactivityInterval: NodeJS.Timeout;
     let logoutTimer: NodeJS.Timeout;
-    let inactivityModalTimer: NodeJS.Timeout;
 
     const startUserActivityTracker = () => {
       const signalUserActivity = debouncer(() => {
@@ -90,30 +137,23 @@ export const InactivityMonitor = () => {
     };
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
+      const newSignOutForInactivityTimeMs =
+        getDefaultSignOutForInactivityTimeMs() - elapsedMs;
+
       clearTimeout(logoutTimer);
       logoutTimer = global.setTimeout(
         () => invalidateInactivityCookieAndSignOut('/session-expired'),
-        Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs)
+        Math.max(0, newSignOutForInactivityTimeMs - Date.now())
       );
 
-      clearTimeout(inactivityModalTimer);
-      inactivityModalTimer = global.setTimeout(
-        () => setShowModal(true),
-        Math.max(
-          0,
-          1000 *
-            (environment.inactivityTimeoutSeconds -
-              environment.inactivityWarningBeforeSeconds) -
-            elapsedMs
-        )
-      );
+      setSignOutForInactivityTimeMs(newSignOutForInactivityTimeMs);
     };
 
     const startInactivityMonitoring = () => {
       startInactivityTimers();
 
       const resetTimers = () => {
-        setShowModal(false);
+        resetSignOutForInactivityTime();
         startInactivityTimers();
       };
 
@@ -169,33 +209,25 @@ export const InactivityMonitor = () => {
 
     return () => {
       clearInterval(inactivityInterval);
-      [getUserActivityTimer(), logoutTimer, inactivityModalTimer].forEach((t) =>
-        clearTimeout(t)
-      );
+      [getUserActivityTimer(), logoutTimer].forEach((t) => clearTimeout(t));
     };
-  }, []);
+  }, [authLoaded, isSignedIn]);
 
-  const secondsBeforeDisplayingModal =
-    environment.inactivityTimeoutSeconds -
-    environment.inactivityWarningBeforeSeconds;
+  const onCloseInactivityModal = () => {
+    resetSignOutForInactivityTime();
+    // todo: clicking to close the modal will fire a click event, which will reset the timer,
+    // however, we should still reset the timers here so we don't rely on that implicit behavior
+  };
+
+  if (!authLoaded || !isSignedIn) {
+    return null;
+  }
 
   return (
-    <React.Fragment>
-      {showModal && (
-        <TextModal
-          closeFunction={() => setShowModal(false)}
-          title='Your session is about to expire'
-          body={
-            `You have been idle for over ${secondsToText(
-              secondsBeforeDisplayingModal
-            )}. ` +
-            'You can choose to extend your session by clicking the button below. You will be automatically logged ' +
-            `out if there is no action in the next ${secondsToText(
-              environment.inactivityWarningBeforeSeconds
-            )}.`
-          }
-        />
-      )}
-    </React.Fragment>
+    <InactivityModal
+      closeFunction={onCloseInactivityModal}
+      currentTimeMs={currentTimeMs}
+      signOutForInactivityTimeMs={signOutForInactivityTimeMs}
+    />
   );
 };

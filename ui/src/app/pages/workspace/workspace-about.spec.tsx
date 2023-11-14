@@ -299,4 +299,26 @@ describe('WorkspaceAbout', () => {
         .props().disabled
     ).toBeTruthy();
   });
+
+  it('should display Google project id', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="googleProject"]').text()).toContain(
+      workspace.googleProject
+    );
+  });
+  it('should display Google project id', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="bucketName"]').text()).toContain(
+      workspace.googleBucketName
+    );
+  });
+  it('should display workspace namespace', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(
+      wrapper.find('[data-test-id="workspaceNamespace"]').text()
+    ).toContain(workspace.namespace);
+  });
 });

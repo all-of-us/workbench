@@ -15,6 +15,7 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
+import { analysisTabName, analysisTabPath } from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
@@ -22,7 +23,6 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams, userAppsStore } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import {
   createListAppsRStudioResponse,
@@ -60,7 +60,9 @@ const renderInteractiveNotebook = (pathParameters: { params: MatchParams }) =>
   render(
     <MemoryRouter
       initialEntries={[
-        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/${pathParameters.params.nbName}`,
+        `${analysisTabPath('sampleNameSpace', 'sampleWorkspace')}/preview/${
+          pathParameters.params.nbName
+        }`,
       ]}
     >
       <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>
