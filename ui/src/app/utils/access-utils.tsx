@@ -13,7 +13,6 @@ import {
 import { cond, DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
-import { ComplianceTrainingModuleCardTitle } from 'app/pages/access/compliance-training-module-card-title';
 import { userIsDisabled } from 'app/routing/guards';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -171,13 +170,8 @@ export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 export const ACCESS_RENEWAL_PATH =
   DATA_ACCESS_REQUIREMENTS_PATH + '?pageMode=' + DARPageMode.ANNUAL_RENEWAL;
 
-interface AARTitleComponentConfig {
-  profile: Profile;
-}
-
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
-  AARTitleComponent: (config: AARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
@@ -243,12 +237,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
-        AARTitleComponent: (props: AARTitleComponentConfig) => (
-          <ComplianceTrainingModuleCardTitle
-            tier={AccessTierShortNames.Registered}
-            profile={props.profile}
-          />
-        ),
         adminPageTitle: 'Registered Tier training',
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
@@ -263,12 +251,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
-        AARTitleComponent: (props: AARTitleComponentConfig) => (
-          <ComplianceTrainingModuleCardTitle
-            tier={AccessTierShortNames.Controlled}
-            profile={props.profile}
-          />
-        ),
         adminPageTitle: 'Controlled Tier training',
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
@@ -283,7 +265,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
-        AARTitleComponent: () => 'Sign Data User Code of Conduct',
         adminPageTitle: 'Sign Data User Code of Conduct',
         renewalTimeEstimate: 5,
       }),
@@ -294,7 +275,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
-        AARTitleComponent: () => 'Update your profile',
         adminPageTitle: 'Update your profile',
         renewalTimeEstimate: 5,
       }),
@@ -305,8 +285,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
-        AARTitleComponent: () =>
-          'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
         renewalTimeEstimate: 5,
       }),
