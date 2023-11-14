@@ -13,11 +13,7 @@ import {
 import { cond, DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
-import { InfoIcon } from 'app/components/icons';
-import { TooltipTrigger } from 'app/components/popups';
 import { ComplianceTrainingModuleCardTitle } from 'app/pages/access/compliance-training-module-card-title';
-import { IdentityHelpText } from 'app/pages/access/identity-help-text';
-import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { userIsDisabled } from 'app/routing/guards';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -175,12 +171,6 @@ export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
 export const ACCESS_RENEWAL_PATH =
   DATA_ACCESS_REQUIREMENTS_PATH + '?pageMode=' + DARPageMode.ANNUAL_RENEWAL;
 
-interface DARTitleComponentConfig {
-  profile: Profile;
-  afterInitialClick?: boolean;
-  onClick?: Function;
-}
-
 interface AARTitleComponentConfig {
   profile: Profile;
 }
@@ -188,7 +178,6 @@ interface AARTitleComponentConfig {
 interface AccessModuleUIConfig extends AccessModuleConfig {
   isEnabledInEnvironment: boolean; // either true or dependent on a feature flag
   AARTitleComponent: (config: AARTitleComponentConfig) => JSX.Element;
-  DARTitleComponent: (config: DARTitleComponentConfig) => JSX.Element;
   adminPageTitle: string;
   externalSyncAction?: Function;
   refreshAction?: Function;
@@ -207,7 +196,6 @@ export const getAccessModuleConfig = (
   moduleName: AccessModule
 ): AccessModuleUIConfig => {
   const {
-    enableRasIdMeLinking,
     enableRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
@@ -222,7 +210,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
-        DARTitleComponent: () => <div>Turn on Google 2-Step Verification</div>,
         adminPageTitle: 'Google 2-Step Verification',
         externalSyncAction: async () =>
           await profileApi().syncTwoFactorAuthStatus(),
@@ -234,28 +221,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableRasLoginGovLinking,
-        DARTitleComponent: (props: DARTitleComponentConfig) => {
-          return enableRasIdMeLinking ? (
-            <>
-              <div>Verify your identity</div>
-              <IdentityHelpText {...props} />
-            </>
-          ) : (
-            <>
-              <div>
-                Verify your identity with Login.gov{' '}
-                <TooltipTrigger
-                  content={
-                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-                  }
-                >
-                  <InfoIcon style={{ margin: '0 0.45rem' }} />
-                </TooltipTrigger>
-              </div>
-              <LoginGovHelpText {...props} />
-            </>
-          );
-        },
         adminPageTitle: 'Verify your identity with Login.gov',
         refreshAction: () => redirectToRas(false),
       }),
@@ -266,7 +231,6 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,
-        DARTitleComponent: () => <div>Connect your eRA Commons account</div>,
         adminPageTitle: 'Connect your eRA Commons* account',
         externalSyncAction: async () =>
           await profileApi().syncEraCommonsStatus(),
@@ -280,12 +244,6 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
         AARTitleComponent: (props: AARTitleComponentConfig) => (
-          <ComplianceTrainingModuleCardTitle
-            tier={AccessTierShortNames.Registered}
-            profile={props.profile}
-          />
-        ),
-        DARTitleComponent: (props: DARTitleComponentConfig) => (
           <ComplianceTrainingModuleCardTitle
             tier={AccessTierShortNames.Registered}
             profile={props.profile}
@@ -311,12 +269,6 @@ export const getAccessModuleConfig = (
             profile={props.profile}
           />
         ),
-        DARTitleComponent: (props: DARTitleComponentConfig) => (
-          <ComplianceTrainingModuleCardTitle
-            tier={AccessTierShortNames.Controlled}
-            profile={props.profile}
-          />
-        ),
         adminPageTitle: 'Controlled Tier training',
         externalSyncAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
@@ -332,7 +284,6 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment: true,
         AARTitleComponent: () => 'Sign Data User Code of Conduct',
-        DARTitleComponent: () => <div>Sign Data User Code of Conduct</div>,
         adminPageTitle: 'Sign Data User Code of Conduct',
         renewalTimeEstimate: 5,
       }),
