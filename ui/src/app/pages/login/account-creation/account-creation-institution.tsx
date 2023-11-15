@@ -451,10 +451,7 @@ export class AccountCreationInstitution extends React.Component<
                     style={{ ...inputStyles.iconArea }}
                     aria-label={'emailvalidation'}
                   >
-                    <ValidationIcon
-                      // data-test-id='email-validation-icon'
-                      validSuccess={this.isEmailValid()}
-                    />
+                    <ValidationIcon validSuccess={this.isEmailValid()} />
                   </div>
                 </TextInputWithLabel>
                 {this.displayEmailErrorMessageIfNeeded()}

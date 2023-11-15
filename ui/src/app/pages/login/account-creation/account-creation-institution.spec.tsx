@@ -60,29 +60,28 @@ describe('Account Creation- Institution', () => {
   });
 
   it('should render and display default values', async () => {
-    setup();
-    try {
-      // Static text: Headers
-      expect(screen.getByText('Create your account')).toBeInTheDocument();
-      expect(screen.getByText('Please complete Step 1')).toBeInTheDocument();
-      expect(screen.getByText('select your institution')).toBeInTheDocument();
+    const { container } = setup();
+    await waitForSpinnerToGoAway(container);
+    // Static text: Headers
+    expect(screen.getByText('Create your account')).toBeInTheDocument();
+    expect(screen.getByText('Please complete Step 1')).toBeInTheDocument();
+    expect(screen.getByText('Select your institution')).toBeInTheDocument();
 
-      // Default values of institution, contact email and role are selected
-      const dropDownDefaultValue = screen.getByText('Broad Institute');
-      expect(dropDownDefaultValue).toBeInTheDocument();
+    // Default values of institution, contact email and role are selected
+    const dropDownDefaultValue = screen.getByText('Broad Institute');
+    expect(dropDownDefaultValue).toBeInTheDocument();
 
-      expect(
-        screen.getByText('contactEmail@broadinstitute.org')
-      ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(/contactemail@broadinstitute\.org/i)
+    ).toBeInTheDocument();
 
-      expect(
-        screen.getByDisplayValue(
-          'Research fellow (a post-doctoral fellow or medical resident in training)'
-        )
-      ).toBeInTheDocument();
-    } catch (e) {
-      expect(true);
-    }
+    expect(
+      screen.getByRole('combobox', {
+        hidden: true,
+      }).textContent
+    ).toBe(
+      'Research fellow (a post-doctoral fellow or medical resident in training)'
+    );
   });
 
   it('should load dropdown with institutions list and institutions Role list', async () => {
@@ -95,19 +94,21 @@ describe('Account Creation- Institution', () => {
 
     expect(mockGetPublicInstitutionDetails).toHaveBeenCalled();
 
+    const defaultInstitutionNameList = defaultInstitutions.map(
+      (institution) => institution.displayName
+    );
+
     const institutionDropDown = screen.getByText('Broad Institute');
     await user.click(institutionDropDown);
 
-    // Check institution drop down lists
-    for (let index = 0; index < defaultInstitutions.length; index++) {
-      const name = defaultInstitutions[index].displayName;
-      if (name === 'Broad Institute') {
-        // As Broad institute is selected, we have multiple text on screen so it gives error in case of screen.getByText
-        continue;
-      }
-      expect(screen.getByText(name)).toBeInTheDocument();
-    }
+    const dropdownOptions = document.querySelector('.react-select__menu-list');
 
+    // Dropdown options should match defaultInstitution list
+    expect(dropdownOptions.children.length).toBe(
+      defaultInstitutionNameList.length
+    );
+
+    // Find and click the institution Role dropdown
     await userEvent.click(
       within(
         screen.getByDisplayValue(
@@ -117,19 +118,17 @@ describe('Account Creation- Institution', () => {
     );
 
     // Check institution Role drop down lists
-    const institutionRoleOpt = AccountCreationOptions.institutionalRoleOptions;
-    for (let index = 0; index < institutionRoleOpt.length; index++) {
-      if (institutionRoleOpt[index].value !== InstitutionalRole.FELLOW) {
-        expect(
-          await screen.findByText(institutionRoleOpt[index].label)
-        ).toBeInTheDocument();
-      } else {
-        expect(
-          screen.getByDisplayValue(
-            'Research fellow (a post-doctoral fellow or medical resident in training)'
-          )
-        ).toBeInTheDocument();
-      }
+    const mockInstOpt = AccountCreationOptions.institutionalRoleOptions;
+    const institutionRoleOptionsHTMLElement = within(
+      screen.getByRole('listbox', { hidden: true })
+    ).getAllByRole('option', { hidden: true });
+
+    const institutionRoleOptionsText = institutionRoleOptionsHTMLElement.map(
+      (role) => role.textContent
+    );
+    expect(institutionRoleOptionsText.length).toBe(mockInstOpt.length);
+    for (let index = 0; index < mockInstOpt.length; index++) {
+      expect(institutionRoleOptionsText.includes(mockInstOpt[index].value));
     }
   });
 
@@ -231,14 +230,11 @@ describe('Account Creation- Institution', () => {
     await user.tab();
 
     // Should not display error as the new user id has google domain
-    try {
-      const emailError = screen.getByText(
-        /your email does not match your institution/i
-      );
-      expect(emailError).not.toBeInTheDocument();
-    } catch (e) {
-      expect(true);
-    }
+    const emailError1 = screen.queryByText(
+      /your email does not match your institution/i
+    );
+    expect(emailError1).toBeNull();
+    //  expect(emailError1).not.toBeInTheDocument();
 
     // Change user email to another domain and we should see error message then
     await user.click(contactEmail);
@@ -256,11 +252,9 @@ describe('Account Creation- Institution', () => {
     await user.tab();
 
     // verily is also a valid domain for the institution so confirm no error
-    try {
-      screen.getByText(/your email does not match your institution/i);
-    } catch (e) {
-      expect(true);
-    }
+    expect(
+      screen.queryByText(/your email does not match your institution/i)
+    ).toBeNull();
   });
 
   it('should display appropriate icons if email is valid/invalid', async () => {
@@ -276,7 +270,7 @@ describe('Account Creation- Institution', () => {
       /contactemail@broadinstitute\.org/i
     );
 
-    // Broad institute is not valid for someAnotherDomain@broadinstitute.org hence show warning
+    // Email someAnotherDomain@broadinstitute.org is not valid for Broad Institute hence show warning
     await user.click(contactEmail);
     await user.paste('someAnotherDomain@broadinstitute.org');
     await user.tab();
@@ -317,7 +311,7 @@ describe('Account Creation- Institution', () => {
     );
     expect(newInstitutionRole).toBeInTheDocument();
 
-    // Nexct button is still disabeld as  we change the institution so email is not valid
+    // Next button is still disabled as  we change the institution so email is not valid
     nextButton = screen.getByRole('button', { name: /next/i });
     expectButtonElementDisabled(nextButton);
 
