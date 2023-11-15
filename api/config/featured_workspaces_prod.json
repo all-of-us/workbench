@@ -281,6 +281,12 @@
       "namespace": "aou-rw-d56fb435",
       "id": "bestpracticesforaoudatascience",
       "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Demo - All of Us v6 GWAS on LDL Cholesterol with Regenie and dsub",
+      "namespace": "aou-rw-5981f9dc",
+      "id": "aouldlgwasregeniedsubctv6duplicate",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
