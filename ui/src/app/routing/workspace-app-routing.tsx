@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
@@ -13,6 +14,7 @@ import {
   LeonardoAppLauncher,
 } from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
+import { RStudioAppLauncher } from 'app/pages/analysis/rStudio-app-launcher';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortPage } from 'app/pages/data/cohort/cohort-page';
@@ -98,6 +100,10 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
+const RStudioAppRedirectPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(RStudioAppLauncher);
 const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
@@ -202,6 +208,27 @@ export const WorkspaceRoutes = () => {
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.JupyterNotebook}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${UIAppType.RSTUDIO}/:nbName`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <RStudioAppRedirectPage
+          key='notebook'
+          routeData={{
+            pathElementForTitle: 'nbName',
+            breadcrumb: BreadcrumbType.Analysis,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            workspaceNavBarTab: analysisTabName,
+            minimizeChrome: true,
+          }}
+          leoAppType={UIAppType.RSTUDIO}
         />
       </AppRoute>
       <AppRoute

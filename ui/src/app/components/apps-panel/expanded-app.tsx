@@ -159,11 +159,16 @@ const CromwellButtonRow = (props: {
 const RStudioButtonRow = (props: {
   userApp: UserAppEnvironment;
   workspaceNamespace: string;
+  workspaceId: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openRStudio(workspaceNamespace, userApp);
+    // openRStudio(workspaceNamespace, userApp);
+    window.open(
+      `/workspaces/${props.workspaceNamespace}/${props.workspaceId}/RStudio/${userApp.appName}`,
+      '_self'
+    );
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -341,6 +346,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                 <RStudioButtonRow
                   userApp={initialUserAppInfo}
                   workspaceNamespace={workspace.namespace}
+                  workspaceId={workspace.id}
                 />
               ),
             ],

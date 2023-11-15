@@ -124,7 +124,7 @@ export const openRStudio = (
       false
     )
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+  // window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openSAS = (

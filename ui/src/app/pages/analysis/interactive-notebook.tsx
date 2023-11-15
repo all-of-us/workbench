@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Iframe from 'react-iframe';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -38,7 +39,6 @@ import {
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import {
   analysisTabName,
-  openRStudioOrConfigPanel,
   openSASOrConfigPanel,
 } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -280,6 +280,15 @@ export const InteractiveNotebook = fp.flow(
       );
     }
 
+    private navigateToRstudioPage(appType, appName) {
+      this.props.navigate([
+        'workspaces',
+        this.props.match.params.ns,
+        this.props.match.params.wsid,
+        appType,
+        appName,
+      ]);
+    }
     private navigatePlaygroundMode() {
       this.navigateOldNotebooksPage(true);
     }
@@ -543,8 +552,7 @@ export const InteractiveNotebook = fp.flow(
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
           if (appType === UIAppType.RSTUDIO) {
-            const { userApps } = this.props.userAppsStore;
-            openRStudioOrConfigPanel(ns, userApps);
+            this.navigateToRstudioPage(appType, nbName);
           } else if (appType === UIAppType.SAS) {
             const { userApps } = this.props.userAppsStore;
             openSASOrConfigPanel(ns, userApps);
