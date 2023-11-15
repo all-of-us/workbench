@@ -205,9 +205,11 @@ export const CustomFunnel = withCurrentWorkspace()(
               const displayText =
                 funnelGroup.count?.toLocaleString() +
                 ' (' +
-                (percentage < 1
-                  ? Math.round(percentage * 100) / 100
-                  : Math.round(percentage)) +
+                (percentage < 0.01
+                  ? percentage.toExponential(1)
+                  : percentage < 1
+                  ? percentage.toFixed(2)
+                  : percentage.toFixed(0)) +
                 '%)';
               return (
                 <div
