@@ -266,7 +266,10 @@ describe('ExpandedApp', () => {
       }
     );
 
-    test.each([[AppStatus.RUNNING, 'Pause']])(
+    test.each([
+      [AppStatus.RUNNING, 'Pause'],
+      [AppStatus.STOPPED, 'Resume'],
+    ])(
       'should allow clicking pause/resume when the app status is %s and enableGKEAppPausing is true',
       async (status, name) => {
         const appName = 'my-app';
