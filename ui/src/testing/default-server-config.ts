@@ -77,6 +77,7 @@ const defaultServerConfig: ConfigResponse = {
   enableRStudioGKEApp: true,
   enableSasGKEApp: true,
   tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
+  enableGKEAppPausing: false,
 };
 
 export default defaultServerConfig;
