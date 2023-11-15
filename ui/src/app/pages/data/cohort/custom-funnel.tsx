@@ -222,7 +222,7 @@ export const CustomFunnel = withCurrentWorkspace()(
                     <Spinner size={30} style={{ marginTop: '0.25rem' }} />
                   ) : (
                     <>
-                      {(percentage < 1 && (
+                      {percentage < 10 && (
                         <div
                           style={{
                             position: 'absolute',
@@ -232,18 +232,7 @@ export const CustomFunnel = withCurrentWorkspace()(
                         >
                           {displayText}
                         </div>
-                      )) ||
-                        (percentage < 10 && (
-                          <div
-                            style={{
-                              position: 'absolute',
-                              left: `calc(${47 - percentage}% - 0.5rem)`,
-                              top: '0.5rem',
-                            }}
-                          >
-                            {displayText}
-                          </div>
-                        ))}
+                      )}
                       <div
                         style={{
                           background: colors.chartColors[index],
