@@ -2097,7 +2097,7 @@ describe('DataAccessRequirements', () => {
     spySyncModulesExternal.mockImplementation(() =>
       Promise.reject('Deliberate testing failure for syncModulesExternal')
     );
-    const { container } = component();
+    component();
     expect(spySyncModulesExternal).toHaveBeenCalledTimes(1);
     expect(notificationStore.get()).toBeNull();
 
