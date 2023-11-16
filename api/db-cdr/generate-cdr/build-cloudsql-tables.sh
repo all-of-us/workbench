@@ -432,29 +432,3 @@ FROM
         GROUP BY 1
     ) y
 WHERE x.concept_id = y.ancestor_concept_id"
-
-# Set the question count on the survey_module row
-# Concept ids (1310132, 1310137) are duplicated in both Cope Surveys and Cope
-# Vaccine Surveys. We only show them in the vaccinations survey, so we need to
-# update count to not include these concepts.
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
-SET x.question_count = y.num_questions
-FROM
-    (
-        SELECT ancestor_concept_id, count(*) as num_questions
-        FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_concept_ancestor\`
-        join \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` on concept_id = descendant_concept_id
-        WHERE subtype = 'QUESTION'
-        AND ancestor_concept_id in
-            (
-                SELECT concept_id
-                FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
-                WHERE domain_id = 'SURVEY'
-                  AND parent_id = 0
-                  AND concept_id = 1333342
-            )
-        AND descendant_concept_id NOT IN (1310132, 1310137)
-        GROUP BY 1
-    ) y
-WHERE x.concept_id = y.ancestor_concept_id"

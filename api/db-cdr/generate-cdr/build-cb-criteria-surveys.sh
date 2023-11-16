@@ -168,149 +168,89 @@ LEFT JOIN (SELECT id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE
 WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
-echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
+echo "PPI SURVEYS - generate answer counts for all questions"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.item_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT concept_id, CAST(value_source_concept_id as STRING) as value, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id in
-                (
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                    WHERE domain_id = 'SURVEY'
-                        and type = 'PPI'
-                        and subtype = 'ANSWER'
-                        and concept_id != 1585747
-                )
-        GROUP BY 1,2
-        ORDER BY 1,2
-    ) y
-WHERE x.domain_id = 'SURVEY'
-    and x.type = 'PPI'
-    and x.subtype = 'ANSWER'
-    and x.concept_id = y.concept_id
-    and x.value = y.value"
-
-echo "PPI SURVEYS - generate answer counts for question concept_id = 1585747"
-bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.item_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT concept_id, CAST(value_as_number as STRING) as value, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id = 1585747
-            and value_as_number is not null
-        GROUP BY 1,2
-
-        UNION ALL
-
-        SELECT concept_id, CAST(value_source_concept_id as STRING) as value, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id = 1585747
-            and value_source_concept_id != 0
-        GROUP BY 1,2
-    ) y
-WHERE x.domain_id = 'SURVEY'
-    and x.type = 'PPI'
-    and x.subtype = 'ANSWER'
-    and x.concept_id = y.concept_id
-    and x.value = y.value"
+ SET x.item_count = y.cnt
+     , x.est_count = y.cnt
+ FROM
+     (
+         SELECT a.id, se.concept_id, CAST(value_source_concept_id as STRING) as value, COUNT(DISTINCT person_id) cnt
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+         JOIN (
+             SELECT LEFT(path, STRPOS(path, '.')-1) AS id, concept_id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE domain_id = 'SURVEY'
+             and type = 'PPI'
+             and subtype = 'ANSWER'
+         ) a ON se.concept_id = a.concept_id
+         WHERE is_standard = 0
+         GROUP BY 1,2,3
+         ORDER BY 1,2,3
+     ) y
+ WHERE x.domain_id = 'SURVEY'
+     and x.type = 'PPI'
+     and x.subtype = 'ANSWER'
+     and x.concept_id = y.concept_id
+     and x.value = y.value
+     and x.path LIKE CONCAT('%', y.id, '.%')"
 
 echo "PPI SURVEYS - generate question counts"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.rollup_count = y.cnt
-    , x.item_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id in
-                (
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                    WHERE domain_id = 'SURVEY'
-                        and type = 'PPI'
-                        and is_group = 1
-                        and is_selectable = 1
-                        and parent_id != 0
-                )
-        GROUP BY 1
-    ) y
-WHERE x.domain_id = 'SURVEY'
-    and x.type = 'PPI'
-    and x.is_group = 1
-    and x.concept_id = y.concept_id"
+ SET x.rollup_count = y.cnt
+     , x.item_count = y.cnt
+     , x.est_count = y.cnt
+ FROM (
+   SELECT id, se.concept_id, COUNT(DISTINCT person_id) cnt
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+   JOIN (
+     SELECT DISTINCT a.id, concept_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+     JOIN (
+       SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+       WHERE domain_id = 'SURVEY'
+         AND parent_id = 0
+     ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+   ) b ON (se.concept_id = b.concept_id)
+   WHERE is_standard = 0
+   GROUP BY 1, 2
+ ) y
+ WHERE x.domain_id = 'SURVEY'
+   AND x.type = 'PPI'
+   AND x.is_group = 1
+   AND x.concept_id = y.concept_id
+   AND x.path LIKE CONCAT('%', y.id, '.%')"
 
 echo "PPI SURVEYS - generate survey counts"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.rollup_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT b.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-        JOIN
-            (
-                SELECT *
-                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
-                WHERE ancestor_concept_id in
-                    (
-                        SELECT concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                        WHERE domain_id = 'SURVEY'
-                            and parent_id = 0
-                    )
-            ) b on a.concept_id = b.descendant_concept_id
-        WHERE a.is_standard = 0
-        GROUP BY 1
-    ) y
-WHERE x.domain_id = 'SURVEY'
-and x.concept_id = y.ancestor_concept_id"
+ SET x.rollup_count = y.cnt
+     , x.est_count = y.cnt
+ FROM
+     (
+         SELECT c.id, c.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+         JOIN
+             (
+                 SELECT b.id, pca.ancestor_concept_id, pca.descendant_concept_id
+                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\` pca
+                 JOIN (
 
-# Correct Cope Survey total participant count. Concept ids (1310132, 1310137)
-# are duplicated in both Cope Surveys and Cope Vaccine Surveys. We only show them
-# in the vaccinations survey, so we need to update count to not include these concepts.
-echo "PPI SURVEYS - Correct Survey counts for Cope Survey"
-bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
-SET x.rollup_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT b.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-        JOIN
-            (
-                SELECT *
-                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
-                WHERE ancestor_concept_id in
-                    (
-                        SELECT concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-                        WHERE domain_id = 'SURVEY'
-                          AND parent_id = 0
-                          AND concept_id = 1333342
-                    )
-            ) b on a.concept_id = b.descendant_concept_id
-        WHERE a.is_standard = 0
-        AND b.descendant_concept_id NOT IN (1310132, 1310137)
-        GROUP BY 1
-    ) y
-WHERE x.domain_id = 'SURVEY'
-and x.concept_id = y.ancestor_concept_id"
+                     SELECT CAST(id AS STRING) AS id, concept_id
+                     FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                     WHERE domain_id = 'SURVEY'
+                     AND parent_id = 0
+
+                 ) b ON pca.ancestor_concept_id = b.concept_id
+             ) c on a.concept_id = c.descendant_concept_id
+         WHERE a.is_standard = 0
+         GROUP BY 1, 2
+     ) y
+ WHERE x.domain_id = 'SURVEY'
+ and x.concept_id = y.ancestor_concept_id
+ AND x.path = y.id"
 
 echo "PPI SURVEYS - update Minute Survey Name"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \

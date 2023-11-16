@@ -265,30 +265,6 @@ WHERE domain_id = 'SURVEY'
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
     )"
 
-echo "cb_criteria - delete duplicated questions from COVID-19 Participant Experience (COPE) Survey"
-bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"DELETE FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
- WHERE id IN (
-   SELECT id
-       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-       WHERE concept_id IN (
-         SELECT concept_id FROM (
-           SELECT concept_id, COUNT(*)
-           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-           WHERE domain_id = 'SURVEY'
-           AND subtype = 'QUESTION'
-           GROUP BY concept_id
-           HAVING COUNT(*) > 1
-         )
-       )
-       AND path LIKE (
-         SELECT CONCAT(id, '.%')
-         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-         WHERE domain_id = 'SURVEY'
-         AND LOWER(code) = 'cope'
-       )
- )"
-
 ################################################
 # CB_CRITERIA_RELATIONSHIP
 ################################################
