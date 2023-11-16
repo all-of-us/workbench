@@ -698,19 +698,29 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
-      const onMount = async () => {
-        await syncModulesExternal(
-          incompleteModules(
-            getEligibleModules(allInitialModules, profile),
-            profile,
-            pageMode
-          )
-        );
-        await reload();
-        spinnerProps.hideSpinner();
-      };
+      const syncModalsPromise = fetchWithErrorModal(
+        () =>
+          syncModulesExternal(
+            incompleteModules(
+              getEligibleModules(allInitialModules, profile),
+              profile,
+              pageMode
+            )
+          ),
+        {
+          customErrorResponseFormatter: (apiErrorResponse) => {
+            return {
+              title: 'Error Syncronizing Training',
+              message: `Encountered an error syncronizing your Absorb training.`,
+              showBugReportLink: true,
+            };
+          },
+        }
+      );
 
-      onMount();
+      syncModalsPromise
+        .then(async () => await reload())
+        .finally(() => spinnerProps.hideSpinner());
     }, []);
 
     /*
