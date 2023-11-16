@@ -2103,10 +2103,10 @@ describe('DataAccessRequirements', () => {
 
     await waitFor(() => {
       expect(notificationStore.get().title).toEqual(
-        'Error Syncronizing Training'
+        'Error Syncronizing Modals'
       );
       expect(notificationStore.get().message).toEqual(
-        'Encountered an error syncronizing your Absorb training.'
+        'Encountered an error syncronizing your external modals.'
       );
     });
   });
