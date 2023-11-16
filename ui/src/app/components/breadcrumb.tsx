@@ -11,6 +11,12 @@ import {
 
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
+import {
+  analysisTabName,
+  analysisTabPath,
+  dataTabPath,
+  workspacePath,
+} from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -24,7 +30,6 @@ import {
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';
@@ -62,7 +67,6 @@ export const getTrail = (
   params: MatchParams
 ): Array<BreadcrumbData> => {
   const { ns, wsid, cid, crid, csid, pid, nbName } = params;
-  const prefix = `/workspaces/${ns}/${wsid}`;
   switch (type) {
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
@@ -78,7 +82,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          `${prefix}/data`
+          dataTabPath(ns, wsid)
         ),
       ];
     case BreadcrumbType.WorkspaceEdit:
@@ -91,7 +95,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Edit Workspace', `${prefix}/edit`),
+        new BreadcrumbData('Edit Workspace', `${workspacePath(ns, wsid)}/edit`),
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
@@ -103,7 +107,10 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
+        new BreadcrumbData(
+          'Duplicate Workspace',
+          `${workspacePath(ns, wsid)}/duplicate`
+        ),
       ];
     case BreadcrumbType.Analysis:
       return [
@@ -117,11 +124,11 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          `${prefix}/${analysisTabName}`
+          analysisTabPath(ns, wsid)
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/${analysisTabName}/${nbName}`
+          `${analysisTabPath(ns, wsid)}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -136,7 +143,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           conceptSet ? conceptSet.name : '...',
-          `${prefix}/data/concepts/sets/${csid}`
+          `${dataTabPath(ns, wsid)}/concepts/sets/${csid}`
         ),
       ];
     case BreadcrumbType.Cohort:
@@ -151,7 +158,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohort ? cohort.name : '...',
-          `${prefix}/data/cohorts/${cid}`
+          `${dataTabPath(ns, wsid)}/cohorts/${cid}`
         ),
       ];
     case BreadcrumbType.CohortReview:
@@ -166,7 +173,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohortReview ? cohortReview.cohortName : '...',
-          `${prefix}/data/cohorts/${cid}/reviews/${crid}`
+          `${dataTabPath(ns, wsid)}/cohorts/${cid}/reviews/${crid}`
         ),
       ];
     case BreadcrumbType.Participant:
@@ -181,7 +188,10 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           `Participant ${pid}`,
-          `${prefix}/data/cohorts/${cid}/reviews/${crid}/participants/${pid}`
+          `${dataTabPath(
+            ns,
+            wsid
+          )}/cohorts/${cid}/reviews/${crid}/participants/${pid}`
         ),
       ];
     case BreadcrumbType.CohortAdd:
@@ -196,7 +206,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           'Build Cohort Criteria',
-          `${prefix}/data/cohorts/build`
+          `${dataTabPath(ns, wsid)}/cohorts/build`
         ),
       ];
     case BreadcrumbType.SearchConcepts:
@@ -209,7 +219,10 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Search Concepts', `${prefix}/data/concepts`),
+        new BreadcrumbData(
+          'Search Concepts',
+          `${dataTabPath(ns, wsid)}/concepts`
+        ),
       ];
     case BreadcrumbType.Dataset:
       return [
@@ -221,7 +234,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Dataset', `${prefix}/data/datasets`),
+        new BreadcrumbData('Dataset', `${dataTabPath(ns, wsid)}/datasets`),
       ];
     case BreadcrumbType.Data:
       return [
@@ -235,7 +248,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          `${prefix}/data`
+          `${dataTabPath(ns, wsid)}`
         ),
       ];
     default:

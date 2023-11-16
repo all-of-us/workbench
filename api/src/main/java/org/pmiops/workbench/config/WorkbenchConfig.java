@@ -258,7 +258,6 @@ public class WorkbenchConfig {
 
   public static class AbsorbConfig {
     public String externalDepartmentId;
-    public boolean enabledForNewUsers;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
   }
@@ -334,6 +333,8 @@ public class WorkbenchConfig {
     public boolean enableDataExplorer;
     // If true, enable has EHR data
     public boolean enableHasEhrData;
+    // If true, allow users to pause their GKE apps
+    public boolean enableGKEAppPausing;
   }
 
   public static class ActionAuditConfig {

@@ -6470,7 +6470,6 @@ components:
       - ARRAY_DATA
       - CONCEPT_SET
       - CONCEPT_QUICK_ADD
-      - PERSON_HAS_EHR_DATA
     Surveys:
       type: string
       description: a survey for concepts
@@ -6895,6 +6894,10 @@ components:
         tanagraBaseUrl:
           type: string
           description: The tanagra base url
+        enableGKEAppPausing:
+          type: boolean
+          default: false
+          description: Whether users are allowed to pause GKE applications.
     RuntimeImage:
       type: object
       properties:
@@ -7752,7 +7755,6 @@ components:
       enum:
       - NONE
       - PERSON
-      - PERSON_HAS_EHR_DATA
       - SURVEY
       - SURVEY_BASICS
       - SURVEY_LIFESTYLE

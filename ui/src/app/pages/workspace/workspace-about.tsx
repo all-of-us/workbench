@@ -81,7 +81,7 @@ const styles = reactStyles({
   },
   infoBox: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.75),
-    width: '9rem',
+    width: '15rem',
     borderRadius: '5px',
     padding: '0.6rem',
     marginRight: '0.75rem',
@@ -420,6 +420,12 @@ export const WorkspaceAbout = fp.flow(
                   <InfoIcon style={{ margin: '0 0.45rem' }} />
                 </TooltipTrigger>
               </h3>
+              <div style={styles.infoBox} data-test-id='workspaceNamespace'>
+                <div style={styles.infoBoxHeader}>Workspace Namespace</div>
+                <div style={{ fontSize: '0.75rem' }}>
+                  {workspace ? workspace.namespace : 'Loading...'}
+                </div>
+              </div>
               <div style={styles.infoBox} data-test-id='cdrVersion'>
                 <div style={styles.infoBoxHeader}>Dataset</div>
                 <div style={{ fontSize: '0.75rem' }}>
@@ -464,6 +470,21 @@ export const WorkspaceAbout = fp.flow(
                     </div>
                   </div>
                 )}
+            </div>
+            <div>
+              <h3 style={{ marginBottom: '0.75rem' }}>Cloud Information:</h3>
+              <div style={styles.infoBox} data-test-id='googleProject'>
+                <div style={styles.infoBoxHeader}>Google Project Id</div>
+                <div style={{ fontSize: '0.75rem' }}>
+                  {workspace ? workspace.googleProject : 'Loading...'}
+                </div>
+              </div>
+              <div style={styles.infoBox} data-test-id='bucketName'>
+                <div style={styles.infoBoxHeader}>Bucket Name</div>
+                <div style={{ fontSize: '0.75rem' }}>
+                  {workspace ? workspace.googleBucketName : 'Loading...'}
+                </div>
+              </div>
             </div>
 
             <TooltipTrigger

@@ -8,6 +8,7 @@ import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
+import { analysisTabName } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import {
@@ -17,7 +18,6 @@ import {
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 

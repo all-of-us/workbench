@@ -9,6 +9,7 @@ import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
+import { workspacePath } from 'app/routing/utils';
 import {
   registerApiClient,
   workspacesApi,
@@ -62,7 +63,7 @@ describe(WorkspaceWrapper.name, () => {
     render(
       <MemoryRouter
         initialEntries={[
-          `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}`,
+          workspacePath(workspaceDataStub.namespace, workspaceDataStub.id),
         ]}
       >
         <Route path='/workspaces/:ns/:wsid'>

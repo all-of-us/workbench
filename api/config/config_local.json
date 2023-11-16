@@ -92,7 +92,6 @@
   },
   "absorb": {
     "externalDepartmentId": "Development",
-    "enabledForNewUsers": true,
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028"
   },
@@ -124,7 +123,8 @@
     "enableRStudioGKEApp": true,
     "enableSasGKEApp": true,
     "enableDataExplorer": true,
-    "enableHasEhrData": true
+    "enableHasEhrData": true,
+    "enableGKEAppPausing": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

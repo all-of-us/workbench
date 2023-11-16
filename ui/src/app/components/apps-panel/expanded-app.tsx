@@ -26,12 +26,12 @@ import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator'
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
   RuntimeStatusRequest,
-  useRuntimeStatus,
 } from 'app/utils/runtime-utils';
-import { runtimeStore, useStore } from 'app/utils/stores';
+import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {
   openRStudio,
   openSAS,
@@ -122,6 +122,7 @@ const PauseUserAppButton = (props: {
   workspaceNamespace: string;
 }) => {
   const { googleProject, appName, status } = props.userApp || {};
+  const { config } = useStore(serverConfigStore);
 
   return (
     <PauseResumeButton
@@ -132,8 +133,11 @@ const PauseUserAppButton = (props: {
       onResume={() =>
         resumeUserApp(googleProject, appName, props.workspaceNamespace)
       }
-      disabled
-      disabledTooltip='Pause and resume are not currently available.'
+      disabled={!config.enableGKEAppPausing}
+      disabledTooltip={
+        !config.enableGKEAppPausing &&
+        'Pause and resume are not currently available.'
+      }
     />
   );
 };

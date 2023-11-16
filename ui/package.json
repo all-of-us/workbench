@@ -35,7 +35,7 @@
     "@terra-ui-packages/components": "0.0.4",
     "@terra-ui-packages/core-utils": "0.0.6",
     "@types/color": "^3.0.2",
-    "@types/enzyme": "^3.10.10",
+    "@types/enzyme": "^3.10.15",
     "@types/jest": "^27.5.1",
     "@types/js-cookie": "^2.2.2",
     "@types/lodash": "^4.14.199",
@@ -48,8 +48,8 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "classnames": "^2.2.6",
     "color": "^3.1.1",
-    "highcharts": "^9.0.0",
-    "highcharts-react-official": "3.0.0",
+    "highcharts": "^9.3.3",
+    "highcharts-react-official": "^3.2.1",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
@@ -68,7 +68,7 @@
     "react-iframe": "^1.8.0",
     "react-interactive": "^0.9.1",
     "react-modal": "^3.16.1",
-    "react-oidc-context": "^2.2.2",
+    "react-oidc-context": "^2.3.1",
     "react-onclickoutside": "^6.13.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
@@ -125,7 +125,6 @@
     ],
     "coverageReporters": [
       "lcov",
-      "text",
       "html"
     ]
   }

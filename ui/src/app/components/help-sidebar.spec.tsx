@@ -609,7 +609,7 @@ describe('HelpSidebar', () => {
 
     wrapper
       .find({ 'data-test-id': `Cromwell-expanded` })
-      .find({ 'data-test-id': 'Cromwell-settings-button' })
+      .find('div[data-test-id="apps-panel-button-Settings"]')
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
 

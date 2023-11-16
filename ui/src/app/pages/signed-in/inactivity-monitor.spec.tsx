@@ -7,7 +7,7 @@ import {
   InactivityMonitor,
 } from 'app/pages/signed-in/inactivity-monitor';
 import * as Authentication from 'app/utils/authentication';
-import { notificationStore } from 'app/utils/stores';
+import { authStore, notificationStore } from 'app/utils/stores';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
@@ -16,6 +16,10 @@ describe(InactivityMonitor.name, () => {
     const signOutSpy = jest.spyOn(Authentication, 'signOut');
     signOutSpy.mockImplementation(() => {
       throw new Error();
+    });
+    authStore.set({
+      authLoaded: true,
+      isSignedIn: true,
     });
 
     window.localStorage.setItem(
