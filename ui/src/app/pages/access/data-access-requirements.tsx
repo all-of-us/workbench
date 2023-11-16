@@ -720,7 +720,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
       syncModulesPromise
         .then(async () => await reload())
-        .catch(() => console.error('Failed to syncronize Absorb records.'))
+        .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
     }, []);
 
