@@ -2086,7 +2086,7 @@ describe('DataAccessRequirements', () => {
   });
 
   const spySyncModulesExternal = jest.spyOn(accessUtils, 'syncModulesExternal');
-  it('should show an error modal when ', async () => {
+  it('should show an error modal when syncModulesExternal fails', async () => {
     spySyncModulesExternal.mockReturnValue(
       Promise.reject('Deliberate testing failure for syncModulesExternal')
     );
