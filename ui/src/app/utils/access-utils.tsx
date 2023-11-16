@@ -292,7 +292,8 @@ export const getAccessModuleConfig = (
           />
         ),
         adminPageTitle: 'Registered Tier training',
-        externalSyncAction: async () => Promise.reject(),
+        externalSyncAction: async () =>
+          await profileApi().syncComplianceTrainingStatus(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         renewalTimeEstimate: 60,
