@@ -698,7 +698,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
-      const syncModalsPromise = fetchWithErrorModal(
+      const syncModulesPromise = fetchWithErrorModal(
         () =>
           syncModulesExternal(
             incompleteModules(
@@ -718,8 +718,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         }
       );
 
-      syncModalsPromise
+      syncModulesPromise
         .then(async () => await reload())
+        .catch(() => console.error('Failed to syncronize Absorb records.'))
         .finally(() => spinnerProps.hideSpinner());
     }, []);
 
