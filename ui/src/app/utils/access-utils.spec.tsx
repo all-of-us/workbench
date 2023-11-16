@@ -942,34 +942,16 @@ describe(syncModulesExternal.name, () => {
   });
 
   it('should return a successful promise when no modules are passed', () => {
-    const ignoredDuccVersion = 0;
-    const status: AccessModuleStatus = {
-      moduleName: arbitraryModuleName,
-      completionEpochMillis: 12345,
-    };
-
     expect(syncModulesExternal([])).toBeTruthy();
   });
 
   it('should return a successful promise when all externalSyncActions succeed ', () => {
-    const ignoredDuccVersion = 0;
-    const status: AccessModuleStatus = {
-      moduleName: arbitraryModuleName,
-      completionEpochMillis: 12345,
-    };
-
     const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
     spyERA.mockImplementation(() => Promise.resolve(null));
     expect(syncModulesExternal([AccessModule.ERA_COMMONS])).toBeTruthy();
   });
 
   it('should return a rejected promise when all externalSyncActions fail ', () => {
-    const ignoredDuccVersion = 0;
-    const status: AccessModuleStatus = {
-      moduleName: arbitraryModuleName,
-      completionEpochMillis: 12345,
-    };
-
     const spyCompliance = jest.spyOn(
       profileApi(),
       'syncComplianceTrainingStatus'
@@ -981,12 +963,6 @@ describe(syncModulesExternal.name, () => {
   });
 
   it('should return a rejected promise when one externalSyncAction fails ', () => {
-    const ignoredDuccVersion = 0;
-    const status: AccessModuleStatus = {
-      moduleName: arbitraryModuleName,
-      completionEpochMillis: 12345,
-    };
-
     const spyCompliance = jest.spyOn(
       profileApi(),
       'syncComplianceTrainingStatus'
