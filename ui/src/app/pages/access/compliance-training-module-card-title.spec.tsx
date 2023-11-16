@@ -15,6 +15,7 @@ import {
   ComplianceTrainingModuleCardProps,
   ComplianceTrainingModuleCardTitle,
 } from 'app/pages/access/compliance-training-module-card-title';
+import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import {
   profileApi,
@@ -85,14 +86,6 @@ const setup = (
       .container,
     user: userEvent.setup(),
   };
-};
-
-export const queryForRTTitle = () => {
-  return screen.queryByText(/responsible conduct of research training/i);
-};
-
-export const queryForCTTitle = () => {
-  return screen.queryByText(/controlled tier training/i);
 };
 
 describe(ComplianceTrainingModuleCardTitle.name, () => {

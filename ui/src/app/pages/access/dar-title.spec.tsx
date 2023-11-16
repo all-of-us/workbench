@@ -2,19 +2,18 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { AccessModule, ConfigResponse } from 'generated/fetch';
+import { AccessModule, ConfigResponse, ProfileApi } from 'generated/fetch';
 
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  queryForCTTitle,
-  queryForRTTitle,
-} from 'app/pages/access/compliance-training-module-card-title.spec';
 import { DARTitle, DARTitleProps } from 'app/pages/access/dar-title';
+import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 const createProps = (): DARTitleProps => ({
   moduleName: AccessModule.COMPLIANCE_TRAINING,
@@ -27,6 +26,7 @@ const setup = (
   props = createProps(),
   config: ConfigResponse = { ...defaultServerConfig }
 ) => {
+  registerApiClient(ProfileApi, new ProfileApiStub());
   serverConfigStore.set({ config });
   render(<DARTitle {...props} />);
   return userEvent.setup();

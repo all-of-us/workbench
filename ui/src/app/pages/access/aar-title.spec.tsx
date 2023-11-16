@@ -6,12 +6,8 @@ import { AccessModule, ConfigResponse, ProfileApi } from 'generated/fetch';
 
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AARTitle } from 'app/pages/access/aar-title';
-import {
-  queryForCTTitle,
-  queryForRTTitle,
-} from 'app/pages/access/compliance-training-module-card-title.spec';
-import { DARTitleProps } from 'app/pages/access/dar-title';
+import { AARTitle, AARTitleProps } from 'app/pages/access/aar-title';
+import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
@@ -19,7 +15,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
-const createProps = (): DARTitleProps => ({
+const createProps = (): AARTitleProps => ({
   moduleName: AccessModule.COMPLIANCE_TRAINING,
   profile: {
     ...createEmptyProfile(),
