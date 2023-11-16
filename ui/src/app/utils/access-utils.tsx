@@ -292,8 +292,7 @@ export const getAccessModuleConfig = (
           />
         ),
         adminPageTitle: 'Registered Tier training',
-        externalSyncAction: async () =>
-          await profileApi().syncComplianceTrainingStatus(),
+        externalSyncAction: async () => Promise.reject(),
         refreshAction: async () =>
           await profileApi().syncComplianceTrainingStatus(),
         renewalTimeEstimate: 60,
@@ -695,7 +694,7 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
         try {
           await externalSyncAction();
         } catch (exception) {
-          throw `Failed to syncronize ${adminPageTitle}`;
+          throw new Error(`Failed to syncronize ${adminPageTitle}`);
         }
       }
     })
