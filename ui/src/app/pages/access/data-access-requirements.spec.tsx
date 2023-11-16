@@ -11,7 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { render, RenderResult, screen } from '@testing-library/react';
+import { render, RenderResult, screen, waitFor } from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
@@ -24,7 +24,11 @@ import {
   rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import {
+  notificationStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -2092,6 +2096,15 @@ describe('DataAccessRequirements', () => {
     );
     const { container } = component();
     expect(spySyncModulesExternal).toHaveBeenCalledTimes(1);
-    await screen.findByText('Failed to sync external modals');
+    expect(notificationStore.get()).toBeNull();
+
+    await waitFor(() => {
+      expect(notificationStore.get().title).toEqual(
+        'Error Syncronizing Training'
+      );
+      expect(notificationStore.get().message).toEqual(
+        'Encountered an error syncronizing your Absorb training.'
+      );
+    });
   });
 });
