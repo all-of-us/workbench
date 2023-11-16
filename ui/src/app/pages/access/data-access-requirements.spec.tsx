@@ -17,6 +17,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import * as accessUtils from 'app/utils/access-utils';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
@@ -2082,5 +2083,15 @@ describe('DataAccessRequirements', () => {
     ).click();
 
     expectButtonElementEnabled(screen.queryByText('Confirm'));
+  });
+
+  const spySyncModulesExternal = jest.spyOn(accessUtils, 'syncModulesExternal');
+  it('should show an error modal when ', async () => {
+    spySyncModulesExternal.mockReturnValue(
+      Promise.reject('Deliberate testing failure for syncModulesExternal')
+    );
+    const { container } = component();
+    expect(spySyncModulesExternal).toHaveBeenCalledTimes(1);
+    await screen.findByText('Failed to sync external modals');
   });
 });
