@@ -2106,7 +2106,7 @@ describe('DataAccessRequirements', () => {
         'Error Syncronizing Modals'
       );
       expect(notificationStore.get().message).toEqual(
-        'Encountered an error syncronizing your external modals.'
+        'Deliberate testing failure for syncModulesExternal'
       );
     });
   });

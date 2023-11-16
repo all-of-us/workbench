@@ -689,9 +689,14 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
 
   return Promise.all(
     filteredModuleNames.map(async (moduleName) => {
-      const { externalSyncAction } = getAccessModuleConfig(moduleName);
+      const { adminPageTitle, externalSyncAction } =
+        getAccessModuleConfig(moduleName);
       if (externalSyncAction) {
-        await externalSyncAction();
+        try {
+          await externalSyncAction();
+        } catch (exception) {
+          throw `Failed to syncronize ${adminPageTitle}`;
+        }
       }
     })
   );
