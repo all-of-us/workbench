@@ -2089,9 +2089,12 @@ describe('DataAccessRequirements', () => {
     expectButtonElementEnabled(screen.queryByText('Confirm'));
   });
 
-  const spySyncModulesExternal = jest.spyOn(accessUtils, 'syncModulesExternal');
   it('should show an error modal when syncModulesExternal fails', async () => {
-    spySyncModulesExternal.mockReturnValue(
+    const spySyncModulesExternal = jest.spyOn(
+      accessUtils,
+      'syncModulesExternal'
+    );
+    spySyncModulesExternal.mockImplementation(() =>
       Promise.reject('Deliberate testing failure for syncModulesExternal')
     );
     const { container } = component();
