@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
-import { adminGetProfile } from 'app/pages/admin/admin-egress-audit';
-
 import { AdminUserLink } from './admin-user-link';
+import {Profile} from "generated/fetch";
+import {userAdminApi} from "app/services/swagger-fetch-clients";
 
-export const AdminUserComponent = ({ username, userWithDomain }) => {
+export const AdminUserComponent = ({ userWithDomain }) => {
   const [userDisabled, setUserDisabled] = useState(false);
   const [sourceUserEmail, setSourceUserEmail] = useState('');
+
+  const username = getUsernameWithoutDomain(userWithDomain);
 
   const handleGetProfile = async (usernameWithDomain) => {
     try {
@@ -35,3 +37,14 @@ export const AdminUserComponent = ({ username, userWithDomain }) => {
     </div>
   );
 };
+
+export const adminGetProfile = async (
+  usernameWithDomain: string
+): Promise<Profile> => {
+  return userAdminApi().getUserByUsername(usernameWithDomain);
+};
+
+export function getUsernameWithoutDomain(sourceUserEmail: string) {
+  const [username] = sourceUserEmail.split('@');
+  return username;
+}

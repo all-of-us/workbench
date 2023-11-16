@@ -10,7 +10,6 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import {
   AuditEgressEventResponse,
   EgressEvent,
-  Profile,
 } from 'generated/fetch';
 
 import { AdminUserComponent } from 'app/components/admin/admin-user-component';
@@ -19,7 +18,6 @@ import { FlexRow } from 'app/components/flex';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import {
   egressEventsAdminApi,
-  userAdminApi,
 } from 'app/services/swagger-fetch-clients';
 import { mutableEgressEventStatuses } from 'app/utils/egress-events';
 import { MatchParams } from 'app/utils/stores';
@@ -137,8 +135,6 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     timeWindowEndEpochMillis,
   } = event;
 
-  const [username] = sourceUserEmail.split('@');
-
   return (
     <div style={{ padding: '0 20px' }}>
       <h2>Egress event {egressEventId}</h2>
@@ -150,7 +146,6 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
         <DetailRow label='Source user'>
           <AdminUserComponent
             userWithDomain={sourceUserEmail}
-            {...{ username }}
           ></AdminUserComponent>
         </DetailRow>
         <DetailRow label='Source workspace'>
@@ -246,8 +241,4 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
   );
 };
 
-export const adminGetProfile = async (
-  usernameWithDomain: string
-): Promise<Profile> => {
-  return userAdminApi().getUserByUsername(usernameWithDomain);
-};
+
