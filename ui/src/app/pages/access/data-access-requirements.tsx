@@ -711,7 +711,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
               title: 'Error Syncronizing Modals',
-              message: `Encountered an error syncronizing your external modals.`,
+              message: `${apiErrorResponse.originalResponse}`,
               showBugReportLink: true,
             };
           },
