@@ -234,7 +234,6 @@ describe('Account Creation- Institution', () => {
       /your email does not match your institution/i
     );
     expect(emailError1).toBeNull();
-    //  expect(emailError1).not.toBeInTheDocument();
 
     // Change user email to another domain and we should see error message then
     await user.click(contactEmail);
@@ -270,7 +269,8 @@ describe('Account Creation- Institution', () => {
       /contactemail@broadinstitute\.org/i
     );
 
-    // Email someAnotherDomain@broadinstitute.org is not valid for Broad Institute hence show warning
+    // Broad institution has specific emails list and not domain hence someAnotherDomain@broadinstitute.org
+    // is not valid for Broad Institute hence show warning
     await user.click(contactEmail);
     await user.paste('someAnotherDomain@broadinstitute.org');
     await user.tab();
