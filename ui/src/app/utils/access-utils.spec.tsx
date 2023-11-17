@@ -941,7 +941,7 @@ describe(syncModulesExternal.name, () => {
   });
 
   it('should return a successful promise when no modules are passed', () => {
-    expect(syncModulesExternal([])).toBeTruthy();
+    expect(syncModulesExternal([])).resolves.toBeTruthy();
   });
 
   it('should return a successful promise when all externalSyncActions succeed ', () => {
