@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 
 import { AdminUserLink } from './admin-user-link';
-import {Profile} from "generated/fetch";
-import {userAdminApi} from "app/services/swagger-fetch-clients";
+import { Profile } from "generated/fetch";
+import { userAdminApi } from "app/services/swagger-fetch-clients";
+
+export const adminGetProfile = async (
+  usernameWithDomain: string
+): Promise<Profile> => {
+  return userAdminApi().getUserByUsername(usernameWithDomain);
+};
+
+export function getUsernameWithoutDomain(sourceUserEmail: string) {
+  const [username] = sourceUserEmail.split('@');
+  return username;
+}
 
 export const AdminUserComponent = ({ userWithDomain }) => {
   const [userDisabled, setUserDisabled] = useState(false);
@@ -37,14 +48,3 @@ export const AdminUserComponent = ({ userWithDomain }) => {
     </div>
   );
 };
-
-export const adminGetProfile = async (
-  usernameWithDomain: string
-): Promise<Profile> => {
-  return userAdminApi().getUserByUsername(usernameWithDomain);
-};
-
-export function getUsernameWithoutDomain(sourceUserEmail: string) {
-  const [username] = sourceUserEmail.split('@');
-  return username;
-}
