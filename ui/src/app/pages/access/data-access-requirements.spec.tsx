@@ -303,6 +303,7 @@ describe('DataAccessRequirements', () => {
   afterEach(() => {
     // reset to standard behavior after tests which use fake timers
     jest.useRealTimers();
+    notificationStore.reset();
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
@@ -2103,7 +2104,7 @@ describe('DataAccessRequirements', () => {
 
     await waitFor(() => {
       expect(notificationStore.get().title).toEqual(
-        'Error Syncronizing Training Status'
+        'Error Synchronizing Training Status'
       );
       expect(notificationStore.get().message).toEqual(
         'Deliberate testing failure for syncModulesExternal'
