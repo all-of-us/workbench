@@ -695,7 +695,7 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
         try {
           await externalSyncAction();
         } catch (exception) {
-          return Promise.reject(`Failed to syncronize ${adminPageTitle}`);
+          return Promise.reject(`Failed to synchronize ${adminPageTitle}`);
         }
       }
     })

@@ -959,7 +959,7 @@ describe(syncModulesExternal.name, () => {
     spyCompliance.mockImplementation(() => Promise.reject(null));
     expect(
       syncModulesExternal([AccessModule.CT_COMPLIANCE_TRAINING])
-    ).rejects.toEqual('Failed to syncronize Controlled Tier training');
+    ).rejects.toEqual('Failed to synchronize Controlled Tier training');
   });
 
   it('should return a rejected promise when one externalSyncAction fails ', () => {
@@ -978,6 +978,6 @@ describe(syncModulesExternal.name, () => {
         AccessModule.COMPLIANCE_TRAINING,
         AccessModule.ERA_COMMONS,
       ])
-    ).rejects.toEqual('Failed to syncronize Registered Tier training');
+    ).rejects.toEqual('Failed to synchronize Registered Tier training');
   });
 });
