@@ -710,7 +710,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         {
           customErrorResponseFormatter: (apiErrorResponse) => {
             return {
-              title: 'Error Synchronizing Modules',
+              title: 'Error Synchronizing Training Status',
               message: `${apiErrorResponse.originalResponse}`,
               showBugReportLink: true,
             };

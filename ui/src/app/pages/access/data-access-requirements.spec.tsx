@@ -2103,7 +2103,7 @@ describe('DataAccessRequirements', () => {
 
     await waitFor(() => {
       expect(notificationStore.get().title).toEqual(
-        'Error Syncronizing Modals'
+        'Error Syncronizing Training Status'
       );
       expect(notificationStore.get().message).toEqual(
         'Deliberate testing failure for syncModulesExternal'
