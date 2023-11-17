@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-import { AdminUserLink } from './admin-user-link';
-import { Profile } from "generated/fetch";
-import { userAdminApi } from "app/services/swagger-fetch-clients";
+import { Profile } from 'generated/fetch';
+
+import { AdminUserLink } from 'app/components/admin/admin-user-link';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 
 export const adminGetProfile = async (
   usernameWithDomain: string
