@@ -117,6 +117,7 @@ export const isDeletable = (status: AppStatus): boolean =>
     [
       AppStatus.STATUS_UNSPECIFIED,
       AppStatus.RUNNING,
+      AppStatus.STOPPED,
       AppStatus.ERROR,
     ] as Array<AppStatus>
   ).includes(status);
