@@ -8,6 +8,7 @@ import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { DARTitle } from 'app/pages/access/dar-title';
 import {
   getAccessModuleConfig,
   getStatusText,
@@ -72,7 +73,7 @@ export const Module = (props: {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
-  const { DARTitleComponent, refreshAction, isEnabledInEnvironment } =
+  const { refreshAction, isEnabledInEnvironment } =
     getAccessModuleConfig(moduleName);
 
   return isEnabledInEnvironment ? (
@@ -114,7 +115,8 @@ export const Module = (props: {
               ...{ fontWeight: 500 },
             }}
           >
-            <DARTitleComponent
+            <DARTitle
+              moduleName={moduleName}
               {...{ profile }}
               afterInitialClick={showRefresh}
               onClick={() => {
