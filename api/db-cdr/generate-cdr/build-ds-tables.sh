@@ -344,7 +344,8 @@ function do_PFHH(){
       ) b on a.concept_id = b.descendant_concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
-  WHERE a.is_standard = 0"
+  WHERE a.is_standard = 0
+    AND a.survey_concept_id = 1740639"
 }
 
 function do_COPE_vaccine(){
@@ -378,7 +379,8 @@ function do_COPE_vaccine(){
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
+  WHERE g.survey_version_concept_id IN (905047,1741006, 765936, 905055)"
 }
 
 function do_COPE(){
@@ -408,12 +410,12 @@ JOIN
                 AND parent_id = 0
                 AND concept_id IN (1333342)
             )
-        AND descendant_concept_id NOT IN (1310132, 1310137)
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
+WHERE g.survey_version_concept_id IN (2100000002, 2100000003, 2100000004, 2100000005, 2100000006, 2100000007)"
 }
 
 if [[ "$DOMAIN" = "observation" ]]; then
