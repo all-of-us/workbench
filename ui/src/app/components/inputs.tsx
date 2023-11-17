@@ -472,6 +472,7 @@ export const Select = ({ value, options, onChange, ...props }) => {
           zIndex: 1,
         }),
       }}
+      aria-label={props.ariaLabel}
       {...props}
     />
   );
