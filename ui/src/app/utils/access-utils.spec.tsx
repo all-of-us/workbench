@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Prompt } from 'react-router';
 import { mount, ReactWrapper } from 'enzyme';
 
 import {
