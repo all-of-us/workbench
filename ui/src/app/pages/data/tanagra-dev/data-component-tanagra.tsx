@@ -232,6 +232,7 @@ export const DataComponentTanagra = fp.flow(
       'cohorts',
       newCohort.id,
       'first',
+      'none',
     ]);
   };
 
