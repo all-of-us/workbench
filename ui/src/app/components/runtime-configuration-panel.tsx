@@ -67,6 +67,7 @@ import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
+import { initDerivedValues } from './runtime-configuration-panel-logic';
 
 const { useState, useEffect } = React;
 
@@ -102,30 +103,11 @@ export const RuntimeConfigurationPanel = fp.flow(
       googleProject
     );
 
-    if (!runtimeLoaded) {
-      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
-    }
-
-    // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    const currentRuntime =
-      crFromCustomRuntimeHook &&
-      crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
-        ? applyPresetOverride(
-            // The attached disk information is lost for deleted runtimes. In any case,
-            // by default we want to offer that the user reattach their existing disk,
-            // if any and if the configuration allows it.
-            maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
-          )
-        : crFromCustomRuntimeHook;
-
-    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
-    const existingRuntime =
-      pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
-    const existingAnalysisConfig = toAnalysisConfig(
-      existingRuntime,
-      gcePersistentDisk
-    );
+    const { currentRuntime, existingAnalysisConfig } = initDerivedValues({
+      crFromCustomRuntimeHook,
+      pendingRuntime,
+      gcePersistentDisk,
+    });
 
     const [analysisConfig, setAnalysisConfig] = useState(
       withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
@@ -338,6 +320,10 @@ export const RuntimeConfigurationPanel = fp.flow(
         [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
       ).includes(runtimeStatus) &&
       runtimeCanBeCreated;
+
+    if (!runtimeLoaded) {
+      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+    }
 
     return (
       <div id='runtime-panel'>
