@@ -192,6 +192,16 @@ def checkout_branch_or_tag(op, common)
     env_project = ENVIRONMENTS[environment_name_to_project_name(op.opts.env)]
     common.status op.opts.version ? "Checkout specified Tanagra tag" : "Using project specified tag from environment variables."
     deploy_version = op.opts.version ? op.opts.version : env_project.fetch(:tanagra_tag)
+
+    #### TEMP HACK
+    # fixes this error
+    #       error: Your local changes to the following files would be overwritten by checkout:
+    #               ui/src/apiContext.ts
+    #       Please commit your changes or stash them before you switch branches.
+    #       Aborting
+    common.run_inline %W{git checkout HEAD ui/src/apiContext.ts}
+    #### END TEMP HACK
+
     common.run_inline %W{git checkout tags/#{deploy_version}}
   end
 end
