@@ -16,6 +16,7 @@ import { FormSection } from 'app/components/forms';
 import { ValidationIcon } from 'app/components/icons';
 import {
   Error as ErrorDiv,
+  Select,
   styles as inputStyles,
   TextInputWithLabel,
 } from 'app/components/inputs';
@@ -25,6 +26,7 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { SupportMailto } from 'app/components/support';
 import { AouTitle } from 'app/components/text-wrappers';
 import { PubliclyDisplayed } from 'app/icons/publicly-displayed-icon';
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import {
   commonStyles,
   WhyWillSomeInformationBePublic,
@@ -36,7 +38,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
-  getRoleOptions,
 } from 'app/utils/institutions';
 import { notTooLong } from 'app/utils/validators';
 
@@ -389,18 +390,17 @@ export class AccountCreationInstitution extends React.Component<
                   Your institution will be notified that you have registered
                   using your institutional credentials.
                 </div>
-                <Dropdown
-                  ariaLabel='Institution'
-                  data-test-id='institution-dropdown'
-                  style={styles.wideInputSize}
-                  options={institutions.map((inst) => ({
-                    value: inst.shortName,
-                    label: inst.displayName,
-                  }))}
-                  value={institutionShortName}
-                  onChange={(e) => this.onInstitutionChange(e.value)}
-                  appendTo='self'
-                />
+                <div style={styles.wideInputSize}>
+                  <Select
+                    ariaLabel='Institution'
+                    options={institutions.map((inst) => ({
+                      value: inst.shortName,
+                      label: inst.displayName,
+                    }))}
+                    value={institutionShortName}
+                    onChange={(e) => this.onInstitutionChange(e)}
+                  />
+                </div>
                 {this.state.institutionLoadError && (
                   <ErrorDiv data-test-id='data-load-error'>
                     An error occurred loading the institution list. Please try
@@ -447,11 +447,11 @@ export class AccountCreationInstitution extends React.Component<
                   onBlur={() => this.onEmailBlur()}
                   onChange={(email) => this.updateContactEmail(email)}
                 >
-                  <div style={{ ...inputStyles.iconArea }}>
-                    <ValidationIcon
-                      data-test-id='email-validation-icon'
-                      validSuccess={this.isEmailValid()}
-                    />
+                  <div
+                    style={{ ...inputStyles.iconArea }}
+                    aria-label={'emailvalidation'}
+                  >
+                    <ValidationIcon validSuccess={this.isEmailValid()} />
                   </div>
                 </TextInputWithLabel>
                 {this.displayEmailErrorMessageIfNeeded()}
@@ -468,14 +468,11 @@ export class AccountCreationInstitution extends React.Component<
                       data-test-id='role-dropdown'
                       style={styles.wideInputSize}
                       placeholder={
-                        getRoleOptions(institutions, institutionShortName)
-                          ? ''
+                        institutionShortName
+                          ? 'Select Role'
                           : 'First select an institution above'
                       }
-                      options={getRoleOptions(
-                        institutions,
-                        institutionShortName
-                      )}
+                      options={AccountCreationOptions.institutionalRoleOptions}
                       value={institutionalRoleEnum}
                       appendTo='self'
                       onChange={(e) =>

@@ -73,8 +73,6 @@ public class DataSetController implements DataSetApiDelegate {
   public static final String EMPTY_CELL_MARKER = "";
   public static final String WHOLE_GENOME_VALUE = "VCF Files";
 
-  public static final String HAS_EHR_DATA_VALUE = "has_ehr_data";
-
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final DataSetService dataSetService;

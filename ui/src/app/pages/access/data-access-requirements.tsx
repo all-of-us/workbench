@@ -32,6 +32,7 @@ import {
   maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { ReactComponent as additional } from 'assets/icons/DAR/additional.svg';
 import { ReactComponent as electronic } from 'assets/icons/DAR/electronic.svg';
@@ -360,27 +361,26 @@ const handleRasCallback = (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
 ) => {
-  const handler = withErrorModal({
-    title: 'Error saving identity verification status.',
-    message:
-      'An error occurred trying to save your identity verification status. Please try again.',
-    onDismiss: () => {
-      spinnerProps.hideSpinner();
-    },
-  })(async () => {
-    spinnerProps.showSpinner();
-    await profileApi().linkRasAccount({
-      authCode: code,
-      redirectUrl: buildRasRedirectUrl(),
-    });
-    spinnerProps.hideSpinner();
-    reloadProfile();
+  const profilePromise = fetchWithErrorModal(
+    () =>
+      profileApi().linkRasAccount({
+        authCode: code,
+        redirectUrl: buildRasRedirectUrl(),
+      }),
+    {
+      customErrorResponseFormatter: (apiErrorResponse) => {
+        return {
+          title: 'Error Finalizing Identity Verification',
+          message: `Error reading identity provider (ID.me or Login.gov) response: ${apiErrorResponse.responseJson.message}`,
+          showBugReportLink: true,
+        };
+      },
+    }
+  );
 
-    // Cleanup parameter from URL after linking.
-    window.history.replaceState({}, '', '/');
-  });
-
-  return handler();
+  return profilePromise
+    .then(() => reloadProfile())
+    .finally(() => window.history.replaceState({}, '', '/'));
 };
 
 const selfBypass = async (
@@ -698,19 +698,30 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
-      const onMount = async () => {
-        await syncModulesExternal(
-          incompleteModules(
-            getEligibleModules(allInitialModules, profile),
-            profile,
-            pageMode
-          )
-        );
-        await reload();
-        spinnerProps.hideSpinner();
-      };
+      const syncModulesPromise = fetchWithErrorModal(
+        () =>
+          syncModulesExternal(
+            incompleteModules(
+              getEligibleModules(allInitialModules, profile),
+              profile,
+              pageMode
+            )
+          ),
+        {
+          customErrorResponseFormatter: (apiErrorResponse) => {
+            return {
+              title: 'Error Synchronizing Training Status',
+              message: `${apiErrorResponse.originalResponse}`,
+              showBugReportLink: true,
+            };
+          },
+        }
+      );
 
-      onMount();
+      syncModulesPromise
+        .then(async () => await reload())
+        .catch((e) => console.error(e))
+        .finally(() => spinnerProps.hideSpinner());
     }, []);
 
     /*

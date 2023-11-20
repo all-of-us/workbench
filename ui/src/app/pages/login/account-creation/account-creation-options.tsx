@@ -4,7 +4,6 @@ import {
   Ethnicity,
   GenderIdentity,
   InstitutionalRole,
-  OrganizationType,
   Race,
   SexAtBirth,
 } from 'generated/fetch';
@@ -74,58 +73,6 @@ export const AccountCreationOptions = {
     { label: 'Student', value: InstitutionalRole.STUDENT },
     { label: 'Administrator', value: InstitutionalRole.ADMIN },
     { label: 'Other (free text)', value: InstitutionalRole.OTHER },
-  ],
-  institutionalRolesByOrganizationType: [
-    {
-      type: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
-      roles: [
-        InstitutionalRole.UNDERGRADUATE,
-        InstitutionalRole.TRAINEE,
-        InstitutionalRole.FELLOW,
-        InstitutionalRole.EARLY_CAREER,
-        InstitutionalRole.MID_CAREER,
-        InstitutionalRole.LATE_CAREER,
-        InstitutionalRole.PROJECT_PERSONNEL,
-        InstitutionalRole.OTHER,
-      ],
-    },
-    {
-      type: OrganizationType.INDUSTRY,
-      // identical to the HEALTHCENTERNONPROFIT roles
-      roles: [
-        InstitutionalRole.PRE_DOCTORAL,
-        InstitutionalRole.POST_DOCTORAL,
-        InstitutionalRole.SENIOR_RESEARCHER,
-        InstitutionalRole.PROJECT_PERSONNEL,
-        InstitutionalRole.OTHER,
-      ],
-    },
-    {
-      type: OrganizationType.HEALTH_CENTER_NON_PROFIT,
-      // identical to the INDUSTRY roles
-      roles: [
-        InstitutionalRole.PRE_DOCTORAL,
-        InstitutionalRole.POST_DOCTORAL,
-        InstitutionalRole.SENIOR_RESEARCHER,
-        InstitutionalRole.PROJECT_PERSONNEL,
-        InstitutionalRole.OTHER,
-      ],
-    },
-    {
-      type: OrganizationType.EDUCATIONAL_INSTITUTION,
-      roles: [
-        InstitutionalRole.TEACHER,
-        InstitutionalRole.STUDENT,
-        InstitutionalRole.ADMIN,
-        InstitutionalRole.PROJECT_PERSONNEL,
-        InstitutionalRole.OTHER,
-      ],
-    },
-    {
-      type: OrganizationType.OTHER,
-      // display all roles for OTHER
-      roles: Object.keys(InstitutionalRole).map((k) => InstitutionalRole[k]),
-    },
   ],
   race: [
     { label: 'American Indian or Alaska Native (AI/AN)', value: Race.AIAN },

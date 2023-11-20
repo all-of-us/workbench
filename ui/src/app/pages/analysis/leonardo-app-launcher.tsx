@@ -16,6 +16,7 @@ import { Spinner } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookIcon } from 'app/icons/notebook-icon';
 import { ReminderIcon } from 'app/icons/reminder';
+import { analysisTabName, analysisTabPath } from 'app/routing/utils';
 import {
   leoJupyterApi,
   leoProxyApi,
@@ -27,16 +28,15 @@ import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { fetchAbortableRetry } from 'app/utils/retry';
+import { withRuntimeStore } from 'app/utils/runtime-hooks';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
   RuntimeStatusError,
   SparkConsolePath,
-  withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -578,7 +578,7 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          `workspaces/${namespace}/${id}/${analysisTabName}/${encodeURIComponent(
+          `${analysisTabPath(namespace, id)}/${encodeURIComponent(
             this.getFullJupyterNotebookName()
           )}`
         );

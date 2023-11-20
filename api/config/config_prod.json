@@ -92,7 +92,6 @@
   },
   "absorb": {
     "externalDepartmentId": "Researchers",
-    "enabledForNewUsers": true,
     "samlIdentityProviderId": "C02celxus",
     "samlServiceProviderId": "638082479253"
   },
@@ -124,7 +123,8 @@
     "enableRStudioGKEApp": false,
     "enableSasGKEApp": false,
     "enableDataExplorer": false,
-    "enableHasEhrData": false
+    "enableHasEhrData": true,
+    "enableGKEAppPausing": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

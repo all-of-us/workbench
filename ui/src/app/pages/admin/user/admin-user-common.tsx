@@ -30,6 +30,7 @@ import {
 import { TextInputWithLabel } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import { TooltipTrigger } from 'app/components/popups';
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import {
   institutionApi,
   userAdminApi,
@@ -49,7 +50,6 @@ import {
   isBypassed,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
-import { getRoleOptions } from 'app/utils/institutions';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -539,17 +539,13 @@ export const InstitutionalRoleDropdown = ({
   labelStyle,
   dropdownStyle,
 }: InstitutionalRoleDropdownProps) => {
-  const options = getRoleOptions(
-    institutions,
-    currentAffiliation?.institutionShortName
-  );
   return institutions && currentAffiliation ? (
     <DropdownWithLabel
       dataTestId='institutionalRole'
       className='institutional-role'
       label='Institutional role'
       disabled={!currentAffiliation?.institutionShortName}
-      options={options}
+      options={AccountCreationOptions.institutionalRoleOptions}
       currentValue={currentAffiliation?.institutionalRoleEnum}
       previousValue={previousRole}
       highlightOnChange={highlightOnChange}

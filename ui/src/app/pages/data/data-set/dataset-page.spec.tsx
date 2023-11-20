@@ -22,6 +22,7 @@ import {
 } from 'app/pages/data/data-set/dataset-page';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import { dataTabPath } from 'app/routing/utils';
 import {
   dataSetApi,
   registerApiClient,
@@ -78,9 +79,10 @@ describe('DataSetPage', () => {
     return mount(
       <MemoryRouter
         initialEntries={[
-          `/workspaces/${workspaceDataStub.namespace}/${
+          `${dataTabPath(
+            workspaceDataStub.namespace,
             workspaceDataStub.id
-          }/data/data-sets/${stubDataSet().id}`,
+          )}/data-sets/${stubDataSet().id}`,
         ]}
       >
         <Route exact path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'>
@@ -398,12 +400,10 @@ describe('DataSetPage', () => {
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async () => {
     const wrapper = component();
-    const pathPrefix =
-      'workspaces/' +
-      workspaceDataStub.namespace +
-      '/' +
-      workspaceDataStub.id +
-      '/data';
+    const pathPrefix = dataTabPath(
+      workspaceDataStub.namespace,
+      workspaceDataStub.id
+    );
 
     // Check Cohorts "+" link
     wrapper.find({ 'data-test-id': 'cohorts-link' }).first().simulate('click');
@@ -590,7 +590,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(16);
+    ).toBe(15);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -600,7 +600,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    ).toBe(14);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -611,7 +611,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(12);
+    ).toBe(11);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
@@ -622,7 +622,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(11);
+    ).toBe(10);
 
     // restore original CDR Version for other tests
     cdrVersionTiersResponse.tiers[0].versions[0] = originalCdrVersion;

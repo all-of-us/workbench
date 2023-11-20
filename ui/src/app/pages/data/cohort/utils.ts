@@ -78,9 +78,6 @@ export function domainToTitle(domain: any): string {
     case Domain.PERSON:
       domain = 'Demographics';
       break;
-    case Domain.PERSON_HAS_EHR_DATA:
-      domain = 'Demographics has EHR data';
-      break;
     case Domain.MEASUREMENT:
       domain = 'Labs and Measurements';
       break;

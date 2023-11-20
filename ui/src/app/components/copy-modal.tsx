@@ -20,13 +20,13 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { Spinner } from 'app/components/spinners';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { FlexRow } from './flex';
@@ -37,12 +37,6 @@ enum RequestState {
   COPY_ERROR,
   SUCCESS,
 }
-
-const ResourceTypeHomeTabs = new Map()
-  .set(ResourceType.NOTEBOOK, analysisTabName)
-  .set(ResourceType.COHORT, 'data')
-  .set(ResourceType.CONCEPT_SET, 'data')
-  .set(ResourceType.DATASET, 'data');
 
 export interface CopyModalProps {
   fromWorkspaceNamespace: string;
@@ -332,7 +326,8 @@ const CopyModal = withCdrVersions()(
     }
 
     renderActionButton() {
-      const resourceType = toDisplay(this.props.resourceType);
+      const { resourceType } = this.props;
+      const resourceString = toDisplay(resourceType);
       if (
         this.state.requestState === RequestState.UNSENT ||
         this.state.requestState === RequestState.COPY_ERROR
@@ -344,19 +339,21 @@ const CopyModal = withCdrVersions()(
             onClick={() => this.save()}
             data-test-id='copy-button'
           >
-            Copy {resourceType}
+            Copy {resourceString}
           </Button>
         );
       } else if (this.state.requestState === RequestState.SUCCESS) {
         const { namespace, id } = this.state.destination;
         return (
           <Button
-            path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(
-              this.props.resourceType
-            )}`}
+            path={
+              resourceType === ResourceType.NOTEBOOK
+                ? analysisTabPath(namespace, id)
+                : dataTabPath(namespace, id)
+            }
             style={{ marginLeft: '0.75rem' }}
           >
-            Go to Copied {resourceType}
+            Go to Copied {resourceString}
           </Button>
         );
       }

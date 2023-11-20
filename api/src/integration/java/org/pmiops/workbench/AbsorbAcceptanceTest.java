@@ -75,6 +75,10 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
         enrollments.stream()
             .filter(e -> e.courseId.equals(ComplianceTrainingServiceImpl.ctTrainingCourseId))
             .findFirst();
+    // Users are enrolled in CT training only after RT training is complete. This prevents
+    // first-time users from seeing two courses upon visiting Absorb and taking the wrong one. We
+    // were unable to directly link to the right course and this is a workaround. The logic for this
+    // is implemented on the Absorb side.
     assertThat(ctTrainingEnrollment.isPresent()).isFalse();
   }
 

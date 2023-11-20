@@ -64,24 +64,23 @@ export const AppsPanelButton = (props: Props) => {
     <TooltipTrigger content={disabledTooltip} disabled={!showTooltip}>
       <Clickable
         {...{ disabled, onClick }}
-        style={{ padding: '0.5em' }}
+        style={{
+          ...(disabled ? buttonStyles.disabledButton : buttonStyles.button),
+          margin: '0.5em',
+        }}
+        as={FlexColumn}
         data-test-id={`apps-panel-button-${buttonText.replace(' ', '-')}`}
         propagateDataTestId
+        role='button'
       >
-        <FlexColumn
-          style={disabled ? buttonStyles.disabledButton : buttonStyles.button}
+        <FontAwesomeIcon {...{ icon }} style={buttonStyles.buttonIcon} />
+        <div
+          style={
+            disabled ? buttonStyles.disabledButtonText : buttonStyles.buttonText
+          }
         >
-          <FontAwesomeIcon {...{ icon }} style={buttonStyles.buttonIcon} />
-          <div
-            style={
-              disabled
-                ? buttonStyles.disabledButtonText
-                : buttonStyles.buttonText
-            }
-          >
-            {buttonText}
-          </div>
-        </FlexColumn>
+          {buttonText}
+        </div>
       </Clickable>
     </TooltipTrigger>
   );

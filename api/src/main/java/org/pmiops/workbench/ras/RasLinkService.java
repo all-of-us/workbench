@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -141,7 +140,7 @@ public class RasLinkService {
   public DbUser linkRasAccount(String authCode, String redirectUrl) {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
-    String txnClaim;
+    String txnClaim = "";
     String aouUsername = userProvider.get().getUsername();
     try {
       // Oauth dance to get id token and access token.
@@ -168,7 +167,8 @@ public class RasLinkService {
             String.format(
                 "User does not have IAL2 enabled, acrClaim: %s, txn: %s", acrClaim, txnClaim));
         throw new ForbiddenException(
-            String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
+            String.format(
+                "User does not have IAL2 enabled (acrClaim: %s, txn: %s).", acrClaim, txnClaim));
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
@@ -178,8 +178,13 @@ public class RasLinkService {
                   + "from RAS access token for user (%s), txn:  %s",
               aouUsername, txnClaim));
     } catch (IOException e) {
-      log.log(Level.WARNING, "Failed to link RAS account", e);
-      throw new ServerErrorException("Failed to link RAS account", e);
+      log.warning(
+          String.format(
+              "Unable to retrieve user information from RAS access token, txn: %s", txnClaim));
+      throw new ServerErrorException(
+          String.format(
+              "Unable to retrieve user information from RAS access token (txn: %s).", txnClaim),
+          e);
     }
 
     String rasUsername = getUsername(userInfoResponse);
@@ -196,13 +201,14 @@ public class RasLinkService {
       log.info(
           String.format(
               "User has neither a valid id.me account "
-                  + "nor a valid login.gov account, "
-                  + "preferred_username: %s, txn: %s",
+                  + "nor a valid login.gov account ( "
+                  + "preferred_username: %s, txn: %s)",
               rasUsername, txnClaim));
       throw new ForbiddenException(
           String.format(
-              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
-              rasUsername));
+              "User has neither a valid id.me account nor a valid login.gov account "
+                  + "(preferred_username: %s, , txn: %s).",
+              rasUsername, txnClaim));
     }
 
     log.info(

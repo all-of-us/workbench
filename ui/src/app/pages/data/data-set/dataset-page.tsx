@@ -47,6 +47,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { CircleWithText } from 'app/icons/circleWithText';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -280,7 +281,6 @@ interface ImmutableListItemProps {
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
-  disabled?: boolean;
 }
 const ImmutableListItem = ({
   name,
@@ -288,7 +288,6 @@ const ImmutableListItem = ({
   onChange,
   checked,
   showSourceConceptIcon,
-  disabled,
 }: ImmutableListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
@@ -303,7 +302,6 @@ const ImmutableListItem = ({
             : styles.listItemCheckbox
         }
         checked={checked}
-        disabled={disabled}
       />
       <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
         <div
@@ -372,7 +370,10 @@ const ImmutableWorkspaceCohortListItem = ({
         </TooltipTrigger>
         <div style={{ marginLeft: 'auto', paddingRight: '1.5rem' }}>
           <StyledRouterLink
-            path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/reviews/cohort-description`}
+            path={`${dataTabPath(
+              namespace,
+              wid
+            )}/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
           >
             <ClrIcon size='20' shape='bar-chart' />
@@ -660,7 +661,6 @@ const BoxHeader = ({
 
 const prepackagedAllSurveyConceptSetToString = {
   PERSON: 'Demographics',
-  PERSON_HAS_EHR_DATA: 'Demographics Has EHR Data',
   SURVEY: 'All Surveys',
   FITBIT_HEART_RATE_SUMMARY: 'Fitbit Heart Rate Summary',
   FITBIT_ACTIVITY: 'Fitbit Activity Summary',
@@ -685,7 +685,6 @@ const prepackagedSurveyConceptSetToString = {
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
-  [PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA]: Domain.PERSON_HAS_EHR_DATA,
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
 };
 
@@ -755,7 +754,6 @@ const reverseDomainEnum = {
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
   ARRAY_DATA: Domain.ARRAY_DATA,
-  PERSON_HAS_EHR_DATA: Domain.PERSON_HAS_EHR_DATA,
 };
 
 // Temp workaround to prevent errors from mismatched upper and lower case values
@@ -950,11 +948,9 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![
-            domain,
-            Domain.PHYSICAL_MEASUREMENT_CSS,
-            Domain.PERSON_HAS_EHR_DATA,
-          ].includes(domainWithConceptSetId.domain)
+          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
+            domainWithConceptSetId.domain
+          )
         ) {
           updatedCrossDomainConceptSetList.add(
             domainWithConceptSetId.conceptSetId
@@ -1039,11 +1035,9 @@ export const DatasetPage = fp.flow(
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
           if (
-            ![
-              domain,
-              Domain.PHYSICAL_MEASUREMENT_CSS,
-              Domain.PERSON_HAS_EHR_DATA,
-            ].includes(domainWithConceptSetId.domain)
+            ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
+              domainWithConceptSetId.domain
+            )
           ) {
             newCrossDomainConceptSetList.add(
               domainWithConceptSetId.conceptSetId
@@ -1140,16 +1134,6 @@ export const DatasetPage = fp.flow(
       );
     };
 
-    const prepackagedIsDisabled = (prepackaged: string) =>
-      (prepackaged === PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
-        selectedPrepackagedConceptSets.includes(
-          PrePackagedConceptSetEnum.PERSON
-        )) ||
-      (prepackaged === PrePackagedConceptSetEnum.PERSON &&
-        selectedPrepackagedConceptSets.includes(
-          PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA
-        ));
-
     const selectPrePackagedConceptSet = (
       prepackaged: PrePackagedConceptSetEnum,
       selected: boolean
@@ -1184,14 +1168,6 @@ export const DatasetPage = fp.flow(
         }
         // if *any* of the individual survey is unselected, unselect all-surveys
         // code here ...
-        if (
-          prepackaged !== PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA &&
-          updatedPrepackaged.has(prepackaged)
-        ) {
-          updatedPrepackaged.delete(
-            PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA
-          );
-        }
         if (
           prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
           updatedPrepackaged.has(prepackaged) &&
@@ -1697,7 +1673,7 @@ export const DatasetPage = fp.flow(
     };
 
     const { namespace, id } = workspace;
-    const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
+    const pathPrefix = dataTabPath(namespace, id);
     const cohortsPath = pathPrefix + '/cohorts/build';
     const conceptSetsPath = pathPrefix + '/concepts';
     const exportError = !canWrite()
@@ -1826,7 +1802,6 @@ export const DatasetPage = fp.flow(
                         data-test-id='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
-                        disabled={prepackagedIsDisabled(p)}
                         onChange={() =>
                           selectPrePackagedConceptSet(
                             p,

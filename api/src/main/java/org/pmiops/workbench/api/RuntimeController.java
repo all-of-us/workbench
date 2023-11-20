@@ -197,8 +197,10 @@ public class RuntimeController implements RuntimeApiDelegate {
           // Find active disks for runtime VM. Block user from creating new disk.
           throw new BadRequestException(
               String.format(
-                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
-                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+                  "Can not create new runtime with new PD if user has active runtime PD. "
+                      + "Existing disks: %s, GceWithPdConfig in the request: %s",
+                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks),
+                  runtime.getGceWithPdConfig()));
         }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }

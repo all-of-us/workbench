@@ -181,29 +181,6 @@ export const ProfileComponent = fp.flow(
       }
     }
 
-    getRoleOptions(): Array<{ label: string; value: InstitutionalRole }> {
-      const { institutions, currentProfile } = this.state;
-      if (currentProfile) {
-        const selectedOrgType = institutions.find(
-          (inst) =>
-            inst.shortName ===
-            currentProfile.verifiedInstitutionalAffiliation.institutionShortName
-        );
-        if (selectedOrgType) {
-          const sel = selectedOrgType.organizationTypeEnum;
-
-          const availableRoles: Array<InstitutionalRole> =
-            AccountCreationOptions.institutionalRolesByOrganizationType.find(
-              (obj) => obj.type === sel
-            ).roles;
-
-          return AccountCreationOptions.institutionalRoleOptions.filter(
-            (option) => availableRoles.includes(option.value)
-          );
-        }
-      }
-    }
-
     saveProfileErrorMessage(errors) {
       return (
         <React.Fragment>
@@ -449,7 +426,9 @@ export const ProfileComponent = fp.flow(
                         style={{ width: '18.75rem' }}
                         data-test-id='role-dropdown'
                         placeholder='Your Role'
-                        options={this.getRoleOptions()}
+                        options={
+                          AccountCreationOptions.institutionalRoleOptions
+                        }
                         disabled={true}
                         value={
                           currentProfile.verifiedInstitutionalAffiliation

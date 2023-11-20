@@ -15,6 +15,7 @@ import {
   ComplianceTrainingModuleCardProps,
   ComplianceTrainingModuleCardTitle,
 } from 'app/pages/access/compliance-training-module-card-title';
+import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import {
   profileApi,
@@ -94,9 +95,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       tier: AccessTierShortNames.Registered,
     });
 
-    expect(
-      screen.queryByText(/responsible conduct of research training/i)
-    ).not.toBeNull();
+    expect(queryForRTTitle()).not.toBeNull();
   });
 
   it('renders controlled tier training title', () => {
@@ -105,7 +104,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       tier: AccessTierShortNames.Controlled,
     });
 
-    expect(screen.queryByText(/controlled tier training/i)).not.toBeNull();
+    expect(queryForCTTitle()).not.toBeNull();
   });
 
   it('shows help text if module is incomplete', async () => {

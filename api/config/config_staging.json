@@ -12,7 +12,7 @@
     "xAppIdValue": "staging-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.4",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.2.7",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-staging",
@@ -92,7 +92,6 @@
   },
   "absorb": {
     "externalDepartmentId": "Development",
-    "enabledForNewUsers": true,
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028"
   },
@@ -124,7 +123,8 @@
     "enableRStudioGKEApp": true,
     "enableSasGKEApp": true,
     "enableDataExplorer": false,
-    "enableHasEhrData": true
+    "enableHasEhrData": true,
+    "enableGKEAppPausing": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
