@@ -1,9 +1,16 @@
-import { Disk, Runtime, RuntimeStatus } from 'generated/fetch';
+import {
+  Disk,
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   maybeWithPersistentDisk,
+  PanelContent,
   toAnalysisConfig,
 } from 'app/utils/runtime-utils';
 
@@ -12,12 +19,10 @@ interface InitDerivedInProps {
   pendingRuntime: Runtime;
   gcePersistentDisk: Disk;
 }
-
 interface InitDerivedOutProps {
   currentRuntime: Runtime;
   existingAnalysisConfig: AnalysisConfig;
 }
-
 export const initDerivedValues = ({
   crFromCustomRuntimeHook,
   pendingRuntime,
@@ -46,3 +51,44 @@ export const initDerivedValues = ({
 
   return { currentRuntime, existingAnalysisConfig };
 };
+
+interface InitPanelProps {
+  initialPanelContent: PanelContent;
+  pendingRuntime: Runtime;
+  currentRuntime: Runtime;
+  runtimeStatus: RuntimeStatus;
+}
+export const initializePanelContent = ({
+  initialPanelContent,
+  pendingRuntime,
+  currentRuntime,
+  runtimeStatus,
+}: InitPanelProps): PanelContent =>
+  cond<PanelContent>(
+    [!!initialPanelContent, () => initialPanelContent],
+    // If there's a pendingRuntime, this means there's already a create/update
+    // in progress, even if the runtime store doesn't actively reflect this yet.
+    // Show the customize panel in this event.
+    [!!pendingRuntime, () => PanelContent.Customize],
+    [
+      currentRuntime === null ||
+        currentRuntime === undefined ||
+        runtimeStatus === RuntimeStatus.UNKNOWN,
+      () => PanelContent.Create,
+    ],
+    [
+      // General Analysis consist of GCE + PD. Display create page only if
+      // 1) currentRuntime + pd both are deleted and
+      // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
+      currentRuntime?.status === RuntimeStatus.DELETED &&
+        !currentRuntime?.gceWithPdConfig &&
+        (
+          [
+            RuntimeConfigurationType.GENERAL_ANALYSIS,
+            RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+          ] as Array<RuntimeConfigurationType>
+        ).includes(currentRuntime?.configurationType),
+      () => PanelContent.Create,
+    ],
+    () => PanelContent.Customize
+  );
