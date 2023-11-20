@@ -83,7 +83,8 @@ export const RuntimeConfigurationPanel = fp.flow(
   ({
     cdrVersionTiersResponse,
     workspace,
-    profileState,
+    workspace: { namespace, cdrVersionId, googleProject },
+    profileState: { profile },
     onClose = () => {},
     initialPanelContent = null,
     creatorFreeCreditsRemaining = null,
@@ -91,18 +92,19 @@ export const RuntimeConfigurationPanel = fp.flow(
     WithCdrVersions &
     WithCurrentWorkspace) => {
     const { runtimeLoaded } = useStore(runtimeStore);
-    if (!runtimeLoaded) {
-      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
-    }
-
-    const { profile } = profileState;
-    const { namespace, cdrVersionId, googleProject } = workspace;
-
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
     const [
       { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
       setRuntimeRequest,
     ] = useCustomRuntime(namespace, gcePersistentDisk);
+    const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
+      namespace,
+      googleProject
+    );
+
+    if (!runtimeLoaded) {
+      return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+    }
 
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
     const currentRuntime =
@@ -115,11 +117,6 @@ export const RuntimeConfigurationPanel = fp.flow(
             maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
           )
         : crFromCustomRuntimeHook;
-
-    const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
-      namespace,
-      googleProject
-    );
 
     // Prioritize the "pendingRuntime", if any. When an update is pending, we want
     // to render the target runtime details, which  may not match the current runtime.
@@ -471,6 +468,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                   analysisConfig,
                   attachedPdExists,
                   creatorFreeCreditsRemaining,
+                  currentRuntime,
                   environmentChanged,
                   existingAnalysisConfig,
                   gcePersistentDisk,
@@ -487,7 +485,6 @@ export const RuntimeConfigurationPanel = fp.flow(
                   updateMessaging,
                   validMainMachineTypes,
                 }}
-                currentRuntime={currentRuntime}
                 allowDataproc={
                   findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
                     ?.hasWgsData
