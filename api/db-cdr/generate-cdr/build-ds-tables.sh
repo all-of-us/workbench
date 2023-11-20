@@ -380,7 +380,7 @@ function do_COPE_vaccine(){
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
-  WHERE g.survey_version_concept_id IN (905047,1741006, 765936, 905055)"
+  WHERE g.survey_version_concept_id IN (905047, 1741006, 765936, 905055)"
 }
 
 function do_COPE(){
