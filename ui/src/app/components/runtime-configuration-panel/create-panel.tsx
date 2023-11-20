@@ -55,8 +55,8 @@ export const CreatePanel = ({
             onPause,
             onResume,
           }}
-          appType={UIAppType.JUPYTER}
           status={runtimeStatus}
+          appType={UIAppType.JUPYTER}
         />
         <FlexRow
           style={{ justifyContent: 'space-between', alignItems: 'center' }}
