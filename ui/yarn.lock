@@ -2026,10 +2026,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/color@^3.0.4":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.5.tgz#658fd9286a44c21dabaa56c2e2f63da3ac15f063"
-  integrity sha512-T9yHCNtd8ap9L/r8KEESu5RDMLkoWXHo7dTureNoI1dbp25NsCN054vOu09iniIjR21MXUL+LU9bkIWrbyg8gg==
+"@types/color@^3.0.5":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.6.tgz#29c27a99d4de2975e1676712679a0bd7f646a3fb"
+  integrity sha512-NMiNcZFRUAiUUCCf7zkAelY8eV3aKqfbzyFQlXpPIEeoNDbsEHGpb854V3gzTsGKYj830I5zPuOwU/TP5/cW6A==
   dependencies:
     "@types/color-convert" "*"
 
@@ -8181,7 +8181,7 @@ primeicons@^5.0.0:
   resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-5.0.0.tgz#73a0b6028a77c58a9eeb331ad13aaf085e8451ee"
   integrity sha512-heygWF0X5HFI1otlZE62pp6ye7sZ8om78J9au2BRkg8O7Y8AHTZ9qKMRzchZUHLe8zUAvdi6hZzzm9XxgwIExw==
 
-primereact@^9.6.2:
+primereact@^9.6.3:
   version "9.6.3"
   resolved "https://registry.yarnpkg.com/primereact/-/primereact-9.6.3.tgz#bcadfef1ce98edfa0bcbad9344158fcab2bc220f"
   integrity sha512-E1Apj4zHeEqFuNR43PFmcpYO51V17PDaVuZmYggEUxZHUo7XWoqkOGg7896SRRMDMBQcO3+HXdJQXi6DOWRV1g==
