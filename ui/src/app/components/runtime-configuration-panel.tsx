@@ -99,18 +99,22 @@ export const RuntimeConfigurationPanel = fp.flow(
     const { namespace, cdrVersionId, googleProject } = workspace;
 
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
-    let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
-      useCustomRuntime(namespace, gcePersistentDisk);
+    const [
+      { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
+      setRuntimeRequest,
+    ] = useCustomRuntime(namespace, gcePersistentDisk);
 
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    if (currentRuntime && currentRuntime.status === RuntimeStatus.DELETED) {
-      currentRuntime = applyPresetOverride(
-        // The attached disk information is lost for deleted runtimes. In any case,
-        // by default we want to offer that the user reattach their existing disk,
-        // if any and if the configuration allows it.
-        maybeWithPersistentDisk(currentRuntime, gcePersistentDisk)
-      );
-    }
+    const currentRuntime =
+      crFromCustomRuntimeHook &&
+      crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
+        ? applyPresetOverride(
+            // The attached disk information is lost for deleted runtimes. In any case,
+            // by default we want to offer that the user reattach their existing disk,
+            // if any and if the configuration allows it.
+            maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
+          )
+        : crFromCustomRuntimeHook;
 
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
@@ -467,7 +471,6 @@ export const RuntimeConfigurationPanel = fp.flow(
                   analysisConfig,
                   attachedPdExists,
                   creatorFreeCreditsRemaining,
-                  currentRuntime,
                   environmentChanged,
                   existingAnalysisConfig,
                   gcePersistentDisk,
@@ -484,6 +487,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                   updateMessaging,
                   validMainMachineTypes,
                 }}
+                currentRuntime={currentRuntime}
                 allowDataproc={
                   findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
                     ?.hasWgsData
