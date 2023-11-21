@@ -375,7 +375,7 @@ describe('ExpandedApp', () => {
       it(`should allow launching ${appType} when the app status is RUNNING`, async () => {
         const appName = 'my-app';
         const proxyUrl = 'https://example.com';
-        const userAppInfo = {
+        await component(appType, {
           appName,
           googleProject,
           appType: toAppType[appType],
@@ -383,8 +383,7 @@ describe('ExpandedApp', () => {
           proxyUrls: {
             [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
           },
-        };
-        await component(appType, userAppInfo);
+        });
 
         const localizeSpy = jest
           .spyOn(appsApi(), 'localizeApp')
@@ -413,9 +412,11 @@ describe('ExpandedApp', () => {
           );
 
           if (appType !== UIAppType.RSTUDIO) {
+            // Confirms SAS opens in a new Window
             expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
             expect(focusStub).toHaveBeenCalled();
           } else {
+            // Confirm navigate is called to launch RStudio in iframe
             expect(mockNavigate).toHaveBeenCalledWith([
               'workspaces',
               WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
