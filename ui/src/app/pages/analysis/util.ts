@@ -1,4 +1,4 @@
-import { FileDetail, Workspace } from 'generated/fetch';
+import { AppType, FileDetail, Workspace } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';

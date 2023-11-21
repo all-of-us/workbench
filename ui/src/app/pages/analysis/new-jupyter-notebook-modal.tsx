@@ -53,13 +53,12 @@ export const NewJupyterNotebookModal = (props: Props) => {
   }, [props.existingNameList]);
 
   const errors = validate(
-    // we expect the notebook name to lack the .ipynb suffix
-    // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
+    // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names
     { name: appendJupyterNotebookFileSuffix(name), kernel },
     {
       kernel: { presence: { allowEmpty: false } },
       name: nameValidationFormat(
-        existingNotebookNameList,
+        existingNotebookNameList.map(appendJupyterNotebookFileSuffix),
         ResourceType.NOTEBOOK
       ),
     }
