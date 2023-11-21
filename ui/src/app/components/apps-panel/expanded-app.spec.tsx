@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { mockNavigate } from 'setupTests';
 
 import {
   AppsApi,
@@ -20,6 +21,7 @@ import {
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 import {
@@ -86,6 +88,7 @@ describe('ExpandedApp', () => {
   runtimeStub.runtime.googleProject = googleProject;
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
+    currentWorkspaceStore.next(workspace);
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     leoRegisterApiClient(LeoAppsApi, new LeoAppsApiStub());
@@ -372,7 +375,7 @@ describe('ExpandedApp', () => {
       it(`should allow launching ${appType} when the app status is RUNNING`, async () => {
         const appName = 'my-app';
         const proxyUrl = 'https://example.com';
-        await component(appType, {
+        const userAppInfo = {
           appName,
           googleProject,
           appType: toAppType[appType],
@@ -380,7 +383,9 @@ describe('ExpandedApp', () => {
           proxyUrls: {
             [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
           },
-        });
+        };
+        await component(appType, userAppInfo);
+
         const localizeSpy = jest
           .spyOn(appsApi(), 'localizeApp')
           .mockImplementation((): Promise<any> => Promise.resolve());
@@ -407,8 +412,18 @@ describe('ExpandedApp', () => {
             }
           );
 
-          expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
-          expect(focusStub).toHaveBeenCalled();
+          if (appType !== UIAppType.RSTUDIO) {
+            expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+            expect(focusStub).toHaveBeenCalled();
+          } else {
+            expect(mockNavigate).toHaveBeenCalledWith([
+              'workspaces',
+              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+              WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+              UIAppType.RSTUDIO,
+              'default',
+            ]);
+          }
         });
       });
 

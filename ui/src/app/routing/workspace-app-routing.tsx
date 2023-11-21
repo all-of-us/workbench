@@ -4,9 +4,11 @@ import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import {
   LeoApplicationType,
@@ -99,6 +101,10 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
+const GKEAppRedirectPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(GKEAppLauncher);
 const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
@@ -203,6 +209,26 @@ export const WorkspaceRoutes = () => {
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.JupyterNotebook}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${UIAppType.RSTUDIO}/:appName`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <GKEAppRedirectPage
+          key='app'
+          routeData={{
+            pathElementForTitle: 'appName',
+            breadcrumb: BreadcrumbType.Analysis,
+            // The iframe we use to display the Jupyter notebook does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            workspaceNavBarTab: analysisTabName,
+            minimizeChrome: true,
+          }}
         />
       </AppRoute>
       <AppRoute

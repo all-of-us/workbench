@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import * as fp from 'lodash/fp';
 import {
   faGear,
   faRocket,
@@ -24,8 +25,11 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import {
+  NavigationProps,
+  setSidebarActiveIconStore,
+} from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
@@ -33,11 +37,13 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {
-  openRStudio,
+  openRStudioOrConfigPanel,
   openSAS,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
@@ -160,18 +166,24 @@ const CromwellButtonRow = (props: {
   );
 };
 
-const RStudioButtonRow = (props: {
+interface rstudioProps extends NavigationProps {
   userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  const { userApp, workspaceNamespace } = props;
-
+  workspace: WorkspaceData;
+}
+const RStudioButtonRow = fp.flow(
+  withNavigation,
+  withCurrentWorkspace()
+)((props: rstudioProps) => {
+  const {
+    userApp,
+    workspace: { namespace, id },
+    navigate,
+  } = props;
   const onClickLaunch = async () => {
-    openRStudio(workspaceNamespace, userApp);
+    openRStudioOrConfigPanel(namespace, id, [userApp], 'default', navigate);
   };
-
+  const workspaceNamespace = props.workspace.namespace;
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
-
   return (
     <FlexRow>
       <SettingsButton
@@ -197,7 +209,7 @@ const RStudioButtonRow = (props: {
       </TooltipTrigger>
     </FlexRow>
   );
-};
+});
 
 const SASButtonRow = (props: {
   userApp: UserAppEnvironment;
@@ -341,12 +353,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             ],
             [
               appType === UIAppType.RSTUDIO,
-              () => (
-                <RStudioButtonRow
-                  userApp={initialUserAppInfo}
-                  workspaceNamespace={workspace.namespace}
-                />
-              ),
+              () => <RStudioButtonRow userApp={initialUserAppInfo} />,
             ],
             [
               appType === UIAppType.SAS,
