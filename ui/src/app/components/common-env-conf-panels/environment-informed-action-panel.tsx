@@ -102,10 +102,13 @@ export const EnvironmentInformedActionPanel = ({
       <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
     )}
     <CostInfo
-      {...{ analysisConfig, environmentChanged }}
+      {...{
+        analysisConfig,
+        creatorFreeCreditsRemaining,
+        environmentChanged,
+        workspace,
+      }}
       currentUser={profile.username}
-      workspace={workspace}
-      creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
       isGKEApp={appType !== UIAppType.JUPYTER}
     />
   </FlexRow>

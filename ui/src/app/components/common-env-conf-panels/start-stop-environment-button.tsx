@@ -30,18 +30,22 @@ interface ButtonProps extends ImgProps {
   onClick?: () => void;
 }
 
-interface ComponentProps {
-  status: AppStatus | RuntimeStatus;
-  onPause: () => void;
-  onResume: () => void;
+export interface StartStopEnvironmentProps {
   appType: UIAppType;
+  status: AppStatus | RuntimeStatus;
+  // This component may be called in a context where pause and resume are not possible,
+  // so these functions are not always necessary.
+  // If we do somehow get into a state where they are *necessary* but not *provided*,
+  // we fail gracefully by present an unclickable icon here instead of crashing.
+  onPause?: () => void;
+  onResume?: () => void;
 }
 export const StartStopEnvironmentButton = ({
+  appType,
   status,
   onPause,
   onResume,
-  appType,
-}: ComponentProps) => {
+}: StartStopEnvironmentProps) => {
   const userEnvironmentStatus: UserEnvironmentStatus =
     toUserEnvironmentStatusByAppType(status, appType);
 
@@ -148,15 +152,9 @@ export const StartStopEnvironmentButton = ({
     ]
   );
 
-  {
-    /* height/width of the icon wrapper are set so that the img element can rotate inside it */
-  }
-  {
-    /* without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal */
-  }
-  {
-    /* is 50.9px, so we round up */
-  }
+  // height/width of the icon wrapper are set so that the img element can rotate inside it
+  // without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal
+  // is 50.9px, so we round up
   const iconWrapperStyle = {
     height: '51px',
     width: '51px',
