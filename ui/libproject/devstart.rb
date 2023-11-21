@@ -102,11 +102,6 @@ def deploy_tanagra_ui(cmd_name, args)
   env_project = ENVIRONMENTS[op.opts.project]
   env = env_project.fetch(:env_name)
   tanagra_dep("tanagra-dep", ["--env", "#{env}"])
-  #Temp hack to pass the bearer token
-  #This needs to be removed at some point
-  Dir.chdir('../tanagra-aou-utils') do
-    common.run_inline("cp -av apiContext.ts ./tanagra/ui/src")
-  end
 
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
@@ -136,12 +131,6 @@ def deploy_tanagra_ui(cmd_name, args)
       } + %W{--project #{gcc.project} #{promote}} +
       (op.opts.quiet ? %W{--quiet} : []) +
       (deploy_version ? %W{--version #{deploy_version}} : []))
-  end
-  #Cleanup tanagra folder
-  #Mainly because of the change to apiContext.ts
-  #This is a hack and should be removed once load balancing works correctly
-  Dir.chdir('../tanagra-aou-utils') do
-    common.run_inline("rm -rf tanagra")
   end
   common.status "Deployment of Tanagra UI complete!"
 end
