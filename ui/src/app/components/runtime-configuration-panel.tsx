@@ -357,12 +357,6 @@ const PanelMain = fp.flow(
                   setPanelContent,
                   workspace,
                 }}
-                onPause={() =>
-                  setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
-                }
-                onResume={() =>
-                  setRuntimeStatusRequest(RuntimeStatusRequest.Start)
-                }
               />
             ),
           ],

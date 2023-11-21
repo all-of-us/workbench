@@ -81,9 +81,9 @@ interface PanelProps {
   workspace: Workspace;
   analysisConfig: AnalysisConfig;
   status: AppStatus | RuntimeStatus;
-  onPause: () => void;
-  onResume: () => void;
   appType: UIAppType;
+  onPause?: () => void;
+  onResume?: () => void;
   environmentChanged?: boolean;
 }
 export const EnvironmentInformedActionPanel = ({
@@ -92,14 +92,14 @@ export const EnvironmentInformedActionPanel = ({
   workspace,
   analysisConfig,
   status,
+  appType,
   onPause,
   onResume,
-  appType,
   environmentChanged = false,
 }: PanelProps) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
     {appType === UIAppType.JUPYTER && (
-      <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
+      <StartStopEnvironmentButton {...{ status, appType, onPause, onResume }} />
     )}
     <CostInfo
       {...{

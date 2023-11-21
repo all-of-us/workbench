@@ -16,8 +16,6 @@ export interface CreatePanelProps {
   analysisConfig: AnalysisConfig;
   creatorFreeCreditsRemaining: number;
   onClose: () => void;
-  onPause: () => void;
-  onResume: () => void;
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
@@ -29,8 +27,6 @@ export const CreatePanel = ({
   analysisConfig,
   creatorFreeCreditsRemaining,
   onClose,
-  onPause,
-  onResume,
   profile,
   requestAnalysisConfig,
   runtimeCanBeCreated,
@@ -52,8 +48,6 @@ export const CreatePanel = ({
             profile,
             workspace,
             analysisConfig,
-            onPause,
-            onResume,
           }}
           status={runtimeStatus}
           appType={UIAppType.JUPYTER}
