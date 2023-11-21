@@ -34,7 +34,7 @@
     "@openapitools/openapi-generator-cli": "^2.7.0",
     "@terra-ui-packages/components": "0.0.4",
     "@terra-ui-packages/core-utils": "0.0.6",
-    "@types/color": "^3.0.2",
+    "@types/color": "^3.0.5",
     "@types/enzyme": "^3.10.15",
     "@types/jest": "^27.5.1",
     "@types/js-cookie": "^2.2.2",
