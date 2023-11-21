@@ -31,10 +31,9 @@ browserTest('create user', async browser => {
   }).then(sel => page.click(sel))
 
   await page.waitForSelector('#account-creation-institution') // Institution Page
-  // This could be replaced by aria-label but would require a change in UI
-  await page.waitForSelector('input[id="react-select-2-input"]')
+  await page.waitForSelector('[aria-label="Institution"]')
     .then(eh => eh.evaluate(e => e.parentNode.click()))
-  await page.type('input[id="react-select-2-input"]',"Broad Institute");
+  await page.type('[aria-label="Institution"]',"Broad Institute");
   await page.keyboard.press('Tab')
 
   // Email needs to be real or it will bounce and account creation will fail.
