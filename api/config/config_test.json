@@ -196,6 +196,6 @@
   },
   "tanagra": {
     "baseUrl": "https:\/\/aou-tanagra-dev.fake-research-aou.org",
-    "workbenchBaseUrl": "https://test.fake-research-aou.org"
+    "workbenchBaseUrl": "https:\/\/test.fake-research-aou.org"
   }
 }
