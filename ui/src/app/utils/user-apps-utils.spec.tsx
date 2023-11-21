@@ -122,7 +122,8 @@ describe('User Apps Helper functions', () => {
     // There will be no navigation to any other page
     expect(setSidebarActiveIconStore.value).toBe(rstudioConfigIconId);
   });
-  it('Will not open Config panel if RStudio App is running', async () => {
+
+  it('Will open RStudio App in iframe if app is running', async () => {
     const navigate = mockNavigate;
     expect(setSidebarActiveIconStore.value).toBeNull();
 
