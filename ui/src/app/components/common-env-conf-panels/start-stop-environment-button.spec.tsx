@@ -2,7 +2,6 @@ import '@testing-library/jest-dom';
 
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
-import { appTypeToString } from '../../utils/user-apps-utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import { UIAppType } from 'app/components/apps-panel/utils';
 

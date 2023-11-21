@@ -3,7 +3,6 @@ import { CSSProperties } from 'react';
 
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
-import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import {
   toUserEnvironmentStatusByAppType,
   UIAppType,
@@ -33,10 +32,10 @@ interface ButtonProps extends ImgProps {
 export interface StartStopEnvironmentProps {
   appType: UIAppType;
   status: AppStatus | RuntimeStatus;
-  // This component may be called in a context where pause and resume are not possible,
+  // This component may be called in a context where pause or resume is not possible,
   // so these functions are not always necessary.
   // If we do somehow get into a state where they are *necessary* but not *provided*,
-  // we fail gracefully by present an unclickable icon here instead of crashing.
+  // we fail gracefully by presenting an unclickable icon here instead of crashing.
   onPause?: () => void;
   onResume?: () => void;
 }
@@ -50,107 +49,67 @@ export const StartStopEnvironmentButton = ({
     toUserEnvironmentStatusByAppType(status, appType);
 
   const rotateStyle = { animation: 'rotation 2s infinite linear' };
-  const { onClick = null, ...imgProps } = switchCase<
-    UserEnvironmentStatus,
-    ButtonProps
-  >(
-    userEnvironmentStatus,
-    [
-      UserEnvironmentStatus.CREATING,
-      () => ({
-        alt: 'Environment creation in progress',
-        src: computeStarting,
-        'data-test-id': 'environment-status-icon-starting',
-        style: rotateStyle,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.RUNNING,
-      () => ({
-        alt: 'Environment running, click to pause',
-        src: computeRunning,
-        'data-test-id': 'environment-status-icon-running',
-        onClick: onPause,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.UPDATING,
-      () => ({
-        alt: 'Environment update in progress',
-        src: computeStarting,
-        'data-test-id': 'environment-status-icon-starting',
-        style: rotateStyle,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.ERROR,
-      () => ({
-        alt: 'Environment in error state',
-        src: computeError,
-        'data-test-id': 'environment-status-icon-error',
-      }),
-    ],
-    [
-      UserEnvironmentStatus.PAUSING,
-      () => ({
-        alt: 'Environment pause in progress',
-        src: computeStopping,
-        'data-test-id': 'environment-status-icon-stopping',
-        style: rotateStyle,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.PAUSED,
-      () => ({
-        alt: 'Environment paused, click to resume',
-        src: computeStopped,
-        'data-test-id': 'environment-status-icon-stopped',
-        onClick: onResume,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.RESUMING,
-      () => ({
-        alt: 'Environment resume in progress',
-        src: computeStarting,
-        'data-test-id': 'environment-status-icon-starting',
-        style: rotateStyle,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.DELETING,
-      () => ({
-        alt: 'Environment deletion in progress',
-        src: computeStopping,
-        'data-test-id': 'environment-status-icon-stopping',
-        style: rotateStyle,
-      }),
-    ],
-    [
-      UserEnvironmentStatus.DELETED,
-      () => ({
-        alt: 'Environment has been deleted',
-        src: computeNone,
-        'data-test-id': 'environment-status-icon-none',
-      }),
-    ],
-    [
-      UserEnvironmentStatus.UNKNOWN,
-      () => ({
-        alt: 'Environment status unknown',
-        src: computeNone,
-        'data-test-id': 'environment-status-icon-none',
-      }),
-    ],
-    [
-      DEFAULT,
-      () => ({
-        alt: 'No Environment found',
-        src: computeNone,
-        'data-test-id': 'environment-status-icon-none',
-      }),
-    ]
-  );
+
+  const toProps: Record<UserEnvironmentStatus, ButtonProps> = {
+    [UserEnvironmentStatus.CREATING]: {
+      alt: 'Environment creation in progress',
+      src: computeStarting,
+      'data-test-id': 'environment-status-icon-starting',
+      style: rotateStyle,
+    },
+    [UserEnvironmentStatus.RUNNING]: {
+      alt: 'Environment running, click to pause',
+      src: computeRunning,
+      'data-test-id': 'environment-status-icon-running',
+      onClick: onPause,
+    },
+    [UserEnvironmentStatus.UPDATING]: {
+      alt: 'Environment update in progress',
+      src: computeStarting,
+      'data-test-id': 'environment-status-icon-starting',
+      style: rotateStyle,
+    },
+    [UserEnvironmentStatus.ERROR]: {
+      alt: 'Environment in error state',
+      src: computeError,
+      'data-test-id': 'environment-status-icon-error',
+    },
+    [UserEnvironmentStatus.PAUSING]: {
+      alt: 'Environment pause in progress',
+      src: computeStopping,
+      'data-test-id': 'environment-status-icon-stopping',
+      style: rotateStyle,
+    },
+    [UserEnvironmentStatus.PAUSED]: {
+      alt: 'Environment paused, click to resume',
+      src: computeStopped,
+      'data-test-id': 'environment-status-icon-stopped',
+      onClick: onResume,
+    },
+    [UserEnvironmentStatus.RESUMING]: {
+      alt: 'Environment resume in progress',
+      src: computeStarting,
+      'data-test-id': 'environment-status-icon-starting',
+      style: rotateStyle,
+    },
+    [UserEnvironmentStatus.DELETING]: {
+      alt: 'Environment deletion in progress',
+      src: computeStopping,
+      'data-test-id': 'environment-status-icon-stopping',
+      style: rotateStyle,
+    },
+    [UserEnvironmentStatus.DELETED]: {
+      alt: 'Environment has been deleted',
+      src: computeNone,
+      'data-test-id': 'environment-status-icon-none',
+    },
+    [UserEnvironmentStatus.UNKNOWN]: {
+      alt: 'Environment status unknown',
+      src: computeNone,
+      'data-test-id': 'environment-status-icon-none',
+    },
+  };
+  const { onClick, ...imgProps } = toProps[userEnvironmentStatus];
 
   // height/width of the icon wrapper are set so that the img element can rotate inside it
   // without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal
