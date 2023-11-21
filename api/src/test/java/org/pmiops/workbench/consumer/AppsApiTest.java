@@ -1,57 +1,63 @@
 package org.pmiops.workbench.consumer;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import org.junit.jupiter.api.BeforeEach;
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
+import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.annotations.Pact;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.web.client.RestTemplate;
-import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 
 @ExtendWith(PactConsumerTestExt.class)
 class ProductServiceTest {
 
-  private WireMockServer wireMockServer;
-  private AppsApi leoAppService;
-
-  @BeforeEach
-  void setUp() {
-    wireMockServer = new WireMockServer(options().dynamicPort());
-
-    wireMockServer.start();
-
-    RestTemplate restTemplate = new RestTemplateBuilder().rootUri(wireMockServer.baseUrl()).build();
-
-    ApiClient client = new ApiClient();
-    client.setBasePath(wireMockServer.baseUrl());
-    leoAppService = new AppsApi(client);
+  @Pact(consumer = "x", provider = "y")
+  RequestResponsePact getApp(PactDslWithProvider builder) throws ApiException {
+    return builder
+        .given("a")
+        .uponReceiving("b")
+        .method("GET")
+        .path("/api/google/v1/apps/googleProject/appName")
+        .willRespondWith()
+        .status(200)
+        .headers(headers())
+        .body(newJsonBody(body -> {
+          body.stringType("appName", "MinivanB");
+          body.stringType("status", "RUNNING");
+          body.stringType("diskName", "Porg");
+          body.stringType("appType","CROMWELL");
+          body.array("errors", errors -> {});
+        }).build())
+        .toPact();
   }
 
   @Test
-  void getApp() throws ApiException {
-    wireMockServer.stubFor(
-        get(urlPathEqualTo("/api/google/v1/apps/x/y"))
-            .willReturn(
-                aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        "{\"id\":\"10\",\"type\":\"CREDIT_CARD\",\"name\":\"28 Degrees\",\"version\":\"v1\"}")));
+  @PactTestFor(pactMethod = "getApp")
+  void getProductById_whenProductWithId10Exists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi leoAppService = new AppsApi(client);
+    LeonardoGetAppResponse expected = new LeonardoGetAppResponse();
+    expected.setAppName("Minivan");
 
-    LeonardoGetAppResponse expected = null;
+    LeonardoGetAppResponse response = leoAppService.getApp("googleProject", "appName");
 
-    LeonardoGetAppResponse appResponse = leoAppService.getApp("x", "y");
+    assertEquals(expected, response);
+  }
 
-    assertEquals(expected, appResponse);
+  private Map<String, String> headers() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Content-Type", "application/json; charset=utf-8");
+    return headers;
   }
 }
