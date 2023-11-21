@@ -64,7 +64,7 @@
     "react": "^17",
     "react-calendar": "^2.18.1",
     "react-dom": "^17",
-    "react-google-recaptcha": "2.1.0",
+    "react-google-recaptcha": "^2.1.0",
     "react-iframe": "^1.8.0",
     "react-interactive": "^0.9.1",
     "react-modal": "^3.16.1",
