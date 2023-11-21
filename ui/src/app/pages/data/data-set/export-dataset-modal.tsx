@@ -30,7 +30,7 @@ import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
   dropJupyterNotebookFileSuffix,
-  getExistingNotebookNames,
+  getExistingJupyterNotebookNames,
 } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
@@ -233,7 +233,7 @@ export const ExportDatasetModal = ({
   }
 
   useEffect(() => {
-    getExistingNotebookNames(workspace)
+    getExistingJupyterNotebookNames(workspace)
       .then(setExistingNotebooks)
       .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);

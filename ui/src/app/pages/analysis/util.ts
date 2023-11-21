@@ -1,4 +1,4 @@
-import { FileDetail } from 'generated/fetch';
+import { AppType, FileDetail } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
@@ -74,11 +74,16 @@ export const listNotebooks = (workspace): Promise<FileDetail[]> => {
   return notebooksApi().getNoteBookList(namespace, id);
 };
 
-export const getExistingNotebookNames = async (
+export const getExistingJupyterNotebookNames = async (
   workspace
 ): Promise<string[]> => {
   const notebooks = await listNotebooks(workspace);
-  return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
+  return notebooks
+    .filter(
+      (fd: FileDetail) =>
+        getAppInfoFromFileName(fd.name).appType === UIAppType.JUPYTER
+    )
+    .map((fd: FileDetail) => dropJupyterNotebookFileSuffix(fd.name));
 };
 
 const appsExtensionMap = [
