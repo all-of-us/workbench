@@ -400,9 +400,12 @@ export const WorkspaceEdit = fp.flow(
         },
       } = this.props;
 
+      const freeTierUsageInNumber = freeTierUsage ?? 0;
+
+      const initialCreditsBalance = freeTierDollarQuota - freeTierUsageInNumber;
       return (
         'Use All of Us initial credits - ' +
-        formatInitialCreditsUSD(freeTierDollarQuota - (freeTierUsage ?? 0)) +
+        formatInitialCreditsUSD(initialCreditsBalance) +
         ' left'
       );
     }
