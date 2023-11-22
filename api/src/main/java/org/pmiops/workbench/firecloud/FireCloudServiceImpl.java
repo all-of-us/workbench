@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
+import org.broadinstitute.dsde.workbench.client.sam.model.TermsOfServiceComplianceStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
@@ -52,6 +53,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequestClone;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryException;
@@ -100,6 +102,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final CalhounRetryHandler calhounRetryHandler;
   private final FirecloudRetryHandler retryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
+  private final SamRetryHandler samRetryHandler;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -153,6 +156,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       FirecloudRetryHandler retryHandler,
       RawlsRetryHandler rawlsRetryHandler,
       CalhounRetryHandler calhounRetryHandler,
+      SamRetryHandler samRetryHandler,
 
       // old Terms of Service endpoints, before Nov 2023 update
       @Deprecated(forRemoval = true)
@@ -176,6 +180,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.rawlsRetryHandler = rawlsRetryHandler;
     this.calhounRetryHandler = calhounRetryHandler;
+    this.samRetryHandler = samRetryHandler;
     this.firecloudTermsOfServiceApiProvider = firecloudTermsOfServiceApiProvider;
     this.termsOfServiceApiProvider = termsOfServiceApiProvider;
   }
@@ -580,9 +585,17 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Deprecated(forRemoval = true)
   @Override
-  public boolean getUserTermsOfServiceStatus() throws ApiException {
+  public boolean getUserTermsOfServiceStatusDeprecated() {
     org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
         firecloudTermsOfServiceApiProvider.get();
     return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
+  }
+
+  // new Terms of Service endpoints, after Nov 2023 update
+
+  @Override
+  public TermsOfServiceComplianceStatus getUserTermsOfServiceStatus() {
+    TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
+    return samRetryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceComplianceStatus());
   }
 }

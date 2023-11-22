@@ -270,7 +270,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void getUserTermsOfServiceStatus() throws ApiException {
-    service.getUserTermsOfServiceStatus();
+    service.getUserTermsOfServiceStatusDeprecated();
     verify(termsOfServiceApi).getTermsOfServiceStatus();
   }
 }

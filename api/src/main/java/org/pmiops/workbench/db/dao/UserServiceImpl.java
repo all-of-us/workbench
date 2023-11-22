@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.sam.model.TermsOfServiceComplianceStatus;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -444,11 +445,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   // service
   @Override
   public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
-    return validateAllOfUsTermsOfServiceVersion(dbUser) && getUserTerraTermsOfServiceStatus(dbUser);
+    return validateAllOfUsTermsOfServiceVersion(dbUser) && getDeprecatedTerraTermsOfServiceStatus(dbUser);
   }
 
   @Override
-  public boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
+  public boolean getDeprecatedTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
+    try {
+      return fireCloudService.getUserTermsOfServiceStatusDeprecated();
+    } catch (ApiException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Error while getting Terra Terms of Service status for user %s",
+              dbUser.getUsername()));
+      throw new ServerErrorException(e);
+    }
+  }
+
+  private boolean getUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
+    return getUserTerraToSStatus(dbUser).getUserHasAcceptedLatestTos();
+  }
+
+  private boolean getUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {
+    return getUserTerraToSStatus(dbUser).getPermitsSystemUsage();
+  }
+
+  private TermsOfServiceComplianceStatus getUserTerraToSStatus(@Nonnull DbUser dbUser) {
     try {
       return fireCloudService.getUserTermsOfServiceStatus();
     } catch (ApiException e) {

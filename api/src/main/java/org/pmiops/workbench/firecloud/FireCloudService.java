@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.sam.model.TermsOfServiceComplianceStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -140,5 +141,7 @@ public interface FireCloudService {
 
   void acceptTermsOfService();
 
-  boolean getUserTermsOfServiceStatus() throws ApiException;
+  boolean getUserTermsOfServiceStatusDeprecated();
+
+  TermsOfServiceComplianceStatus getUserTermsOfServiceStatus();
 }
