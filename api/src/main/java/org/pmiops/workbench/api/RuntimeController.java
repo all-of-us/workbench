@@ -1,5 +1,11 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
+
 import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Map;
@@ -201,16 +207,9 @@ public class RuntimeController implements RuntimeApiDelegate {
 
       var labels = persistentDiskRequest.getLabels();
       labels =
-          LeonardoLabelHelper.upsertLeonardoLabel(
-              labels,
-              LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME,
-              LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE);
-      labels =
-          LeonardoLabelHelper.upsertLeonardoLabel(
-              labels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
-      labels =
-          LeonardoLabelHelper.upsertLeonardoLabel(
-              labels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
+          upsertLeonardoLabel(labels, LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace);
+      labels = upsertLeonardoLabel(labels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
       persistentDiskRequest.labels(labels);
     }
 
