@@ -61,8 +61,6 @@ public interface UserService {
 
   boolean validateTermsOfService(@Nonnull DbUser dbUser);
 
-  boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser);
-
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
 

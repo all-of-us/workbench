@@ -311,7 +311,7 @@ public class ProfileControllerTest extends BaseControllerTest {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
       when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(true);
-    } catch (ApiException | org.pmiops.workbench.firecloud.ApiException e) {
+    } catch (ApiException e) {
       e.printStackTrace();
     }
 

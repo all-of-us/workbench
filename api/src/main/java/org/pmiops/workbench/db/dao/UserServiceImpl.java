@@ -45,7 +45,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
@@ -445,14 +444,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   // service
   @Override
   public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
-    return validateAllOfUsTermsOfServiceVersion(dbUser) && getDeprecatedTerraTermsOfServiceStatus(dbUser);
+    return validateAllOfUsTermsOfServiceVersion(dbUser)
+        && getDeprecatedTerraTermsOfServiceStatus(dbUser);
   }
 
-  @Override
-  public boolean getDeprecatedTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
+  private boolean getDeprecatedTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
     try {
       return fireCloudService.getUserTermsOfServiceStatusDeprecated();
-    } catch (ApiException e) {
+    } catch (Exception e) {
       log.log(
           Level.SEVERE,
           String.format(
@@ -473,7 +472,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private TermsOfServiceComplianceStatus getUserTerraToSStatus(@Nonnull DbUser dbUser) {
     try {
       return fireCloudService.getUserTermsOfServiceStatus();
-    } catch (ApiException e) {
+    } catch (Exception e) {
       log.log(
           Level.SEVERE,
           String.format(
