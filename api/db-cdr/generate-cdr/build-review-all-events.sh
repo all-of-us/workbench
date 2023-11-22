@@ -34,7 +34,7 @@ JOIN
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     and parent_id = 0
-                    and concept_id not in (1333342, 1740639)
+                    and concept_id not in (1741006, 1333342, 1740639)
             )
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
@@ -47,12 +47,12 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
 SELECT  DISTINCT a.person_id,
-        a.observation_id as data_id,
-        case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
-        c.name as survey,
+        o.observation_id as data_id,
+        case when a.entry_datetime is null then CAST(a.entry_date AS TIMESTAMP) else a.entry_datetime end as survey_datetime,
+        f.concept_name as survey,
         d.concept_name as question,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
 JOIN
     (
         SELECT *
@@ -65,11 +65,12 @@ JOIN
                     AND parent_id = 0
                     AND concept_id IN (1333342)
             )
-            AND descendant_concept_id NOT IN (1310132, 1310137)
-    ) b on a.observation_source_concept_id = b.descendant_concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+    ) b ON (a.concept_id = b.descendant_concept_id AND a.survey_concept_id = b.ancestor_concept_id)
+JOIN \`$BQ_PROJECT.$BQ_DATASET.observation\` o ON (a.entry_date = o.observation_date AND a.person_id = o.person_id AND a.concept_id = o.observation_source_concept_id AND a.value_source_concept_id = o.value_source_concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` f on b.ancestor_concept_id = f.concept_id
+WHERE a.is_standard = 0"
 
 # Insert PFHH survey data
 echo "Inserting PFHH survey data into cb_review_survey"
