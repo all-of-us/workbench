@@ -33,7 +33,6 @@ public class CalhounConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ConvertApi endUserCalhounApi(
       @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
-    // Billing calls are made by the user
     ConvertApi api = new ConvertApi();
     api.setApiClient(apiClient);
     return api;

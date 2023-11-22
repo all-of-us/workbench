@@ -310,8 +310,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-      when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
-    } catch (ApiException | org.pmiops.workbench.firecloud.ApiException e) {
+      when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(true);
+    } catch (ApiException e) {
       e.printStackTrace();
     }
 
@@ -604,9 +604,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
-      throws org.pmiops.workbench.firecloud.ApiException {
-    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS() {
+    when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
     assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
@@ -705,7 +704,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void test_AcceptTermsOfService() {
     createAccountAndDbUserWithAffiliation();
     profileController.acceptTermsOfService(1);
-    verify(mockFireCloudService).acceptTermsOfService();
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test
