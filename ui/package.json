@@ -81,7 +81,7 @@
     "stacktrace-js": "^2.0.0",
     "swr": "^1.3.0",
     "typescript": "^4.9.5",
-    "validate.js": "^0.12.0",
+    "validate.js": "^0.13.1",
     "yarn": "^1.22.0"
   },
   "devDependencies": {
