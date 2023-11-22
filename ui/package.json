@@ -45,7 +45,7 @@
     "@types/react-modal": "^3.16.1",
     "@types/react-onclickoutside": "^6.7.6",
     "@types/react-router-dom": "^5.3.2",
-    "@webcomponents/custom-elements": "^1.0.0",
+    "@webcomponents/custom-elements": "^1.6.0",
     "classnames": "^2.2.6",
     "color": "^3.1.1",
     "highcharts": "^9.3.3",
