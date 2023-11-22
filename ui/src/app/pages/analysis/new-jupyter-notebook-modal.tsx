@@ -14,7 +14,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { getExistingNotebookNames } from 'app/pages/analysis/util';
+import { getExistingJupyterNotebookNames } from 'app/pages/analysis/util';
 import { analysisTabName } from 'app/routing/utils';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
@@ -46,7 +46,9 @@ export const NewJupyterNotebookModal = (props: Props) => {
     if (!!existingNameList) {
       setExistingNotebookNameList(existingNameList);
     } else {
-      getExistingNotebookNames(workspace).then(setExistingNotebookNameList);
+      getExistingJupyterNotebookNames(workspace).then(
+        setExistingNotebookNameList
+      );
     }
   }, [props.existingNameList]);
 

@@ -1,4 +1,4 @@
-import { FileDetail } from 'generated/fetch';
+import { FileDetail, Workspace } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
@@ -69,18 +69,6 @@ export function appendAnalysisFileSuffixByOldName(
   );
 }
 
-export const listNotebooks = (workspace): Promise<FileDetail[]> => {
-  const { namespace, id } = workspace;
-  return notebooksApi().getNoteBookList(namespace, id);
-};
-
-export const getExistingNotebookNames = async (
-  workspace
-): Promise<string[]> => {
-  const notebooks = await listNotebooks(workspace);
-  return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
-};
-
 const appsExtensionMap = [
   {
     extension: JUPYTER_FILE_EXT,
@@ -106,4 +94,21 @@ const appsExtensionMap = [
 
 export const getAppInfoFromFileName = (name: string) => {
   return appsExtensionMap.find((app) => name.endsWith(app.extension));
+};
+
+export const listNotebooks = (workspace: Workspace): Promise<FileDetail[]> => {
+  const { namespace, id } = workspace;
+  return notebooksApi().getNoteBookList(namespace, id);
+};
+
+export const getExistingJupyterNotebookNames = async (
+  workspace: Workspace
+): Promise<string[]> => {
+  const notebooks = await listNotebooks(workspace);
+  return notebooks
+    .filter(
+      (fd: FileDetail) =>
+        getAppInfoFromFileName(fd.name).appType === UIAppType.JUPYTER
+    )
+    .map((fd: FileDetail) => dropJupyterNotebookFileSuffix(fd.name));
 };
