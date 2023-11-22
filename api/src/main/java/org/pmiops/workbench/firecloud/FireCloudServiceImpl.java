@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
+import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
@@ -31,7 +32,6 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
-import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -74,10 +74,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
-
-  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
-      requestScopedGroupCacheProvider;
 
   // We call some of the endpoints in these APIs with the user's credentials
   // and others with the app's Service Account credentials
@@ -91,10 +87,19 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
-  private final FirecloudRetryHandler retryHandler;
-  private final RawlsRetryHandler rawlsRetryHandler;
+  // old Terms of Service endpoints, before Nov 2023 update
+  @Deprecated(forRemoval = true)
+  private final Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
+      firecloudTermsOfServiceApiProvider;
+
+  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
+
+  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+      requestScopedGroupCacheProvider;
 
   private final CalhounRetryHandler calhounRetryHandler;
+  private final FirecloudRetryHandler retryHandler;
+  private final RawlsRetryHandler rawlsRetryHandler;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -140,7 +145,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(RawlsConfig.SERVICE_ACCOUNT_WORKSPACE_API)
           Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider,
       Provider<StatusApi> statusApiProvider,
-      Provider<TermsOfServiceApi> termsOfServiceApiProvider,
       @Qualifier(FireCloudConfig.END_USER_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
@@ -148,7 +152,13 @@ public class FireCloudServiceImpl implements FireCloudService {
               requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
       RawlsRetryHandler rawlsRetryHandler,
-      CalhounRetryHandler calhounRetryHandler) {
+      CalhounRetryHandler calhounRetryHandler,
+
+      // old Terms of Service endpoints, before Nov 2023 update
+      @Deprecated(forRemoval = true)
+          Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
+              firecloudTermsOfServiceApiProvider,
+      Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.serviceAccountBillingV2ApiProvider = serviceAccountBillingV2ApiProvider;
@@ -161,12 +171,13 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.retryHandler = retryHandler;
     this.rawlsRetryHandler = rawlsRetryHandler;
     this.calhounRetryHandler = calhounRetryHandler;
+    this.firecloudTermsOfServiceApiProvider = firecloudTermsOfServiceApiProvider;
+    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
   }
 
   @Override
@@ -557,15 +568,21 @@ public class FireCloudServiceImpl implements FireCloudService {
     return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
   }
 
+  // old Terms of Service endpoints, before Nov 2023 update
+
+  @Deprecated(forRemoval = true)
   @Override
   public void acceptTermsOfService() {
-    TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
+    org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
+        firecloudTermsOfServiceApiProvider.get();
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
 
+  @Deprecated(forRemoval = true)
   @Override
   public boolean getUserTermsOfServiceStatus() throws ApiException {
-    TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
+    org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
+        firecloudTermsOfServiceApiProvider.get();
     return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
   }
 }
