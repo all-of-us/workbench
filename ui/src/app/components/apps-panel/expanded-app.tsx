@@ -37,7 +37,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {
-  openRStudioOrConfigPanel,
+  openRStudio,
   openSAS,
   pauseUserApp,
   resumeUserApp,
@@ -180,7 +180,7 @@ const RStudioButtonRow = fp.flow(
     navigate,
   } = props;
   const onClickLaunch = async () => {
-    openRStudioOrConfigPanel(namespace, id, [userApp], 'default', navigate);
+    openRStudio(namespace, id, userApp, 'default', navigate);
   };
   const workspaceNamespace = props.workspace.namespace;
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;

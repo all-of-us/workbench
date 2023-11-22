@@ -141,6 +141,23 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
+export const openRStudio = (
+  workspaceNamespace: string,
+  workspaceId: string,
+  userApp: UserAppEnvironment,
+  appName: string,
+  navigate: (commands: any, extras?: any) => void
+) => {
+  localizeRStudioApp(workspaceNamespace, userApp);
+  navigate([
+    'workspaces',
+    workspaceNamespace,
+    workspaceId,
+    UIAppType.RSTUDIO,
+    appName,
+  ]);
+};
+
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   workspaceId: string,
@@ -150,14 +167,7 @@ export const openRStudioOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    localizeRStudioApp(workspaceNamespace, userApp);
-    navigate([
-      'workspaces',
-      workspaceNamespace,
-      workspaceId,
-      UIAppType.RSTUDIO,
-      appName,
-    ]);
+    openRStudio(workspaceNamespace, workspaceId, userApp, appName, navigate);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }
