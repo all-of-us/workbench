@@ -1,4 +1,4 @@
-package org.pmiops.workbench.iam;
+package org.pmiops.workbench.sam;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import java.io.IOException;
@@ -49,15 +49,13 @@ public class SamApiClientFactory {
    * Creates a SAM API client, unauthenticated. Most clients should use an authenticated, request
    * scoped bean instead of calling this directly.
    */
-  public ApiClient newApiClient() {
+  private ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final ApiClient apiClient =
-        new ApiClient()
-            .setBasePath(workbenchConfig.firecloud.samBaseUrl)
-            .setDebugging(workbenchConfig.firecloud.debugEndpoints)
-            .addDefaultHeader(
-                FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
-    return apiClient;
+    return new ApiClient()
+        .setBasePath(workbenchConfig.firecloud.samBaseUrl)
+        .setDebugging(workbenchConfig.firecloud.debugEndpoints)
+        .addDefaultHeader(
+            FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue)
+        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
   }
 }

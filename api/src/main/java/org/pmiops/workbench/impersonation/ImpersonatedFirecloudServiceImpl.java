@@ -10,13 +10,13 @@ import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
-import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
-import org.pmiops.workbench.firecloud.RawlsRetryHandler;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.iam.SamApiClientFactory;
-import org.pmiops.workbench.iam.SamRetryHandler;
+import org.pmiops.workbench.rawls.RawlsApiClientFactory;
+import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.sam.SamApiClientFactory;
+import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

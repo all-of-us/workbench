@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import jakarta.mail.MessagingException;
@@ -32,6 +30,7 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
@@ -225,7 +224,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
           disksApiProvider
               .get()
               .listDisks(
-                  /* labels */ null, /* includeDeleted */ false, LEONARDO_DISK_LABEL_KEYS, null);
+                  /* labels */ null, /* includeDeleted */
+                  false,
+                  LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                  null);
     } catch (ApiException e) {
       throw new ServerErrorException("listDisks failed", e);
     }

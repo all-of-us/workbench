@@ -1,11 +1,5 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -537,7 +531,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
             .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
+            .put(
+                LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
+                LeonardoLabelHelper.appTypeToLabelValue(appType))
             .put(
                 LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
                 dbWorkspace.getWorkspaceNamespace())
@@ -546,15 +542,17 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     var pdLabels = persistentDiskRequest.getLabels();
     pdLabels =
-        upsertLeonardoLabel(
-            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
+        LeonardoLabelHelper.upsertLeonardoLabel(
+            pdLabels,
+            LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
+            LeonardoLabelHelper.appTypeToLabelValue(appType));
     pdLabels =
-        upsertLeonardoLabel(
+        LeonardoLabelHelper.upsertLeonardoLabel(
             pdLabels,
             LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
             dbWorkspace.getWorkspaceNamespace());
     pdLabels =
-        upsertLeonardoLabel(
+        LeonardoLabelHelper.upsertLeonardoLabel(
             pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
     LeonardoPersistentDiskRequest diskRequest =
         leonardoMapper.toLeonardoPersistentDiskRequest(persistentDiskRequest).labels(pdLabels);
@@ -590,11 +588,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
             dbWorkspace, fireCloudService, workbenchConfigProvider.get());
     // Required by Leo to validate one App per user per workspace (namespace with workspace name)
-    appCustomEnvVars.put(WORKSPACE_NAME_ENV_KEY, dbWorkspace.getFirecloudName());
+    appCustomEnvVars.put(
+        LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY, dbWorkspace.getFirecloudName());
 
     // Used by AoU RW and but not set by Leo for GKE APP.
-    appCustomEnvVars.put(GOOGLE_PROJECT_ENV_KEY, dbWorkspace.getGoogleProject());
-    appCustomEnvVars.put(OWNER_EMAIL_ENV_KEY, userProvider.get().getUsername());
+    appCustomEnvVars.put(
+        LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY, dbWorkspace.getGoogleProject());
+    appCustomEnvVars.put(
+        LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY, userProvider.get().getUsername());
 
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))

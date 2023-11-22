@@ -1,4 +1,4 @@
-package org.pmiops.workbench.firecloud;
+package org.pmiops.workbench.rawls;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.OAuth2Credentials;
@@ -11,7 +11,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.rawls.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
