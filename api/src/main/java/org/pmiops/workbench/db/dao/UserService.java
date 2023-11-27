@@ -61,8 +61,7 @@ public interface UserService {
    * Is the user up-to-date with our Terms of Service?
    *
    * @param dbUser the current user - used only to generate error messages
-   * @return true only if the user has accepted the latest version of both AoU and Terra Terms of
-   *     Service
+   * @return true only if the user has accepted the latest version of the AoU Terms of Service
    */
   boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser);
 
