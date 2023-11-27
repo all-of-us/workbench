@@ -93,7 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
   // old Terms of Service endpoints, before Nov 2023 update
-  @Deprecated(forRemoval = true)
+  @Deprecated
   private final Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
       firecloudTermsOfServiceApiProvider;
 
@@ -162,7 +162,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       SamRetryHandler samRetryHandler,
 
       // old Terms of Service endpoints, before Nov 2023 update
-      @Deprecated(forRemoval = true)
+      @Deprecated
           Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
               firecloudTermsOfServiceApiProvider,
       Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
@@ -578,7 +578,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   // these relate to the old Terms of Service endpoints, before Nov 2023 update
 
-  @Deprecated(forRemoval = true)
+  @Deprecated
   @Override
   public void acceptTermsOfServiceDeprecated() {
     org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
