@@ -264,7 +264,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void acceptTermsOfService() throws ApiException {
-    service.acceptTermsOfService();
+    service.acceptTermsOfServiceDeprecated();
     verify(termsOfServiceApi).acceptTermsOfService(TERMS_OF_SERVICE_BODY);
   }
 

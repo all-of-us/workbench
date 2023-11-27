@@ -705,7 +705,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void test_AcceptTermsOfService() {
     createAccountAndDbUserWithAffiliation();
     profileController.acceptTermsOfService(1);
-    verify(mockFireCloudService).acceptTermsOfService();
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test

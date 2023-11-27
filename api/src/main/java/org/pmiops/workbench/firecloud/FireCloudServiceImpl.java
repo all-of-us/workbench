@@ -576,11 +576,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
   }
 
-  // old Terms of Service endpoints, before Nov 2023 update
+  // these relate to the old Terms of Service endpoints, before Nov 2023 update
 
   @Deprecated(forRemoval = true)
   @Override
-  public void acceptTermsOfService() {
+  public void acceptTermsOfServiceDeprecated() {
     org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
         firecloudTermsOfServiceApiProvider.get();
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
@@ -594,7 +594,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
   }
 
-  // new Terms of Service endpoints, after Nov 2023 update
+  // these relate to the new Terms of Service endpoints, after Nov 2023 update
 
   @Override
   public boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {

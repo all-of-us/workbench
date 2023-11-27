@@ -140,7 +140,7 @@ public interface FireCloudService {
 
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
 
-  void acceptTermsOfService();
+  void acceptTermsOfServiceDeprecated();
 
   boolean getUserTermsOfServiceStatusDeprecated();
 

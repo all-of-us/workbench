@@ -310,7 +310,7 @@ public class UserServiceTest {
         user, providedWorkbenchConfig.termsOfService.latestAouVersion);
 
     userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
-    verify(mockFireCloudService).acceptTermsOfService();
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
 
     Optional<DbUserTermsOfService> tosMaybe =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
