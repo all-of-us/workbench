@@ -57,9 +57,23 @@ public interface UserService {
 
   void validateAllOfUsTermsOfService(Integer tosVersion);
 
-  boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser);
+  /**
+   * Is the user up-to-date with our Terms of Service?
+   *
+   * @param dbUser the current user - used only to generate error messages
+   * @return true only if the user has accepted the latest version of both AoU and Terra Terms of
+   *     Service
+   */
+  boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser);
 
-  boolean validateTermsOfService(@Nonnull DbUser dbUser);
+  /**
+   * Is the user up-to-date with both AoU and Terra Terms of Service?
+   *
+   * @param dbUser the current user - used only to generate error messages
+   * @return true only if the user has accepted the latest version of both AoU and Terra Terms of
+   *     Service
+   */
+  boolean hasSignedLatestTermsOfServiceBoth(@Nonnull DbUser dbUser);
 
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);

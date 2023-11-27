@@ -430,26 +430,22 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
-  public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
+  public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
     return userTermsOfServiceDao
         .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
         .map(u -> u.getTosVersion() == configProvider.get().termsOfService.latestAouVersion)
         .orElse(false);
   }
 
-  // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
-  // service
   @Override
-  public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
-    return validateAllOfUsTermsOfServiceVersion(dbUser)
-        && getDeprecatedTerraTermsOfServiceStatus(dbUser);
+  public boolean hasSignedLatestTermsOfServiceBoth(@Nonnull DbUser dbUser) {
+    return hasSignedLatestAoUTermsOfService(dbUser) && hasSignedLatestTerraTermsOfService(dbUser);
   }
 
-  private boolean getDeprecatedTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
+  private boolean hasSignedLatestTerraTermsOfService(@Nonnull DbUser dbUser) {
     try {
-      return fireCloudService.getUserTermsOfServiceStatusDeprecated();
+      return fireCloudService.hasUserAcceptedLatestTerraToS(dbUser);
     } catch (Exception e) {
       log.log(
           Level.SEVERE,
