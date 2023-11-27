@@ -604,8 +604,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS() {
     when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
     assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();

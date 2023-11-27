@@ -531,8 +531,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_hasNotAcceptedTerraTOS()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void test_validateTermsOfService_dbUser_hasNotAcceptedTerraTOS() {
     when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(false);
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
@@ -541,8 +540,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void test_validateTermsOfService_dbUser() {
     when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(true);
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
@@ -557,8 +555,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_wrong_aou_version_acceptedTerra()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void test_validateTermsOfService_dbUser_wrong_aou_version_acceptedTerra() {
     when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(true);
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
@@ -566,8 +563,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_wrong_aou_version_hasNot_acceptedTerra()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void test_validateTermsOfService_dbUser_wrong_aou_version_hasNot_acceptedTerra() {
     when(mockFireCloudService.getUserTermsOfServiceStatusDeprecated()).thenReturn(false);
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);

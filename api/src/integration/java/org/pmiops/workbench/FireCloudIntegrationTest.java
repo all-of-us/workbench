@@ -17,6 +17,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -32,7 +33,8 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
     FirecloudApiClientFactory.class,
     FireCloudServiceImpl.class,
     StorageConfig.class,
-    BaseIntegrationTest.Configuration.class
+    BaseIntegrationTest.Configuration.class,
+    SamRetryHandler.class,
   })
   static class Configuration {}
 
