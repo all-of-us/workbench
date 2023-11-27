@@ -10,7 +10,6 @@ import {
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
@@ -65,7 +64,7 @@ import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 
-const { useState, useEffect, Fragment } = React;
+const { useState, useEffect } = React;
 
 const PanelMain = fp.flow(
   withCdrVersions(),
@@ -346,33 +345,25 @@ const PanelMain = fp.flow(
           [
             PanelContent.Create,
             () => (
-              <Fragment>
-                <CreatePanel
-                  {...{
-                    analysisConfig,
-                    creatorFreeCreditsRemaining,
-                    profile,
-                    setPanelContent,
-                    setRuntimeStatusRequest,
-                    runtimeStatus,
-                    workspace,
-                  }}
-                />
-                <FlexRow
-                  style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
-                >
-                  <Button
-                    aria-label='Create'
-                    disabled={!runtimeCanBeCreated}
-                    onClick={() => {
-                      requestAnalysisConfig(analysisConfig);
-                      onClose();
-                    }}
-                  >
-                    Create
-                  </Button>
-                </FlexRow>
-              </Fragment>
+              <CreatePanel
+                {...{
+                  analysisConfig,
+                  creatorFreeCreditsRemaining,
+                  onClose,
+                  profile,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
+                  runtimeStatus,
+                  setPanelContent,
+                  workspace,
+                }}
+                onPause={() =>
+                  setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
+                }
+                onResume={() =>
+                  setRuntimeStatusRequest(RuntimeStatusRequest.Start)
+                }
+              />
             ),
           ],
           [
