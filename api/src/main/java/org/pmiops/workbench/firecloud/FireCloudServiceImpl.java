@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
-import org.broadinstitute.dsde.workbench.client.sam.model.TermsOfServiceComplianceStatus;
+import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
@@ -595,14 +595,13 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
-    return getUserTerraToSStatus(dbUser).getUserHasAcceptedLatestTos();
+    return getUserTerraToSStatus(dbUser).getIsCurrentVersion();
   }
 
-  private TermsOfServiceComplianceStatus getUserTerraToSStatus(@Nonnull DbUser dbUser) {
+  private UserTermsOfServiceDetails getUserTerraToSStatus(@Nonnull DbUser dbUser) {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
     try {
-      return samRetryHandler.run(
-          (context) -> termsOfServiceApi.getTermsOfServiceComplianceStatus());
+      return samRetryHandler.run((context) -> termsOfServiceApi.userTermsOfServiceGetSelf());
     } catch (Exception e) {
       log.log(
           Level.SEVERE,

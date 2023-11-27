@@ -12,7 +12,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
-import org.broadinstitute.dsde.workbench.client.sam.model.TermsOfServiceComplianceStatus;
+import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -279,44 +279,44 @@ public class FireCloudServiceImplTest {
   @Test
   public void isUserCompliantWithTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new TermsOfServiceComplianceStatus().permitsSystemUsage(true);
-    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.isUserCompliantWithTerraToS(new DbUser())).isTrue();
 
-    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
   }
 
   @Test
   public void isUserCompliantWithTerraToS_false()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new TermsOfServiceComplianceStatus().permitsSystemUsage(false);
-    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.isUserCompliantWithTerraToS(new DbUser())).isFalse();
 
-    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
   }
 
   @Test
   public void hasUserAcceptedLatestTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new TermsOfServiceComplianceStatus().userHasAcceptedLatestTos(true);
-    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    var toReturn = new UserTermsOfServiceDetails().isCurrentVersion(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isTrue();
 
-    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
   }
 
   @Test
   public void hasUserAcceptedLatestTerraToS_false()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new TermsOfServiceComplianceStatus().userHasAcceptedLatestTos(false);
-    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    var toReturn = new UserTermsOfServiceDetails().isCurrentVersion(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
 
-    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
   }
 }
