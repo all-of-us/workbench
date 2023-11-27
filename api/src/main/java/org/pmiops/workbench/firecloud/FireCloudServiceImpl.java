@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
@@ -26,7 +27,9 @@ import org.json.JSONObject;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
 import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -594,8 +597,27 @@ public class FireCloudServiceImpl implements FireCloudService {
   // new Terms of Service endpoints, after Nov 2023 update
 
   @Override
-  public TermsOfServiceComplianceStatus getUserTermsOfServiceStatus() {
+  public boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {
+    return getUserTerraToSStatus(dbUser).getPermitsSystemUsage();
+  }
+
+  @Override
+  public boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
+    return getUserTerraToSStatus(dbUser).getUserHasAcceptedLatestTos();
+  }
+
+  private TermsOfServiceComplianceStatus getUserTerraToSStatus(@Nonnull DbUser dbUser) {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
-    return samRetryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceComplianceStatus());
+    try {
+      return samRetryHandler.run(
+          (context) -> termsOfServiceApi.getTermsOfServiceComplianceStatus());
+    } catch (Exception e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Error while getting Terra Terms of Service status for user %s",
+              dbUser.getUsername()));
+      throw new ServerErrorException(e);
+    }
   }
 }
