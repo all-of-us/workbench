@@ -1,23 +1,19 @@
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 
 import {
   Institution,
-  InstitutionalRole,
   InstitutionMembershipRequirement,
   InstitutionTierConfig,
   PublicInstitutionDetails,
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
-import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
-import { isBlank } from './index';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.
@@ -92,33 +88,6 @@ export const getEmailValidationErrorMessage = (
     // Institution requires email domain matching and the domain is not in the allowed list
     return <EmailDomainMismatchErrorMessage />;
   }
-};
-
-export const getRoleOptions = (
-  institutions: Array<PublicInstitutionDetails>,
-  institutionShortName?: string
-): Array<{ label: string; value: InstitutionalRole }> => {
-  if (isBlank(institutionShortName)) {
-    return [];
-  }
-
-  const matchedInstitution = fp.find((institution) => {
-    const { shortName } = institution;
-    return shortName === institutionShortName;
-  }, institutions);
-  if (matchedInstitution === undefined) {
-    return [];
-  }
-
-  const { organizationTypeEnum } = matchedInstitution;
-  const availableRoles: Array<InstitutionalRole> =
-    AccountCreationOptions.institutionalRolesByOrganizationType.find(
-      (obj) => obj.type === organizationTypeEnum
-    ).roles;
-
-  return AccountCreationOptions.institutionalRoleOptions.filter((option) =>
-    availableRoles.includes(option.value)
-  );
 };
 
 export const defaultTierConfig = (

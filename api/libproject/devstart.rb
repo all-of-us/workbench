@@ -126,6 +126,8 @@ def dev_up_tanagra(cmd_name, args)
   end
 
   ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path("sa-key.json")
+  env_project = ENVIRONMENTS["local"]
+  underlays = env_project.fetch(:tanagra_underlay_files)
 
   common = Common.new
   common.status "Setting up local environment for tanagra API"
@@ -142,10 +144,11 @@ def dev_up_tanagra(cmd_name, args)
     else
       common.run_inline("../ui/project.rb tanagra-dep --env local")
     end
-    dis_auth = op.opts.disable_auth ? '-a' : ''
-    d_db = op.opts.drop_db ? '-d' : ''
+    dis_auth = op.opts.disable_auth ? '-a ' : ''
+    d_db = op.opts.drop_db ? '-d ' : ''
+    args = dis_auth + d_db + "-u #{underlays}"
     common.status "Starting Tanagra API server"
-    common.run_inline %W{./run_tanagra_server.sh #{dis_auth} #{d_db}}
+    common.run_inline("./run_tanagra_server.sh #{args}")
   end
 end
 

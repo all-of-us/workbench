@@ -234,6 +234,7 @@
   <include file="changelog/db.changelog-224-cdr-version-tanagra-enabled.xml"/>
   <include file="changelog/db.changelog-225-add-user-discovery-source.xml"/>
   <include file="changelog/db.changelog-226-compliance-training-verification.xml"/>
+  <include file="changelog/db.changelog-227-drop-user-data-use-agreement.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

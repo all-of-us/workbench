@@ -241,6 +241,8 @@ export const TanagraResourceList = fp.flow(
       displayName = cohortV2.displayName;
       url = `${urlPrefix}/cohorts/${cohortV2.id}/${
         cohortV2.criteriaGroupSections?.[0]?.id ?? 'first'
+      }/${
+        cohortV2.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ?? 'none'
       }`;
     } else if (conceptSetV2) {
       const domain = JSON.parse(conceptSetV2.criteria.uiConfig)?.title ?? '';
