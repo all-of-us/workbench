@@ -157,12 +157,16 @@ public class ProfileController implements ProfileApiDelegate {
     if (dbUser.getFirstSignInTime() == null) {
       // This call should be idempotent. If the user is already registered, their profile will get
       // updated.
+      // TODO: this assumption is false.  We have seen errors because this is not idempotent.
+      // See RW-11393 for such a user error.  We plan to fix this as part of the Nov 2023 ToS work.
       fireCloudService.registerUser();
 
-      // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
-      // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos
-      // will take care of scenario by re-directing them to AoU terms of service page. This call
-      // should be idempotent.
+      // By approving the latest AoU Terms of Service, the user also approves the latest Terra ToS.
+      // If the user has not accepted the latest AoU version, then it's not appropriate to call
+      // the Terra ToS acceptance endpoint.  We will require the user to approve the ToS in the UI,
+      // because it will detect that the user is non-compliant at login via
+      // getUserTermsOfServiceStatus(), and it will redirect them to the AoU ToS.
+      // This call should be idempotent.
       if (userService.hasSignedLatestAoUTermsOfService(dbUser)) {
         userService.acceptTerraTermsOfService(dbUser);
       }
