@@ -78,7 +78,7 @@ public class FireCloudServiceImplTest {
   @MockBean private StatusApi statusApi;
   // old Terms of Service endpoints, before Nov 2023 update
   @MockBean private org.pmiops.workbench.firecloud.api.TermsOfServiceApi firecloudTermsOfServiceApi;
-  // new Terms of Service endpoints, before Nov 2023 update
+  // new Terms of Service endpoints, after Nov 2023 update
   @MockBean private TermsOfServiceApi termsOfServiceApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -295,11 +295,33 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
+  public void isUserCompliantWithTerraToS_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new TermsOfServiceComplianceStatus().permitsSystemUsage(false);
+    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    assertThat(service.isUserCompliantWithTerraToS(new DbUser())).isFalse();
+
+    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
   public void hasUserAcceptedLatestTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn = new TermsOfServiceComplianceStatus().userHasAcceptedLatestTos(true);
     when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
     assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isTrue();
+
+    verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new TermsOfServiceComplianceStatus().userHasAcceptedLatestTos(false);
+    when(termsOfServiceApi.getTermsOfServiceComplianceStatus()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
 
     verify(termsOfServiceApi).getTermsOfServiceComplianceStatus();
     verifyNoInteractions(firecloudTermsOfServiceApi);
