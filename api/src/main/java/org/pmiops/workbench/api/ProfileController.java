@@ -163,7 +163,7 @@ public class ProfileController implements ProfileApiDelegate {
       // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos
       // will take care of scenario by re-directing them to AoU terms of service page. This call
       // should be idempotent.
-      if (userService.validateAllOfUsTermsOfServiceVersion(dbUser)) {
+      if (userService.hasSignedLatestAoUTermsOfService(dbUser)) {
         userService.acceptTerraTermsOfService(dbUser);
       }
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -190,7 +190,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Boolean> getUserTermsOfServiceStatus() {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
-    return ResponseEntity.ok(userService.validateTermsOfService(loggedInUser));
+    return ResponseEntity.ok(userService.hasSignedLatestTermsOfServiceBoth(loggedInUser));
   }
 
   @Override
