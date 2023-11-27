@@ -76,9 +76,9 @@ public class FireCloudServiceImplTest {
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
-  // old Terms of Service endpoints, before Nov 2023 update
+  // old Terms of Service endpoints, before RW-11416
   @MockBean private org.pmiops.workbench.firecloud.api.TermsOfServiceApi firecloudTermsOfServiceApi;
-  // new Terms of Service endpoints, after Nov 2023 update
+  // new Terms of Service endpoints, after RW-11416
   @MockBean private TermsOfServiceApi termsOfServiceApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();

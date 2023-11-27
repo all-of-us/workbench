@@ -92,7 +92,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
-  // old Terms of Service endpoints, before Nov 2023 update
+  // old Terms of Service endpoints, before RW-11416
   @Deprecated
   private final Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
       firecloudTermsOfServiceApiProvider;
@@ -161,7 +161,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       CalhounRetryHandler calhounRetryHandler,
       SamRetryHandler samRetryHandler,
 
-      // old Terms of Service endpoints, before Nov 2023 update
+      // old Terms of Service endpoints, before RW-11416
       @Deprecated
           Provider<org.pmiops.workbench.firecloud.api.TermsOfServiceApi>
               firecloudTermsOfServiceApiProvider,
@@ -576,7 +576,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return !(StringUtils.isEmpty(fileTransferTime) || fileTransferTime.equals("0"));
   }
 
-  // these relate to the old Terms of Service endpoints, before Nov 2023 update
+  // these relate to the old Terms of Service endpoints, before RW-11416
 
   @Deprecated
   @Override
@@ -586,7 +586,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
 
-  // these relate to the new Terms of Service endpoints, after Nov 2023 update
+  // these relate to the new Terms of Service endpoints, after RW-11416
 
   @Override
   public boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {
