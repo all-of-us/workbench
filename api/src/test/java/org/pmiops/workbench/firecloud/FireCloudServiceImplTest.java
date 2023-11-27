@@ -277,13 +277,6 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void getUserTermsOfServiceStatusDeprecated() throws ApiException {
-    service.getUserTermsOfServiceStatusDeprecated();
-    verify(firecloudTermsOfServiceApi).getTermsOfServiceStatus();
-    verifyNoInteractions(termsOfServiceApi);
-  }
-
-  @Test
   public void isUserCompliantWithTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn = new TermsOfServiceComplianceStatus().permitsSystemUsage(true);

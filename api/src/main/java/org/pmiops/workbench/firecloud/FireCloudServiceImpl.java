@@ -586,14 +586,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
 
-  @Deprecated(forRemoval = true)
-  @Override
-  public boolean getUserTermsOfServiceStatusDeprecated() {
-    org.pmiops.workbench.firecloud.api.TermsOfServiceApi termsOfServiceApi =
-        firecloudTermsOfServiceApiProvider.get();
-    return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
-  }
-
   // these relate to the new Terms of Service endpoints, after Nov 2023 update
 
   @Override
