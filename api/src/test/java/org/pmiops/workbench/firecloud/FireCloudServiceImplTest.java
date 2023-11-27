@@ -301,7 +301,12 @@ public class FireCloudServiceImplTest {
   @Test
   public void hasUserAcceptedLatestTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new UserTermsOfServiceDetails().isCurrentVersion(true);
+    var toReturn =
+        new UserTermsOfServiceDetails()
+            .isCurrentVersion(true)
+            // currently required - see the comment at hasUserAcceptedLatestTerraToS() for more
+            // details
+            .permitsSystemUsage(true);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isTrue();
 
@@ -312,7 +317,39 @@ public class FireCloudServiceImplTest {
   @Test
   public void hasUserAcceptedLatestTerraToS_false()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
-    var toReturn = new UserTermsOfServiceDetails().isCurrentVersion(false);
+    var toReturn =
+        new UserTermsOfServiceDetails()
+            .isCurrentVersion(false)
+            // currently required - see the comment at hasUserAcceptedLatestTerraToS() for more
+            // details
+            .permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  // these 2 show that hasUserAcceptedLatestTerraToS() is currently dependent on the
+  // permitsSystemUsage value as well as isCurrentVersion.
+  // see the comment at hasUserAcceptedLatestTerraToS() for more details
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_permits_false_current_true()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_permits_false_current_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn =
+        new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(false);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
     assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
 
