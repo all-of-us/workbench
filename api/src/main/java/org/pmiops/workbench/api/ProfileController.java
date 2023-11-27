@@ -168,7 +168,8 @@ public class ProfileController implements ProfileApiDelegate {
       // getUserTermsOfServiceStatus(), and it will redirect them to the AoU ToS.
       // This call should be idempotent.
       if (userService.hasSignedLatestAoUTermsOfService(dbUser)) {
-        userService.acceptTerraTermsOfService(dbUser);
+        // to be replaced as part of RW-11416
+        userService.acceptTerraTermsOfServiceDeprecated(dbUser);
       }
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       return saveUserWithConflictHandling(dbUser);
@@ -201,7 +202,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> acceptTermsOfService(Integer termsOfServiceVersion) {
     DbUser loggedInUser = userAuthenticationProvider.get().getUser();
     userService.submitAouTermsOfService(loggedInUser, termsOfServiceVersion);
-    userService.acceptTerraTermsOfService(loggedInUser);
+    // to be replaced as part of RW-11416
+    userService.acceptTerraTermsOfServiceDeprecated(loggedInUser);
     return ResponseEntity.ok().build();
   }
 

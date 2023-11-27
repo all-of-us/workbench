@@ -78,7 +78,8 @@ public interface UserService {
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
 
   // Registers that a user has accepted the latest version of the Terra Terms of Service.
-  void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
+  @Deprecated(forRemoval = true) // to be replaced as part of RW-11416
+  void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

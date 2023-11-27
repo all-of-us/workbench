@@ -299,7 +299,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testAcceptTerraTermsOfService() {
+  public void testAcceptTerraTermsOfServiceDeprecated() {
     // confirm empty to start
     assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
         .isEqualTo(0);
@@ -309,7 +309,8 @@ public class UserServiceTest {
     userService.submitAouTermsOfService(
         user, providedWorkbenchConfig.termsOfService.latestAouVersion);
 
-    userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
+    // to be replaced as part of RW-11416
+    userService.acceptTerraTermsOfServiceDeprecated(userDao.findUserByUsername(USERNAME));
     verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
 
     Optional<DbUserTermsOfService> tosMaybe =

@@ -458,7 +458,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void acceptTerraTermsOfService(@Nonnull DbUser dbUser) {
+  @Deprecated(forRemoval = true) // to be replaced as part of RW-11416
+  public void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser) {
     fireCloudService.acceptTermsOfServiceDeprecated();
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
