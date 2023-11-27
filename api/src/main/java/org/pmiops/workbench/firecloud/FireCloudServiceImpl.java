@@ -597,7 +597,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
     var status = getUserTerraToSStatus(dbUser);
     // I'd prefer to simply call `getIsCurrentVersion()` but this still returns true if the user
-    // rejects the ToS.
+    // has rejected the ToS.
     // See
     // https://broadinstitute.slack.com/archives/C0DSD41QT/p1701111037789719?thread_ts=1701103991.553039&cid=C0DSD41QT
     // TODO link a Terra/Sam bug if they create one for this
