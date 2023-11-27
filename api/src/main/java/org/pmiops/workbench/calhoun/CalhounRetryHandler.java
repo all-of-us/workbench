@@ -1,28 +1,27 @@
-package org.pmiops.workbench.iam;
+package org.pmiops.workbench.calhoun;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
-import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
-import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SamRetryHandler extends TerraServiceRetryHandler<ApiException> {
+public class CalhounRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
-  private static final Logger logger = Logger.getLogger(SamRetryHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(CalhounRetryHandler.class.getName());
 
-  private static class SamRetryPolicy extends ResponseCodeRetryPolicy {
+  private static class CalhounRetryPolicy extends ResponseCodeRetryPolicy {
 
-    public SamRetryPolicy() {
-      super("Sam API");
+    public CalhounRetryPolicy() {
+      super("Calhoun API");
     }
 
     @Override
@@ -42,7 +41,7 @@ public class SamRetryHandler extends TerraServiceRetryHandler<ApiException> {
         logger.log(
             getLogLevel(responseCode),
             String.format(
-                "Exception calling Sam API with response: %s",
+                "Exception calling Calhoun API with response: %s",
                 ((ApiException) t).getResponseBody()),
             t);
       } else {
@@ -52,14 +51,14 @@ public class SamRetryHandler extends TerraServiceRetryHandler<ApiException> {
   }
 
   @Autowired
-  public SamRetryHandler(
+  public CalhounRetryHandler(
       BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
-    super(backoffPolicy, new SamRetryPolicy(), termsOfServiceApiProvider);
+    super(backoffPolicy, new CalhounRetryPolicy(), termsOfServiceApiProvider);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
     return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertSamException(exception));
+        .orElseGet(() -> ExceptionUtils.convertCalhounException(exception));
   }
 }

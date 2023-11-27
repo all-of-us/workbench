@@ -1,8 +1,7 @@
-package org.pmiops.workbench.firecloud;
+package org.pmiops.workbench.calhoun;
 
 import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.calhoun.ApiClient;
 import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Qualifier;

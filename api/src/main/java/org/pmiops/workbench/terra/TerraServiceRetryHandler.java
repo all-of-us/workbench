@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils;
+package org.pmiops.workbench.terra;
 
 import java.util.Optional;
 import javax.inject.Provider;
@@ -8,6 +8,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.BackOffPolicy;
 

@@ -32,6 +32,7 @@ import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
+import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
 import org.springframework.beans.factory.annotation.Autowired;
