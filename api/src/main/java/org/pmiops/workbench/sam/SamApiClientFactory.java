@@ -49,7 +49,7 @@ public class SamApiClientFactory {
    * Creates a SAM API client, unauthenticated. Most clients should use an authenticated, request
    * scoped bean instead of calling this directly.
    */
-  public ApiClient newApiClient() {
+  ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     return new ApiClient()
         .setBasePath(workbenchConfig.firecloud.samBaseUrl)
