@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
@@ -27,7 +26,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.calhoun.CalhounRetryHandler;
 import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
@@ -588,12 +586,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   // these relate to the new Terms of Service endpoints, after RW-11416
 
   @Override
-  public boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {
+  public boolean isUserCompliantWithTerraToS() {
     return getUserTerraToSStatus().getPermitsSystemUsage();
   }
 
   @Override
-  public boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
+  public boolean hasUserAcceptedLatestTerraToS() {
     var status = getUserTerraToSStatus();
     // I'd prefer to simply call `getIsCurrentVersion()` but this still returns true if the user
     // has rejected the ToS.

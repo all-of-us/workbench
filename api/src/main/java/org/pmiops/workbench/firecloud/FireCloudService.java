@@ -3,8 +3,6 @@ package org.pmiops.workbench.firecloud;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -144,22 +142,18 @@ public interface FireCloudService {
   void acceptTermsOfServiceDeprecated();
 
   /**
-   * Is the current user currently compliant with Terra's Terms of Service?
-   *
-   * <p>This will be true of the user has accepted the latest version OR we are in the rolling
+   * Is the current user currently compliant with Terra's Terms of Service?  This will be true if the user has accepted the latest version OR we are in the rolling
    * acceptance window
    *
-   * @param dbUser the current user (only used to construct error message)
    * @return true if Terra allows system usage based on ToS status
    */
-  boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser);
+  boolean isUserCompliantWithTerraToS();
 
   /**
    * Has the current user accepted the <b>latest</b> Terra Terms of Service? Note: this is a
-   * stricter requirement than {@link #isUserCompliantWithTerraToS(DbUser)}
+   * stricter requirement than {@link #isUserCompliantWithTerraToS()}
    *
-   * @param dbUser the current user (only used to construct error message)
    * @return true if the user is compliant with the latest Terra ToS
    */
-  boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser);
+  boolean hasUserAcceptedLatestTerraToS();
 }

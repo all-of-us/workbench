@@ -310,8 +310,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-      when(mockFireCloudService.hasUserAcceptedLatestTerraToS(any())).thenReturn(true);
-      when(mockFireCloudService.isUserCompliantWithTerraToS(any())).thenReturn(true);
+      when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
+      when(mockFireCloudService.isUserCompliantWithTerraToS()).thenReturn(true);
     } catch (ApiException e) {
       e.printStackTrace();
     }
@@ -606,7 +606,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS() {
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(any())).thenReturn(false);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
     assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }

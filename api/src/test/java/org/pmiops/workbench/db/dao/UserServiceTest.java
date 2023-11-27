@@ -535,7 +535,7 @@ public class UserServiceTest {
   public void test_hasSignedLatestTermsOfServiceBoth() {
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(true);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isTrue();
   }
 
@@ -543,14 +543,14 @@ public class UserServiceTest {
   public void test_hasSignedLatestTermsOfServiceBoth_has_not_accepted_terra() {
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(false);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isFalse();
   }
 
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth_missing_aou_version_has_accepted_terra() {
     DbUser user = userDao.findUserByUsername(USERNAME);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(true);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
     userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isFalse();
   }
@@ -558,7 +558,7 @@ public class UserServiceTest {
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth_missing_aou_version_has_not_accepted_terra() {
     DbUser user = userDao.findUserByUsername(USERNAME);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(false);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isFalse();
   }
@@ -567,7 +567,7 @@ public class UserServiceTest {
   public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_accepted_terra() {
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(true);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isFalse();
   }
 
@@ -575,7 +575,7 @@ public class UserServiceTest {
   public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_not_accepted_terra() {
     DbUser user =
         createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
-    when(mockFireCloudService.hasUserAcceptedLatestTerraToS(user)).thenReturn(false);
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     assertThat(userService.hasSignedLatestTermsOfServiceBoth(user)).isFalse();
   }
 

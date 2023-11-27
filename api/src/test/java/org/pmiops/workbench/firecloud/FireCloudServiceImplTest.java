@@ -23,7 +23,6 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -281,7 +280,7 @@ public class FireCloudServiceImplTest {
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(true);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.isUserCompliantWithTerraToS(new DbUser())).isTrue();
+    assertThat(service.isUserCompliantWithTerraToS()).isTrue();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
@@ -292,7 +291,7 @@ public class FireCloudServiceImplTest {
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.isUserCompliantWithTerraToS(new DbUser())).isFalse();
+    assertThat(service.isUserCompliantWithTerraToS()).isFalse();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
@@ -308,7 +307,7 @@ public class FireCloudServiceImplTest {
             // details
             .permitsSystemUsage(true);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isTrue();
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isTrue();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
@@ -324,7 +323,7 @@ public class FireCloudServiceImplTest {
             // details
             .permitsSystemUsage(true);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
@@ -339,7 +338,7 @@ public class FireCloudServiceImplTest {
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(true);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
@@ -351,7 +350,7 @@ public class FireCloudServiceImplTest {
     var toReturn =
         new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(false);
     when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
-    assertThat(service.hasUserAcceptedLatestTerraToS(new DbUser())).isFalse();
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
