@@ -29,7 +29,6 @@ import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -590,12 +589,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public boolean isUserCompliantWithTerraToS(@Nonnull DbUser dbUser) {
-    return getUserTerraToSStatus(dbUser).getPermitsSystemUsage();
+    return getUserTerraToSStatus().getPermitsSystemUsage();
   }
 
   @Override
   public boolean hasUserAcceptedLatestTerraToS(@Nonnull DbUser dbUser) {
-    var status = getUserTerraToSStatus(dbUser);
+    var status = getUserTerraToSStatus();
     // I'd prefer to simply call `getIsCurrentVersion()` but this still returns true if the user
     // has rejected the ToS.
     // See
@@ -604,17 +603,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     return status.getPermitsSystemUsage() && status.getIsCurrentVersion();
   }
 
-  private UserTermsOfServiceDetails getUserTerraToSStatus(@Nonnull DbUser dbUser) {
+  private UserTermsOfServiceDetails getUserTerraToSStatus() {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
-    try {
-      return samRetryHandler.run((context) -> termsOfServiceApi.userTermsOfServiceGetSelf());
-    } catch (Exception e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error while getting Terra Terms of Service status for user %s",
-              dbUser.getUsername()));
-      throw new ServerErrorException(e);
-    }
+    return samRetryHandler.run(context -> termsOfServiceApi.userTermsOfServiceGetSelf());
   }
 }
