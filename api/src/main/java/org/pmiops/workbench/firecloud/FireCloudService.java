@@ -142,8 +142,8 @@ public interface FireCloudService {
   void acceptTermsOfServiceDeprecated();
 
   /**
-   * Is the current user currently compliant with Terra's Terms of Service?  This will be true if the user has accepted the latest version OR we are in the rolling
-   * acceptance window
+   * Is the current user currently compliant with Terra's Terms of Service? This will be true if the
+   * user has accepted the latest version OR we are in the rolling acceptance window
    *
    * @return true if Terra allows system usage based on ToS status
    */
