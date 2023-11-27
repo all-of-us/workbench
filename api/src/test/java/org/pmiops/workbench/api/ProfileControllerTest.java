@@ -702,7 +702,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_AcceptTermsOfService() {
+  public void test_acceptTermsOfServiceDeprecated() {
     createAccountAndDbUserWithAffiliation();
     profileController.acceptTermsOfService(1);
     verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
