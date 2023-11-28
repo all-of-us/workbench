@@ -726,8 +726,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_acceptTermsOfServiceDeprecated() {
+  public void test_acceptTermsOfService() {
     createAccountAndDbUserWithAffiliation();
+
+    // current behavior is to record any given version of the AoU ToS in the DB
+    // and always invoke Terra acceptance as well, regardless of version
+    // TODO: should we be more stringent about this in the future for RW-11416?
+
     profileController.acceptTermsOfService(1);
     verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
