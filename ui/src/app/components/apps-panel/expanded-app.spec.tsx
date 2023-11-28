@@ -417,13 +417,15 @@ describe('ExpandedApp', () => {
             expect(focusStub).toHaveBeenCalled();
           } else if (appType === UIAppType.RSTUDIO) {
             // Confirm navigate is called to launch RStudio in iframe
-            expect(mockNavigate).toHaveBeenCalledWith([
-              'workspaces',
-              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-              UIAppType.RSTUDIO,
-              'default',
-            ]);
+            expect(mockNavigate).toHaveBeenCalledWith(
+              [
+                'workspaces',
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+                'gkeApp',
+              ],
+              { queryParams: { appType: 'RStudio' } }
+            );
           }
         });
       });
