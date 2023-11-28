@@ -378,6 +378,44 @@ else
 fi
 
 ##############################################################
+# Observation - Update cb_search_all_events for The Basics,
+# Overall Health and Lifestyle surveys. Each of these surveys
+# having missing survey_conduct rows. We need to update the
+# survey_concept_id for the following answers(2000000002, 2000000003,
+# 903096).
+##############################################################
+echo "cb_search_all_events - update survey_concept_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` updt
+ SET updt.survey_concept_id = x.survey_concept_id
+ FROM (
+   SELECT distinct se.person_id, se.concept_id, se.value_source_concept_id, se1.survey_concept_id
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+   JOIN (
+     SELECT distinct concept_id, value_source_concept_id, survey_concept_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+     WHERE survey_concept_id IN (1586134, 1585710, 1585855)
+     AND value_source_concept_id IN (2000000002, 2000000003, 903096)
+   ) se1 ON (se.concept_id = se1.concept_id AND se.value_source_concept_id = se1.value_source_concept_id)
+   WHERE se.survey_concept_id IS NULL
+   AND se.is_standard = 0
+ ) x
+ WHERE x.person_id = updt.person_id
+ AND x.concept_id = updt.concept_id
+ AND x.value_source_concept_id = updt.value_source_concept_id"
+
+##############################################################
+# Observation - Update old question from Healthcare Access
+# and Utilization to the Basics survey
+##############################################################
+echo "cb_search_all_events - update survey_concept_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = 1586134
+ WHERE concept_id = 43528428
+ AND survey_concept_id = 43528895"
+
+##############################################################
 # Observation - Unify the PFHH survey
 ##############################################################
 echo "cb_search_all_events - updating all questions to new pfhh survey"
@@ -397,17 +435,6 @@ AND x.value_source_concept_id = y.answer
 AND x.person_id = y.person_id
 AND x.entry_date = y.entry_date
 AND x.is_standard = 0"
-
-echo "cb_search_all_events - updating all questions to new pfhh survey"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` x
-SET x.survey_concept_id = 1740639
-WHERE concept_id IN (
-  SELECT concept_id
-  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_question\`
-)
-AND x.survey_concept_id IN (43528698, 43529712)
-AND CAST(x.value_source_concept_id AS STRING) NOT LIKE '90%'"
 
 echo "cb_search_all_events - deleting deprecated questions"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
@@ -457,6 +484,30 @@ SELECT DISTINCT
     , a.cati_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_non_answer_insert\` a
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id"
+
+echo "cb_search_all_events - updating all survey_concept_ids for Med History/Personal History to new PFHH survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = 1740639
+ WHERE survey_concept_id IN (43528698, 43529712)"
+
+echo "cb_search_all_events - updating all COPE Vaccine surveys to proper survey_concept_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = 1741006
+ WHERE survey_concept_id IN (905055, 905047, 765936)"
+
+echo "cb_search_all_events - updating all surveys we don't show in CB to null"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = null
+ WHERE survey_concept_id IN (903505, 1585594, 903507)"
+
+echo "cb_search_all_events - updating all COPE surveys to proper survey_concept_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = 1333342
+ WHERE survey_concept_id IN (2100000002, 2100000003, 2100000004, 2100000005, 2100000006, 2100000007)"
 
 ################################################################
 #   insert standard observation data into cb_search_all_events
