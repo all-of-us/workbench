@@ -411,11 +411,11 @@ describe('ExpandedApp', () => {
             }
           );
 
-          if (appType !== UIAppType.RSTUDIO) {
+          if (appType === UIAppType.SAS) {
             // Confirms SAS opens in a new Window
             expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
             expect(focusStub).toHaveBeenCalled();
-          } else {
+          } else if (appType === UIAppType.RSTUDIO) {
             // Confirm navigate is called to launch RStudio in iframe
             expect(mockNavigate).toHaveBeenCalledWith([
               'workspaces',

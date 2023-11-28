@@ -149,13 +149,12 @@ export const openRStudio = (
   navigate: (commands: any, extras?: any) => void
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
-  navigate([
-    'workspaces',
-    workspaceNamespace,
-    workspaceId,
-    UIAppType.RSTUDIO,
-    appName,
-  ]);
+  const queryParams = {
+    appType: UIAppType.RSTUDIO,
+  };
+  navigate(['workspaces', workspaceNamespace, workspaceId, 'gkeApp'], {
+    queryParams: queryParams,
+  });
 };
 
 export const openRStudioOrConfigPanel = (

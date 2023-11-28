@@ -114,15 +114,7 @@ test.each([
     renderInteractiveNotebook(pathParameters);
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
-    if (appType !== 'RStudio') {
-      await waitFor(() => {
-        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-        expect(spyWindowOpen).toHaveBeenCalledWith(
-          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-          '_blank'
-        );
-      });
-    } else {
+    if (appType === 'RStudio') {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith([
           'workspaces',
@@ -131,6 +123,15 @@ test.each([
           UIAppType.RSTUDIO,
           `test${suffix}`,
         ]);
+      });
+    } else if (appType === 'SAS') {
+      // This is temp. Once SAS moves to iframe this if else will be removed
+      await waitFor(() => {
+        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
+        expect(spyWindowOpen).toHaveBeenCalledWith(
+          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
+          '_blank'
+        );
       });
     }
   }

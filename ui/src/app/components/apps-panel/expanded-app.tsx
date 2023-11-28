@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState } from 'react';
-import * as fp from 'lodash/fp';
 import {
   faGear,
   faRocket,
@@ -25,10 +24,11 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import {
-  NavigationProps,
+  currentWorkspaceStore,
   setSidebarActiveIconStore,
+  useNavigation,
 } from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
@@ -42,8 +42,6 @@ import {
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
@@ -166,23 +164,13 @@ const CromwellButtonRow = (props: {
   );
 };
 
-interface rstudioProps extends NavigationProps {
-  userApp: UserAppEnvironment;
-  workspace: WorkspaceData;
-}
-const RStudioButtonRow = fp.flow(
-  withNavigation,
-  withCurrentWorkspace()
-)((props: rstudioProps) => {
-  const {
-    userApp,
-    workspace: { namespace, id },
-    navigate,
-  } = props;
+const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
+  const { userApp } = props;
+  const [navigate] = useNavigation();
+  const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
     openRStudio(namespace, id, userApp, 'default', navigate);
   };
-  const workspaceNamespace = props.workspace.namespace;
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
   return (
     <FlexRow>
@@ -191,7 +179,7 @@ const RStudioButtonRow = fp.flow(
           setSidebarActiveIconStore.next(rstudioConfigIconId);
         }}
       />
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='Environment must be running to launch RStudio'
@@ -209,7 +197,7 @@ const RStudioButtonRow = fp.flow(
       </TooltipTrigger>
     </FlexRow>
   );
-});
+};
 
 const SASButtonRow = (props: {
   userApp: UserAppEnvironment;

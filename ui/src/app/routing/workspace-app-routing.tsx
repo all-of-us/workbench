@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
@@ -213,17 +212,18 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${UIAppType.RSTUDIO}/:appName`}
+        path={`${path}/gkeApp`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <GKEAppRedirectPage
           key='app'
           routeData={{
-            pathElementForTitle: 'appName',
+            pathElementForTitle: 'Gke-App',
             breadcrumb: BreadcrumbType.Analysis,
-            // The iframe we use to display the Jupyter notebook does something strange
+            // The iframe we use to display the Gke App does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
+            // This is same as the configuration used for Jupyter iframe
             contentFullHeightOverride: true,
             pageKey: LEONARDO_APP_PAGE_KEY,
             workspaceNavBarTab: analysisTabName,
