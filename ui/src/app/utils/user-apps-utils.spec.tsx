@@ -10,7 +10,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -114,7 +113,6 @@ describe('User Apps Helper functions', () => {
       'ws',
       'wsid',
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
-      'newFile',
       navigate
     );
     expect(mockNavigate).not.toBeCalled();
@@ -131,17 +129,13 @@ describe('User Apps Helper functions', () => {
       'ws',
       'wsid',
       [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],
-      'newFile',
       navigate
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
-    expect(mockNavigate).toHaveBeenCalledWith([
-      'workspaces',
-      'ws',
-      'wsid',
-      UIAppType.RSTUDIO,
-      'newFile',
-    ]);
+    expect(mockNavigate).toHaveBeenCalledWith(
+      ['workspaces', 'ws', 'wsid', 'gkeApp'],
+      { queryParams: { appType: 'RStudio' } }
+    );
     expect(setSidebarActiveIconStore.value).toBeNull();
   });
 });

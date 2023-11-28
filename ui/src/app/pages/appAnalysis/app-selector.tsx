@@ -67,7 +67,6 @@ export const AppSelector = (props: AppSelectorProps) => {
           workspace.namespace,
           workspace.name,
           userApps,
-          'default',
           navigate
         );
         break;

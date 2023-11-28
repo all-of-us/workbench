@@ -145,7 +145,6 @@ export const openRStudio = (
   workspaceNamespace: string,
   workspaceId: string,
   userApp: UserAppEnvironment,
-  appName: string,
   navigate: (commands: any, extras?: any) => void
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
@@ -161,12 +160,11 @@ export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   workspaceId: string,
   userApps: ListAppsResponse,
-  appName: string,
   navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, workspaceId, userApp, appName, navigate);
+    openRStudio(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }

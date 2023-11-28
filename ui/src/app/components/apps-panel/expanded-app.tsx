@@ -169,7 +169,7 @@ const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
   const [navigate] = useNavigation();
   const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
-    openRStudio(namespace, id, userApp, 'default', navigate);
+    openRStudio(namespace, id, userApp, navigate);
   };
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
   return (

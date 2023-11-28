@@ -545,7 +545,7 @@ export const InteractiveNotebook = fp.flow(
           if (appType === UIAppType.RSTUDIO) {
             const { userApps } = this.props.userAppsStore;
             const { navigate } = this.props;
-            openRStudioOrConfigPanel(ns, wsid, userApps, nbName, navigate);
+            openRStudioOrConfigPanel(ns, wsid, userApps, navigate);
           } else if (appType === UIAppType.SAS) {
             const { userApps } = this.props.userAppsStore;
             openSASOrConfigPanel(ns, userApps);
