@@ -310,8 +310,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
-      when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
-    } catch (ApiException | org.pmiops.workbench.firecloud.ApiException e) {
+      when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
+      when(mockFireCloudService.isUserCompliantWithTerraToS()).thenReturn(true);
+    } catch (ApiException e) {
       e.printStackTrace();
     }
 
@@ -442,9 +443,31 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
-    Profile profile = profileService.getProfile(dbUser);
+
+    // invokes Terra account creation, so we can check if the Terra ToS has been accepted
+    Profile profile = profileController.getMe().getBody();
     assertThat(profile.getLatestTermsOfServiceVersion())
         .isEqualTo(config.termsOfService.latestAouVersion);
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
+  }
+
+  @Test
+  public void testCreateAccount_tos_changes() {
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountAndDbUserWithAffiliation();
+
+    // between user creation and first sign-in, the AoU ToS version changes
+    config.termsOfService.latestAouVersion = config.termsOfService.latestAouVersion + 1;
+
+    // invokes Terra account creation
+    Profile profile = profileController.getMe().getBody();
+
+    // because the user did not accept the latest AoU ToS, we also do not indicate acceptance of
+    // the Terra ToS
+
+    assertThat(profile.getLatestTermsOfServiceVersion())
+        .isNotEqualTo(config.termsOfService.latestAouVersion);
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -455,6 +478,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -465,6 +489,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountRequest.setTermsOfServiceVersion(null);
           createAccountAndDbUserWithAffiliation();
         });
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -604,9 +629,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS()
-      throws org.pmiops.workbench.firecloud.ApiException {
-    when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
+  public void testGetUserTermsOfServiceStatus_UserHasNotAcceptedTerraTOS() {
+    when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     createAccountAndDbUserWithAffiliation();
     assertThat(profileController.getUserTermsOfServiceStatus().getBody()).isFalse();
   }
@@ -702,10 +726,15 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void test_AcceptTermsOfService() {
+  public void test_acceptTermsOfService() {
     createAccountAndDbUserWithAffiliation();
+
+    // current behavior is to record any given version of the AoU ToS in the DB
+    // and always invoke Terra acceptance as well, regardless of version
+    // TODO: should we be more stringent about this in the future for RW-11416?
+
     profileController.acceptTermsOfService(1);
-    verify(mockFireCloudService).acceptTermsOfService();
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test
