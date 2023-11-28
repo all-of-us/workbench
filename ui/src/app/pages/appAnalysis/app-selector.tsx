@@ -65,7 +65,7 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.None);
         openRStudioOrConfigPanel(
           workspace.namespace,
-          workspace.name,
+          workspace.id,
           userApps,
           navigate
         );
