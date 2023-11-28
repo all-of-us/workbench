@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.TERMS_OF_SERVICE_BODY;
+import static org.pmiops.workbench.model.ErrorCode.TERRA_TOS_NON_COMPLIANT;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -161,13 +162,33 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testGetMe_throwsUnauthorized() {
-    assertThrows(
-        UnauthorizedException.class,
-        () -> {
-          when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
-          service.getMe();
-        });
+  public void testGetMe_throwsUnauthorized_good_tos()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException, ApiException {
+
+    // user is TOS-compliant
+
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+
+    when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
+
+    var exception = assertThrows(UnauthorizedException.class, () -> service.getMe());
+    assertThat(exception.getErrorResponse()).isNull(); // not TERRA_TOS_NON_COMPLIANT;
+  }
+
+  @Test
+  public void testGetMe_throwsUnauthorized_bad_tos()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException, ApiException {
+
+    // user is TOS-noncompliant
+
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+
+    when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
+
+    var exception = assertThrows(UnauthorizedException.class, () -> service.getMe());
+    assertThat(exception.getErrorResponse().getErrorCode()).isEqualTo(TERRA_TOS_NON_COMPLIANT);
   }
 
   @Test
