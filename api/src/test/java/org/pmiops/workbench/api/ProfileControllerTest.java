@@ -443,9 +443,31 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
-    Profile profile = profileService.getProfile(dbUser);
+
+    // invokes Terra account creation, so we can check if the Terra ToS has been accepted
+    Profile profile = profileController.getMe().getBody();
     assertThat(profile.getLatestTermsOfServiceVersion())
         .isEqualTo(config.termsOfService.latestAouVersion);
+    verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
+  }
+
+  @Test
+  public void testCreateAccount_tos_changes() {
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountAndDbUserWithAffiliation();
+
+    // between user creation and first sign-in, the AoU ToS version changes
+    config.termsOfService.latestAouVersion = config.termsOfService.latestAouVersion + 1;
+
+    // invokes Terra account creation
+    Profile profile = profileController.getMe().getBody();
+
+    // because the user did not accept the latest AoU ToS, we also do not indicate acceptance of
+    // the Terra ToS
+
+    assertThat(profile.getLatestTermsOfServiceVersion())
+        .isNotEqualTo(config.termsOfService.latestAouVersion);
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -456,6 +478,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
@@ -466,6 +489,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountRequest.setTermsOfServiceVersion(null);
           createAccountAndDbUserWithAffiliation();
         });
+    verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
   @Test
