@@ -2,7 +2,9 @@ package org.pmiops.workbench.firecloud;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
+import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
@@ -49,11 +51,12 @@ public class FirecloudRetryHandler extends TerraServiceRetryHandler<ApiException
   }
 
   @Autowired
-  public FirecloudRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
+  public FirecloudRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(
         backoffPolicy,
         new FirecloudRetryPolicy(),
-        fireCloudService,
+        termsOfServiceApiProvider,
         ExceptionUtils::convertFirecloudException);
   }
 

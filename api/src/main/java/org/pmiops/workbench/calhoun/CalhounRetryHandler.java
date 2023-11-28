@@ -2,10 +2,11 @@ package org.pmiops.workbench.calhoun;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
+import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,12 @@ public class CalhounRetryHandler extends TerraServiceRetryHandler<ApiException> 
   }
 
   @Autowired
-  public CalhounRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
+  public CalhounRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(
         backoffPolicy,
         new CalhounRetryPolicy(),
-        fireCloudService,
+        termsOfServiceApiProvider,
         ExceptionUtils::convertCalhounException);
   }
 
