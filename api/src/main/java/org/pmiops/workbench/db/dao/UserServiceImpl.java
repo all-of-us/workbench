@@ -438,7 +438,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public boolean hasSignedLatestTermsOfServiceBoth(@Nonnull DbUser dbUser) {
+  public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
     return hasSignedLatestAoUTermsOfService(dbUser)
         && fireCloudService.hasUserAcceptedLatestTerraToS();
   }
