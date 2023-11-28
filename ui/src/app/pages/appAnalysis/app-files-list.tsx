@@ -140,7 +140,7 @@ export const AppFilesList = withCurrentWorkspace()(
             >
               Your Analyses
             </ListPageHeader>
-            <AppSelector {...{ workspace }} />
+            <AppSelector />
           </FlexRow>
           {workspace && filesList && (
             <DataTable

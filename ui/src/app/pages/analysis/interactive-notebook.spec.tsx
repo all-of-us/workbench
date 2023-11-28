@@ -1,4 +1,5 @@
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 import {
   AppStatus,
@@ -11,6 +12,7 @@ import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
   sasConfigIconId,
@@ -112,13 +114,25 @@ test.each([
     renderInteractiveNotebook(pathParameters);
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
-    await waitFor(() => {
-      expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-      expect(spyWindowOpen).toHaveBeenCalledWith(
-        app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-        '_blank'
-      );
-    });
+    if (appType === 'RStudio') {
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith([
+          'workspaces',
+          'sampleNameSpace',
+          'sampleWorkspace',
+          UIAppType.RSTUDIO,
+          `test${suffix}`,
+        ]);
+      });
+    } else if (appType === 'SAS') {
+      await waitFor(() => {
+        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
+        expect(spyWindowOpen).toHaveBeenCalledWith(
+          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
+          '_blank'
+        );
+      });
+    }
   }
 );
 

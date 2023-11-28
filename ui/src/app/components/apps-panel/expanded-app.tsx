@@ -24,8 +24,13 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import {
+  currentWorkspaceStore,
+  NavigationProps,
+  setSidebarActiveIconStore,
+  useNavigation,
+} from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
@@ -38,6 +43,8 @@ import {
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
@@ -160,18 +167,20 @@ const CromwellButtonRow = (props: {
   );
 };
 
-const RStudioButtonRow = (props: {
-  userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  const { userApp, workspaceNamespace } = props;
-
+const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
+  const { userApp } = props;
+  const [navigate] = useNavigation();
+  const workspace = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
-    openRStudio(workspaceNamespace, userApp);
+    openRStudio(
+      workspace.namespace,
+      workspace.id,
+      userApp,
+      'default',
+      navigate
+    );
   };
-
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
-
   return (
     <FlexRow>
       <SettingsButton
@@ -179,7 +188,10 @@ const RStudioButtonRow = (props: {
           setSidebarActiveIconStore.next(rstudioConfigIconId);
         }}
       />
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <PauseUserAppButton
+        userApp={userApp}
+        workspaceNamespace={workspace.namespace}
+      />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='Environment must be running to launch RStudio'
@@ -204,9 +216,11 @@ const SASButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
+  const [navigate] = useNavigation();
+  const workspace = currentWorkspaceStore.getValue();
 
   const onClickLaunch = async () => {
-    openSAS(workspaceNamespace, userApp);
+    openSAS(workspace.namespace, workspace.id, userApp, 'default', navigate);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -341,12 +355,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             ],
             [
               appType === UIAppType.RSTUDIO,
-              () => (
-                <RStudioButtonRow
-                  userApp={initialUserAppInfo}
-                  workspaceNamespace={workspace.namespace}
-                />
-              ),
+              () => <RStudioButtonRow userApp={initialUserAppInfo} />,
             ],
             [
               appType === UIAppType.SAS,

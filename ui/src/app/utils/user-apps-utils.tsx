@@ -110,7 +110,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (
+export const localizeRStudioApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -123,12 +123,14 @@ export const openRStudio = (
       false
     )
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openSAS = (
   workspaceNamespace: string,
-  userApp: UserAppEnvironment
+  workspaceId: string,
+  userApp: UserAppEnvironment,
+  appName: string,
+  navigate: (commands: any, extras?: any) => void
 ) => {
   fetchWithErrorModal(() =>
     localizeUserApp(
@@ -139,16 +141,43 @@ export const openSAS = (
       false
     )
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+  navigate([
+    'workspaces',
+    workspaceNamespace,
+    workspaceId,
+    UIAppType.SAS,
+    appName,
+  ]);
+  // window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+};
+
+export const openRStudio = (
+  workspaceNamespace: string,
+  workspaceId: string,
+  userApp: UserAppEnvironment,
+  appName: string,
+  navigate: (commands: any, extras?: any) => void
+) => {
+  localizeRStudioApp(workspaceNamespace, userApp);
+  navigate([
+    'workspaces',
+    workspaceNamespace,
+    workspaceId,
+    UIAppType.RSTUDIO,
+    appName,
+  ]);
 };
 
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  appName: string,
+  navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, userApp);
+    openRStudio(workspaceNamespace, workspaceId, userApp, appName, navigate);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }
@@ -156,11 +185,14 @@ export const openRStudioOrConfigPanel = (
 
 export const openSASOrConfigPanel = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  appName: string,
+  navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, UIAppType.SAS);
   if (userApp?.status === AppStatus.RUNNING) {
-    openSAS(workspaceNamespace, userApp);
+    openSAS(workspaceNamespace, workspaceId, userApp, appName, navigate);
   } else {
     setSidebarActiveIconStore.next(sasConfigIconId);
   }

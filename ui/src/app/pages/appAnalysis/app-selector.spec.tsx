@@ -30,7 +30,7 @@ describe('App Selector', () => {
   const component = (workspace: WorkspaceData = workspaceDataStub) =>
     renderModal(
       <MemoryRouter>
-        <AppSelector {...{ workspace }} />
+        <AppSelector />
       </MemoryRouter>
     );
 
