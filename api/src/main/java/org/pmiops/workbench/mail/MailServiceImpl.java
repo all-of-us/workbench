@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -41,6 +40,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -291,7 +291,7 @@ public class MailServiceImpl implements MailService {
 
   private String getEnvironmentType(Object labels) {
     return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(labels)
-        .map(appType -> CaseUtils.toCamelCase(appType.toString(), true))
+        .map(LeonardoAppUtils::appDisplayName)
         .orElse("Jupyter");
   }
 
