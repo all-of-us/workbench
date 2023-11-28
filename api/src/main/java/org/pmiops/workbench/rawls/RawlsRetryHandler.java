@@ -2,11 +2,10 @@ package org.pmiops.workbench.rawls;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +50,8 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
   }
 
   @Autowired
-  public RawlsRetryHandler(
-      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
-    super(backoffPolicy, new RawlsRetryPolicy(), termsOfServiceApiProvider);
+  public RawlsRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
+    super(backoffPolicy, new RawlsRetryPolicy(), fireCloudService);
   }
 
   @Override
