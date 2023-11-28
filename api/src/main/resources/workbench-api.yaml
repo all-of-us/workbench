@@ -1490,32 +1490,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workspace'
       x-codegen-request-body-name: workspace
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/markResearchPurposeReviewed:
-    get:
-      tags:
-      - workspaces
-      description: Mark workspace owner has reviewed research purpose
-      operationId: markResearchPurposeReviewed
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: workspaceId
-        in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: The billing usage for a workspace
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Workspace'
   /v2/workspaces/{workspaceNamespace}/{workspaceId}/resources:
     get:
       tags:
