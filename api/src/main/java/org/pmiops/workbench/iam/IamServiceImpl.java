@@ -1,15 +1,16 @@
 package org.pmiops.workbench.iam;
 
+import com.google.api.services.cloudresourcemanager.v3.model.Policy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.broadinstitute.dsde.workbench.client.sam.api.GoogleApi;
+import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.sam.SamApiClientFactory;
 import org.pmiops.workbench.sam.SamRetryHandler;
@@ -21,18 +22,15 @@ public class IamServiceImpl implements IamService {
   private static final String LIFESCIENCE_RUNNER_ROLE = "roles/lifesciences.workflowsRunner";
 
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final FirecloudApiClientFactory firecloudApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;
   private final SamRetryHandler samRetryHandler;
 
   @Autowired
   public IamServiceImpl(
       CloudResourceManagerService cloudResourceManagerService,
-      FirecloudApiClientFactory firecloudApiClientFactory,
       SamApiClientFactory samApiClientFactory,
       SamRetryHandler samRetryHandler) {
     this.cloudResourceManagerService = cloudResourceManagerService;
-    this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.samApiClientFactory = samApiClientFactory;
     this.samRetryHandler = samRetryHandler;
   }
@@ -51,17 +49,13 @@ public class IamServiceImpl implements IamService {
   @Override
   public Optional<String> getOrCreatePetServiceAccountUsingImpersonation(
       String googleProject, String userEmail) throws IOException, ApiException {
+    var samClient = samApiClientFactory.newImpersonatedApiClient(userEmail);
+    var tosResult =
+        samRetryHandler.run(
+            context -> new TermsOfServiceApi(samClient).userTermsOfServiceGetSelf());
 
-    boolean userAcceptedLatestTos =
-        Boolean.TRUE.equals(
-            new TermsOfServiceApi(firecloudApiClientFactory.newImpersonatedApiClient(userEmail))
-                .getTermsOfServiceStatus());
-
-    if (userAcceptedLatestTos) {
-      return Optional.of(
-          getOrCreatePetServiceAccount(
-              googleProject,
-              new GoogleApi(samApiClientFactory.newImpersonatedApiClient(userEmail))));
+    if (tosResult.getPermitsSystemUsage()) {
+      return Optional.of(getOrCreatePetServiceAccount(googleProject, new GoogleApi(samClient)));
     } else {
       return Optional.empty();
     }
@@ -92,25 +86,21 @@ public class IamServiceImpl implements IamService {
   /** Revokes life science runner role to list of service accounts. */
   private void revokeLifeScienceRunnerRole(
       String googleProject, List<String> petServiceAccountsLostAccess) {
-    com.google.api.services.cloudresourcemanager.v3.model.Policy policy =
-        cloudResourceManagerService.getIamPolicy(googleProject);
-    List<com.google.api.services.cloudresourcemanager.v3.model.Binding> bindingList =
-        Optional.ofNullable(policy.getBindings()).orElse(new ArrayList<>());
-    com.google.api.services.cloudresourcemanager.v3.model.Binding binding =
-        bindingList.stream()
-            .filter(b -> LIFESCIENCE_RUNNER_ROLE.equals(b.getRole()))
-            .findFirst()
-            .orElse(
-                new com.google.api.services.cloudresourcemanager.v3.model.Binding()
-                    .setRole(LIFESCIENCE_RUNNER_ROLE)
-                    .setMembers(new ArrayList<>()));
+    Policy policy = cloudResourceManagerService.getIamPolicy(googleProject);
 
-    binding
-        .getMembers()
-        .removeAll(
-            petServiceAccountsLostAccess.stream()
-                .map(s -> "serviceAccount:" + s)
-                .collect(Collectors.toList()));
+    Stream.ofNullable(policy.getBindings())
+        .flatMap(List::stream)
+        .filter(b -> LIFESCIENCE_RUNNER_ROLE.equals(b.getRole()))
+        .findFirst()
+        .ifPresent(
+            binding ->
+                // update the Binding inside the Policy in-place
+                binding
+                    .getMembers()
+                    .removeAll(
+                        petServiceAccountsLostAccess.stream()
+                            .map(s -> "serviceAccount:" + s)
+                            .collect(Collectors.toSet())));
 
     cloudResourceManagerService.setIamPolicy(googleProject, policy);
   }
