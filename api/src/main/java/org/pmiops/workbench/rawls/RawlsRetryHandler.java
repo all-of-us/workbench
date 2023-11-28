@@ -51,12 +51,15 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
   @Autowired
   public RawlsRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new RawlsRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new RawlsRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertRawlsException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertRawlsException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

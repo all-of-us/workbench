@@ -51,12 +51,15 @@ public class CalhounRetryHandler extends TerraServiceRetryHandler<ApiException> 
 
   @Autowired
   public CalhounRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new CalhounRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new CalhounRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertCalhounException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertCalhounException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

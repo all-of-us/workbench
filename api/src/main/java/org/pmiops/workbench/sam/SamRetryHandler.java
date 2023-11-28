@@ -52,12 +52,12 @@ public class SamRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
   @Autowired
   public SamRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new SamRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy, new SamRetryPolicy(), fireCloudService, ExceptionUtils::convertSamException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertSamException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

@@ -60,12 +60,15 @@ public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException>
 
   @Autowired
   public LeonardoRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new LeonardoRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new LeonardoRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertLeonardoException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertLeonardoException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

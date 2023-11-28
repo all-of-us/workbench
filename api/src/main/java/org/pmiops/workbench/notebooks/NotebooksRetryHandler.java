@@ -51,12 +51,15 @@ public class NotebooksRetryHandler extends TerraServiceRetryHandler<ApiException
 
   @Autowired
   public NotebooksRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new NotebookRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new NotebookRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertNotebookException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertNotebookException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

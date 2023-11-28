@@ -51,12 +51,15 @@ public class ShibbolethRetryHandler extends TerraServiceRetryHandler<ApiExceptio
 
   @Autowired
   public ShibbolethRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new ShibbolethRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new ShibbolethRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertShibbolethException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertShibbolethException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }

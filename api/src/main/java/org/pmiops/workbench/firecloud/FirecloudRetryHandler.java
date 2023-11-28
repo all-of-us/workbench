@@ -50,12 +50,15 @@ public class FirecloudRetryHandler extends TerraServiceRetryHandler<ApiException
 
   @Autowired
   public FirecloudRetryHandler(BackOffPolicy backoffPolicy, FireCloudService fireCloudService) {
-    super(backoffPolicy, new FirecloudRetryPolicy(), fireCloudService);
+    super(
+        backoffPolicy,
+        new FirecloudRetryPolicy(),
+        fireCloudService,
+        ExceptionUtils::convertFirecloudException);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertFirecloudException(exception));
+    return convertTerraException(exception, exception.getCode());
   }
 }
