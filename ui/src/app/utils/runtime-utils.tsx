@@ -148,18 +148,6 @@ export enum SparkConsolePath {
   JobHistory = 'jobhistory',
 }
 
-export enum PanelContent {
-  Create = 'Create',
-  Customize = 'Customize',
-  DeleteRuntime = 'DeleteRuntime',
-  DeleteUnattachedPd = 'DeleteUnattachedPd',
-  DeleteUnattachedPdAndCreate = 'DeleteUnattachedPdAndCreate',
-  Disabled = 'Disabled',
-  ConfirmUpdate = 'ConfirmUpdate',
-  ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
-  SparkConsole = 'SparkConsole',
-}
-
 // should we show the runtime in the UI (in most situations)?
 // Note: we do make users aware of ERROR runtimes in some situations
 export const isVisible = (status: RuntimeStatus) =>

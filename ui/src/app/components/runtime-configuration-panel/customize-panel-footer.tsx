@@ -9,7 +9,9 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
-import { canDeleteRuntime, PanelContent } from 'app/utils/runtime-utils';
+import { canDeleteRuntime } from 'app/utils/runtime-utils';
+
+import { PanelContent } from './utils';
 
 export interface CustomizePanelFooterProps {
   disableControls: boolean;

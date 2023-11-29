@@ -16,7 +16,6 @@ import {
   ComputeType,
 } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { PanelContent } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -31,6 +30,7 @@ import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 import { ALL_RUNTIME_STATUSES, minus } from 'testing/utils';
 
 import { CustomizePanel, CustomizePanelProps } from './customize-panel';
+import { PanelContent } from './utils';
 
 jest.mock(
   'app/components/runtime-configuration-panel/gpu-config-selector',

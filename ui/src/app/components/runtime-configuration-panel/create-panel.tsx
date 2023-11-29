@@ -11,7 +11,8 @@ import { RuntimeSummary } from 'app/components/runtime-summary';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { PanelContent } from 'app/utils/runtime-utils';
+
+import { PanelContent } from './utils';
 
 export interface CreatePanelProps {
   analysisConfig: AnalysisConfig;

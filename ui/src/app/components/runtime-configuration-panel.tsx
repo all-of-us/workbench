@@ -44,7 +44,6 @@ import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   isVisible,
-  PanelContent,
   RuntimeStatusRequest,
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
@@ -67,6 +66,7 @@ import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
+import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 

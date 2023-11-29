@@ -6,7 +6,6 @@ import { DiskType, RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { toAnalysisConfig } from 'app/utils/analysis-config';
-import { PanelContent } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -18,6 +17,7 @@ import {
   CustomizePanelFooter,
   CustomizePanelFooterProps,
 } from './customize-panel-footer';
+import { PanelContent } from './utils';
 
 const onClose = jest.fn();
 const requestAnalysisConfig = jest.fn();

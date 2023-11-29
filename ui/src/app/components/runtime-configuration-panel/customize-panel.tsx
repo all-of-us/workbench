@@ -27,11 +27,7 @@ import {
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   Machine,
 } from 'app/utils/machines';
-import {
-  PanelContent,
-  RuntimeStatusRequest,
-  UpdateMessaging,
-} from 'app/utils/runtime-utils';
+import { RuntimeStatusRequest, UpdateMessaging } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
@@ -40,6 +36,7 @@ import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
 import { PresetSelector } from './preset-selector';
+import { PanelContent } from './utils';
 
 export interface CustomizePanelProps {
   allowDataproc: boolean;
