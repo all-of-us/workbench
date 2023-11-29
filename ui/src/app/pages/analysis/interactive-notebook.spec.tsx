@@ -116,7 +116,7 @@ test.each([
     if (appType === 'RStudio') {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith(
-          ['workspaces', 'sampleNameSpace', 'sampleWorkspace', 'gkeApp'],
+          ['workspaces', 'sampleNameSpace', 'sampleWorkspace', 'userApp'],
           { queryParams: { appType: 'RStudio' } }
         );
       });

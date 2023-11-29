@@ -422,7 +422,7 @@ describe('ExpandedApp', () => {
                 'workspaces',
                 WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
                 WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-                'gkeApp',
+                'userApp',
               ],
               { queryParams: { appType: 'RStudio' } }
             );

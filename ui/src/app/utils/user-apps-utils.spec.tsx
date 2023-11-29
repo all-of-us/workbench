@@ -134,7 +134,7 @@ describe('User Apps Helper functions', () => {
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
     expect(mockNavigate).toHaveBeenCalledWith(
-      ['workspaces', 'ws', 'wsid', 'gkeApp'],
+      ['workspaces', 'ws', 'wsid', 'userApp'],
       { queryParams: { appType: 'RStudio' } }
     );
     expect(setSidebarActiveIconStore.value).toBeNull();
