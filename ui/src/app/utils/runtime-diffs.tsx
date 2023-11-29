@@ -2,17 +2,13 @@ import * as fp from 'lodash/fp';
 
 import { cond } from '@terra-ui-packages/core-utils';
 
+import { AnalysisConfig } from './analysis-config';
 import {
   AutopauseMinuteThresholds,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   findMachineByName,
 } from './machines';
-import {
-  AnalysisConfig,
-  DiskConfig,
-  diskTypeLabels,
-  UpdateMessaging,
-} from './runtime-utils';
+import { DiskConfig, diskTypeLabels, UpdateMessaging } from './runtime-utils';
 
 export interface AnalysisDiff {
   desc: string;

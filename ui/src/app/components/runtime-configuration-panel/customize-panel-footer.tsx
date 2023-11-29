@@ -8,11 +8,8 @@ import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panel
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import {
-  AnalysisConfig,
-  canDeleteRuntime,
-  PanelContent,
-} from 'app/utils/runtime-utils';
+import { AnalysisConfig } from 'app/utils/analysis-config';
+import { canDeleteRuntime, PanelContent } from 'app/utils/runtime-utils';
 
 export interface CustomizePanelFooterProps {
   disableControls: boolean;

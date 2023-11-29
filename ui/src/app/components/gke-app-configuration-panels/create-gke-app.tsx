@@ -22,9 +22,9 @@ import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-p
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType, findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,

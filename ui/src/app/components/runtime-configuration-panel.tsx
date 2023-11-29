@@ -19,6 +19,13 @@ import {
   WithCurrentWorkspace,
   withCurrentWorkspace,
 } from 'app/utils';
+import {
+  AnalysisConfig,
+  fromAnalysisConfig,
+  maybeWithPersistentDisk,
+  toAnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
@@ -32,19 +39,14 @@ import {
   AnalysisDiff,
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
-} from 'app/utils/runtime-diff-utils';
+} from 'app/utils/runtime-diffs';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
-  AnalysisConfig,
-  fromAnalysisConfig,
   isVisible,
-  maybeWithPersistentDisk,
   PanelContent,
   RuntimeStatusRequest,
-  toAnalysisConfig,
   UpdateMessaging,
-  withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
   ProfileStore,

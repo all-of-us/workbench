@@ -1,13 +1,114 @@
+import { GpuConfig } from 'generated/fetch';
+
+import { AnalysisConfig } from './analysis-config';
 import {
   AnalysisDiff,
   AnalysisDiffState,
   applyUpdate,
+  compareGpu,
   diffsToUpdateMessaging,
   findMostSevereDiffState,
   rebootUpdate,
   recreateEnvAndPDUpdate,
   recreateEnvUpdate,
-} from './runtime-diff-utils';
+} from './runtime-diffs';
+
+// only testing the 'diff' field because the others are straightforward
+describe(compareGpu.name, () => {
+  const baseAnalysisConfig: AnalysisConfig = {
+    computeType: undefined, // none of these are used - only gpuConfig
+    machine: undefined,
+    diskConfig: undefined,
+    detachedDisk: undefined,
+    dataprocConfig: undefined,
+    autopauseThreshold: undefined,
+    gpuConfig: undefined, // will be overridden
+  };
+  const baseGpuConfig: GpuConfig = {
+    gpuType: 'the standard one',
+    numOfGpus: 1,
+  };
+
+  it('returns a NO_CHANGE diff when neither the old or new config specifies GPUs', () =>
+    expect(
+      compareGpu(
+        { ...baseAnalysisConfig, gpuConfig: undefined },
+        { ...baseAnalysisConfig, gpuConfig: undefined }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NO_CHANGE));
+
+  it('returns a NO_CHANGE diff when configs are identical', () =>
+    expect(
+      compareGpu(
+        { ...baseAnalysisConfig, gpuConfig: baseGpuConfig },
+        { ...baseAnalysisConfig, gpuConfig: baseGpuConfig }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NO_CHANGE));
+
+  it('returns a NEEDS_DELETE diff when adding a gpuConfig', () =>
+    expect(
+      compareGpu(
+        { ...baseAnalysisConfig, gpuConfig: undefined },
+        { ...baseAnalysisConfig, gpuConfig: baseGpuConfig }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NEEDS_DELETE));
+
+  it('returns a NEEDS_DELETE diff when removing a gpuConfig', () =>
+    expect(
+      compareGpu(
+        { ...baseAnalysisConfig, gpuConfig: baseGpuConfig },
+        { ...baseAnalysisConfig, gpuConfig: undefined }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NEEDS_DELETE));
+
+  it('returns a NEEDS_DELETE diff when GPU type differs', () =>
+    expect(
+      compareGpu(
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: { ...baseGpuConfig, gpuType: 'red' },
+        },
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: { ...baseGpuConfig, gpuType: 'blue' },
+        }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NEEDS_DELETE));
+
+  it('returns a NEEDS_DELETE diff when GPU count increases', () =>
+    expect(
+      compareGpu(
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: baseGpuConfig,
+        },
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: {
+            ...baseGpuConfig,
+            numOfGpus: baseGpuConfig.numOfGpus + 1,
+          },
+        }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NEEDS_DELETE));
+
+  it('returns a NEEDS_DELETE diff when GPU count decreases', () =>
+    expect(
+      compareGpu(
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: baseGpuConfig,
+        },
+        {
+          ...baseAnalysisConfig,
+          gpuConfig: {
+            ...baseGpuConfig,
+            numOfGpus: baseGpuConfig.numOfGpus - 1,
+          },
+        }
+      )?.diff
+    ).toEqual(AnalysisDiffState.NEEDS_DELETE));
+});
 
 describe(findMostSevereDiffState.name, () => {
   test.each([

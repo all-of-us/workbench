@@ -7,16 +7,16 @@ import { RuntimeStatus, WorkspaceAccessLevel } from 'generated/fetch';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
+  toAnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
+import {
   allMachineTypes,
   AutopauseMinuteThresholds,
   ComputeType,
 } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import {
-  PanelContent,
-  toAnalysisConfig,
-  withAnalysisConfigDefaults,
-} from 'app/utils/runtime-utils';
+import { PanelContent } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';

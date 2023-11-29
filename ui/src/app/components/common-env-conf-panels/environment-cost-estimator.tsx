@@ -5,6 +5,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import {
   detachableDiskPricePerMonth,
   diskConfigPricePerMonth,
@@ -14,7 +15,6 @@ import {
   machineStorageCostBreakdown,
 } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 interface Props {
   analysisConfig: AnalysisConfig;

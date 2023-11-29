@@ -13,6 +13,7 @@ import { switchCase } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
 
+import { canUseExistingDisk, toAnalysisConfig } from './analysis-config';
 import { withAsyncErrorHandling } from './index';
 import {
   ExceededActionCountError,
@@ -23,12 +24,10 @@ import {
   AnalysisDiffState,
   findMostSevereDiffState,
   getAnalysisConfigDiffs,
-} from './runtime-diff-utils';
+} from './runtime-diffs';
 import {
-  canUseExistingDisk,
   maybeUnwrapSecuritySuspendedError,
   RuntimeStatusRequest,
-  toAnalysisConfig,
 } from './runtime-utils';
 import {
   compoundRuntimeOpStore,

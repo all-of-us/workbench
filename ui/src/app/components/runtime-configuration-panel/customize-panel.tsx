@@ -18,17 +18,19 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import {
+  AnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
+import {
   AutopauseMinuteThresholds,
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   Machine,
 } from 'app/utils/machines';
 import {
-  AnalysisConfig,
   PanelContent,
   RuntimeStatusRequest,
   UpdateMessaging,
-  withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
