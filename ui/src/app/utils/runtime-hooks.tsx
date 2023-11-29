@@ -21,9 +21,11 @@ import {
 } from './leo-runtime-initializer';
 import {
   AnalysisDiffState,
-  canUseExistingDisk,
   findMostSevereDiffState,
   getAnalysisConfigDiffs,
+} from './runtime-diff-utils';
+import {
+  canUseExistingDisk,
   maybeUnwrapSecuritySuspendedError,
   RuntimeStatusRequest,
   toAnalysisConfig,
