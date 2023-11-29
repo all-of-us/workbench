@@ -14,6 +14,7 @@ import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner
 import {
   analysisTabName,
   analysisTabPath,
+  appTabPath,
   dataTabPath,
   workspacePath,
 } from 'app/routing/utils';
@@ -66,8 +67,23 @@ export const getTrail = (
   conceptSet: ConceptSet,
   params: MatchParams
 ): Array<BreadcrumbData> => {
-  const { ns, wsid, cid, crid, csid, pid, nbName } = params;
+  const { ns, wsid, cid, crid, csid, pid, nbName, appType } = params;
   switch (type) {
+    case BreadcrumbType.App:
+      return [
+        ...getTrail(
+          BreadcrumbType.Workspace,
+          workspace,
+          cohort,
+          cohortReview,
+          conceptSet,
+          params
+        ),
+        new BreadcrumbData(
+          appType,
+          `${appTabPath(ns, wsid)}?appType=${appType}`
+        ),
+      ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
     case BreadcrumbType.Workspace:
@@ -343,19 +359,27 @@ export const Breadcrumb = fp.flow(
       const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
+
+      const appPreviewMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/userApp`,
+      });
+
       const analysisFileName = analysisMatch
         ? analysisMatch.params.nbName
         : analysisPreviewMatch
         ? analysisPreviewMatch.params.nbName
         : undefined;
 
+      const appType = appPreviewMatch
+        ? new URLSearchParams(location.search).get('appType')
+        : undefined;
       return getTrail(
         this.props.routeData.breadcrumb,
         this.props.workspace,
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName: analysisFileName }
+        { ns, wsid, cid, csid, pid, nbName: analysisFileName, appType }
       );
     }
 

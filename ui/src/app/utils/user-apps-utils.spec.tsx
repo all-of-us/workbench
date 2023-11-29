@@ -115,9 +115,10 @@ describe('User Apps Helper functions', () => {
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
       navigate
     );
-    expect(mockNavigate).not.toBeCalled();
+
     // Since RStudio is NOT in running state this will open the RStudio config side panel and
     // There will be no navigation to any other page
+    expect(mockNavigate).not.toBeCalled();
     expect(setSidebarActiveIconStore.value).toBe(rstudioConfigIconId);
   });
 

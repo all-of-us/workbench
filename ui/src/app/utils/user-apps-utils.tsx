@@ -151,7 +151,7 @@ export const openRStudio = (
   const queryParams = {
     appType: UIAppType.RSTUDIO,
   };
-  navigate(['workspaces', workspaceNamespace, workspaceId, 'gkeApp'], {
+  navigate(['workspaces', workspaceNamespace, workspaceId, 'userApp'], {
     queryParams: queryParams,
   });
 };

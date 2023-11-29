@@ -6,39 +6,45 @@ import * as fp from 'lodash/fp';
 
 import { parseQueryParams } from 'app/components/app-router';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
-import { FlexRow } from 'app/components/flex';
-import { WarningIcon } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
-  MatchParams,
-  UserAppsStore,
-  userAppsStore,
-  useStore,
-} from 'app/utils/stores';
+  ErrorMode,
+  NotebookFrameError,
+} from 'app/pages/analysis/notebook-frame-error';
+import { analysisTabName } from 'app/routing/utils';
+import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
+import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
+import { MatchParams, userAppsStore, useStore } from 'app/utils/stores';
 
 interface Props
   extends WithSpinnerOverlayProps,
-    RouteComponentProps<MatchParams> {
-  userAppsStore: UserAppsStore;
-}
+    RouteComponentProps<MatchParams> {}
 
 export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
   useEffect(() => {
     props.hideSpinner();
   }, []);
   const { userApps } = useStore(userAppsStore);
-
   const queryParams = parseQueryParams(props.location.search);
   const appType = queryParams.get('appType') as UIAppType;
   const userApp = findApp(userApps, appType);
+  const [navigate] = useNavigation();
+
+  useEffect(() => {
+    // In case app is deleted redirect user to the analysis tab.
+    if (!!userApp && userApp.status === 'DELETED') {
+      const { namespace, id } = currentWorkspaceStore.getValue();
+      navigate([`workspaces/${namespace}/${id}/${analysisTabName}`]);
+    }
+  }, [userApp]);
+
   if (!!userApp) {
     const url = userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX];
     return (
       <div style={{ height: '100%' }}>
         <div style={{ borderBottom: '5px solid #2691D0', width: '100%' }} />
         <Iframe
-          title='Gke-App embed'
+          title={`${appType} embed`}
           frameBorder={0}
           url={url}
           width='100%'
@@ -48,10 +54,10 @@ export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
     );
   } else {
     return (
-      <FlexRow style={{ paddingTop: '5rem', paddingLeft: '5rem' }}>
-        <WarningIcon />
-        <label>Something went wrong please try later</label>
-      </FlexRow>
+      <NotebookFrameError errorMode={ErrorMode.ERROR}>
+        An error was encountered with your App {appType}. To resolve, please see
+        the Applications side panel.
+      </NotebookFrameError>
     );
   }
 });

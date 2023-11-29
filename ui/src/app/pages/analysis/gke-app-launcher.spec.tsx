@@ -3,47 +3,67 @@ import '@testing-library/jest-dom';
 import { Router } from 'react-router';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { mockNavigate } from 'setupTests';
 
-import { AppType } from 'generated/fetch';
+import {
+  AppStatus,
+  AppType,
+  ListAppsResponse,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
+import { workspaceStubs } from 'testing/stubs/workspaces';
+
+const RSTUDIO_FAKE_URL = 'https://fakeRStudioUrl/';
 const createHistory = (queryParam: string) => {
   const history = createMemoryHistory({
-    initialEntries: ['/workspaces/:ns/:wsid/gkeApp'],
+    initialEntries: ['/workspaces/:ns/:wsid/userApp'],
   });
   history.location.search = queryParam;
   return history;
 };
 
-const createApp = (appType: AppType = AppType.RSTUDIO) => ({
-  googleProject: 'googleProject',
-  appName: 'rstudioApp',
-  appType: appType,
-  proxyUrls: { app: `https://fakeRStudioUrl/` },
-});
+const createApp = (appType: AppType = AppType.RSTUDIO) => [
+  {
+    googleProject: 'googleProject',
+    appName: 'rstudioApp',
+    appType: appType,
+    status: AppStatus.RUNNING,
+    proxyUrls: { app: RSTUDIO_FAKE_URL },
+  },
+];
 
 const createRoute = (queryParam: string) => (
   <Router history={createHistory(queryParam)}>
-    <Route path={`/workspaces/:ns/:wsid/gkeApp`}>
+    <Route path={`/workspaces/:ns/:wsid/userApp`}>
       <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
     </Route>
   </Router>
 );
 
+const setUpWorkspace = () => {
+  currentWorkspaceStore.next({
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.WRITER,
+  });
+};
+
 const setup = (
   queryParam: string = 'appType=RStudio',
-  appType: AppType = AppType.RSTUDIO
+  app: ListAppsResponse = createApp()
 ) => {
   userAppsStore.set({
     updating: false,
-    userApps: [createApp(appType)],
+    userApps: app,
   });
-
+  setUpWorkspace();
   return {
     container: render(createRoute(queryParam)).container,
     user: userEvent.setup(),
@@ -65,24 +85,68 @@ const setupEmptyUserStore = () => {
 it('Should display iframe with rStudio App Url', async () => {
   setup();
   // Confirm IFrame exist
-  expect(screen.getByTitle('Gke-App embed')).toBeInTheDocument();
+  expect(screen.getByTitle('RStudio embed')).toBeInTheDocument();
   // Confirm IFrame source is same as proxyUrl for Rstudio L24
-  expect(screen.getByTitle('Gke-App embed').getAttribute('src')).toBe(
-    'https://fakeRStudioUrl/'
+  expect(screen.getByTitle('RStudio embed').getAttribute('src')).toBe(
+    RSTUDIO_FAKE_URL
   );
 });
 
 it('Should display error message if App type is not found', async () => {
   setup('appType=fakeApp');
-  expect(screen.getByText(/something went wrong please try later/i));
+  console.log(screen.logTestingPlaygroundURL());
+  expect(
+    screen.getByText(
+      /an error was encountered with your app fakeapp\. to resolve, please see the applications side panel\./i
+    )
+  );
 });
 
 it('Should display error message if User App is not found', async () => {
-  setup('appType=RStudio', AppType.CROMWELL);
-  expect(screen.getByText(/something went wrong please try later/i));
+  setup('appType=RStudio', createApp(AppType.CROMWELL));
+  expect(
+    screen.getByText(
+      /an error was encountered with your app rstudio\. to resolve, please see the applications side panel\./i
+    )
+  );
 });
 
 it('Should display error message if there are no user apps in userAppStore', async () => {
   setupEmptyUserStore();
-  expect(screen.getByText(/something went wrong please try later/i));
+  expect(
+    screen.getByText(
+      /an error was encountered with your app rstudio\. to resolve, please see the applications side panel\./i
+    )
+  );
+});
+
+it('Should redirect user to analysis page in case displayed App is deleted', async () => {
+  // Confirm the RStudio app is up and displayed in iframe and no navigate is called
+  setup();
+  expect(screen.getByTitle('RStudio embed')).toBeInTheDocument();
+  expect(mockNavigate).not.toHaveBeenCalledWith([
+    'workspaces/defaultNamespace/1/analysis',
+  ]);
+
+  // Set the app status to be deleted and set it in userAppsStore
+  const deletedAppList: ListAppsResponse = [
+    {
+      googleProject: 'googleProject',
+      appName: 'rstudioApp',
+      appType: AppType.RSTUDIO,
+      status: AppStatus.DELETED,
+      proxyUrls: { app: RSTUDIO_FAKE_URL },
+    },
+  ];
+  userAppsStore.set({
+    updating: false,
+    userApps: deletedAppList,
+  });
+
+  await waitFor(() => {
+    // Since the app is now deleted navigate to analysis tab
+    expect(mockNavigate).toHaveBeenCalledWith([
+      'workspaces/defaultNamespace/1/analysis',
+    ]);
+  });
 });

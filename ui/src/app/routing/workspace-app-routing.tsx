@@ -212,14 +212,13 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/gkeApp`}
+        path={`${path}/userApp`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <GKEAppRedirectPage
           key='app'
           routeData={{
-            pathElementForTitle: 'Gke-App',
-            breadcrumb: BreadcrumbType.Analysis,
+            breadcrumb: BreadcrumbType.App,
             // The iframe we use to display the Gke App does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
