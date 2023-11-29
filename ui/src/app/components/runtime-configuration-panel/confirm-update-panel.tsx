@@ -1,15 +1,15 @@
 import * as React from 'react';
 
-import {
-  diffsToUpdateMessaging,
-  getAnalysisConfigDiffs,
-} from '../../utils/runtime-diff-utils';
 import { Button } from 'app/components/buttons';
 import { EnvironmentCostEstimator } from 'app/components/common-env-conf-panels/environment-cost-estimator';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { TextColumn } from 'app/components/text-column';
+import {
+  diffsToUpdateMessaging,
+  getAnalysisConfigDiffs,
+} from 'app/utils/runtime-diff-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 interface Props {

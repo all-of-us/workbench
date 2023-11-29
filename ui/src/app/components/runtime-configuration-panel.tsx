@@ -8,11 +8,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import {
-  AnalysisDiff,
-  diffsToUpdateMessaging,
-  getAnalysisConfigDiffs,
-} from '../utils/runtime-diff-utils';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
@@ -33,6 +28,11 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
+import {
+  AnalysisDiff,
+  diffsToUpdateMessaging,
+  getAnalysisConfigDiffs,
+} from 'app/utils/runtime-diff-utils';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
