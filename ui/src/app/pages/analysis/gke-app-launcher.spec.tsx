@@ -134,7 +134,7 @@ it('Should redirect user to analysis page in case displayed App is deleted', asy
       googleProject: 'googleProject',
       appName: 'rstudioApp',
       appType: AppType.RSTUDIO,
-      status: AppStatus.DELETED,
+      status: AppStatus.DELETING,
       proxyUrls: { app: RSTUDIO_FAKE_URL },
     },
   ];

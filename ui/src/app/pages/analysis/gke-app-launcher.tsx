@@ -4,6 +4,8 @@ import Iframe from 'react-iframe';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
+import { AppStatus } from 'generated/fetch';
+
 import { parseQueryParams } from 'app/components/app-router';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -21,9 +23,6 @@ interface Props
     RouteComponentProps<MatchParams> {}
 
 export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
-  useEffect(() => {
-    props.hideSpinner();
-  }, []);
   const { userApps } = useStore(userAppsStore);
   const queryParams = parseQueryParams(props.location.search);
   const appType = queryParams.get('appType') as UIAppType;
@@ -31,8 +30,9 @@ export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
   const [navigate] = useNavigation();
 
   useEffect(() => {
+    props.hideSpinner();
     // In case app is deleted redirect user to the analysis tab.
-    if (!!userApp && userApp.status === 'DELETED') {
+    if (!!userApp && userApp.status === AppStatus.DELETING) {
       const { namespace, id } = currentWorkspaceStore.getValue();
       navigate([`workspaces/${namespace}/${id}/${analysisTabName}`]);
     }
