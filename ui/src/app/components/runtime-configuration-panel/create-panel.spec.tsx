@@ -28,8 +28,6 @@ const defaultAnalysisConfig = toAnalysisConfig(
 
 const setPanelContent = jest.fn();
 const onClose = jest.fn();
-const onPause = jest.fn();
-const onResume = jest.fn();
 const requestAnalysisConfig = jest.fn();
 
 const defaultProps: CreatePanelProps = {
@@ -41,8 +39,6 @@ const defaultProps: CreatePanelProps = {
   runtimeCanBeCreated: true,
   setPanelContent,
   onClose,
-  onPause,
-  onResume,
   requestAnalysisConfig,
 };
 
