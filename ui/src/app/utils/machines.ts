@@ -370,8 +370,10 @@ export const validLeoGceMachineTypes = allMachineTypes.filter(
 export const validLeoDataprocMasterMachineTypes = allMachineTypes.filter(
   ({ memory }) => memory > 4
 );
+// updated 29 Nov 2023 after observing the error:
+// Creating clusters using the n1-standard-1 machine type is not supported for image version 2.1.11-debian11
 export const validLeoDataprocWorkerMachineTypes = allMachineTypes.filter(
-  ({ memory }) => memory >= 3
+  ({ memory }) => memory >= 4
 );
 
 export const findMachineByName = (machineToFind: string) =>
