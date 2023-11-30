@@ -109,8 +109,8 @@ def deploy_tanagra_ui(cmd_name, args)
     common.status "npm run codegen"
     common.run_inline("npm run codegen")
     ui_base_url = get_config(op.opts.project)["tanagra"]["workbenchBaseUrl"]
-    common.status "REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_GET_LOCAL_AUTH_TOKEN=true npm run build --if-present"
-    common.run_inline("REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_GET_LOCAL_AUTH_TOKEN=true npm run build --if-present")
+    common.status "PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_GET_LOCAL_AUTH_TOKEN=true npm run build --if-present"
+    common.run_inline("PUBLIC_URL=/tanagra REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} REACT_APP_GET_LOCAL_AUTH_TOKEN=true npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
     common.run_inline("mkdir -p ../../appengine && cp -av ./build ../../appengine/")
