@@ -7,7 +7,6 @@ import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.sam.SamApiClientFactory;
 import org.pmiops.workbench.sam.SamRetryHandler;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 public class ImpersonatedUserServiceImpl implements ImpersonatedUserService {
 
   private final Clock clock;
-  private final ImpersonatedFirecloudService impersonatedFirecloudService;
   private final UserDao userDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final SamApiClientFactory samApiClientFactory;
@@ -34,13 +32,11 @@ public class ImpersonatedUserServiceImpl implements ImpersonatedUserService {
   @Autowired
   public ImpersonatedUserServiceImpl(
       Clock clock,
-      ImpersonatedFirecloudService impersonatedFirecloudService,
       UserDao userDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       SamApiClientFactory samApiClientFactory,
       SamRetryHandler samRetryHandler) {
     this.clock = clock;
-    this.impersonatedFirecloudService = impersonatedFirecloudService;
     this.userDao = userDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.samApiClientFactory = samApiClientFactory;
@@ -60,17 +56,20 @@ public class ImpersonatedUserServiceImpl implements ImpersonatedUserService {
 
   @Override
   public void acceptTerraTermsOfServiceForUser(String username) {
-    final DbUser dbUser = userDao.findUserByUsername(username);
-
     try {
-      impersonatedFirecloudService.acceptTermsOfService(dbUser);
+      var samClient = samApiClientFactory.newImpersonatedApiClient(username);
+      samRetryHandler.run(
+          context -> {
+            new TermsOfServiceApi(samClient).userTermsOfServiceAcceptSelf();
+            return null; // retry handlers can't return void, but anything else is fine
+          });
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
 
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
-            .findByUserIdOrThrow(dbUser.getUserId())
+            .findByUserIdOrThrow(userDao.findUserByUsername(username).getUserId())
             .setTerraAgreementTime(new Timestamp(clock.instant().toEpochMilli())));
 
     // TODO: save the terra tos version as well, when that's available
