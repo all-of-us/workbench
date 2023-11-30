@@ -23,6 +23,7 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -38,7 +39,6 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -78,8 +78,9 @@ const WorkspaceNavigation = (props: NavProps) => {
     resource,
     style,
   } = props;
-  const tab = isNotebook(resource) ? analysisTabName : 'data';
-  const url = `/workspaces/${namespace}/${id}/${tab}`;
+  const url = isNotebook(resource)
+    ? analysisTabPath(namespace, id)
+    : dataTabPath(namespace, id);
 
   return (
     <Clickable>
@@ -234,11 +235,14 @@ export const TanagraResourceList = fp.flow(
     } = rowData;
     let displayName = '';
     let url = '';
-    const urlPrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/data/tanagra`;
+    const urlPrefix =
+      dataTabPath(workspaceNamespace, workspaceFirecloudName) + 'tanagra';
     if (cohortV2) {
       displayName = cohortV2.displayName;
       url = `${urlPrefix}/cohorts/${cohortV2.id}/${
         cohortV2.criteriaGroupSections?.[0]?.id ?? 'first'
+      }/${
+        cohortV2.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ?? 'none'
       }`;
     } else if (conceptSetV2) {
       const domain = JSON.parse(conceptSetV2.criteria.uiConfig)?.title ?? '';

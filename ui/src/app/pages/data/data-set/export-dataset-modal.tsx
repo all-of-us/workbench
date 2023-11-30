@@ -30,8 +30,9 @@ import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
   dropJupyterNotebookFileSuffix,
-  getExistingNotebookNames,
+  getExistingJupyterNotebookNames,
 } from 'app/pages/analysis/util';
+import { analysisTabPath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
@@ -39,7 +40,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -128,7 +128,7 @@ export const ExportDatasetModal = ({
         createExportDatasetRequest()
       );
       const notebookUrl =
-        `/workspaces/${workspace.namespace}/${workspace.id}/${analysisTabName}/preview/` +
+        `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );
@@ -233,7 +233,7 @@ export const ExportDatasetModal = ({
   }
 
   useEffect(() => {
-    getExistingNotebookNames(workspace)
+    getExistingJupyterNotebookNames(workspace)
       .then(setExistingNotebooks)
       .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);

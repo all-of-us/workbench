@@ -79,7 +79,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
     this.absorbService = absorbService;
   }
 
-  /** Syncs the current user's training status from Moodle. */
+  /**
+   * Syncs the current user's training status from the relevant LMS (Learning Management System).
+   */
   public DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException {
     DbUser user = userProvider.get();
@@ -225,6 +227,12 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Transactional
   public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
+    /*
+    When debugging or manually testing Absorb, it can be helpful to use the Absorb Admin UI.
+    You can log into https://aoudev.myabsorb.com/admin/dashboard using our Absorb API credentials.
+    From there, you can view the current state of Absorb or manually bypass courses.
+     */
+
     log.info("Using Absorb to sync compliance training status.");
 
     Credentials credentials = absorbService.fetchCredentials(dbUser.getUsername());

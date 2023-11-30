@@ -23,6 +23,11 @@ import {
   Progress,
   ProgressCardState,
 } from 'app/pages/analysis/leonardo-app-launcher';
+import {
+  analysisTabName,
+  analysisTabPath,
+  workspacePath,
+} from 'app/routing/utils';
 import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -32,7 +37,6 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 import {
   JupyterApi,
   ProxyApi,
@@ -73,7 +77,7 @@ describe('NotebookLauncher', () => {
 
   let runtimeStub;
 
-  const notebookInitialUrl = `/workspaces/namespace/id/${analysisTabName}/wharrgarbl`;
+  const notebookInitialUrl = `${analysisTabPath('namespace', 'id')}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = async () => {
@@ -440,7 +444,7 @@ describe('TerminalLauncher', () => {
 
   let runtimeStub;
 
-  const terminalInitialUrl = '/workspaces/namespace/id/terminals';
+  const terminalInitialUrl = workspacePath('namespace', 'id') + '/terminals';
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {
@@ -568,7 +572,8 @@ describe('SparkConsoleLauncher', () => {
 
   let runtimeStub;
 
-  const terminalInitialUrl = '/workspaces/namespace/id/spark/apphistory';
+  const terminalInitialUrl =
+    workspacePath('namespace', 'id') + '/spark/apphistory';
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {

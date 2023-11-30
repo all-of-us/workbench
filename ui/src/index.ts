@@ -4,7 +4,6 @@ import 'app/styles/genome-extraction-datatable.css';
 import 'app/styles/sidebar.css';
 import '@clr/icons/clr-icons.min.css';
 import '@clr/icons/clr-icons.min.js';
-import '@webcomponents/custom-elements/custom-elements.min.js';
 import 'nouislider/distribute/nouislider.min.css';
 import 'outdated-browser-rework/dist/style.css';
 import 'primeicons/primeicons.css';

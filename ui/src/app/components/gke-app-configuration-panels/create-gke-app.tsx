@@ -138,8 +138,6 @@ export const CreateGkeApp = ({
           }}
           appType={toUIAppType[appType]}
           status={app?.status}
-          onPause={() => Promise.resolve()}
-          onResume={() => Promise.resolve()}
         />
         <CostNote />
       </div>

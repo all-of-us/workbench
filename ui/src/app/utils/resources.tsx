@@ -11,8 +11,9 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { analysisTabPath, dataTabPath } from 'app/routing/utils';
+
 import { encodeURIComponentStrict, UrlObj } from './navigation';
-import { analysisTabName } from './user-apps-utils';
 import { WorkspaceData } from './workspace-data';
 
 export const isCohort = (resource: WorkspaceResource): boolean =>
@@ -72,36 +73,37 @@ export function getId(resource: WorkspaceResource): number {
 
 export function getResourceUrl(resource: WorkspaceResource): UrlObj {
   const { workspaceNamespace, workspaceFirecloudName } = resource;
-  const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
+  const dataTabPrefix = dataTabPath(workspaceNamespace, workspaceFirecloudName);
+  const analysisTabPrefix = analysisTabPath(
+    workspaceNamespace,
+    workspaceFirecloudName
+  );
 
   return fp.cond([
     [
       isCohort,
       (r) => ({
-        url: `${workspacePrefix}/data/cohorts/build`,
+        url: `${dataTabPrefix}/cohorts/build`,
         queryParams: { cohortId: r.cohort.id },
       }),
     ],
     [
       isCohortReview,
       (r) => ({
-        url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
+        url: `${dataTabPrefix}/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
       }),
     ],
     [
       isConceptSet,
       (r) => ({
-        url: `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`,
+        url: `${dataTabPrefix}/concepts/sets/${r.conceptSet.id}`,
       }),
     ],
-    [
-      isDataSet,
-      (r) => ({ url: `${workspacePrefix}/data/data-sets/${r.dataSet.id}` }),
-    ],
+    [isDataSet, (r) => ({ url: `${dataTabPrefix}/data-sets/${r.dataSet.id}` })],
     [
       isNotebook,
       (r) => ({
-        url: `${workspacePrefix}/${analysisTabName}/preview/${encodeURIComponentStrict(
+        url: `${analysisTabPrefix}/preview/${encodeURIComponentStrict(
           r.notebook.name
         )}`,
       }),

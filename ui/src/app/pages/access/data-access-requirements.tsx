@@ -698,19 +698,30 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // Effects
     useEffect(() => {
-      const onMount = async () => {
-        await syncModulesExternal(
-          incompleteModules(
-            getEligibleModules(allInitialModules, profile),
-            profile,
-            pageMode
-          )
-        );
-        await reload();
-        spinnerProps.hideSpinner();
-      };
+      const syncModulesPromise = fetchWithErrorModal(
+        () =>
+          syncModulesExternal(
+            incompleteModules(
+              getEligibleModules(allInitialModules, profile),
+              profile,
+              pageMode
+            )
+          ),
+        {
+          customErrorResponseFormatter: (apiErrorResponse) => {
+            return {
+              title: 'Error Synchronizing Training Status',
+              message: `${apiErrorResponse.originalResponse}`,
+              showBugReportLink: true,
+            };
+          },
+        }
+      );
 
-      onMount();
+      syncModulesPromise
+        .then(async () => await reload())
+        .catch((e) => console.error(e))
+        .finally(() => spinnerProps.hideSpinner());
     }, []);
 
     /*

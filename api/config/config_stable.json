@@ -121,9 +121,10 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": false,
-    "enableSasGKEApp": false,
+    "enableSasGKEApp": true,
     "enableDataExplorer": false,
-    "enableHasEhrData": true
+    "enableHasEhrData": true,
+    "enableGKEAppPausing": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
@@ -173,6 +174,7 @@
     "latestAouVersion": 1
   },
   "tanagra": {
-    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
+    "baseUrl": "https:\/\/aou-tanagra-dev.fake-research-aou.org",
+    "workbenchBaseUrl": "https:\/\/test.fake-research-aou.org"
   }
 }

@@ -9,7 +9,7 @@ import { TabPanel, TabView } from 'primereact/tabview';
 
 import { AuditEgressEventResponse, EgressEvent } from 'generated/fetch';
 
-import { AdminUserLink } from 'app/components/admin/admin-user-link';
+import { AdminUserComponent } from 'app/components/admin/admin-user-component';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -130,8 +130,6 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
     timeWindowEndEpochMillis,
   } = event;
 
-  const [username] = sourceUserEmail.split('@');
-
   return (
     <div style={{ padding: '0 20px' }}>
       <h2>Egress event {egressEventId}</h2>
@@ -141,7 +139,9 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
           {new Date(timeWindowEndEpochMillis).toLocaleString()}
         </DetailRow>
         <DetailRow label='Source user'>
-          <AdminUserLink {...{ username }}>{sourceUserEmail}</AdminUserLink>
+          <AdminUserComponent
+            userWithDomain={sourceUserEmail}
+          ></AdminUserComponent>
         </DetailRow>
         <DetailRow label='Source workspace'>
           <StyledRouterLink

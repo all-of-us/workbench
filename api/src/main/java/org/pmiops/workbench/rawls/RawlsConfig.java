@@ -1,4 +1,4 @@
-package org.pmiops.workbench.firecloud;
+package org.pmiops.workbench.rawls;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;

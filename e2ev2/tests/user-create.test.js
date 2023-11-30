@@ -33,11 +33,13 @@ browserTest('create user', async browser => {
   await page.waitForSelector('#account-creation-institution') // Institution Page
   await page.waitForSelector('[aria-label="Institution"]')
     .then(eh => eh.evaluate(e => e.parentNode.click()))
-  await page.waitForSelector('[role="option"][aria-label="Broad Institute"]').then(eh => eh.click())
+  await page.type('[aria-label="Institution"]',"Broad Institute");
+  await page.keyboard.press('Tab')
+
   // Email needs to be real or it will bounce and account creation will fail.
   await page.type('#contact-email', 'dmohs@broadinstitute.org')
   // The second dropdown, which is a child of a sibling of the first one.
-  await page.waitForSelector('[aria-label="Role"]')
+  await page.waitForSelector('[aria-label="Select Role"]')
     .then(eh => eh.evaluate(e => e.parentNode.click()))
   await page.waitForSelector('[role="option"][aria-label^="Project Personnel"]')
     .then(eh => eh.click())

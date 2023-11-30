@@ -12,6 +12,7 @@ import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
+import { AARTitle } from 'app/pages/access/aar-title';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { useId } from 'app/utils';
@@ -230,7 +231,7 @@ export const RenewalCardBody = ({
 
   const { duccSignedVersion } = profile;
 
-  const { AARTitleComponent, renewalTimeEstimate } = getAccessModuleConfig(
+  const { renewalTimeEstimate } = getAccessModuleConfig(
     moduleStatus.moduleName
   );
   const { lastConfirmedDate, nextReviewDate } = computeRenewalDisplayDates(
@@ -542,7 +543,7 @@ export const RenewalCardBody = ({
         )}
       </div>
       <div style={{ gridArea: 'title', fontWeight: 500 }}>
-        <AARTitleComponent profile={profile} />
+        <AARTitle moduleName={moduleStatus.moduleName} profile={profile} />
       </div>
       {module}
     </div>

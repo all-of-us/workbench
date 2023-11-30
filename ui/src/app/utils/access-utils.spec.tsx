@@ -26,6 +26,7 @@ import {
   RAS_CALLBACK_PATH,
   redirectToControlledTraining,
   redirectToRegisteredTraining,
+  syncModulesExternal,
   useIsUserDisabled,
 } from 'app/utils/access-utils';
 import {
@@ -926,5 +927,58 @@ describe(isCompleted.name, () => {
     };
     const duccSignedVersion = Math.min(...getCurrentDUCCVersions()) - 1;
     expect(isCompleted(status, duccSignedVersion)).toBeFalsy();
+  });
+});
+
+describe(syncModulesExternal.name, () => {
+  beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+      },
+    });
+  });
+
+  it('should return a successful promise when no modules are passed', () => {
+    expect(syncModulesExternal([])).resolves.toBeTruthy();
+  });
+
+  it('should return a successful promise when all externalSyncActions succeed ', () => {
+    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
+    spyERA.mockImplementation(() => Promise.resolve(null));
+    expect(
+      syncModulesExternal([AccessModule.ERA_COMMONS])
+    ).resolves.toBeTruthy();
+  });
+
+  it('should return a rejected promise when all externalSyncActions fail ', () => {
+    const spyCompliance = jest.spyOn(
+      profileApi(),
+      'syncComplianceTrainingStatus'
+    );
+    spyCompliance.mockImplementation(() => Promise.reject(null));
+    expect(
+      syncModulesExternal([AccessModule.CT_COMPLIANCE_TRAINING])
+    ).rejects.toEqual('Failed to synchronize Controlled Tier training');
+  });
+
+  it('should return a rejected promise when one externalSyncAction fails ', () => {
+    const spyCompliance = jest.spyOn(
+      profileApi(),
+      'syncComplianceTrainingStatus'
+    );
+    spyCompliance.mockImplementation(() => Promise.reject(null));
+
+    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
+    spyERA.mockImplementation(() => Promise.resolve(null));
+
+    expect(
+      syncModulesExternal([
+        AccessModule.CT_COMPLIANCE_TRAINING,
+        AccessModule.COMPLIANCE_TRAINING,
+        AccessModule.ERA_COMMONS,
+      ])
+    ).rejects.toEqual('Failed to synchronize Registered Tier training');
   });
 });

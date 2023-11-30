@@ -11,19 +11,24 @@ import {
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { render, RenderResult, screen } from '@testing-library/react';
+import { render, RenderResult, screen, waitFor } from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import * as accessUtils from 'app/utils/access-utils';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
   rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import {
+  notificationStore,
+  profileStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -298,6 +303,7 @@ describe('DataAccessRequirements', () => {
   afterEach(() => {
     // reset to standard behavior after tests which use fake timers
     jest.useRealTimers();
+    notificationStore.reset();
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
@@ -2082,5 +2088,27 @@ describe('DataAccessRequirements', () => {
     ).click();
 
     expectButtonElementEnabled(screen.queryByText('Confirm'));
+  });
+
+  it('should show an error modal when syncModulesExternal fails', async () => {
+    const spySyncModulesExternal = jest.spyOn(
+      accessUtils,
+      'syncModulesExternal'
+    );
+    spySyncModulesExternal.mockImplementation(() =>
+      Promise.reject('Deliberate testing failure for syncModulesExternal')
+    );
+    expect(notificationStore.get()).toBeNull();
+    component();
+    expect(spySyncModulesExternal).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(notificationStore.get().title).toEqual(
+        'Error Synchronizing Training Status'
+      );
+      expect(notificationStore.get().message).toEqual(
+        'Deliberate testing failure for syncModulesExternal'
+      );
+    });
   });
 });

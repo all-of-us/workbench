@@ -14,14 +14,14 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { getExistingNotebookNames } from 'app/pages/analysis/util';
+import { getExistingJupyterNotebookNames } from 'app/pages/analysis/util';
+import { analysisTabName } from 'app/routing/utils';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { nameValidationFormat } from 'app/utils/resources';
-import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { appendJupyterNotebookFileSuffix } from './util';
 
@@ -46,7 +46,9 @@ export const NewJupyterNotebookModal = (props: Props) => {
     if (!!existingNameList) {
       setExistingNotebookNameList(existingNameList);
     } else {
-      getExistingNotebookNames(workspace).then(setExistingNotebookNameList);
+      getExistingJupyterNotebookNames(workspace).then(
+        setExistingNotebookNameList
+      );
     }
   }, [props.existingNameList]);
 

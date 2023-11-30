@@ -27,7 +27,8 @@ const defaultAnalysisConfig = toAnalysisConfig(
 );
 
 const setPanelContent = jest.fn();
-const setRuntimeStatusRequest = jest.fn();
+const onClose = jest.fn();
+const requestAnalysisConfig = jest.fn();
 
 const defaultProps: CreatePanelProps = {
   profile: ProfileStubVariables.PROFILE_STUB,
@@ -35,8 +36,10 @@ const defaultProps: CreatePanelProps = {
   analysisConfig: defaultAnalysisConfig,
   creatorFreeCreditsRemaining: 0,
   runtimeStatus: RuntimeStatus.RUNNING,
+  runtimeCanBeCreated: true,
   setPanelContent,
-  setRuntimeStatusRequest,
+  onClose,
+  requestAnalysisConfig,
 };
 
 describe(CreatePanel.name, () => {
@@ -77,5 +80,29 @@ describe(CreatePanel.name, () => {
     await waitFor(() =>
       expect(setPanelContent).toHaveBeenCalledWith(PanelContent.Customize)
     );
+  });
+
+  it('should allow creation if runtimeCanBeCreated', async () => {
+    await component({ runtimeCanBeCreated: true });
+
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(defaultAnalysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should not allow creation if !runtimeCanBeCreated', async () => {
+    await component({ runtimeCanBeCreated: false });
+
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
   });
 });

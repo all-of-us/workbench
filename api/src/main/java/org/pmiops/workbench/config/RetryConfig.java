@@ -1,11 +1,11 @@
 package org.pmiops.workbench.config;
 
-import org.pmiops.workbench.firecloud.CalhounRetryHandler;
+import org.pmiops.workbench.calhoun.CalhounRetryHandler;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
-import org.pmiops.workbench.firecloud.RawlsRetryHandler;
 import org.pmiops.workbench.google.GoogleRetryHandler;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
+import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.shibboleth.ShibbolethRetryHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

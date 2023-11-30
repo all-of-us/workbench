@@ -34,7 +34,8 @@ import {
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
-import { analysisTabName } from 'app/utils/user-apps-utils';
+
+import { analysisTabName } from './utils';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(

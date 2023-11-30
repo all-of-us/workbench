@@ -6,8 +6,9 @@ import { switchCase } from '@terra-ui-packages/core-utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { RegisteredTierBadge } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { DARTitle } from 'app/pages/access/dar-title';
 import { AccessTierDisplayNames } from 'app/utils/access-tiers';
-import { DARPageMode, getAccessModuleConfig } from 'app/utils/access-utils';
+import { DARPageMode } from 'app/utils/access-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import {
@@ -24,7 +25,6 @@ import { ModulesForInitialRegistration } from './modules-for-initial-registratio
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = (props: { profile: Profile }) => {
   const moduleName = AccessModule.IDENTITY;
-  const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
     <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA} />
@@ -35,7 +35,7 @@ const TemporaryRASModule = (props: { profile: Profile }) => {
           eligible={false}
         />
         <FlexColumn style={styles.backgroundModuleText}>
-          <DARTitleComponent profile={props.profile} />
+          <DARTitle moduleName={moduleName} profile={props.profile} />
           <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
             <b>Temporarily disabled.</b> Due to technical difficulties, this
             step is disabled. In the future, you'll be prompted to complete
