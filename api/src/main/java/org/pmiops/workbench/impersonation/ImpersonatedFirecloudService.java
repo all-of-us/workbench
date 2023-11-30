@@ -13,11 +13,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
  * production, except where absolutely necessary.
  */
 public interface ImpersonatedFirecloudService {
-  // accept the Terra Terms of Service on behalf of a user by using impersonation
-  void acceptTermsOfService(@Nonnull DbUser dbUser) throws IOException;
-
-  // retrieve a user's Terra Terms of Service status, by using impersonation
-  boolean getUserTermsOfServiceStatus(@Nonnull DbUser dbUser) throws IOException;
 
   List<RawlsWorkspaceListResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException;
 
