@@ -194,6 +194,7 @@ export const withAnalysisConfigDefaults = (
       r.autopauseThreshold ?? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   };
 };
+
 export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
