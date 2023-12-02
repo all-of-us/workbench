@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,16 +9,20 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "googleproject_cost")
 public class DbGoogleProjectPerCost {
-  int id;
   String googleProject;
   Double cost;
+
+  public DbGoogleProjectPerCost() {}
 
   public DbGoogleProjectPerCost(String googleProject, Double cost) {
     this.googleProject = googleProject;
     this.cost = cost;
   }
 
-  public DbGoogleProjectPerCost() {}
+  public DbGoogleProjectPerCost(Map.Entry<String, Double> projectCostMap) {
+    this.googleProject = projectCostMap.getKey();
+    this.cost = projectCostMap.getValue();
+  }
 
   @Id
   @Column(name = "google_project_id")

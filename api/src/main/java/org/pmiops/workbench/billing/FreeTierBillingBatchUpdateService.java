@@ -18,6 +18,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbGoogleProjectPerCost;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,30 +66,24 @@ public class FreeTierBillingBatchUpdateService {
   }
 
   /**
-   * Takes in List of : user and all BQ cost of workspace for the user
+   * Takes in List of user Id and then find its BQ Cost
    *
    * @param userIdList
    */
   public void checkAndAlertFreeTierBillingUsage(List<Long> userIdList) {
-    Map<String, Double> userWorkspaceBQCosts = new HashMap<String, Double>();
 
-    Set<String> googleProjectsForUserSet =
-        userIdList.stream()
-            .map(
-                (userId) -> {
-                  return workspaceDao.getGoogleProjectForUser(userId);
-                })
-            .collect(HashSet::new, HashSet::addAll, HashSet::addAll);
+    Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
 
-    // Create Map of project and cost
-    googleProjectsForUserSet.forEach(
-        (usersGoogleProject) -> {
-          userWorkspaceBQCosts.put(
-              usersGoogleProject,
-              googleProjectPerCostDao.getCostByGoogleProject(usersGoogleProject));
-        });
+    List<DbGoogleProjectPerCost> googleProjectPerCostList =
+        (List<DbGoogleProjectPerCost>)
+            googleProjectPerCostDao.findAllById(googleProjectsForUserSet);
 
-    // Aggregate the BQ cost for all users in the batch
+    // Create Map Key: googleProject and value: cost
+    Map<String, Double> userWorkspaceBQCosts =
+        googleProjectPerCostList.stream()
+            .collect(
+                Collectors.toMap(
+                    DbGoogleProjectPerCost::getGoogleProject, DbGoogleProjectPerCost::getCost));
 
     Set<DbUser> dbUserSet =
         userIdList.stream()

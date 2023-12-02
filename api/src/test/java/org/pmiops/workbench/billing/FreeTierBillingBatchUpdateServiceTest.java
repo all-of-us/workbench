@@ -1,7 +1,5 @@
 package org.pmiops.workbench.billing;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,15 +7,19 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbGoogleProjectPerCost;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -26,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FreeTierBillingBatchUpdateServiceTest {
 
   @Autowired private GoogleProjectPerCostDao mockGoogleProjectPerCostDao;
@@ -48,25 +51,23 @@ public class FreeTierBillingBatchUpdateServiceTest {
 
   Set<DbUser> mockDbuserSet = new HashSet<DbUser>();
 
-  @Test
-  public void testFreeTierBillingBatchUpdateService() {
+  Set<String> googleProjectIdsSet = new HashSet<>(Arrays.asList("12", "22", "23", "32", "33"));
+
+  @BeforeAll
+  public void init() throws Exception {
     mockDbUser();
     mockGoogleProjectsForUser();
     mockGoogleProjectCost();
+  }
 
+  @Test
+  public void testFreeTierBillingBatchUpdateService() {
     freeTierBillingBatchUpdateService.checkAndAlertFreeTierBillingUsage(
         Arrays.asList(new Long[] {1l, 2l, 3l}));
 
-    verify(mockWorkspaceDao, times(3)).getGoogleProjectForUser(anyLong());
-    verify(mockWorkspaceDao).getGoogleProjectForUser(1l);
-    verify(mockWorkspaceDao).getGoogleProjectForUser(2l);
-    verify(mockWorkspaceDao).getGoogleProjectForUser(3l);
-    verify(mockGoogleProjectPerCostDao, times(5)).getCostByGoogleProject(anyString());
-    verify(mockGoogleProjectPerCostDao).getCostByGoogleProject("12");
-    verify(mockGoogleProjectPerCostDao).getCostByGoogleProject("22");
-    verify(mockGoogleProjectPerCostDao).getCostByGoogleProject("23");
-    verify(mockGoogleProjectPerCostDao).getCostByGoogleProject("32");
-    verify(mockGoogleProjectPerCostDao).getCostByGoogleProject("33");
+    verify(mockWorkspaceDao, times(1))
+        .getGoogleProjectForUserList(Arrays.asList(new Long[] {1l, 2l, 3l}));
+    verify(mockGoogleProjectPerCostDao, times(1)).findAllById(googleProjectIdsSet);
 
     verify(mockFreeTierBillingService)
         .checkFreeTierBillingUsageForUsers(mockDbuserSet, getUserCostMap());
@@ -85,20 +86,20 @@ public class FreeTierBillingBatchUpdateServiceTest {
   }
 
   private void mockGoogleProjectsForUser() {
-    when(mockWorkspaceDao.getGoogleProjectForUser(1l))
-        .thenReturn(new HashSet<>(Arrays.asList("12", "22")));
-    when(mockWorkspaceDao.getGoogleProjectForUser(2l))
-        .thenReturn(new HashSet<>(Arrays.asList("22", "23")));
-    when(mockWorkspaceDao.getGoogleProjectForUser(3l))
-        .thenReturn(new HashSet<>(Arrays.asList("32", "33")));
+    when(mockWorkspaceDao.getGoogleProjectForUserList(Arrays.asList(1l, 2l, 3l)))
+        .thenReturn(googleProjectIdsSet);
   }
 
   private void mockGoogleProjectCost() {
-    when(mockGoogleProjectPerCostDao.getCostByGoogleProject("12")).thenReturn(0.013);
-    when(mockGoogleProjectPerCostDao.getCostByGoogleProject("22")).thenReturn(1.123);
-    when(mockGoogleProjectPerCostDao.getCostByGoogleProject("23")).thenReturn(6.5);
-    when(mockGoogleProjectPerCostDao.getCostByGoogleProject("32")).thenReturn(0.34);
-    when(mockGoogleProjectPerCostDao.getCostByGoogleProject("33")).thenReturn(0.9);
+    List<DbGoogleProjectPerCost> dbGoogleProjectPerCostList =
+        Arrays.asList(
+            new DbGoogleProjectPerCost("12", 0.013),
+            new DbGoogleProjectPerCost("22", 1.123),
+            new DbGoogleProjectPerCost("23", 6.5),
+            new DbGoogleProjectPerCost("32", 0.34),
+            new DbGoogleProjectPerCost("33", 0.9));
+    when(mockGoogleProjectPerCostDao.findAllById(googleProjectIdsSet))
+        .thenReturn(dbGoogleProjectPerCostList);
   }
 
   private Map<String, Double> getUserCostMap() {

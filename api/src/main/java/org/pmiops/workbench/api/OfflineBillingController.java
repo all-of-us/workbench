@@ -41,21 +41,20 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsageCloudTask() {
-    googleProjectPerCostDao.deleteAll();
     // Get cost for all workspace from BQ
     Map<String, Double> freeTierForAllWorkspace =
         freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();
 
     List<DbGoogleProjectPerCost> googleProjectCostList =
         freeTierForAllWorkspace.entrySet().stream()
-            .map(
-                (entry) -> {
-                  return new DbGoogleProjectPerCost(entry.getKey(), entry.getValue());
-                })
+            .map(DbGoogleProjectPerCost::new)
             .collect(Collectors.toList());
 
+    // Clear table googleproject_cost and then insert all entries from BQ
+    googleProjectPerCostDao.deleteAll();
     googleProjectPerCostDao.saveAll(googleProjectCostList);
-    // Get all user IDS and then set BQ cost for all workspace user has
+
+    System.out.println("Table updated, create task for queue now");
     List<Long> allUserIds = userService.getAllUserIds();
 
     taskQueueService.groupAndPushFreeTierBilling(allUserIds);

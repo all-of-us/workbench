@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -122,5 +123,12 @@ public class CloudTaskUserControllerTest {
     List<Long> userIdList = new ArrayList<Long>(Arrays.asList(1L, 2L, 3L));
     controller.checkAndAlertFreeTierBillingUsage(userIdList);
     verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
+  }
+
+  @Test
+  public void testCheckAndAlertFreeTierBillingUsage_noUserListPassedFromTask() {
+    List<Long> userIdList = new ArrayList<>();
+    controller.checkAndAlertFreeTierBillingUsage(userIdList);
+    verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(userIdList);
   }
 }
