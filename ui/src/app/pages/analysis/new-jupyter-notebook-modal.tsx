@@ -17,7 +17,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { getExistingJupyterNotebookNames } from 'app/pages/analysis/util';
 import { analysisTabName } from 'app/routing/utils';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
-import { summarizeErrors } from 'app/utils';
+import { isEmpty, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
@@ -128,7 +128,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
             style={{ marginLeft: '0.75rem' }}
-            disabled={Object.keys(errors).length > 0}
+            disabled={!isEmpty(errors)}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
               create();

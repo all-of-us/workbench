@@ -36,23 +36,7 @@ export function isBlank(toTest: String): boolean {
   }
 }
 
-/**
- * Random String Generator (simplified version)
- *
- * Info:      http://stackoverflow.com/a/27872144/383904
- * Use:       randomString(length);
- * Default:   return a random alpha-numeric string
- */
-export function randomString(len): string {
-  let str = '',
-    i = 0;
-  for (; i++ < len; ) {
-    let rand = Math.floor(Math.random() * 62);
-    const charCode = (rand += rand > 9 ? (rand < 36 ? 55 : 61) : 48);
-    str += String.fromCharCode(charCode);
-  }
-  return str;
-}
+export const isEmpty = (o: Object): boolean => Object.keys(o).length === 0;
 
 const throttleAnimation = (fn) => {
   let running = false;
@@ -122,12 +106,6 @@ export const withWindowSize = () => (WrappedComponent) => {
   return Wrapper;
 };
 
-export const nextSort = ({ field, direction }, newField) => {
-  return newField === field
-    ? { field, direction: direction === 'asc' ? 'desc' : 'asc' }
-    : { field: newField, direction: 'asc' };
-};
-
 type ReactStyles<T> = {
   readonly [P in keyof T]: React.CSSProperties;
 };
@@ -157,15 +135,6 @@ export function reactStyles<T extends { [key: string]: React.CSSProperties }>(
   t: T
 ): ReactStyles<T> {
   return t;
-}
-
-export function decamelize(str: string, separator: string) {
-  separator = typeof separator === 'undefined' ? '_' : separator;
-
-  return str
-    .replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
-    .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
-    .toLowerCase();
 }
 
 export const withStyle = (styleObj) => (WrappedComponent) => {

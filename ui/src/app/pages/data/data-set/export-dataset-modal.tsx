@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
 
 import {
   BillingStatus,
@@ -32,7 +31,7 @@ import {
 import { analysisTabPath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, summarizeErrors } from 'app/utils';
+import { isEmpty, reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { validateNewNotebookName } from 'app/utils/resources';
@@ -96,12 +95,10 @@ export const ExportDatasetModal = ({
     };
   }
 
-  function hasWgs() {
-    return fp.includes(
-      PrePackagedConceptSetEnum.WHOLE_GENOME,
-      dataset.prePackagedConceptSet
+  const hasWgs = () =>
+    dataset.prePackagedConceptSet?.includes(
+      PrePackagedConceptSetEnum.WHOLE_GENOME
     );
-  }
 
   function createExportDatasetRequest(): DataSetExportRequest {
     return {
@@ -375,7 +372,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!fp.isEmpty(errors)}
+                disabled={!isEmpty(errors)}
                 onClick={() => exportDataset()}
               >
                 Export
