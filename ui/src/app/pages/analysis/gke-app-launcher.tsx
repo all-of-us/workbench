@@ -6,7 +6,6 @@ import * as fp from 'lodash/fp';
 
 import { AppStatus } from 'generated/fetch';
 
-import { parseQueryParams } from 'app/components/app-router';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import {
@@ -24,8 +23,7 @@ interface Props
 
 export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
   const { userApps } = useStore(userAppsStore);
-  const queryParams = parseQueryParams(props.location.search);
-  const appType = queryParams.get('appType') as UIAppType;
+  const appType = props.match.params.appType as UIAppType;
   const userApp = findApp(userApps, appType);
   const [navigate] = useNavigation();
 

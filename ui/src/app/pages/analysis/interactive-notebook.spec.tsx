@@ -115,10 +115,14 @@ test.each([
     await user.click(editButton);
     if (appType === 'RStudio') {
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith(
-          ['workspaces', 'sampleNameSpace', 'sampleWorkspace', 'userApp'],
-          { queryParams: { appType: 'RStudio' } }
-        );
+        expect(mockNavigate).toHaveBeenCalledWith([
+          'workspaces',
+          'sampleNameSpace',
+          'sampleWorkspace',
+          analysisTabName,
+          'userApp',
+          appType,
+        ]);
       });
     } else if (appType === 'SAS') {
       // This is temp. Once SAS moves to iframe this if else will be removed

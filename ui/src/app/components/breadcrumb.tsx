@@ -80,9 +80,10 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          appType,
-          `${appTabPath(ns, wsid)}?appType=${appType}`
+          fp.upperFirst(analysisTabName),
+          analysisTabPath(ns, wsid)
         ),
+        new BreadcrumbData(appType, `${appTabPath(ns, wsid)}/${appType}`),
       ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
@@ -361,7 +362,7 @@ export const Breadcrumb = fp.flow(
       });
 
       const appPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/userApp`,
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
       });
 
       const analysisFileName = analysisMatch
@@ -371,8 +372,9 @@ export const Breadcrumb = fp.flow(
         : undefined;
 
       const appType = appPreviewMatch
-        ? new URLSearchParams(location.search).get('appType')
+        ? appPreviewMatch.params.appType
         : undefined;
+
       return getTrail(
         this.props.routeData.breadcrumb,
         this.props.workspace,
