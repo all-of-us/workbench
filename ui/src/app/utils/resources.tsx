@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import validate from 'validate.js';
 
 import {
   Cohort,
@@ -11,6 +12,10 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import {
+  appendAnalysisFileSuffixByOldName,
+  appendJupyterNotebookFileSuffix,
+} from 'app/pages/analysis/util';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
@@ -212,3 +217,18 @@ export const nameValidationFormat = (
           message: 'already exists',
         },
       };
+
+export const validateNewNotebookName = (
+  newName: string,
+  existingNames: string[]
+) =>
+  validate(
+    // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names
+    { newName: appendJupyterNotebookFileSuffix(newName) },
+    {
+      newName: nameValidationFormat(
+        existingNames.map(appendJupyterNotebookFileSuffix),
+        ResourceType.NOTEBOOK
+      ),
+    }
+  );

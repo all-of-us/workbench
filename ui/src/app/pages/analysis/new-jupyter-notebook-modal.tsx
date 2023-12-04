@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { validate } from 'validate.js';
 
-import { ResourceType, Workspace } from 'generated/fetch';
+import { Workspace } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
@@ -21,7 +21,7 @@ import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
-import { nameValidationFormat } from 'app/utils/resources';
+import { validateNewNotebookName } from 'app/utils/resources';
 
 import { appendJupyterNotebookFileSuffix } from './util';
 
@@ -52,17 +52,15 @@ export const NewJupyterNotebookModal = (props: Props) => {
     }
   }, [props.existingNameList]);
 
-  const errors = validate(
-    // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names
-    { name: appendJupyterNotebookFileSuffix(name), kernel },
-    {
-      kernel: { presence: { allowEmpty: false } },
-      name: nameValidationFormat(
-        existingNotebookNameList.map(appendJupyterNotebookFileSuffix),
-        ResourceType.NOTEBOOK
-      ),
-    }
-  );
+  const errors = [
+    ...validateNewNotebookName(name, existingNotebookNameList),
+    ...validate(
+      { kernel },
+      {
+        kernel: { presence: { allowEmpty: false } },
+      }
+    ),
+  ];
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {

@@ -38,7 +38,10 @@ import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
-import { nameValidationFormat } from 'app/utils/resources';
+import {
+  nameValidationFormat,
+  validateNewNotebookName,
+} from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -245,18 +248,9 @@ export const ExportDatasetModal = ({
   }, [kernelType, genomicsAnalysisTool]);
 
   const errors = {
-    ...validate(
-      // we expect the notebook name to lack the .ipynb suffix
-      // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-      {
-        notebookName: dropJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
-      },
-      {
-        notebookName: nameValidationFormat(
-          creatingNewNotebook ? existingNotebooks : [],
-          ResourceType.NOTEBOOK
-        ),
-      }
+    ...validateNewNotebookName(
+      notebookNameWithoutSuffix,
+      creatingNewNotebook ? existingNotebooks : []
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
       ? { billing: [ACTION_DISABLED_INVALID_BILLING] }
