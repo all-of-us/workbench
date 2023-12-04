@@ -61,15 +61,6 @@ describe(applyPresetOverride.name, () => {
       runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
     );
 
-    const presetConfigWithOldName = {
-      ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
-      persistentDisk: {
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-          .persistentDisk,
-        name: runtime.gceWithPdConfig.persistentDisk.name,
-      },
-    };
-
     expect(applyPresetOverride(runtime).gceWithPdConfig).toEqual(
       runtime.gceWithPdConfig
     );
