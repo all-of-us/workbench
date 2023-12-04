@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import fp from 'lodash/fp';
 
 import {
   BillingStatus,
@@ -95,11 +96,12 @@ export const ExportDatasetModal = ({
     };
   }
 
-  const hasWgs = () =>
-    dataset.prePackagedConceptSet?.includes(
-      PrePackagedConceptSetEnum.WHOLE_GENOME
+  function hasWgs() {
+    return fp.includes(
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+      dataset.prePackagedConceptSet
     );
-
+  }
   function createExportDatasetRequest(): DataSetExportRequest {
     return {
       dataSetRequest: createDataSetRequest(),
