@@ -460,7 +460,8 @@ dependencies {
     // updated versions of transitive dependencies to resolve vulnerabilities
 
     // https://security.snyk.io/vuln/SNYK-JAVA-ORGBOUNCYCASTLE-2841508
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    // https://github.com/bcgit/bc-java/wiki/CVE-2023-33202
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
     // https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement
     implementation "org.springframework:spring-aop:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-aspects:$project.ext.SPRING_FRAMEWORK_VERSION"
