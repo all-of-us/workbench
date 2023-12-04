@@ -128,7 +128,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
             style={{ marginLeft: '0.75rem' }}
-            disabled={!!errors}
+            disabled={Object.keys(errors).length > 0}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
               create();
