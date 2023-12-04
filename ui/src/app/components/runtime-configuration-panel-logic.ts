@@ -6,13 +6,14 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
   maybeWithPersistentDisk,
-  PanelContent,
   toAnalysisConfig,
-} from 'app/utils/runtime-utils';
+} from 'app/utils/analysis-config';
+import { applyPresetOverride } from 'app/utils/runtime-presets';
+
+import { PanelContent } from './runtime-configuration-panel/utils';
 
 interface InitDerivedInProps {
   crFromCustomRuntimeHook: Runtime;
