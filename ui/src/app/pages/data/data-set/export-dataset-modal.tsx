@@ -102,6 +102,7 @@ export const ExportDatasetModal = ({
       dataset.prePackagedConceptSet
     );
   }
+
   function createExportDatasetRequest(): DataSetExportRequest {
     return {
       dataSetRequest: createDataSetRequest(),
