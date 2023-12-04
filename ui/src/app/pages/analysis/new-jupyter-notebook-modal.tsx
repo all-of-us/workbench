@@ -53,7 +53,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
   }, [props.existingNameList]);
 
   const errors = {
-    ...validateNewNotebookName(name, 'name', existingNotebookNameList),
+    ...validateNewNotebookName(name, existingNotebookNameList),
     ...validate(
       { kernel },
       {

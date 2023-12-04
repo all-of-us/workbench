@@ -217,8 +217,8 @@ export const nameValidationFormat = (
 
 export const validateNewNotebookName = (
   name: string,
-  fieldName: string = name,
-  existingNames: string[]
+  existingNames: string[],
+  fieldName: string = 'name' // error validators sometimes depend on the field name
 ) =>
   validate(
     // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names

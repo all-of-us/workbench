@@ -245,8 +245,8 @@ export const ExportDatasetModal = ({
   const errors = {
     ...validateNewNotebookName(
       notebookNameWithoutSuffix,
-      'notebookName',
-      creatingNewNotebook ? existingNotebooks : []
+      creatingNewNotebook ? existingNotebooks : [],
+      'notebookName'
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
       ? { billing: [ACTION_DISABLED_INVALID_BILLING] }
