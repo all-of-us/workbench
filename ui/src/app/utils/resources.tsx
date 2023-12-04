@@ -12,10 +12,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import {
-  appendAnalysisFileSuffixByOldName,
-  appendJupyterNotebookFileSuffix,
-} from 'app/pages/analysis/util';
+import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
