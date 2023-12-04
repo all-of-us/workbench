@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
-import { validate } from 'validate.js';
 
 import {
   BillingStatus,
@@ -11,7 +10,6 @@ import {
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
-  ResourceType,
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
@@ -29,7 +27,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
-  dropJupyterNotebookFileSuffix,
   getExistingJupyterNotebookNames,
 } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
@@ -38,10 +35,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
-import {
-  nameValidationFormat,
-  validateNewNotebookName,
-} from 'app/utils/resources';
+import { validateNewNotebookName } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -67,7 +61,8 @@ export const ExportDatasetModal = ({
   dataset,
   closeFunction,
 }: Props) => {
-  const [existingNotebooks, setExistingNotebooks] = useState(undefined);
+  const [existingNotebooks, setExistingNotebooks] =
+    useState<string[]>(undefined);
   const [kernelType, setKernelType] = useState<KernelTypeEnum>(
     KernelTypeEnum.PYTHON
   );
@@ -250,7 +245,7 @@ export const ExportDatasetModal = ({
   const errors = {
     ...validateNewNotebookName(
       notebookNameWithoutSuffix,
-      creatingNewNotebook ? existingNotebooks : []
+      creatingNewNotebook && existingNotebooks
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
       ? { billing: [ACTION_DISABLED_INVALID_BILLING] }

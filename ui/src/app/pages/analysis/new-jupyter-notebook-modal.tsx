@@ -52,7 +52,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
     }
   }, [props.existingNameList]);
 
-  const errors = [
+  const errors = {
     ...validateNewNotebookName(name, existingNotebookNameList),
     ...validate(
       { kernel },
@@ -60,7 +60,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         kernel: { presence: { allowEmpty: false } },
       }
     ),
-  ];
+  };
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
