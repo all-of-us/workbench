@@ -190,7 +190,7 @@ export const convertToResources = (
  * Other AoU resource types do not have the same name restriction and only block slashes.
  */
 export const nameValidationFormat = (
-  existingNames,
+  existingNames: string[],
   resourceType: ResourceType
 ) =>
   resourceType === ResourceType.NOTEBOOK
@@ -220,13 +220,14 @@ export const nameValidationFormat = (
 
 export const validateNewNotebookName = (
   name: string,
+  fieldName: string = name,
   existingNames: string[]
 ) =>
   validate(
     // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names
-    { name: appendJupyterNotebookFileSuffix(name) },
+    { [fieldName]: appendJupyterNotebookFileSuffix(name) },
     {
-      name: nameValidationFormat(
+      [fieldName]: nameValidationFormat(
         existingNames?.map(appendJupyterNotebookFileSuffix),
         ResourceType.NOTEBOOK
       ),
