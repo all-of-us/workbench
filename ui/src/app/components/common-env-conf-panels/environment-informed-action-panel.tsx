@@ -6,8 +6,8 @@ import { UIAppType } from 'app/components/apps-panel/utils';
 import { FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import { formatUsd } from 'app/utils/numbers';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { EnvironmentCostEstimator } from './environment-cost-estimator';

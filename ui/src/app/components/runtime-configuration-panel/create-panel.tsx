@@ -8,9 +8,11 @@ import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-p
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { RuntimeSummary } from 'app/components/runtime-summary';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
+
+import { PanelContent } from './utils';
 
 export interface CreatePanelProps {
   analysisConfig: AnalysisConfig;

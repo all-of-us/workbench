@@ -3,9 +3,10 @@ import * as React from 'react';
 import { RuntimeStatus } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
+import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
-import { isVisible, toAnalysisConfig } from 'app/utils/runtime-utils';
+import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeDiskStore, runtimeStore, useStore } from 'app/utils/stores';
 
 export const RuntimeCost = () => {

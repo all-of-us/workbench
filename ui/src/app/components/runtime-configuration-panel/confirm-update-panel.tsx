@@ -6,11 +6,11 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { TextColumn } from 'app/components/text-column';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import {
-  AnalysisConfig,
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
-} from 'app/utils/runtime-utils';
+} from 'app/utils/runtime-diffs';
 
 interface Props {
   existingAnalysisConfig: AnalysisConfig;

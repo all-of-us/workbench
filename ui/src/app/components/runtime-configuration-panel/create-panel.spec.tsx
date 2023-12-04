@@ -5,9 +5,9 @@ import * as React from 'react';
 import { RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -20,6 +20,7 @@ import {
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 
 import { CreatePanel, CreatePanelProps } from './create-panel';
+import { PanelContent } from './utils';
 
 const defaultAnalysisConfig = toAnalysisConfig(
   defaultGceRuntimeWithPd(),
