@@ -6,7 +6,7 @@
     "build-terra-deps": "./src/terraui/build.sh",
     "deps": "./src/deps/deps.sh",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
-    "start-tanagra": "BROWSER='none' REACT_APP_GET_LOCAL_AUTH_TOKEN=true REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
+    "start-tanagra": "BROWSER='none' PUBLIC_URL=/tanagra REACT_APP_GET_LOCAL_AUTH_TOKEN=true REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
     "dev-up": "yarn && yarn run deps test && yarn start",
     "dev-up-test": "yarn && yarn run deps test && REACT_APP_ENVIRONMENT=localtest yarn start",
     "dev-up-local": "yarn && yarn run deps local && REACT_APP_ENVIRONMENT=local yarn start",
