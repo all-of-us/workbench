@@ -476,6 +476,17 @@ jobs:
                 working_directory: ~/workbench/api
                 command: ./project.rb bigquerytest
 
+  api-contract-test:
+    executor: workbench-executor
+    steps:
+    - run-api-test:
+        additional_steps:
+        - gcloud-auth-login
+        - run:
+            name: Run Contract tests
+            working_directory: ~/workbench/api
+            command: ./project.rb contracttest
+
   ui-unit-test:
     executor: workbench-executor
     resource_class: large
@@ -805,6 +816,7 @@ workflows:
       - api-unit-test
       - ui-unit-test
       - api-bigquery-test
+      - api-contract-test
       - api-integration-test
       - api-test-coverage:
           requires:
