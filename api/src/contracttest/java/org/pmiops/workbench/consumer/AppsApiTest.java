@@ -24,7 +24,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 @ExtendWith(PactConsumerTestExt.class)
 class AppsApiTest {
 
-  @Pact(consumer = "aou", provider = "leonardo")
+  @Pact(consumer = "aou-rw-api", provider = "leonardo")
   RequestResponsePact getApp(PactDslWithProvider builder) {
     return builder
         .given("there is an app in a Google project")
