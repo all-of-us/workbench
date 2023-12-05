@@ -472,6 +472,8 @@ dependencies {
     implementation("org.springframework:spring-core:$project.ext.SPRING_FRAMEWORK_VERSION") {
       exclude group: 'org.springframework', module: 'spring-jcl'
     }
+    implementation "com.squareup.okio:okio-jvm:3.6.0"
+
     implementation "org.springframework:spring-expression:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-jcl:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-jdbc:$project.ext.SPRING_FRAMEWORK_VERSION"
@@ -480,7 +482,6 @@ dependencies {
     implementation "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
-    implementation "com.squareup.okio:okio-jvm:3.4.0"
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
