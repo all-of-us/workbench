@@ -98,7 +98,7 @@ it('Should display error message if App type is not found', async () => {
   setup('fakeApp');
   expect(
     screen.getByText(
-      /an error was encountered with your app fakeapp\. to resolve, please see the applications side panel\./i
+      /an error was encountered with your fakeapp environment\. to resolve, please see the applications side panel\./i
     )
   );
 });
@@ -107,7 +107,7 @@ it('Should display error message if User App is not found', async () => {
   setup('RStudio', createApp(AppType.CROMWELL));
   expect(
     screen.getByText(
-      /an error was encountered with your app rstudio\. to resolve, please see the applications side panel\./i
+      /an error was encountered with your rstudio environment\. to resolve, please see the applications side panel\./i
     )
   );
 });
@@ -116,7 +116,7 @@ it('Should display error message if there are no user apps in userAppStore', asy
   setupEmptyUserStore();
   expect(
     screen.getByText(
-      /an error was encountered with your app rstudio\. to resolve, please see the applications side panel\./i
+      /an error was encountered with your rstudio environment\. to resolve, please see the applications side panel\./i
     )
   );
 });
