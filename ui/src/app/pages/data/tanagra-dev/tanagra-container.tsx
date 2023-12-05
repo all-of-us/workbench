@@ -43,7 +43,7 @@ export const TanagraContainer = fp.flow(
             height: '100%',
             width: '100%',
           }}
-          src={`${tanagraUrl}/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}/?token=${getAccessToken()}`}
+          src={`${tanagraUrl}/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}/?token=${getAccessToken()}`}
         />
       </div>
     );

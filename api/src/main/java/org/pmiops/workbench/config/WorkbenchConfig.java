@@ -269,7 +269,6 @@ public class WorkbenchConfig {
 
   public static class TanagraConfig {
     public String baseUrl;
-    public String workbenchBaseUrl;
   }
 
   public static class ZendeskConfig {
