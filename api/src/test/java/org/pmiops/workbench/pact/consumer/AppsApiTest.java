@@ -1,4 +1,4 @@
-package org.pmiops.workbench.consumer;
+package org.pmiops.workbench.pact.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,7 +51,7 @@ class ProductServiceTest {
 
   @Test
   @PactTestFor(pactMethod = "getApp")
-  void getProductById_whenProductWithId10Exists(MockServer mockServer) throws ApiException {
+  void testGetAppWhenAppExists(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     AppsApi leoAppService = new AppsApi(client);
