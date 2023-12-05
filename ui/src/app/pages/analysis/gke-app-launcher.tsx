@@ -12,7 +12,7 @@ import {
   ErrorMode,
   NotebookFrameError,
 } from 'app/pages/analysis/notebook-frame-error';
-import { analysisTabName } from 'app/routing/utils';
+import { analysisTabPath } from 'app/routing/utils';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams, userAppsStore, useStore } from 'app/utils/stores';
@@ -32,7 +32,7 @@ export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
     // In case app is deleted redirect user to the analysis tab.
     if (!!userApp && userApp.status === AppStatus.DELETING) {
       const { namespace, id } = currentWorkspaceStore.getValue();
-      navigate([`workspaces/${namespace}/${id}/${analysisTabName}`]);
+      navigate([analysisTabPath(namespace, id)]);
     }
   }, [userApp]);
 

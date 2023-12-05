@@ -15,13 +15,13 @@ import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
+import { analysisTabPath } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 const RSTUDIO_FAKE_URL = 'https://fakeRStudioUrl/';
-
 const createApp = (appType: AppType = AppType.RSTUDIO) => [
   {
     googleProject: 'googleProject',
@@ -50,6 +50,12 @@ const setUpWorkspace = () => {
     accessLevel: WorkspaceAccessLevel.WRITER,
   });
 };
+const currentWorkspace = workspaceStubs[0];
+
+const pathToCurrentWSAnalysisTab = analysisTabPath(
+  currentWorkspace.namespace,
+  currentWorkspace.id
+);
 
 const setup = (
   queryParam: string = 'RStudio',
@@ -119,9 +125,7 @@ it('Should redirect user to analysis page in case displayed App is deleted', asy
   // Confirm the RStudio app is up and displayed in iframe and no navigate is called
   setup();
   expect(screen.getByTitle('RStudio embed')).toBeInTheDocument();
-  expect(mockNavigate).not.toHaveBeenCalledWith([
-    'workspaces/defaultNamespace/1/analysis',
-  ]);
+  expect(mockNavigate).not.toHaveBeenCalledWith([pathToCurrentWSAnalysisTab]);
 
   // Set the app status to be deleted and set it in userAppsStore
   const deletedAppList: ListAppsResponse = [
@@ -140,8 +144,6 @@ it('Should redirect user to analysis page in case displayed App is deleted', asy
 
   await waitFor(() => {
     // Since the app is now deleted navigate to analysis tab for the same workspace
-    expect(mockNavigate).toHaveBeenCalledWith([
-      'workspaces/defaultNamespace/1/analysis',
-    ]);
+    expect(mockNavigate).toHaveBeenCalledWith([pathToCurrentWSAnalysisTab]);
   });
 });

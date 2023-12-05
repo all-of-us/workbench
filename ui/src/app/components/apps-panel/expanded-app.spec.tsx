@@ -15,7 +15,7 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { analysisTabName } from 'app/routing/utils';
+import { appTabPath } from 'app/routing/utils';
 import {
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
@@ -417,12 +417,11 @@ describe('ExpandedApp', () => {
           } else if (appType === UIAppType.RSTUDIO) {
             // Confirm navigate is called to launch RStudio in iframe
             expect(mockNavigate).toHaveBeenCalledWith([
-              'workspaces',
-              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-              analysisTabName,
-              'userApp',
-              appType,
+              appTabPath(
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+                appType
+              ),
             ]);
           }
         });

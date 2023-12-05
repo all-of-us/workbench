@@ -83,7 +83,7 @@ export const getTrail = (
           fp.upperFirst(analysisTabName),
           analysisTabPath(ns, wsid)
         ),
-        new BreadcrumbData(appType, `${appTabPath(ns, wsid)}/${appType}`),
+        new BreadcrumbData(appType, `${appTabPath(ns, wsid, appType)}`),
       ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
