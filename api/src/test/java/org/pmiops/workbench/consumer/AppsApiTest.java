@@ -10,7 +10,6 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,25 +24,24 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 @ExtendWith(PactConsumerTestExt.class)
 class ProductServiceTest {
 
-  @Pact(consumer = "x", provider = "y")
-  RequestResponsePact getApp(PactDslWithProvider builder) throws ApiException {
+  @Pact(consumer = "aou", provider = "leonardo")
+  RequestResponsePact getApp(PactDslWithProvider builder) {
     return builder
-        .given("a")
-        .uponReceiving("b")
+        .given("there is an app in a Google project")
+        .uponReceiving("a request to get that app")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject/appName")
+        .path("/api/google/v1/apps/googleProject/appname")
         .willRespondWith()
         .status(200)
-        .headers(headers())
+        .headers(contentTypeJsonHeader)
         .body(newJsonBody(body -> {
-          body.stringType("appName", "Minivan");
+          body.stringType("appName", "sample-cromwell-study");
           body.stringType("status", "RUNNING");
-          body.stringType("diskName", "Porg");
-          body.stringType("appType","CROMWELL");
-          body.array("errors", errors -> {});
-          body.object("cloudContext", context -> {
-            context.stringType("cloudprovider", null);
+          body.stringType("diskName", "disk-123");
+          body.stringType("appType", "CROMWELL");
+          body.array("errors", errors -> {
           });
+          body.object("cloudContext", context -> context.stringType("cloudprovider", null));
         }).build())
         .toPact();
   }
@@ -56,21 +54,17 @@ class ProductServiceTest {
     AppsApi leoAppService = new AppsApi(client);
 
     LeonardoGetAppResponse expected = new LeonardoGetAppResponse();
-    expected.setAppName("Minivan");
+    expected.setAppName("sample-cromwell-study");
     expected.setErrors(new ArrayList<>());
-    expected.setDiskName("Porg");
+    expected.setDiskName("disk-123");
     expected.setStatus(LeonardoAppStatus.RUNNING);
     expected.setAppType(LeonardoAppType.CROMWELL);
     expected.setCloudContext(new LeonardoCloudContext());
 
-    LeonardoGetAppResponse response = leoAppService.getApp("googleProject", "appName");
+    LeonardoGetAppResponse response = leoAppService.getApp("googleProject", "appname");
 
     assertEquals(expected, response);
   }
 
-  private Map<String, String> headers() {
-    Map<String, String> headers = new HashMap<>();
-    headers.put("Content-Type", "application/json; charset=utf-8");
-    return headers;
-  }
+  static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
