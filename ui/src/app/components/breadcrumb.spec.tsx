@@ -1,7 +1,13 @@
+import * as fp from 'lodash/fp';
+
 import { WorkspacesApi } from 'generated/fetch';
 
 import { getTrail } from 'app/components/breadcrumb';
-import { dataTabPath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  appDisplayPath,
+  dataTabPath,
+} from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -11,6 +17,7 @@ import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
+import { UIAppType } from './apps-panel/utils';
 import { BreadcrumbType } from './breadcrumb-type';
 
 describe('getTrail', () => {
@@ -55,4 +62,31 @@ describe('getTrail', () => {
       expect(trail.length).toBeGreaterThan(0);
     }
   );
+
+  it('Should display correct trail for App display', () => {
+    const trail = getTrail(
+      BreadcrumbType.App,
+      workspaceDataStub,
+      exampleCohortStubs[0],
+      cohortReviewStubs[0],
+      ConceptSetsApiStub.stubConceptSets()[0],
+      {
+        ns: 'testns',
+        wsid: 'testwsid',
+        cid: '88',
+        crid: '99',
+        pid: '77',
+        appType: UIAppType.RSTUDIO,
+      }
+    );
+    expect(trail.map((item) => item.label)).toEqual([
+      'Workspaces',
+      'defaultWorkspace',
+      fp.upperFirst(analysisTabName),
+      UIAppType.RSTUDIO,
+    ]);
+    expect(trail[3].url).toEqual(
+      appDisplayPath('testns', 'testwsid', UIAppType.RSTUDIO)
+    );
+  });
 });
