@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import validate from 'validate.js';
 
 import {
   Cohort,
@@ -11,6 +12,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
@@ -185,7 +187,7 @@ export const convertToResources = (
  * Other AoU resource types do not have the same name restriction and only block slashes.
  */
 export const nameValidationFormat = (
-  existingNames,
+  existingNames: string[],
   resourceType: ResourceType
 ) =>
   resourceType === ResourceType.NOTEBOOK
@@ -212,3 +214,19 @@ export const nameValidationFormat = (
           message: 'already exists',
         },
       };
+
+export const validateNewNotebookName = (
+  name: string,
+  existingNames: string[],
+  fieldName: string = 'name' // error validators sometimes depend on the field name
+) =>
+  validate(
+    // append the Jupyter suffix if missing, to both the user-chosen name and the list of existing names
+    { [fieldName]: appendJupyterNotebookFileSuffix(name) },
+    {
+      [fieldName]: nameValidationFormat(
+        existingNames?.map(appendJupyterNotebookFileSuffix),
+        ResourceType.NOTEBOOK
+      ),
+    }
+  );
