@@ -14,7 +14,7 @@ import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner
 import {
   analysisTabName,
   analysisTabPath,
-  appTabPath,
+  appDisplayPath,
   dataTabPath,
   workspacePath,
 } from 'app/routing/utils';
@@ -83,7 +83,7 @@ export const getTrail = (
           fp.upperFirst(analysisTabName),
           analysisTabPath(ns, wsid)
         ),
-        new BreadcrumbData(appType, appTabPath(ns, wsid, appType)),
+        new BreadcrumbData(appType, appDisplayPath(ns, wsid, appType)),
       ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];

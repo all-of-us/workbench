@@ -12,7 +12,7 @@ import {
 
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
-import { appTabPath } from 'app/routing/utils';
+import { appDisplayPath } from 'app/routing/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
@@ -136,7 +136,7 @@ describe('User Apps Helper functions', () => {
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
     expect(mockNavigate).toHaveBeenCalledWith([
-      appTabPath('ws', 'wsid', UIAppType.RSTUDIO),
+      appDisplayPath('ws', 'wsid', UIAppType.RSTUDIO),
     ]);
     expect(setSidebarActiveIconStore.value).toBeNull();
   });

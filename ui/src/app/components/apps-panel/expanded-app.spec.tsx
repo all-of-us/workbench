@@ -15,7 +15,7 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { appTabPath } from 'app/routing/utils';
+import { appDisplayPath } from 'app/routing/utils';
 import {
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
@@ -417,7 +417,7 @@ describe('ExpandedApp', () => {
           } else if (appType === UIAppType.RSTUDIO) {
             // Confirm navigate is called to launch RStudio in iframe
             expect(mockNavigate).toHaveBeenCalledWith([
-              appTabPath(
+              appDisplayPath(
                 WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
                 WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
                 appType

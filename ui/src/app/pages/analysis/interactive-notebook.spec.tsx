@@ -19,7 +19,7 @@ import {
 import {
   analysisTabName,
   analysisTabPath,
-  appTabPath,
+  appDisplayPath,
 } from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
@@ -120,7 +120,7 @@ test.each([
     if (appType === 'RStudio') {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith([
-          appTabPath('sampleNameSpace', 'sampleWorkspace', appType),
+          appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
         ]);
       });
     } else if (appType === 'SAS') {

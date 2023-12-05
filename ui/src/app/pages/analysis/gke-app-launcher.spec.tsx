@@ -15,7 +15,7 @@ import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
-import { analysisTabPath, appTabPath } from 'app/routing/utils';
+import { analysisTabPath, appDisplayPath } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
@@ -43,7 +43,7 @@ const currentWorkspace = workspaceStubs[0];
 const createRoute = (appType: string) => (
   <MemoryRouter
     initialEntries={[
-      appTabPath(currentWorkspace.namespace, currentWorkspace.id, appType),
+      appDisplayPath(currentWorkspace.namespace, currentWorkspace.id, appType),
     ]}
   >
     <Route path='/workspaces/:ns/:wsid/analysis/userApp/:appType'>

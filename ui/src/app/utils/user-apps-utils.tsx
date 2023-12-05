@@ -12,7 +12,7 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { appTabPath } from 'app/routing/utils';
+import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -149,7 +149,9 @@ export const openRStudio = (
   navigate: (commands: any, extras?: any) => void
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
-  navigate([appTabPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO)]);
+  navigate([
+    appDisplayPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO),
+  ]);
 };
 
 export const openRStudioOrConfigPanel = (
