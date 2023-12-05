@@ -543,8 +543,10 @@ export const InteractiveNotebook = fp.flow(
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
           if (appType === UIAppType.RSTUDIO) {
-            const { userApps } = this.props.userAppsStore;
-            const { navigate } = this.props;
+            const {
+              userAppsStore: { userApps },
+              navigate,
+            } = this.props;
             openRStudioOrConfigPanel(ns, wsid, userApps, navigate);
           } else if (appType === UIAppType.SAS) {
             const { userApps } = this.props.userAppsStore;

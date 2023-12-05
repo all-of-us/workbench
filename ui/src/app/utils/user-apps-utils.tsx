@@ -149,12 +149,7 @@ export const openRStudio = (
   navigate: (commands: any, extras?: any) => void
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
-  const pathToApp = appTabPath(
-    workspaceNamespace,
-    workspaceId,
-    UIAppType.RSTUDIO
-  );
-  navigate([pathToApp]);
+  navigate([appTabPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO)]);
 };
 
 export const openRStudioOrConfigPanel = (
