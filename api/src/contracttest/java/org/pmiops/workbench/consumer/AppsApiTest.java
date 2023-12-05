@@ -1,4 +1,4 @@
-package org.pmiops.workbench.pact.consumer;
+package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +22,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 
 @ExtendWith(PactConsumerTestExt.class)
-class ProductServiceTest {
+class AppsApiTest {
 
   @Pact(consumer = "aou", provider = "leonardo")
   RequestResponsePact getApp(PactDslWithProvider builder) {
