@@ -251,8 +251,8 @@ public interface LeonardoMapper {
   @ValueMapping(source = "SAS", target = "ALLOWED")
   LeonardoAppType toLeonardoAppType(AppType appType);
 
-  @ValueMapping(source = "RSTUDIO", target = "RSTUDIO_CHART")
-  @ValueMapping(source = "SAS", target = "SAS_CHART")
+  @ValueMapping(source = "RSTUDIO", target = "RSTUDIO")
+  @ValueMapping(source = "SAS", target = "SAS")
   @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
   LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
 

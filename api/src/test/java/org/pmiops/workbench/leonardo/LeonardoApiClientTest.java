@@ -235,7 +235,7 @@ public class LeonardoApiClientTest {
         new LeonardoCreateAppRequest()
             .appType(LeonardoAppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .allowedChartName(LeonardoAllowedChartName.RSTUDIO_CHART)
+            .allowedChartName(LeonardoAllowedChartName.RSTUDIO)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .customEnvironmentVariables(customEnvironmentVariables);
