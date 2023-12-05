@@ -24,5 +24,4 @@ export const testEnvironmentBase: EnvironmentBase = {
   allowTestAccessTokenOverride: true,
   showNewAnalysisTab: true,
   showCBFunnelPlot: true,
-  tanagraBaseUrl: 'https://aou-tanagra-dev.fake-research-aou.org',
 };

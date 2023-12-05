@@ -90,7 +90,7 @@ const bindClients = () => {
   );
   tanagraBindApiClients(
     new TanagraConfiguration({
-      basePath: environment.tanagraBaseUrl,
+      basePath: serverConfigStore.get().config.tanagraBaseUrl,
       accessToken: () => getAccessToken(),
     })
   );

@@ -176,6 +176,5 @@
   },
   "tanagra": {
     "baseUrl": "http:\/\/localhost:3000",
-    "workbenchBaseUrl": "http:\/\/localhost:4200"
   }
 }
