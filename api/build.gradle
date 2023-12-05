@@ -268,7 +268,7 @@ jacocoTestReport {
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
 sourceSets {
     //
-    // SorceSets added by Java plugin. These share a namespace with the ones users create.
+    // SourceSets added by Java plugin. These share a namespace with the ones users create.
     //
     generated {
         compileClasspath = configurations.generatedCompileClasspath
@@ -360,7 +360,7 @@ project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
                                  'generate_appengine_cron_yaml'])
 
-// Clear out generated Java sorces before cleaning the project.
+// Clear out generated Java sources before cleaning the project.
 clean.doFirst {
     delete(SWAGGER_3_CODEGEN_DIR)
 }
@@ -480,7 +480,7 @@ dependencies {
     implementation "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
-
+    implementation "com.squareup.okio:okio-jvm:3.4.0"
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
