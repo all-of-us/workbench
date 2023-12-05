@@ -34,15 +34,18 @@ class ProductServiceTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(newJsonBody(body -> {
-          body.stringType("appName", "sample-cromwell-study");
-          body.stringType("status", "RUNNING");
-          body.stringType("diskName", "disk-123");
-          body.stringType("appType", "CROMWELL");
-          body.array("errors", errors -> {
-          });
-          body.object("cloudContext", context -> context.stringType("cloudprovider", null));
-        }).build())
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.stringType("appName", "sample-cromwell-study");
+                      body.stringType("status", "RUNNING");
+                      body.stringType("diskName", "disk-123");
+                      body.stringType("appType", "CROMWELL");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext", context -> context.stringType("cloudprovider", null));
+                    })
+                .build())
         .toPact();
   }
 
