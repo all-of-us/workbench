@@ -43,8 +43,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
@@ -431,34 +429,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  // Returns true if user has accepted the latest AoU Terms of Service Version
   @Override
-  public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
+  public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
     return userTermsOfServiceDao
         .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
         .map(u -> u.getTosVersion() == configProvider.get().termsOfService.latestAouVersion)
         .orElse(false);
   }
 
-  // Returns true only if the user has accepted the latest version of both AoU and Terra terms of
-  // service
   @Override
-  public boolean validateTermsOfService(@Nonnull DbUser dbUser) {
-    return validateAllOfUsTermsOfServiceVersion(dbUser) && getUserTerraTermsOfServiceStatus(dbUser);
-  }
-
-  @Override
-  public boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser) {
-    try {
-      return fireCloudService.getUserTermsOfServiceStatus();
-    } catch (ApiException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error while getting Terra Terms of Service status for user %s",
-              dbUser.getUsername()));
-      throw new ServerErrorException(e);
-    }
+  public boolean hasSignedLatestTermsOfServiceForBoth(@Nonnull DbUser dbUser) {
+    return hasSignedLatestAoUTermsOfService(dbUser)
+        && fireCloudService.hasUserAcceptedLatestTerraToS();
   }
 
   @Override
@@ -476,8 +458,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void acceptTerraTermsOfService(@Nonnull DbUser dbUser) {
-    fireCloudService.acceptTermsOfService();
+  @Deprecated // to be replaced as part of RW-11416
+  public void acceptTerraTermsOfServiceDeprecated(@Nonnull DbUser dbUser) {
+    fireCloudService.acceptTermsOfServiceDeprecated();
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
             .findByUserIdOrThrow(dbUser.getUserId())

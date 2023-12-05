@@ -4,8 +4,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { Disk } from 'generated/fetch';
 
 import colors from 'app/styles/colors';
+import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { AnalysisConfig, toAnalysisConfig } from 'app/utils/runtime-utils';
 
 export interface PresetSelectorProps {
   allowDataproc: boolean;

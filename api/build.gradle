@@ -483,9 +483,8 @@ dependencies {
     implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-    // updated 3 Nov 2023
-    // the latest version of Sam which passed all tests was on 12 October with hash 06ef266...
-    implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-06ef266") {
+    // updated 30 Nov 2023 to most recent passing Sam on 28 Nov
+    implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-8713af5") {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
 

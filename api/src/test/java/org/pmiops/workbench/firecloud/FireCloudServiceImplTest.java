@@ -3,13 +3,17 @@ package org.pmiops.workbench.firecloud;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.PROJECT_BILLING_ID_SIZE;
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.TERMS_OF_SERVICE_BODY;
+import static org.pmiops.workbench.model.ErrorCode.TERRA_TOS_NON_COMPLIANT;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
+import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +32,13 @@ import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
-import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
+import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
+import org.pmiops.workbench.sam.SamRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -68,10 +73,12 @@ public class FireCloudServiceImplTest {
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API)
   private GroupsApi groupsApi;
 
-  @MockBean private FirecloudApiClientFactory firecloudApiClientFactory;
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
+  // old Terms of Service endpoints, before RW-11416
+  @MockBean private org.pmiops.workbench.firecloud.api.TermsOfServiceApi firecloudTermsOfServiceApi;
+  // new Terms of Service endpoints, after RW-11416
   @MockBean private TermsOfServiceApi termsOfServiceApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -81,7 +88,8 @@ public class FireCloudServiceImplTest {
     FakeClockConfiguration.class,
     FireCloudCacheConfig.class,
     FireCloudServiceImpl.class,
-    RetryConfig.class
+    RetryConfig.class,
+    SamRetryHandler.class
   })
   static class Configuration {
     @Bean
@@ -154,13 +162,33 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testGetMe_throwsUnauthorized() {
-    assertThrows(
-        UnauthorizedException.class,
-        () -> {
-          when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
-          service.getMe();
-        });
+  public void testGetMe_throwsUnauthorized_good_tos()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException, ApiException {
+
+    // user is TOS-compliant
+
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+
+    when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
+
+    var exception = assertThrows(UnauthorizedException.class, () -> service.getMe());
+    assertThat(exception.getErrorResponse()).isNull(); // not TERRA_TOS_NON_COMPLIANT;
+  }
+
+  @Test
+  public void testGetMe_throwsUnauthorized_bad_tos()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException, ApiException {
+
+    // user is TOS-noncompliant
+
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+
+    when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
+
+    var exception = assertThrows(UnauthorizedException.class, () -> service.getMe());
+    assertThat(exception.getErrorResponse().getErrorCode()).isEqualTo(TERRA_TOS_NON_COMPLIANT);
   }
 
   @Test
@@ -262,14 +290,90 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void acceptTermsOfService() throws ApiException {
-    service.acceptTermsOfService();
-    verify(termsOfServiceApi).acceptTermsOfService(TERMS_OF_SERVICE_BODY);
+  public void acceptTermsOfServiceDeprecated() throws ApiException {
+    service.acceptTermsOfServiceDeprecated();
+    verify(firecloudTermsOfServiceApi).acceptTermsOfService(TERMS_OF_SERVICE_BODY);
+    verifyNoInteractions(termsOfServiceApi);
   }
 
   @Test
-  public void getUserTermsOfServiceStatus() throws ApiException {
-    service.getUserTermsOfServiceStatus();
-    verify(termsOfServiceApi).getTermsOfServiceStatus();
+  public void isUserCompliantWithTerraToS()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.isUserCompliantWithTerraToS()).isTrue();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void isUserCompliantWithTerraToS_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.isUserCompliantWithTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn =
+        new UserTermsOfServiceDetails()
+            .isCurrentVersion(true)
+            // currently required - see the comment at hasUserAcceptedLatestTerraToS() for more
+            // details
+            .permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isTrue();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn =
+        new UserTermsOfServiceDetails()
+            .isCurrentVersion(false)
+            // currently required - see the comment at hasUserAcceptedLatestTerraToS() for more
+            // details
+            .permitsSystemUsage(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  // these 2 show that hasUserAcceptedLatestTerraToS() is currently dependent on the
+  // permitsSystemUsage value as well as isCurrentVersion.
+  // see the comment at hasUserAcceptedLatestTerraToS() for more details
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_permits_false_current_true()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn = new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(true);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_permits_false_current_false()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    var toReturn =
+        new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(false);
+    when(termsOfServiceApi.userTermsOfServiceGetSelf()).thenReturn(toReturn);
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
   }
 }

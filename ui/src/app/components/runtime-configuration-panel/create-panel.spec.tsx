@@ -5,9 +5,9 @@ import * as React from 'react';
 import { RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { PanelContent, toAnalysisConfig } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -20,6 +20,7 @@ import {
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 
 import { CreatePanel, CreatePanelProps } from './create-panel';
+import { PanelContent } from './utils';
 
 const defaultAnalysisConfig = toAnalysisConfig(
   defaultGceRuntimeWithPd(),
@@ -27,7 +28,8 @@ const defaultAnalysisConfig = toAnalysisConfig(
 );
 
 const setPanelContent = jest.fn();
-const setRuntimeStatusRequest = jest.fn();
+const onClose = jest.fn();
+const requestAnalysisConfig = jest.fn();
 
 const defaultProps: CreatePanelProps = {
   profile: ProfileStubVariables.PROFILE_STUB,
@@ -35,8 +37,10 @@ const defaultProps: CreatePanelProps = {
   analysisConfig: defaultAnalysisConfig,
   creatorFreeCreditsRemaining: 0,
   runtimeStatus: RuntimeStatus.RUNNING,
+  runtimeCanBeCreated: true,
   setPanelContent,
-  setRuntimeStatusRequest,
+  onClose,
+  requestAnalysisConfig,
 };
 
 describe(CreatePanel.name, () => {
@@ -77,5 +81,29 @@ describe(CreatePanel.name, () => {
     await waitFor(() =>
       expect(setPanelContent).toHaveBeenCalledWith(PanelContent.Customize)
     );
+  });
+
+  it('should allow creation if runtimeCanBeCreated', async () => {
+    await component({ runtimeCanBeCreated: true });
+
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).toHaveBeenCalledWith(defaultAnalysisConfig);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should not allow creation if !runtimeCanBeCreated', async () => {
+    await component({ runtimeCanBeCreated: false });
+
+    const createButton = screen.queryByRole('button', { name: 'Create' });
+    expect(createButton).toBeInTheDocument();
+    createButton.click();
+    await waitFor(() => {
+      expect(requestAnalysisConfig).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
   });
 });

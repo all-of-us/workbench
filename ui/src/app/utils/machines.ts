@@ -4,8 +4,9 @@ import { Disk, DiskType } from 'generated/fetch';
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
+import { AnalysisConfig } from './analysis-config';
 import { formatUsd } from './numbers';
-import { AnalysisConfig, DiskConfig } from './runtime-utils';
+import { DiskConfig } from './runtime-utils';
 
 // Copied from https://github.com/DataBiosphere/terra-ui/blob/219b063b07d56499ccc38013fd88f4f0b88f8cd6/src/data/machines.js
 
@@ -370,8 +371,10 @@ export const validLeoGceMachineTypes = allMachineTypes.filter(
 export const validLeoDataprocMasterMachineTypes = allMachineTypes.filter(
   ({ memory }) => memory > 4
 );
+// updated 29 Nov 2023 after observing the error:
+// Creating clusters using the n1-standard-1 machine type is not supported for image version 2.1.11-debian11
 export const validLeoDataprocWorkerMachineTypes = allMachineTypes.filter(
-  ({ memory }) => memory >= 3
+  ({ memory }) => memory >= 4
 );
 
 export const findMachineByName = (machineToFind: string) =>

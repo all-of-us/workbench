@@ -138,7 +138,22 @@ public interface FireCloudService {
 
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
 
-  void acceptTermsOfService();
+  @Deprecated
+  void acceptTermsOfServiceDeprecated();
 
-  boolean getUserTermsOfServiceStatus() throws ApiException;
+  /**
+   * Is the current user currently compliant with Terra's Terms of Service? This will be true if the
+   * user has accepted the latest version OR we are in the rolling acceptance window
+   *
+   * @return true if Terra allows system usage based on ToS status
+   */
+  boolean isUserCompliantWithTerraToS();
+
+  /**
+   * Has the current user accepted the <b>latest</b> Terra Terms of Service? Note: this is a
+   * stricter requirement than {@link #isUserCompliantWithTerraToS()}
+   *
+   * @return true if the user is compliant with the latest Terra ToS
+   */
+  boolean hasUserAcceptedLatestTerraToS();
 }

@@ -10,12 +10,9 @@ import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import { maybeWithExistingDiskName } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
-import {
-  DiskConfig,
-  diskTypeLabels,
-  maybeWithExistingDiskName,
-} from 'app/utils/runtime-utils';
+import { DiskConfig, diskTypeLabels } from 'app/utils/runtime-utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { DiskSizeSelector } from './disk-size-selector';

@@ -10,7 +10,6 @@ import {
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
@@ -20,6 +19,13 @@ import {
   WithCurrentWorkspace,
   withCurrentWorkspace,
 } from 'app/utils';
+import {
+  AnalysisConfig,
+  fromAnalysisConfig,
+  maybeWithPersistentDisk,
+  toAnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
@@ -29,21 +35,17 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
+import {
+  AnalysisDiff,
+  diffsToUpdateMessaging,
+  getAnalysisConfigDiffs,
+} from 'app/utils/runtime-diffs';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
-  AnalysisConfig,
-  AnalysisDiff,
-  diffsToUpdateMessaging,
-  fromAnalysisConfig,
-  getAnalysisConfigDiffs,
   isVisible,
-  maybeWithPersistentDisk,
-  PanelContent,
   RuntimeStatusRequest,
-  toAnalysisConfig,
   UpdateMessaging,
-  withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
   ProfileStore,
@@ -64,8 +66,9 @@ import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
+import { PanelContent } from './runtime-configuration-panel/utils';
 
-const { useState, useEffect, Fragment } = React;
+const { useState, useEffect } = React;
 
 const PanelMain = fp.flow(
   withCdrVersions(),
@@ -346,33 +349,19 @@ const PanelMain = fp.flow(
           [
             PanelContent.Create,
             () => (
-              <Fragment>
-                <CreatePanel
-                  {...{
-                    analysisConfig,
-                    creatorFreeCreditsRemaining,
-                    profile,
-                    setPanelContent,
-                    setRuntimeStatusRequest,
-                    runtimeStatus,
-                    workspace,
-                  }}
-                />
-                <FlexRow
-                  style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
-                >
-                  <Button
-                    aria-label='Create'
-                    disabled={!runtimeCanBeCreated}
-                    onClick={() => {
-                      requestAnalysisConfig(analysisConfig);
-                      onClose();
-                    }}
-                  >
-                    Create
-                  </Button>
-                </FlexRow>
-              </Fragment>
+              <CreatePanel
+                {...{
+                  analysisConfig,
+                  creatorFreeCreditsRemaining,
+                  onClose,
+                  profile,
+                  requestAnalysisConfig,
+                  runtimeCanBeCreated,
+                  runtimeStatus,
+                  setPanelContent,
+                  workspace,
+                }}
+              />
             ),
           ],
           [

@@ -62,14 +62,15 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   }
 
   private void ensureTosCompliance(String username) {
-    boolean currentState = impersonatedUserService.getUserTerraTermsOfServiceStatus(username);
-    if (currentState) {
+    var currentStatus = impersonatedUserService.getTerraTermsOfServiceStatusForUser(username);
+    if (currentStatus.getIsCurrentVersion()) {
       LOGGER.info(
           String.format(
-              "Test user %s is already compliant with the Terra Terms of Service", username));
+              "Test user %s is already compliant with the latest Terra Terms of Service",
+              username));
     } else {
       LOGGER.info(String.format("Accepting the Terra Terms of Service for test user %s", username));
-      impersonatedUserService.acceptTerraTermsOfService(username);
+      impersonatedUserService.acceptTerraTermsOfServiceForUser(username);
     }
   }
 

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.impersonation;
 
+import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;
+
 /**
  * An impersonation-enabled version of {@link org.pmiops.workbench.db.dao.UserService}
  *
@@ -8,8 +10,8 @@ package org.pmiops.workbench.impersonation;
  */
 public interface ImpersonatedUserService {
   // retrieve a user's Terra Terms of Service status, by using impersonation
-  boolean getUserTerraTermsOfServiceStatus(String username);
+  UserTermsOfServiceDetails getTerraTermsOfServiceStatusForUser(String username);
 
   // accepts the latest Terra Terms of Service on behalf of a user by using impersonation
-  void acceptTerraTermsOfService(String username);
+  void acceptTerraTermsOfServiceForUser(String username);
 }

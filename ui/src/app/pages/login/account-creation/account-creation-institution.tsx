@@ -392,7 +392,7 @@ export class AccountCreationInstitution extends React.Component<
                 </div>
                 <div style={styles.wideInputSize}>
                   <Select
-                    ariaLabel='Institution'
+                    aria-label='Institution'
                     options={institutions.map((inst) => ({
                       value: inst.shortName,
                       label: inst.displayName,

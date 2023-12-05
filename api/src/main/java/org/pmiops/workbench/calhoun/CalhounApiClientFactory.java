@@ -1,8 +1,7 @@
-package org.pmiops.workbench.firecloud;
+package org.pmiops.workbench.calhoun;
 
 import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
-import org.pmiops.workbench.calhoun.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
