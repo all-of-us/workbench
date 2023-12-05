@@ -585,7 +585,6 @@ task contractTest(type: Test) {
     description = 'Run contract test suite.'
     testClassesDirs = sourceSets.__contractTest__.output.classesDirs
     classpath = sourceSets.__contractTest__.runtimeClasspath
-    // These tests should always run when requested since they consume and produce side-effects.
     outputs.upToDateWhen { false }
 
     useJUnitPlatform()
