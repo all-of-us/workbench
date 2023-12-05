@@ -15,7 +15,7 @@ import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
-import { analysisTabPath } from 'app/routing/utils';
+import { analysisTabPath, appTabPath } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
@@ -32,18 +32,6 @@ const createApp = (appType: AppType = AppType.RSTUDIO) => [
   },
 ];
 
-const createRoute = (appType: string) => (
-  <MemoryRouter
-    initialEntries={[
-      `/workspaces/defaultNamespace/1/analysis/userApp/${appType}`,
-    ]}
-  >
-    <Route path='/workspaces/:ns/:wsid/analysis/userApp/:appType'>
-      <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
-    </Route>
-  </MemoryRouter>
-);
-
 const setUpWorkspace = () => {
   currentWorkspaceStore.next({
     ...workspaceStubs[0],
@@ -51,6 +39,18 @@ const setUpWorkspace = () => {
   });
 };
 const currentWorkspace = workspaceStubs[0];
+
+const createRoute = (appType: string) => (
+  <MemoryRouter
+    initialEntries={[
+      appTabPath(currentWorkspace.namespace, currentWorkspace.id, appType),
+    ]}
+  >
+    <Route path='/workspaces/:ns/:wsid/analysis/userApp/:appType'>
+      <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
+    </Route>
+  </MemoryRouter>
+);
 
 const pathToCurrentWSAnalysisTab = analysisTabPath(
   currentWorkspace.namespace,

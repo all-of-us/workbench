@@ -53,8 +53,8 @@ export const GKEAppLauncher = fp.flow(withRouter)((props: Props) => {
   } else {
     return (
       <NotebookFrameError errorMode={ErrorMode.ERROR}>
-        An error was encountered with your App {appType}. To resolve, please see
-        the Applications side panel.
+        An error was encountered with your {appType} Environment. To resolve,
+        please see the Applications side panel.
       </NotebookFrameError>
     );
   }

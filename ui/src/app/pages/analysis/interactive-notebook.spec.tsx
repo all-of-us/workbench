@@ -16,7 +16,11 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { analysisTabName, analysisTabPath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  analysisTabPath,
+  appTabPath,
+} from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
@@ -116,12 +120,7 @@ test.each([
     if (appType === 'RStudio') {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith([
-          'workspaces',
-          'sampleNameSpace',
-          'sampleWorkspace',
-          analysisTabName,
-          'userApp',
-          appType,
+          appTabPath('sampleNameSpace', 'sampleWorkspace', appType),
         ]);
       });
     } else if (appType === 'SAS') {

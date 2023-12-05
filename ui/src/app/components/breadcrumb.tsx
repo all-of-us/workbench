@@ -361,7 +361,7 @@ export const Breadcrumb = fp.flow(
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
 
-      const appPreviewMatch = matchPath<MatchParams>(location.pathname, {
+      const userAppMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
       });
 
@@ -371,9 +371,7 @@ export const Breadcrumb = fp.flow(
         ? analysisPreviewMatch.params.nbName
         : undefined;
 
-      const appType = appPreviewMatch
-        ? appPreviewMatch.params.appType
-        : undefined;
+      const appType = userAppMatch ? userAppMatch.params.appType : undefined;
 
       return getTrail(
         this.props.routeData.breadcrumb,
