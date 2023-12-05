@@ -860,8 +860,8 @@ compileTestKotlin {
 }
 
 dependencies {
-    implementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
-    implementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
+    testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
+    testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
     modules {
     module("com.sun.activation:jakarta.activation") {
       replacedBy("jakarta.annotation:jakarta.annotation-api")
