@@ -94,7 +94,7 @@ it('Should display iframe with rStudio App Url', async () => {
   );
 });
 
-it('Should display error message if User App is not found', async () => {
+it('Should display error message if valid User App is not in userAppStore', async () => {
   setup('RStudio', createApp(AppType.CROMWELL));
   expect(
     screen.getByText(

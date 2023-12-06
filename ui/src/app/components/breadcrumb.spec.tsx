@@ -2,7 +2,7 @@ import { WorkspacesApi } from 'generated/fetch';
 
 import { getTrail } from 'app/components/breadcrumb';
 import {
-  analysisTabDisplay,
+  analysisTabName,
   appDisplayPath,
   dataTabPath,
 } from 'app/routing/utils';
@@ -77,6 +77,10 @@ describe('getTrail', () => {
         appType: UIAppType.RSTUDIO,
       }
     );
+
+    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
+      .slice(1)
+      .toLowerCase()}`;
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',

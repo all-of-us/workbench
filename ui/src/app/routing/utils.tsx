@@ -8,10 +8,6 @@ export const analysisTabName = environment.showNewAnalysisTab
   ? 'analysis'
   : 'notebooks';
 
-export const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
-  .slice(1)
-  .toLowerCase()}`;
-
 export const analysisTabPath = (namespace: string, id: string): string =>
   `${workspacePath(namespace, id)}/${analysisTabName}`;
 
