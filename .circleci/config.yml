@@ -417,11 +417,6 @@ jobs:
         working_directory: ~
         command: |
           ls /tmp/workspace/pacts
-    - run:
-        name: ls pacts2
-        working_directory: ~
-        command: |
-          ls pacts
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
@@ -550,7 +545,7 @@ jobs:
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: pactfoundation/pact-cli:latest
     steps:
       - run:
           name: Echo
