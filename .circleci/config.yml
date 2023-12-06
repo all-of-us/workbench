@@ -53,6 +53,13 @@ anchors:
         # Regex matches Workbench release tag. Example: v5-3-rc1
         only: /^v[0-9]+-[0-9]+-rc[0-9]+$/
 
+  filter-stable-deployment-manual-verification-tags: &filter-stable-deployment-manual-verification-tags
+    filters:
+      branches:
+        ignore: /.*/
+      tags:
+        only: /^rw-11491-manual-verification-[0-9]+$/
+
   # Job runs for PR branch only
   filter-pr-branch: &filter-pr-branch
     filters:
@@ -143,6 +150,25 @@ commands:
               --key-file ~/workbench/api/circle-sa-key.json \
               --promote
           name: Deploy API and UI to all-of-us-rw-staging App Engine
+
+  deploy-to-stable-command:
+    description: "Deploy API and UI to stable App Engine"
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - deploy:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-stable \
+              --account << pipeline.parameters.circle-service-account >> \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file ~/workbench/api/circle-sa-key.json
+          name: Deploy API and UI to all-of-us-rw-stable App Engine
 
   gcloud-auth-login:
     description: "Activate CircleCI service account credential"
@@ -629,6 +655,12 @@ jobs:
     steps:
       - deploy-to-staging-command
 
+  deploy-to-stable:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+      - deploy-to-stable-command
+
   puppeteer-generate-access-tokens:
     executor: puppeteer-executor
     parameters:
@@ -895,6 +927,11 @@ workflows:
             - deploy-to-staging
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
+
+  deploy-stable:
+    jobs:
+      - deploy-to-stable:
+          <<: *filter-stable-deployment-manual-verification-tags
 
   nightly-tests:
     triggers:
