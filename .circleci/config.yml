@@ -8,6 +8,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.2.1
   queue: eddiewebb/queue@volatile
   coverage-reporter: codacy/coverage-reporter@13.13.7
+  pact: trustedshops-public/pact@3.0.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -401,6 +402,50 @@ jobs:
           coverage-reports: /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
 
+  api-contract-upload:
+    #Jacoco runs against test results to get test coverage
+    executor: workbench-executor
+    steps:
+    - run-api-test:
+        additional_steps:
+        - attach_workspace:
+            at: /tmp/workspace
+        - run:
+            name: ls home
+            working_directory: ~
+            command: |
+              ls
+        - run:
+            name: ls tmp
+            working_directory: ~
+            command: |
+              ls tmp
+        - run:
+            name: ls tmp/workspace
+            working_directory: ~
+            command: |
+              ls tmp/workspace
+        - run:
+            name: ls tmp/workpsace/workbench
+            working_directory: ~
+            command: |
+              ls tmp/workspace/workbench
+        - run:
+            name: ls tmp/workpsace/workbench/api
+            working_directory: ~
+            command: |
+              ls tmp/workspace/workbench/api
+        - run:
+            name: ls tmp/workpsace/workbench/api/build
+            working_directory: ~
+            command: |
+              ls tmp/workspace/workbench/api/build
+        - run:
+            name: ls tmp/workpsace/workbench/api/build/pacts
+            working_directory: ~
+            command: |
+              ls tmp/workspace/workbench/api/build/pacts
+
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
@@ -486,6 +531,10 @@ jobs:
             name: Run Contract tests
             working_directory: ~/workbench/api
             command: ./project.rb contracttest
+    - persist_to_workspace:
+        root: .
+        paths:
+        - api
 
   ui-unit-test:
     executor: workbench-executor
@@ -824,6 +873,9 @@ workflows:
       - ui-test-coverage:
           requires:
           - ui-unit-test
+      - api-contract-upload
+        - requires:
+          - api-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
