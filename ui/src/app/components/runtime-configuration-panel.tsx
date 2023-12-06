@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 
 import { RuntimeStatus } from 'generated/fetch';
 
-import { cond, switchCase } from '@terra-ui-packages/core-utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
@@ -211,24 +211,11 @@ export const RuntimeConfigurationPanel = fp.flow(
                 return (
                   <ConfirmDeleteEnvironmentWithPD
                     onConfirm={async (deletePDSelected) => {
-                      const runtimeStatusReq = cond(
-                        [
-                          !deletePDSelected,
-                          () => RuntimeStatusRequest.DeleteRuntime,
-                        ],
-                        [
-                          deletePDSelected &&
-                            analysisConfig.computeType !== ComputeType.Dataproc,
-                          () => RuntimeStatusRequest.DeleteRuntimeAndPD,
-                        ],
-                        [
-                          // TODO: this configuration is not supported.  Remove?
-                          deletePDSelected &&
-                            analysisConfig.computeType === ComputeType.Dataproc,
-                          () => RuntimeStatusRequest.DeletePD,
-                        ]
+                      await setRuntimeStatusRequest(
+                        deletePDSelected
+                          ? RuntimeStatusRequest.DeleteRuntimeAndPD
+                          : RuntimeStatusRequest.DeleteRuntime
                       );
-                      await setRuntimeStatusRequest(runtimeStatusReq);
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
