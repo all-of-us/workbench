@@ -75,10 +75,8 @@ export const styles = reactStyles({
     width: '400px',
   },
   costsDrawnFrom: {
-    borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
-    fontSize: '12px',
-    padding: '.495rem .75rem',
-    width: '250px',
+    fontSize: '14px',
+    paddingTop: '.495rem',
   },
   deleteLink: {
     alignSelf: 'center',

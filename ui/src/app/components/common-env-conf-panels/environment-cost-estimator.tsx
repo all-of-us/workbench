@@ -25,7 +25,7 @@ interface Props {
 
 const styles = reactStyles({
   costSection: {
-    marginRight: '0.5rem',
+    marginRight: '2rem',
     overflow: 'hidden',
   },
   cost: {
@@ -41,6 +41,7 @@ const styles = reactStyles({
   },
   costPeriod: {
     fontWeight: '600',
+    marginLeft: '.3rem',
   },
 });
 

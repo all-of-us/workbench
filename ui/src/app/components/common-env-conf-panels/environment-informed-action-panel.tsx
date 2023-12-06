@@ -3,7 +3,7 @@ import * as React from 'react';
 import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
-import { FlexRow } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
@@ -15,62 +15,28 @@ import { StartStopEnvironmentButton } from './start-stop-environment-button';
 import { styles } from './styles';
 
 interface CostInfoProps {
-  creatorFreeCreditsRemaining: number;
   environmentChanged: boolean;
   analysisConfig: AnalysisConfig;
-  currentUser: string;
-  workspace: Workspace;
   isGKEApp: boolean;
 }
 const CostInfo = ({
-  creatorFreeCreditsRemaining,
   environmentChanged,
   analysisConfig,
-  currentUser,
-  workspace,
   isGKEApp,
 }: CostInfoProps) => {
-  const remainingCredits =
-    creatorFreeCreditsRemaining === null ? (
-      <Spinner size={10} />
-    ) : (
-      formatUsd(creatorFreeCreditsRemaining)
-    );
-
+  const style = {
+    padding: '.495rem .75rem',
+    ...(environmentChanged
+      ? {
+          backgroundColor: colorWithWhiteness(colors.warning, 0.9),
+        }
+      : {}),
+  };
   return (
-    <FlexRow data-test-id='cost-estimator'>
-      <div
-        style={{
-          padding: '.495rem .75rem',
-          ...(environmentChanged
-            ? {
-                backgroundColor: colorWithWhiteness(colors.warning, 0.9),
-              }
-            : {}),
-        }}
-      >
-        <EnvironmentCostEstimator {...{ analysisConfig }} isGKEApp={isGKEApp} />
-      </div>
-      {isUsingFreeTierBillingAccount(workspace) &&
-        currentUser === workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from your remaining {remainingCredits} of free
-            credits.
-          </div>
-        )}
-      {isUsingFreeTierBillingAccount(workspace) &&
-        currentUser !== workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from workspace creator's remaining{' '}
-            {remainingCredits} of free credits.
-          </div>
-        )}
-      {!isUsingFreeTierBillingAccount(workspace) && (
-        <div style={styles.costsDrawnFrom}>
-          Costs will be charged to billing account{' '}
-          {workspace.billingAccountName}.
-        </div>
-      )}
+    <FlexRow data-test-id='cost-estimator' {...{ style }}>
+      {/* <div {...{ style }}> */}
+      <EnvironmentCostEstimator {...{ analysisConfig }} isGKEApp={isGKEApp} />
+      {/* </div> */}
     </FlexRow>
   );
 };
@@ -96,20 +62,49 @@ export const EnvironmentInformedActionPanel = ({
   onPause,
   onResume,
   environmentChanged = false,
-}: PanelProps) => (
-  <FlexRow style={styles.environmentInformedActionPanelWrapper}>
-    {appType === UIAppType.JUPYTER && (
-      <StartStopEnvironmentButton {...{ status, appType, onPause, onResume }} />
-    )}
-    <CostInfo
-      {...{
-        analysisConfig,
-        creatorFreeCreditsRemaining,
-        environmentChanged,
-        workspace,
-      }}
-      currentUser={profile.username}
-      isGKEApp={appType !== UIAppType.JUPYTER}
-    />
-  </FlexRow>
-);
+}: PanelProps) => {
+  const remainingCredits =
+    creatorFreeCreditsRemaining === null ? (
+      <Spinner size={10} />
+    ) : (
+      formatUsd(creatorFreeCreditsRemaining)
+    );
+  return (
+    <FlexColumn>
+      <FlexRow style={styles.environmentInformedActionPanelWrapper}>
+        {appType === UIAppType.JUPYTER && (
+          <StartStopEnvironmentButton
+            {...{ status, appType, onPause, onResume }}
+          />
+        )}
+        <CostInfo
+          {...{
+            analysisConfig,
+            environmentChanged,
+          }}
+          isGKEApp={appType !== UIAppType.JUPYTER}
+        />
+      </FlexRow>
+      {isUsingFreeTierBillingAccount(workspace) &&
+        profile.username === workspace.creator && (
+          <div style={styles.costsDrawnFrom}>
+            Costs will draw from your remaining {remainingCredits} of free
+            credits.
+          </div>
+        )}
+      {isUsingFreeTierBillingAccount(workspace) &&
+        profile.username !== workspace.creator && (
+          <div style={styles.costsDrawnFrom}>
+            Costs will draw from workspace creator's remaining{' '}
+            {remainingCredits} of free credits.
+          </div>
+        )}
+      {!isUsingFreeTierBillingAccount(workspace) && (
+        <div style={styles.costsDrawnFrom}>
+          Costs will be charged to billing account{' '}
+          {workspace.billingAccountName}.
+        </div>
+      )}
+    </FlexColumn>
+  );
+};
