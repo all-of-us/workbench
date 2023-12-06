@@ -56,8 +56,8 @@ import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-d
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 import {
+  deriveConfiguration,
   deriveErrorsAndWarnings,
-  initDerivedValues,
 } from './runtime-configuration-panel-logic';
 
 const { useState, useEffect } = React;
@@ -132,7 +132,7 @@ export const RuntimeConfigurationPanel = fp.flow(
       googleProject
     );
 
-    const { currentRuntime, existingAnalysisConfig } = initDerivedValues({
+    const { currentRuntime, existingAnalysisConfig } = deriveConfiguration({
       crFromCustomRuntimeHook,
       pendingRuntime,
       gcePersistentDisk,

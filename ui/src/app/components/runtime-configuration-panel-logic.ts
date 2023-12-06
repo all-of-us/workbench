@@ -1,13 +1,7 @@
 import validate from 'validate.js';
 
-import {
-  Disk,
-  Runtime,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { Disk, Runtime, RuntimeStatus } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
 import { summarizeErrors } from 'app/utils';
 import {
   AnalysisConfig,
@@ -23,22 +17,20 @@ import {
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { PanelContent } from './runtime-configuration-panel/utils';
-
-interface InitDerivedInProps {
+interface DeriveConfigProps {
   crFromCustomRuntimeHook: Runtime;
   pendingRuntime: Runtime;
   gcePersistentDisk: Disk;
 }
-interface InitDerivedOutProps {
+interface DerivedConfigResult {
   currentRuntime: Runtime;
   existingAnalysisConfig: AnalysisConfig;
 }
-export const initDerivedValues = ({
+export const deriveConfiguration = ({
   crFromCustomRuntimeHook,
   pendingRuntime,
   gcePersistentDisk,
-}: InitDerivedInProps): InitDerivedOutProps => {
+}: DeriveConfigProps): DerivedConfigResult => {
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
   const currentRuntime =
     crFromCustomRuntimeHook &&
