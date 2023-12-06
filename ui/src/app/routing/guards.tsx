@@ -98,7 +98,7 @@ export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   };
 };
 
-const confrimAppIsValid = () => {
+export const confirmAppIsValid = () => {
   const urlMatchParam = matchPath<MatchParams>(location.pathname, {
     path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
   });
@@ -108,7 +108,7 @@ const confrimAppIsValid = () => {
 
 export const appIsValidGuard = (ns: string, wsid: string): Guard => {
   return {
-    allowed: (): boolean => confrimAppIsValid(),
+    allowed: (): boolean => confirmAppIsValid(),
     redirectPath: `${analysisTabPath(ns, wsid)}`,
   };
 };

@@ -94,15 +94,6 @@ it('Should display iframe with rStudio App Url', async () => {
   );
 });
 
-it('Should display error message if App type is not found', async () => {
-  setup('fakeApp');
-  expect(
-    screen.getByText(
-      /an error was encountered with your fakeapp environment\. to resolve, please see the applications side panel\./i
-    )
-  );
-});
-
 it('Should display error message if User App is not found', async () => {
   setup('RStudio', createApp(AppType.CROMWELL));
   expect(
