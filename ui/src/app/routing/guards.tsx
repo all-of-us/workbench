@@ -102,8 +102,8 @@ export const confirmAppIsValid = () => {
   const urlMatchParam = matchPath<MatchParams>(location.pathname, {
     path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
   });
-  const userApp = urlMatchParam.params.appType as UIAppType;
-  return Object.values(UIAppType).includes(userApp);
+  const appFromUrl = urlMatchParam.params.appType as UIAppType;
+  return Object.values(UIAppType).includes(appFromUrl);
 };
 
 export const appIsValidGuard = (ns: string, wsid: string): Guard => {
