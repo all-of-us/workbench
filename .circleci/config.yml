@@ -590,12 +590,12 @@ jobs:
           name: ls home
           working_directory: ~
           command: |
-            pact-broker
+            ls /tmp/workspace/pacts
       - run:
           name: ls home
           working_directory: ~
           command: |
-            pact-broker publish --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
+            pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
 
   e2etests-deploy-ui:
     machine:
