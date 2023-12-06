@@ -403,48 +403,25 @@ jobs:
           project-token: $CODACY_PROJECT_TOKEN
 
   api-contract-upload:
-    #Jacoco runs against test results to get test coverage
     executor: workbench-executor
     steps:
-    - run-api-test:
-        additional_steps:
-        - attach_workspace:
-            at: /tmp/workspace
-        - run:
-            name: ls home
-            working_directory: ~
-            command: |
-              ls
-        - run:
-            name: ls pacts
-            working_directory: ~
-            command: |
-              ls /tmp/workspace/pacts
-        - run:
-            name: ls pacts2
-            working_directory: ~
-            command: |
-              ls pacts
-        - run:
-            name: ls tmp/workpsace/workbench
-            working_directory: ~
-            command: |
-              ls tmp/workspace/workbench
-        - run:
-            name: ls tmp/workpsace/workbench/api
-            working_directory: ~
-            command: |
-              ls tmp/workspace/workbench/api
-        - run:
-            name: ls tmp/workpsace/workbench/api/build
-            working_directory: ~
-            command: |
-              ls tmp/workspace/workbench/api/build
-        - run:
-            name: ls tmp/workpsace/workbench/api/build/pacts
-            working_directory: ~
-            command: |
-              ls tmp/workspace/workbench/api/build/pacts
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: ls home
+        working_directory: ~
+        command: |
+          ls
+    - run:
+        name: ls pacts
+        working_directory: ~
+        command: |
+          ls /tmp/workspace/pacts
+    - run:
+        name: ls pacts2
+        working_directory: ~
+        command: |
+          ls pacts
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
