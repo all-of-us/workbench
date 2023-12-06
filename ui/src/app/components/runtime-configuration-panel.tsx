@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { validate } from 'validate.js';
 
 import { RuntimeStatus } from 'generated/fetch';
 
@@ -9,7 +8,6 @@ import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
-  summarizeErrors,
   WithCdrVersions,
   withCdrVersions,
   WithCurrentWorkspace,
@@ -21,12 +19,7 @@ import {
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
 import { findCdrVersion } from 'app/utils/cdr-versions';
-import {
-  ComputeType,
-  DATAPROC_MIN_DISK_SIZE_GB,
-  machineRunningCost,
-  MIN_DISK_SIZE_GB,
-} from 'app/utils/machines';
+import { ComputeType } from 'app/utils/machines';
 import {
   AnalysisDiff,
   diffsToUpdateMessaging,
@@ -42,7 +35,6 @@ import {
   ProfileStore,
   runtimeDiskStore,
   runtimeStore,
-  serverConfigStore,
   useStore,
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -183,20 +175,14 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     return (
       <div id='runtime-panel'>
-        {cond<React.ReactNode>(
-          [
-            [PanelContent.Create, PanelContent.Customize].includes(
-              panelContent
-            ),
-            () => (
-              <div style={{ marginBottom: '1.5rem' }}>
-                Your analysis environment consists of an application and compute
-                resources. Your cloud environment is unique to this workspace
-                and not shared with other users.
-              </div>
-            ),
-          ],
-          () => null
+        {[PanelContent.Create, PanelContent.Customize].includes(
+          panelContent
+        ) && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            Your analysis environment consists of an application and compute
+            resources. Your cloud environment is unique to this workspace and
+            not shared with other users.
+          </div>
         )}
         {switchCase(
           panelContent,
