@@ -545,7 +545,7 @@ jobs:
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
     machine:
-      image: pactfoundation/pact-cli:latest
+      image: pactfoundation/pact-cli
     steps:
       - run:
           name: Echo
