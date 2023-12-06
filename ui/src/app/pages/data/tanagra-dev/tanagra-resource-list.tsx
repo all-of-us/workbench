@@ -23,7 +23,13 @@ import {
   WithConfirmDeleteModalProps,
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
-import { analysisTabPath, dataTabPath } from 'app/routing/utils';
+import {
+  getDisplayName,
+  getType,
+  getTypeString,
+  StyledResourceType,
+} from 'app/pages/data/tanagra-dev/tanagra-resources';
+import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
   conceptSetsApi,
@@ -33,12 +39,6 @@ import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
-import {
-  getDisplayName,
-  getType,
-  getTypeString,
-  isNotebook,
-} from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -75,12 +75,9 @@ interface NavProps {
 const WorkspaceNavigation = (props: NavProps) => {
   const {
     workspace: { name, namespace, id },
-    resource,
     style,
   } = props;
-  const url = isNotebook(resource)
-    ? analysisTabPath(namespace, id)
-    : dataTabPath(namespace, id);
+  const url = dataTabPath(namespace, id);
 
   return (
     <Clickable>
@@ -172,9 +169,13 @@ export const TanagraResourceList = fp.flow(
     if (workspaceResources) {
       setTableData(
         fp.flatMap((r) => {
+          console.log(r);
+          console.log(getTypeString(r));
+          console.log(getDisplayName(r));
           const workspace = workspaces.find(
             (w) => w.namespace === r.workspaceNamespace
           );
+          console.log(workspace);
 
           // Don't return resources where we no longer have access to the workspace.
           // For example: the owner has unshared the workspace, but a recent-resource entry remains.
@@ -214,46 +215,44 @@ export const TanagraResourceList = fp.flow(
 
   const displayResourceType = (rowData) => {
     const { resource } = rowData;
-    if (resource.cohortV2) {
-      return 'Cohort';
-    } else if (resource.conceptSetV2) {
-      return 'Concept Set';
-    } else if (resource.reviewV2) {
-      return 'Cohort Review';
-    }
+    return <StyledResourceType resource={resource} />;
   };
 
   const displayResourceName = (rowData) => {
     const {
       resource: {
-        cohortV2,
-        conceptSetV2,
-        reviewV2,
+        cohortTanagra,
+        conceptSetTanagra,
+        reviewTanagra,
         workspaceFirecloudName,
         workspaceNamespace,
       },
     } = rowData;
     let displayName = '';
     let url = '';
-    const urlPrefix =
-      dataTabPath(workspaceNamespace, workspaceFirecloudName) + 'tanagra';
-    if (cohortV2) {
-      displayName = cohortV2.displayName;
-      url = `${urlPrefix}/cohorts/${cohortV2.id}/${
-        cohortV2.criteriaGroupSections?.[0]?.id ?? 'first'
+    const urlPrefix = `${dataTabPath(
+      workspaceNamespace,
+      workspaceFirecloudName
+    )}/tanagra`;
+    if (cohortTanagra) {
+      displayName = cohortTanagra.displayName;
+      url = `${urlPrefix}/cohorts/${cohortTanagra.id}/${
+        cohortTanagra.criteriaGroupSections?.[0]?.id ?? 'first'
       }/${
-        cohortV2.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ?? 'none'
+        cohortTanagra.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ??
+        'none'
       }`;
-    } else if (conceptSetV2) {
-      const domain = JSON.parse(conceptSetV2.criteria.uiConfig)?.title ?? '';
+    } else if (conceptSetTanagra) {
+      const domain =
+        JSON.parse(conceptSetTanagra.criteria.uiConfig)?.title ?? '';
       const selection =
-        JSON.parse(conceptSetV2.criteria.selectionData)?.selected?.[0]?.name ??
-        '';
+        JSON.parse(conceptSetTanagra.criteria.selectionData)?.selected?.[0]
+          ?.name ?? '';
       displayName = `${domain}: ${selection}`;
-      url = `${urlPrefix}/conceptSets/edit/${conceptSetV2.id}`;
-    } else if (reviewV2) {
-      displayName = reviewV2.displayName;
-      url = `${urlPrefix}/reviews/${reviewV2.cohort.id}/${reviewV2.id}`;
+      url = `${urlPrefix}/conceptSets/edit/${conceptSetTanagra.id}`;
+    } else if (reviewTanagra) {
+      displayName = reviewTanagra.displayName;
+      url = `${urlPrefix}/reviews/${reviewTanagra.cohort.id}/${reviewTanagra.id}`;
     }
     return (
       <Clickable>

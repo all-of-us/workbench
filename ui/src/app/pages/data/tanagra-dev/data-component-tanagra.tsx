@@ -201,11 +201,11 @@ export const DataComponentTanagra = fp.flow(
       case Tabs.SHOWALL:
         return true;
       case Tabs.COHORTS:
-        return resource.cohortV2;
+        return resource.cohortTanagra;
       case Tabs.COHORTREVIEWS:
-        return resource.reviewV2;
+        return resource.reviewTanagra;
       case Tabs.CONCEPTSETS:
-        return resource.conceptSetV2;
+        return resource.conceptSetTanagra;
       case Tabs.DATASETS:
         return false; // Currently no saved datasets in Tanagra
     }
