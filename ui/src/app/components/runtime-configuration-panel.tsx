@@ -530,7 +530,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 updateButton={
                   <Button
                     aria-label='Update'
-                    disabled={!runtimeCanBeCreated}
+                    disabled={!runtimeCanBeUpdated}
                     onClick={() => {
                       requestAnalysisConfig(analysisConfig);
                       onClose();
