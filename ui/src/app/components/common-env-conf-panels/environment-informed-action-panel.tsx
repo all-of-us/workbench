@@ -51,8 +51,8 @@ const CostsDrawnFrom = ({
       usingInitialCredits && !userIsCreator,
       () => (
         <div style={{ ...styles.costsDrawnFrom, ...style }}>
-          Costs will draw from workspace creator's remaining {remainingCredits}{' '}
-          of free credits.
+          Costs will draw from the workspace creator's remaining{' '}
+          {remainingCredits} of free credits.
         </div>
       ),
     ],
