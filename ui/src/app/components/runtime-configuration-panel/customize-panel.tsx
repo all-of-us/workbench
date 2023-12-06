@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -26,6 +27,8 @@ import {
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   Machine,
+  validLeoDataprocMasterMachineTypes,
+  validLeoGceMachineTypes,
 } from 'app/utils/machines';
 import { RuntimeStatusRequest, UpdateMessaging } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -59,7 +62,6 @@ export interface CustomizePanelProps {
   setPanelContent: (pc: PanelContent) => void;
   setRuntimeStatusRequest: (rs: RuntimeStatusRequest) => Promise<void>;
   updateMessaging: UpdateMessaging;
-  validMainMachineTypes: Machine[];
   warningMessageContent: JSX.Element[];
   workspaceData: WorkspaceData;
 }
@@ -84,10 +86,29 @@ export const CustomizePanel = ({
   setPanelContent,
   setRuntimeStatusRequest,
   updateMessaging,
-  validMainMachineTypes,
   warningMessageContent,
   workspaceData,
 }: CustomizePanelProps) => {
+  const validMainMachineTypes =
+    analysisConfig.computeType === ComputeType.Standard
+      ? validLeoGceMachineTypes
+      : validLeoDataprocMasterMachineTypes;
+  // The compute type affects the set of valid machine types, so revert to the
+  // default machine type if switching compute types would invalidate the main
+  // machine type choice.
+  useEffect(() => {
+    if (
+      !validMainMachineTypes.find(
+        ({ name }) => name === analysisConfig.machine.name
+      )
+    ) {
+      setAnalysisConfig({
+        ...analysisConfig,
+        machine: existingAnalysisConfig.machine,
+      });
+    }
+  }, [analysisConfig.computeType]);
+
   const disableControls =
     runtimeExists &&
     !(

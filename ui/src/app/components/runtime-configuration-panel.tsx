@@ -26,8 +26,6 @@ import {
   DATAPROC_MIN_DISK_SIZE_GB,
   machineRunningCost,
   MIN_DISK_SIZE_GB,
-  validLeoDataprocMasterMachineTypes,
-  validLeoGceMachineTypes,
 } from 'app/utils/machines';
 import {
   AnalysisDiff,
@@ -135,26 +133,6 @@ export const RuntimeConfigurationPanel = fp.flow(
         runtimeStatus,
       })
     );
-
-    const validMainMachineTypes =
-      analysisConfig.computeType === ComputeType.Standard
-        ? validLeoGceMachineTypes
-        : validLeoDataprocMasterMachineTypes;
-    // The compute type affects the set of valid machine types, so revert to the
-    // default machine type if switching compute types would invalidate the main
-    // machine type choice.
-    useEffect(() => {
-      if (
-        !validMainMachineTypes.find(
-          ({ name }) => name === analysisConfig.machine.name
-        )
-      ) {
-        setAnalysisConfig({
-          ...analysisConfig,
-          machine: existingAnalysisConfig.machine,
-        });
-      }
-    }, [analysisConfig.computeType]);
 
     const runtimeExists =
       (runtimeStatus && isVisible(runtimeStatus)) || !!pendingRuntime;
@@ -440,7 +418,6 @@ export const RuntimeConfigurationPanel = fp.flow(
                   setPanelContent,
                   setRuntimeStatusRequest,
                   updateMessaging,
-                  validMainMachineTypes,
                 }}
                 allowDataproc={
                   findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
