@@ -595,7 +595,7 @@ jobs:
           name: ls home
           working_directory: ~
           command: |
-            pact-broker publish --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/"
+            pact-broker publish --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
 
   e2etests-deploy-ui:
     machine:
