@@ -241,6 +241,7 @@ export interface MatchParams {
   username?: string;
   usernameWithoutGsuiteDomain?: string;
   wsid?: string;
+  appType?: string;
 }
 
 /**

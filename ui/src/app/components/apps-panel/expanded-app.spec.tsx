@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { mockNavigate } from 'setupTests';
 
 import {
   AppsApi,
@@ -14,12 +15,14 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
+import { appDisplayPath } from 'app/routing/utils';
 import {
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 import {
@@ -86,6 +89,7 @@ describe('ExpandedApp', () => {
   runtimeStub.runtime.googleProject = googleProject;
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
+    currentWorkspaceStore.next(workspace);
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     leoRegisterApiClient(LeoAppsApi, new LeoAppsApiStub());
@@ -227,9 +231,7 @@ describe('ExpandedApp', () => {
         });
         expect(container).toBeInTheDocument();
 
-        screen.logTestingPlaygroundURL();
         const actionButton = screen.getByRole('button', { name });
-        screen.logTestingPlaygroundURL();
         expectButtonElementDisabled(actionButton);
       }
     );
@@ -381,6 +383,7 @@ describe('ExpandedApp', () => {
             [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
           },
         });
+
         const localizeSpy = jest
           .spyOn(appsApi(), 'localizeApp')
           .mockImplementation((): Promise<any> => Promise.resolve());
@@ -407,8 +410,20 @@ describe('ExpandedApp', () => {
             }
           );
 
-          expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
-          expect(focusStub).toHaveBeenCalled();
+          if (appType === UIAppType.SAS) {
+            // Confirms SAS opens in a new Window
+            expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+            expect(focusStub).toHaveBeenCalled();
+          } else if (appType === UIAppType.RSTUDIO) {
+            // Confirm navigate is called to launch RStudio in iframe
+            expect(mockNavigate).toHaveBeenCalledWith([
+              appDisplayPath(
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+                WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+                appType
+              ),
+            ]);
+          }
         });
       });
 

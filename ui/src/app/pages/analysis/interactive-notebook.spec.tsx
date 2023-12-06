@@ -1,4 +1,5 @@
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 import {
   AppStatus,
@@ -15,7 +16,11 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { analysisTabName, analysisTabPath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  analysisTabPath,
+  appDisplayPath,
+} from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
@@ -112,13 +117,22 @@ test.each([
     renderInteractiveNotebook(pathParameters);
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
-    await waitFor(() => {
-      expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-      expect(spyWindowOpen).toHaveBeenCalledWith(
-        app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-        '_blank'
-      );
-    });
+    if (appType === 'RStudio') {
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith([
+          appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
+        ]);
+      });
+    } else if (appType === 'SAS') {
+      // This is temp. Once SAS moves to iframe this if else will be removed
+      await waitFor(() => {
+        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
+        expect(spyWindowOpen).toHaveBeenCalledWith(
+          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
+          '_blank'
+        );
+      });
+    }
   }
 );
 

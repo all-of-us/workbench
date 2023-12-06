@@ -1,3 +1,5 @@
+import { mockNavigate } from 'setupTests';
+
 import {
   AppsApi,
   AppStatus,
@@ -8,7 +10,11 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
+import { appDisplayPath } from 'app/routing/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 
@@ -35,6 +41,7 @@ describe('User Apps Helper functions', () => {
     appsApiStub = new AppsApiStub();
     registerApiClient(AppsApi, appsApiStub);
     userAppsStore.set({ updating: false });
+    setSidebarActiveIconStore.next(null);
   });
 
   afterEach(async () => {
@@ -98,5 +105,39 @@ describe('User Apps Helper functions', () => {
 
     jest.advanceTimersByTime(20e3);
     expect(spyListAppsAPI).toHaveBeenCalledTimes(2);
+  });
+
+  it('Opens Config panel if RStudio App is not running', async () => {
+    const navigate = mockNavigate;
+    expect(setSidebarActiveIconStore.value).toBeNull();
+
+    userAppsUtils.openRStudioOrConfigPanel(
+      'ws',
+      'wsid',
+      [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
+      navigate
+    );
+
+    // Since RStudio is NOT in running state this will open the RStudio config side panel and
+    // There will be no navigation to any other page
+    expect(mockNavigate).not.toBeCalled();
+    expect(setSidebarActiveIconStore.value).toBe(rstudioConfigIconId);
+  });
+
+  it('Will open RStudio App in iframe if app is running', async () => {
+    const navigate = mockNavigate;
+    expect(setSidebarActiveIconStore.value).toBeNull();
+
+    userAppsUtils.openRStudioOrConfigPanel(
+      'ws',
+      'wsid',
+      [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],
+      navigate
+    );
+    // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
+    expect(mockNavigate).toHaveBeenCalledWith([
+      appDisplayPath('ws', 'wsid', UIAppType.RSTUDIO),
+    ]);
+    expect(setSidebarActiveIconStore.value).toBeNull();
   });
 });

@@ -12,13 +12,14 @@ import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
+import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { userAppsStore } from 'app/utils/stores';
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
 import { fetchWithErrorModal } from './errors';
-import { setSidebarActiveIconStore } from './navigation';
-import { userAppsStore } from './stores';
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
@@ -110,7 +111,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (
+export const localizeRStudioApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -123,7 +124,6 @@ export const openRStudio = (
       false
     )
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openSAS = (
@@ -142,13 +142,27 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
+export const openRStudio = (
+  workspaceNamespace: string,
+  workspaceId: string,
+  userApp: UserAppEnvironment,
+  navigate: (commands: any, extras?: any) => void
+) => {
+  localizeRStudioApp(workspaceNamespace, userApp);
+  navigate([
+    appDisplayPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO),
+  ]);
+};
+
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, userApp);
+    openRStudio(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }

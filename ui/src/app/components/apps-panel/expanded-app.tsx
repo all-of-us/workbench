@@ -25,7 +25,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  setSidebarActiveIconStore,
+  useNavigation,
+} from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
@@ -160,18 +164,14 @@ const CromwellButtonRow = (props: {
   );
 };
 
-const RStudioButtonRow = (props: {
-  userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  const { userApp, workspaceNamespace } = props;
-
+const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
+  const { userApp } = props;
+  const [navigate] = useNavigation();
+  const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
-    openRStudio(workspaceNamespace, userApp);
+    openRStudio(namespace, id, userApp, navigate);
   };
-
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
-
   return (
     <FlexRow>
       <SettingsButton
@@ -179,7 +179,7 @@ const RStudioButtonRow = (props: {
           setSidebarActiveIconStore.next(rstudioConfigIconId);
         }}
       />
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='Environment must be running to launch RStudio'
@@ -341,12 +341,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             ],
             [
               appType === UIAppType.RSTUDIO,
-              () => (
-                <RStudioButtonRow
-                  userApp={initialUserAppInfo}
-                  workspaceNamespace={workspace.namespace}
-                />
-              ),
+              () => <RStudioButtonRow userApp={initialUserAppInfo} />,
             ],
             [
               appType === UIAppType.SAS,
