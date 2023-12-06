@@ -3,6 +3,7 @@ import { CSSProperties } from 'react';
 
 import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
@@ -14,6 +15,55 @@ import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { StartStopEnvironmentButton } from './start-stop-environment-button';
 import { styles } from './styles';
+
+interface CostsDrawnFromProps {
+  usingInitialCredits: boolean;
+  userIsCreator: boolean;
+  creatorFreeCreditsRemaining: number;
+  billingAccountName: string;
+}
+const CostsDrawnFrom = ({
+  usingInitialCredits,
+  userIsCreator,
+  creatorFreeCreditsRemaining,
+  billingAccountName,
+}: CostsDrawnFromProps) => {
+  const remainingCredits =
+    creatorFreeCreditsRemaining === null ? (
+      <Spinner size={10} />
+    ) : (
+      formatUsd(creatorFreeCreditsRemaining)
+    );
+
+  return cond(
+    [
+      usingInitialCredits && userIsCreator,
+      () => (
+        <div style={styles.costsDrawnFrom}>
+          Costs will draw from your remaining {remainingCredits} of free
+          credits.
+        </div>
+      ),
+    ],
+    [
+      usingInitialCredits && !userIsCreator,
+      () => (
+        <div style={styles.costsDrawnFrom}>
+          Costs will draw from workspace creator's remaining {remainingCredits}{' '}
+          of free credits.
+        </div>
+      ),
+    ],
+    [
+      !usingInitialCredits,
+      () => (
+        <div style={styles.costsDrawnFrom}>
+          Costs will be charged to billing account {billingAccountName}.
+        </div>
+      ),
+    ]
+  );
+};
 
 interface PanelProps {
   creatorFreeCreditsRemaining: number;
@@ -37,13 +87,6 @@ export const EnvironmentInformedActionPanel = ({
   onResume,
   environmentChanged = false,
 }: PanelProps) => {
-  const remainingCredits =
-    creatorFreeCreditsRemaining === null ? (
-      <Spinner size={10} />
-    ) : (
-      formatUsd(creatorFreeCreditsRemaining)
-    );
-
   const costEstimatorStyle: CSSProperties = {
     padding: '.495rem .75rem',
     ...(environmentChanged
@@ -68,26 +111,12 @@ export const EnvironmentInformedActionPanel = ({
           />
         </FlexRow>
       </FlexRow>
-      {isUsingFreeTierBillingAccount(workspace) &&
-        profile.username === workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from your remaining {remainingCredits} of free
-            credits.
-          </div>
-        )}
-      {isUsingFreeTierBillingAccount(workspace) &&
-        profile.username !== workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from workspace creator's remaining{' '}
-            {remainingCredits} of free credits.
-          </div>
-        )}
-      {!isUsingFreeTierBillingAccount(workspace) && (
-        <div style={styles.costsDrawnFrom}>
-          Costs will be charged to billing account{' '}
-          {workspace.billingAccountName}.
-        </div>
-      )}
+      <CostsDrawnFrom
+        {...{ creatorFreeCreditsRemaining }}
+        usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
+        userIsCreator={profile.username === workspace.creator}
+        billingAccountName={workspace.billingAccountName}
+      />
     </FlexColumn>
   );
 };
