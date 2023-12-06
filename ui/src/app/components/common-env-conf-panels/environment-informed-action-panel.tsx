@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
 
@@ -13,33 +14,6 @@ import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { StartStopEnvironmentButton } from './start-stop-environment-button';
 import { styles } from './styles';
-
-interface CostInfoProps {
-  environmentChanged: boolean;
-  analysisConfig: AnalysisConfig;
-  isGKEApp: boolean;
-}
-const CostInfo = ({
-  environmentChanged,
-  analysisConfig,
-  isGKEApp,
-}: CostInfoProps) => {
-  const style = {
-    padding: '.495rem .75rem',
-    ...(environmentChanged
-      ? {
-          backgroundColor: colorWithWhiteness(colors.warning, 0.9),
-        }
-      : {}),
-  };
-  return (
-    <FlexRow data-test-id='cost-estimator' {...{ style }}>
-      {/* <div {...{ style }}> */}
-      <EnvironmentCostEstimator {...{ analysisConfig }} isGKEApp={isGKEApp} />
-      {/* </div> */}
-    </FlexRow>
-  );
-};
 
 interface PanelProps {
   creatorFreeCreditsRemaining: number;
@@ -69,6 +43,16 @@ export const EnvironmentInformedActionPanel = ({
     ) : (
       formatUsd(creatorFreeCreditsRemaining)
     );
+
+  const costEstimatorStyle: CSSProperties = {
+    padding: '.495rem .75rem',
+    ...(environmentChanged
+      ? {
+          backgroundColor: colorWithWhiteness(colors.warning, 0.9),
+        }
+      : {}),
+  };
+
   return (
     <FlexColumn>
       <FlexRow style={styles.environmentInformedActionPanelWrapper}>
@@ -77,13 +61,12 @@ export const EnvironmentInformedActionPanel = ({
             {...{ status, appType, onPause, onResume }}
           />
         )}
-        <CostInfo
-          {...{
-            analysisConfig,
-            environmentChanged,
-          }}
-          isGKEApp={appType !== UIAppType.JUPYTER}
-        />
+        <FlexRow data-test-id='cost-estimator' style={costEstimatorStyle}>
+          <EnvironmentCostEstimator
+            {...{ analysisConfig }}
+            isGKEApp={appType !== UIAppType.JUPYTER}
+          />
+        </FlexRow>
       </FlexRow>
       {isUsingFreeTierBillingAccount(workspace) &&
         profile.username === workspace.creator && (
