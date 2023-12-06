@@ -1,9 +1,13 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { RuntimeStatus } from 'generated/fetch';
+import {
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
@@ -54,10 +58,47 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 import {
   deriveErrorsAndWarnings,
   initDerivedValues,
-  initializePanelContent,
 } from './runtime-configuration-panel-logic';
 
 const { useState, useEffect } = React;
+
+interface DerivePanelProps {
+  pendingRuntime: Runtime;
+  currentRuntime: Runtime;
+  runtimeStatus: RuntimeStatus;
+}
+export const derivePanelContent = ({
+  pendingRuntime,
+  currentRuntime,
+  runtimeStatus,
+}: DerivePanelProps): PanelContent =>
+  cond<PanelContent>(
+    // If there's a pendingRuntime, this means there's already a create/update
+    // in progress, even if the runtime store doesn't actively reflect this yet.
+    // Show the customize panel in this event.
+    [!!pendingRuntime, () => PanelContent.Customize],
+    [
+      currentRuntime === null ||
+        currentRuntime === undefined ||
+        runtimeStatus === RuntimeStatus.UNKNOWN,
+      () => PanelContent.Create,
+    ],
+    [
+      // General Analysis consist of GCE + PD. Display create page only if
+      // 1) currentRuntime + pd both are deleted and
+      // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
+      currentRuntime?.status === RuntimeStatus.DELETED &&
+        !currentRuntime?.gceWithPdConfig &&
+        (
+          [
+            RuntimeConfigurationType.GENERAL_ANALYSIS,
+            RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+          ] as Array<RuntimeConfigurationType>
+        ).includes(currentRuntime?.configurationType),
+      () => PanelContent.Create,
+    ],
+    () => PanelContent.Customize
+  );
 
 export interface RuntimeConfigurationPanelProps {
   onClose?: () => void;
@@ -120,12 +161,12 @@ export const RuntimeConfigurationPanel = fp.flow(
       });
 
     const [panelContent, setPanelContent] = useState<PanelContent>(
-      initializePanelContent({
-        initialPanelContent,
-        pendingRuntime,
-        currentRuntime,
-        runtimeStatus,
-      })
+      initialPanelContent ||
+        derivePanelContent({
+          pendingRuntime,
+          currentRuntime,
+          runtimeStatus,
+        })
     );
 
     const { getErrorMessageContent, getWarningMessageContent } =
