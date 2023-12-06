@@ -89,6 +89,8 @@ export const EnvironmentInformedActionPanel = ({
 }: PanelProps) => {
   const costEstimatorStyle: CSSProperties = {
     padding: '.495rem .75rem',
+    justifyContent: 'space-evenly',
+    flexGrow: 1,
     ...(environmentChanged
       ? {
           backgroundColor: colorWithWhiteness(colors.warning, 0.9),
@@ -104,12 +106,12 @@ export const EnvironmentInformedActionPanel = ({
             {...{ status, appType, onPause, onResume }}
           />
         )}
-        <FlexRow data-test-id='cost-estimator' style={costEstimatorStyle}>
-          <EnvironmentCostEstimator
-            {...{ analysisConfig }}
-            isGKEApp={appType !== UIAppType.JUPYTER}
-          />
-        </FlexRow>
+        <EnvironmentCostEstimator
+          {...{ analysisConfig }}
+          data-test-id='cost-estimator'
+          isGKEApp={appType !== UIAppType.JUPYTER}
+          style={costEstimatorStyle}
+        />
       </FlexRow>
       <CostsDrawnFrom
         {...{ creatorFreeCreditsRemaining }}
