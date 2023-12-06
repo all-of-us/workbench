@@ -571,6 +571,13 @@ jobs:
           working_directory: ~
           command: |
             pwd
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: ls pacts
+          working_directory: ~
+          command: |
+            ls /tmp/workspace/pacts
 
   e2etests-deploy-ui:
     machine:
