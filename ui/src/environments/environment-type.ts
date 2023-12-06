@@ -65,6 +65,9 @@ export interface EnvironmentBase {
   showNewAnalysisTab: boolean;
   // Show the funnel plot icon in the cohort builder UI
   showCBFunnelPlot: boolean;
+  // Pass auth token in iframe url
+  // WARNING: This is insecure and should only be enabled for local environments
+  tanagraLocalAuth: boolean;
 }
 
 export interface Environment extends EnvironmentBase {
