@@ -59,6 +59,7 @@ import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-d
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 import {
+  deriveErrorsAndWarnings,
   initDerivedValues,
   initializePanelContent,
 } from './runtime-configuration-panel-logic';
@@ -153,106 +154,12 @@ export const RuntimeConfigurationPanel = fp.flow(
     }
     const environmentChanged = configDiffs.length > 0;
 
-    // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
-    // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
-    // persistent disk.
-    const diskSizeValidatorWithMessage = (
-      diskType = 'standard' || 'master' || 'worker'
-    ) => {
-      const maxDiskSize = isUsingFreeTierBillingAccount(workspace)
-        ? 4000
-        : 64000;
-      const minDiskSize =
-        analysisConfig.computeType === ComputeType.Dataproc
-          ? DATAPROC_MIN_DISK_SIZE_GB
-          : MIN_DISK_SIZE_GB;
-      const message = {
-        standard: `^Disk size must be between ${minDiskSize} and ${maxDiskSize} GB`,
-        master: `^Master disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-        worker: `^Worker disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-      };
-
-      return {
-        numericality: {
-          greaterThanOrEqualTo:
-            analysisConfig.computeType === ComputeType.Dataproc
-              ? DATAPROC_MIN_DISK_SIZE_GB
-              : MIN_DISK_SIZE_GB,
-          lessThanOrEqualTo: maxDiskSize,
-          message: message[diskType],
-        },
-      };
-    };
-
-    const costErrorsAsWarnings =
-      !isUsingFreeTierBillingAccount(workspace) ||
-      // We've increased the workspace creator's free credits. This means they may be expecting to run
-      // a more expensive analysis, and the program has extended some further trust for free credit
-      // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
-      // the default amount of free credits because (1) this can result in overspend and (2) we have
-      // easy access to remaining credits, and not the creator's quota.
-      creatorFreeCreditsRemaining >
-        serverConfigStore.get().config.defaultFreeCreditsDollarLimit;
-
-    const runningCostValidatorWithMessage = () => {
-      const maxRunningCost = isUsingFreeTierBillingAccount(workspace)
-        ? 25
-        : 150;
-      const message = costErrorsAsWarnings
-        ? '^Your runtime is expensive. Are you sure you wish to proceed?'
-        : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
-      return {
-        numericality: {
-          lessThan: maxRunningCost,
-          message: message,
-        },
-      };
-    };
-
-    const runningCostErrors = validate(
-      { currentRunningCost: machineRunningCost(analysisConfig) },
-      {
-        currentRunningCost: runningCostValidatorWithMessage(),
-      }
-    );
-
-    const getErrorMessageContent = () => {
-      const diskErrors = validate(
-        { diskSize: analysisConfig.diskConfig.size },
-        {
-          diskSize: diskSizeValidatorWithMessage('standard'),
-        }
-      );
-
-      const { masterDiskSize, workerDiskSize, numberOfWorkers } =
-        analysisConfig.dataprocConfig || {};
-      const dataprocErrors =
-        analysisConfig.computeType === ComputeType.Dataproc &&
-        validate(
-          { masterDiskSize, workerDiskSize, numberOfWorkers },
-          // We don't clear dataproc config when we change compute type so we can't combine this with the
-          // runningCostValidator or else we can end up with phantom validation fails
-          {
-            masterDiskSize: diskSizeValidatorWithMessage('master'),
-            workerDiskSize: diskSizeValidatorWithMessage('worker'),
-            numberOfWorkers: {
-              numericality: {
-                greaterThanOrEqualTo: 2,
-                message: 'Dataproc requires at least 2 worker nodes',
-              },
-            },
-          }
-        );
-
-      return [
-        ...(diskErrors ? summarizeErrors(diskErrors) : []),
-        ...(dataprocErrors ? summarizeErrors(dataprocErrors) : []),
-        // only report cost errors -as errors- if costErrorsAsWarnings is false
-        ...(!costErrorsAsWarnings && runningCostErrors
-          ? summarizeErrors(runningCostErrors)
-          : []),
-      ];
-    };
+    const { getErrorMessageContent, getWarningMessageContent } =
+      deriveErrorsAndWarnings({
+        usingInitialCredits: isUsingFreeTierBillingAccount(workspace),
+        creatorFreeCreditsRemaining,
+        analysisConfig,
+      });
 
     // For computeType Standard: We are moving away from storage disk as Standard
     // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
@@ -424,12 +331,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                     ?.hasWgsData
                 }
                 errorMessageContent={getErrorMessageContent()}
-                warningMessageContent={
-                  // if costErrorsAsWarnings is false, we report them as errors.  See getErrorMessageContent()
-                  costErrorsAsWarnings && runningCostErrors
-                    ? summarizeErrors(runningCostErrors)
-                    : []
-                }
+                warningMessageContent={getWarningMessageContent()}
                 workspaceData={workspace}
               />
             ),
