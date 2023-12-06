@@ -3,8 +3,8 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { toAnalysisConfig } from 'app/utils/runtime-utils';
 
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 

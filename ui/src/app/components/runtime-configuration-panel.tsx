@@ -19,6 +19,13 @@ import {
   WithCurrentWorkspace,
   withCurrentWorkspace,
 } from 'app/utils';
+import {
+  AnalysisConfig,
+  fromAnalysisConfig,
+  maybeWithPersistentDisk,
+  toAnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   ComputeType,
@@ -28,21 +35,17 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
+import {
+  AnalysisDiff,
+  diffsToUpdateMessaging,
+  getAnalysisConfigDiffs,
+} from 'app/utils/runtime-diffs';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import { applyPresetOverride } from 'app/utils/runtime-presets';
 import {
-  AnalysisConfig,
-  AnalysisDiff,
-  diffsToUpdateMessaging,
-  fromAnalysisConfig,
-  getAnalysisConfigDiffs,
   isVisible,
-  maybeWithPersistentDisk,
-  PanelContent,
   RuntimeStatusRequest,
-  toAnalysisConfig,
   UpdateMessaging,
-  withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
   ProfileStore,
@@ -63,6 +66,7 @@ import { CreatePanel } from './runtime-configuration-panel/create-panel';
 import { CustomizePanel } from './runtime-configuration-panel/customize-panel';
 import { OfferDeleteDiskWithUpdate } from './runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from './runtime-configuration-panel/spark-console-panel';
+import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
@@ -357,12 +361,6 @@ const PanelMain = fp.flow(
                   setPanelContent,
                   workspace,
                 }}
-                onPause={() =>
-                  setRuntimeStatusRequest(RuntimeStatusRequest.Stop)
-                }
-                onResume={() =>
-                  setRuntimeStatusRequest(RuntimeStatusRequest.Start)
-                }
               />
             ),
           ],

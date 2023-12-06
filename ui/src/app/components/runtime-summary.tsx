@@ -1,6 +1,6 @@
 import { reactStyles } from 'app/utils';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType, findMachineByName } from 'app/utils/machines';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 const styles = reactStyles({
   bold: {

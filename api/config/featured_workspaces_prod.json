@@ -283,9 +283,9 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "Demo - All of Us v6 GWAS on LDL Cholesterol with Regenie and dsub",
-      "namespace": "aou-rw-5981f9dc",
-      "id": "aouldlgwasregeniedsubctv6duplicate",
+      "name": "Demo - Regenie LDL GWAS using Cromwell (v7)",
+      "namespace": "aou-rw-ed56f93b",
+      "id": "regenieldlgwasusingcromwellv7",
       "category": "DEMO_PROJECTS"
     }
   ]

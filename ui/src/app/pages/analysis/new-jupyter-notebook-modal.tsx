@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { validate } from 'validate.js';
 
-import { ResourceType, Workspace } from 'generated/fetch';
+import { Workspace } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
@@ -17,11 +17,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { getExistingJupyterNotebookNames } from 'app/pages/analysis/util';
 import { analysisTabName } from 'app/routing/utils';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
-import { summarizeErrors } from 'app/utils';
+import { isEmpty, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
-import { nameValidationFormat } from 'app/utils/resources';
+import { validateNewNotebookName } from 'app/utils/resources';
 
 import { appendJupyterNotebookFileSuffix } from './util';
 
@@ -52,18 +52,15 @@ export const NewJupyterNotebookModal = (props: Props) => {
     }
   }, [props.existingNameList]);
 
-  const errors = validate(
-    // we expect the notebook name to lack the .ipynb suffix
-    // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-    { name: appendJupyterNotebookFileSuffix(name), kernel },
-    {
-      kernel: { presence: { allowEmpty: false } },
-      name: nameValidationFormat(
-        existingNotebookNameList,
-        ResourceType.NOTEBOOK
-      ),
-    }
-  );
+  const errors = {
+    ...validateNewNotebookName(name, existingNotebookNameList),
+    ...validate(
+      { kernel },
+      {
+        kernel: { presence: { allowEmpty: false } },
+      }
+    ),
+  };
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
@@ -131,7 +128,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
             style={{ marginLeft: '0.75rem' }}
-            disabled={!!errors}
+            disabled={!isEmpty(errors)}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);
               create();

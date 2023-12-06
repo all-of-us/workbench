@@ -65,8 +65,7 @@ handlers:
         https://aousupporthelp.zendesk.com
         https://aousupporthelp1634849601.zendesk.com
         https://www.google-analytics.com
-        https://aou-tanagra.dev.pmi-ops.org
-        https://aou-tanagra-dev.fake-research-aou.org;
+        https://test.fake-research-aou.org;
       child-src
         'self'
         https://accounts.google.com

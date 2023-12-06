@@ -64,7 +64,6 @@ import {
 import {
   ComputeSecuritySuspendedError,
   maybeUnwrapSecuritySuspendedError,
-  PanelContent,
 } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
@@ -74,6 +73,8 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+
+import { PanelContent } from './runtime-configuration-panel/utils';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 

@@ -8,16 +8,16 @@ import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-p
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { RuntimeSummary } from 'app/components/runtime-summary';
+import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { AnalysisConfig, PanelContent } from 'app/utils/runtime-utils';
+
+import { PanelContent } from './utils';
 
 export interface CreatePanelProps {
   analysisConfig: AnalysisConfig;
   creatorFreeCreditsRemaining: number;
   onClose: () => void;
-  onPause: () => void;
-  onResume: () => void;
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
@@ -29,8 +29,6 @@ export const CreatePanel = ({
   analysisConfig,
   creatorFreeCreditsRemaining,
   onClose,
-  onPause,
-  onResume,
   profile,
   requestAnalysisConfig,
   runtimeCanBeCreated,
@@ -52,8 +50,6 @@ export const CreatePanel = ({
             profile,
             workspace,
             analysisConfig,
-            onPause,
-            onResume,
           }}
           status={runtimeStatus}
           appType={UIAppType.JUPYTER}
