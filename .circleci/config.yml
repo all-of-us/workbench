@@ -25,7 +25,7 @@ parameters:
     default: "cimg/mysql:5.7"
   pact-image:
     type: string
-    default: "docker.io/library/pactfoundation/pact-cli:latest"
+    default: "https://hub.docker.com/r/pactfoundation/pact-cli"
 
 # -------------------------
 #   ANCHORS
