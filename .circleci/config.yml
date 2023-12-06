@@ -873,8 +873,8 @@ workflows:
       - ui-test-coverage:
           requires:
           - ui-unit-test
-      - api-contract-upload
-        - requires:
+      - api-contract-upload:
+          requires:
           - api-unit-test
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
