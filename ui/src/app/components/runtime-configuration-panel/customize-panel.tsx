@@ -65,7 +65,7 @@ export interface CustomizePanelProps {
   setAnalysisConfig: (config: AnalysisConfig) => void;
   setPanelContent: (pc: PanelContent) => void;
   setRuntimeStatusRequest: (rs: RuntimeStatusRequest) => Promise<void>;
-  updateMessaging: UpdateMessaging;
+  updateMessaging?: UpdateMessaging;
   warningMessageContent: JSX.Element[];
   workspaceData: WorkspaceData;
 }
@@ -295,7 +295,7 @@ export const CustomizePanel = ({
         existingDisk={gcePersistentDisk}
         computeType={analysisConfig.computeType}
       />
-      {runtimeExists && updateMessaging.warn && (
+      {runtimeExists && updateMessaging?.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <div>{updateMessaging.warn}</div>
         </WarningMessage>
