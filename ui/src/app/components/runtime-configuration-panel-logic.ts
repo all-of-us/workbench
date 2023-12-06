@@ -106,8 +106,8 @@ export const initializePanelContent = ({
 
 interface DeriveErrorsWarningsProps {
   usingInitialCredits: boolean;
-  creatorFreeCreditsRemaining: number;
-  analysisConfig;
+  creatorFreeCreditsRemaining?: number;
+  analysisConfig: AnalysisConfig;
 }
 interface DeriveErrorsWarningsResult {
   getErrorMessageContent: () => JSX.Element[];
@@ -115,7 +115,7 @@ interface DeriveErrorsWarningsResult {
 }
 export const deriveErrorsAndWarnings = ({
   usingInitialCredits,
-  creatorFreeCreditsRemaining,
+  creatorFreeCreditsRemaining = 0,
   analysisConfig,
 }: DeriveErrorsWarningsProps): DeriveErrorsWarningsResult => {
   // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a

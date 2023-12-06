@@ -75,8 +75,8 @@ export const RuntimeConfigurationPanel = fp.flow(
     workspace: { namespace, cdrVersionId, googleProject },
     profileState: { profile },
     onClose = () => {},
-    initialPanelContent = null,
-    creatorFreeCreditsRemaining = null,
+    initialPanelContent,
+    creatorFreeCreditsRemaining,
   }: RuntimeConfigurationPanelProps &
     WithCdrVersions &
     WithCurrentWorkspace) => {
