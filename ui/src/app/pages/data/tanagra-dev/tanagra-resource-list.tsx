@@ -24,6 +24,7 @@ import {
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
 import {
+  getCreatedBy,
   getDisplayName,
   getType,
   getTypeString,
@@ -94,7 +95,7 @@ interface TableData {
   resourceName: string;
   formattedLastModified: string;
   lastModifiedDateAsString: string;
-  lastModifiedBy: string;
+  createdBy: string;
   cdrVersionName: string;
   resource: WorkspaceResource;
   workspace: Workspace;
@@ -169,13 +170,9 @@ export const TanagraResourceList = fp.flow(
     if (workspaceResources) {
       setTableData(
         fp.flatMap((r) => {
-          console.log(r);
-          console.log(getTypeString(r));
-          console.log(getDisplayName(r));
           const workspace = workspaces.find(
             (w) => w.namespace === r.workspaceNamespace
           );
-          console.log(workspace);
 
           // Don't return resources where we no longer have access to the workspace.
           // For example: the owner has unshared the workspace, but a recent-resource entry remains.
@@ -195,6 +192,7 @@ export const TanagraResourceList = fp.flow(
                   ),
                   cdrVersionName: getCdrVersionName(r),
                   lastModifiedBy: r.lastModifiedBy,
+                  createdBy: getCreatedBy(r),
                 },
               ]
             : [];
@@ -319,8 +317,8 @@ export const TanagraResourceList = fp.flow(
               />
             )}
             <Column
-              field='lastModifiedBy'
-              header='Last Modified By'
+              field='createdBy'
+              header='Created By'
               style={styles.column}
             />
           </DataTable>

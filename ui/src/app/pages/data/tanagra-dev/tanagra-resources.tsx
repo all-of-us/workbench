@@ -27,6 +27,14 @@ export function toDisplay(resourceType: ResourceType): string {
   ])(resourceType);
 }
 
+export function getCreatedBy(resource: TanagraWorkspaceResource): string {
+  return fp.cond([
+    [isCohort, (r) => r.cohortTanagra.createdBy],
+    [isCohortReview, (r) => r.reviewTanagra.createdBy],
+    [isConceptSet, (r) => r.conceptSetTanagra.createdBy],
+  ])(resource);
+}
+
 export function getDisplayName(resource: TanagraWorkspaceResource): string {
   return fp.cond([
     [isCohort, (r) => r.cohortTanagra.displayName],
