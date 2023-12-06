@@ -30,7 +30,11 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { RuntimeStatusRequest, UpdateMessaging } from 'app/utils/runtime-utils';
+import {
+  canUpdateRuntime,
+  RuntimeStatusRequest,
+  UpdateMessaging,
+} from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
@@ -109,11 +113,7 @@ export const CustomizePanel = ({
     }
   }, [analysisConfig.computeType]);
 
-  const disableControls =
-    runtimeExists &&
-    !(
-      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
-    ).includes(runtimeStatus);
+  const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
 
   return (
     <div style={{ marginBottom: '10px' }}>
