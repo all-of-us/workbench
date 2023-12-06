@@ -561,6 +561,16 @@ jobs:
           name: Echo
           command: |
             echo Hello Circle!
+      - run:
+          name: ls home
+          working_directory: ~
+          command: |
+            ls
+      - run:
+          name: pwd
+          working_directory: ~
+          command: |
+            pwd
 
   e2etests-deploy-ui:
     machine:
