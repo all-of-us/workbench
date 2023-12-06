@@ -23,6 +23,9 @@ parameters:
   db-image:
     type: string
     default: "cimg/mysql:5.7"
+  pact-image:
+    type: string
+    default: "docker.io/library/pactfoundation/pact-cli:latest"
 
 # -------------------------
 #   ANCHORS
@@ -112,6 +115,14 @@ executors:
       WORKBENCH_ENV: test
       TEST_MODE: integration
       TZ: "America/New_York"
+
+  # Default workbench docker image environment which is used in all jobs
+  pact-executor:
+    environment:
+      <<: *env-default
+    docker:
+    - image: << pipeline.parameters.pact-image >>
+    working_directory: ~
 
 # -------------------------
 #   COMMANDS
@@ -545,7 +556,7 @@ jobs:
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
     machine:
-      image: pactfoundation/pact-cli
+      image: "docker.io/library/pactfoundation/pact-cli:latest"
     steps:
       - run:
           name: Echo
