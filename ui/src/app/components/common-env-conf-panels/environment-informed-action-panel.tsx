@@ -21,12 +21,14 @@ interface CostsDrawnFromProps {
   userIsCreator: boolean;
   creatorFreeCreditsRemaining: number;
   billingAccountName: string;
+  style?: CSSProperties;
 }
 const CostsDrawnFrom = ({
   usingInitialCredits,
   userIsCreator,
   creatorFreeCreditsRemaining,
   billingAccountName,
+  style,
 }: CostsDrawnFromProps) => {
   const remainingCredits =
     creatorFreeCreditsRemaining === null ? (
@@ -39,7 +41,7 @@ const CostsDrawnFrom = ({
     [
       usingInitialCredits && userIsCreator,
       () => (
-        <div style={styles.costsDrawnFrom}>
+        <div style={{ ...styles.costsDrawnFrom, ...style }}>
           Costs will draw from your remaining {remainingCredits} of free
           credits.
         </div>
@@ -48,7 +50,7 @@ const CostsDrawnFrom = ({
     [
       usingInitialCredits && !userIsCreator,
       () => (
-        <div style={styles.costsDrawnFrom}>
+        <div style={{ ...styles.costsDrawnFrom, ...style }}>
           Costs will draw from workspace creator's remaining {remainingCredits}{' '}
           of free credits.
         </div>
@@ -57,7 +59,7 @@ const CostsDrawnFrom = ({
     [
       !usingInitialCredits,
       () => (
-        <div style={styles.costsDrawnFrom}>
+        <div style={{ ...styles.costsDrawnFrom, ...style }}>
           Costs will be charged to billing account {billingAccountName}.
         </div>
       ),
@@ -98,6 +100,9 @@ export const EnvironmentInformedActionPanel = ({
       : {}),
   };
 
+  // with a PD, the "drawn from" text is too crowded
+  const showCostsDrawnFromWithCosts = !analysisConfig.diskConfig.detachable;
+
   return (
     <FlexColumn>
       <FlexRow style={styles.environmentInformedActionPanelWrapper}>
@@ -112,13 +117,27 @@ export const EnvironmentInformedActionPanel = ({
           isGKEApp={appType !== UIAppType.JUPYTER}
           style={costEstimatorStyle}
         />
+        {showCostsDrawnFromWithCosts && (
+          <CostsDrawnFrom
+            {...{ creatorFreeCreditsRemaining }}
+            usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
+            userIsCreator={profile.username === workspace.creator}
+            billingAccountName={workspace.billingAccountName}
+            style={{
+              borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
+              paddingLeft: '.5rem',
+            }}
+          />
+        )}
       </FlexRow>
-      <CostsDrawnFrom
-        {...{ creatorFreeCreditsRemaining }}
-        usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
-        userIsCreator={profile.username === workspace.creator}
-        billingAccountName={workspace.billingAccountName}
-      />
+      {!showCostsDrawnFromWithCosts && (
+        <CostsDrawnFrom
+          {...{ creatorFreeCreditsRemaining }}
+          usingInitialCredits={isUsingFreeTierBillingAccount(workspace)}
+          userIsCreator={profile.username === workspace.creator}
+          billingAccountName={workspace.billingAccountName}
+        />
+      )}
     </FlexColumn>
   );
 };

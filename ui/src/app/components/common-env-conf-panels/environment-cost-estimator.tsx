@@ -25,6 +25,7 @@ interface Props {
 
 const styles = reactStyles({
   costSection: {
+    marginRight: '1rem',
     overflow: 'hidden',
   },
   cost: {
