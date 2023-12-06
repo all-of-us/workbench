@@ -27,6 +27,7 @@ import {
 } from 'app/utils/runtime-diffs';
 import { useCustomRuntime, useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
+  canUpdateRuntime,
   isVisible,
   RuntimeStatusRequest,
   UpdateMessaging,
@@ -127,6 +128,13 @@ export const RuntimeConfigurationPanel = fp.flow(
       })
     );
 
+    const { getErrorMessageContent, getWarningMessageContent } =
+      deriveErrorsAndWarnings({
+        usingInitialCredits: isUsingFreeTierBillingAccount(workspace),
+        creatorFreeCreditsRemaining,
+        analysisConfig,
+      });
+
     const runtimeExists =
       (runtimeStatus && isVisible(runtimeStatus)) || !!pendingRuntime;
 
@@ -135,39 +143,30 @@ export const RuntimeConfigurationPanel = fp.flow(
       runtimeExists &&
       existingAnalysisConfig.diskConfig.detachable;
 
-    let configDiffs: AnalysisDiff[] = [];
-    let updateMessaging: UpdateMessaging;
-    if (runtimeExists) {
-      configDiffs = getAnalysisConfigDiffs(
-        existingAnalysisConfig,
-        analysisConfig
-      );
-      updateMessaging = diffsToUpdateMessaging(configDiffs);
-    }
-    const environmentChanged = configDiffs.length > 0;
+    const configDiffs: AnalysisDiff[] = runtimeExists
+      ? getAnalysisConfigDiffs(existingAnalysisConfig, analysisConfig)
+      : [];
 
-    const { getErrorMessageContent, getWarningMessageContent } =
-      deriveErrorsAndWarnings({
-        usingInitialCredits: isUsingFreeTierBillingAccount(workspace),
-        creatorFreeCreditsRemaining,
-        analysisConfig,
-      });
+    const updateMessaging: UpdateMessaging =
+      runtimeExists && diffsToUpdateMessaging(configDiffs);
+
+    const environmentChanged = configDiffs.length > 0;
 
     // For computeType Standard: We are moving away from storage disk as Standard
     // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
     // Eventually we will be removing this option altogether
+
     const runtimeCanBeCreated =
-      !(getErrorMessageContent().length > 0) &&
+      getErrorMessageContent().length === 0 &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
           !analysisConfig.diskConfig.detachable));
+
     const runtimeCanBeUpdated =
+      runtimeCanBeCreated &&
       environmentChanged &&
-      (
-        [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
-      ).includes(runtimeStatus) &&
-      runtimeCanBeCreated;
+      canUpdateRuntime(runtimeStatus);
 
     if (!runtimeLoaded) {
       return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
@@ -323,7 +322,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                 updateButton={
                   <Button
                     aria-label='Update'
-                    disabled={!runtimeCanBeUpdated}
+                    disabled={!runtimeCanBeCreated}
                     onClick={() => {
                       requestAnalysisConfig(analysisConfig);
                       onClose();
