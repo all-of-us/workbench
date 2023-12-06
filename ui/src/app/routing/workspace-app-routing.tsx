@@ -33,7 +33,7 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard } from 'app/routing/guards';
+import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
@@ -213,7 +213,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/${analysisTabName}/userApp/:appType`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, wsid), appIsValidGuard(ns, wsid)]}
       >
         <GKEAppRedirectPage
           key='app'

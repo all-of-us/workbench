@@ -1,10 +1,8 @@
-import * as fp from 'lodash/fp';
-
 import { WorkspacesApi } from 'generated/fetch';
 
 import { getTrail } from 'app/components/breadcrumb';
 import {
-  analysisTabName,
+  analysisTabDisplay,
   appDisplayPath,
   dataTabPath,
 } from 'app/routing/utils';
@@ -67,22 +65,23 @@ describe('getTrail', () => {
     const trail = getTrail(
       BreadcrumbType.App,
       workspaceDataStub,
-      exampleCohortStubs[0],
-      cohortReviewStubs[0],
-      ConceptSetsApiStub.stubConceptSets()[0],
+      undefined,
+      undefined,
+      undefined,
       {
         ns: 'testns',
         wsid: 'testwsid',
-        cid: '88',
-        crid: '99',
-        pid: '77',
+        cid: undefined,
+        crid: undefined,
+        pid: undefined,
         appType: UIAppType.RSTUDIO,
       }
     );
+
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
       'defaultWorkspace',
-      fp.upperFirst(analysisTabName),
+      analysisTabDisplay,
       UIAppType.RSTUDIO,
     ]);
     expect(trail[3].url).toEqual(

@@ -1,7 +1,10 @@
+import { matchPath } from 'react-router-dom';
+
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { Guard } from 'app/components/app-router';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
@@ -21,10 +24,10 @@ import {
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
-import { authStore, profileStore } from 'app/utils/stores';
+import { authStore, MatchParams, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
-import { workspacePath } from './utils';
+import { analysisTabName, analysisTabPath, workspacePath } from './utils';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -92,6 +95,21 @@ export const adminLockedGuard = (ns: string, wsid: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
     redirectPath: `${workspacePath(ns, wsid)}/about`,
+  };
+};
+
+const confrimAppIsValid = () => {
+  const urlMatchParam = matchPath<MatchParams>(location.pathname, {
+    path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
+  });
+  const userApp = urlMatchParam.params.appType as UIAppType;
+  return Object.values(UIAppType).includes(userApp);
+};
+
+export const appIsValidGuard = (ns: string, wsid: string): Guard => {
+  return {
+    allowed: (): boolean => confrimAppIsValid(),
+    redirectPath: `${analysisTabPath(ns, wsid)}`,
   };
 };
 
