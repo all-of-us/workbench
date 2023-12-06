@@ -416,15 +416,15 @@ jobs:
             command: |
               ls
         - run:
-            name: ls tmp
+            name: ls pacts
             working_directory: ~
             command: |
-              ls tmp
+              ls /tmp/workspace/pacts
         - run:
-            name: ls tmp/workspace
+            name: ls pacts2
             working_directory: ~
             command: |
-              ls tmp/workspace
+              ls pacts
         - run:
             name: ls tmp/workpsace/workbench
             working_directory: ~
@@ -532,9 +532,9 @@ jobs:
             working_directory: ~/workbench/api
             command: ./project.rb contracttest
     - persist_to_workspace:
-        root: .
+        root: ~/workbench/api/build
         paths:
-        - api
+        - pacts
 
   ui-unit-test:
     executor: workbench-executor
