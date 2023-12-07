@@ -661,7 +661,10 @@ export const ListOverview = fp.flow(
                           ? { ...styles.actionIcon, ...styles.disabled }
                           : styles.actionIcon
                       }
-                      onClick={(e) => this.funnelOverlay.toggle(e)}
+                      onClick={(e) => {
+                        AnalyticsTracker.CohortBuilder.ViewFunnelPlot();
+                        this.funnelOverlay.toggle(e);
+                      }}
                     >
                       <ClrIcon
                         shape='filter-grid-circle'
