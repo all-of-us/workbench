@@ -163,7 +163,7 @@ commands:
           command: |
             ./project.rb deploy \
               --project all-of-us-rw-stable \
-              --account << pipeline.parameters.circle-service-account >> \
+              --account deploy@all-of-us-rw-stable.iam.gserviceaccount.com \
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
