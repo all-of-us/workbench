@@ -585,7 +585,11 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo Hello Circle!
+            echo "My name is ${PACT_BROKER_USERNAME}"
+      - run:
+          name: Echo
+          command: |
+            echo "My password is ${PACT_BROKER_PASSWORD}"
       - run:
           name: ls home
           working_directory: ~
