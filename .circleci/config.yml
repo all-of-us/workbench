@@ -417,47 +417,10 @@ jobs:
     executor: pact-executor
     steps:
     - run:
-        name: Echo
-        command: |
-          echo Hello Circle!
-    - run:
-        name: ls home
-        working_directory: ~
-        command: |
-          ls
-    - run:
-        name: pwd
-        working_directory: ~
-        command: |
-          pwd
-    - run:
-        name: ls tmp pre
-        working_directory: ~
-        command: |
-          ls /tmp
-    - attach_workspace:
-        at: /tmp/workspace
-    - run:
-        name: ls tmp/workspace
-        working_directory: ~
-        command: |
-          ls /tmp/workspace
-    - run:
-        name: ls tmp post
-        working_directory: ~
-        command: |
-          ls /tmp/workspace
-    - run:
-        name: ls pacts
-        working_directory: ~
-        command: |
-          ls /tmp/workspace/pacts
-    - run:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
-
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 1
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
@@ -590,21 +553,7 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo "My name is ${PACT_BROKER_USERNAME}"
-      - run:
-          name: Echo
-          command: |
-            echo "My password is ${PACT_BROKER_PASSWORD}"
-      - run:
-          name: ls home
-          working_directory: ~
-          command: |
-            ls /tmp/workspace/pacts
-      - run:
-          name: ls home
-          working_directory: ~
-          command: |
-            pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
+            echo Hello Circle!
 
   e2etests-deploy-ui:
     machine:
