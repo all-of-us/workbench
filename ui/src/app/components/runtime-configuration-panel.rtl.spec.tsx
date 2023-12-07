@@ -1,8 +1,14 @@
-import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
+import {
+  GpuConfig,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
 
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
+  findMachineByName,
+  Machine,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
@@ -480,5 +486,94 @@ describe(getErrorsAndWarnings.name, () => {
     expect(warningMessageContent).toEqual([]);
     expect(errorMessageContent).toHaveLength(1);
     expect(errorMessageContent[0].props.children).toEqual(expectedError);
+  });
+
+  it('should show a cost warning when the user has enough remaining initial credits', () => {
+    const usingInitialCredits = true;
+    const creatorFreeCreditsRemaining =
+      serverConfigStore.get().config.defaultFreeCreditsDollarLimit + 1;
+
+    // want a running cost over $25/hr
+
+    const machine: Machine = findMachineByName('n1-highmem-96'); // most expensive, at about $5.70
+    const gpuConfig: GpuConfig = { gpuType: 'nvidia-tesla-v100', numOfGpus: 8 }; // nearly $20 by itself
+    const analysisConfig = { ...defaultGceAc, machine, gpuConfig };
+
+    const expectedWarning =
+      'Your runtime is expensive. Are you sure you wish to proceed?';
+
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+    );
+
+    expect(errorMessageContent).toEqual([]);
+    expect(warningMessageContent).toHaveLength(1);
+    expect(warningMessageContent[0].props.children).toEqual(expectedWarning);
+  });
+
+  it('should show a cost error when the user does not have enough remaining initial credits', () => {
+    const usingInitialCredits = true;
+    const creatorFreeCreditsRemaining =
+      serverConfigStore.get().config.defaultFreeCreditsDollarLimit - 1;
+
+    // want a running cost over $25/hr
+
+    const machine: Machine = findMachineByName('n1-highmem-96'); // most expensive, at about $5.70
+    const gpuConfig: GpuConfig = { gpuType: 'nvidia-tesla-v100', numOfGpus: 8 }; // nearly $20 by itself
+    const analysisConfig = { ...defaultGceAc, machine, gpuConfig };
+
+    const expectedError =
+      'Your runtime is too expensive. To proceed using free credits, reduce your running costs below'; // $cost
+
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      { usingInitialCredits, analysisConfig, creatorFreeCreditsRemaining }
+    );
+
+    expect(warningMessageContent).toEqual([]);
+    expect(errorMessageContent).toHaveLength(1);
+    expect(errorMessageContent[0].props.children).toContain(expectedError);
+  });
+
+  it('should have a higher warning threshold when using BYOBilling', () => {
+    const usingInitialCredits = false;
+
+    // over the initial-credits threshold of $25/hr but less than $150/hr
+
+    const machine: Machine = findMachineByName('n1-highmem-96'); // most expensive, at about $5.70
+    const gpuConfig: GpuConfig = { gpuType: 'nvidia-tesla-v100', numOfGpus: 8 }; // nearly $20 by itself
+    const analysisConfig = { ...defaultGceAc, machine, gpuConfig };
+
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      { usingInitialCredits, analysisConfig }
+    );
+
+    expect(warningMessageContent).toEqual([]);
+    expect(errorMessageContent).toEqual([]);
+  });
+
+  it('should return a cost warning when passing the higher BYOBilling threshold', () => {
+    const usingInitialCredits = false;
+
+    // over $150/hr
+
+    const analysisConfig = {
+      ...defaultDataProcAc,
+      dataprocConfig: {
+        ...defaultDataProcAc.dataprocConfig,
+        workerMachineType: 'n1-highmem-96', // most expensive, at about $5.70
+        numberOfWorkers: 30, // so 30 x $5.70 for the workers alone
+      },
+    };
+
+    const expectedWarning =
+      'Your runtime is expensive. Are you sure you wish to proceed?';
+
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      { usingInitialCredits, analysisConfig }
+    );
+
+    expect(errorMessageContent).toEqual([]);
+    expect(warningMessageContent).toHaveLength(1);
+    expect(warningMessageContent[0].props.children).toEqual(expectedWarning);
   });
 });
