@@ -1,3 +1,7 @@
+import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
+
+import { defaultRuntime } from 'testing/stubs/runtime-api-stub';
+
 import {
   deriveCurrentRuntime,
   DeriveCurrentRuntimeProps,
@@ -10,16 +14,39 @@ import {
   DerivePanelProps,
 } from './runtime-configuration-panel';
 
-// TODO
-
 describe(deriveCurrentRuntime.name, () => {
-  it('is a placeholder test', () => {
+  it('returns an undefined runtime if the inputs are undefined', () => {
     const dummy: DeriveCurrentRuntimeProps = {
       crFromCustomRuntimeHook: undefined,
       gcePersistentDisk: undefined,
     };
     const expected = undefined;
     expect(deriveCurrentRuntime(dummy)).toEqual(expected);
+  });
+
+  it('returns the runtime from the hook if it is not DELETED', () => {
+    const runtime = {
+      ...defaultRuntime(),
+      runtimeStatus: RuntimeStatus.RUNNING,
+    };
+    const dummy: DeriveCurrentRuntimeProps = {
+      crFromCustomRuntimeHook: runtime,
+      gcePersistentDisk: undefined,
+    };
+    expect(deriveCurrentRuntime(dummy)).toEqual(runtime);
+  });
+
+  it('returns the runtime from the hook if it is DELETED and config type USER_OVERRIDE', () => {
+    const runtime = {
+      ...defaultRuntime(),
+      runtimeStatus: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+    };
+    const dummy: DeriveCurrentRuntimeProps = {
+      crFromCustomRuntimeHook: runtime,
+      gcePersistentDisk: undefined,
+    };
+    expect(deriveCurrentRuntime(dummy)).toEqual(runtime);
   });
 });
 

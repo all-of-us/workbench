@@ -293,14 +293,14 @@ export const RuntimeConfigurationPanel = fp.flow(
     WithCurrentWorkspace) => {
     const { runtimeLoaded } = useStore(runtimeStore);
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
-    const [
-      { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
-      setRuntimeRequest,
-    ] = useCustomRuntime(namespace, gcePersistentDisk);
     const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
       namespace,
       googleProject
     );
+    const [
+      { currentRuntime: crFromCustomRuntimeHook, pendingRuntime },
+      setRuntimeRequest,
+    ] = useCustomRuntime(namespace, gcePersistentDisk);
 
     const currentRuntime = deriveCurrentRuntime({
       crFromCustomRuntimeHook,
@@ -329,12 +329,6 @@ export const RuntimeConfigurationPanel = fp.flow(
       [gcePersistentDisk]
     );
 
-    const requestAnalysisConfig = (config: AnalysisConfig) =>
-      setRuntimeRequest({
-        runtime: fromAnalysisConfig(config),
-        detachedDisk: config.detachedDisk,
-      });
-
     const [panelContent, setPanelContent] = useState<PanelContent>(
       initialPanelContent ||
         derivePanelContent({
@@ -343,6 +337,12 @@ export const RuntimeConfigurationPanel = fp.flow(
           runtimeStatus,
         })
     );
+
+    const requestAnalysisConfig = (config: AnalysisConfig) =>
+      setRuntimeRequest({
+        runtime: fromAnalysisConfig(config),
+        detachedDisk: config.detachedDisk,
+      });
 
     const { getErrorMessageContent, getWarningMessageContent } =
       deriveErrorsAndWarnings({
