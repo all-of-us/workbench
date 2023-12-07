@@ -417,6 +417,21 @@ jobs:
     executor: pact-executor
     steps:
     - run:
+        name: ls home
+        working_directory: ~
+        command: |
+          ls /tmp
+    - run:
+        name: ls home
+        working_directory: ~
+        command: |
+          ls /tmp/workspace
+    - run:
+          name: ls home
+          working_directory: ~
+          command: |
+            ls /tmp/workspace/pacts
+    - run:
         name: Pact Broker Publish
         working_directory: ~
         command: |
