@@ -1,28 +1,37 @@
 import {
-  DeriveConfigProps,
-  deriveConfiguration,
-  DerivedConfigResult,
+  deriveCurrentRuntime,
+  DeriveCurrentRuntimeProps,
   deriveErrorsAndWarnings,
   DeriveErrorsWarningsProps,
   DeriveErrorsWarningsResult,
+  deriveExistingAC,
+  DeriveExistingACProps,
   derivePanelContent,
   DerivePanelProps,
 } from './runtime-configuration-panel';
 
 // TODO
 
-describe(deriveConfiguration.name, () => {
+describe(deriveCurrentRuntime.name, () => {
   it('is a placeholder test', () => {
-    const dummy: DeriveConfigProps = {
+    const dummy: DeriveCurrentRuntimeProps = {
       crFromCustomRuntimeHook: undefined,
+      gcePersistentDisk: undefined,
+    };
+    const expected = undefined;
+    expect(deriveCurrentRuntime(dummy)).toEqual(expected);
+  });
+});
+
+describe(deriveExistingAC.name, () => {
+  it('is a placeholder test', () => {
+    const dummy: DeriveExistingACProps = {
+      currentRuntime: undefined,
       gcePersistentDisk: undefined,
       pendingRuntime: undefined,
     };
-    const expected: DerivedConfigResult = {
-      currentRuntime: undefined,
-      existingAnalysisConfig: undefined,
-    };
-    expect(deriveConfiguration(dummy)).toEqual(expected);
+    const expected = undefined;
+    expect(deriveExistingAC(dummy)).toEqual(expected);
   });
 });
 

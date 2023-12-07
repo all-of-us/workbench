@@ -68,32 +68,35 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-export interface DeriveConfigProps {
+export interface DeriveCurrentRuntimeProps {
   crFromCustomRuntimeHook: Runtime;
+  gcePersistentDisk: Disk;
+}
+export const deriveCurrentRuntime = ({
+  crFromCustomRuntimeHook,
+  gcePersistentDisk,
+}: DeriveCurrentRuntimeProps): Runtime =>
+  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
+  crFromCustomRuntimeHook &&
+  crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
+    ? applyPresetOverride(
+        // The attached disk information is lost for deleted runtimes. In any case,
+        // by default we want to offer that the user reattach their existing disk,
+        // if any and if the configuration allows it.
+        maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
+      )
+    : crFromCustomRuntimeHook;
+
+export interface DeriveExistingACProps {
+  currentRuntime: Runtime;
   pendingRuntime: Runtime;
   gcePersistentDisk: Disk;
 }
-export interface DerivedConfigResult {
-  currentRuntime: Runtime;
-  existingAnalysisConfig: AnalysisConfig;
-}
-export const deriveConfiguration = ({
-  crFromCustomRuntimeHook,
+export const deriveExistingAC = ({
+  currentRuntime,
   pendingRuntime,
   gcePersistentDisk,
-}: DeriveConfigProps): DerivedConfigResult => {
-  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-  const currentRuntime =
-    crFromCustomRuntimeHook &&
-    crFromCustomRuntimeHook.status === RuntimeStatus.DELETED
-      ? applyPresetOverride(
-          // The attached disk information is lost for deleted runtimes. In any case,
-          // by default we want to offer that the user reattach their existing disk,
-          // if any and if the configuration allows it.
-          maybeWithPersistentDisk(crFromCustomRuntimeHook, gcePersistentDisk)
-        )
-      : crFromCustomRuntimeHook;
-
+}: DeriveExistingACProps): AnalysisConfig => {
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
   const existingRuntime =
@@ -103,7 +106,7 @@ export const deriveConfiguration = ({
     gcePersistentDisk
   );
 
-  return { currentRuntime, existingAnalysisConfig };
+  return existingAnalysisConfig;
 };
 
 export interface DerivePanelProps {
@@ -299,8 +302,13 @@ export const RuntimeConfigurationPanel = fp.flow(
       googleProject
     );
 
-    const { currentRuntime, existingAnalysisConfig } = deriveConfiguration({
+    const currentRuntime = deriveCurrentRuntime({
       crFromCustomRuntimeHook,
+      gcePersistentDisk,
+    });
+
+    const existingAnalysisConfig = deriveExistingAC({
+      currentRuntime,
       pendingRuntime,
       gcePersistentDisk,
     });
