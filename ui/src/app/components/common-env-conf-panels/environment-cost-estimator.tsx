@@ -25,7 +25,7 @@ interface Props {
 
 const styles = reactStyles({
   costSection: {
-    marginRight: '0.5rem',
+    marginRight: '1rem',
     overflow: 'hidden',
   },
   cost: {
@@ -41,6 +41,7 @@ const styles = reactStyles({
   },
   costPeriod: {
     fontWeight: '600',
+    marginLeft: '.3rem',
   },
 });
 
@@ -51,7 +52,7 @@ export const EnvironmentCostEstimator = ({
   analysisConfig,
   isGKEApp,
   costTextColor = colors.accent,
-  style = {},
+  style,
 }: Props) => {
   const { detachedDisk, diskConfig } = analysisConfig;
   const runningCost =
@@ -81,7 +82,7 @@ export const EnvironmentCostEstimator = ({
     () => 0
   );
   return (
-    <FlexRow style={style}>
+    <FlexRow {...{ style }}>
       <FlexColumn style={styles.costSection}>
         <div style={{ fontSize: '10px', fontWeight: 600 }}>
           Cost when running
