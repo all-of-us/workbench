@@ -419,25 +419,10 @@ jobs:
     - attach_workspace:
         at: /tmp/workspace
     - run:
-        name: ls home
-        working_directory: ~
-        command: |
-          ls /tmp
-    - run:
-        name: ls home
-        working_directory: ~
-        command: |
-          ls /tmp/workspace
-    - run:
-          name: ls home
-          working_directory: ~
-          command: |
-            ls /tmp/workspace/pacts
-    - run:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 1 --branch ${CIRCLE_BRANCH}
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH}
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
@@ -570,7 +555,7 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo Hello Circle: ${CIRCLE_SHA1}!
+            echo Hello Circle!
 
   e2etests-deploy-ui:
     machine:
