@@ -157,20 +157,20 @@ const diskSizeValidatorWithMessage = (
   };
 };
 
-interface DeriveErrorsWarningsProps {
+interface ErrorsWarningsProps {
   usingInitialCredits: boolean;
   creatorFreeCreditsRemaining?: number;
   analysisConfig: AnalysisConfig;
 }
-interface DeriveErrorsWarningsResult {
-  getErrorMessageContent: () => JSX.Element[];
-  getWarningMessageContent: () => JSX.Element[];
+interface ErrorsWarningsResult {
+  errorMessageContent: JSX.Element[];
+  warningMessageContent: JSX.Element[];
 }
-export const deriveErrorsAndWarnings = ({
+export const getErrorsAndWarnings = ({
   usingInitialCredits,
   creatorFreeCreditsRemaining = 0,
   analysisConfig,
-}: DeriveErrorsWarningsProps): DeriveErrorsWarningsResult => {
+}: ErrorsWarningsProps): ErrorsWarningsResult => {
   const costErrorsAsWarnings =
     !usingInitialCredits ||
     // We've increased the workspace creator's free credits. This means they may be expecting to run
@@ -228,26 +228,24 @@ export const deriveErrorsAndWarnings = ({
       }
     );
 
-  const getErrorMessageContent = (): JSX.Element[] => {
-    return [
-      ...(diskErrors ? summarizeErrors(diskErrors) : []),
-      ...(dataprocErrors ? summarizeErrors(dataprocErrors) : []),
-      // only report cost errors -as errors- if costErrorsAsWarnings is false
-      ...(!costErrorsAsWarnings && runningCostErrors
-        ? summarizeErrors(runningCostErrors)
-        : []),
-    ];
-  };
+  // only report cost errors -as errors- if costErrorsAsWarnings is false
+  const costErrors =
+    !costErrorsAsWarnings && runningCostErrors
+      ? summarizeErrors(runningCostErrors)
+      : [];
 
-  const getWarningMessageContent = (): JSX.Element[] =>
-    // if costErrorsAsWarnings is false, we report them as errors.  See getErrorMessageContent()
+  const costWarnings =
     costErrorsAsWarnings && runningCostErrors
       ? summarizeErrors(runningCostErrors)
       : [];
 
   return {
-    getErrorMessageContent,
-    getWarningMessageContent,
+    errorMessageContent: [
+      ...(diskErrors ? summarizeErrors(diskErrors) : []),
+      ...(dataprocErrors ? summarizeErrors(dataprocErrors) : []),
+      ...costErrors,
+    ],
+    warningMessageContent: costWarnings,
   };
 };
 
@@ -326,12 +324,13 @@ export const RuntimeConfigurationPanel = fp.flow(
         detachedDisk: config.detachedDisk,
       });
 
-    const { getErrorMessageContent, getWarningMessageContent } =
-      deriveErrorsAndWarnings({
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      {
         usingInitialCredits: isUsingFreeTierBillingAccount(workspace),
         creatorFreeCreditsRemaining,
         analysisConfig,
-      });
+      }
+    );
 
     const runtimeExists =
       (runtimeStatus && isVisible(runtimeStatus)) || !!pendingRuntime;
@@ -355,7 +354,7 @@ export const RuntimeConfigurationPanel = fp.flow(
     // Eventually we will be removing this option altogether
 
     const runtimeCanBeCreated =
-      getErrorMessageContent().length === 0 &&
+      errorMessageContent.length === 0 &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
@@ -482,6 +481,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                   creatorFreeCreditsRemaining,
                   currentRuntime,
                   environmentChanged,
+                  errorMessageContent,
                   existingAnalysisConfig,
                   gcePersistentDisk,
                   onClose,
@@ -495,13 +495,12 @@ export const RuntimeConfigurationPanel = fp.flow(
                   setPanelContent,
                   setRuntimeStatusRequest,
                   updateMessaging,
+                  warningMessageContent,
                 }}
                 allowDataproc={
                   findCdrVersion(cdrVersionId, cdrVersionTiersResponse)
                     ?.hasWgsData
                 }
-                errorMessageContent={getErrorMessageContent()}
-                warningMessageContent={getWarningMessageContent()}
                 workspaceData={workspace}
               />
             ),

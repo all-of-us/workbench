@@ -1,12 +1,10 @@
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
 
-import { expectButtonElementDisabled } from '../../testing/react-test-helpers';
+import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
-  ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
-} from '../utils/machines';
-import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
+} from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -22,7 +20,7 @@ import {
 import {
   createOrCustomize,
   deriveCurrentRuntime,
-  deriveErrorsAndWarnings,
+  getErrorsAndWarnings,
 } from './runtime-configuration-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 
@@ -277,19 +275,20 @@ describe(createOrCustomize.name, () => {
   );
 });
 
-describe(deriveErrorsAndWarnings.name, () => {
+describe(getErrorsAndWarnings.name, () => {
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
   });
   it('should show no errors or warnings by default', () => {
-    const { getErrorMessageContent, getWarningMessageContent } =
-      deriveErrorsAndWarnings({
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      {
         usingInitialCredits: true,
         analysisConfig: toAnalysisConfig(defaultRuntime(), stubDisk()),
-      });
+      }
+    );
 
-    expect(getErrorMessageContent()).toEqual([]);
-    expect(getWarningMessageContent()).toEqual([]);
+    expect(errorMessageContent).toEqual([]);
+    expect(warningMessageContent).toEqual([]);
   });
 
   const minDiskGce = MIN_DISK_SIZE_GB;
@@ -454,13 +453,12 @@ describe(deriveErrorsAndWarnings.name, () => {
         : maxDiskBYOBilling;
       const expectedError = `${diskSizeDesc} must be between ${minDisk} and ${maxDisk} GB`;
 
-      const { getErrorMessageContent, getWarningMessageContent } =
-        deriveErrorsAndWarnings({ usingInitialCredits, analysisConfig });
+      const { errorMessageContent, warningMessageContent } =
+        getErrorsAndWarnings({ usingInitialCredits, analysisConfig });
 
-      expect(getWarningMessageContent()).toEqual([]);
-      const errors = getErrorMessageContent();
-      expect(errors).toHaveLength(1);
-      expect(errors[0].props.children).toEqual(expectedError);
+      expect(warningMessageContent).toEqual([]);
+      expect(errorMessageContent).toHaveLength(1);
+      expect(errorMessageContent[0].props.children).toEqual(expectedError);
     }
   );
 
@@ -475,12 +473,12 @@ describe(deriveErrorsAndWarnings.name, () => {
     };
     const expectedError = 'Dataproc requires at least 2 worker nodes';
 
-    const { getErrorMessageContent, getWarningMessageContent } =
-      deriveErrorsAndWarnings({ usingInitialCredits, analysisConfig });
+    const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
+      { usingInitialCredits, analysisConfig }
+    );
 
-    expect(getWarningMessageContent()).toEqual([]);
-    const errors = getErrorMessageContent();
-    expect(errors).toHaveLength(1);
-    expect(errors[0].props.children).toEqual(expectedError);
+    expect(warningMessageContent).toEqual([]);
+    expect(errorMessageContent).toHaveLength(1);
+    expect(errorMessageContent[0].props.children).toEqual(expectedError);
   });
 });
