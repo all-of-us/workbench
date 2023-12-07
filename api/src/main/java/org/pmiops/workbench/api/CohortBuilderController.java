@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -160,18 +159,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, Long parentId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    if (workbenchConfigProvider.get().featureFlags.enableHasEhrData) {
-      return ResponseEntity.ok(
-          new CriteriaMenuListResponse()
-              .items(cohortBuilderService.findCriteriaMenuByParentId(parentId)));
-    } else {
-      return ResponseEntity.ok(
-          new CriteriaMenuListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaMenuByParentId(parentId).stream()
-                      .filter(item -> !CriteriaType.HAS_EHR_DATA.toString().equals(item.getType()))
-                      .collect(Collectors.toList())));
-    }
+    return ResponseEntity.ok(
+        new CriteriaMenuListResponse()
+            .items(cohortBuilderService.findCriteriaMenuByParentId(parentId)));
   }
 
   @Override

@@ -6861,10 +6861,6 @@ components:
           type: boolean
           description: Whether to enable visual data explorer.
           default: false
-        enableHasEhrData:
-          type: boolean
-          default: false
-          description: Whether to enable has ehr data.
         tanagraBaseUrl:
           type: string
           description: The tanagra base url

@@ -331,8 +331,6 @@ public class WorkbenchConfig {
     public boolean enableSasGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
-    // If true, enable has EHR data
-    public boolean enableHasEhrData;
     // If true, allow users to pause their GKE apps
     public boolean enableGKEAppPausing;
   }
