@@ -11,8 +11,10 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
-import { shouldRedirectToMaybe } from './guards';
+import { confirmAppIsValid, shouldRedirectToMaybe } from './guards';
+import { analysisTabName } from './utils';
 
+const hostPath = 'https://exampleWorkbenchUrl';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {
@@ -96,10 +98,24 @@ const allCompleteCtTrainingExpired: AccessModuleStatus[] =
     });
 
 describe('redirectTo', () => {
+  const originalWindowLocation = window.location;
+
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: new URL(window.location.href),
+    });
   });
 
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: originalWindowLocation,
+    });
+  });
   test.each([
     [
       'all complete and not expiring',
@@ -221,5 +237,17 @@ describe('redirectTo', () => {
     ],
   ])('%s', (desc, expected: string, profile: Profile) => {
     expect(shouldRedirectToMaybe(profile)).toEqual(expected);
+  });
+
+  it('Should verify App defined in URL is valid', async () => {
+    const pathToRstudioApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/RStudio`;
+    window.location.href = pathToRstudioApp;
+    let appIsValid = confirmAppIsValid();
+    expect(appIsValid).toBeTruthy();
+
+    const pathToFakeApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/FakeApp`;
+    window.location.href = pathToFakeApp;
+    appIsValid = confirmAppIsValid();
+    expect(appIsValid).toBeFalsy();
   });
 });
