@@ -1,7 +1,10 @@
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
 
+import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { runtimePresets } from 'app/utils/runtime-presets';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataProcRuntime,
@@ -269,14 +272,17 @@ describe(createOrCustomize.name, () => {
 });
 
 describe(deriveErrorsAndWarnings.name, () => {
-  it('is a placeholder test', () => {
+  beforeEach(() => {
+    serverConfigStore.set({ config: defaultServerConfig });
+  });
+  it('should show no errors or warnings by default', () => {
     const { getErrorMessageContent, getWarningMessageContent } =
       deriveErrorsAndWarnings({
-        usingInitialCredits: undefined,
-        analysisConfig: undefined,
+        usingInitialCredits: true,
+        analysisConfig: toAnalysisConfig(defaultRuntime(), stubDisk()),
       });
 
-    expect(getErrorMessageContent()).toBeFalsy();
-    expect(getWarningMessageContent()).toBeFalsy();
+    expect(getErrorMessageContent()).toEqual([]);
+    expect(getWarningMessageContent()).toEqual([]);
   });
 });
