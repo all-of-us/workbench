@@ -1,10 +1,8 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { environment } from 'environments/environment';
-
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -31,12 +29,6 @@ export const TanagraContainer = fp.flow(
     }/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}${
       environment.tanagraLocalAuth ? `/?token=${getAccessToken()}` : ''
     }`;
-
-    useEffect(() => {
-      if (!environment.tanagraLocalAuth) {
-        localStorage.setItem('tanagraAccessToken', getAccessToken());
-      }
-    }, []);
 
     useExitActionListener(() => {
       // Navigate to Data tab when exiting Tanagra iframe
