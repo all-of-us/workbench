@@ -8,6 +8,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
@@ -23,6 +24,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -132,7 +134,12 @@ export const DataComponentTanagra = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )((props: Props) => {
-  useEffect(() => props.hideSpinner(), []);
+  useEffect(() => {
+    props.hideSpinner();
+    if (!environment.tanagraLocalAuth) {
+      localStorage.setItem('tanagraAccessToken', getAccessToken());
+    }
+  }, []);
   const [navigate] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [isLoading, setIsLoading] = useState(true);
