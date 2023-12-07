@@ -68,7 +68,7 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-export interface DeriveCurrentRuntimeProps {
+interface DeriveCurrentRuntimeProps {
   crFromCustomRuntimeHook: Runtime;
   gcePersistentDisk: Disk;
 }
@@ -87,38 +87,16 @@ export const deriveCurrentRuntime = ({
       )
     : crFromCustomRuntimeHook;
 
-export interface DeriveExistingACProps {
-  currentRuntime: Runtime;
-  pendingRuntime: Runtime;
-  gcePersistentDisk: Disk;
-}
-export const deriveExistingAC = ({
-  currentRuntime,
-  pendingRuntime,
-  gcePersistentDisk,
-}: DeriveExistingACProps): AnalysisConfig => {
-  // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-  // to render the target runtime details, which  may not match the current runtime.
-  const existingRuntime =
-    pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
-  const existingAnalysisConfig = toAnalysisConfig(
-    existingRuntime,
-    gcePersistentDisk
-  );
-
-  return existingAnalysisConfig;
-};
-
-export interface DerivePanelProps {
+interface CCProps {
   pendingRuntime: Runtime;
   currentRuntime: Runtime;
   runtimeStatus: RuntimeStatus;
 }
-export const derivePanelContent = ({
+export const createOrCustomize = ({
   pendingRuntime,
   currentRuntime,
   runtimeStatus,
-}: DerivePanelProps): PanelContent =>
+}: CCProps): PanelContent =>
   cond<PanelContent>(
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
@@ -147,12 +125,12 @@ export const derivePanelContent = ({
     () => PanelContent.Customize
   );
 
-export interface DeriveErrorsWarningsProps {
+interface DeriveErrorsWarningsProps {
   usingInitialCredits: boolean;
   creatorFreeCreditsRemaining?: number;
   analysisConfig: AnalysisConfig;
 }
-export interface DeriveErrorsWarningsResult {
+interface DeriveErrorsWarningsResult {
   getErrorMessageContent: () => JSX.Element[];
   getWarningMessageContent: () => JSX.Element[];
 }
@@ -307,11 +285,12 @@ export const RuntimeConfigurationPanel = fp.flow(
       gcePersistentDisk,
     });
 
-    const existingAnalysisConfig = deriveExistingAC({
-      currentRuntime,
-      pendingRuntime,
-      gcePersistentDisk,
-    });
+    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
+    // to render the target runtime details, which  may not match the current runtime.
+    const existingAnalysisConfig = toAnalysisConfig(
+      pendingRuntime || currentRuntime || ({} as Partial<Runtime>),
+      gcePersistentDisk
+    );
 
     const [analysisConfig, setAnalysisConfig] = useState(
       withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
@@ -331,7 +310,7 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     const [panelContent, setPanelContent] = useState<PanelContent>(
       initialPanelContent ||
-        derivePanelContent({
+        createOrCustomize({
           pendingRuntime,
           currentRuntime,
           runtimeStatus,

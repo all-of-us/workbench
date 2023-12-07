@@ -1,26 +1,21 @@
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
 
-import { expectButtonElementEnabled } from '../../testing/react-test-helpers';
-import { stubDisk } from '../../testing/stubs/disks-api-stub';
-import { runtimePresets } from '../utils/runtime-presets';
+import { runtimePresets } from 'app/utils/runtime-presets';
 
+import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataProcRuntime,
   defaultGceRuntime,
   defaultGceRuntimeWithPd,
+  defaultRuntime,
 } from 'testing/stubs/runtime-api-stub';
 
 import {
+  createOrCustomize,
   deriveCurrentRuntime,
-  DeriveCurrentRuntimeProps,
   deriveErrorsAndWarnings,
-  DeriveErrorsWarningsProps,
-  DeriveErrorsWarningsResult,
-  deriveExistingAC,
-  DeriveExistingACProps,
-  derivePanelContent,
-  DerivePanelProps,
 } from './runtime-configuration-panel';
+import { PanelContent } from './runtime-configuration-panel/utils';
 
 describe(deriveCurrentRuntime.name, () => {
   it('returns an undefined runtime if the inputs are undefined', () => {
@@ -225,41 +220,63 @@ describe(deriveCurrentRuntime.name, () => {
     );
   });
 });
-//
-// describe(deriveExistingAC.name, () => {
-//   it('is a placeholder test', () => {
-//     const dummy: DeriveExistingACProps = {
-//       currentRuntime: undefined,
-//       gcePersistentDisk: undefined,
-//       pendingRuntime: undefined,
-//     };
-//     const expected = undefined;
-//     expect(deriveExistingAC(dummy)).toEqual(expected);
-//   });
-// });
-//
-// describe(derivePanelContent.name, () => {
-//   it('is a placeholder test', () => {
-//     const dummy: DerivePanelProps = {
-//       pendingRuntime: undefined,
-//       currentRuntime: undefined,
-//       runtimeStatus: undefined,
-//     };
-//     const expected = undefined;
-//     expect(derivePanelContent(dummy)).toEqual(expected);
-//   });
-// });
-//
-// describe(deriveErrorsAndWarnings.name, () => {
-//   it('is a placeholder test', () => {
-//     const dummy: DeriveErrorsWarningsProps = {
-//       usingInitialCredits: undefined,
-//       analysisConfig: undefined,
-//     };
-//     const expected: DeriveErrorsWarningsResult = {
-//       getErrorMessageContent: undefined,
-//       getWarningMessageContent: undefined,
-//     };
-//     expect(deriveErrorsAndWarnings(dummy)).toEqual(expected);
-//   });
-// });
+
+describe(createOrCustomize.name, () => {
+  it('returns Customize when a pendingRuntime exists', () => {
+    expect(
+      createOrCustomize({
+        pendingRuntime: defaultRuntime(),
+        currentRuntime: undefined,
+        runtimeStatus: undefined,
+      })
+    ).toEqual(PanelContent.Customize);
+  });
+
+  test.each([
+    ['null', null, undefined],
+    ['undefined', undefined, undefined],
+    ['UNKNOWN', defaultRuntime(), RuntimeStatus.UNKNOWN],
+    [
+      'DELETED GCE GENERAL_ANALYSIS', // not GCE with PD
+      {
+        ...defaultGceRuntime(),
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      },
+      RuntimeStatus.DELETED, // not used here, but let's be consistent
+    ],
+    [
+      'DELETED HAIL_GENOMIC_ANALYSIS',
+      {
+        ...defaultDataProcRuntime(),
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      },
+      RuntimeStatus.DELETED, // not used here, but let's be consistent
+    ],
+  ])(
+    'it returns Create for a %s runtime',
+    (desc, currentRuntime, runtimeStatus) => {
+      expect(
+        createOrCustomize({
+          pendingRuntime: undefined,
+          currentRuntime,
+          runtimeStatus,
+        })
+      ).toEqual(PanelContent.Create);
+    }
+  );
+});
+
+describe(deriveErrorsAndWarnings.name, () => {
+  it('is a placeholder test', () => {
+    const { getErrorMessageContent, getWarningMessageContent } =
+      deriveErrorsAndWarnings({
+        usingInitialCredits: undefined,
+        analysisConfig: undefined,
+      });
+
+    expect(getErrorMessageContent()).toBeFalsy();
+    expect(getWarningMessageContent()).toBeFalsy();
+  });
+});
