@@ -143,7 +143,7 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.SAS]: UIAppType.SAS,
 };
 
-export const toHelpSideBarId = (appType: UIAppType) => {
+export const helpSidebarConfigIdForUIApp = (appType: UIAppType) => {
   switch (appType) {
     case UIAppType.SAS:
       return sasConfigIconId;

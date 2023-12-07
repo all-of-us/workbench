@@ -111,6 +111,7 @@ describe('redirectTo', () => {
   });
 
   afterEach(() => {
+    // Reset window.location to original Window location
     Object.defineProperty(window, 'location', {
       configurable: true,
       enumerable: true,

@@ -9,7 +9,7 @@ import {
 
 import {
   findApp,
-  toHelpSideBarId,
+  helpSidebarConfigIdForUIApp,
   toUIAppType,
   UIAppType,
 } from 'app/components/apps-panel/utils';
@@ -170,7 +170,7 @@ export const openAppOrConfigPanel = (
   if (userApp?.status === AppStatus.RUNNING) {
     openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(toHelpSideBarId(requestedApp));
+    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp(requestedApp));
   }
 };
 
