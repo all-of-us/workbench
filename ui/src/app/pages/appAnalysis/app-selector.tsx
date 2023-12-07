@@ -72,7 +72,12 @@ export const AppSelector = (props: AppSelectorProps) => {
         break;
       case UIAppType.SAS:
         setVisibleModal(VisibleModal.None);
-        openSASOrConfigPanel(workspace.namespace, userApps);
+        openSASOrConfigPanel(
+          workspace.namespace,
+          workspace.id,
+          userApps,
+          navigate
+        );
         break;
     }
   };

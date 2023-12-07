@@ -22,7 +22,6 @@ import {
   appDisplayPath,
 } from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
-import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
@@ -117,22 +116,11 @@ test.each([
     renderInteractiveNotebook(pathParameters);
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
-    if (appType === 'RStudio') {
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith([
-          appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
-        ]);
-      });
-    } else if (appType === 'SAS') {
-      // This is temp. Once SAS moves to iframe this if else will be removed
-      await waitFor(() => {
-        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-        expect(spyWindowOpen).toHaveBeenCalledWith(
-          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-          '_blank'
-        );
-      });
-    }
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith([
+        appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
+      ]);
+    });
   }
 );
 

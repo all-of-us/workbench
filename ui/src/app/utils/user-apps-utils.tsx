@@ -7,7 +7,11 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
+import {
+  findApp,
+  toUIAppType,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
   sasConfigIconId,
@@ -142,7 +146,7 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
-export const openRStudio = (
+export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
   userApp: UserAppEnvironment,
@@ -150,7 +154,11 @@ export const openRStudio = (
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
   navigate([
-    appDisplayPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO),
+    appDisplayPath(
+      workspaceNamespace,
+      workspaceId,
+      toUIAppType[userApp.appType]
+    ),
   ]);
 };
 
@@ -162,7 +170,7 @@ export const openRStudioOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, workspaceId, userApp, navigate);
+    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }
@@ -170,11 +178,13 @@ export const openRStudioOrConfigPanel = (
 
 export const openSASOrConfigPanel = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, UIAppType.SAS);
   if (userApp?.status === AppStatus.RUNNING) {
-    openSAS(workspaceNamespace, userApp);
+    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
     setSidebarActiveIconStore.next(sasConfigIconId);
   }

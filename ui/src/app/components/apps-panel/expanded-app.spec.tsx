@@ -388,11 +388,6 @@ describe('ExpandedApp', () => {
           .spyOn(appsApi(), 'localizeApp')
           .mockImplementation((): Promise<any> => Promise.resolve());
 
-        const focusStub = jest.fn();
-        const windowOpenSpy = jest
-          .spyOn(window, 'open')
-          .mockReturnValue({ focus: focusStub } as any as Window);
-
         const launchButton = screen.getByRole('button', {
           name: `Open ${appType}`,
         });
@@ -410,20 +405,14 @@ describe('ExpandedApp', () => {
             }
           );
 
-          if (appType === UIAppType.SAS) {
-            // Confirms SAS opens in a new Window
-            expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
-            expect(focusStub).toHaveBeenCalled();
-          } else if (appType === UIAppType.RSTUDIO) {
-            // Confirm navigate is called to launch RStudio in iframe
-            expect(mockNavigate).toHaveBeenCalledWith([
-              appDisplayPath(
-                WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-                WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-                appType
-              ),
-            ]);
-          }
+          // Confirm navigate is called to launch App in iframe
+          expect(mockNavigate).toHaveBeenCalledWith([
+            appDisplayPath(
+              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+              WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+              appType
+            ),
+          ]);
         });
       });
 

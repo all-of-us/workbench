@@ -539,18 +539,18 @@ export const InteractiveNotebook = fp.flow(
 
     private startEditMode() {
       const { ns, wsid, nbName } = this.props.match.params;
+      const {
+        userAppsStore: { userApps },
+        navigate,
+      } = this.props;
+
       const { appType } = getAppInfoFromFileName(nbName);
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
           if (appType === UIAppType.RSTUDIO) {
-            const {
-              userAppsStore: { userApps },
-              navigate,
-            } = this.props;
             openRStudioOrConfigPanel(ns, wsid, userApps, navigate);
           } else if (appType === UIAppType.SAS) {
-            const { userApps } = this.props.userAppsStore;
-            openSASOrConfigPanel(ns, userApps);
+            openSASOrConfigPanel(ns, wsid, userApps, navigate);
           } else {
             this.runRuntime(() => {
               this.navigateEditMode();
