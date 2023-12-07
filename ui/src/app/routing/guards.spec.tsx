@@ -1,5 +1,6 @@
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
@@ -14,7 +15,7 @@ import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { confirmAppIsValid, shouldRedirectToMaybe } from './guards';
 import { analysisTabName } from './utils';
 
-const hostPath = 'https://exampleWorkbenchUrl';
+const hostPath = 'https://exampleWorkbenchHost';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {
@@ -240,11 +241,18 @@ describe('redirectTo', () => {
   });
 
   it('Should verify App defined in URL is valid', async () => {
-    const pathToRstudioApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/RStudio`;
-    window.location.href = pathToRstudioApp;
-    let appIsValid = confirmAppIsValid();
-    expect(appIsValid).toBeTruthy();
+    const appTypes = Object.values(UIAppType);
 
+    // All URLs containing "App" in UIAppType are considered valid and require no redirection.
+    let appIsValid = false;
+    appTypes.forEach((appType: UIAppType) => {
+      const pathToRstudioApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/${appType}`;
+      window.location.href = pathToRstudioApp;
+      appIsValid = confirmAppIsValid();
+      expect(appIsValid).toBeTruthy();
+    });
+
+    // If an app from the URL is not listed in UIAppType, it should return false, triggering a redirect.
     const pathToFakeApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/FakeApp`;
     window.location.href = pathToFakeApp;
     appIsValid = confirmAppIsValid();
