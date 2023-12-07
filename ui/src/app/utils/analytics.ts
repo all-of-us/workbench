@@ -418,6 +418,12 @@ export const AnalyticsTracker = {
         'Navigate from cohort',
         label
       ),
+    ViewFunnelPlot: () =>
+      triggerEvent(
+        AnalyticsCategory.COHORT_BUILDER,
+        'Click funnel plot icon',
+        'View Funnel Plot'
+      ),
   },
   User: {
     InactivitySignOut: () =>
