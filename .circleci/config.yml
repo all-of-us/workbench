@@ -570,7 +570,7 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo Hello Circle!
+            echo Hello Circle: ${CIRCLE_BRANCH}!
 
   e2etests-deploy-ui:
     machine:
