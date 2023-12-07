@@ -5,6 +5,7 @@ import { stubDisk } from '../../testing/stubs/disks-api-stub';
 import { runtimePresets } from '../utils/runtime-presets';
 
 import {
+  defaultDataProcRuntime,
   defaultGceRuntime,
   defaultGceRuntimeWithPd,
 } from 'testing/stubs/runtime-api-stub';
@@ -33,37 +34,40 @@ describe(deriveCurrentRuntime.name, () => {
     ).toEqual(expected);
   });
 
-  it('returns the runtime from the hook if it is not DELETED', () => {
-    const runtime = {
-      ...defaultGceRuntimeWithPd(),
-      status: RuntimeStatus.RUNNING,
-    };
+  describe.each([
+    ['GCE', defaultGceRuntime()],
+    ['GCE with PD', defaultGceRuntimeWithPd()],
+    ['DataProc', defaultDataProcRuntime()],
+  ])('%s', (desc, runtime) => {
+    it(`returns a ${desc} runtime from the hook if it is not DELETED`, () => {
+      // sanity check
+      expect(runtime.status).not.toEqual(RuntimeStatus.DELETED);
+      expect(
+        deriveCurrentRuntime({
+          crFromCustomRuntimeHook: runtime,
+          gcePersistentDisk: undefined,
+        })
+      ).toEqual(runtime);
+    });
 
-    expect(
-      deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: undefined,
-      })
-    ).toEqual(runtime);
-  });
+    it(`returns a ${desc} runtime from the hook if it is DELETED and config type USER_OVERRIDE`, () => {
+      const testRuntime = {
+        ...runtime,
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+      };
 
-  it('returns the runtime from the hook if it is DELETED and config type USER_OVERRIDE', () => {
-    const runtime = {
-      ...defaultGceRuntime(),
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-    };
-
-    expect(
-      deriveCurrentRuntime({
-        crFromCustomRuntimeHook: runtime,
-        gcePersistentDisk: undefined,
-      })
-    ).toEqual(runtime);
+      expect(
+        deriveCurrentRuntime({
+          crFromCustomRuntimeHook: testRuntime,
+          gcePersistentDisk: undefined,
+        })
+      ).toEqual(testRuntime);
+    });
   });
 
   it(
-    'converts the GCE runtime from the hook to the GCE-with-PD preset if: ' +
+    'converts a GCE runtime from the hook to the GCE-with-PD preset if: ' +
       'it is DELETED and config type GENERAL_ANALYSIS, ' +
       'and there is no PD',
     () => {
@@ -89,11 +93,12 @@ describe(deriveCurrentRuntime.name, () => {
 
       expect(currentRuntime.gceConfig).toBeFalsy();
       expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
     }
   );
 
   it(
-    'converts the GCE runtime from the hook to the GCE-with-PD preset if: ' +
+    'converts a GCE runtime from the hook to the GCE-with-PD preset if: ' +
       'it is DELETED and config type GENERAL_ANALYSIS, ' +
       'and there is a PD',
     () => {
@@ -121,8 +126,104 @@ describe(deriveCurrentRuntime.name, () => {
 
       expect(currentRuntime.gceConfig).toBeFalsy();
       expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
     }
   );
+
+  it(
+    'converts the GCE-with-PD runtime from the hook to the preset if: ' +
+      'it is DELETED and config type GENERAL_ANALYSIS, ' +
+      'and there is a PD',
+    () => {
+      const runtimeDiskName = 'something';
+      const pdName = 'something else';
+
+      const runtime = {
+        ...defaultGceRuntimeWithPd(),
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+        gceWithPdConfig: {
+          ...defaultGceRuntimeWithPd().gceWithPdConfig,
+          persistentDisk: {
+            ...defaultGceRuntimeWithPd().gceWithPdConfig.persistentDisk,
+            name: runtimeDiskName,
+          },
+        },
+      };
+
+      const disk = { ...stubDisk(), name: pdName };
+
+      const expectedGceWithPdConfig = {
+        ...runtime.gceWithPdConfig,
+        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        persistentDisk: {
+          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk,
+          name: runtimeDiskName, // keeps original disk, does NOT attach a different one
+        },
+      };
+
+      const currentRuntime = deriveCurrentRuntime({
+        crFromCustomRuntimeHook: runtime,
+        gcePersistentDisk: disk,
+      });
+
+      expect(currentRuntime.gceConfig).toBeFalsy();
+      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
+    }
+  );
+
+  it(
+    'converts the GCE-with-PD runtime from the hook to the preset if: ' +
+      'it is DELETED and config type GENERAL_ANALYSIS, ' +
+      'and there is no PD',
+    () => {
+      const runtime = {
+        ...defaultGceRuntimeWithPd(),
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      };
+
+      const expectedGceWithPdConfig = {
+        ...runtime.gceWithPdConfig,
+        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        persistentDisk: {
+          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .persistentDisk,
+          name: runtime.gceWithPdConfig.persistentDisk.name,
+        },
+      };
+
+      const currentRuntime = deriveCurrentRuntime({
+        crFromCustomRuntimeHook: runtime,
+        gcePersistentDisk: undefined,
+      });
+
+      expect(currentRuntime.gceConfig).toBeFalsy();
+      expect(currentRuntime.gceWithPdConfig).toEqual(expectedGceWithPdConfig);
+      expect(currentRuntime.dataprocConfig).toBeFalsy();
+    }
+  );
+
+  it('converts the Dataproc runtime from the hook to the preset if it is DELETED and config type HAIL_GENOMIC_ANALYSIS', () => {
+    const runtime = {
+      ...defaultDataProcRuntime(),
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+    };
+
+    const currentRuntime = deriveCurrentRuntime({
+      crFromCustomRuntimeHook: runtime,
+      gcePersistentDisk: undefined,
+    });
+
+    expect(currentRuntime.gceConfig).toBeFalsy();
+    expect(currentRuntime.gceWithPdConfig).toBeFalsy();
+    expect(currentRuntime.dataprocConfig).toEqual(
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+    );
+  });
 });
 //
 // describe(deriveExistingAC.name, () => {
