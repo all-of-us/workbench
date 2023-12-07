@@ -68,12 +68,12 @@ import { PanelContent } from './runtime-configuration-panel/utils';
 
 const { useState, useEffect } = React;
 
-interface DeriveConfigProps {
+export interface DeriveConfigProps {
   crFromCustomRuntimeHook: Runtime;
   pendingRuntime: Runtime;
   gcePersistentDisk: Disk;
 }
-interface DerivedConfigResult {
+export interface DerivedConfigResult {
   currentRuntime: Runtime;
   existingAnalysisConfig: AnalysisConfig;
 }
@@ -106,7 +106,7 @@ export const deriveConfiguration = ({
   return { currentRuntime, existingAnalysisConfig };
 };
 
-interface DerivePanelProps {
+export interface DerivePanelProps {
   pendingRuntime: Runtime;
   currentRuntime: Runtime;
   runtimeStatus: RuntimeStatus;
@@ -144,12 +144,12 @@ export const derivePanelContent = ({
     () => PanelContent.Customize
   );
 
-interface DeriveErrorsWarningsProps {
+export interface DeriveErrorsWarningsProps {
   usingInitialCredits: boolean;
   creatorFreeCreditsRemaining?: number;
   analysisConfig: AnalysisConfig;
 }
-interface DeriveErrorsWarningsResult {
+export interface DeriveErrorsWarningsResult {
   getErrorMessageContent: () => JSX.Element[];
   getWarningMessageContent: () => JSX.Element[];
 }
