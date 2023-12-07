@@ -123,7 +123,6 @@
     "enableRStudioGKEApp": false,
     "enableSasGKEApp": false,
     "enableDataExplorer": false,
-    "enableHasEhrData": true,
     "enableGKEAppPausing": false
   },
   "actionAudit": {
