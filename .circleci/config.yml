@@ -416,6 +416,8 @@ jobs:
   api-contract-upload:
     executor: pact-executor
     steps:
+    - attach_workspace:
+        at: /tmp/workspace
     - run:
         name: ls home
         working_directory: ~
