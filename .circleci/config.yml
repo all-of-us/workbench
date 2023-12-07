@@ -437,7 +437,7 @@ jobs:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 1
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 1 --branch ${CIRCLE_BRANCH}
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
@@ -570,7 +570,7 @@ jobs:
       - run:
           name: Echo
           command: |
-            echo Hello Circle: ${CIRCLE_BRANCH}!
+            echo Hello Circle: ${CIRCLE_SHA1}!
 
   e2etests-deploy-ui:
     machine:
