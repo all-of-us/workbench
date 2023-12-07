@@ -125,6 +125,38 @@ export const createOrCustomize = ({
     () => PanelContent.Customize
   );
 
+// Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
+// disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
+// persistent disk.
+type ValidatorDiskType = 'standard' | 'master' | 'worker';
+const diskSizeValidatorWithMessage = (
+  diskType: ValidatorDiskType,
+  usingInitialCredits: boolean,
+  analysisConfig: AnalysisConfig
+) => {
+  const maxDiskSize = usingInitialCredits ? 4000 : 64000;
+  const minDiskSize =
+    analysisConfig.computeType === ComputeType.Dataproc
+      ? DATAPROC_MIN_DISK_SIZE_GB
+      : MIN_DISK_SIZE_GB;
+  const message = {
+    standard: `^Disk size must be between ${minDiskSize} and ${maxDiskSize} GB`,
+    master: `^Master disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+    worker: `^Worker disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+  };
+
+  return {
+    numericality: {
+      greaterThanOrEqualTo:
+        analysisConfig.computeType === ComputeType.Dataproc
+          ? DATAPROC_MIN_DISK_SIZE_GB
+          : MIN_DISK_SIZE_GB,
+      lessThanOrEqualTo: maxDiskSize,
+      message: message[diskType],
+    },
+  };
+};
+
 interface DeriveErrorsWarningsProps {
   usingInitialCredits: boolean;
   creatorFreeCreditsRemaining?: number;
@@ -139,35 +171,6 @@ export const deriveErrorsAndWarnings = ({
   creatorFreeCreditsRemaining = 0,
   analysisConfig,
 }: DeriveErrorsWarningsProps): DeriveErrorsWarningsResult => {
-  // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
-  // persistent disk.
-  const diskSizeValidatorWithMessage = (
-    diskType = 'standard' || 'master' || 'worker'
-  ) => {
-    const maxDiskSize = usingInitialCredits ? 4000 : 64000;
-    const minDiskSize =
-      analysisConfig.computeType === ComputeType.Dataproc
-        ? DATAPROC_MIN_DISK_SIZE_GB
-        : MIN_DISK_SIZE_GB;
-    const message = {
-      standard: `^Disk size must be between ${minDiskSize} and ${maxDiskSize} GB`,
-      master: `^Master disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-      worker: `^Worker disk size must be between ${DATAPROC_MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
-    };
-
-    return {
-      numericality: {
-        greaterThanOrEqualTo:
-          analysisConfig.computeType === ComputeType.Dataproc
-            ? DATAPROC_MIN_DISK_SIZE_GB
-            : MIN_DISK_SIZE_GB,
-        lessThanOrEqualTo: maxDiskSize,
-        message: message[diskType],
-      },
-    };
-  };
-
   const costErrorsAsWarnings =
     !usingInitialCredits ||
     // We've increased the workspace creator's free credits. This means they may be expecting to run
@@ -198,12 +201,13 @@ export const deriveErrorsAndWarnings = ({
     }
   );
 
+  const diskValidator = (diskType: ValidatorDiskType) =>
+    diskSizeValidatorWithMessage(diskType, usingInitialCredits, analysisConfig);
+
   const getErrorMessageContent = (): JSX.Element[] => {
     const diskErrors = validate(
       { diskSize: analysisConfig.diskConfig.size },
-      {
-        diskSize: diskSizeValidatorWithMessage('standard'),
-      }
+      { diskSize: diskValidator('standard') }
     );
 
     const { masterDiskSize, workerDiskSize, numberOfWorkers } =
@@ -215,8 +219,8 @@ export const deriveErrorsAndWarnings = ({
         // We don't clear dataproc config when we change compute type so we can't combine this with the
         // runningCostValidator or else we can end up with phantom validation fails
         {
-          masterDiskSize: diskSizeValidatorWithMessage('master'),
-          workerDiskSize: diskSizeValidatorWithMessage('worker'),
+          masterDiskSize: diskValidator('master'),
+          workerDiskSize: diskValidator('worker'),
           numberOfWorkers: {
             numericality: {
               greaterThanOrEqualTo: 2,
