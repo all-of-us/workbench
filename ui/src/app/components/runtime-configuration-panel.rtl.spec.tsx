@@ -1,6 +1,12 @@
 import { RuntimeConfigurationType, RuntimeStatus } from 'generated/fetch';
 
-import { toAnalysisConfig } from 'app/utils/analysis-config';
+import { expectButtonElementDisabled } from '../../testing/react-test-helpers';
+import {
+  ComputeType,
+  DATAPROC_MIN_DISK_SIZE_GB,
+  MIN_DISK_SIZE_GB,
+} from '../utils/machines';
+import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -284,5 +290,197 @@ describe(deriveErrorsAndWarnings.name, () => {
 
     expect(getErrorMessageContent()).toEqual([]);
     expect(getWarningMessageContent()).toEqual([]);
+  });
+
+  const minDiskGce = MIN_DISK_SIZE_GB;
+  const minDiskDataProc = DATAPROC_MIN_DISK_SIZE_GB;
+  const maxDiskInitialCredits = 4000;
+  const maxDiskBYOBilling = 64000;
+  const defaultGceAc = toAnalysisConfig(defaultGceRuntime(), undefined);
+  const defaultDataProcAc = toAnalysisConfig(
+    defaultDataProcRuntime(),
+    undefined
+  );
+
+  it.each([
+    [
+      'too-small GCE standard disk when using initial credits',
+      'Disk size',
+      true,
+      {
+        ...defaultGceAc,
+        diskConfig: { ...defaultGceAc.diskConfig, size: minDiskGce - 1 },
+      },
+    ],
+    [
+      'too-small GCE standard disk when not using initial credits',
+      'Disk size',
+      false,
+      {
+        ...defaultGceAc,
+        diskConfig: { ...defaultGceAc.diskConfig, size: minDiskGce - 1 },
+      },
+    ],
+    [
+      'too-large GCE standard disk when using initial credits',
+      'Disk size',
+      true,
+      {
+        ...defaultGceAc,
+        diskConfig: {
+          ...defaultGceAc.diskConfig,
+          size: maxDiskInitialCredits + 1,
+        },
+      },
+    ],
+    [
+      'too-large GCE standard disk when not using initial credits',
+      'Disk size',
+      false,
+      {
+        ...defaultGceAc,
+        diskConfig: { ...defaultGceAc.diskConfig, size: maxDiskBYOBilling + 1 },
+      },
+    ],
+    [
+      'too-small DataProc master disk when using initial credits',
+      'Master disk size',
+      true,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          masterDiskSize: minDiskDataProc - 1,
+        },
+      },
+    ],
+    [
+      'too-small DataProc master disk when using BYOBilling credits',
+      'Master disk size',
+      false,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          masterDiskSize: minDiskDataProc - 1,
+        },
+      },
+    ],
+    [
+      'too-large DataProc master disk when using initial credits',
+      'Master disk size',
+      true,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          masterDiskSize: maxDiskInitialCredits + 1,
+        },
+      },
+    ],
+    [
+      'too-large DataProc master disk when using BYOBilling credits',
+      'Master disk size',
+      false,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          masterDiskSize: maxDiskBYOBilling + 1,
+        },
+      },
+    ],
+    [
+      'too-small DataProc worker disk when using initial credits',
+      'Worker disk size',
+      true,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          workerDiskSize: minDiskDataProc - 1,
+        },
+      },
+    ],
+    [
+      'too-small DataProc worker disk when using BYOBilling credits',
+      'Worker disk size',
+      false,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          workerDiskSize: minDiskDataProc - 1,
+        },
+      },
+    ],
+    [
+      'too-large DataProc worker disk when using initial credits',
+      'Worker disk size',
+      true,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          workerDiskSize: maxDiskInitialCredits + 1,
+        },
+      },
+    ],
+    [
+      'too-large DataProc worker disk when using BYOBilling credits',
+      'Worker disk size',
+      false,
+      {
+        ...defaultDataProcAc,
+        dataprocConfig: {
+          ...defaultDataProcAc.dataprocConfig,
+          workerDiskSize: maxDiskBYOBilling + 1,
+        },
+      },
+    ],
+  ])(
+    'it should show a disk error for a %s',
+    (
+      desc,
+      diskSizeDesc: string,
+      usingInitialCredits: boolean,
+      analysisConfig: AnalysisConfig
+    ) => {
+      const minDisk = analysisConfig.dataprocConfig
+        ? minDiskDataProc
+        : minDiskGce;
+      const maxDisk = usingInitialCredits
+        ? maxDiskInitialCredits
+        : maxDiskBYOBilling;
+      const expectedError = `${diskSizeDesc} must be between ${minDisk} and ${maxDisk} GB`;
+
+      const { getErrorMessageContent, getWarningMessageContent } =
+        deriveErrorsAndWarnings({ usingInitialCredits, analysisConfig });
+
+      expect(getWarningMessageContent()).toEqual([]);
+      const errors = getErrorMessageContent();
+      expect(errors).toHaveLength(1);
+      expect(errors[0].props.children).toEqual(expectedError);
+    }
+  );
+
+  it('should show an error for fewer than 2 dataproc workers', () => {
+    const usingInitialCredits = true; // not relevant here
+    const analysisConfig = {
+      ...defaultDataProcAc,
+      dataprocConfig: {
+        ...defaultDataProcAc.dataprocConfig,
+        numberOfWorkers: 1,
+      },
+    };
+    const expectedError = 'Dataproc requires at least 2 worker nodes';
+
+    const { getErrorMessageContent, getWarningMessageContent } =
+      deriveErrorsAndWarnings({ usingInitialCredits, analysisConfig });
+
+    expect(getWarningMessageContent()).toEqual([]);
+    const errors = getErrorMessageContent();
+    expect(errors).toHaveLength(1);
+    expect(errors[0].props.children).toEqual(expectedError);
   });
 });

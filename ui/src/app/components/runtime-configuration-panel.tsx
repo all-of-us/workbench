@@ -203,33 +203,32 @@ export const deriveErrorsAndWarnings = ({
 
   const diskValidator = (diskType: ValidatorDiskType) =>
     diskSizeValidatorWithMessage(diskType, usingInitialCredits, analysisConfig);
+  const diskErrors = validate(
+    { diskSize: analysisConfig.diskConfig.size },
+    { diskSize: diskValidator('standard') }
+  );
 
-  const getErrorMessageContent = (): JSX.Element[] => {
-    const diskErrors = validate(
-      { diskSize: analysisConfig.diskConfig.size },
-      { diskSize: diskValidator('standard') }
+  const { masterDiskSize, workerDiskSize, numberOfWorkers } =
+    analysisConfig.dataprocConfig || {};
+  const dataprocErrors =
+    analysisConfig.computeType === ComputeType.Dataproc &&
+    validate(
+      { masterDiskSize, workerDiskSize, numberOfWorkers },
+      // We don't clear dataproc config when we change compute type so we can't combine this with the
+      // runningCostValidator or else we can end up with phantom validation fails
+      {
+        masterDiskSize: diskValidator('master'),
+        workerDiskSize: diskValidator('worker'),
+        numberOfWorkers: {
+          numericality: {
+            greaterThanOrEqualTo: 2,
+            message: '^Dataproc requires at least 2 worker nodes',
+          },
+        },
+      }
     );
 
-    const { masterDiskSize, workerDiskSize, numberOfWorkers } =
-      analysisConfig.dataprocConfig || {};
-    const dataprocErrors =
-      analysisConfig.computeType === ComputeType.Dataproc &&
-      validate(
-        { masterDiskSize, workerDiskSize, numberOfWorkers },
-        // We don't clear dataproc config when we change compute type so we can't combine this with the
-        // runningCostValidator or else we can end up with phantom validation fails
-        {
-          masterDiskSize: diskValidator('master'),
-          workerDiskSize: diskValidator('worker'),
-          numberOfWorkers: {
-            numericality: {
-              greaterThanOrEqualTo: 2,
-              message: 'Dataproc requires at least 2 worker nodes',
-            },
-          },
-        }
-      );
-
+  const getErrorMessageContent = (): JSX.Element[] => {
     return [
       ...(diskErrors ? summarizeErrors(diskErrors) : []),
       ...(dataprocErrors ? summarizeErrors(dataprocErrors) : []),
