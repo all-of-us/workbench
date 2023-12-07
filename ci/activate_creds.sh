@@ -9,7 +9,7 @@ then
   exit 1
 fi
 
-echo SERVICE_ACCOUNT_CREDENTIALS_STABLE_ENV | \
+echo $SERVICE_ACCOUNT_CREDENTIALS_STABLE_ENV | \
      openssl enc -d -md sha256 -aes-256-cbc -base64 -A -k "${SERVICE_ACCOUNT_CREDENTIALS_STABLE_ENV_KEY}" \
      > $1
 
