@@ -452,6 +452,11 @@ jobs:
         working_directory: ~
         command: |
           ls /tmp/workspace/pacts
+    - run:
+        name: Pact Broker Publish
+        working_directory: ~
+        command: |
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version 0
 
 
   api-test-coverage:
