@@ -9,13 +9,10 @@ import {
 
 import {
   findApp,
+  toHelpSideBarId,
   toUIAppType,
   UIAppType,
 } from 'app/components/apps-panel/utils';
-import {
-  rstudioConfigIconId,
-  sasConfigIconId,
-} from 'app/components/help-sidebar-icons';
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
@@ -162,18 +159,34 @@ export const openAppInIframe = (
   ]);
 };
 
+export const openAppOrConfigPanel = (
+  workspaceNamespace: string,
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  requestedApp: UIAppType,
+  navigate: (commands: any, extras?: any) => void
+) => {
+  const userApp = findApp(userApps, requestedApp);
+  if (userApp?.status === AppStatus.RUNNING) {
+    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
+  } else {
+    setSidebarActiveIconStore.next(toHelpSideBarId(requestedApp));
+  }
+};
+
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   workspaceId: string,
   userApps: ListAppsResponse,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  const userApp = findApp(userApps, UIAppType.RSTUDIO);
-  if (userApp?.status === AppStatus.RUNNING) {
-    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
-  } else {
-    setSidebarActiveIconStore.next(rstudioConfigIconId);
-  }
+  openAppOrConfigPanel(
+    workspaceNamespace,
+    workspaceId,
+    userApps,
+    UIAppType.RSTUDIO,
+    navigate
+  );
 };
 
 export const openSASOrConfigPanel = (
@@ -182,10 +195,11 @@ export const openSASOrConfigPanel = (
   userApps: ListAppsResponse,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  const userApp = findApp(userApps, UIAppType.SAS);
-  if (userApp?.status === AppStatus.RUNNING) {
-    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
-  } else {
-    setSidebarActiveIconStore.next(sasConfigIconId);
-  }
+  openAppOrConfigPanel(
+    workspaceNamespace,
+    workspaceId,
+    userApps,
+    UIAppType.SAS,
+    navigate
+  );
 };
