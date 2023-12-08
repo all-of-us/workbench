@@ -19,7 +19,6 @@ import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
 } from 'app/components/runtime-configuration-panel';
-import { Spinner } from 'app/components/spinners';
 import {
   disksApi,
   registerApiClient,
@@ -319,16 +318,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   };
 
   it('should show loading spinner while loading', async () => {
-    const wrapper = await component();
-
-    // Check before ticking - stub returns the runtime asynchronously.
-    expect(!wrapper.exists('#runtime-panel'));
-    expect(wrapper.exists(Spinner));
-
-    // Now getRuntime returns.
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('#runtime-panel'));
-    expect(!wrapper.exists(Spinner));
+    // migrated to RTL
   });
 
   it('should show Create panel when no runtime', async () => {

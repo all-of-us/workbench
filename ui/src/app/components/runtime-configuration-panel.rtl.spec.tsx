@@ -10,15 +10,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import {
-  CdrVersionsStubVariables,
-  cdrVersionTiersResponse,
-} from '../../testing/stubs/cdr-versions-api-stub';
-import { workspaceStubs } from '../../testing/stubs/workspaces';
-import { WorkspacesApiStub } from '../../testing/stubs/workspaces-api-stub';
-import { registerApiClient } from '../services/swagger-fetch-clients';
-import { currentWorkspaceStore } from '../utils/navigation';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -26,10 +19,20 @@ import {
   Machine,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  runtimeDiskStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
@@ -39,6 +42,8 @@ import {
   defaultRuntime,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
+import { workspaceStubs } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import {
   createOrCustomize,
@@ -621,9 +626,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   };
 
   beforeEach(async () => {
-    cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({ config: { ...defaultServerConfig } });
-
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
 
@@ -633,6 +635,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({ config: { ...defaultServerConfig } });
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
@@ -641,10 +645,48 @@ describe(RuntimeConfigurationPanel.name, () => {
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       googleProject: runtimeApiStub.runtime.googleProject,
     });
+
+    runtimeStore.set({
+      runtime: runtimeApiStub.runtime,
+      workspaceNamespace: workspaceStubs[0].namespace,
+      runtimeLoaded: true,
+    });
+
+    runtimeDiskStore.set({
+      workspaceNamespace: workspaceStubs[0].namespace,
+      gcePersistentDisk: null,
+    });
   });
 
-  it('renders', () => {
+  it('should show loading spinner while loading', async () => {
+    // simulate not done loading
+    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
+
     const { container } = component();
     expect(container).toBeInTheDocument();
+
+    await waitFor(() => {
+      // spinner label
+      expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument();
+    });
+
+    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: true });
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders the chosen panel when specified in initialPanelContent', () => {
+    const { container } = component({
+      initialPanelContent: PanelContent.Create,
+    });
+    expect(container).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        /Your analysis environment consists of an application and compute resources./
+      )
+    ).toBeInTheDocument();
   });
 });
