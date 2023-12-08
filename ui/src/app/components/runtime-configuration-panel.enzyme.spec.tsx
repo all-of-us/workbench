@@ -155,8 +155,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
-    cdrVersionStore.set(cdrVersionTiersResponse);
-
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,

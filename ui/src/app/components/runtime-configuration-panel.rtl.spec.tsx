@@ -1,9 +1,24 @@
+import '@testing-library/jest-dom';
+
 import {
+  DisksApi,
   GpuConfig,
+  RuntimeApi,
   RuntimeConfigurationType,
   RuntimeStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
 } from 'generated/fetch';
 
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from '../../testing/stubs/cdr-versions-api-stub';
+import { workspaceStubs } from '../../testing/stubs/workspaces';
+import { WorkspacesApiStub } from '../../testing/stubs/workspaces-api-stub';
+import { registerApiClient } from '../services/swagger-fetch-clients';
+import { currentWorkspaceStore } from '../utils/navigation';
+import { render } from '@testing-library/react';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -12,21 +27,25 @@ import {
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { serverConfigStore } from 'app/utils/stores';
+import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { stubDisk } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   defaultDataProcRuntime,
   defaultGceRuntime,
   defaultGceRuntimeWithPd,
   defaultRuntime,
+  RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
 
 import {
   createOrCustomize,
   deriveCurrentRuntime,
   getErrorsAndWarnings,
+  RuntimeConfigurationPanel,
+  RuntimeConfigurationPanelProps,
 } from './runtime-configuration-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 
@@ -575,5 +594,57 @@ describe(getErrorsAndWarnings.name, () => {
     expect(errorMessageContent).toEqual([]);
     expect(warningMessageContent).toHaveLength(1);
     expect(warningMessageContent[0].props.children).toEqual(expectedWarning);
+  });
+});
+
+describe(RuntimeConfigurationPanel.name, () => {
+  let runtimeApiStub: RuntimeApiStub;
+  let disksApiStub: DisksApiStub;
+  let workspacesApiStub: WorkspacesApiStub;
+
+  const onClose = jest.fn();
+  const defaultProps: RuntimeConfigurationPanelProps = {
+    onClose,
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
+  };
+
+  const component = (
+    propOverrides?: Partial<RuntimeConfigurationPanelProps>
+  ) => {
+    const allProps = { ...defaultProps, ...propOverrides };
+    return render(<RuntimeConfigurationPanel {...allProps} />);
+  };
+
+  beforeEach(async () => {
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({ config: { ...defaultServerConfig } });
+
+    runtimeApiStub = new RuntimeApiStub();
+    registerApiClient(RuntimeApi, runtimeApiStub);
+
+    disksApiStub = new DisksApiStub();
+    registerApiClient(DisksApi, disksApiStub);
+
+    workspacesApiStub = new WorkspacesApiStub();
+    registerApiClient(WorkspacesApi, workspacesApiStub);
+
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountName:
+        'billingAccounts/' + defaultServerConfig.freeTierBillingAccountId,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+      googleProject: runtimeApiStub.runtime.googleProject,
+    });
+  });
+
+  it('renders', () => {
+    const { container } = component();
+    expect(container).toBeInTheDocument();
   });
 });
