@@ -210,12 +210,12 @@ export const getErrorsAndWarnings = ({
 
   const { masterDiskSize, workerDiskSize, numberOfWorkers } =
     analysisConfig.dataprocConfig || {};
+  // only validate if DataProc because it's possible for a Standard/GCE analysisConfig
+  // to have an invalid dataprocConfig if we haven't cleared it properly
   const dataprocErrors =
     analysisConfig.computeType === ComputeType.Dataproc &&
     validate(
       { masterDiskSize, workerDiskSize, numberOfWorkers },
-      // We don't clear dataproc config when we change compute type so we can't combine this with the
-      // runningCostValidator or else we can end up with phantom validation fails
       {
         masterDiskSize: diskValidator('master'),
         workerDiskSize: diskValidator('worker'),
