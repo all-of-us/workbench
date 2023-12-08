@@ -184,11 +184,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     jest.useRealTimers();
   });
 
-  const expectEqualFields = (a, b, fieldNames) => {
-    const pick = fp.flow(fp.pick(fieldNames));
-    expect(pick(a)).toEqual(pick(b));
-  };
-
   const pickDropdownOption = async (wrapper, id, label) => {
     wrapper.find(id).first().simulate('click');
     const item = wrapper
@@ -335,19 +330,10 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creation when no runtime exists with defaults', async () => {
-    setCurrentRuntime(null);
-
-    const wrapper = await component();
-
-    await mustClickButton(wrapper, 'Create');
-
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
-      'n1-standard-4'
-    );
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+    // migrated to RTL
   });
 
+  // TODO: this test appears to be invalid
   it('should show customize after create', async () => {
     setCurrentRuntime(null);
 
@@ -360,113 +346,19 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
-    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
-    // we should ignore the other runtime config values that were delivered with the getRuntime response
-    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: 1000,
-      },
-    });
-
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Create');
-
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-    expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
-    );
-    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-        .persistentDisk.size
-    );
+    // migrated to RTL
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
-    // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
-    // we should ignore the other runtime config values that were delivered with the getRuntime response
-    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      gceConfig: null,
-      gceWithPdConfig: null,
-      dataprocConfig: {
-        ...defaultDataprocConfig(),
-        masterMachineType: 'n1-standard-16',
-        masterDiskSize: 999,
-        workerDiskSize: 444,
-        numberOfWorkers: 5,
-      },
-    });
-
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Create');
-
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expectEqualFields(
-      runtimeApiStub.runtime.dataprocConfig,
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig,
-      [
-        'masterMachineType',
-        'masterDiskSize',
-        'workerDiskSize',
-        'numberOfWorkers',
-      ]
-    );
+    // migrated to RTL
   });
 
   it('should allow creation when runtime has error status', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.ERROR,
-      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: MIN_DISK_SIZE_GB,
-      },
-      dataprocConfig: null,
-    });
-
-    const wrapper = await component();
-
-    await mustClickButton(wrapper, 'Try Again');
-
-    // Kicks off a deletion to first clear the error status runtime.
-    expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+    // migrated to RTL
   });
 
   it('should allow creation with update from error', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.ERROR,
-      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: {
-        ...defaultGceConfig(),
-        machineType: 'n1-standard-16',
-        diskSize: MIN_DISK_SIZE_GB,
-      },
-      dataprocConfig: null,
-    });
-
-    const wrapper = await component();
-
-    await pickMainCpu(wrapper, 8);
-    await mustClickButton(wrapper, 'Try Again');
-
-    // Kicks off a deletion to first clear the error status runtime.
-    expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+    // migrated to RTL
   });
 
   it('should allow creation with GCE with PD config', async () => {

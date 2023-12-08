@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import {
   DisksApi,
   GpuConfig,
+  Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
   RuntimeStatus,
@@ -11,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
@@ -23,6 +25,7 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import {
   cdrVersionStore,
+  clearCompoundRuntimeOperations,
   runtimeDiskStore,
   runtimeStore,
   serverConfigStore,
@@ -30,13 +33,19 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementEnabled,
+  getDropdownOption,
+} from 'testing/react-test-helpers';
+import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
+  defaultDataprocConfig,
   defaultDataProcRuntime,
+  defaultGceConfig,
   defaultGceRuntime,
   defaultGceRuntimeWithPd,
   defaultRuntime,
@@ -618,6 +627,42 @@ describe(RuntimeConfigurationPanel.name, () => {
     },
   };
 
+  const setCurrentRuntime = (runtime: Runtime) => {
+    runtimeApiStub.runtime = runtime;
+    runtimeStore.set({ ...runtimeStore.get(), runtime });
+  };
+
+  const clickExpectedButton = (name: string) => {
+    const button = screen.getByRole('button', { name });
+    expect(button).toBeInTheDocument();
+    expectButtonElementEnabled(button);
+    button.click();
+  };
+
+  const pickAndClick = (
+    container: HTMLElement,
+    user: UserEvent,
+    dropDownId: string,
+    optionText: string
+  ): void => {
+    const option = getDropdownOption(container, dropDownId, optionText);
+    user.click(option);
+  };
+
+  const pickMainCpu = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): void => pickAndClick(container, user, 'runtime-cpu', option.toString());
+
+  // TODO
+  // const expectMainCpuOption = (container: HTMLElement) => expectDropdown(container, 'runtime-cpu');
+  // const pickMainRam = (
+  //   container: HTMLElement,
+  //   user: UserEvent,
+  //   option: number
+  // ): void => pickAndClick(container, user, 'runtime-ram', option.toString());
+
   const component = (
     propOverrides?: Partial<RuntimeConfigurationPanelProps>
   ) => {
@@ -658,6 +703,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
+  afterEach(() => {
+    clearCompoundRuntimeOperations();
+  });
+
   it('should show loading spinner while loading', async () => {
     // simulate not done loading
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
@@ -689,4 +738,184 @@ describe(RuntimeConfigurationPanel.name, () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('should allow creation with defaults when no runtime exists', async () => {
+    setCurrentRuntime(null);
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
+        'n1-standard-4'
+      );
+      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+      expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
+    });
+  });
+
+  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
+    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 1000,
+      },
+    });
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .machineType
+      );
+      expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .persistentDisk.size
+      );
+    });
+  });
+
+  it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
+    // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        ...defaultDataprocConfig(),
+        masterMachineType: 'n1-standard-16',
+        masterDiskSize: 999,
+        workerDiskSize: 444,
+        numberOfWorkers: 5,
+      },
+    });
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } = runtimeApiStub.runtime.dataprocConfig;
+
+      expect(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      ).toMatchObject({
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      });
+    });
+  });
+
+  it('should allow creation when runtime has error status', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.ERROR,
+      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: MIN_DISK_SIZE_GB,
+      },
+      dataprocConfig: null,
+    });
+
+    component();
+
+    clickExpectedButton('Try Again');
+    await waitFor(() => {
+      // Kicks off a deletion to first clear the error status runtime.
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+    });
+  });
+
+  it('should allow creation from error with an update', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.ERROR,
+      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: MIN_DISK_SIZE_GB,
+      },
+      dataprocConfig: null,
+    });
+
+    const { container } = component();
+
+    pickMainCpu(container, user, 8);
+    clickExpectedButton('Try Again');
+
+    await waitFor(() => {
+      // Kicks off a deletion to first clear the error status runtime.
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+    });
+  });
+
+  // TODO
+  // it('should allow creation with GCE with PD config', async () => {
+  //   const user = userEvent.setup();
+  //
+  //   setCurrentRuntime(null);
+  //
+  //   const { container } = component();
+  //   clickExpectedButton('Customize');
+  //
+  //   await waitFor(() => expectMainCpuOption(container));
+  //
+  //   pickMainCpu(container, user, 8);
+  //   pickMainRam(container, user, 52);
+  //   pickDetachableDiskSize(container, user, MIN_DISK_SIZE_GB + 10);
+  //
+  //   clickExpectedButton('Create');
+  //
+  //   await waitFor(() => {
+  //     expect(runtimeApiStub.runtime.status).toEqual('Creating');
+  //     expect(runtimeApiStub.runtime.configurationType).toEqual(
+  //       RuntimeConfigurationType.USER_OVERRIDE
+  //     );
+  //     expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
+  //       machineType: 'n1-highmem-8',
+  //       gpuConfig: null,
+  //       persistentDisk: {
+  //         diskType: 'pd-standard',
+  //         labels: {},
+  //         name: 'stub-disk',
+  //         size: MIN_DISK_SIZE_GB + 10,
+  //       },
+  //     });
+  //     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+  //   });
+  // });
 });

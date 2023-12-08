@@ -143,14 +143,23 @@ export const renderModal = <C,>(
 
 // seems to be the best we can do with Primereact Dropdown
 // based on runtime-configuration-panel.spec pickDropdownOption
+
+export const expectDropdown = (
+  container: HTMLElement,
+  dropDownId: string
+): HTMLElement => {
+  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
+  expect(dropdown).toBeInTheDocument();
+  return dropdown;
+};
+
 export const getDropdownOption = (
   container: HTMLElement,
   dropDownId: string,
   optionText: string,
   expectedCount?: number
 ): Element => {
-  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
-  expect(dropdown).toBeInTheDocument();
+  const dropdown: HTMLElement = expectDropdown(container, dropDownId);
   dropdown.click();
 
   const allOptions = container.querySelectorAll(
@@ -173,8 +182,7 @@ export const expectDropdownDisabled = (
   container: HTMLElement,
   dropDownId: string
 ) => {
-  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
-  expect(dropdown).toBeInTheDocument();
+  const dropdown: HTMLElement = expectDropdown(container, dropDownId);
   dropdown.click();
 
   expect(
