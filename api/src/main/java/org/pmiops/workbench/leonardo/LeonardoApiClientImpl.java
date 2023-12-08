@@ -603,6 +603,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
         .customEnvironmentVariables(appCustomEnvVars)
+        .workspaceId(dbWorkspace.getFirecloudUuid())
         .labels(appLabels);
 
     leonardoRetryHandler.run(

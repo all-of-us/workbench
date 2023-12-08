@@ -2481,6 +2481,9 @@ components:
         descriptorPath:
           type: string
           description: URL path to an app descriptor file. Only used if appType is CUSTOM.
+        workspaceId:
+          type: string
+          description: The workspace ID of the workspace in which to create the app.
         extraArgs:
           type: array
           items:
