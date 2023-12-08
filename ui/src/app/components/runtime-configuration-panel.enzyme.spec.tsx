@@ -13,7 +13,6 @@ import {
 import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
-import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import {
@@ -63,7 +62,9 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-describe('RuntimeConfigurationPanel', () => {
+import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
+
+describe(RuntimeConfigurationPanel.name, () => {
   const defaultProps: RuntimeConfigurationPanelProps = {
     onClose: jest.fn(),
     profileState: {

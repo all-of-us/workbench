@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -26,8 +27,14 @@ import {
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   Machine,
+  validLeoDataprocMasterMachineTypes,
+  validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { RuntimeStatusRequest, UpdateMessaging } from 'app/utils/runtime-utils';
+import {
+  canUpdateRuntime,
+  RuntimeStatusRequest,
+  UpdateMessaging,
+} from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
@@ -58,8 +65,7 @@ export interface CustomizePanelProps {
   setAnalysisConfig: (config: AnalysisConfig) => void;
   setPanelContent: (pc: PanelContent) => void;
   setRuntimeStatusRequest: (rs: RuntimeStatusRequest) => Promise<void>;
-  updateMessaging: UpdateMessaging;
-  validMainMachineTypes: Machine[];
+  updateMessaging?: UpdateMessaging;
   warningMessageContent: JSX.Element[];
   workspaceData: WorkspaceData;
 }
@@ -84,15 +90,30 @@ export const CustomizePanel = ({
   setPanelContent,
   setRuntimeStatusRequest,
   updateMessaging,
-  validMainMachineTypes,
   warningMessageContent,
   workspaceData,
 }: CustomizePanelProps) => {
-  const disableControls =
-    runtimeExists &&
-    !(
-      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
-    ).includes(runtimeStatus);
+  const validMainMachineTypes =
+    analysisConfig.computeType === ComputeType.Standard
+      ? validLeoGceMachineTypes
+      : validLeoDataprocMasterMachineTypes;
+  // The compute type affects the set of valid machine types, so revert to the
+  // default machine type if switching compute types would invalidate the main
+  // machine type choice.
+  useEffect(() => {
+    if (
+      !validMainMachineTypes.find(
+        ({ name }) => name === analysisConfig.machine.name
+      )
+    ) {
+      setAnalysisConfig({
+        ...analysisConfig,
+        machine: existingAnalysisConfig.machine,
+      });
+    }
+  }, [analysisConfig.computeType]);
+
+  const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -274,7 +295,7 @@ export const CustomizePanel = ({
         existingDisk={gcePersistentDisk}
         computeType={analysisConfig.computeType}
       />
-      {runtimeExists && updateMessaging.warn && (
+      {runtimeExists && updateMessaging?.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <div>{updateMessaging.warn}</div>
         </WarningMessage>
