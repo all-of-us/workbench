@@ -2483,7 +2483,7 @@ components:
           description: URL path to an app descriptor file. Only used if appType is CUSTOM.
         workspaceId:
           type: string
-          description: The workspace ID of the workspace in which to create the app.
+          description: The workspace ID of the workspace in which to create the app. Note, this is Terra workspace ID, which is equivalent to firecloud_uuid in RWB codebase.
         extraArgs:
           type: array
           items:
