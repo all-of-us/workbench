@@ -369,7 +369,7 @@ export const validLeoGceMachineTypes = allMachineTypes.filter(
   ({ memory }) => memory >= 2
 );
 export const validLeoDataprocMasterMachineTypes = allMachineTypes.filter(
-  ({ memory }) => memory > 13
+  ({ memory }) => memory > 16
 );
 // updated 29 Nov 2023 after observing the error:
 // Creating clusters using the n1-standard-1 machine type is not supported for image version 2.1.11-debian11
