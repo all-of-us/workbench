@@ -950,7 +950,7 @@ workflows:
       - deploy-to-stable-approval:
           type: approval
           <<: *filter-stable-deployment-manual-verification-tags
-      - deploy-to-stable:
+      - deploy-to-staging:
           requires:
             - deploy-to-stable-approval
           <<: *filter-stable-deployment-manual-verification-tags
