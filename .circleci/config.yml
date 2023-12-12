@@ -937,6 +937,7 @@ workflows:
       - deploy-to-stable:
           requires:
             - deploy-to-stable-approval
+          <<: *filter-stable-deployment-manual-verification-tags
 
   nightly-tests:
     triggers:
