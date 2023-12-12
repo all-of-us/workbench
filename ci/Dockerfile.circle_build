@@ -49,5 +49,3 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN sudo gem install jira-ruby
-
-RUN sudo npm install @openapitools/openapi-generator-cli -g
