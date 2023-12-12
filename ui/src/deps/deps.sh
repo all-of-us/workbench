@@ -10,6 +10,8 @@ if [[ -z ${1} || $envs != *"$1"* ]]; then
   exit 1
 fi
 
+yarn install
+
 ./project.rb tanagra-dep --env "$1"
 
 yarn run codegen && yarn run build-terra-deps
