@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 
 import {
+  Disk,
   DisksApi,
   GpuConfig,
   Runtime,
@@ -16,6 +17,7 @@ import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
+  ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   Machine,
@@ -36,6 +38,7 @@ import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   getDropdownOption,
+  waitForFakeTimersAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
@@ -55,8 +58,7 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { Button, LinkButton } from './buttons';
-import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
+import { RadioButton } from './inputs';
 import {
   createOrCustomize,
   deriveCurrentRuntime,
@@ -635,6 +637,14 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeStore.set({ ...runtimeStore.get(), runtime });
   };
 
+  const setCurrentDisk = (disk: Disk) => {
+    disksApiStub.disk = disk;
+    runtimeDiskStore.set({
+      ...runtimeDiskStore.get(),
+      gcePersistentDisk: disk,
+    });
+  };
+
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -658,6 +668,13 @@ describe(RuntimeConfigurationPanel.name, () => {
     option: number
   ): void => pickAndClick(container, user, 'runtime-cpu', option.toString());
 
+  const pickComputeType = (
+    container: HTMLElement,
+    user: UserEvent,
+    computeType: ComputeType
+  ): void =>
+    pickAndClick(container, user, 'runtime-compute', computeType.toString());
+
   // TODO
   // const expectMainCpuOption = (container: HTMLElement) => expectDropdown(container, 'runtime-cpu');
   // const pickMainRam = (
@@ -670,6 +687,16 @@ describe(RuntimeConfigurationPanel.name, () => {
     'You’re about to delete your cloud analysis environment.';
   const expectConfirmDeletePanel = () =>
     expect(screen.queryByText(confirmDeleteText)).not.toBeNull();
+
+  const getDetachableDiskRadio = () =>
+    screen.getByRole('radio', {
+      name: 'detachableDisk',
+    });
+
+  const getStandardDiskRadio = () =>
+    screen.getByRole('radio', {
+      name: 'standardDisk',
+    });
 
   const component = (
     propOverrides?: Partial<RuntimeConfigurationPanelProps>
@@ -722,16 +749,16 @@ describe(RuntimeConfigurationPanel.name, () => {
     const { container } = component();
     expect(container).toBeInTheDocument();
 
-    await waitFor(() => {
+    await waitFor(() =>
       // spinner label
-      expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument();
-    });
+      expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument()
+    );
 
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: true });
 
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
   });
 
   it('renders the chosen panel when specified in initialPanelContent', () => {
@@ -858,10 +885,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     component();
 
     clickExpectedButton('Try Again');
-    await waitFor(() => {
+    await waitFor(() =>
       // Kicks off a deletion to first clear the error status runtime.
-      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
-    });
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting')
+    );
   });
 
   it('should allow creation from error with an update', async () => {
@@ -885,10 +912,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     pickMainCpu(container, user, 8);
     clickExpectedButton('Try Again');
 
-    await waitFor(() => {
+    await waitFor(() =>
       // Kicks off a deletion to first clear the error status runtime.
-      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
-    });
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting')
+    );
   });
 
   // TODO
@@ -978,4 +1005,122 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(screen.queryByText(confirmDeleteText)).toBeNull();
     });
   });
+
+  it('should require PD (prevent standard disk) for GCE', async () => {
+    setCurrentRuntime(defaultGceRuntimeWithPd());
+
+    component();
+
+    const detachablePdButton = getDetachableDiskRadio();
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).not.toBeDisabled();
+
+    const standardDiskButton = getStandardDiskRadio();
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).toBeDisabled();
+  });
+
+  it('should require standard disk / prevent detachable PD use for Dataproc', async () => {
+    setCurrentRuntime(defaultDataProcRuntime());
+
+    component();
+
+    const detachablePdButton = getDetachableDiskRadio();
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).toBeDisabled();
+
+    const standardDiskButton = getStandardDiskRadio();
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).not.toBeDisabled();
+  });
+
+  it('should allow Dataproc -> PD transition', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(defaultDataProcRuntime());
+
+    const { container } = component();
+
+    // confirm Dataproc by observing that PD is disabled
+    expect(getDetachableDiskRadio()).toBeDisabled();
+
+    pickComputeType(container, user, ComputeType.Standard);
+
+    await waitFor(() => {
+      // confirm GCE by observing that PD is enabled
+      expect(getDetachableDiskRadio()).not.toBeDisabled();
+    });
+
+    clickExpectedButton('Next');
+    clickExpectedButton('Update');
+
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+      expect(disksApiStub.disk).toBeTruthy();
+    });
+  });
+
+  // TODO
+  // it('should allow disk deletion when detaching', async () => {
+  //   const user = userEvent.setup();
+  //
+  //   setCurrentRuntime(defaultGceRuntimeWithPd());
+  //   setCurrentDisk(stubDisk());
+  //
+  //   const { container } = component();
+  //
+  //   pickComputeType(container, user, ComputeType.Dataproc);
+  //
+  //   await waitFor(() =>
+  //     // confirm Dataproc by observing that PD is disabled
+  //     expect(getDetachableDiskRadio()).toBeDisabled()
+  //   );
+  //
+  //   clickExpectedButton('Next');
+  //
+  //   expect(
+  //     screen.queryByText(/will be unused after you apply this update/)
+  //   ).toBeInTheDocument();
+  //
+  //   const deleteRadio = screen.getByRole('radio', {
+  //     name: 'Delete persistent disk',
+  //   });
+  //   deleteRadio.click();
+  //
+  //   clickExpectedButton('Next');
+  //   clickExpectedButton('Update');
+  //
+  //   runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+  //
+  //   await waitFor(() => {
+  //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+  //     expect(disksApiStub.disk).toBeNull();
+  //   });
+  // });
+
+  //   it('should allow skipping disk deletion when detaching', async () => {
+  //     setCurrentRuntime(defaultGceRuntimeWithPd());
+  // //    setCurrentDisk(existingDisk());
+  //
+  //     const wrapper = await component();
+  //     pickComputeType(wrapper, ComputeType.Dataproc);
+  //
+  //     await mustClickButton(wrapper, 'Next');
+  //
+  //     expect(wrapper.text()).toContain(
+  //       'will be unused after you apply this update'
+  //     );
+  //
+  //     // Default option should be NOT to delete.
+  //     await mustClickButton(wrapper, 'Next');
+  //     await mustClickButton(wrapper, 'Update');
+  //     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+  //
+  //     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
+  //
+  //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+  //     expect(disksApiStub.disk?.name).toEqual(disk.name);
+  //   });
 });

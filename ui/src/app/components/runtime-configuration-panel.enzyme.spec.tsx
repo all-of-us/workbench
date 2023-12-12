@@ -1189,17 +1189,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should prevent detachable PD use for Dataproc', async () => {
-    setCurrentRuntime(detachableDiskRuntime());
-
-    const wrapper = await component();
-    const getDetachableRadio = () =>
-      wrapper.find({ name: 'detachableDisk' }).first();
-
-    expect(getDetachableRadio().prop('disabled')).toBeFalsy();
-    await enableDetachable(wrapper);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-
-    expect(getDetachableRadio().prop('disabled')).toBeTruthy();
+    // migrate to RTL
   });
 
   const pickSsdType = async (wrapper) =>
@@ -1365,27 +1355,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   );
 
   it('should allow Dataproc -> PD transition', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      gceConfig: null,
-      gceWithPdConfig: null,
-      dataprocConfig: defaultDataprocConfig(),
-    });
-
-    const wrapper = await component();
-    pickComputeType(wrapper, ComputeType.Standard);
-
-    enableDetachable(wrapper);
-    await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
-
-    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-
-    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-    expect(disksApiStub.disk).toBeTruthy();
+    // migrated to RTL
   });
 
   it('should allow disk deletion when detaching', async () => {
