@@ -33,6 +33,7 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementDisabled,
   expectButtonElementEnabled,
   getDropdownOption,
 } from 'testing/react-test-helpers';
@@ -54,6 +55,8 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
+import { Button, LinkButton } from './buttons';
+import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
 import {
   createOrCustomize,
   deriveCurrentRuntime,
@@ -663,6 +666,11 @@ describe(RuntimeConfigurationPanel.name, () => {
   //   option: number
   // ): void => pickAndClick(container, user, 'runtime-ram', option.toString());
 
+  const confirmDeleteText =
+    'You’re about to delete your cloud analysis environment.';
+  const expectConfirmDeletePanel = () =>
+    expect(screen.queryByText(confirmDeleteText)).not.toBeNull();
+
   const component = (
     propOverrides?: Partial<RuntimeConfigurationPanelProps>
   ) => {
@@ -918,4 +926,56 @@ describe(RuntimeConfigurationPanel.name, () => {
   //     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   //   });
   // });
+
+  it('should disable the Next button if there are no changes and runtime is running', async () => {
+    setCurrentRuntime(defaultGceRuntimeWithPd());
+    component();
+    const button = screen.getByRole('button', { name: 'Next' });
+    expect(button).toBeInTheDocument();
+    expectButtonElementDisabled(button);
+  });
+
+  it('should show create button if runtime is deleted', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+    });
+    component();
+    const button = screen.getByRole('button', { name: 'Create' });
+    expect(button).toBeInTheDocument();
+    expectButtonElementEnabled(button);
+  });
+
+  it('should allow runtime deletion', async () => {
+    component({});
+    clickExpectedButton('Delete Environment');
+
+    // confirm that the correct panel is visible
+    await waitFor(() => expectConfirmDeletePanel());
+
+    clickExpectedButton('Delete');
+
+    await waitFor(() => {
+      // Runtime should be deleting, and panel should have closed.
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should allow cancelling runtime deletion', async () => {
+    component({});
+    clickExpectedButton('Delete Environment');
+
+    // confirm that the correct panel is visible
+    await waitFor(() => expectConfirmDeletePanel());
+
+    clickExpectedButton('Cancel');
+
+    await waitFor(() => {
+      // Runtime should still be active, and confirm page should no longer be visible.
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.RUNNING);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByText(confirmDeleteText)).toBeNull();
+    });
+  });
 });

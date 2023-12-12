@@ -685,16 +685,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
-    setCurrentRuntime(detachableDiskRuntime());
-    const wrapper = await component();
-
-    expect(
-      wrapper
-        .find(Button)
-        .find({ 'aria-label': 'Next' })
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
+    // migrated to RTL
   });
 
   it('should respect divergent sets of valid machine types across compute types', async () => {
@@ -1032,16 +1023,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should show create button if runtime is deleted', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.DELETED,
-    });
-
-    const wrapper = await component();
-
-    expect(
-      wrapper.find(Button).find({ 'aria-label': 'Create' }).first().exists()
-    ).toBeTruthy();
+    // migrated to RTL
   });
 
   it('should add additional options when the compute type changes', async () => {
@@ -1130,41 +1112,11 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow runtime deletion', async () => {
-    const onClose = jest.fn();
-    const wrapper = await component({ onClose: onClose });
-
-    wrapper
-      .find(LinkButton)
-      .find({ 'aria-label': 'Delete Environment' })
-      .first()
-      .simulate('click');
-    expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
-
-    await mustClickButton(wrapper, 'Delete');
-
-    // Runtime should be deleting, and panel should have closed.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
-    expect(onClose).toHaveBeenCalled();
+    // migrated to RTL
   });
 
   it('should allow cancelling runtime deletion', async () => {
-    const onClose = jest.fn();
-    const wrapper = await component({ onClose: onClose });
-
-    wrapper
-      .find(LinkButton)
-      .find({ 'aria-label': 'Delete Environment' })
-      .first()
-      .simulate('click');
-    expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
-
-    // Click cancel
-    await mustClickButton(wrapper, 'Cancel');
-
-    // Runtime should still be active, and confirm page should no longer be visible.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.RUNNING);
-    expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
-    expect(onClose).not.toHaveBeenCalled();
+    // migrated to RTL
   });
 
   it('should prevent runtime creation when disk size is invalid', async () => {
