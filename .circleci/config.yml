@@ -933,10 +933,10 @@ workflows:
     jobs:
       - deploy-to-stable-approval:
           type: approval
+          <<: *filter-stable-deployment-manual-verification-tags
       - deploy-to-stable:
           requires:
             - deploy-to-stable-approval
-          <<: *filter-stable-deployment-manual-verification-tags
 
   nightly-tests:
     triggers:
