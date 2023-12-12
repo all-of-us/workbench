@@ -90,8 +90,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       dataLoadError,
       workspaceDetails: { collaborators, resources, workspace },
     } = this.state;
-    const { workspaceObjects, cloudStorage } = resources;
-    const { researchPurpose } = workspace;
+    const { workspaceObjects, cloudStorage } = resources || {};
+    const { researchPurpose } = workspace || {};
     return (
       <div style={{ margin: '1.5rem' }}>
         {dataLoadError && (
