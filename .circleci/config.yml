@@ -159,7 +159,7 @@ commands:
                 --app-version "${CIRCLE_TAG}" \
                 --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
                 --key-file ~/workbench/api/circle-sa-key.json \
-                --promote
+                --no-promote
             name: Deploy API and UI to << parameters.project_name >> App Engine
 
   deploy-to-staging-command:
