@@ -1,5 +1,6 @@
 # To build and deploy, from this directory:
 # $ docker build . -f Dockerfile.circle_build -t us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z .
+# Note: M1 Macs may need to add `--platform linux/x86_64/v8`
 # Test out the new image with:
 # $ docker run -it us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z /bin/bash
 # Update all mentions of us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z in
@@ -48,3 +49,5 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN sudo gem install jira-ruby
+
+RUN sudo npm install @openapitools/openapi-generator-cli -g
