@@ -131,45 +131,55 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
+    deploy-command:
+      description: "Deploy API and UI to App Engine"
+      parameters:
+        project_name:
+          type: string
+        service_account:
+          type: string
+        credentials_env_var:
+          type: string
+        key_env_var:
+          type: string
+      steps:
+        - checkout-code
+        - attach_workspace:
+            at: .
+        - gcloud-auth-login:
+            credentials_env_var: << parameters.credentials_env_var >>
+            key_env_var: << parameters.key_env_var >>
+        - deploy:
+            working_directory: ~/workbench/deploy
+            command: |
+              ./project.rb deploy \
+                --project << parameters.project_name >> \
+                --account << parameters.service_account >> \
+                --git-version "${CIRCLE_TAG}" \
+                --app-version "${CIRCLE_TAG}" \
+                --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+                --key-file ~/workbench/api/circle-sa-key.json \
+                --promote
+            name: Deploy API and UI to << parameters.project_name >> App Engine
+
   deploy-to-staging-command:
-    description: "Deploy API and UI to staging App Engine"
+    description: "Deploy to staging environment"
     steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - deploy:
-          working_directory: ~/workbench/deploy
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-staging \
-              --account << pipeline.parameters.circle-service-account >> \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --promote
-          name: Deploy API and UI to all-of-us-rw-staging App Engine
+      - deploy-command:
+          project_name: "all-of-us-rw-staging"
+          service_account: "<< pipeline.parameters.circle-service-account >>"
+          credentials_env_var: "GCLOUD_CREDENTIALS"
+          key_env_var: "GCLOUD_CREDENTIALS_KEY"
 
   deploy-to-stable-command:
-    description: "Deploy API and UI to stable App Engine"
+    description: "Deploy to stable environment"
     steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - deploy:
-          working_directory: ~/workbench/deploy
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-stable \
-              --account deploy@all-of-us-rw-stable.iam.gserviceaccount.com \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --no-promote
-          name: Deploy API and UI to all-of-us-rw-stable App Engine
+      - deploy-command:
+          project_name: "all-of-us-rw-stable"
+          service_account: "deploy@all-of-us-rw-stable.iam.gserviceaccount.com"
+          credentials_env_var: "SERVICE_ACCOUNT_CREDENTIALS_DEPLOY_STABLE_ENV"
+          key_env_var: "SERVICE_ACCOUNT_CREDENTIALS_DEPLOY_STABLE_ENV_KEY"
+
 
   gcloud-auth-login:
     description: "Activate CircleCI service account credential"
