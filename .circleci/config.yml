@@ -931,7 +931,11 @@ workflows:
 
   deploy-stable:
     jobs:
+      - deploy-to-stable-approval:
+          type: approval
       - deploy-to-stable:
+          requires:
+            - deploy-to-stable-approval
           <<: *filter-stable-deployment-manual-verification-tags
 
   nightly-tests:
