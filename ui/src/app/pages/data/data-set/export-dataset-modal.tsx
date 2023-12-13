@@ -291,7 +291,7 @@ export const ExportDatasetModal = ({
             </div>
 
             {creatingNewNotebook && (
-              <React.Fragment>
+              <label>
                 <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
                   Notebook Name
                 </SmallHeader>
@@ -300,7 +300,7 @@ export const ExportDatasetModal = ({
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                 />
-              </React.Fragment>
+              </label>
             )}
 
             <div style={headerStyles.formLabel}>
