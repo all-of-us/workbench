@@ -245,18 +245,16 @@ describe('redirectTo', () => {
     const appTypes = Object.values(UIAppType);
 
     // All URLs containing "App" in UIAppType are considered valid and require no redirection.
-    let appIsValid = false;
     appTypes.forEach((appType: UIAppType) => {
-      const pathToRstudioApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/${appType}`;
-      window.location.href = pathToRstudioApp;
-      appIsValid = confirmAppIsValid();
-      expect(appIsValid).toBeTruthy();
+      window.location.href = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/${appType}`;
+      expect(confirmAppIsValid()).toBeTruthy();
     });
+  });
 
+  it('Should return false if App defined in URL is not valid', async () => {
     // If an app from the URL is not listed in UIAppType, it should return false, triggering a redirect.
-    const pathToFakeApp = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/FakeApp`;
-    window.location.href = pathToFakeApp;
-    appIsValid = confirmAppIsValid();
+    window.location.href = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/FakeApp`;
+    const appIsValid = confirmAppIsValid();
     expect(appIsValid).toBeFalsy();
   });
 });

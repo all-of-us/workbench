@@ -143,13 +143,12 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.SAS]: UIAppType.SAS,
 };
 
-export const helpSidebarConfigIdForUIApp = (appType: UIAppType) => {
-  switch (appType) {
-    case UIAppType.SAS:
-      return sasConfigIconId;
-    case UIAppType.RSTUDIO:
-      return rstudioConfigIconId;
-  }
+export const helpSidebarConfigIdForUIApp: Record<
+  Exclude<UIAppType, UIAppType.CROMWELL | UIAppType.JUPYTER>,
+  string
+> = {
+  [UIAppType.SAS]: sasConfigIconId,
+  [UIAppType.RSTUDIO]: rstudioConfigIconId,
 };
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,

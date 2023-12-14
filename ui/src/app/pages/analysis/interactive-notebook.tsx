@@ -37,10 +37,7 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import {
-  openRStudioOrConfigPanel,
-  openSASOrConfigPanel,
-} from 'app/utils/user-apps-utils';
+import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -547,14 +544,12 @@ export const InteractiveNotebook = fp.flow(
       const { appType } = getAppInfoFromFileName(nbName);
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
-          if (appType === UIAppType.RSTUDIO) {
-            openRStudioOrConfigPanel(ns, wsid, userApps, navigate);
-          } else if (appType === UIAppType.SAS) {
-            openSASOrConfigPanel(ns, wsid, userApps, navigate);
-          } else {
+          if (appType === UIAppType.JUPYTER) {
             this.runRuntime(() => {
               this.navigateEditMode();
             });
+          } else {
+            openAppOrConfigPanel(ns, wsid, userApps, appType, navigate);
           }
         } else {
           this.setState({

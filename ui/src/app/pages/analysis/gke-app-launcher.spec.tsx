@@ -100,7 +100,7 @@ test.each([
     setup(app);
     // Confirm IFrame exist
     expect(screen.getByTitle(`${app} embed`)).toBeInTheDocument();
-    // Confirm IFrame source is same as proxyUrl for Rstudio
+    // Confirm IFrame source is same as proxyUrl for App
     expect(screen.getByTitle(`${app} embed`).getAttribute('src')).toBe(
       iframeSrcUrl
     );
@@ -113,7 +113,7 @@ test.each([
 ])(
   'Should redirect user to analysis page in case %s App is deleted',
   async (app: UIAppType, name: string, iframeUrl: string) => {
-    // Confirm the RStudio app is up and displayed in iframe and no navigate is called
+    // Confirm the App is up and displayed in iframe and no navigate is called
     setup(app);
     expect(screen.getByTitle(`${app} embed`)).toBeInTheDocument();
     expect(mockNavigate).not.toHaveBeenCalledWith([pathToCurrentWSAnalysisTab]);

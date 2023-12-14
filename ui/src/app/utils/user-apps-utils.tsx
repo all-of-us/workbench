@@ -170,36 +170,6 @@ export const openAppOrConfigPanel = (
   if (userApp?.status === AppStatus.RUNNING) {
     openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp(requestedApp));
+    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[requestedApp]);
   }
-};
-
-export const openRStudioOrConfigPanel = (
-  workspaceNamespace: string,
-  workspaceId: string,
-  userApps: ListAppsResponse,
-  navigate: (commands: any, extras?: any) => void
-) => {
-  openAppOrConfigPanel(
-    workspaceNamespace,
-    workspaceId,
-    userApps,
-    UIAppType.RSTUDIO,
-    navigate
-  );
-};
-
-export const openSASOrConfigPanel = (
-  workspaceNamespace: string,
-  workspaceId: string,
-  userApps: ListAppsResponse,
-  navigate: (commands: any, extras?: any) => void
-) => {
-  openAppOrConfigPanel(
-    workspaceNamespace,
-    workspaceId,
-    userApps,
-    UIAppType.SAS,
-    navigate
-  );
 };

@@ -111,10 +111,11 @@ describe('User Apps Helper functions', () => {
     const navigate = mockNavigate;
     expect(setSidebarActiveIconStore.value).toBeNull();
 
-    userAppsUtils.openRStudioOrConfigPanel(
+    userAppsUtils.openAppOrConfigPanel(
       'ws',
       'wsid',
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
+      UIAppType.RSTUDIO,
       navigate
     );
 
@@ -128,10 +129,11 @@ describe('User Apps Helper functions', () => {
     const navigate = mockNavigate;
     expect(setSidebarActiveIconStore.value).toBeNull();
 
-    userAppsUtils.openRStudioOrConfigPanel(
+    userAppsUtils.openAppOrConfigPanel(
       'ws',
       'wsid',
       [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],
+      UIAppType.RSTUDIO,
       navigate
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
