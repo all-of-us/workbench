@@ -11,6 +11,10 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import {
+  rstudioConfigIconId,
+  sasConfigIconId,
+} from 'app/components/help-sidebar-icons';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
@@ -139,6 +143,13 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.SAS]: UIAppType.SAS,
 };
 
+export const helpSidebarConfigIdForUIApp: Record<
+  Exclude<UIAppType, UIAppType.CROMWELL | UIAppType.JUPYTER>,
+  string
+> = {
+  [UIAppType.SAS]: sasConfigIconId,
+  [UIAppType.RSTUDIO]: rstudioConfigIconId,
+};
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType

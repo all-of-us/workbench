@@ -37,8 +37,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import {
-  openRStudio,
-  openSAS,
+  openAppInIframe,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -169,7 +168,7 @@ const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
   const [navigate] = useNavigation();
   const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
-    openRStudio(namespace, id, userApp, navigate);
+    openAppInIframe(namespace, id, userApp, navigate);
   };
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
   return (
@@ -199,14 +198,13 @@ const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
   );
 };
 
-const SASButtonRow = (props: {
-  userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  const { userApp, workspaceNamespace } = props;
+const SASButtonRow = (props: { userApp: UserAppEnvironment }) => {
+  const { userApp } = props;
+  const [navigate] = useNavigation();
+  const { namespace, id } = currentWorkspaceStore.getValue();
 
   const onClickLaunch = async () => {
-    openSAS(workspaceNamespace, userApp);
+    openAppInIframe(namespace, id, userApp, navigate);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -218,7 +216,7 @@ const SASButtonRow = (props: {
           setSidebarActiveIconStore.next(sasConfigIconId);
         }}
       />
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='Environment must be running to launch SAS'
@@ -345,12 +343,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             ],
             [
               appType === UIAppType.SAS,
-              () => (
-                <SASButtonRow
-                  userApp={initialUserAppInfo}
-                  workspaceNamespace={workspace.namespace}
-                />
-              ),
+              () => <SASButtonRow userApp={initialUserAppInfo} />,
             ],
 
             () => null
