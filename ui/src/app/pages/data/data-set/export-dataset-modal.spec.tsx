@@ -485,59 +485,67 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('Auto reload code preview if genomics analysis tool is changed', async () => {
-  //   const expectedDatasetRequest = {
-  //     dataSetId: dataset.id,
-  //     name: dataset.name,
-  //     domainValuePairs: dataset.domainValuePairs,
-  //   };
-  //   datasetApiStub.codePreview = {
-  //     html: '<div id="notebook">print("hello world!")</div>',
-  //   };
-  //   testProps.dataset.prePackagedConceptSet = [
-  //     PrePackagedConceptSetEnum.WHOLE_GENOME,
-  //   ];
-  //   const { container } = render(component(testProps));
-  //   const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
-  //
-  //   container.querySelector('[data-test-id="code-preview-button"]').simulate('click');
-  //   expect(previewSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       kernelType: KernelTypeEnum.PYTHON,
-  //       genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
-  //     })
-  //   );
-  //
-  //   container
-  //     .querySelector('[data-test-id="genomics-tool-PLINK"]')
-  //     .first()
-  //     .simulate('click');
-  //   expect(previewSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       kernelType: KernelTypeEnum.PYTHON,
-  //       genomicsAnalysisTool:
-  //         DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
-  //     })
-  //   );
-  //
-  //   container
-  //     .querySelector('[data-test-id="genomics-tool-NONE"]')
-  //     .first()
-  //     .simulate('click');
-  //   expect(previewSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       kernelType: KernelTypeEnum.PYTHON,
-  //       genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
-  //     })
-  //   );
-  // });
+  it('Auto reload code preview if genomics analysis tool is changed', async () => {
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+    datasetApiStub.codePreview = {
+      html: '<div id="notebook">print("hello world!")</div>',
+    };
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const { container, unmount } = render(component(testProps));
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+
+    const seeCodePreviewButton = findSeeCodePreviewButton();
+    fireEvent.click(seeCodePreviewButton);
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).toBeNull();
+    });
+
+    expect(previewSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        kernelType: KernelTypeEnum.PYTHON,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
+      })
+    );
+
+    const plinkjRadioButtonLabel = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+    fireEvent.click(plinkjRadioButtonLabel);
+
+    expect(previewSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        kernelType: KernelTypeEnum.PYTHON,
+        genomicsAnalysisTool:
+          DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
+      })
+    );
+
+    const otherjRadioButtonLabel = screen.getByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+    fireEvent.click(otherjRadioButtonLabel);
+    expect(previewSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        kernelType: KernelTypeEnum.PYTHON,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
+      })
+    );
+
+    unmount();
+  });
 });
