@@ -399,23 +399,36 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('Remove genomics analysis tools if R is selected', async () => {
-  //   testProps.dataset.prePackagedConceptSet = [
-  //     PrePackagedConceptSetEnum.WHOLE_GENOME,
-  //   ];
-  //   const { container } = render(component(testProps));
-  //
-  //   container.querySelector('[data-test-id="kernel-type-r"]').first().simulate('click');
-  //
-  //   Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
-  //     (tool) => {
-  //       expect(
-  //         container.querySelector(`[data-test-id="genomics-tool-${tool}"]`).exists()
-  //       ).toBeFalsy();
-  //     }
-  //   );
-  // });
-  //
+  it('Remove genomics analysis tools if R is selected', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const { container, unmount } = render(component(testProps));
+
+    const rRadioButtonLabel = screen.getByRole('radio', {
+      name: 'R',
+    });
+
+    fireEvent.click(rRadioButtonLabel);
+
+    const hailRadio = screen.queryByRole('radio', {
+      name: 'Hail',
+    });
+    expect(hailRadio).toBeNull();
+
+    const plinkRadio = screen.queryByRole('radio', {
+      name: 'PLINK',
+    });
+    expect(plinkRadio).toBeNull();
+
+    const otherRadio = screen.queryByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+    expect(otherRadio).toBeNull();
+
+    unmount();
+  });
+
   // it('Remove genomics analysis tools if no WGS', async () => {
   //   testProps.dataset.prePackagedConceptSet = [];
   //   const { container } = render(component(testProps));
