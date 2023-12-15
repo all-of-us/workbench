@@ -240,8 +240,10 @@ public class ComplianceTrainingServiceTest {
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Verify database updates for RT and CT training completion
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtOriginalCompletionTime));
-    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtOriginalCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
     // Verify Absorb (not Moodle) verification records for RT and CT
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
@@ -258,8 +260,10 @@ public class ComplianceTrainingServiceTest {
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Verify there is no change in DB if RT completion time is returned null from Absorb.
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtOriginalCompletionTime));
-    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtOriginalCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
     // Verify Absorb (not Moodle) verification records still exist
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
@@ -273,8 +277,10 @@ public class ComplianceTrainingServiceTest {
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Verify RT training completion time is updated
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(currentRt));
-    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(currentRt));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
     // Verify Absorb (not Moodle) verification records still exist
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
@@ -283,9 +289,8 @@ public class ComplianceTrainingServiceTest {
 
   private void assertAbsorbVerificationSystem(DbAccessModuleName moduleName) {
     assertThat(getVerification(moduleName).get().getComplianceTrainingVerificationSystem())
-            .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
-
 
   @Test
   public void testSyncComplianceTrainingStatus_Moodle_ResyncCausesNoChanges() throws Exception {
@@ -542,13 +547,14 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void stubAbsorbOnlyCTComplete(Instant ctCompletionTime)
-          throws org.pmiops.workbench.absorb.ApiException {
+      throws org.pmiops.workbench.absorb.ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
-            .thenReturn(
-                    List.of(
-                            new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null),
-                            new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime)));
+        .thenReturn(
+            List.of(
+                new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null),
+                new Enrollment(
+                    ComplianceTrainingServiceImpl.ctTrainingCourseId, ctCompletionTime)));
   }
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
