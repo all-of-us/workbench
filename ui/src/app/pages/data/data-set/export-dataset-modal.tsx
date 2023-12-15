@@ -375,7 +375,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!isEmpty(errors)}
+                disabled={!isEmpty(errors) || isNotebooksLoading}
                 onClick={() => exportDataset()}
               >
                 Export

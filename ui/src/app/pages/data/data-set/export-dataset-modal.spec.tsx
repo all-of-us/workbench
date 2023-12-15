@@ -58,6 +58,11 @@ describe('ExportDatasetModal', () => {
     return screen.getByLabelText('Notebook Name');
   }
 
+  const waitUntilDoneLoading = async () =>
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).toBeNull();
+    });
+
   beforeEach(() => {
     // // Setup a DOM element as a render target
     // modalRoot = document.createElement('div');
@@ -87,7 +92,7 @@ describe('ExportDatasetModal', () => {
 
   afterEach(() => {
     // console.log('A');
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should render', async () => {
@@ -113,6 +118,8 @@ describe('ExportDatasetModal', () => {
       name: dataset.name,
       domainValuePairs: dataset.domainValuePairs,
     };
+
+    await waitUntilDoneLoading();
 
     fireEvent.change(notebookNameInput, { target: { value: notebookName } });
     fireEvent.click(findExportButton());
@@ -143,8 +150,10 @@ describe('ExportDatasetModal', () => {
       domainValuePairs: dataset.domainValuePairs,
     };
 
-    const x = findNotebookNameInput();
-    fireEvent.change(x, {
+    await waitUntilDoneLoading();
+
+    const notebookNameInput = findNotebookNameInput();
+    fireEvent.change(notebookNameInput, {
       target: { value: notebookName },
     });
     fireEvent.click(findExportButton());
@@ -162,72 +171,79 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('should disable export if no name is provided', async () => {
-  //   const { container } = render(component(testProps));
-  //   const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-  //
-  //   container
-  //     .querySelector('[data-test-id="notebook-name-input"]')
-  //     .first()
-  //     .simulate('change', { target: { value: '' } });
-  //   findExportButton(container).simulate('click');
-  //   expect(findExportButton(container).props().disabled).toBeTruthy();
-  //   expect(exportSpy).not.toHaveBeenCalled();
-  //
-  //   findExportButton(container).simulate('mouseenter');
-  //   expect(container.querySelector(Tooltip).text()).toBe("Notebook name can't be blank");
-  // });
-  //
-  // it('should disable export if a conflicting name is provided, without the suffix', async () => {
-  //   const existingNotebookName = 'existing notebook.ipynb';
-  //   notebooksApiStub.notebookList = [
-  //     {
-  //       name: existingNotebookName,
-  //     },
-  //   ];
-  //   const { container } = render(component(testProps));
-  //   const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-  //
-  //   container
-  //     .querySelector('[data-test-id="notebook-name-input"]')
-  //     .first()
-  //     .simulate('change', {
-  //       target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
-  //     });
-  //   findExportButton(container).simulate('click');
-  //   expect(findExportButton(container).props().disabled).toBeTruthy();
-  //
-  //   findExportButton(container).simulate('mouseenter');
-  //   expect(container.querySelector(Tooltip).text()).toBe('Notebook name already exists');
-  //   expect(exportSpy).not.toHaveBeenCalled();
-  // });
-  //
-  // it('should disable export if a conflicting name is provided, including the suffix', async () => {
-  //   const existingNotebookName = 'existing notebook.ipynb';
-  //   notebooksApiStub.notebookList = [
-  //     {
-  //       name: existingNotebookName,
-  //     },
-  //   ];
-  //   const { container } = render(component(testProps));
-  //   const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-  //
-  //   container
-  //     .querySelector('[data-test-id="notebook-name-input"]')
-  //     .first()
-  //     .simulate('change', {
-  //       target: {
-  //         value: appendJupyterNotebookFileSuffix(existingNotebookName),
-  //       },
-  //     });
-  //   findExportButton(container).simulate('click');
-  //   expect(findExportButton(container).props().disabled).toBeTruthy();
-  //
-  //   findExportButton(container).simulate('mouseenter');
-  //   expect(container.querySelector(Tooltip).text()).toBe('Notebook name already exists');
-  //   expect(exportSpy).not.toHaveBeenCalled();
-  // });
-  //
+  it('should disable export if no name is provided', async () => {
+    const { container, unmount } = render(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    const notebookNameInput = findNotebookNameInput();
+    fireEvent.change(notebookNameInput, {
+      target: { value: '' },
+    });
+
+    const exportButton = findExportButton();
+    fireEvent.click(exportButton);
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(exportButton);
+
+    await screen.findByText("Notebook name can't be blank");
+    unmount();
+  });
+
+  it('should disable export if a conflicting name is provided, without the suffix', async () => {
+    const existingNotebookName = 'existing notebook1.ipynb';
+    notebooksApiStub.notebookList = [
+      {
+        name: existingNotebookName,
+      },
+    ];
+    const { container, unmount } = render(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    await waitUntilDoneLoading();
+
+    const notebookNameInput = findNotebookNameInput();
+    fireEvent.change(notebookNameInput, {
+      target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
+    });
+
+    const exportButton = findExportButton();
+    fireEvent.click(exportButton);
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(exportButton);
+
+    await screen.findByText('Notebook name already exists');
+    unmount();
+  });
+
+  it('should disable export if a conflicting name is provided, including the suffix', async () => {
+    const existingNotebookName = 'existing notebook2.ipynb';
+    notebooksApiStub.notebookList = [
+      {
+        name: existingNotebookName,
+      },
+    ];
+    const { container, unmount } = render(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    await waitUntilDoneLoading();
+
+    const notebookNameInput = findNotebookNameInput();
+    fireEvent.change(notebookNameInput, {
+      target: { value: appendJupyterNotebookFileSuffix(existingNotebookName) },
+    });
+
+    const exportButton = findExportButton();
+    fireEvent.click(exportButton);
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(exportButton);
+    await screen.findByText('Notebook name already exists');
+
+    unmount();
+  });
+
   // it('should export to an existing notebook with the correct kernel type', async () => {
   //   const notebookName = 'existing notebook';
   //   const datasetName = 'dataset';
