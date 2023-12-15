@@ -378,21 +378,27 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('Show genomics analysis tools if WGS is in the dataset', async () => {
-  //   testProps.dataset.prePackagedConceptSet = [
-  //     PrePackagedConceptSetEnum.WHOLE_GENOME,
-  //   ];
-  //   const { container } = render(component(testProps));
-  //
-  //   Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
-  //     (tool) => {
-  //       expect(
-  //         container.querySelector(`[data-test-id="genomics-tool-${tool}"]`).exists()
-  //       ).toBeTruthy();
-  //     }
-  //   );
-  // });
-  //
+  it('Show genomics analysis tools if WGS is in the dataset', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const { container, unmount } = render(component(testProps));
+
+    await screen.findByRole('radio', {
+      name: 'Hail',
+    });
+
+    await screen.findByRole('radio', {
+      name: 'PLINK',
+    });
+
+    await screen.findByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+
+    unmount();
+  });
+
   // it('Remove genomics analysis tools if R is selected', async () => {
   //   testProps.dataset.prePackagedConceptSet = [
   //     PrePackagedConceptSetEnum.WHOLE_GENOME,
