@@ -244,44 +244,58 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('should export to an existing notebook with the correct kernel type', async () => {
-  //   const notebookName = 'existing notebook';
-  //   const datasetName = 'dataset';
-  //   const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
-  //   dataset.name = datasetName;
-  //   notebooksApiStub.notebookList = [
-  //     {
-  //       name: expectedNotebookName,
-  //     },
-  //   ];
-  //   notebooksApiStub.notebookKernel = KernelTypeEnum.R;
-  //
-  //   const expectedDatasetRequest = {
-  //     dataSetId: dataset.id,
-  //     name: datasetName,
-  //     domainValuePairs: dataset.domainValuePairs,
-  //   };
-  //   const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-  //
-  //   const { container } = render(component(testProps));
-  //   act(() => {
-  //     container.querySelector(Select).props().onChange(notebookName);
-  //   });
-  //
-  //   findExportButton(container).simulate('click');
-  //
-  //   expect(exportSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       newNotebook: false,
-  //       notebookName: expectedNotebookName,
-  //       kernelType: KernelTypeEnum.R,
-  //     })
-  //   );
-  // });
-  //
+  it('should export to an existing notebook with the correct kernel type', async () => {
+    const notebookName = 'existing notebook';
+    const datasetName = 'dataset';
+    const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
+    dataset.name = datasetName;
+    notebooksApiStub.notebookList = [
+      {
+        name: expectedNotebookName,
+      },
+    ];
+    notebooksApiStub.notebookKernel = KernelTypeEnum.R;
+
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: datasetName,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    const { container, unmount } = render(component(testProps));
+
+    await waitUntilDoneLoading();
+
+    const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
+    fireEvent.mouseDown(notebookDropdown);
+
+    screen.logTestingPlaygroundURL();
+
+    const existingNotebookOption = screen.getByText(notebookName);
+    fireEvent.click(existingNotebookOption);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Notebook Name')).toBeNull();
+    });
+
+    const exportButton = findExportButton();
+    fireEvent.click(exportButton);
+
+    expect(exportSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        newNotebook: false,
+        notebookName: expectedNotebookName,
+        kernelType: KernelTypeEnum.R,
+      })
+    );
+
+    unmount();
+  });
+
   // it('should show code preview, auto reload on kernel switch, and hide code preview', async () => {
   //   const expectedDatasetRequest = {
   //     dataSetId: dataset.id,
