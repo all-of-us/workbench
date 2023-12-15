@@ -17,6 +17,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { RenameModal } from 'app/components/rename-modal';
 import { Spinner } from 'app/components/spinners';
 import { CohortCriteriaMenu } from 'app/pages/data/cohort/cohort-criteria-menu';
+import { abortError } from 'app/pages/data/cohort/overview';
 import { SearchGroupItem } from 'app/pages/data/cohort/search-group-item';
 import {
   criteriaMenuOptionsStore,
@@ -32,7 +33,6 @@ import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { isAbortError } from 'app/utils/errors';
 import { currentGroupCountsStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -326,7 +326,7 @@ export const SearchGroup = withCurrentWorkspace()(
           currentGroupCountsStore.next(currentGroupCounts);
         })
         .catch((error) => {
-          if (!isAbortError(error)) {
+          if (!abortError(error)) {
             console.error(error);
             this.setState({ error: true, loading: false });
           }

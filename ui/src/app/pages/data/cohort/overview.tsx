@@ -9,6 +9,7 @@ import {
   CdrVersionTiersResponse,
   Cohort,
   DemoChartInfo,
+  FetchError,
   GenderSexRaceOrEthType,
   ResourceType,
   TemporalTime,
@@ -141,6 +142,9 @@ const styles = reactStyles({
 // Limit the size of cohort definition to 1MB
 const COHORT_BYTE_LIMIT = 1000000;
 
+export const abortError = (e: Error) =>
+  e instanceof FetchError && e.name === 'FetchError';
+
 interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
@@ -264,7 +268,7 @@ export const ListOverview = fp.flow(
             });
           })
           .catch((error) => {
-            if (!isAbortError(error)) {
+            if (!abortError(error)) {
               console.error(error);
               this.setState({ apiError: true, loading: false });
             }
