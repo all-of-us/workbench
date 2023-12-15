@@ -451,35 +451,40 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('Should export code with genomics analysis tool', async () => {
-  //   testProps.dataset.prePackagedConceptSet = [
-  //     PrePackagedConceptSetEnum.WHOLE_GENOME,
-  //   ];
-  //   const { container } = render(component(testProps));
-  //   const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-  //   const notebookName = 'Notebook Name';
-  //   const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
-  //   const expectedDatasetRequest: DataSetRequest = {
-  //     dataSetId: dataset.id,
-  //     name: dataset.name,
-  //     domainValuePairs: dataset.domainValuePairs,
-  //   };
-  //
-  //   container
-  //     .querySelector('[data-test-id="notebook-name-input"]')
-  //     .first()
-  //     .simulate('change', { target: { value: notebookName } });
-  //   findExportButton(container).simulate('click');
-  //   expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
-  //     dataSetRequest: expectedDatasetRequest,
-  //     newNotebook: true,
-  //     notebookName: expectedNotebookName,
-  //     kernelType: KernelTypeEnum.PYTHON,
-  //     generateGenomicsAnalysisCode: true,
-  //     genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
-  //   });
-  // });
-  //
+  it('Should export code with genomics analysis tool', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const { container, unmount } = render(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const notebookName = 'Notebook Name';
+    const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
+    const expectedDatasetRequest: DataSetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+
+    await waitUntilDoneLoading();
+
+    const notebookNameInput = findNotebookNameInput();
+    fireEvent.change(notebookNameInput, {
+      target: { value: appendJupyterNotebookFileSuffix(notebookName) },
+    });
+    const exportButton = findExportButton();
+    fireEvent.click(exportButton);
+
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+      dataSetRequest: expectedDatasetRequest,
+      newNotebook: true,
+      notebookName: expectedNotebookName,
+      kernelType: KernelTypeEnum.PYTHON,
+      generateGenomicsAnalysisCode: true,
+      genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
+    });
+    unmount();
+  });
+
   // it('Auto reload code preview if genomics analysis tool is changed', async () => {
   //   const expectedDatasetRequest = {
   //     dataSetId: dataset.id,
