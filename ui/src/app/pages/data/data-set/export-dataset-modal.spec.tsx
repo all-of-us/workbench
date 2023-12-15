@@ -15,9 +15,11 @@ import {
 import {
   cleanup,
   fireEvent,
+  getByText,
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Select } from 'app/components/inputs';
@@ -51,6 +53,18 @@ describe('ExportDatasetModal', () => {
   function findExportButton() {
     return screen.getByRole('button', {
       name: /export/i,
+    });
+  }
+
+  function findSeeCodePreviewButton() {
+    return screen.getByRole('button', {
+      name: /see code preview/i,
+    });
+  }
+
+  function findHideCodePreviewButton() {
+    return screen.getByRole('button', {
+      name: /hide code preview/i,
     });
   }
 
@@ -270,8 +284,6 @@ describe('ExportDatasetModal', () => {
     const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
     fireEvent.mouseDown(notebookDropdown);
 
-    screen.logTestingPlaygroundURL();
-
     const existingNotebookOption = screen.getByText(notebookName);
     fireEvent.click(existingNotebookOption);
 
@@ -296,44 +308,76 @@ describe('ExportDatasetModal', () => {
     unmount();
   });
 
-  // it('should show code preview, auto reload on kernel switch, and hide code preview', async () => {
-  //   const expectedDatasetRequest = {
-  //     dataSetId: dataset.id,
-  //     name: dataset.name,
-  //     domainValuePairs: dataset.domainValuePairs,
-  //   };
-  //   datasetApiStub.codePreview = {
-  //     html: '<div id="notebook">print("hello world!")</div>',
-  //   };
-  //   const { container } = render(component(testProps));
-  //   const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
-  //
-  //   container.querySelector('[data-test-id="code-preview-button"]').simulate('click');
-  //
-  //   expect(previewSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       kernelType: KernelTypeEnum.PYTHON,
-  //     })
-  //   );
-  //   expect(container.querySelector('iframe').html()).toContain('hello world!');
-  //
-  //   container.querySelector('[data-test-id="kernel-type-r"]').first().simulate('click');
-  //   expect(previewSpy).toHaveBeenCalledWith(
-  //     workspace.namespace,
-  //     workspace.id,
-  //     expect.objectContaining({
-  //       dataSetRequest: expectedDatasetRequest,
-  //       kernelType: KernelTypeEnum.R,
-  //     })
-  //   );
-  //
-  //   container.querySelector('[data-test-id="code-preview-button"]').simulate('click');
-  //   expect(container.querySelector('iframe').exists()).toBeFalsy();
-  // });
-  //
+  it('should show code preview, auto reload on kernel switch, and hide code preview', async () => {
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name,
+      domainValuePairs: dataset.domainValuePairs,
+    };
+
+    datasetApiStub.codePreview = {
+      html: '<div id="notebook">print("hello world!")</div>',
+    };
+    const { container, unmount } = render(component(testProps));
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+
+    await waitUntilDoneLoading();
+
+    const seeCodePreviewButton = findSeeCodePreviewButton();
+    fireEvent.click(seeCodePreviewButton);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).toBeNull();
+    });
+
+    let iframe;
+    await waitFor(() => {
+      iframe = screen.getByTestId('export-preview-frame');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe.contentDocument.readyState).toEqual('complete');
+      expect(iframe.outerHTML).toContain('hello world!');
+    });
+
+    expect(previewSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        kernelType: KernelTypeEnum.PYTHON,
+      })
+    );
+
+    const rRadioButtonLabel = screen.getByRole('radio', {
+      name: 'R',
+    });
+
+    fireEvent.click(rRadioButtonLabel);
+
+    expect(previewSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        kernelType: KernelTypeEnum.R,
+      })
+    );
+
+    const hideCodePreviewButton = findHideCodePreviewButton();
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).toBeNull();
+    });
+    screen.logTestingPlaygroundURL();
+    fireEvent.click(hideCodePreviewButton);
+
+    await waitFor(() => {
+      iframe = screen.queryByTestId('export-preview-frame');
+      expect(iframe).not.toBeInTheDocument();
+    });
+
+    unmount();
+  });
+
   // it('Show genomics analysis tools if WGS is in the dataset', async () => {
   //   testProps.dataset.prePackagedConceptSet = [
   //     PrePackagedConceptSetEnum.WHOLE_GENOME,
