@@ -1581,59 +1581,14 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should disable Spark console for non-running cluster', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      dataprocConfig: defaultDataprocConfig(),
-      gceConfig: null,
-      gceWithPdConfig: null,
-    });
-
-    const wrapper = await component();
-    const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');
-    expect(manageButton.exists()).toBeTruthy();
-    expect(manageButton.first().prop('disabled')).toBeTruthy();
+    // migrated to RTL
   });
 
   it('should render Spark console links for running cluster', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      dataprocConfig: defaultDataprocConfig(),
-      gceConfig: null,
-      gceWithPdConfig: null,
-    });
-
-    const wrapper = await component();
-    const manageButton = wrapper.find('[data-test-id="manage-spark-console"]');
-    expect(manageButton.exists()).toBeTruthy();
-    manageButton.first().simulate('click');
-
-    wrapper.update();
-    expect(wrapper.text()).toContain('MapReduce History Server');
+    // migrated to RTL
   });
+
   it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
-    // set GCE Runtime as current runtime
-    setCurrentRuntime(runtimeApiStub.runtime);
-    const wrapper = await component();
-
-    const warningMessages = wrapper.find(WarningMessage);
-    expect(warningMessages.length).toBe(2);
-    expect(
-      warningMessages
-        .first()
-        .text()
-        .includes('support reattachable persistent disks')
-    ).toBeTruthy();
-    expect(warningMessages.at(1).text().includes('deletion')).toBeTruthy();
-
-    expect(
-      wrapper
-        .find('[data-test-id="detachable-disk-radio"]')
-        .first()
-        .prop('checked')
-    ).toBeTruthy();
+    // migrated to RTL
   });
 });

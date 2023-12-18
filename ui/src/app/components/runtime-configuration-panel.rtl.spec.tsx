@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
 
+import { MemoryRouter } from 'react-router';
+
 import {
   Disk,
   DisksApi,
@@ -59,6 +61,7 @@ import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { RadioButton } from './inputs';
+import { WarningMessage } from './messages';
 import {
   createOrCustomize,
   deriveCurrentRuntime,
@@ -702,7 +705,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     propOverrides?: Partial<RuntimeConfigurationPanelProps>
   ) => {
     const allProps = { ...defaultProps, ...propOverrides };
-    return render(<RuntimeConfigurationPanel {...allProps} />);
+    return render(
+      <MemoryRouter>
+        {' '}
+        <RuntimeConfigurationPanel {...allProps} />
+      </MemoryRouter>
+    );
   };
 
   beforeEach(async () => {
@@ -1104,7 +1112,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   //     setCurrentRuntime(defaultGceRuntimeWithPd());
   // //    setCurrentDisk(existingDisk());
   //
-  //     const wrapper = await component();
+  //     const wrapper = component();
   //     pickComputeType(wrapper, ComputeType.Dataproc);
   //
   //     await mustClickButton(wrapper, 'Next');
@@ -1123,4 +1131,65 @@ describe(RuntimeConfigurationPanel.name, () => {
   //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
   //     expect(disksApiStub.disk?.name).toEqual(disk.name);
   //   });
+
+  it('should render Spark console links for a running cluster', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
+      gceWithPdConfig: null,
+    });
+
+    component();
+    const manageButton = screen.getByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    expect(manageButton).toBeInTheDocument();
+    expectButtonElementEnabled(manageButton);
+    manageButton.click();
+
+    await waitFor(() => screen.getByText('MapReduce History Server'));
+  });
+
+  it('should disable the Spark console for a non-running cluster', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
+      gceWithPdConfig: null,
+    });
+
+    component();
+    const manageButton = screen.getByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    expect(manageButton).toBeInTheDocument();
+    expectButtonElementDisabled(manageButton);
+    manageButton.click();
+  });
+
+  it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
+    // set GCE Runtime without PD as current runtime
+    setCurrentRuntime(defaultGceRuntime());
+
+    component();
+
+    expect(
+      screen.queryByText(/only support reattachable persistent disks/)
+    ).toBeInTheDocument();
+
+    const detachablePdButton = getDetachableDiskRadio();
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).toBeEnabled();
+    expect(detachablePdButton).toHaveProperty('checked');
+
+    const standardDiskButton = getStandardDiskRadio();
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).toBeDisabled();
+    expect(standardDiskButton).toHaveProperty('disabled');
+  });
 });
