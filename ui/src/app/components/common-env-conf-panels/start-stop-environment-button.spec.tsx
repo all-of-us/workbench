@@ -30,6 +30,49 @@ describe(StartStopEnvironmentButton.name, () => {
       <StartStopEnvironmentButton {...{ ...defaultProps, ...propOverrides }} />
     );
 
+  // a few selected statuses, non-exhaustive
+  it.each([
+    [
+      UIAppType.JUPYTER,
+      RuntimeStatus.RUNNING,
+      runningText,
+      'compute-running.svg',
+    ],
+    [
+      UIAppType.JUPYTER,
+      RuntimeStatus.STOPPED,
+      pausedText,
+      'compute-stopped.svg',
+    ],
+    [
+      UIAppType.JUPYTER,
+      undefined,
+      'Environment status unknown',
+      'compute-none.svg',
+    ],
+    [UIAppType.SAS, AppStatus.RUNNING, runningText, 'compute-running.svg'],
+    [UIAppType.RSTUDIO, AppStatus.STOPPED, pausedText, 'compute-stopped.svg'],
+    [
+      UIAppType.CROMWELL,
+      undefined,
+      'Environment status unknown',
+      'compute-none.svg',
+    ],
+  ])(
+    'it displays the appropriate icon for the %s %s state',
+    (
+      appType: UIAppType,
+      status: AppStatus | RuntimeStatus,
+      iconText: string,
+      iconFilename: string
+    ) => {
+      component({ status, appType });
+      const button = screen.getByAltText(iconText);
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveProperty('src', 'http://localhost/' + iconFilename);
+    }
+  );
+
   describe.each([
     [UIAppType.JUPYTER, RuntimeStatus.RUNNING, RuntimeStatus.STOPPED],
     [UIAppType.CROMWELL, AppStatus.RUNNING, AppStatus.STOPPED],
