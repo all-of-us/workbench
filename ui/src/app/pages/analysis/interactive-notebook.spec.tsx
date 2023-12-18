@@ -145,7 +145,9 @@ test.each([
     const pathParameters = { params: matchParams };
     const spyWindowOpen = jest.spyOn(window, 'open');
     spyWindowOpen.mockImplementation(jest.fn(() => window));
+
     renderInteractiveNotebook(pathParameters);
+
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
     expect(spyWindowOpen).toHaveBeenCalledTimes(0);

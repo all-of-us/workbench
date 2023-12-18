@@ -154,17 +154,15 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.SAS]: UIAppType.SAS,
 };
 
-export const helpSidebarConfigIdForUIApp: Record<
-  Exclude<UIAppType, UIAppType.JUPYTER>,
-  SidebarIconId
-> = {
+type UIUserAppTypes = Exclude<UIAppType, UIAppType.JUPYTER>;
+export const sidebarConfigIcon: Record<UIUserAppTypes, string> = {
   [UIAppType.SAS]: sasConfigIconId,
   [UIAppType.RSTUDIO]: rstudioConfigIconId,
   [UIAppType.CROMWELL]: cromwellConfigIconId,
 };
 
 export const openConfigPanelForUIApp = (appType: UIAppType) =>
-  sidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
+  sidebarActiveIconStore.next(sidebarConfigIcon[appType]);
 
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
