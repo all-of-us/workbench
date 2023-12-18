@@ -11,7 +11,9 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
+import { renderModal } from '../../../../testing/react-test-helpers';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
@@ -29,15 +31,20 @@ describe('ExportDatasetModal', () => {
   let testProps;
   let notebooksApiStub;
   let datasetApiStub;
-  let unmount;
 
   const component = (props) => {
-    return <ExportDatasetModal {...props} />;
+    return renderModal(<ExportDatasetModal {...props} />);
   };
 
   function findExportButton() {
     return screen.getByRole('button', {
       name: /export/i,
+    });
+  }
+
+  function findCopyCodeButton() {
+    return screen.getByRole('button', {
+      name: /copy code/i,
     });
   }
 
@@ -99,23 +106,16 @@ describe('ExportDatasetModal', () => {
   });
 
   afterEach(() => {
-    // React-modal makes changes to the ownerDocument where
-    // a modal is found when the modal is closed. Since we are using
-    // React Testing Library(RTL), components are generally tested in
-    // isolation, so we have little concept of an owning document.
-    // By using RTL's umount method, we are able to cleanup our
-    // modal before its cleanup functionality is called.
-    unmount();
     jest.resetAllMocks();
   });
 
   it('should render', async () => {
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     await screen.findByText('Export Dataset');
   });
 
   it('should export to a new notebook', async () => {
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -143,7 +143,7 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should export to a new notebook if the user types in the file suffix', async () => {
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'MyNotebook.ipynb';
     const expectedNotebookName = notebookName;
@@ -172,7 +172,7 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should disable export if no name is provided', async () => {
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     changeNotebookName('');
@@ -192,7 +192,7 @@ describe('ExportDatasetModal', () => {
         name: existingNotebookName,
       },
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
@@ -214,7 +214,7 @@ describe('ExportDatasetModal', () => {
         name: existingNotebookName,
       },
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
@@ -246,7 +246,7 @@ describe('ExportDatasetModal', () => {
     };
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
 
     await waitUntilDoneLoading();
 
@@ -284,7 +284,7 @@ describe('ExportDatasetModal', () => {
     datasetApiStub.codePreview = {
       html: '<div id="notebook">print("hello world!")</div>',
     };
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
     await waitUntilDoneLoading();
@@ -341,7 +341,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
 
     await screen.findByRole('radio', {
       name: 'Hail',
@@ -360,7 +360,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
 
     const rRadioButtonLabel = screen.getByRole('radio', {
       name: 'R',
@@ -386,7 +386,7 @@ describe('ExportDatasetModal', () => {
 
   it('Remove genomics analysis tools if no WGS', async () => {
     testProps.dataset.prePackagedConceptSet = [];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
 
     const hailRadio = screen.queryByRole('radio', {
       name: 'Hail',
@@ -408,7 +408,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -445,7 +445,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    ({ unmount } = render(component(testProps)));
+    component(testProps);
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
     const seeCodePreviewButton = findSeeCodePreviewButton();
