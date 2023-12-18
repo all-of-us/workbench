@@ -12,7 +12,6 @@ import {
 } from 'generated/fetch';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
