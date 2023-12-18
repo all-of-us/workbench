@@ -79,6 +79,10 @@ describe('ExportDatasetModal', () => {
     fireEvent.click(findExportButton());
   };
 
+  const clickShowCodePreviewButton = () => {
+    fireEvent.click(findSeeCodePreviewButton());
+  };
+
   const hoverOverExportButton = () => {
     fireEvent.mouseEnter(findExportButton());
   };
@@ -289,8 +293,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const seeCodePreviewButton = findSeeCodePreviewButton();
-    fireEvent.click(seeCodePreviewButton);
+    clickShowCodePreviewButton();
 
     await waitUntilDoneLoading();
 
@@ -448,8 +451,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
-    const seeCodePreviewButton = findSeeCodePreviewButton();
-    fireEvent.click(seeCodePreviewButton);
+    clickShowCodePreviewButton();
     await waitUntilDoneLoading();
 
     expect(previewSpy).toHaveBeenCalledWith(
@@ -491,5 +493,40 @@ describe('ExportDatasetModal', () => {
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );
+  });
+
+  it('Dataset copied to clipboard when "copy code" button is clicked', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    component(testProps);
+
+    // Act
+    await user.click(findCopyCodeButton());
+
+    // Assert
+    const clipboardText = await navigator.clipboard.readText();
+    expect(clipboardText).toBe('expected text');
+    // Assert tooltip is shown
+    await screen.findByText('Dataset query copied to clipboard');
+  });
+
+  it('Dataset copied to clipboard when "copy code" icon button is clicked in expanded view', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    component(testProps);
+
+    // Act
+    await waitUntilDoneLoading();
+
+    clickShowCodePreviewButton();
+
+    await waitUntilDoneLoading();
+    await user.click(screen.getByLabelText('Dataset query copy icon button'));
+
+    // Assert
+    const clipboardText = await navigator.clipboard.readText();
+    expect(clipboardText).toBe('expected text');
+    // Assert tooltip is shown
+    await screen.findByText('Dataset query copied to clipboard');
   });
 });
