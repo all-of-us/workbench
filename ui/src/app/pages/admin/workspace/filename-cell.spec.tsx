@@ -51,7 +51,7 @@ describe('FilenameCell', () => {
     expect(container).toBeInTheDocument();
     expect(screen.getByText(notebookFilename)).toBeInTheDocument();
 
-    const previewButton = screen.getByRole('button');
+    const previewButton = screen.getByRole('button', { name: 'Preview' });
     expect(previewButton).toBeInTheDocument();
     expectButtonElementEnabled(previewButton);
 
