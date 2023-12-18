@@ -344,10 +344,9 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    const hideCodePreviewButton = findHideCodePreviewButton();
-
     await waitUntilDoneLoading();
 
+    const hideCodePreviewButton = findHideCodePreviewButton();
     fireEvent.click(hideCodePreviewButton);
 
     await waitFor(() => {
