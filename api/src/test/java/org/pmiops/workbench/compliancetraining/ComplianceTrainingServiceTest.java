@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -230,7 +231,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_ReEnroll_Absorb() throws Exception {
+  public void testSyncComplianceTrainingStatus_renew_Absorb() throws Exception {
     // User has completed RT and CT training in Absorb
     var rtOriginalCompletionTime = currentInstant().minusSeconds(2000);
     var ctOriginalCompletionTime = currentInstant();
@@ -249,12 +250,12 @@ public class ComplianceTrainingServiceTest {
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertAbsorbVerificationSystem(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
-    // Time passes
-    tick();
+    // Time passes: 1 year, user Trainings are now expired
+    tick_NextYear();
 
     // User is re-enrolled to RT training in Absorb:
     // This means the RT Course enrollment completion date is null, while CT remains as is
-    stubAbsorbOnlyCTComplete(ctOriginalCompletionTime);
+    stubAbsorbRTExpiredCTComplete(ctOriginalCompletionTime);
 
     // User syncs training
     user = complianceTrainingService.syncComplianceTrainingStatus();
@@ -546,7 +547,7 @@ public class ComplianceTrainingServiceTest {
                 new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null)));
   }
 
-  private void stubAbsorbOnlyCTComplete(Instant ctCompletionTime)
+  private void stubAbsorbRTExpiredCTComplete(Instant ctCompletionTime)
       throws org.pmiops.workbench.absorb.ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
@@ -607,5 +608,10 @@ public class ComplianceTrainingServiceTest {
 
   private void tick() {
     fakeClock.increment(1000); // The time increment is arbitrary
+  }
+
+  private void tick_NextYear() {
+    Instant nextYearInstant = fakeClock.instant().plus(365, ChronoUnit.DAYS);
+    fakeClock.setInstant(nextYearInstant);
   }
 }
