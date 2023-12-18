@@ -1,57 +1,31 @@
-import { useEffect, useState } from 'react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { InputSwitch } from 'primereact/inputswitch';
 
 import { FileDetail } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
-import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
+import { parseDirectory } from 'app/pages/analysis/util';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
-import { useNavigation } from 'app/utils/navigation';
 
+import { FilenameCell } from './filename-cell';
 import { PurpleLabel } from './workspace-info-field';
-
-const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
-
-const NOTEBOOKS_DIRECTORY = 'notebooks';
-const NOTEBOOKS_SUFFIX = '.ipynb';
-
-const parseLocation = (file: FileDetail, bucket: string): string => {
-  const prefixLength = bucket.length;
-  const start = prefixLength + 1; // slash after bucket name
-  const suffixPos = file.path.lastIndexOf(file.name);
-  const end = suffixPos - 1; // slash before filename
-
-  return file.path.substring(start, end);
-};
 
 const styles = reactStyles({
   accessReasonText: {
     maxWidth: '1000px',
     height: '4.5rem',
   },
-  previewButton: {
-    marginLeft: '20px',
-    height: '1.5rem',
-  },
   fileDetailsTable: {
     maxWidth: '1000px',
     marginTop: '1.5rem',
   },
 });
-interface NameCellProps {
-  file: FileDetail;
-  bucket: string;
-  workspaceNamespace: string;
-  accessReason: string;
-}
 
 export const formatMB = (fileSize: number): string => {
   const mb = fileSize / 1000000.0;
@@ -60,68 +34,6 @@ export const formatMB = (fileSize: number): string => {
   } else {
     return mb.toFixed(2);
   }
-};
-const NameCell = (props: NameCellProps) => {
-  const [navigate] = useNavigation();
-  const { file, bucket, workspaceNamespace, accessReason } = props;
-  const filename = file.name.trim();
-
-  const filenameSpan = () => <span>{filename}</span>;
-
-  const fileTooLarge = () => (
-    <FlexRow>
-      {filenameSpan()}
-      <TooltipTrigger
-        content={`Files larger than ${formatMB(
-          MAX_NOTEBOOK_READ_SIZE_BYTES
-        )} MB are too large to preview`}
-      >
-        <Button style={styles.previewButton} disabled={true}>
-          Preview
-        </Button>
-      </TooltipTrigger>
-    </FlexRow>
-  );
-
-  const navigateToPreview = () =>
-    navigate(
-      ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
-      { queryParams: { accessReason: accessReason } }
-    );
-
-  const fileWithPreviewButton = () => (
-    <FlexRow>
-      {filenameSpan()}
-      <TooltipTrigger
-        content='Please enter an access reason below'
-        disabled={accessReason?.trim()}
-      >
-        <Button
-          style={styles.previewButton}
-          disabled={!accessReason?.trim()}
-          onClick={navigateToPreview}
-        >
-          Preview
-        </Button>
-      </TooltipTrigger>
-    </FlexRow>
-  );
-
-  // remove first check after RW-5626
-  const isNotebook =
-    NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
-    filename.endsWith(NOTEBOOKS_SUFFIX);
-  const isTooLargeNotebook =
-    isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
-
-  // if (tooLarge()) fileTooLarge();
-  // else if (isNotebook()) fileWithPreviewButton();
-  // else filenameSpan();
-  return cond(
-    [isTooLargeNotebook, fileTooLarge],
-    [isNotebook, fileWithPreviewButton],
-    filenameSpan
-  );
 };
 
 interface Props {
@@ -141,7 +53,7 @@ export const FileTable = (props: Props) => {
   const [fileDetail, setFileDetail] = useState<Array<FileDetail>>();
   const [tableData, setTable] = useState<Array<TableEntry>>();
   const [loading, setLoading] = useState<boolean>();
-  const [showOnlyAppFiles, setShowOnlyAppFiles] = useState<boolean>(true);
+  const [showAllFiles, setShowAllFiles] = useState<boolean>(false);
 
   const initTable = (
     fileDetails: Array<FileDetail>,
@@ -150,14 +62,11 @@ export const FileTable = (props: Props) => {
     return fileDetails
       .map((file) => {
         return {
-          location: parseLocation(file, storageBucketPath),
+          location: parseDirectory(file, storageBucketPath),
           rawName: file.name,
           nameCell: (
-            <NameCell
-              file={file}
-              bucket={storageBucketPath}
-              workspaceNamespace={workspaceNamespace}
-              accessReason={accessReason}
+            <FilenameCell
+              {...{ file, storageBucketPath, workspaceNamespace, accessReason }}
             />
           ),
           size: formatMB(file.sizeInBytes),
@@ -170,6 +79,7 @@ export const FileTable = (props: Props) => {
           : locationComparison;
       });
   };
+
   const updateFileAccessReason = (
     fileAccessReason: string
   ): Array<TableEntry> => {
@@ -180,7 +90,7 @@ export const FileTable = (props: Props) => {
     setLoading(true);
     const files = await workspaceAdminApi().listFiles(
       workspaceNamespace,
-      showOnlyAppFiles
+      !showAllFiles
     );
     setFileDetail(files);
     setTable(initTable(files));
@@ -190,15 +100,15 @@ export const FileTable = (props: Props) => {
   useEffect(() => {
     setLoading(true);
     getWorkspaceFiles().finally(() => setLoading(false));
-  }, [showOnlyAppFiles]);
+  }, [showAllFiles]);
 
   return (
     <div>
       <FlexRow>
         <InputSwitch
-          checked={!showOnlyAppFiles}
+          checked={showAllFiles}
           onChange={() => {
-            setShowOnlyAppFiles(!showOnlyAppFiles);
+            setShowAllFiles(!showAllFiles);
           }}
           style={{
             marginRight: '1.5rem',

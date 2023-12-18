@@ -1,16 +1,14 @@
 import * as React from 'react';
 
-import { render, RenderResult, screen } from '@testing-library/react';
+import { RenderResult, screen } from '@testing-library/react';
+
+import { renderModal } from 'testing/react-test-helpers';
 
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 describe('TwoFactorAuthModal', () => {
   const component = (): RenderResult =>
-    render(
-      <div id='popup-root'>
-        <TwoFactorAuthModal onCancel={() => {}} onClick={() => {}} />
-      </div>
-    );
+    renderModal(<TwoFactorAuthModal onCancel={() => {}} onClick={() => {}} />);
 
   it('should render', () => {
     component();
