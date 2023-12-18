@@ -603,17 +603,24 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private UserTermsOfServiceDetails getUserTerraToSStatus() {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
-    UserTermsOfServiceDetails tosDetails;
-    try {
-      tosDetails = samRetryHandler.run(context -> termsOfServiceApi.userTermsOfServiceGetSelf());
-    } catch (Exception e) {
-      log.warning(
-          "Could not retrieve the Terra Terms of Service status for the current user: "
-              + e.getMessage());
-      // assume noncompliance if we can't check
-      tosDetails =
-          new UserTermsOfServiceDetails().permitsSystemUsage(false).isCurrentVersion(false);
-    }
-    return tosDetails;
+    return samRetryHandler.run(
+        context -> {
+          try {
+            return termsOfServiceApi.userTermsOfServiceGetSelf();
+          } catch (org.broadinstitute.dsde.workbench.client.sam.ApiException e) {
+            if (e.getCode() >= 400 && e.getCode() < 500) {
+              log.warning(
+                  "Could not retrieve the Terra Terms of Service status for the current user: "
+                      + e.getMessage());
+              // assume noncompliance if we can't check
+              return new UserTermsOfServiceDetails()
+                  .permitsSystemUsage(false)
+                  .isCurrentVersion(false);
+            } else {
+              // not a 4xx, pass through
+              throw e;
+            }
+          }
+        });
   }
 }
