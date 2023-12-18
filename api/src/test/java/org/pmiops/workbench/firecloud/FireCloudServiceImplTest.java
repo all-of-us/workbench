@@ -319,6 +319,25 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
+  public void isUserCompliantWithTerraToS_404()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    when(termsOfServiceApi.userTermsOfServiceGetSelf())
+        .thenThrow(new org.broadinstitute.dsde.workbench.client.sam.ApiException(404, "Not found"));
+    assertThat(service.isUserCompliantWithTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void isUserCompliantWithTerraToS_500()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    when(termsOfServiceApi.userTermsOfServiceGetSelf())
+        .thenThrow(new org.broadinstitute.dsde.workbench.client.sam.ApiException(500, "WELP"));
+    assertThrows(ServerErrorException.class, () -> service.isUserCompliantWithTerraToS());
+  }
+
+  @Test
   public void hasUserAcceptedLatestTerraToS()
       throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
     var toReturn =
@@ -348,6 +367,25 @@ public class FireCloudServiceImplTest {
 
     verify(termsOfServiceApi).userTermsOfServiceGetSelf();
     verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_404()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    when(termsOfServiceApi.userTermsOfServiceGetSelf())
+        .thenThrow(new org.broadinstitute.dsde.workbench.client.sam.ApiException(404, "Not found"));
+    assertThat(service.hasUserAcceptedLatestTerraToS()).isFalse();
+
+    verify(termsOfServiceApi).userTermsOfServiceGetSelf();
+    verifyNoInteractions(firecloudTermsOfServiceApi);
+  }
+
+  @Test
+  public void hasUserAcceptedLatestTerraToS_500()
+      throws org.broadinstitute.dsde.workbench.client.sam.ApiException {
+    when(termsOfServiceApi.userTermsOfServiceGetSelf())
+        .thenThrow(new org.broadinstitute.dsde.workbench.client.sam.ApiException(500, "WELP"));
+    assertThrows(ServerErrorException.class, () -> service.hasUserAcceptedLatestTerraToS());
   }
 
   // these 2 show that hasUserAcceptedLatestTerraToS() is currently dependent on the
