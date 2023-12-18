@@ -102,8 +102,9 @@ const iconStyles = reactStyles({
   },
 });
 
-export const rstudioConfigIconId = 'rstudioConfig';
+export const jupyterConfigIconId = 'runtimeConfig';
 export const cromwellConfigIconId = 'cromwellConfig';
+export const rstudioConfigIconId = 'rstudioConfig';
 export const sasConfigIconId = 'sasConfig';
 
 export type SidebarIconId =
@@ -114,7 +115,7 @@ export type SidebarIconId =
   | 'dataDictionary'
   | 'annotations'
   | 'apps'
-  | 'runtimeConfig'
+  | typeof jupyterConfigIconId
   | typeof cromwellConfigIconId
   | typeof rstudioConfigIconId
   | typeof sasConfigIconId
@@ -406,7 +407,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
       ),
     ],
     [
-      'runtimeConfig',
+      jupyterConfigIconId,
       () => (
         <RuntimeIcon
           {...{ userSuspended }}
@@ -603,8 +604,8 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: runtimeTooltip('Applications', loadingError, userSuspended),
       hasContent: true,
     },
-    runtimeConfig: {
-      id: 'runtimeConfig',
+    [jupyterConfigIconId]: {
+      id: jupyterConfigIconId,
       disabled: disableEnvironmentSidebarIcons,
       faIcon: null,
       label: 'Jupyter Icon',
@@ -715,7 +716,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     if (config.enableSasGKEApp) {
       keys.push(sasConfigIconId);
     }
-    keys.push('runtimeConfig', 'terminal');
+    keys.push(jupyterConfigIconId, 'terminal');
   }
 
   if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {

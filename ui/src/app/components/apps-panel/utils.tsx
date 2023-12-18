@@ -13,6 +13,7 @@ import {
 import { cond } from '@terra-ui-packages/core-utils';
 import {
   cromwellConfigIconId,
+  jupyterConfigIconId,
   rstudioConfigIconId,
   sasConfigIconId,
   SidebarIconId,
@@ -154,11 +155,11 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.SAS]: UIAppType.SAS,
 };
 
-type UIUserAppTypes = Exclude<UIAppType, UIAppType.JUPYTER>;
-export const sidebarConfigIcon: Record<UIUserAppTypes, string> = {
+export const sidebarConfigIcon: Record<UIAppType, SidebarIconId> = {
   [UIAppType.SAS]: sasConfigIconId,
   [UIAppType.RSTUDIO]: rstudioConfigIconId,
   [UIAppType.CROMWELL]: cromwellConfigIconId,
+  [UIAppType.JUPYTER]: jupyterConfigIconId,
 };
 
 export const openConfigPanelForUIApp = (appType: UIAppType) =>
