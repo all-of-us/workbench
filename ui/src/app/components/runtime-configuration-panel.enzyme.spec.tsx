@@ -317,32 +317,15 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should show Create panel when no runtime', async () => {
-    setCurrentRuntime(null);
-
-    const wrapper = await component();
-
-    // TODO(RW-7152): This test is incorrectly depending on "default" values in runtime-panel, and
-    // not general analysis. Ensure this test passes for the right reasons when fixing.
-    const computeDefaults = wrapper.find('#compute-resources').first();
-    expect(computeDefaults.text()).toEqual(
-      '- Compute size of 4 CPUs, 15 GB memory, and a 120 GB disk'
-    );
+    // replaced by createOrCustomize() tests
   });
 
   it('should allow creation when no runtime exists with defaults', async () => {
     // migrated to RTL
   });
 
-  // TODO: this test appears to be invalid
   it('should show customize after create', async () => {
-    setCurrentRuntime(null);
-
-    const wrapperBefore = await component();
-
-    await mustClickButton(wrapperBefore, 'Create');
-
-    const wrapperAfter = await component();
-    expect(wrapperAfter.find('#runtime-cpu').exists()).toBeTruthy();
+    // migrated to RTL
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {

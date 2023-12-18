@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router';
 
 import {
-  Disk,
   DisksApi,
   GpuConfig,
   Runtime,
@@ -37,10 +36,11 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectDropdown,
   getDropdownOption,
-  waitForFakeTimersAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
@@ -640,13 +640,14 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeStore.set({ ...runtimeStore.get(), runtime });
   };
 
-  const setCurrentDisk = (disk: Disk) => {
-    disksApiStub.disk = disk;
-    runtimeDiskStore.set({
-      ...runtimeDiskStore.get(),
-      gcePersistentDisk: disk,
-    });
-  };
+  // TODO
+  // const setCurrentDisk = (disk: Disk) => {
+  //   disksApiStub.disk = disk;
+  //   runtimeDiskStore.set({
+  //     ...runtimeDiskStore.get(),
+  //     gcePersistentDisk: disk,
+  //   });
+  // };
 
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
@@ -679,7 +680,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     pickAndClick(container, user, 'runtime-compute', computeType.toString());
 
   // TODO
-  // const expectMainCpuOption = (container: HTMLElement) => expectDropdown(container, 'runtime-cpu');
+  const expectMainCpuOption = (container: HTMLElement) =>
+    expectDropdown(container, 'runtime-cpu');
   // const pickMainRam = (
   //   container: HTMLElement,
   //   user: UserEvent,
@@ -796,6 +798,27 @@ describe(RuntimeConfigurationPanel.name, () => {
       );
       expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
       expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
+    });
+  });
+
+  it('should show customize after create', async () => {
+    setCurrentRuntime(null);
+
+    component();
+
+    clickExpectedButton('Create');
+
+    // creation closes the panel. re-render with the new runtime state
+    await waitFor(() => {
+      const { container } = component();
+
+      // now in Customize mode
+
+      const button = screen.getByRole('button', { name: 'Customize' });
+      expect(button).toBeInTheDocument();
+      expectButtonElementEnabled(button);
+
+      expectMainCpuOption(container);
     });
   });
 

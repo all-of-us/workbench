@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -189,3 +189,6 @@ export const expectDropdownDisabled = (
     container.querySelector(`#${dropDownId} .p-dropdown-item`)
   ).not.toBeInTheDocument();
 };
+
+// by default, screen.debug() cuts off after 7000 chars.  let's output more than that
+export const debugAll = () => screen.debug(undefined, 1_000_000);
