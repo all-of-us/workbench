@@ -77,12 +77,21 @@ describe('ExportDatasetModal', () => {
       expect(screen.queryByLabelText('Please Wait')).toBeNull();
     });
 
-  beforeEach(() => {
-    // // Setup a DOM element as a render target
-    // modalRoot = document.createElement('div');
-    // modalRoot.setAttribute('id', 'popup-root');
-    // document.body.appendChild(modalRoot);
+  const changeNotebookName = (newNotebookName) => {
+    fireEvent.change(findNotebookNameInput(), {
+      target: { value: newNotebookName },
+    });
+  };
 
+  const clickExportButton = () => {
+    fireEvent.click(findExportButton());
+  };
+
+  const hoverOverExportButton = () => {
+    fireEvent.mouseEnter(findExportButton());
+  };
+
+  beforeEach(() => {
     window.open = jest.fn();
     dataset = {
       id: 1,
@@ -105,13 +114,10 @@ describe('ExportDatasetModal', () => {
   });
 
   afterEach(() => {
-    // console.log('A');
     jest.resetAllMocks();
   });
 
   it('should render', async () => {
-    const popupRoot = document.createElement('div');
-    popupRoot.setAttribute('id', 'popup-root');
     const user = userEvent.setup();
     const { container, unmount } = render(component(testProps));
     await screen.findByText('Export Dataset');
@@ -119,11 +125,7 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should export to a new notebook', async () => {
-    const popupRoot = document.createElement('div');
-    popupRoot.setAttribute('id', 'popup-root');
-    document.body.appendChild(popupRoot);
     const { container, unmount } = render(component(testProps));
-    const notebookNameInput = findNotebookNameInput();
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -135,8 +137,8 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    fireEvent.change(notebookNameInput, { target: { value: notebookName } });
-    fireEvent.click(findExportButton());
+    changeNotebookName(notebookName);
+    clickExportButton();
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -152,8 +154,6 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should export to a new notebook if the user types in the file suffix', async () => {
-    const popupRoot = document.createElement('div');
-    popupRoot.setAttribute('id', 'popup-root');
     const { container, unmount } = render(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'MyNotebook.ipynb';
@@ -166,11 +166,9 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const notebookNameInput = findNotebookNameInput();
-    fireEvent.change(notebookNameInput, {
-      target: { value: notebookName },
-    });
-    fireEvent.click(findExportButton());
+    changeNotebookName(notebookName);
+    clickExportButton();
+
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -189,16 +187,12 @@ describe('ExportDatasetModal', () => {
     const { container, unmount } = render(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    const notebookNameInput = findNotebookNameInput();
-    fireEvent.change(notebookNameInput, {
-      target: { value: '' },
-    });
+    changeNotebookName('');
+    clickExportButton();
 
-    const exportButton = findExportButton();
-    fireEvent.click(exportButton);
     expect(exportSpy).not.toHaveBeenCalled();
 
-    fireEvent.mouseEnter(exportButton);
+    hoverOverExportButton();
 
     await screen.findByText("Notebook name can't be blank");
     unmount();
@@ -216,16 +210,12 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const notebookNameInput = findNotebookNameInput();
-    fireEvent.change(notebookNameInput, {
-      target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
-    });
+    changeNotebookName(existingNotebookName);
+    clickExportButton();
 
-    const exportButton = findExportButton();
-    fireEvent.click(exportButton);
     expect(exportSpy).not.toHaveBeenCalled();
 
-    fireEvent.mouseEnter(exportButton);
+    hoverOverExportButton();
 
     await screen.findByText('Notebook name already exists');
     unmount();
@@ -242,17 +232,12 @@ describe('ExportDatasetModal', () => {
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
+    changeNotebookName(existingNotebookName);
 
-    const notebookNameInput = findNotebookNameInput();
-    fireEvent.change(notebookNameInput, {
-      target: { value: appendJupyterNotebookFileSuffix(existingNotebookName) },
-    });
-
-    const exportButton = findExportButton();
-    fireEvent.click(exportButton);
+    clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
 
-    fireEvent.mouseEnter(exportButton);
+    hoverOverExportButton();
     await screen.findByText('Notebook name already exists');
 
     unmount();
@@ -291,8 +276,7 @@ describe('ExportDatasetModal', () => {
       expect(screen.queryByLabelText('Notebook Name')).toBeNull();
     });
 
-    const exportButton = findExportButton();
-    fireEvent.click(exportButton);
+    clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -326,9 +310,7 @@ describe('ExportDatasetModal', () => {
     const seeCodePreviewButton = findSeeCodePreviewButton();
     fireEvent.click(seeCodePreviewButton);
 
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Please Wait')).toBeNull();
-    });
+    await waitUntilDoneLoading();
 
     let iframe;
     await waitFor(() => {
@@ -364,10 +346,8 @@ describe('ExportDatasetModal', () => {
 
     const hideCodePreviewButton = findHideCodePreviewButton();
 
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Please Wait')).toBeNull();
-    });
-    screen.logTestingPlaygroundURL();
+    await waitUntilDoneLoading();
+
     fireEvent.click(hideCodePreviewButton);
 
     await waitFor(() => {
@@ -467,12 +447,8 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const notebookNameInput = findNotebookNameInput();
-    fireEvent.change(notebookNameInput, {
-      target: { value: appendJupyterNotebookFileSuffix(notebookName) },
-    });
-    const exportButton = findExportButton();
-    fireEvent.click(exportButton);
+    changeNotebookName(notebookName);
+    clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
       dataSetRequest: expectedDatasetRequest,
@@ -502,9 +478,7 @@ describe('ExportDatasetModal', () => {
 
     const seeCodePreviewButton = findSeeCodePreviewButton();
     fireEvent.click(seeCodePreviewButton);
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Please Wait')).toBeNull();
-    });
+    await waitUntilDoneLoading();
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
