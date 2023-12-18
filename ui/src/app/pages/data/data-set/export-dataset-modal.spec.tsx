@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 
 import {
   DataSetApi,
@@ -12,22 +11,9 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import {
-  cleanup,
-  fireEvent,
-  getByText,
-  render,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Select } from 'app/components/inputs';
-import { Tooltip } from 'app/components/popups';
-import {
-  appendJupyterNotebookFileSuffix,
-  dropJupyterNotebookFileSuffix,
-} from 'app/pages/analysis/util';
+import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
   dataSetApi,
@@ -42,9 +28,9 @@ describe('ExportDatasetModal', () => {
   let dataset;
   let workspace;
   let testProps;
+  ``;
   let notebooksApiStub;
   let datasetApiStub;
-  let modalRoot;
 
   const component = (props) => {
     return <ExportDatasetModal {...props} />;
@@ -118,7 +104,6 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should render', async () => {
-    const user = userEvent.setup();
     const { unmount } = render(component(testProps));
     await screen.findByText('Export Dataset');
     unmount();
