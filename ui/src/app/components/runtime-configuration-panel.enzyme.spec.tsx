@@ -1287,22 +1287,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('should display the Running runtime status icon in state Running', async () => {
-    const wrapper = await component();
-
-    expect(
-      wrapper.find('[data-test-id="environment-status-icon-running"]').exists()
-    ).toBeTruthy();
-  });
-
-  it('should display a compute-none when there is no runtime', async () => {
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    expect(
-      wrapper.find('[data-test-id="environment-status-icon-none"]').exists()
-    ).toBeTruthy();
-  });
-
   it('should prevent runtime creation when disk size is invalid', async () => {
     setCurrentRuntime(null);
     const wrapper = await component();
