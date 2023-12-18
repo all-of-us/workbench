@@ -27,9 +27,9 @@ describe('ExportDatasetModal', () => {
   let dataset;
   let workspace;
   let testProps;
-  ``;
   let notebooksApiStub;
   let datasetApiStub;
+  let unmount;
 
   const component = (props) => {
     return <ExportDatasetModal {...props} />;
@@ -99,17 +99,23 @@ describe('ExportDatasetModal', () => {
   });
 
   afterEach(() => {
+    // React-modal makes changes to the ownerDocument where
+    // a modal is found when the modal is closed. Since we are using
+    // React Testing Library(RTL), components are generally tested in
+    // isolation, so we have little concept of an owning document.
+    // By using RTL's umount method, we are able to cleanup our
+    // modal before its cleanup functionality is called.
+    unmount();
     jest.resetAllMocks();
   });
 
   it('should render', async () => {
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     await screen.findByText('Export Dataset');
-    unmount();
   });
 
   it('should export to a new notebook', async () => {
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -134,11 +140,10 @@ describe('ExportDatasetModal', () => {
         generateGenomicsAnalysisCode: false,
       })
     );
-    unmount();
   });
 
   it('should export to a new notebook if the user types in the file suffix', async () => {
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'MyNotebook.ipynb';
     const expectedNotebookName = notebookName;
@@ -164,11 +169,10 @@ describe('ExportDatasetModal', () => {
         generateGenomicsAnalysisCode: false,
       })
     );
-    unmount();
   });
 
   it('should disable export if no name is provided', async () => {
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     changeNotebookName('');
@@ -179,7 +183,6 @@ describe('ExportDatasetModal', () => {
     hoverOverExportButton();
 
     await screen.findByText("Notebook name can't be blank");
-    unmount();
   });
 
   it('should disable export if a conflicting name is provided, without the suffix', async () => {
@@ -189,7 +192,7 @@ describe('ExportDatasetModal', () => {
         name: existingNotebookName,
       },
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
@@ -202,7 +205,6 @@ describe('ExportDatasetModal', () => {
     hoverOverExportButton();
 
     await screen.findByText('Notebook name already exists');
-    unmount();
   });
 
   it('should disable export if a conflicting name is provided, including the suffix', async () => {
@@ -212,7 +214,7 @@ describe('ExportDatasetModal', () => {
         name: existingNotebookName,
       },
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
@@ -223,8 +225,6 @@ describe('ExportDatasetModal', () => {
 
     hoverOverExportButton();
     await screen.findByText('Notebook name already exists');
-
-    unmount();
   });
 
   it('should export to an existing notebook with the correct kernel type', async () => {
@@ -246,7 +246,7 @@ describe('ExportDatasetModal', () => {
     };
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
     await waitUntilDoneLoading();
 
@@ -272,8 +272,6 @@ describe('ExportDatasetModal', () => {
         kernelType: KernelTypeEnum.R,
       })
     );
-
-    unmount();
   });
 
   it('should show code preview, auto reload on kernel switch, and hide code preview', async () => {
@@ -286,7 +284,7 @@ describe('ExportDatasetModal', () => {
     datasetApiStub.codePreview = {
       html: '<div id="notebook">print("hello world!")</div>',
     };
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
     await waitUntilDoneLoading();
@@ -337,15 +335,13 @@ describe('ExportDatasetModal', () => {
       iframe = screen.queryByTestId('export-preview-frame');
       expect(iframe).not.toBeInTheDocument();
     });
-
-    unmount();
   });
 
   it('Show genomics analysis tools if WGS is in the dataset', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
     await screen.findByRole('radio', {
       name: 'Hail',
@@ -358,15 +354,13 @@ describe('ExportDatasetModal', () => {
     await screen.findByRole('radio', {
       name: 'Other VCF-compatible tool',
     });
-
-    unmount();
   });
 
   it('Remove genomics analysis tools if R is selected', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
     const rRadioButtonLabel = screen.getByRole('radio', {
       name: 'R',
@@ -388,13 +382,11 @@ describe('ExportDatasetModal', () => {
       name: 'Other VCF-compatible tool',
     });
     expect(otherRadio).toBeNull();
-
-    unmount();
   });
 
   it('Remove genomics analysis tools if no WGS', async () => {
     testProps.dataset.prePackagedConceptSet = [];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
     const hailRadio = screen.queryByRole('radio', {
       name: 'Hail',
@@ -410,15 +402,13 @@ describe('ExportDatasetModal', () => {
       name: 'Other VCF-compatible tool',
     });
     expect(otherRadio).toBeNull();
-
-    unmount();
   });
 
   it('Should export code with genomics analysis tool', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -441,7 +431,6 @@ describe('ExportDatasetModal', () => {
       generateGenomicsAnalysisCode: true,
       genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
     });
-    unmount();
   });
 
   it('Auto reload code preview if genomics analysis tool is changed', async () => {
@@ -456,7 +445,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const { unmount } = render(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
     const seeCodePreviewButton = findSeeCodePreviewButton();
@@ -502,7 +491,5 @@ describe('ExportDatasetModal', () => {
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );
-
-    unmount();
   });
 });
