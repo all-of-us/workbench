@@ -103,7 +103,7 @@ def setup_and_enter_docker(cmd_name, opts)
   end
 
   # By default Tempfile on OS X does not use a docker-friendly location
-  key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp")
+  key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp/colima")
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
     common.run_inline %W{docker-compose build deploy}
