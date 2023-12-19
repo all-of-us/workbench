@@ -1,6 +1,6 @@
 # To build and deploy, from this directory:
 # $ docker build . -f Dockerfile.circle_build -t us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z .
-# Note: M1 Macs may need to add `--platform linux/x86_64/v8`
+# Note: M1 Macs may need to add `--platform linux/x86_64` after `docker build`
 # Test out the new image with:
 # $ docker run -it us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z /bin/bash
 # Update all mentions of us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z in
