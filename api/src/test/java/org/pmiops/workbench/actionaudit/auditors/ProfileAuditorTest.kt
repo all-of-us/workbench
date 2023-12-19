@@ -1,10 +1,6 @@
 package org.pmiops.workbench.actionaudit.auditors
 
 import com.google.common.truth.Truth.assertThat
-import java.math.BigDecimal
-import java.time.Clock
-import java.time.Instant
-import javax.inject.Provider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
@@ -30,6 +26,10 @@ import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Race
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation
 import org.springframework.test.context.junit4.SpringRunner
+import java.math.BigDecimal
+import java.time.Clock
+import java.time.Instant
+import javax.inject.Provider
 
 @RunWith(SpringRunner::class)
 class ProfileAuditorTest {
@@ -42,14 +42,17 @@ class ProfileAuditorTest {
 
     @BeforeEach
     fun setUp() {
-        user = DbUser()
+        user =
+            DbUser()
                 .apply { userId = 1001 }
                 .apply { username = USER_EMAIL }
 
-        profileAuditAdapter = ProfileAuditorImpl(
+        profileAuditAdapter =
+            ProfileAuditorImpl(
                 actionAuditService = mockActionAuditService,
                 clock = mockClock,
-                actionIdProvider = mockActionIdProvider)
+                actionIdProvider = mockActionIdProvider,
+            )
         whenever(mockClock.millis()).thenReturn(Y2K_EPOCH_MILLIS)
         whenever(mockActionIdProvider.get()).thenReturn(ACTION_ID)
     }
@@ -68,12 +71,14 @@ class ProfileAuditorTest {
     }
 
     private fun buildProfile(): Profile {
-        val caltechAffiliation = VerifiedInstitutionalAffiliation()
+        val caltechAffiliation =
+            VerifiedInstitutionalAffiliation()
                 .apply { institutionShortName = "Caltech" }
                 .apply { institutionDisplayName = "California Institute of Technology" }
                 .apply { institutionalRoleEnum = InstitutionalRole.ADMIN }
 
-        val demographicSurvey1 = DemographicSurvey()
+        val demographicSurvey1 =
+            DemographicSurvey()
                 .apply { disability = Disability.FALSE }
                 .apply { ethnicity = Ethnicity.NOT_HISPANIC }
                 .apply { yearOfBirth = BigDecimal.valueOf(1999) }
@@ -82,27 +87,28 @@ class ProfileAuditorTest {
                 .apply { lgbtqIdentity = "gay" }
                 .identifiesAsLgbtq(true)
 
-        val addr = Address()
-            .apply { streetAddress1 = "415 Main Street" }
-            .apply { streetAddress2 = "7th floor" }
-            .apply { zipCode = "12345" }
-            .apply { city = "Cambridge" }
-            .apply { state = "MA" }
-            .apply { country = "USA" }
+        val addr =
+            Address()
+                .apply { streetAddress1 = "415 Main Street" }
+                .apply { streetAddress2 = "7th floor" }
+                .apply { zipCode = "12345" }
+                .apply { city = "Cambridge" }
+                .apply { state = "MA" }
+                .apply { country = "USA" }
 
         return Profile()
-                .apply { userId = 444 }
-                .apply { username = "slim_shady" }
-                .apply { contactEmail = USER_EMAIL }
-                .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
-                .apply { givenName = "Robert" }
-                .apply { familyName = "Paulson" }
-                .apply { areaOfResearch = "Aliens" }
-                .apply { professionalUrl = "linkedin.com" }
-                .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
-                .apply { demographicSurvey = demographicSurvey1 }
-                .apply { address = addr }
-                .disabled(false)
+            .apply { userId = 444 }
+            .apply { username = "slim_shady" }
+            .apply { contactEmail = USER_EMAIL }
+            .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
+            .apply { givenName = "Robert" }
+            .apply { familyName = "Paulson" }
+            .apply { areaOfResearch = "Aliens" }
+            .apply { professionalUrl = "linkedin.com" }
+            .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
+            .apply { demographicSurvey = demographicSurvey1 }
+            .apply { address = addr }
+            .disabled(false)
     }
 
     @Test
@@ -125,7 +131,6 @@ class ProfileAuditorTest {
     }
 
     companion object {
-
         private const val USER_ID = 101L
         private const val USER_EMAIL = "a@b.com"
         private val Y2K_EPOCH_MILLIS = Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli()

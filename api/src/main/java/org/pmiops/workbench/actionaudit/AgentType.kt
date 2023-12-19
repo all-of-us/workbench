@@ -4,5 +4,5 @@ package org.pmiops.workbench.actionaudit
 enum class AgentType {
     USER,
     ADMINISTRATOR,
-    SYSTEM
+    SYSTEM,
 }
