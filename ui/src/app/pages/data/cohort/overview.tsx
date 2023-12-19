@@ -889,7 +889,7 @@ export const ListOverview = fp.flow(
           </OverlayPanel>
           {saveModalOpen && (
             <CreateModal
-              entityName='Cohort'
+              resourceType={ResourceType.COHORT}
               title='Save Cohort as'
               getExistingNames={() => this.getCohortNames()}
               save={(name, desc) => this.createCohort(name, desc)}
