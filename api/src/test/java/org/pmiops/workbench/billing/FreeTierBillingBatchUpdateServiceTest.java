@@ -67,7 +67,7 @@ public class FreeTierBillingBatchUpdateServiceTest {
 
     verify(mockWorkspaceDao, times(1))
         .getGoogleProjectForUserList(Arrays.asList(new Long[] {1l, 2l, 3l}));
-    verify(mockGoogleProjectPerCostDao, times(1)).findAllById(googleProjectIdsSet);
+    verify(mockGoogleProjectPerCostDao, times(1)).findAllByGoogleProjectId(googleProjectIdsSet);
 
     verify(mockFreeTierBillingService)
         .checkFreeTierBillingUsageForUsers(mockDbuserSet, getUserCostMap());
@@ -98,7 +98,7 @@ public class FreeTierBillingBatchUpdateServiceTest {
             new DbGoogleProjectPerCost("23", 6.5),
             new DbGoogleProjectPerCost("32", 0.34),
             new DbGoogleProjectPerCost("33", 0.9));
-    when(mockGoogleProjectPerCostDao.findAllById(googleProjectIdsSet))
+    when(mockGoogleProjectPerCostDao.findAllByGoogleProjectId(googleProjectIdsSet))
         .thenReturn(dbGoogleProjectPerCostList);
   }
 

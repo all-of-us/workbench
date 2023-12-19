@@ -76,14 +76,14 @@ public class FreeTierBillingBatchUpdateService {
 
     List<DbGoogleProjectPerCost> googleProjectPerCostList =
         (List<DbGoogleProjectPerCost>)
-            googleProjectPerCostDao.findAllById(googleProjectsForUserSet);
+            googleProjectPerCostDao.findAllByGoogleProjectId(googleProjectsForUserSet);
 
     // Create Map Key: googleProject and value: cost
     Map<String, Double> userWorkspaceBQCosts =
         googleProjectPerCostList.stream()
             .collect(
                 Collectors.toMap(
-                    DbGoogleProjectPerCost::getGoogleProject, DbGoogleProjectPerCost::getCost));
+                    DbGoogleProjectPerCost::getGoogleProjectId, DbGoogleProjectPerCost::getCost));
 
     Set<DbUser> dbUserSet =
         userIdList.stream()

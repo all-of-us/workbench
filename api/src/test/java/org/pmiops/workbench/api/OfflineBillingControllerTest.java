@@ -54,7 +54,7 @@ public class OfflineBillingControllerTest {
 
     // Confirm the database is cleared and saved with new value
     verify(mockGoogleProjectPerCostDao).deleteAll();
-    verify(mockGoogleProjectPerCostDao).saveAll(anyList());
+    verify(mockGoogleProjectPerCostDao).batchInsertProjectPerCost(anyList());
 
     // Confirm that task as pushed with User Id List
     verify(mockTaskQueueService)
