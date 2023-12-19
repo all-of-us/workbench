@@ -5,16 +5,17 @@ FROM eclipse-temurin:17
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -yq \
-  gettext \
-  ruby \
   default-mysql-client \
-  python3 \
-  python3-pip \
+  gettext \
+  git \
   nodejs \
   npm \
+  python3 \
+  python3-pip \
+  ruby \
+  unzip \
   wait-for-it \
   zip \
-  unzip \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

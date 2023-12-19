@@ -30,8 +30,15 @@ RUN cd && \
   ~/google-cloud-sdk/bin/gcloud components install app-engine-java && \
   rm -rf gcloud.tgz
 
-RUN sudo apt-get update
-RUN sudo apt-get install gettext ruby default-mysql-client python3-pip wait-for-it
+RUN sudo apt-get update && sudo apt-get install --no-install-recommends -yq \
+  default-mysql-client \
+  gettext \
+  python3-pip \
+  ruby \
+  wait-for-it \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN sudo pip install --upgrade pip pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
