@@ -125,7 +125,9 @@ public interface LeonardoApiClient {
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
-  /** @return true if Leonardo service is okay, false otherwise. */
+  /**
+   * @return true if Leonardo service is okay, false otherwise.
+   */
   boolean getLeonardoStatus();
 
   int deleteUserAppsAsService(String userEmail);

@@ -27,10 +27,14 @@ public interface FireCloudService {
   @VisibleForTesting
   String getApiBasePath();
 
-  /** @return true if firecloud is okay, false if firecloud is down. */
+  /**
+   * @return true if firecloud is okay, false if firecloud is down.
+   */
   boolean getFirecloudStatus();
 
-  /** @return the FireCloud profile for the requesting user. */
+  /**
+   * @return the FireCloud profile for the requesting user.
+   */
   FirecloudMe getMe();
 
   /** Registers the user in Firecloud. */

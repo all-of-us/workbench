@@ -160,6 +160,7 @@ public class DbUser {
     this.creationNonce = creationNonce;
     return this;
   }
+
   /**
    * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
    * "username" in this entity class to distinguish it from getContactEmail, which is the user's
@@ -176,6 +177,7 @@ public class DbUser {
     this.username = userName;
     return this;
   }
+
   /**
    * Returns the user's designated contact email address, e.g. "joe@gmail.com".
    *
@@ -230,6 +232,7 @@ public class DbUser {
     this.firstSignInTime = firstSignInTime;
     return this;
   }
+
   // Authorities (special permissions) are granted using api/project.rb set-authority.
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))

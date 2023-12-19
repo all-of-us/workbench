@@ -637,6 +637,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
     return queryResults;
   }
+
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {

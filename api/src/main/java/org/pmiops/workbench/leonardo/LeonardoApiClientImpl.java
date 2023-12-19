@@ -685,10 +685,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 appsApiAsService.listApp(
-                    /* labels =*/ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
-                    /* includeDeleted = */ false,
-                    /* includeLabels = */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
-                    /* role = */ null));
+                    /* labels= */ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    /* includeDeleted= */ false,
+                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* role= */ null));
 
     List<Boolean> results =
         apps.stream()

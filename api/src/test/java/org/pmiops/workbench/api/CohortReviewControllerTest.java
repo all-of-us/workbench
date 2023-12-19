@@ -1640,6 +1640,7 @@ public class CohortReviewControllerTest {
 
     assertForbiddenException(exception);
   }
+
   ////////// getParticipantCount  //////////
   @Test
   public void getParticipantCountWrongWorkspace() {
@@ -2290,6 +2291,7 @@ public class CohortReviewControllerTest {
 
     assertForbiddenException(exception);
   }
+
   ////////// helper methods  //////////
 
   private static Stream<Arguments> paramsSortByFilterColumn() {
