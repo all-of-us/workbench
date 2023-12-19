@@ -1,6 +1,6 @@
 # Image used for deployment. The Circle image is not used here as it does not
 # have an ARM build (M1 chip requires emulation).
-# Keep synchronized with ci/Dockerfile.circle_build
+# Keep synchronized with ci/Dockerfile.circle_build and api/gradle.build
 FROM eclipse-temurin:17
 
 RUN apt-get update \

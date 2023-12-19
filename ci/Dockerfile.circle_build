@@ -9,7 +9,7 @@
 # $ docker push us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z
 # Include your changes to config.yml in the PR that uses the build image.
 
-# This image should be kept synchronized with deploy/Dockerfile.
+# This image should be kept synchronized with deploy/Dockerfile and api/gradle.build
 
 # Note: we depend on dockerize being installed on this image.
 #
