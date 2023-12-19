@@ -13,13 +13,14 @@
 
 # Note: we depend on dockerize being installed on this image.
 #
-# We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
+# We use OpenJDK 17, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
 # and https://discuss.circleci.com/t/legacy-convenience-image-deprecation
-FROM cimg/openjdk:11.0-browsers
+FROM cimg/openjdk:17.0-browsers
 
 USER circleci
 
+# keep in sync with deploy/Dockerfile and api/gradle.build
 ENV CLOUD_SDK_VERSION 392.0.0
 
 RUN cd && \

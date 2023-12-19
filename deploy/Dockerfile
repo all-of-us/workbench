@@ -1,7 +1,7 @@
 # Image used for deployment. The Circle image is not used here as it does not
 # have an ARM build (M1 chip requires emulation).
 # Keep synchronized with ci/Dockerfile.circle_build
-FROM openjdk:11
+FROM eclipse-temurin:17
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -yq \
@@ -14,6 +14,7 @@ RUN apt-get update \
   npm \
   wait-for-it \
   zip \
+  unzip \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -21,6 +22,7 @@ RUN npm install --global yarn n
 # Upgrade to Node 18, above installs 12.
 RUN n 18
 
+# keep in sync with api/gradle.build and ci/Dockerfile.circle_build
 ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root
