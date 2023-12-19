@@ -56,6 +56,7 @@ plugins {
     id 'jacoco'
 }
 
+// keep in sync with sourceCompatibility and targetCompatibility
 if (JavaVersion.current() != JavaVersion.VERSION_17) {
      throw new GradleException(
             "This build must be run with Java 17. " +
@@ -686,10 +687,10 @@ version = '0.1.0'          // Version in generated output
 
 // This restricts the language features that may be used to those at or below the given Java
 // version.
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 // This restricts the runtime environment to be at or above the given Java version.
-targetCompatibility = 11
+targetCompatibility = 17
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
