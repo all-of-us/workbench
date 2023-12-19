@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { CriteriaType } from 'generated/fetch';
+
 import { AlertDanger } from 'app/components/alert';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
@@ -276,6 +278,16 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
       }
     };
 
+    const temporalFilter = (options) =>
+      options.reduce((acc, subOptions) => {
+        if (subOptions[0].category !== 'Program Data') {
+          acc.push(
+            subOptions.filter((op) => op.type !== CriteriaType.HAS_EHR_DATA)
+          );
+        }
+        return acc;
+      }, []);
+
     useEffect(() => {
       // Close menu on outside click
       document.getElementById('root').addEventListener('click', onClickOutside);
@@ -375,145 +387,138 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                     <Spinner size={36} />
                   </div>
                 ) : (
-                  menuOptions
-                    .filter((optionList) =>
-                      isTemporal
-                        ? optionList[0].category !== 'Program Data'
-                        : optionList
-                    )
-                    .map(
-                      (category, index) =>
-                        showMenuItem(index) && (
-                          <ul key={index}>
-                            <li
-                              style={styles.dropdownHeader}
-                              className='menuitem-header'
-                            >
-                              <span style={styles.dropdownHeaderText}>
-                                {category[0].category}
-                              </span>
-                            </li>
-                            {category
-                              .filter(
-                                (menuItem) =>
-                                  domainCounts === null ||
-                                  domainCounts.find(
-                                    (dc) => dc.domain === menuItem.domain
-                                  )
-                              )
-                              .map((menuItem, m) => (
-                                <li
+                  (isTemporal ? temporalFilter(menuOptions) : menuOptions).map(
+                    (category, index) =>
+                      showMenuItem(index) && (
+                        <ul key={index}>
+                          <li
+                            style={styles.dropdownHeader}
+                            className='menuitem-header'
+                          >
+                            <span style={styles.dropdownHeaderText}>
+                              {category[0].category}
+                            </span>
+                          </li>
+                          {category
+                            .filter(
+                              (menuItem) =>
+                                domainCounts === null ||
+                                domainCounts.find(
+                                  (dc) => dc.domain === menuItem.domain
+                                )
+                            )
+                            .map((menuItem, m) => (
+                              <li
+                                key={m}
+                                style={{
+                                  ...styles.dropdownItem,
+                                  ...(hoverId === `${index}-${m}`
+                                    ? {
+                                        background: colorWithWhiteness(
+                                          colors.light,
+                                          0.5
+                                        ),
+                                      }
+                                    : {}),
+                                }}
+                                onMouseEnter={() => {
+                                  setHoverId(`${index}-${m}`);
+                                  if (menuItem.group) {
+                                    setSubMenuOpen(true);
+                                  }
+                                }}
+                                onMouseLeave={() => {
+                                  setHoverId(null);
+                                  if (menuItem.group) {
+                                    setSubMenuOpen(false);
+                                  }
+                                }}
+                              >
+                                <a
+                                  role='menuitem'
+                                  aria-haspopup={menuItem.group}
                                   key={m}
-                                  style={{
-                                    ...styles.dropdownItem,
-                                    ...(hoverId === `${index}-${m}`
-                                      ? {
-                                          background: colorWithWhiteness(
-                                            colors.light,
-                                            0.5
-                                          ),
-                                        }
-                                      : {}),
-                                  }}
-                                  onMouseEnter={() => {
-                                    setHoverId(`${index}-${m}`);
-                                    if (menuItem.group) {
-                                      setSubMenuOpen(true);
-                                    }
-                                  }}
-                                  onMouseLeave={() => {
-                                    setHoverId(null);
-                                    if (menuItem.group) {
-                                      setSubMenuOpen(false);
+                                  style={styles.dropdownLink}
+                                  onClick={() => {
+                                    if (
+                                      !menuItem.group ||
+                                      categoryHasResults(index)
+                                    ) {
+                                      onMenuItemClick(menuItem);
                                     }
                                   }}
                                 >
-                                  <a
-                                    role='menuitem'
-                                    aria-haspopup={menuItem.group}
-                                    key={m}
-                                    style={styles.dropdownLink}
-                                    onClick={() => {
-                                      if (
-                                        !menuItem.group ||
-                                        categoryHasResults(index)
-                                      ) {
-                                        onMenuItemClick(menuItem);
-                                      }
-                                    }}
-                                  >
-                                    <span style={{ verticalAlign: 'middle' }}>
-                                      {menuItem.name}
+                                  <span style={{ verticalAlign: 'middle' }}>
+                                    {menuItem.name}
+                                  </span>
+                                  {domainCounts !== null && (
+                                    <span style={styles.count}>
+                                      {domainCounts
+                                        .find(
+                                          (dc) => dc.domain === menuItem.domain
+                                        )
+                                        .count.toLocaleString()}
                                     </span>
-                                    {domainCounts !== null && (
-                                      <span style={styles.count}>
-                                        {domainCounts
-                                          .find(
-                                            (dc) =>
-                                              dc.domain === menuItem.domain
-                                          )
-                                          .count.toLocaleString()}
-                                      </span>
-                                    )}
-                                  </a>
-                                  {menuItem.group &&
-                                    !categoryHasResults(index) && (
-                                      <React.Fragment>
-                                        <i
-                                          style={styles.subMenuIcon}
-                                          className='pi pi-sort-down'
-                                        />
-                                        {hoverId === `${index}-${m}` &&
-                                          subMenuOpen && (
-                                            <ul style={styles.subMenu}>
-                                              {menuItem.children?.map(
-                                                (subMenuItem, s) => (
-                                                  <li>
-                                                    <a
-                                                      role='menuitem'
-                                                      key={s}
-                                                      style={{
-                                                        ...styles.subMenuItem,
-                                                        ...(subHoverId ===
+                                  )}
+                                </a>
+                                {menuItem.group &&
+                                  !categoryHasResults(index) && (
+                                    <React.Fragment>
+                                      <i
+                                        style={styles.subMenuIcon}
+                                        className='pi pi-sort-down'
+                                      />
+                                      {hoverId === `${index}-${m}` &&
+                                        subMenuOpen && (
+                                          <ul style={styles.subMenu}>
+                                            {menuItem.children?.map(
+                                              (subMenuItem, s) => (
+                                                <li>
+                                                  <a
+                                                    role='menuitem'
+                                                    key={s}
+                                                    style={{
+                                                      ...styles.subMenuItem,
+                                                      ...(subHoverId ===
+                                                      `${index}-${m}-${s}`
+                                                        ? {
+                                                            background:
+                                                              colorWithWhiteness(
+                                                                colors.light,
+                                                                0.5
+                                                              ),
+                                                          }
+                                                        : {}),
+                                                    }}
+                                                    onMouseEnter={() =>
+                                                      setSubHoverId(
                                                         `${index}-${m}-${s}`
-                                                          ? {
-                                                              background:
-                                                                colorWithWhiteness(
-                                                                  colors.light,
-                                                                  0.5
-                                                                ),
-                                                            }
-                                                          : {}),
-                                                      }}
-                                                      onMouseEnter={() =>
-                                                        setSubHoverId(
-                                                          `${index}-${m}-${s}`
-                                                        )
-                                                      }
-                                                      onMouseLeave={() => {
-                                                        setSubHoverId(null);
-                                                      }}
-                                                      onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        onMenuItemClick(
-                                                          subMenuItem
-                                                        );
-                                                      }}
-                                                    >
-                                                      {subMenuItem.name}
-                                                    </a>
-                                                  </li>
-                                                )
-                                              )}
-                                            </ul>
-                                          )}
-                                      </React.Fragment>
-                                    )}
-                                </li>
-                              ))}
-                          </ul>
-                        )
-                    )
+                                                      )
+                                                    }
+                                                    onMouseLeave={() => {
+                                                      setSubHoverId(null);
+                                                    }}
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      onMenuItemClick(
+                                                        subMenuItem
+                                                      );
+                                                    }}
+                                                  >
+                                                    {subMenuItem.name}
+                                                  </a>
+                                                </li>
+                                              )
+                                            )}
+                                          </ul>
+                                        )}
+                                    </React.Fragment>
+                                  )}
+                              </li>
+                            ))}
+                        </ul>
+                      )
+                  )
                 )}
               </React.Fragment>
             )}
