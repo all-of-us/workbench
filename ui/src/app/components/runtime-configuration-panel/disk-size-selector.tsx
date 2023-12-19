@@ -20,9 +20,7 @@ export const DiskSizeSelector = ({
   style = {},
 }: Props) => (
   <FlexRow style={{ ...styles.labelAndInput, ...style }}>
-    <label style={styles.label} htmlFor={`${idPrefix}-disk-size`}>
-      Disk (GB)
-    </label>
+    <label style={styles.label}>Disk (GB)</label>
     <InputNumber
       id={`${idPrefix}-disk`}
       showButtons

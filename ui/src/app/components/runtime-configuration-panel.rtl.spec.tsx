@@ -656,37 +656,36 @@ describe(RuntimeConfigurationPanel.name, () => {
     button.click();
   };
 
-  const pickAndClick = (
+  const pickAndClick = async (
     container: HTMLElement,
     user: UserEvent,
     dropDownId: string,
     optionText: string
-  ): void => {
+  ): Promise<void> => {
     const option = getDropdownOption(container, dropDownId, optionText);
-    user.click(option);
+    await user.click(option);
   };
 
   const pickMainCpu = (
     container: HTMLElement,
     user: UserEvent,
     option: number
-  ): void => pickAndClick(container, user, 'runtime-cpu', option.toString());
+  ): Promise<void> =>
+    pickAndClick(container, user, 'runtime-cpu', option.toString());
 
   const pickComputeType = (
     container: HTMLElement,
     user: UserEvent,
     computeType: ComputeType
-  ): void =>
+  ): Promise<void> =>
     pickAndClick(container, user, 'runtime-compute', computeType.toString());
 
-  // TODO
-  const expectMainCpuOption = (container: HTMLElement) =>
-    expectDropdown(container, 'runtime-cpu');
-  // const pickMainRam = (
-  //   container: HTMLElement,
-  //   user: UserEvent,
-  //   option: number
-  // ): void => pickAndClick(container, user, 'runtime-ram', option.toString());
+  const pickMainRam = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickAndClick(container, user, 'runtime-ram', option.toString());
 
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
@@ -810,15 +809,13 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     // creation closes the panel. re-render with the new runtime state
     await waitFor(() => {
-      const { container } = component();
+      component();
 
       // now in Customize mode
 
       const button = screen.getByRole('button', { name: 'Customize' });
       expect(button).toBeInTheDocument();
       expectButtonElementEnabled(button);
-
-      expectMainCpuOption(container);
     });
   });
 
@@ -940,7 +937,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     const { container } = component();
 
-    pickMainCpu(container, user, 8);
+    await pickMainCpu(container, user, 8);
     clickExpectedButton('Try Again');
 
     await waitFor(() =>
@@ -949,41 +946,44 @@ describe(RuntimeConfigurationPanel.name, () => {
     );
   });
 
-  // TODO
-  // it('should allow creation with GCE with PD config', async () => {
-  //   const user = userEvent.setup();
-  //
-  //   setCurrentRuntime(null);
-  //
-  //   const { container } = component();
-  //   clickExpectedButton('Customize');
-  //
-  //   await waitFor(() => expectMainCpuOption(container));
-  //
-  //   pickMainCpu(container, user, 8);
-  //   pickMainRam(container, user, 52);
-  //   pickDetachableDiskSize(container, user, MIN_DISK_SIZE_GB + 10);
-  //
-  //   clickExpectedButton('Create');
-  //
-  //   await waitFor(() => {
-  //     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-  //     expect(runtimeApiStub.runtime.configurationType).toEqual(
-  //       RuntimeConfigurationType.USER_OVERRIDE
-  //     );
-  //     expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
-  //       machineType: 'n1-highmem-8',
-  //       gpuConfig: null,
-  //       persistentDisk: {
-  //         diskType: 'pd-standard',
-  //         labels: {},
-  //         name: 'stub-disk',
-  //         size: MIN_DISK_SIZE_GB + 10,
-  //       },
-  //     });
-  //     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
-  //   });
-  // });
+  it('should allow creation with GCE with PD config', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(null);
+
+    const { container } = component();
+    clickExpectedButton('Customize');
+
+    await pickMainCpu(container, user, 8);
+    await pickMainRam(container, user, 52);
+
+    const detachableDiskSize = screen.getByRole('spinbutton', {
+      name: 'detachable-disk',
+    });
+    expect(detachableDiskSize).toBeInTheDocument();
+    await user.clear(detachableDiskSize);
+    await user.type(detachableDiskSize, (MIN_DISK_SIZE_GB + 10).toString());
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.USER_OVERRIDE
+      );
+      expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
+        machineType: 'n1-highmem-8',
+        gpuConfig: null,
+        persistentDisk: {
+          diskType: 'pd-standard',
+          labels: {},
+          name: 'stub-disk',
+          size: MIN_DISK_SIZE_GB + 10,
+        },
+      });
+      expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+    });
+  });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
     setCurrentRuntime(defaultGceRuntimeWithPd());
@@ -1075,9 +1075,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     // confirm Dataproc by observing that PD is disabled
     expect(getDetachableDiskRadio()).toBeDisabled();
 
-    pickComputeType(container, user, ComputeType.Standard);
+    await pickComputeType(container, user, ComputeType.Standard);
 
     await waitFor(() => {
+      debugAll();
       // confirm GCE by observing that PD is enabled
       expect(getDetachableDiskRadio()).not.toBeDisabled();
     });

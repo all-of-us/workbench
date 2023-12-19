@@ -345,33 +345,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creation with GCE with PD config', async () => {
-    setCurrentRuntime(null);
-
-    const wrapper = await component();
-
-    await mustClickButton(wrapper, 'Customize');
-
-    await pickMainCpu(wrapper, 8);
-    await pickMainRam(wrapper, 52);
-    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
-
-    await mustClickButton(wrapper, 'Create');
-
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.USER_OVERRIDE
-    );
-    expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
-      machineType: 'n1-highmem-8',
-      gpuConfig: null,
-      persistentDisk: {
-        diskType: 'pd-standard',
-        labels: {},
-        name: 'stub-disk',
-        size: MIN_DISK_SIZE_GB + 10,
-      },
-    });
-    expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+    // migrated to RTL
   });
 
   it('should allow creation with Dataproc config', async () => {
