@@ -5,7 +5,7 @@ FROM eclipse-temurin:17
 
 # keep in sync with api/gradle.build and ci/Dockerfile.circle_build
 ENV CLOUD_SDK_VERSION 457.0.0
-ENV GRADLE_VERSION 7.6.1
+ENV GRADLE_VERSION 7.6.3
 
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
