@@ -54,6 +54,7 @@ public class DbAddress {
     this.streetAddress2 = streetAddress2;
     return this;
   }
+
   // Most @Column annotations in our codebase don't have a length specification. This is included
   // on the zip_code field to allow test cases (where an in-memory H2 database is used instead of
   // MySQL) to trigger an exception when a user attempts to save a DbUser row with too-large field

@@ -319,6 +319,19 @@ Common.register_command({
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
 })
 
+def run_contract_tests(cmd_name, *args)
+  common = Common.new
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    common.run_inline %W{./gradlew contractTest} + args
+  end
+end
+
+Common.register_command({
+                          :invocation => "contracttest",
+                          :description => "Runs contracttest tests.",
+                          :fn => ->(*args) { run_contract_tests("contracttest", *args) }
+                        })
+
 def connect_to_db()
   common = Common.new
   common.status "Starting database if necessary..."

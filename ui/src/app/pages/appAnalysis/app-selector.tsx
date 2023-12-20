@@ -10,11 +10,9 @@ import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { useNavigation } from 'app/utils/navigation';
 import { userAppsStore, useStore } from 'app/utils/stores';
-import {
-  openRStudioOrConfigPanel,
-  openSASOrConfigPanel,
-} from 'app/utils/user-apps-utils';
+import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -40,6 +38,7 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
+  const [navigate] = useNavigation();
   const { userApps } = useStore(userAppsStore);
   const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
   const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
@@ -60,12 +59,15 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.Jupyter);
         break;
       case UIAppType.RSTUDIO:
-        setVisibleModal(VisibleModal.None);
-        openRStudioOrConfigPanel(workspace.namespace, userApps);
-        break;
       case UIAppType.SAS:
         setVisibleModal(VisibleModal.None);
-        openSASOrConfigPanel(workspace.namespace, userApps);
+        openAppOrConfigPanel(
+          workspace.namespace,
+          workspace.id,
+          userApps,
+          selectedApp,
+          navigate
+        );
         break;
     }
   };

@@ -6,7 +6,7 @@
     "build-terra-deps": "./src/terraui/build.sh",
     "deps": "./src/deps/deps.sh",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
-    "start-tanagra": "BROWSER='none' REACT_APP_GET_LOCAL_AUTH_TOKEN=true REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
+    "start-tanagra": "BROWSER='none' PUBLIC_URL=/tanagra REACT_APP_GET_LOCAL_AUTH_TOKEN=true REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra-aou-utils/tanagra/ui",
     "dev-up": "yarn && yarn run deps test && yarn start",
     "dev-up-test": "yarn && yarn run deps test && REACT_APP_ENVIRONMENT=localtest yarn start",
     "dev-up-local": "yarn && yarn run deps local && REACT_APP_ENVIRONMENT=local yarn start",
@@ -58,7 +58,7 @@
     "outdated-browser-rework": "^2.8.0",
     "portable-fetch": "^3.0.0",
     "primeicons": "^5.0.0",
-    "primereact": "^9.6.3",
+    "primereact": "^9.6.4",
     "querystring-es3": "^0.2.1",
     "react": "^17",
     "react-calendar": "^2.18.1",
@@ -81,7 +81,7 @@
     "swr": "^1.3.0",
     "typescript": "^4.9.5",
     "validate.js": "^0.13.1",
-    "yarn": "^1.22.0"
+    "yarn": "^1.22.21"
   },
   "devDependencies": {
     "@testing-library/dom": "^9.3.3",

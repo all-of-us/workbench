@@ -39,6 +39,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T>
         .map(batch -> build(tableId, batch, fixedValues))
         .collect(ImmutableList.toImmutableList());
   }
+
   /**
    * Construct an InsertAllRequest from all of the provided models, one row per model. The
    * fixedValues argument is to allow a value (like snapshot_timestamp) to span all rows in its

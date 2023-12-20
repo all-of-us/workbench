@@ -1,4 +1,5 @@
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 import {
   AppStatus,
@@ -12,12 +13,19 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import {
+  helpSidebarConfigIdForUIApp,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
+import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
-import { analysisTabName, analysisTabPath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  analysisTabPath,
+  appDisplayPath,
+} from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
-import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
@@ -44,6 +52,8 @@ beforeEach(async () => {
   jest.mock('app/services/swagger-fetch-clients');
   mockAppsApi = jest.spyOn(swaggerClients, 'appsApi');
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
+  helpSidebarConfigIdForUIApp[UIAppType.RSTUDIO] = rstudioConfigIconId;
+  helpSidebarConfigIdForUIApp[UIAppType.SAS] = sasConfigIconId;
 });
 
 const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
@@ -113,11 +123,9 @@ test.each([
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
     await waitFor(() => {
-      expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-      expect(spyWindowOpen).toHaveBeenCalledWith(
-        app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-        '_blank'
-      );
+      expect(mockNavigate).toHaveBeenCalledWith([
+        appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
+      ]);
     });
   }
 );

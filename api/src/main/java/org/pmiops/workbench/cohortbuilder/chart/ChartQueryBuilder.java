@@ -164,6 +164,7 @@ public class ChartQueryBuilder extends QueryBuilder {
         .setUseLegacySql(false)
         .build();
   }
+
   /**
    * Provides counts with domain info for charts defined by the provided {@link
    * ParticipantCriteria}.

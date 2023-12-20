@@ -749,7 +749,7 @@ export const ListSearch = fp.flow(
         (this.props.searchContext.source === 'cohort' &&
           row.subtype === CriteriaSubType.QUESTION);
       const parentSelected = this.props.criteria?.find(({ id }) =>
-        row.path.split('.').includes(id.toString())
+        row.path.split('.').includes(id?.toString())
       );
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected =

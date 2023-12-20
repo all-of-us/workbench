@@ -75,7 +75,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
-  @Mapping(target = "enableHasEhrData", source = "config.featureFlags.enableHasEhrData")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

@@ -455,6 +455,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       return (
         this.preventItemEdit ||
         type === Domain.PERSON.toString() ||
+        type === Domain.SNP_INDEL_VARIANT.toString() ||
         !searchParameters.some(
           (param) => param.subtype !== CriteriaSubType.ANSWER.toString()
         )

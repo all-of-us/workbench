@@ -4,10 +4,6 @@ import { AppsApi, AppStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
-import {
-  CreateGkeAppButton,
-  CreateGKEAppButtonProps,
-} from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import {
@@ -20,6 +16,11 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
+
+import {
+  CreateGkeAppButton,
+  CreateGKEAppButtonProps,
+} from './create-gke-app-button';
 
 describe(CreateGkeAppButton.name, () => {
   const defaultProps: CreateGKEAppButtonProps = {

@@ -8,9 +8,9 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { CreateModal } from 'app/components/create-modal';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -24,6 +24,7 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -97,6 +98,7 @@ export interface TanagraWorkspaceResource extends WorkspaceResource {
   cohortTanagra?: Cohort;
   conceptSetTanagra?: ConceptSet;
   reviewTanagra?: Review;
+  createdBy?: string;
 }
 
 const mapTanagraWorkspaceResource = ({
@@ -132,12 +134,16 @@ export const DataComponentTanagra = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
 )((props: Props) => {
-  useEffect(() => props.hideSpinner(), []);
+  useEffect(() => {
+    props.hideSpinner();
+    if (!environment.tanagraLocalAuth) {
+      localStorage.setItem('tanagraAccessToken', getAccessToken());
+    }
+  }, []);
   const [navigate] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [isLoading, setIsLoading] = useState(true);
   const [resourceList, setResourceList] = useState([]);
-  const [showCohortModal, setShowCohortModal] = useState(false);
 
   const { cdrVersionTiersResponse, workspace } = props;
   const { bigqueryDataset } = findCdrVersion(
@@ -201,24 +207,21 @@ export const DataComponentTanagra = fp.flow(
       case Tabs.SHOWALL:
         return true;
       case Tabs.COHORTS:
-        return resource.cohortV2;
+        return resource.cohortTanagra;
       case Tabs.COHORTREVIEWS:
-        return resource.reviewV2;
+        return resource.reviewTanagra;
       case Tabs.CONCEPTSETS:
-        return resource.conceptSetV2;
+        return resource.conceptSetTanagra;
       case Tabs.DATASETS:
         return false; // Currently no saved datasets in Tanagra
     }
   });
 
-  const getCohortNames = async () => [];
-
-  const createCohort = async (name: string, desc: string) => {
+  const createCohort = async () => {
     const createCohortRequest: CreateCohortRequest = {
       studyId: workspace.namespace,
       cohortCreateInfo: {
-        description: desc,
-        displayName: name,
+        displayName: `Untitled cohort ${new Date().toLocaleString()}`,
         underlayName: 'aou' + bigqueryDataset,
       },
     };
@@ -249,7 +252,7 @@ export const DataComponentTanagra = fp.flow(
             <CardButton
               style={styles.resourceTypeButton}
               disabled={!writePermission}
-              onClick={() => setShowCohortModal(true)}
+              onClick={() => createCohort()}
             >
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
@@ -400,15 +403,6 @@ export const DataComponentTanagra = fp.flow(
           {isLoading && <SpinnerOverlay />}
         </div>
       </FadeBox>
-      {showCohortModal && (
-        <CreateModal
-          entityName='Cohort'
-          title='Save Cohort as'
-          getExistingNames={() => getCohortNames()}
-          save={(name, desc) => createCohort(name, desc)}
-          close={() => setShowCohortModal(false)}
-        />
-      )}
     </React.Fragment>
   );
 });

@@ -7,7 +7,7 @@ import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
-import { maybeWithPersistentDisk } from './runtime-utils';
+import { maybeWithPersistentDisk } from './analysis-config';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.

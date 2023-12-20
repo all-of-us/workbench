@@ -17,6 +17,10 @@ import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 
 import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
+import {
   mockCromwellDisk,
   mockJupyterDisk,
   mockRStudioDisk,
@@ -73,9 +77,9 @@ test('loads and displays table', async () => {
       rowScope.getByText(getEnvironmentType(disk.gceRuntime, disk.appType))
     ).toBeInTheDocument();
     expect(rowScope.getByText(disk.size)).toBeInTheDocument();
-    expect(
+    expectButtonElementEnabled(
       rowScope.getByText('Delete').closest('div[role="button"]')
-    ).not.toHaveStyle(`cursor: not-allowed`);
+    );
   });
 });
 
@@ -126,9 +130,9 @@ test('delete disk', async () => {
     const mockDiskRow = screen.getByText(disk.name).closest('tr');
     const mockDiskRowScope = within(mockDiskRow);
     // Deletion not allowed because a disk is being updated, so we do not want to allow for duplicate delete requests
-    expect(
+    expectButtonElementDisabled(
       mockDiskRowScope.getByText('Delete').closest('div[role="button"]')
-    ).toHaveStyle(`cursor: not-allowed`);
+    );
   });
 
   resolveDeleteFunction();

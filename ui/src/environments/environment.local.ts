@@ -22,5 +22,5 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   showNewAnalysisTab: true,
   showCBFunnelPlot: true,
-  tanagraBaseUrl: 'http://localhost:3000',
+  tanagraLocalAuth: true,
 };

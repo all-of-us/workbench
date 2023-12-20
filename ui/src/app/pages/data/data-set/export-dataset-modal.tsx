@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
-import { validate } from 'validate.js';
+import fp from 'lodash/fp';
 
 import {
   BillingStatus,
@@ -11,7 +10,6 @@ import {
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
-  ResourceType,
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
@@ -29,16 +27,15 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
-  dropJupyterNotebookFileSuffix,
   getExistingJupyterNotebookNames,
 } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, summarizeErrors } from 'app/utils';
+import { isEmpty, reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
-import { nameValidationFormat } from 'app/utils/resources';
+import { validateNewNotebookName } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -64,7 +61,8 @@ export const ExportDatasetModal = ({
   dataset,
   closeFunction,
 }: Props) => {
-  const [existingNotebooks, setExistingNotebooks] = useState(undefined);
+  const [existingNotebooks, setExistingNotebooks] =
+    useState<string[]>(undefined);
   const [kernelType, setKernelType] = useState<KernelTypeEnum>(
     KernelTypeEnum.PYTHON
   );
@@ -151,6 +149,7 @@ export const ExportDatasetModal = ({
     return (
       <iframe
         id='export-preview-frame'
+        data-testid='export-preview-frame'
         scrolling='yes'
         style={{ width: '100%', height: '100%', border: 'none' }}
         srcDoc={placeholder.outerHTML}
@@ -245,18 +244,10 @@ export const ExportDatasetModal = ({
   }, [kernelType, genomicsAnalysisTool]);
 
   const errors = {
-    ...validate(
-      // we expect the notebook name to lack the .ipynb suffix
-      // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-      {
-        notebookName: dropJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
-      },
-      {
-        notebookName: nameValidationFormat(
-          creatingNewNotebook ? existingNotebooks : [],
-          ResourceType.NOTEBOOK
-        ),
-      }
+    ...validateNewNotebookName(
+      notebookNameWithoutSuffix,
+      creatingNewNotebook ? existingNotebooks : [],
+      'notebookName'
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
       ? { billing: [ACTION_DISABLED_INVALID_BILLING] }
@@ -301,7 +292,7 @@ export const ExportDatasetModal = ({
             </div>
 
             {creatingNewNotebook && (
-              <React.Fragment>
+              <label>
                 <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
                   Notebook Name
                 </SmallHeader>
@@ -310,7 +301,7 @@ export const ExportDatasetModal = ({
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                 />
-              </React.Fragment>
+              </label>
             )}
 
             <div style={headerStyles.formLabel}>
@@ -385,7 +376,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!fp.isEmpty(errors)}
+                disabled={!isEmpty(errors) || isNotebooksLoading}
                 onClick={() => exportDataset()}
               >
                 Export

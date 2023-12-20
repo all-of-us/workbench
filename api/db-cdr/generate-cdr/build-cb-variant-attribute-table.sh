@@ -101,8 +101,13 @@ then
    "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_variant_attribute\` x
     SET x.participant_count = y.size
     FROM (
-     SELECT vid, ARRAY_LENGTH(person_ids) AS size
-     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_variant_to_person\`
+      SELECT vid, count(pid) as size
+      FROM \`$BQ_PROJECT.$BQ_DATASET.cb_variant_to_person\`
+      CROSS JOIN UNNEST(person_ids) AS pid
+      WHERE EXISTS (SELECT 'x' FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` sp
+                    WHERE sp.person_id = pid
+                  )
+      GROUP BY vid
     ) y
     WHERE x.vid = y.vid"
 

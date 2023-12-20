@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -18,17 +19,21 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import {
+  AnalysisConfig,
+  withAnalysisConfigDefaults,
+} from 'app/utils/analysis-config';
+import {
   AutopauseMinuteThresholds,
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   Machine,
+  validLeoDataprocMasterMachineTypes,
+  validLeoGceMachineTypes,
 } from 'app/utils/machines';
 import {
-  AnalysisConfig,
-  PanelContent,
+  canUpdateRuntime,
   RuntimeStatusRequest,
   UpdateMessaging,
-  withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -38,6 +43,7 @@ import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
 import { PresetSelector } from './preset-selector';
+import { PanelContent } from './utils';
 
 export interface CustomizePanelProps {
   allowDataproc: boolean;
@@ -59,8 +65,7 @@ export interface CustomizePanelProps {
   setAnalysisConfig: (config: AnalysisConfig) => void;
   setPanelContent: (pc: PanelContent) => void;
   setRuntimeStatusRequest: (rs: RuntimeStatusRequest) => Promise<void>;
-  updateMessaging: UpdateMessaging;
-  validMainMachineTypes: Machine[];
+  updateMessaging?: UpdateMessaging;
   warningMessageContent: JSX.Element[];
   workspaceData: WorkspaceData;
 }
@@ -85,15 +90,30 @@ export const CustomizePanel = ({
   setPanelContent,
   setRuntimeStatusRequest,
   updateMessaging,
-  validMainMachineTypes,
   warningMessageContent,
   workspaceData,
 }: CustomizePanelProps) => {
-  const disableControls =
-    runtimeExists &&
-    !(
-      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
-    ).includes(runtimeStatus);
+  const validMainMachineTypes =
+    analysisConfig.computeType === ComputeType.Standard
+      ? validLeoGceMachineTypes
+      : validLeoDataprocMasterMachineTypes;
+  // The compute type affects the set of valid machine types, so revert to the
+  // default machine type if switching compute types would invalidate the main
+  // machine type choice.
+  useEffect(() => {
+    if (
+      !validMainMachineTypes.find(
+        ({ name }) => name === analysisConfig.machine.name
+      )
+    ) {
+      setAnalysisConfig({
+        ...analysisConfig,
+        machine: existingAnalysisConfig.machine,
+      });
+    }
+  }, [analysisConfig.computeType]);
+
+  const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -275,7 +295,7 @@ export const CustomizePanel = ({
         existingDisk={gcePersistentDisk}
         computeType={analysisConfig.computeType}
       />
-      {runtimeExists && updateMessaging.warn && (
+      {runtimeExists && updateMessaging?.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <div>{updateMessaging.warn}</div>
         </WarningMessage>

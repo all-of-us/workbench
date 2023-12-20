@@ -1,17 +1,19 @@
 # Image used for deployment. The Circle image is not used here as it does not
 # have an ARM build (M1 chip requires emulation).
-# Keep synchronized with ci/Dockerfile.circle_build
-FROM openjdk:11
+# Keep synchronized with ci/Dockerfile.circle_build and api/gradle.build
+FROM eclipse-temurin:17
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -yq \
-  gettext \
-  ruby \
   default-mysql-client \
-  python3 \
-  python3-pip \
+  gettext \
+  git \
   nodejs \
   npm \
+  python3 \
+  python3-pip \
+  ruby \
+  unzip \
   wait-for-it \
   zip \
   && apt-get clean \
@@ -21,8 +23,7 @@ RUN npm install --global yarn n
 # Upgrade to Node 18, above installs 12.
 RUN n 18
 
-RUN npm install @openapitools/openapi-generator-cli -g
-
+# keep in sync with api/gradle.build and ci/Dockerfile.circle_build
 ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root

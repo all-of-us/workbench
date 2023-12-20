@@ -1,7 +1,6 @@
 package org.pmiops.workbench.impersonation;
 
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.FIRECLOUD_WORKSPACE_REQUIRED_FIELDS;
-import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.TERMS_OF_SERVICE_BODY;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +9,6 @@ import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
-import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
@@ -57,19 +55,6 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public void acceptTermsOfService(@Nonnull DbUser dbUser) throws IOException {
-    TermsOfServiceApi termsOfServiceApi = getImpersonatedTosApi(dbUser);
-    firecloudRetryHandler.run(
-        (context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
-  }
-
-  @Override
-  public boolean getUserTermsOfServiceStatus(@Nonnull DbUser dbUser) throws IOException {
-    TermsOfServiceApi termsOfServiceApi = getImpersonatedTosApi(dbUser);
-    return firecloudRetryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
-  }
-
-  @Override
   public List<RawlsWorkspaceListResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException {
     WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
     return rawlsRetryHandler.run(
@@ -107,11 +92,6 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
           workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
           return null;
         });
-  }
-
-  private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {
-    return new TermsOfServiceApi(
-        firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 
   private WorkspacesApi getImpersonatedWorkspacesApi(@Nonnull DbUser dbUser) throws IOException {

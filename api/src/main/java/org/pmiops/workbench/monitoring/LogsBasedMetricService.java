@@ -31,6 +31,7 @@ public interface LogsBasedMetricService {
   default void recordEvent(EventMetric eventMetric) {
     record(MeasurementBundle.builder().addEvent(eventMetric).build());
   }
+
   /**
    * Use a Stopwatch to time the supplied operation, then add a measurement to the supplied
    * measurementBundleBuilder and record the associated DistributionMetric.

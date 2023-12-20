@@ -65,10 +65,9 @@ export interface EnvironmentBase {
   showNewAnalysisTab: boolean;
   // Show the funnel plot icon in the cohort builder UI
   showCBFunnelPlot: boolean;
-  // The URL to use when making API requests against the Tanagra API. This is used
-  // by the core API / fetch modules and shouldn't be needed by most other components.
-  // Example value: 'https://aou-tanagra-dev.fake-research-aou.org'
-  tanagraBaseUrl?: string;
+  // Pass auth token in iframe url
+  // WARNING: This is insecure and should only be enabled for local environments
+  tanagraLocalAuth: boolean;
 }
 
 export interface Environment extends EnvironmentBase {

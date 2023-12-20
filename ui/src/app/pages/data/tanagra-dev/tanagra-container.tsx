@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
+import { environment } from 'environments/environment';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
@@ -19,11 +20,15 @@ export const TanagraContainer = fp.flow(
   }) => {
     const [navigate] = useNavigation();
     const { 0: splat } = useParams<{ 0: string }>();
-    const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
     const { bigqueryDataset } = findCdrVersion(
       cdrVersionId,
       cdrVersionTiersResponse
     );
+    const tanagraUrl = `${
+      serverConfigStore.get().config.tanagraBaseUrl
+    }/tanagra/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}${
+      environment.tanagraLocalAuth ? `/?token=${getAccessToken()}` : ''
+    }`;
 
     useExitActionListener(() => {
       // Navigate to Data tab when exiting Tanagra iframe
@@ -43,7 +48,7 @@ export const TanagraContainer = fp.flow(
             height: '100%',
             width: '100%',
           }}
-          src={`${tanagraUrl}/ui#/tanagra/underlays/aou${bigqueryDataset}/studies/${namespace}/${splat}/?token=${getAccessToken()}`}
+          src={tanagraUrl}
         />
       </div>
     );

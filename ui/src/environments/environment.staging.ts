@@ -20,4 +20,5 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   showNewAnalysisTab: true,
   showCBFunnelPlot: true,
+  tanagraLocalAuth: false,
 };

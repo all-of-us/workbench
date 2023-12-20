@@ -76,7 +76,7 @@ const defaultServerConfig: ConfigResponse = {
   currentDuccVersions: [3, 4],
   enableRStudioGKEApp: true,
   enableSasGKEApp: true,
-  tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
+  tanagraBaseUrl: 'https://test.fake-research-aou.org',
   enableGKEAppPausing: false,
 };
 

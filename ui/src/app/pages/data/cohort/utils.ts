@@ -304,6 +304,7 @@ export function parseCohortDefinition(json: string) {
             conceptId,
             ancestorData,
             standard,
+            variantId,
           } = sp;
           return {
             parameterId,
@@ -318,6 +319,7 @@ export function parseCohortDefinition(json: string) {
             hasAttributes: attributes && attributes.length > 0,
             hasAncestorData: ancestorData,
             standard,
+            variantId,
           };
         });
         if (!grp.temporal) {
