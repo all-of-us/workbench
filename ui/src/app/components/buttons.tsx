@@ -127,6 +127,20 @@ const buttonVariants = {
     },
     hover: { backgroundColor: colors.primary, color: colors.white },
   },
+  secondaryOutline: {
+    style: {
+      ...styles.baseNew,
+      backgroundColor: 'transparent',
+      color: colors.primary,
+      borderStyle: 'solid',
+      borderWidth: '1px',
+    },
+    disabledStyle: {
+      borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: colors.primary, color: colors.white },
+  },
   secondaryLight: {
     style: {
       ...styles.baseNew,
