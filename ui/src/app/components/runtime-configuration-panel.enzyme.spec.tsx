@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import * as fp from 'lodash/fp';
 import { ReactWrapper } from 'enzyme';
 
 import {
@@ -12,7 +11,7 @@ import {
 } from 'generated/fetch';
 import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
-import { Button, LinkButton } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import {
@@ -60,8 +59,6 @@ import {
 } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-
-import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
 
 describe(RuntimeConfigurationPanel.name, () => {
   const defaultProps: RuntimeConfigurationPanelProps = {
@@ -349,40 +346,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creation with Dataproc config', async () => {
-    setCurrentRuntime(null);
-
-    const wrapper = await component();
-
-    await mustClickButton(wrapper, 'Customize');
-
-    // master settings
-    await pickMainCpu(wrapper, 2);
-    await pickMainRam(wrapper, 7.5);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB + 10);
-
-    // worker settings
-    await pickWorkerCpu(wrapper, 8);
-    await pickWorkerRam(wrapper, 30);
-    await pickWorkerDiskSize(wrapper, 300);
-    await pickNumWorkers(wrapper, 10);
-    await pickNumPreemptibleWorkers(wrapper, 20);
-
-    await mustClickButton(wrapper, 'Create');
-
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.USER_OVERRIDE
-    );
-    expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
-      masterMachineType: 'n1-standard-2',
-      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
-      workerMachineType: 'n1-standard-8',
-      workerDiskSize: 300,
-      numberOfWorkers: 10,
-      numberOfPreemptibleWorkers: 20,
-    });
-    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+    // migrated to RTL
   });
 
   it('should allow configuration via GCE preset', async () => {

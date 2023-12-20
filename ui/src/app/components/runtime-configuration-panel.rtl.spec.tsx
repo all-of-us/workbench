@@ -758,7 +758,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickNumPreemptibleWorkers = async (
     user: UserEvent,
     size: number
-  ): Promise<void> => pickSpinButtonSize(user, 'Preemptible workers', size);
+  ): Promise<void> => pickSpinButtonSize(user, 'num-preemptible', size);
 
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
@@ -1075,19 +1075,21 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     clickExpectedButton('Create');
 
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.USER_OVERRIDE
-    );
-    expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
-      masterMachineType: 'n1-standard-2',
-      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
-      workerMachineType: 'n1-standard-8',
-      workerDiskSize: 300,
-      numberOfWorkers: 10,
-      numberOfPreemptibleWorkers: 20,
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.USER_OVERRIDE
+      );
+      expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
+        masterMachineType: 'n1-standard-2',
+        masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
+        workerMachineType: 'n1-standard-8',
+        workerDiskSize: 300,
+        numberOfWorkers: 10,
+        numberOfPreemptibleWorkers: 20,
+      });
+      expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
     });
-    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
