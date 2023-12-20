@@ -478,6 +478,7 @@ export const ExportDatasetModal = ({
                 icon={Copy}
                 onClick={onCopyCodeClick}
                 style={{ height: '24px', width: '24px' }}
+                title='Dataset query copy icon button'
               />
             </div>
             {codePreview}
