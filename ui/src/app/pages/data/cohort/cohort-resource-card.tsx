@@ -94,7 +94,10 @@ export const CohortResourceCard = fp.flow(
           icon: 'copy',
           displayName: 'Duplicate',
           onClick: () => this.duplicate(),
-          disabled: !canWrite(resource),
+          disabled: !canWrite(resource) || this.duplicateName.length > 80,
+          hoverText:
+            this.duplicateName.length > 80 &&
+            'Cannot duplicate due to length of cohort name',
         },
         {
           icon: 'pencil',
@@ -160,6 +163,10 @@ export const CohortResourceCard = fp.flow(
         });
     }
 
+    get duplicateName() {
+      return `Duplicate of ${getDisplayName(this.props.resource)}`;
+    }
+
     duplicate() {
       this.props.showSpinner();
 
@@ -169,7 +176,7 @@ export const CohortResourceCard = fp.flow(
           this.props.resource.workspaceFirecloudName,
           {
             originalCohortId: this.props.resource.cohort.id,
-            newName: `Duplicate of ${getDisplayName(this.props.resource)}`,
+            newName: this.duplicateName,
           }
         )
         .then(() => {
@@ -178,7 +185,7 @@ export const CohortResourceCard = fp.flow(
         .catch(() => {
           this.props.showErrorModal(
             'Duplicating Cohort Error',
-            'Cohort with the same name already exists.'
+            'Cohort cannot be duplicated. Please try again.'
           );
         })
         .finally(() => {
