@@ -127,8 +127,10 @@ ext.SWAGGER_3_RAW_OPTS = [
 def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
     return {
         inputFile = file("src/main/resources/${yaml}")
+        dependencies {
+            swaggerCodegen  "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
+        }
         code {
-            configuration = configurations.__swaggerCodegenV3__
             language = 'java'
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
@@ -199,8 +201,10 @@ swaggerSources {
     // bindings in this case.
     workbench {
         inputFile = file('src/main/resources/workbench-api.yaml')
+        dependencies {
+            swaggerCodegen  "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
+        }
         code {
-            configuration = configurations.__swaggerCodegenV3__
             language = 'spring'
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
