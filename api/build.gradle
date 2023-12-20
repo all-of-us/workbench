@@ -274,7 +274,7 @@ jacoco {
 jacocoTestReport {
     getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
-        xml.enabled = true
+        xml.required = true
     }
 }
 
