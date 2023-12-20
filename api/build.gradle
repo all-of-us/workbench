@@ -65,11 +65,11 @@ plugins {
 // * targetCompatibility
 // * compileKotlin.kotlinOptions.jvmTarget
 // * compileTestKotlin.kotlinOptions.jvmTarget
-if (JavaVersion.current() != JavaVersion.VERSION_21) {
+if (JavaVersion.current() != JavaVersion.VERSION_17) {
      throw new GradleException(
-            "This build must be run with Java 21. " +
+            "This build must be run with Java 17. " +
                     "See developer-system-initialization.md. " +
-                    "The Java version used was ${JavaVersion.current()}.")
+                    "The java version used was ${JavaVersion.current()}.")
 }
 
 if (System.getenv("ADD_XLINT_DEPRECATION")) {
@@ -695,10 +695,10 @@ version = '0.1.0'          // Version in generated output
 
 // This restricts the language features that may be used to those at or below the given Java
 // version.
-sourceCompatibility = 21
+sourceCompatibility = 17
 
 // This restricts the runtime environment to be at or above the given Java version.
-targetCompatibility = 21
+targetCompatibility = 17
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
@@ -890,12 +890,12 @@ task backfillGSuiteUserData(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = 21
+        jvmTarget = 17
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = 21
+        jvmTarget = 17
     }
 }
 
