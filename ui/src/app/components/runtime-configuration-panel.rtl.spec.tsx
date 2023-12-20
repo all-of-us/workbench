@@ -640,15 +640,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeStore.set({ ...runtimeStore.get(), runtime });
   };
 
-  // TODO
-  // const setCurrentDisk = (disk: Disk) => {
-  //   disksApiStub.disk = disk;
-  //   runtimeDiskStore.set({
-  //     ...runtimeDiskStore.get(),
-  //     gcePersistentDisk: disk,
-  //   });
-  // };
-
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
