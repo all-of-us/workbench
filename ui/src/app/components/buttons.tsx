@@ -441,6 +441,7 @@ export const IconButton = ({
   hover = {},
   tooltip = '',
   disabled = false,
+  title = '',
   ...props
 }) => {
   return (
@@ -459,7 +460,7 @@ export const IconButton = ({
         disabled={disabled}
         {...props}
       >
-        <Icon disabled={disabled} style={style} />
+        <Icon disabled={disabled} style={style} title={title} />
       </TerraUIInteractive>
     </TooltipTrigger>
   );
