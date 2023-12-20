@@ -772,7 +772,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     const allProps = { ...defaultProps, ...propOverrides };
     return render(
       <MemoryRouter>
-        {' '}
         <RuntimeConfigurationPanel {...allProps} />
       </MemoryRouter>
     );
