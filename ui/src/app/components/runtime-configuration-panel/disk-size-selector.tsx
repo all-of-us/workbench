@@ -22,7 +22,8 @@ export const DiskSizeSelector = ({
   <FlexRow style={{ ...styles.labelAndInput, ...style }}>
     <label style={styles.label}>Disk (GB)</label>
     <InputNumber
-      id={`${idPrefix}-disk`}
+        aria-label={`${idPrefix}-disk`}
+        id={`${idPrefix}-disk`}
       showButtons
       disabled={disabled}
       decrementButtonClassName='p-button-secondary'

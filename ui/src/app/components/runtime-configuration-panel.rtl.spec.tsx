@@ -656,7 +656,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     button.click();
   };
 
-  const pickAndClick = async (
+  const pickDropdownOptionAndClick = async (
     container: HTMLElement,
     user: UserEvent,
     dropDownId: string,
@@ -666,26 +666,99 @@ describe(RuntimeConfigurationPanel.name, () => {
     await user.click(option);
   };
 
+  const pickSpinButtonSize = async (
+    user: UserEvent,
+    name: string,
+    value: number
+  ): Promise<void> => {
+    const spinButton = screen.getByRole('spinbutton', { name });
+    expect(spinButton).toBeInTheDocument();
+    await user.clear(spinButton);
+    await user.type(spinButton, value.toString());
+  };
+
   const pickMainCpu = (
     container: HTMLElement,
     user: UserEvent,
     option: number
   ): Promise<void> =>
-    pickAndClick(container, user, 'runtime-cpu', option.toString());
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-cpu',
+      option.toString()
+    );
 
   const pickComputeType = (
     container: HTMLElement,
     user: UserEvent,
     computeType: ComputeType
   ): Promise<void> =>
-    pickAndClick(container, user, 'runtime-compute', computeType.toString());
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-compute',
+      computeType.toString()
+    );
 
   const pickMainRam = (
     container: HTMLElement,
     user: UserEvent,
     option: number
   ): Promise<void> =>
-    pickAndClick(container, user, 'runtime-ram', option.toString());
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-ram',
+      option.toString()
+    );
+
+  const pickWorkerCpu = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'worker-cpu',
+      option.toString()
+    );
+
+  const pickWorkerRam = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'worker-ram',
+      option.toString()
+    );
+
+  const pickDetachableDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'detachable-disk', size);
+
+  const pickStandardDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'standard-disk', size);
+
+  const pickWorkerDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'worker-disk', size);
+
+  const pickNumWorkers = async (user: UserEvent, size: number): Promise<void> =>
+    pickSpinButtonSize(user, 'num-workers', size);
+
+  const pickNumPreemptibleWorkers = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'Preemptible workers', size);
 
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
@@ -956,13 +1029,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await pickMainCpu(container, user, 8);
     await pickMainRam(container, user, 52);
-
-    const detachableDiskSize = screen.getByRole('spinbutton', {
-      name: 'detachable-disk',
-    });
-    expect(detachableDiskSize).toBeInTheDocument();
-    await user.clear(detachableDiskSize);
-    await user.type(detachableDiskSize, (MIN_DISK_SIZE_GB + 10).toString());
+    await pickDetachableDiskSize(user, MIN_DISK_SIZE_GB + 10);
 
     clickExpectedButton('Create');
 
@@ -983,6 +1050,44 @@ describe(RuntimeConfigurationPanel.name, () => {
       });
       expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
     });
+  });
+
+  it('should allow creation with Dataproc config', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(null);
+
+    const { container } = component();
+    clickExpectedButton('Customize');
+
+    // master settings
+    await pickMainCpu(container, user, 2);
+    await pickMainRam(container, user, 7.5);
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB + 10);
+
+    // worker settings
+    await pickWorkerCpu(container, user, 8);
+    await pickWorkerRam(container, user, 30);
+    await pickWorkerDiskSize(user, 300);
+    await pickNumWorkers(user, 10);
+    await pickNumPreemptibleWorkers(user, 20);
+
+    clickExpectedButton('Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.USER_OVERRIDE
+    );
+    expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
+      masterMachineType: 'n1-standard-2',
+      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
+      workerMachineType: 'n1-standard-8',
+      workerDiskSize: 300,
+      numberOfWorkers: 10,
+      numberOfPreemptibleWorkers: 20,
+    });
+    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
