@@ -57,10 +57,14 @@ plugins {
 }
 
 // keep in sync with:
-// sourceCompatibility and targetCompatibility in this file
 // the runtime field in api/src/main/webapp/WEB-INF/appengine-web.xml.template
 // the Docker image in ci/Dockerfile.circle_build
 // the Docker image in deploy/Dockerfile
+// in this file:
+// * sourceCompatibility
+// * targetCompatibility
+// * compileKotlin.kotlinOptions.jvmTarget
+// * compileTestKotlin.kotlinOptions.jvmTarget
 if (JavaVersion.current() != JavaVersion.VERSION_17) {
      throw new GradleException(
             "This build must be run with Java 17. " +
@@ -886,12 +890,12 @@ task backfillGSuiteUserData(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = 17
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = 17
     }
 }
 
