@@ -448,9 +448,11 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    component(testProps);
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
+    component(testProps);
+
+    await waitUntilDoneLoading();
     clickShowCodePreviewButton();
     await waitUntilDoneLoading();
 
@@ -480,6 +482,8 @@ describe('ExportDatasetModal', () => {
       })
     );
 
+    await waitUntilDoneLoading();
+
     const otherjRadioButtonLabel = screen.getByRole('radio', {
       name: 'Other VCF-compatible tool',
     });
@@ -498,14 +502,19 @@ describe('ExportDatasetModal', () => {
   it('Dataset copied to clipboard when "copy code" button is clicked', async () => {
     // Arrange
     const user = userEvent.setup();
-    component(testProps);
+    datasetApiStub.codePreview = {
+      text: '<div id="notebook">print("hello world!")</div>',
+    };
 
     // Act
+    component(testProps);
     await user.click(findCopyCodeButton());
 
     // Assert
     const clipboardText = await navigator.clipboard.readText();
-    expect(clipboardText).toBe('expected text');
+    expect(clipboardText).toBe(
+      '<div id="notebook">print("hello world!")</div>'
+    );
     // Assert tooltip is shown
     await screen.findByText('Dataset query copied to clipboard');
   });
@@ -513,9 +522,12 @@ describe('ExportDatasetModal', () => {
   it('Dataset copied to clipboard when "copy code" icon button is clicked in expanded view', async () => {
     // Arrange
     const user = userEvent.setup();
-    component(testProps);
+    datasetApiStub.codePreview = {
+      text: '<div id="notebook">print("hello world!")</div>',
+    };
 
     // Act
+    component(testProps);
     await waitUntilDoneLoading();
 
     clickShowCodePreviewButton();
@@ -525,7 +537,9 @@ describe('ExportDatasetModal', () => {
 
     // Assert
     const clipboardText = await navigator.clipboard.readText();
-    expect(clipboardText).toBe('expected text');
+    expect(clipboardText).toBe(
+      '<div id="notebook">print("hello world!")</div>'
+    );
     // Assert tooltip is shown
     await screen.findByText('Dataset query copied to clipboard');
   });
