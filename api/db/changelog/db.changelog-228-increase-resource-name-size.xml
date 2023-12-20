@@ -7,19 +7,19 @@
   <changeSet author="dolbeew" id="changelog-228-increase-resource-name-size">
     <modifyDataType
       columnName="name"
-      newDataType="varchar(1500)"
+      newDataType="text"
       tableName="cohort"/>
     <modifyDataType
       columnName="cohortName"
-      newDataType="varchar(1500)"
+      newDataType="text"
       tableName="cohort_review"/>
     <modifyDataType
       columnName="name"
-      newDataType="varchar(1500)"
+      newDataType="text"
       tableName="concept_set"/>
     <modifyDataType
       columnName="name"
-      newDataType="varchar(1500)"
+      newDataType="text"
       tableName="data_set"/>
   </changeSet>
 </databaseChangeLog>
