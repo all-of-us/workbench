@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom';
 
+import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
 import {
+  Disk,
   DisksApi,
   GpuConfig,
   Runtime,
@@ -36,10 +38,8 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  expectDropdown,
   getDropdownOption,
 } from 'testing/react-test-helpers';
 import {
@@ -60,8 +60,6 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { RadioButton } from './inputs';
-import { WarningMessage } from './messages';
 import {
   createOrCustomize,
   deriveCurrentRuntime,
@@ -640,6 +638,14 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeStore.set({ ...runtimeStore.get(), runtime });
   };
 
+  const setCurrentDisk = (disk: Disk) => {
+    disksApiStub.disk = disk;
+    runtimeDiskStore.set({
+      ...runtimeDiskStore.get(),
+      gcePersistentDisk: disk,
+    });
+  };
+
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -811,7 +817,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   afterEach(() => {
-    clearCompoundRuntimeOperations();
+    act(() => clearCompoundRuntimeOperations());
   });
 
   it('should show loading spinner while loading', async () => {
@@ -1175,7 +1181,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickComputeType(container, user, ComputeType.Standard);
 
     await waitFor(() => {
-      debugAll();
       // confirm GCE by observing that PD is enabled
       expect(getDetachableDiskRadio()).not.toBeDisabled();
     });
@@ -1183,8 +1188,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     clickExpectedButton('Next');
     clickExpectedButton('Update');
 
+    // after deletion happens, confirm the new runtime state
     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
       expect(disksApiStub.disk).toBeTruthy();
@@ -1200,7 +1205,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   //
   //   const { container } = component();
   //
-  //   pickComputeType(container, user, ComputeType.Dataproc);
+  //   await pickComputeType(container, user, ComputeType.Dataproc);
   //
   //   await waitFor(() =>
   //     // confirm Dataproc by observing that PD is disabled
@@ -1221,9 +1226,11 @@ describe(RuntimeConfigurationPanel.name, () => {
   //   clickExpectedButton('Next');
   //   clickExpectedButton('Update');
   //
-  //   runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //
+  //   // updating closes the panel.  After deletion happens, re-render with the new runtime state
+  //   // runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
   //   await waitFor(() => {
+  //     // component();
+  //     debugAll();
   //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
   //     expect(disksApiStub.disk).toBeNull();
   //   });
