@@ -27,9 +27,9 @@
   "private": true,
   "dependencies": {
     "@clr/icons": "^0.11.12",
-    "@fortawesome/fontawesome-svg-core": "^6.4.2",
-    "@fortawesome/free-regular-svg-icons": "^6.4.2",
-    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-regular-svg-icons": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@openapitools/openapi-generator-cli": "^2.7.0",
     "@terra-ui-packages/components": "0.0.4",
