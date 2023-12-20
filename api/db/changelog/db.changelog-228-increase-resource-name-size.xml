@@ -5,9 +5,21 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="dolbeew" id="changelog-228-increase-resource-name-size">
-    <modifyDataType columnName="name" newDataType="varchar(1500)" tableName="cohort"/>
-    <modifyDataType columnName="cohortName" newDataType="varchar(1500)" tableName="cohort_review"/>
-    <modifyDataType columnName="name" newDataType="varchar(1500)" tableName="concept_set"/>
-    <modifyDataType columnName="name" newDataType="varchar(1500)" tableName="data_set"/>
+    <modifyDataType
+      columnName="name"
+      newDataType="varchar(1500)"
+      tableName="cohort"/>
+    <modifyDataType
+      columnName="cohortName"
+      newDataType="varchar(1500)"
+      tableName="cohort_review"/>
+    <modifyDataType
+      columnName="name"
+      newDataType="varchar(1500)"
+      tableName="concept_set"/>
+    <modifyDataType
+      columnName="name"
+      newDataType="varchar(1500)"
+      tableName="data_set"/>
   </changeSet>
 </databaseChangeLog>
