@@ -213,9 +213,6 @@ export const nameValidationFormat = (
           within: existingNames,
           message: 'already exists',
         },
-        length: {
-          maximum: 80,
-        },
       };
 
 export const validateNewNotebookName = (
