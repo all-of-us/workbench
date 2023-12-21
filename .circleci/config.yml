@@ -433,7 +433,7 @@ jobs:
         name: Pact Broker, can I deploy?
         working_directory: ~
         command: |
-          pact-broker can-i-deploy /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --branch ${CIRCLE_BRANCH} --version ${CIRCLE_SHA1}
+          pact-broker can-i-deploy /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1}
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
