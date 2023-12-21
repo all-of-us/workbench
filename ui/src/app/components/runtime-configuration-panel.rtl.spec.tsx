@@ -37,6 +37,7 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   getDropdownOption,
@@ -1126,17 +1127,11 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     component();
 
-    const detachablePdButton = screen.getByRole('radio', {
-      name: 'Detachable Disk',
-    });
-    expect(detachablePdButton).toBeInTheDocument();
-    expect(detachablePdButton).not.toBeDisabled();
-
-    const standardDiskButton = screen.getByRole('radio', {
-      name: 'Standard Disk',
-    });
-    expect(standardDiskButton).toBeInTheDocument();
-    expect(standardDiskButton).toBeDisabled();
+    debugAll();
+    expect(
+      screen.queryByText('Reattachable persistent disk')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Standard disk')).not.toBeInTheDocument();
   });
 
   it('should require standard disk / prevent detachable PD use for Dataproc', async () => {
@@ -1144,17 +1139,10 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     component();
 
-    const detachablePdButton = screen.getByRole('radio', {
-      name: 'Detachable Disk',
-    });
-    expect(detachablePdButton).toBeInTheDocument();
-    expect(detachablePdButton).toBeDisabled();
-
-    const standardDiskButton = screen.getByRole('radio', {
-      name: 'Standard Disk',
-    });
-    expect(standardDiskButton).toBeInTheDocument();
-    expect(standardDiskButton).not.toBeDisabled();
+    expect(screen.queryByText('Standard disk')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Reattachable persistent disk')
+    ).not.toBeInTheDocument();
   });
 
   it('should allow Dataproc -> PD transition', async () => {
@@ -1164,22 +1152,16 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     const { container } = component();
 
-    // confirm Dataproc by observing that PD is disabled
-    expect(
-      screen.getByRole('radio', {
-        name: 'Detachable Disk',
-      })
-    ).toBeDisabled();
+    // confirm Dataproc by observing that Standard disk is required
+    expect(screen.queryByText('Standard disk')).toBeInTheDocument();
 
     await pickComputeType(container, user, ComputeType.Standard);
 
     await waitFor(() => {
-      // confirm GCE by observing that PD is enabled
+      // confirm GCE by observing that PD is required
       expect(
-        screen.getByRole('radio', {
-          name: 'Detachable Disk',
-        })
-      ).not.toBeDisabled();
+        screen.queryByText('Reattachable persistent disk')
+      ).toBeInTheDocument();
     });
 
     clickExpectedButton('Next');
@@ -1238,23 +1220,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(defaultGceRuntime());
 
     component();
-
     expect(
-      screen.queryByText(/only support reattachable persistent disks/)
+      screen.queryByText('Reattachable persistent disk')
     ).toBeInTheDocument();
-
-    const detachablePdButton = screen.getByRole('radio', {
-      name: 'Detachable Disk',
-    });
-    expect(detachablePdButton).toBeInTheDocument();
-    expect(detachablePdButton).toBeEnabled();
-    expect(detachablePdButton).toHaveProperty('checked');
-
-    const standardDiskButton = screen.getByRole('radio', {
-      name: 'Standard Disk',
-    });
-    expect(standardDiskButton).toBeInTheDocument();
-    expect(standardDiskButton).toBeDisabled();
-    expect(standardDiskButton).toHaveProperty('disabled');
+    expect(screen.queryByText('Standard disk')).not.toBeInTheDocument();
   });
 });
