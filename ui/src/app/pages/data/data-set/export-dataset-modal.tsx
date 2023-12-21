@@ -150,7 +150,7 @@ export const ExportDatasetModal = ({
   const isNotebooksLoading = existingNotebooks === undefined;
   const isCodePreviewLoading = showCodePreview && !codePreview;
 
-  // Any state that necessiatates disabling all modal controls.
+  // Any state that necessitates disabling all modal controls.
   const modalLoading =
     isNotebooksLoading ||
     loadingNotebook ||
