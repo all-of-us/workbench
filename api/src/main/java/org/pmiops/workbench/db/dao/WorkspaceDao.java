@@ -189,6 +189,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query(
       "SELECT DISTINCT(w.googleProject) AS googleProject "
           + "FROM DbWorkspace w "
-          + "WHERE w.creator.userId = (:creatorid)")
-  Set<String> getGoogleProjectForUser(@Param("creatorid") long creatorId);
+          + "WHERE w.creator.userId in (:creatoridList)")
+  Set<String> getGoogleProjectForUserList(@Param("creatoridList") List<Long> creatorIdList);
 }

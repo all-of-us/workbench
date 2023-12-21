@@ -13,3 +13,9 @@ export const analysisTabPath = (namespace: string, id: string): string =>
 
 export const dataTabPath = (namespace: string, id: string): string =>
   `${workspacePath(namespace, id)}/data`;
+
+export const appDisplayPath = (
+  namespace: string,
+  id: string,
+  appType: string
+): string => `${analysisTabPath(namespace, id)}/userApp/${appType}`;

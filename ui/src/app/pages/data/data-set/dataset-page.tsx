@@ -2140,7 +2140,7 @@ export const DatasetPage = fp.flow(
             ModalState.Create,
             () => (
               <CreateModal
-                entityName='Dataset'
+                resourceType={ResourceType.DATASET}
                 getExistingNames={async () => {
                   const resources =
                     await workspacesApi().getWorkspaceResourcesV2(

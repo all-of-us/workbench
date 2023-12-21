@@ -4,7 +4,7 @@ software in [System Requirements](developer-system-requirements.md).
 
 ## Gradle setup
 
-If your system's default `java` version is 11, you can skip this.
+If your system's default `java` version is 17, you can skip this.
 
 ```Shell
 java --version
@@ -14,20 +14,20 @@ OpenJDK 64-Bit Server VM GraalVM CE 22.3.0 (build 17.0.5+8-jvmci-22.3-b08, mixed
 ...
 ```
 
-Our build requires Java 11.
+Our build requires Java 17.
 
-- Ensure Java 11 is installed on your system
-- Find Java 11 home directory, e.g. on mac run: `/usr/libexec/java_home -v 11`
+- Ensure Java 17 is installed on your system
+- Find Java 17 home directory, e.g. on mac run: `/usr/libexec/java_home -v 17`
 - Create a Gradle properties file to point to this directory:
   - Globally for your workstation: `~/.gradle/gradle.properties`
   - or, just in the Workbench repo: `api/gradle.properties`
   ```
   # gradle.properties
-  org.gradle.java.home={YOUR_PATH_TO_JDK11}
+  org.gradle.java.home={YOUR_PATH_TO_JDK17}
 
   # Example:
   $ cat api/gradle.properties
-  org.gradle.java.home=/usr/local/buildtools/java/jdk11
+  org.gradle.java.home=/usr/local/buildtools/java/jdk17
   ```
 
 ## Gcloud Setup

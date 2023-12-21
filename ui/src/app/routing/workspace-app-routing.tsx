@@ -7,6 +7,7 @@ import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import {
   LeoApplicationType,
@@ -32,7 +33,7 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard } from 'app/routing/guards';
+import { adminLockedGuard, appIsValidGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 
 import { analysisTabName } from './utils';
@@ -99,6 +100,10 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
+const GKEAppRedirectPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(GKEAppLauncher);
 const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
@@ -203,6 +208,27 @@ export const WorkspaceRoutes = () => {
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.JupyterNotebook}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${analysisTabName}/userApp/:appType`}
+        guards={[adminLockedGuard(ns, wsid), appIsValidGuard(ns, wsid)]}
+      >
+        <GKEAppRedirectPage
+          key='app'
+          routeData={{
+            pathElementForTitle: 'appType',
+            breadcrumb: BreadcrumbType.App,
+            // The iframe we use to display the Gke App does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            // This is same as the configuration used for Jupyter iframe
+            contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            workspaceNavBarTab: analysisTabName,
+            minimizeChrome: true,
+          }}
         />
       </AppRoute>
       <AppRoute

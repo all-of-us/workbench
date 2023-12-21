@@ -148,9 +148,9 @@ public class LeonardoMapperTest {
   @Test
   public void testToLeonardoAllowedAppChart() {
     assertThat(mapper.toLeonardoAllowedChartName(AppType.RSTUDIO))
-        .isEqualTo(LeonardoAllowedChartName.RSTUDIO_CHART);
+        .isEqualTo(LeonardoAllowedChartName.RSTUDIO);
     assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS))
-        .isEqualTo(LeonardoAllowedChartName.SAS_CHART);
+        .isEqualTo(LeonardoAllowedChartName.SAS);
     assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
   }
 

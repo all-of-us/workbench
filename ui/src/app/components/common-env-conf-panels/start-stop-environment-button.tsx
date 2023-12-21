@@ -23,7 +23,6 @@ interface ImgProps {
   alt: string;
   src: string;
   style?: CSSProperties;
-  'data-test-id': string;
 }
 interface ButtonProps extends ImgProps {
   onClick?: () => void;
@@ -54,59 +53,49 @@ export const StartStopEnvironmentButton = ({
     [UserEnvironmentStatus.CREATING]: {
       alt: 'Environment creation in progress',
       src: computeStarting,
-      'data-test-id': 'environment-status-icon-starting',
       style: rotateStyle,
     },
     [UserEnvironmentStatus.RUNNING]: {
       alt: 'Environment running, click to pause',
       src: computeRunning,
-      'data-test-id': 'environment-status-icon-running',
       onClick: onPause,
     },
     [UserEnvironmentStatus.UPDATING]: {
       alt: 'Environment update in progress',
       src: computeStarting,
-      'data-test-id': 'environment-status-icon-starting',
       style: rotateStyle,
     },
     [UserEnvironmentStatus.ERROR]: {
       alt: 'Environment in error state',
       src: computeError,
-      'data-test-id': 'environment-status-icon-error',
     },
     [UserEnvironmentStatus.PAUSING]: {
       alt: 'Environment pause in progress',
       src: computeStopping,
-      'data-test-id': 'environment-status-icon-stopping',
       style: rotateStyle,
     },
     [UserEnvironmentStatus.PAUSED]: {
       alt: 'Environment paused, click to resume',
       src: computeStopped,
-      'data-test-id': 'environment-status-icon-stopped',
       onClick: onResume,
     },
     [UserEnvironmentStatus.RESUMING]: {
       alt: 'Environment resume in progress',
       src: computeStarting,
-      'data-test-id': 'environment-status-icon-starting',
       style: rotateStyle,
     },
     [UserEnvironmentStatus.DELETING]: {
       alt: 'Environment deletion in progress',
       src: computeStopping,
-      'data-test-id': 'environment-status-icon-stopping',
       style: rotateStyle,
     },
     [UserEnvironmentStatus.DELETED]: {
       alt: 'Environment has been deleted',
       src: computeNone,
-      'data-test-id': 'environment-status-icon-none',
     },
     [UserEnvironmentStatus.UNKNOWN]: {
       alt: 'Environment status unknown',
       src: computeNone,
-      'data-test-id': 'environment-status-icon-none',
     },
   };
   const { onClick, ...imgProps } = toProps[userEnvironmentStatus];

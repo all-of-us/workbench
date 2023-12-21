@@ -1,6 +1,6 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
 
 import {
   DataSetApi,
@@ -11,19 +11,14 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import { Select } from 'app/components/inputs';
-import { Tooltip } from 'app/components/popups';
-import {
-  appendJupyterNotebookFileSuffix,
-  dropJupyterNotebookFileSuffix,
-} from 'app/pages/analysis/util';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
   dataSetApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -34,14 +29,52 @@ describe('ExportDatasetModal', () => {
   let testProps;
   let notebooksApiStub;
   let datasetApiStub;
+  let unmount;
 
   const component = (props) => {
     return <ExportDatasetModal {...props} />;
   };
 
-  function findExportButton(wrapper) {
-    return wrapper.find('[data-test-id="export-data-set"]').first();
+  function findExportButton() {
+    return screen.getByRole('button', {
+      name: /export/i,
+    });
   }
+
+  function findSeeCodePreviewButton() {
+    return screen.getByRole('button', {
+      name: /see code preview/i,
+    });
+  }
+
+  function findHideCodePreviewButton() {
+    return screen.getByRole('button', {
+      name: /hide code preview/i,
+    });
+  }
+
+  function findNotebookNameInput() {
+    return screen.getByLabelText('Notebook Name');
+  }
+
+  const waitUntilDoneLoading = async () =>
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).toBeNull();
+    });
+
+  const changeNotebookName = (newNotebookName) => {
+    fireEvent.change(findNotebookNameInput(), {
+      target: { value: newNotebookName },
+    });
+  };
+
+  const clickExportButton = () => {
+    fireEvent.click(findExportButton());
+  };
+
+  const hoverOverExportButton = () => {
+    fireEvent.mouseEnter(findExportButton());
+  };
 
   beforeEach(() => {
     window.open = jest.fn();
@@ -66,16 +99,23 @@ describe('ExportDatasetModal', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    // React-modal makes changes to the ownerDocument where
+    // a modal is found when the modal is closed. Since we are using
+    // React Testing Library(RTL), components are generally tested in
+    // isolation, so we have little concept of an owning document.
+    // By using RTL's umount method, we are able to cleanup our
+    // modal before its cleanup functionality is called.
+    unmount();
+    jest.resetAllMocks();
   });
 
-  it('should render', () => {
-    const wrapper = mount(component(testProps));
-    expect(wrapper.exists()).toBeTruthy();
+  it('should render', async () => {
+    ({ unmount } = render(component(testProps)));
+    await screen.findByText('Export Dataset');
   });
 
   it('should export to a new notebook', async () => {
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -85,11 +125,10 @@ describe('ExportDatasetModal', () => {
       domainValuePairs: dataset.domainValuePairs,
     };
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', { target: { value: notebookName } });
-    findExportButton(wrapper).simulate('click');
+    await waitUntilDoneLoading();
+
+    changeNotebookName(notebookName);
+    clickExportButton();
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -104,7 +143,7 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should export to a new notebook if the user types in the file suffix', async () => {
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'MyNotebook.ipynb';
     const expectedNotebookName = notebookName;
@@ -114,11 +153,11 @@ describe('ExportDatasetModal', () => {
       domainValuePairs: dataset.domainValuePairs,
     };
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', { target: { value: notebookName } });
-    findExportButton(wrapper).simulate('click');
+    await waitUntilDoneLoading();
+
+    changeNotebookName(notebookName);
+    clickExportButton();
+
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -133,71 +172,59 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should disable export if no name is provided', async () => {
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', { target: { value: '' } });
-    findExportButton(wrapper).simulate('click');
-    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+    changeNotebookName('');
+    clickExportButton();
+
     expect(exportSpy).not.toHaveBeenCalled();
 
-    findExportButton(wrapper).simulate('mouseenter');
-    expect(wrapper.find(Tooltip).text()).toBe("Notebook name can't be blank");
+    hoverOverExportButton();
+
+    await screen.findByText("Notebook name can't be blank");
   });
 
   it('should disable export if a conflicting name is provided, without the suffix', async () => {
-    const existingNotebookName = 'existing notebook.ipynb';
+    const existingNotebookName = 'existing notebook1.ipynb';
     notebooksApiStub.notebookList = [
       {
         name: existingNotebookName,
       },
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', {
-        target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
-      });
-    await waitOneTickAndUpdate(wrapper);
-    findExportButton(wrapper).simulate('click');
-    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+    await waitUntilDoneLoading();
 
-    findExportButton(wrapper).simulate('mouseenter');
-    expect(wrapper.find(Tooltip).text()).toBe('Notebook name already exists');
+    changeNotebookName(existingNotebookName);
+    clickExportButton();
+
     expect(exportSpy).not.toHaveBeenCalled();
+
+    hoverOverExportButton();
+
+    await screen.findByText('Notebook name already exists');
   });
 
   it('should disable export if a conflicting name is provided, including the suffix', async () => {
-    const existingNotebookName = 'existing notebook.ipynb';
+    const existingNotebookName = 'existing notebook2.ipynb';
     notebooksApiStub.notebookList = [
       {
         name: existingNotebookName,
       },
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', {
-        target: {
-          value: appendJupyterNotebookFileSuffix(existingNotebookName),
-        },
-      });
-    await waitOneTickAndUpdate(wrapper);
-    findExportButton(wrapper).simulate('click');
-    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+    await waitUntilDoneLoading();
+    changeNotebookName(existingNotebookName);
 
-    findExportButton(wrapper).simulate('mouseenter');
-    expect(wrapper.find(Tooltip).text()).toBe('Notebook name already exists');
+    clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
+
+    hoverOverExportButton();
+    await screen.findByText('Notebook name already exists');
   });
 
   it('should export to an existing notebook with the correct kernel type', async () => {
@@ -219,13 +246,21 @@ describe('ExportDatasetModal', () => {
     };
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    const wrapper = mount(component(testProps));
-    act(() => {
-      wrapper.find(Select).props().onChange(notebookName);
-    });
-    await waitOneTickAndUpdate(wrapper);
+    ({ unmount } = render(component(testProps)));
 
-    findExportButton(wrapper).simulate('click');
+    await waitUntilDoneLoading();
+
+    const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
+    fireEvent.mouseDown(notebookDropdown);
+
+    const existingNotebookOption = screen.getByText(notebookName);
+    fireEvent.click(existingNotebookOption);
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Notebook Name')).toBeNull();
+    });
+
+    clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -245,14 +280,27 @@ describe('ExportDatasetModal', () => {
       name: dataset.name,
       domainValuePairs: dataset.domainValuePairs,
     };
+
     datasetApiStub.codePreview = {
       html: '<div id="notebook">print("hello world!")</div>',
     };
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
-    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await waitUntilDoneLoading();
+
+    const seeCodePreviewButton = findSeeCodePreviewButton();
+    fireEvent.click(seeCodePreviewButton);
+
+    await waitUntilDoneLoading();
+
+    let iframe;
+    await waitFor(() => {
+      iframe = screen.getByTestId('export-preview-frame');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe.contentDocument.readyState).toEqual('complete');
+      expect(iframe.outerHTML).toContain('hello world!');
+    });
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -262,10 +310,13 @@ describe('ExportDatasetModal', () => {
         kernelType: KernelTypeEnum.PYTHON,
       })
     );
-    expect(wrapper.find('iframe').html()).toContain('hello world!');
 
-    wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const rRadioButtonLabel = screen.getByRole('radio', {
+      name: 'R',
+    });
+
+    fireEvent.click(rRadioButtonLabel);
+
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -275,62 +326,89 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('iframe').exists()).toBeFalsy();
+    await waitUntilDoneLoading();
+
+    const hideCodePreviewButton = findHideCodePreviewButton();
+    fireEvent.click(hideCodePreviewButton);
+
+    await waitFor(() => {
+      iframe = screen.queryByTestId('export-preview-frame');
+      expect(iframe).not.toBeInTheDocument();
+    });
   });
 
   it('Show genomics analysis tools if WGS is in the dataset', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
-    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
-      (tool) => {
-        expect(
-          wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
-        ).toBeTruthy();
-      }
-    );
+    await screen.findByRole('radio', {
+      name: 'Hail',
+    });
+
+    await screen.findByRole('radio', {
+      name: 'PLINK',
+    });
+
+    await screen.findByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
   });
 
   it('Remove genomics analysis tools if R is selected', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
-    wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const rRadioButtonLabel = screen.getByRole('radio', {
+      name: 'R',
+    });
 
-    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
-      (tool) => {
-        expect(
-          wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
-        ).toBeFalsy();
-      }
-    );
+    fireEvent.click(rRadioButtonLabel);
+
+    const hailRadio = screen.queryByRole('radio', {
+      name: 'Hail',
+    });
+    expect(hailRadio).toBeNull();
+
+    const plinkRadio = screen.queryByRole('radio', {
+      name: 'PLINK',
+    });
+    expect(plinkRadio).toBeNull();
+
+    const otherRadio = screen.queryByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+    expect(otherRadio).toBeNull();
   });
 
   it('Remove genomics analysis tools if no WGS', async () => {
     testProps.dataset.prePackagedConceptSet = [];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
 
-    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
-      (tool) => {
-        expect(
-          wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
-        ).toBeFalsy();
-      }
-    );
+    const hailRadio = screen.queryByRole('radio', {
+      name: 'Hail',
+    });
+    expect(hailRadio).toBeNull();
+
+    const plinkRadio = screen.queryByRole('radio', {
+      name: 'PLINK',
+    });
+    expect(plinkRadio).toBeNull();
+
+    const otherRadio = screen.queryByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+    expect(otherRadio).toBeNull();
   });
 
   it('Should export code with genomics analysis tool', async () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
     const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
@@ -340,11 +418,11 @@ describe('ExportDatasetModal', () => {
       domainValuePairs: dataset.domainValuePairs,
     };
 
-    wrapper
-      .find('[data-test-id="notebook-name-input"]')
-      .first()
-      .simulate('change', { target: { value: notebookName } });
-    findExportButton(wrapper).simulate('click');
+    await waitUntilDoneLoading();
+
+    changeNotebookName(notebookName);
+    clickExportButton();
+
     expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
       dataSetRequest: expectedDatasetRequest,
       newNotebook: true,
@@ -367,11 +445,13 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [
       PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
-    const wrapper = mount(component(testProps));
+    ({ unmount } = render(component(testProps)));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
 
-    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const seeCodePreviewButton = findSeeCodePreviewButton();
+    fireEvent.click(seeCodePreviewButton);
+    await waitUntilDoneLoading();
+
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -382,11 +462,11 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    wrapper
-      .find('[data-test-id="genomics-tool-PLINK"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const plinkjRadioButtonLabel = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+    fireEvent.click(plinkjRadioButtonLabel);
+
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -398,11 +478,10 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    wrapper
-      .find('[data-test-id="genomics-tool-NONE"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const otherjRadioButtonLabel = screen.getByRole('radio', {
+      name: 'Other VCF-compatible tool',
+    });
+    fireEvent.click(otherjRadioButtonLabel);
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,

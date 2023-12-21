@@ -52,6 +52,11 @@ export const styles = reactStyles({
     padding: '1.125rem .75rem',
     width: '3rem',
   },
+  // suitable for 3- and 4-digit numbers
+  largeInputNumber: {
+    backgroundColor: colors.white,
+    width: '4rem',
+  },
   errorMessage: {
     backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
     marginTop: '0.75rem',
@@ -75,10 +80,8 @@ export const styles = reactStyles({
     width: '400px',
   },
   costsDrawnFrom: {
-    borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
-    fontSize: '12px',
-    padding: '.495rem .75rem',
-    width: '250px',
+    fontSize: '14px',
+    paddingTop: '.495rem',
   },
   deleteLink: {
     alignSelf: 'center',

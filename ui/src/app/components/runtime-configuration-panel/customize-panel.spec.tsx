@@ -10,11 +10,7 @@ import {
   toAnalysisConfig,
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
-import {
-  allMachineTypes,
-  AutopauseMinuteThresholds,
-  ComputeType,
-} from 'app/utils/machines';
+import { AutopauseMinuteThresholds, ComputeType } from 'app/utils/machines';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -83,7 +79,6 @@ const defaultProps: CustomizePanelProps = {
   updateMessaging: {
     applyAction: 'APPLY',
   },
-  validMainMachineTypes: allMachineTypes,
   warningMessageContent: [],
   workspaceData: {
     ...buildWorkspaceStub(),

@@ -4,12 +4,15 @@ import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
 
 interface WorkspaceAuditor {
-    fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
+    fun fireCreateAction(
+        createdWorkspace: Workspace,
+        dbWorkspaceId: Long,
+    )
 
     fun fireEditAction(
         previousWorkspace: Workspace?,
         editedWorkspace: Workspace?,
-        workspaceId: Long
+        workspaceId: Long,
     )
 
     fun fireDeleteAction(dbWorkspace: DbWorkspace)
@@ -17,8 +20,11 @@ interface WorkspaceAuditor {
     fun fireDuplicateAction(
         sourceWorkspaceId: Long,
         destinationWorkspaceId: Long,
-        destinationWorkspace: Workspace
+        destinationWorkspace: Workspace,
     )
 
-    fun fireCollaborateAction(sourceWorkspaceId: Long, aclStringsByUserId: Map<Long, String>)
+    fun fireCollaborateAction(
+        sourceWorkspaceId: Long,
+        aclStringsByUserId: Map<Long, String>,
+    )
 }

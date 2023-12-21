@@ -35,7 +35,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -77,7 +76,6 @@ public class UserServiceTest {
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
-  private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
@@ -147,7 +145,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = accessTierDao.save(createRegisteredTier());
+    accessTierDao.save(createRegisteredTier());
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();

@@ -4296,7 +4296,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserWorkspaceBQCostRequest'
+              $ref: '#/components/schemas/UseridList'
         required: true
       responses:
         200:
@@ -6861,10 +6861,6 @@ components:
           type: boolean
           description: Whether to enable visual data explorer.
           default: false
-        enableHasEhrData:
-          type: boolean
-          default: false
-          description: Whether to enable has ehr data.
         tanagraBaseUrl:
           type: string
           description: The tanagra base url
@@ -11355,27 +11351,11 @@ components:
           items:
             type: integer
             format: int64
-    UserWorkspaceBQCostRequest:
-      type: object
-      properties:
-        userCostList:
-          type: array
-          description: List of users return from cloud task
-          items:
-            $ref: '#/components/schemas/UserBQCost'
-    UserBQCost:
-      type: object
-      properties:
-        userId:
-          description: user id
-          type: integer
-          format: int64
-        workspaceBQCost:
-          description: Map with google project key and cost as value
-          type: object
-          additionalProperties:
-            type: number
-            format: double
+    UseridList:
+      type: array
+      items:
+        type: integer
+        format: int64
     ProcessEgressEventRequest:
       required:
       - eventId

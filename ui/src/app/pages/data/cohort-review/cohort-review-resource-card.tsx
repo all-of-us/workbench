@@ -96,10 +96,11 @@ export const CohortReviewResourceCard = fp.flow(
     rename(name, description) {
       const request = {
         ...this.props.resource.cohortReview,
+        participantCohortStatuses: [], // prevents error trying to map null value
         cohortName: name,
         description: description,
       };
-      cohortReviewApi()
+      return cohortReviewApi()
         .updateCohortReview(
           this.props.resource.workspaceNamespace,
           this.props.resource.workspaceFirecloudName,

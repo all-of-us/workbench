@@ -26,6 +26,7 @@ import {
   getAnalysisConfigDiffs,
 } from './runtime-diffs';
 import {
+  isVisible,
   maybeUnwrapSecuritySuspendedError,
   RuntimeStatusRequest,
 } from './runtime-utils';
@@ -356,13 +357,8 @@ export const useCustomRuntime = (
         }
       };
 
-      const runtimeExists =
-        !!runtime &&
-        !(
-          [RuntimeStatus.ERROR, RuntimeStatus.DELETED] as Array<RuntimeStatus>
-        ).includes(runtime.status);
       try {
-        if (runtimeExists) {
+        if (isVisible(runtime?.status)) {
           await applyRuntimeUpdate();
         } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
           await disksApi().updateDisk(

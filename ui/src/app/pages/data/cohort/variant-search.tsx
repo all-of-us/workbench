@@ -307,7 +307,7 @@ const VariantFilters = ({
                 range={{ min: filters.countMin, max: filters.countMax }}
                 start={[
                   formState.countMin ?? filters.countMin,
-                  formState.countMin ?? filters.countMax,
+                  formState.countMax ?? filters.countMax,
                 ]}
                 tooltips
                 connect

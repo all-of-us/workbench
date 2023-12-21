@@ -13,9 +13,11 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
   const [navigate] = useNavigation();
 
   const navigateToWorkspace = () =>
-    navigate(['admin/workspaces/' + workspaceNamespace]);
+    navigate(['admin', 'workspaces', workspaceNamespace]);
 
   useEffect(() => spinnerProps.hideSpinner(), []);
+
+  const inputId = 'admin-workspace-search';
 
   return (
     <FlexRow
@@ -25,7 +27,10 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
         marginTop: '1.5rem',
       }}
     >
-      <label style={{ color: colors.primary, margin: '1.5rem' }}>
+      <label
+        style={{ color: colors.primary, margin: '1.5rem' }}
+        htmlFor={inputId}
+      >
         Workspace namespace
       </label>
       <TextInput
@@ -33,6 +38,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
           width: '15rem',
           marginRight: '1.5rem',
         }}
+        id={inputId}
         onChange={(value) => setWorkspaceNamespace(value)}
         onKeyDown={(event: KeyboardEvent) => {
           if (event.key === 'Enter') {

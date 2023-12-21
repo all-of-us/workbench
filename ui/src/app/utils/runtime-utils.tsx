@@ -166,6 +166,12 @@ export const canDeleteRuntime = (status: RuntimeStatus) =>
     ] as Array<RuntimeStatus>
   ).includes(status);
 
+// can the user update the runtime?
+export const canUpdateRuntime = (status: RuntimeStatus) =>
+  (
+    [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+  ).includes(status);
+
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
   // eslint-disable-next-line @typescript-eslint/dot-notation
   runtime?.labels?.['creator'];

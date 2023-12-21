@@ -149,6 +149,7 @@ export const ExportDatasetModal = ({
     return (
       <iframe
         id='export-preview-frame'
+        data-testid='export-preview-frame'
         scrolling='yes'
         style={{ width: '100%', height: '100%', border: 'none' }}
         srcDoc={placeholder.outerHTML}
@@ -291,7 +292,7 @@ export const ExportDatasetModal = ({
             </div>
 
             {creatingNewNotebook && (
-              <React.Fragment>
+              <label>
                 <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
                   Notebook Name
                 </SmallHeader>
@@ -300,7 +301,7 @@ export const ExportDatasetModal = ({
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                 />
-              </React.Fragment>
+              </label>
             )}
 
             <div style={headerStyles.formLabel}>
@@ -375,7 +376,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!isEmpty(errors)}
+                disabled={!isEmpty(errors) || isNotebooksLoading}
                 onClick={() => exportDataset()}
               >
                 Export

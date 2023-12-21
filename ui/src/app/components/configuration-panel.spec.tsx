@@ -11,8 +11,12 @@ import { render, screen } from '@testing-library/react';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { clearCompoundRuntimeOperations } from 'app/utils/stores';
+import {
+  clearCompoundRuntimeOperations,
+  serverConfigStore,
+} from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -40,6 +44,7 @@ describe('ConfigurationPanel', () => {
       appType: UIAppType.JUPYTER,
     };
 
+    serverConfigStore.set({ config: defaultServerConfig });
     jest.useFakeTimers();
   });
 

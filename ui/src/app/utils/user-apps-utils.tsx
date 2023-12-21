@@ -7,18 +7,20 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import {
-  rstudioConfigIconId,
-  sasConfigIconId,
-} from 'app/components/help-sidebar-icons';
+  findApp,
+  helpSidebarConfigIdForUIApp,
+  toUIAppType,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
+import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { userAppsStore } from 'app/utils/stores';
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
 import { fetchWithErrorModal } from './errors';
-import { setSidebarActiveIconStore } from './navigation';
-import { userAppsStore } from './stores';
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
@@ -110,7 +112,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (
+export const localizeRStudioApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -123,7 +125,6 @@ export const openRStudio = (
       false
     )
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openSAS = (
@@ -142,26 +143,33 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
-export const openRStudioOrConfigPanel = (
+export const openAppInIframe = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApp: UserAppEnvironment,
+  navigate: (commands: any, extras?: any) => void
 ) => {
-  const userApp = findApp(userApps, UIAppType.RSTUDIO);
-  if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, userApp);
-  } else {
-    setSidebarActiveIconStore.next(rstudioConfigIconId);
-  }
+  localizeRStudioApp(workspaceNamespace, userApp);
+  navigate([
+    appDisplayPath(
+      workspaceNamespace,
+      workspaceId,
+      toUIAppType[userApp.appType]
+    ),
+  ]);
 };
 
-export const openSASOrConfigPanel = (
+export const openAppOrConfigPanel = (
   workspaceNamespace: string,
-  userApps: ListAppsResponse
+  workspaceId: string,
+  userApps: ListAppsResponse,
+  requestedApp: UIAppType,
+  navigate: (commands: any, extras?: any) => void
 ) => {
-  const userApp = findApp(userApps, UIAppType.SAS);
+  const userApp = findApp(userApps, requestedApp);
   if (userApp?.status === AppStatus.RUNNING) {
-    openSAS(workspaceNamespace, userApp);
+    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(sasConfigIconId);
+    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[requestedApp]);
   }
 };

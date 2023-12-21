@@ -178,7 +178,7 @@ export const CohortResourceCard = fp.flow(
         .catch(() => {
           this.props.showErrorModal(
             'Duplicating Cohort Error',
-            'Cohort with the same name already exists.'
+            'Cohort could not be duplicated. Please try again.'
           );
         })
         .finally(() => {

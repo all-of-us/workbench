@@ -1,7 +1,11 @@
 import { WorkspacesApi } from 'generated/fetch';
 
 import { getTrail } from 'app/components/breadcrumb';
-import { dataTabPath } from 'app/routing/utils';
+import {
+  analysisTabName,
+  appDisplayPath,
+  dataTabPath,
+} from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -11,6 +15,7 @@ import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
+import { UIAppType } from './apps-panel/utils';
 import { BreadcrumbType } from './breadcrumb-type';
 
 describe('getTrail', () => {
@@ -55,4 +60,36 @@ describe('getTrail', () => {
       expect(trail.length).toBeGreaterThan(0);
     }
   );
+
+  it('Should display correct trail for App display', () => {
+    const trail = getTrail(
+      BreadcrumbType.App,
+      workspaceDataStub,
+      undefined,
+      undefined,
+      undefined,
+      {
+        ns: 'testns',
+        wsid: 'testwsid',
+        cid: undefined,
+        crid: undefined,
+        pid: undefined,
+        appType: UIAppType.RSTUDIO,
+      }
+    );
+
+    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
+      .slice(1)
+      .toLowerCase()}`;
+
+    expect(trail.map((item) => item.label)).toEqual([
+      'Workspaces',
+      'defaultWorkspace',
+      analysisTabDisplay,
+      UIAppType.RSTUDIO,
+    ]);
+    expect(trail[3].url).toEqual(
+      appDisplayPath('testns', 'testwsid', UIAppType.RSTUDIO)
+    );
+  });
 });

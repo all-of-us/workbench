@@ -14,6 +14,7 @@ import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner
 import {
   analysisTabName,
   analysisTabPath,
+  appDisplayPath,
   dataTabPath,
   workspacePath,
 } from 'app/routing/utils';
@@ -66,8 +67,24 @@ export const getTrail = (
   conceptSet: ConceptSet,
   params: MatchParams
 ): Array<BreadcrumbData> => {
-  const { ns, wsid, cid, crid, csid, pid, nbName } = params;
+  const { ns, wsid, cid, crid, csid, pid, nbName, appType } = params;
   switch (type) {
+    case BreadcrumbType.App:
+      return [
+        ...getTrail(
+          BreadcrumbType.Workspace,
+          workspace,
+          cohort,
+          cohortReview,
+          conceptSet,
+          params
+        ),
+        new BreadcrumbData(
+          fp.upperFirst(analysisTabName),
+          analysisTabPath(ns, wsid)
+        ),
+        new BreadcrumbData(appType, appDisplayPath(ns, wsid, appType)),
+      ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
     case BreadcrumbType.Workspace:
@@ -343,11 +360,18 @@ export const Breadcrumb = fp.flow(
       const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
+
+      const userAppMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
+      });
+
       const analysisFileName = analysisMatch
         ? analysisMatch.params.nbName
         : analysisPreviewMatch
         ? analysisPreviewMatch.params.nbName
         : undefined;
+
+      const appType = userAppMatch ? userAppMatch.params.appType : undefined;
 
       return getTrail(
         this.props.routeData.breadcrumb,
@@ -355,7 +379,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName: analysisFileName }
+        { ns, wsid, cid, csid, pid, nbName: analysisFileName, appType }
       );
     }
 

@@ -42,7 +42,7 @@ plugins {
     id 'war'
 
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'com.diffplug.spotless' version '5.12.5'
+    id 'com.diffplug.spotless' version '6.23.3'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
     id 'org.jetbrains.kotlin.jvm' version '1.8.20' // KOTLIN_VERSION
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
@@ -56,8 +56,20 @@ plugins {
     id 'jacoco'
 }
 
-if (JavaVersion.current() != JavaVersion.VERSION_11) {
-    throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md. The java version used ${JavaVersion.current()}")
+// keep in sync with:
+// the runtime field in api/src/main/webapp/WEB-INF/appengine-web.xml.template
+// the Docker image in ci/Dockerfile.circle_build
+// the Docker image in deploy/Dockerfile
+// in this file:
+// * sourceCompatibility
+// * targetCompatibility
+// * compileKotlin.kotlinOptions.jvmTarget
+// * compileTestKotlin.kotlinOptions.jvmTarget
+if (JavaVersion.current() != JavaVersion.VERSION_17) {
+     throw new GradleException(
+            "This build must be run with Java 17. " +
+                    "See developer-system-initialization.md. " +
+                    "The java version used was ${JavaVersion.current()}.")
 }
 
 if (System.getenv("ADD_XLINT_DEPRECATION")) {
@@ -500,8 +512,8 @@ dependencies {
     implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-    // updated 30 Nov 2023 to most recent passing Sam on 28 Nov
-    implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-8713af5") {
+    // updated 13 Dec 2023 to most recent passing Sam on 13 Dec
+    implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-c0263cf") {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
 
@@ -683,10 +695,10 @@ version = '0.1.0'          // Version in generated output
 
 // This restricts the language features that may be used to those at or below the given Java
 // version.
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 // This restricts the runtime environment to be at or above the given Java version.
-targetCompatibility = 11
+targetCompatibility = 17
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
@@ -878,12 +890,12 @@ task backfillGSuiteUserData(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = 17
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = 17
     }
 }
 

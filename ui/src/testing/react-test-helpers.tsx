@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -143,14 +143,23 @@ export const renderModal = <C,>(
 
 // seems to be the best we can do with Primereact Dropdown
 // based on runtime-configuration-panel.spec pickDropdownOption
+
+export const expectDropdown = (
+  container: HTMLElement,
+  dropDownId: string
+): HTMLElement => {
+  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
+  expect(dropdown).toBeInTheDocument();
+  return dropdown;
+};
+
 export const getDropdownOption = (
   container: HTMLElement,
   dropDownId: string,
   optionText: string,
   expectedCount?: number
 ): Element => {
-  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
-  expect(dropdown).toBeInTheDocument();
+  const dropdown: HTMLElement = expectDropdown(container, dropDownId);
   dropdown.click();
 
   const allOptions = container.querySelectorAll(
@@ -173,11 +182,13 @@ export const expectDropdownDisabled = (
   container: HTMLElement,
   dropDownId: string
 ) => {
-  const dropdown: HTMLElement = container.querySelector(`#${dropDownId}`);
-  expect(dropdown).toBeInTheDocument();
+  const dropdown: HTMLElement = expectDropdown(container, dropDownId);
   dropdown.click();
 
   expect(
     container.querySelector(`#${dropDownId} .p-dropdown-item`)
   ).not.toBeInTheDocument();
 };
+
+// by default, screen.debug() cuts off after 7000 chars.  let's output more than that
+export const debugAll = () => screen.debug(undefined, 1_000_000);

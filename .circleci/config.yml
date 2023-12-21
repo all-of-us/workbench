@@ -5,7 +5,7 @@ version: 2.1
 # -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.2.1
+  browser-tools: circleci/browser-tools@1.4.6
   queue: eddiewebb/queue@volatile
   coverage-reporter: codacy/coverage-reporter@13.13.7
   pact: trustedshops-public/pact@3.0.1
@@ -19,7 +19,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench-image:
     type: string
-    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.26"
+    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.27"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
@@ -34,7 +34,8 @@ anchors:
   env-default: &env-default
     JAVA_TOOL_OPTIONS: -Xmx2g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
-    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
+    # https://stackoverflow.com/questions/38967991/why-are-my-gradle-builds-dying-with-exit-code-137
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
     TERM: dumb
 
   env-db: &env-db
@@ -82,9 +83,10 @@ executors:
   # due to garbage collection timeout. This should be reassessed after upgrading to Junit 5. See RW-6460.
   api-unit-test-executor:
     <<: *workbench-executor
+    resource_class: medium+
     environment:
       <<: *env-default
-      # This still assumes a 4G (medium) machine. This increase is possible for unit tests as they are run
+      # The medium+ machine has 6GB.  Increase the Java memory from the default 2G to 3G. This increase is possible for unit tests as they are run
       # as a ~single-process workflow - in other cases using 3GB may starve other processes. For example,
       # this should not be used for the Local API integration test (which starts both a server, and a test process).
       JAVA_TOOL_OPTIONS: -Xmx3g
