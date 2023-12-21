@@ -433,7 +433,7 @@ jobs:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --participant aou-rw-api --branch ${CIRCLE_BRANCH}
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --branch ${CIRCLE_BRANCH}
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
