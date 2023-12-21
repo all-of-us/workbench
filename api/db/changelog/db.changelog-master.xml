@@ -236,6 +236,7 @@
   <include file="changelog/db.changelog-226-compliance-training-verification.xml"/>
   <include file="changelog/db.changelog-227-drop-user-data-use-agreement.xml"/>
   <include file="changelog/db.changelog-228-increase-resource-name-size.xml"/>
+  <include file="changelog/db.changelog-229-store-cost-per-googleproject.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

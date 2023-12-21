@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbGoogleProjectPerCost;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.UserBQCost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,10 @@ public class FreeTierBillingBatchUpdateService {
 
   private final BigQueryService bigQueryService;
 
+  private final GoogleProjectPerCostDao googleProjectPerCostDao;
+
+  private final WorkspaceDao workspaceDao;
+
   private static final int MIN_USERS_BATCH = 5;
   private static final int MAX_USERS_BATCH = 999;
   public static final Range<Integer> batchSizeRange =
@@ -45,31 +51,43 @@ public class FreeTierBillingBatchUpdateService {
 
   @Autowired
   public FreeTierBillingBatchUpdateService(
+      GoogleProjectPerCostDao googleProjectPerCostDao,
       UserDao userDao,
       FreeTierBillingService freeTierBillingService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceDao workspaceDao,
       BigQueryService bigQueryService) {
+    this.googleProjectPerCostDao = googleProjectPerCostDao;
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.bigQueryService = bigQueryService;
+    this.workspaceDao = workspaceDao;
   }
 
   /**
-   * Takes in List of : user and all BQ cost of workspace for the user
+   * Takes in List of user Id and then find its BQ Cost
    *
-   * @param userBQCostReq
+   * @param userIdList
    */
-  public void checkAndAlertFreeTierBillingUsage(List<UserBQCost> userBQCostReq) {
-    Map<String, Double> userWorkspaceBQCosts = new HashMap<String, Double>();
+  public void checkAndAlertFreeTierBillingUsage(List<Long> userIdList) {
 
-    // Aggregate the BQ cost for all users in the batch
-    userBQCostReq.forEach(
-        userBQCost -> userWorkspaceBQCosts.putAll(userBQCost.getWorkspaceBQCost()));
+    Set<String> googleProjectsForUserSet = workspaceDao.getGoogleProjectForUserList(userIdList);
+
+    List<DbGoogleProjectPerCost> googleProjectPerCostList =
+        (List<DbGoogleProjectPerCost>)
+            googleProjectPerCostDao.findAllByGoogleProjectId(googleProjectsForUserSet);
+
+    // Create Map Key: googleProject and value: cost
+    Map<String, Double> userWorkspaceBQCosts =
+        googleProjectPerCostList.stream()
+            .collect(
+                Collectors.toMap(
+                    DbGoogleProjectPerCost::getGoogleProjectId, DbGoogleProjectPerCost::getCost));
 
     Set<DbUser> dbUserSet =
-        userBQCostReq.stream()
-            .map((userCost) -> userDao.findUserByUserId(userCost.getUserId()))
+        userIdList.stream()
+            .map((userId) -> userDao.findUserByUserId(userId))
             .collect(Collectors.toSet());
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(dbUserSet, userWorkspaceBQCosts);

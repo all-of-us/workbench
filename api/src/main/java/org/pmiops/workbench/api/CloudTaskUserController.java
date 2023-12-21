@@ -20,7 +20,6 @@ import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
-import org.pmiops.workbench.model.UserWorkspaceBQCostRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -126,8 +125,10 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    * @return
    */
   @Override
-  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(UserWorkspaceBQCostRequest body) {
-    freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(body.getUserCostList());
+  public ResponseEntity<Void> checkAndAlertFreeTierBillingUsage(List<Long> userIdsList) {
+    if (userIdsList != null && userIdsList.size() > 0) {
+      freeTierBillingUpdateService.checkAndAlertFreeTierBillingUsage(userIdsList);
+    }
     return ResponseEntity.noContent().build();
   }
 
