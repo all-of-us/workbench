@@ -37,7 +37,6 @@ import {
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   getDropdownOption,
@@ -1127,7 +1126,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     component();
 
-    debugAll();
     expect(
       screen.queryByText('Reattachable persistent disk')
     ).toBeInTheDocument();
