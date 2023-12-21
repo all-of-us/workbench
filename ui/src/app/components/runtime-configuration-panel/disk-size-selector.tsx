@@ -24,13 +24,14 @@ export const DiskSizeSelector = ({
     <InputNumber
         aria-label={`${idPrefix}-disk`}
         id={`${idPrefix}-disk`}
-      showButtons
-      disabled={disabled}
-      decrementButtonClassName='p-button-secondary'
-      incrementButtonClassName='p-button-secondary'
-      value={diskSize}
-      inputStyle={styles.inputNumber}
-      onChange={({ value }) => onChange(value)}
-    />
-  </FlexRow>
-);
+        showButtons
+        disabled={disabled}
+        decrementButtonClassName='p-button-secondary'
+        incrementButtonClassName='p-button-secondary'
+        value={diskSize}
+        inputStyle={styles.inputNumber}
+        onChange={({ value }) => onChange(value)}
+      />
+    </FlexRow>
+  );
+};
