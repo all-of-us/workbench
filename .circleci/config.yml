@@ -424,6 +424,17 @@ jobs:
         command: |
           pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH}
 
+  api-contract-can-i-deploy:
+    executor: pact-executor
+    steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: Pact Broker Publish
+        working_directory: ~
+        command: |
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --participant aou-rw-api --branch ${CIRCLE_BRANCH}
+
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
@@ -853,6 +864,9 @@ workflows:
       - api-contract-upload:
           requires:
           - api-contract-test
+      - api-contract-can-i-deploy:
+          requires:
+          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
