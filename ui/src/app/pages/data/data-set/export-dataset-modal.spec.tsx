@@ -78,7 +78,7 @@ describe('ExportDatasetModal', () => {
     fireEvent.click(findExportButton());
   };
 
-  const clickShowCodePreviewButton = () => {
+  const clickSeeCodePreviewButton = () => {
     fireEvent.click(findSeeCodePreviewButton());
   };
 
@@ -298,7 +298,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
 
     await waitUntilDoneLoading();
 
@@ -458,7 +458,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
 
     await waitUntilDoneLoading();
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
     await waitUntilDoneLoading();
 
     expect(previewSpy).toHaveBeenCalledWith(
@@ -533,7 +533,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
     await waitUntilDoneLoading();
 
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
 
     await waitUntilDoneLoading();
     await user.click(screen.getByLabelText('Dataset query copy icon button'));
@@ -574,7 +574,7 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
 
     expect(previewSpy).not.toHaveBeenCalled();
 
@@ -595,7 +595,7 @@ describe('ExportDatasetModal', () => {
 
     component(testProps);
     await waitUntilDoneLoading();
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
 
     await changeNotebookName('New Notebook Name');
     expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
@@ -656,7 +656,7 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
     expect(previewSpy).toHaveBeenCalledTimes(0);
 
     clickExportButton();
@@ -697,7 +697,7 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickShowCodePreviewButton();
+    clickSeeCodePreviewButton();
     // Should only be called on the initial click
     expect(previewSpy).toHaveBeenCalledTimes(1);
 
