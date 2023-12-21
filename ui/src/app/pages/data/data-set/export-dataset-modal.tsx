@@ -239,7 +239,6 @@ export const ExportDatasetModal = ({
   };
 
   const onCodePreviewClick = () => {
-    console.log('Yoinks!');
     if (!codePreview) {
       AnalyticsTracker.DatasetBuilder.SeeCodePreview();
     }
