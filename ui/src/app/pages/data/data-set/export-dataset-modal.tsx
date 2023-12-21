@@ -291,7 +291,7 @@ export const ExportDatasetModal = ({
   // When code preview is showing, but codePreview does not
   // have a value, update code.
   useEffect(() => {
-    if (!codePreview && showCodePreview) {
+    if (showCodePreview && !codePreview) {
       getCode();
     }
   }, [codePreview, showCodePreview]);
