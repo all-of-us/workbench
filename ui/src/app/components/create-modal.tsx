@@ -1,18 +1,22 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { validate } from 'validate.js';
+
+import { ResourceType } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
+import { ClrIcon } from 'app/components/icons';
+import { TextArea, TextInput, ValidationError } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-
-import { ClrIcon } from './icons';
-import { TextArea, TextInput } from './inputs';
-import { Spinner } from './spinners';
+import { summarizeErrors } from 'app/utils';
+import { nameValidationFormat, toDisplay } from 'app/utils/resources';
 
 const styles = {
   error: {
@@ -36,7 +40,7 @@ const styles = {
 };
 
 interface Props {
-  entityName: string;
+  resourceType: ResourceType;
   title?: string;
   getExistingNames: () => Promise<string[]>;
   save: Function;
@@ -44,7 +48,7 @@ interface Props {
 }
 
 export const CreateModal = ({
-  entityName,
+  resourceType,
   title,
   getExistingNames,
   save,
@@ -61,36 +65,29 @@ export const CreateModal = ({
     getExistingNames().then((names) => setExistingNames(names));
   }, []);
 
-  const nameConflictMsg = `A ${entityName.toLowerCase()} with this name already exists. Please choose a different name.`;
-  const invalidNameInput = nameTouched && !name?.trim();
-  const nameConflict = !!name && existingNames.includes(name.trim());
-  const inputErrorMsg = invalidNameInput
-    ? `${entityName} name is required`
-    : nameConflict
-    ? nameConflictMsg
-    : '';
-  const disableSaveButton = nameConflict || invalidNameInput || !name || saving;
-
   const onSave = async () => {
     setSaving(true);
     setSaveErrorMsg('');
     save(name.trim(), description)
       .then(() => close())
-      .catch((e) => {
-        setSaveErrorMsg(
-          e.status === 409
-            ? nameConflictMsg
-            : 'Data cannot be saved. Please try again.'
-        );
+      .catch(() => {
+        setSaveErrorMsg('Data cannot be saved. Please try again.');
         setSaving(false);
       });
   };
 
+  const errors = validate(
+    {
+      name: name?.trim(),
+    },
+    {
+      name: nameValidationFormat(existingNames, resourceType),
+    }
+  );
+
   return (
     <Modal>
-      <ModalTitle style={inputErrorMsg ? { marginBottom: 0 } : {}}>
-        {title || `Create ${entityName}`}
-      </ModalTitle>
+      <ModalTitle>{title || `Create ${toDisplay(resourceType)}`}</ModalTitle>
       <ModalBody style={{ marginTop: '0.3rem' }}>
         {saveErrorMsg && (
           <div style={styles.error}>
@@ -102,18 +99,22 @@ export const CreateModal = ({
             {saveErrorMsg}
           </div>
         )}
-        {inputErrorMsg && <div style={styles.invalid}>{inputErrorMsg}</div>}
-
         <TextInput
-          style={{ marginBottom: '0.75rem' }}
+          style={{
+            marginBottom:
+              nameTouched && errors?.name.length > 0 ? '0' : '0.75rem',
+          }}
           value={name}
-          placeholder={entityName.toUpperCase() + ' NAME'}
+          placeholder={toDisplay(resourceType).toUpperCase() + ' NAME'}
           onChange={(v) => {
             setName(v);
             setNameTouched(true);
           }}
           disabled={saving}
         />
+        <ValidationError>
+          {summarizeErrors(nameTouched && errors?.name)}
+        </ValidationError>
         <TextArea
           value={description}
           placeholder='DESCRIPTION'
@@ -132,7 +133,7 @@ export const CreateModal = ({
         </Button>
         <Button
           type='primary'
-          disabled={disableSaveButton}
+          disabled={!!errors || saving}
           onClick={() => onSave()}
         >
           {saving && <Spinner style={{ marginRight: '0.375rem' }} size={18} />}
