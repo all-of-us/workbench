@@ -30,7 +30,7 @@ export const DiskSizeSelector = ({
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
       value={diskSize}
-      inputStyle={styles.inputNumber}
+      inputStyle={styles.largeInputNumber}
       onChange={({ value }) => onChange(value)}
     />
   </FlexRow>
