@@ -71,27 +71,15 @@ export const DiskSelector = ({
           to learn more.
         </WarningMessage>
       )}
-      <TooltipTrigger
-        content={
-          'To create a new Standard VM environment, you will have to use a reattachable persistent disk'
-        }
-        disabled={computeType !== ComputeType.Standard}
-      >
+      {computeType === ComputeType.Dataproc && (
         <FlexRow style={styles.diskRow}>
           <RadioButton
             aria-label='Standard Disk'
             name='standardDisk'
             data-test-id='standard-disk-radio'
             style={styles.diskRadio}
-            disabled={disabled || computeType === ComputeType.Standard}
-            onChange={() =>
-              onChange({
-                ...diskConfig,
-                detachable: false,
-                detachableType: null,
-                existingDiskName: null,
-              })
-            }
+            disabled={true}
+            onChange={() => {}}
             checked={!diskConfig.detachable}
           />
           <FlexColumn>
@@ -102,9 +90,9 @@ export const DiskSelector = ({
             </span>
             {diskConfig.detachable || (
               <DiskSizeSelector
+                {...{ disabled }}
                 idPrefix='standard'
                 diskSize={diskConfig.size}
-                disabled={disabled || computeType === ComputeType.Standard}
                 style={{ marginTop: '11px' }}
                 onChange={(size: number) =>
                   onChange(
@@ -121,7 +109,7 @@ export const DiskSelector = ({
             )}
           </FlexColumn>
         </FlexRow>
-      </TooltipTrigger>
+      )}
       <TooltipTrigger
         content={disableDetachableReason}
         disabled={!disableDetachableReason}
@@ -132,21 +120,9 @@ export const DiskSelector = ({
             data-test-id='detachable-disk-radio'
             name='detachableDisk'
             style={styles.diskRadio}
-            onChange={() =>
-              onChange(
-                maybeWithExistingDiskName(
-                  {
-                    ...diskConfig,
-                    size: existingDisk?.size || diskConfig.size,
-                    detachable: true,
-                    detachableType: existingDisk?.diskType || DiskType.STANDARD,
-                  },
-                  existingDisk
-                )
-              )
-            }
+            disabled={true}
+            onChange={() => {}}
             checked={diskConfig.detachable}
-            disabled={disabled || !!disableDetachableReason}
           />
           <FlexColumn>
             <label style={styles.diskLabel}>Reattachable persistent disk</label>
