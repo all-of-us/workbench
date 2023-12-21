@@ -11,7 +11,7 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
@@ -74,20 +74,20 @@ describe('ExportDatasetModal', () => {
     await user.type(findNotebookNameInput(), newNotebookName);
   };
 
-  const clickExportButton = () => {
-    fireEvent.click(findExportButton());
+  const clickExportButton = async () => {
+    await user.click(findExportButton());
   };
 
-  const clickSeeCodePreviewButton = () => {
-    fireEvent.click(findSeeCodePreviewButton());
+  const clickSeeCodePreviewButton = async () => {
+    await user.click(findSeeCodePreviewButton());
   };
 
-  const clickHideCodePreviewButton = () => {
-    fireEvent.click(findHideCodePreviewButton());
+  const clickHideCodePreviewButton = async () => {
+    await user.click(findHideCodePreviewButton());
   };
 
-  const hoverOverExportButton = () => {
-    fireEvent.mouseEnter(findExportButton());
+  const hoverOverExportButton = async () => {
+    await user.pointer([{ pointerName: 'mouse', target: findExportButton() }]);
   };
 
   beforeEach(() => {
@@ -137,7 +137,7 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     await changeNotebookName(notebookName);
-    clickExportButton();
+    await clickExportButton();
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -165,7 +165,7 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     await changeNotebookName(notebookName);
-    clickExportButton();
+    await clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -185,11 +185,11 @@ describe('ExportDatasetModal', () => {
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     changeNotebookName('');
-    clickExportButton();
+    await clickExportButton();
 
     expect(exportSpy).not.toHaveBeenCalled();
 
-    hoverOverExportButton();
+    await hoverOverExportButton();
 
     await screen.findByText("Notebook name can't be blank");
   });
@@ -207,11 +207,11 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     await changeNotebookName(existingNotebookName);
-    clickExportButton();
+    await clickExportButton();
 
     expect(exportSpy).not.toHaveBeenCalled();
 
-    hoverOverExportButton();
+    await hoverOverExportButton();
 
     await screen.findByText('Notebook name already exists');
   });
@@ -227,12 +227,12 @@ describe('ExportDatasetModal', () => {
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
     await waitUntilDoneLoading();
-    changeNotebookName(existingNotebookName);
+    await changeNotebookName(existingNotebookName);
 
-    clickExportButton();
+    await clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
 
-    hoverOverExportButton();
+    await hoverOverExportButton();
     await screen.findByText('Notebook name already exists');
   });
 
@@ -260,16 +260,16 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
-    fireEvent.mouseDown(notebookDropdown);
+    await user.click(notebookDropdown);
 
     const existingNotebookOption = screen.getByText(notebookName);
-    fireEvent.click(existingNotebookOption);
+    await user.click(existingNotebookOption);
 
     await waitFor(() => {
       expect(screen.queryByLabelText('Notebook Name')).toBeNull();
     });
 
-    clickExportButton();
+    await clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -298,7 +298,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
 
     await waitUntilDoneLoading();
 
@@ -323,7 +323,7 @@ describe('ExportDatasetModal', () => {
       name: 'R',
     });
 
-    fireEvent.click(rRadioButton);
+    await user.click(rRadioButton);
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -337,7 +337,7 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     const hideCodePreviewButton = findHideCodePreviewButton();
-    fireEvent.click(hideCodePreviewButton);
+    await user.click(hideCodePreviewButton);
 
     await waitFor(() => {
       iframe = screen.queryByTestId('export-preview-frame');
@@ -374,7 +374,7 @@ describe('ExportDatasetModal', () => {
       name: 'R',
     });
 
-    fireEvent.click(rRadioButton);
+    await user.click(rRadioButton);
 
     const hailRadio = screen.queryByRole('radio', {
       name: 'Hail',
@@ -429,7 +429,7 @@ describe('ExportDatasetModal', () => {
     await waitUntilDoneLoading();
 
     await changeNotebookName(notebookName);
-    clickExportButton();
+    await clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
       dataSetRequest: expectedDatasetRequest,
@@ -458,7 +458,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
 
     await waitUntilDoneLoading();
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
     await waitUntilDoneLoading();
 
     expect(previewSpy).toHaveBeenCalledWith(
@@ -471,10 +471,10 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    const plinkjRadioButtonLabel = screen.getByRole('radio', {
+    const plinkRadioButton = screen.getByRole('radio', {
       name: 'PLINK',
     });
-    fireEvent.click(plinkjRadioButtonLabel);
+    await user.click(plinkRadioButton);
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -489,10 +489,10 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const otherjRadioButtonLabel = screen.getByRole('radio', {
+    const otherRadioButton = screen.getByRole('radio', {
       name: 'Other VCF-compatible tool',
     });
-    fireEvent.click(otherjRadioButtonLabel);
+    await user.click(otherRadioButton);
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
       workspace.id,
@@ -533,7 +533,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
     await waitUntilDoneLoading();
 
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
 
     await waitUntilDoneLoading();
     await user.click(screen.getByLabelText('Dataset query copy icon button'));
@@ -574,11 +574,11 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
 
     expect(previewSpy).not.toHaveBeenCalled();
 
-    clickExportButton();
+    await clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
 
     await user.click(findCopyCodeButton());
@@ -595,7 +595,7 @@ describe('ExportDatasetModal', () => {
 
     component(testProps);
     await waitUntilDoneLoading();
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
 
     await changeNotebookName('New Notebook Name');
     expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
@@ -613,12 +613,12 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickHideCodePreviewButton();
+    await clickHideCodePreviewButton();
     // When clicking hide, it should immediately disappear,
     // so if it is still here, then it was disabled.
     expect(findHideCodePreviewButton()).toBeInTheDocument();
 
-    clickExportButton();
+    await clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
 
     await user.click(findCopyCodeButton());
@@ -638,7 +638,7 @@ describe('ExportDatasetModal', () => {
     component(testProps);
     await waitUntilDoneLoading();
     await changeNotebookName('Notebook Name');
-    clickExportButton();
+    await clickExportButton();
 
     await changeNotebookName('New Notebook Name');
     expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
@@ -656,10 +656,10 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
     expect(previewSpy).toHaveBeenCalledTimes(0);
 
-    clickExportButton();
+    await clickExportButton();
     // Should only be called the initial time and not allow a
     // subsequent click.
     expect(exportSpy).toHaveBeenCalledTimes(1);
@@ -697,11 +697,11 @@ describe('ExportDatasetModal', () => {
     await user.click(plinkRadioButton);
     expect(plinkRadioButton).not.toBeChecked();
 
-    clickSeeCodePreviewButton();
+    await clickSeeCodePreviewButton();
     // Should only be called on the initial click
     expect(previewSpy).toHaveBeenCalledTimes(1);
 
-    clickExportButton();
+    await clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();
 
     // The button's text becomes a spinner while loading, so you
