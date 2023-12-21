@@ -255,7 +255,6 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    String rawCode = String.join(System.lineSeparator(), codeCells);
     codeCells.forEach(
         cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
@@ -264,7 +263,7 @@ public class DataSetController implements DataSetApiDelegate {
             .html(
                 notebooksService.convertJupyterNotebookToHtml(
                     notebookFile.toString().getBytes(StandardCharsets.UTF_8)))
-            .text(rawCode));
+            .text(String.join(System.lineSeparator(), codeCells)));
   }
 
   @Override
