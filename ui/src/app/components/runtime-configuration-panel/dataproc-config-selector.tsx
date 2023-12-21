@@ -89,10 +89,9 @@ export const DataProcConfigSelector = ({
       <legend style={styles.sectionTitle}>Worker Configuration</legend>
       <div style={styles.formGrid3}>
         <FlexRow style={styles.labelAndInput}>
-          <label style={styles.label} htmlFor='num-workers'>
-            Workers
-          </label>
+          <label style={styles.label}>Workers</label>
           <InputNumber
+            aria-label='num-workers'
             id='num-workers'
             showButtons
             disabled={disabled || workerCountDisabledByStopped}
@@ -105,7 +104,7 @@ export const DataProcConfigSelector = ({
           />
         </FlexRow>
         <FlexRow style={styles.labelAndInput}>
-          <label style={styles.label} htmlFor='num-preemptible'>
+          <label style={styles.label}>
             Preemptible workers
             <TooltipTrigger
               content='Preemptible secondary workers can be added in addition to
@@ -119,6 +118,7 @@ export const DataProcConfigSelector = ({
             </TooltipTrigger>
           </label>
           <InputNumber
+            aria-label='num-preemptible'
             id='num-preemptible'
             showButtons
             disabled={disabled || workerCountDisabledByStopped}

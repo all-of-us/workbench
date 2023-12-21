@@ -1,32 +1,70 @@
+import '@testing-library/jest-dom';
+
+import { act } from 'react-dom/test-utils';
+import { MemoryRouter } from 'react-router';
+
 import {
+  DisksApi,
   GpuConfig,
+  Runtime,
+  RuntimeApi,
   RuntimeConfigurationType,
   RuntimeStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
+  ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   Machine,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
+import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
-import { serverConfigStore } from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  runtimeDiskStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  getDropdownOption,
+} from 'testing/react-test-helpers';
+import {
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+} from 'testing/stubs/cdr-versions-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
+import {
+  defaultDataprocConfig,
   defaultDataProcRuntime,
+  defaultGceConfig,
   defaultGceRuntime,
   defaultGceRuntimeWithPd,
   defaultRuntime,
+  RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
+import { workspaceStubs } from 'testing/stubs/workspaces';
+import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import {
   createOrCustomize,
   deriveCurrentRuntime,
   getErrorsAndWarnings,
+  RuntimeConfigurationPanel,
+  RuntimeConfigurationPanelProps,
 } from './runtime-configuration-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 
@@ -575,5 +613,648 @@ describe(getErrorsAndWarnings.name, () => {
     expect(errorMessageContent).toEqual([]);
     expect(warningMessageContent).toHaveLength(1);
     expect(warningMessageContent[0].props.children).toEqual(expectedWarning);
+  });
+});
+
+describe(RuntimeConfigurationPanel.name, () => {
+  let runtimeApiStub: RuntimeApiStub;
+  let disksApiStub: DisksApiStub;
+  let workspacesApiStub: WorkspacesApiStub;
+
+  const onClose = jest.fn();
+  const defaultProps: RuntimeConfigurationPanelProps = {
+    onClose,
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
+  };
+
+  const setCurrentRuntime = (runtime: Runtime) => {
+    runtimeApiStub.runtime = runtime;
+    runtimeStore.set({ ...runtimeStore.get(), runtime });
+  };
+
+  const clickExpectedButton = (name: string) => {
+    const button = screen.getByRole('button', { name });
+    expect(button).toBeInTheDocument();
+    expectButtonElementEnabled(button);
+    button.click();
+  };
+
+  const pickDropdownOptionAndClick = async (
+    container: HTMLElement,
+    user: UserEvent,
+    dropDownId: string,
+    optionText: string
+  ): Promise<void> => {
+    const option = getDropdownOption(container, dropDownId, optionText);
+    await user.click(option);
+  };
+
+  const pickSpinButtonSize = async (
+    user: UserEvent,
+    name: string,
+    value: number
+  ): Promise<void> => {
+    const spinButton = screen.getByRole('spinbutton', { name });
+    expect(spinButton).toBeInTheDocument();
+    await user.clear(spinButton);
+    await user.type(spinButton, value.toString());
+  };
+
+  const pickMainCpu = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-cpu',
+      option.toString()
+    );
+
+  const pickComputeType = (
+    container: HTMLElement,
+    user: UserEvent,
+    computeType: ComputeType
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-compute',
+      computeType.toString()
+    );
+
+  const pickMainRam = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'runtime-ram',
+      option.toString()
+    );
+
+  const pickWorkerCpu = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'worker-cpu',
+      option.toString()
+    );
+
+  const pickWorkerRam = (
+    container: HTMLElement,
+    user: UserEvent,
+    option: number
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'worker-ram',
+      option.toString()
+    );
+
+  const pickDetachableDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'detachable-disk', size);
+
+  const pickStandardDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'standard-disk', size);
+
+  const pickWorkerDiskSize = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'worker-disk', size);
+
+  const pickNumWorkers = async (user: UserEvent, size: number): Promise<void> =>
+    pickSpinButtonSize(user, 'num-workers', size);
+
+  const pickNumPreemptibleWorkers = async (
+    user: UserEvent,
+    size: number
+  ): Promise<void> => pickSpinButtonSize(user, 'num-preemptible', size);
+
+  const confirmDeleteText =
+    'You’re about to delete your cloud analysis environment.';
+  const expectConfirmDeletePanel = () =>
+    expect(screen.queryByText(confirmDeleteText)).not.toBeNull();
+
+  const component = (
+    propOverrides?: Partial<RuntimeConfigurationPanelProps>
+  ) => {
+    const allProps = { ...defaultProps, ...propOverrides };
+    return render(
+      <MemoryRouter>
+        <RuntimeConfigurationPanel {...allProps} />
+      </MemoryRouter>
+    );
+  };
+
+  beforeEach(async () => {
+    runtimeApiStub = new RuntimeApiStub();
+    registerApiClient(RuntimeApi, runtimeApiStub);
+
+    disksApiStub = new DisksApiStub();
+    registerApiClient(DisksApi, disksApiStub);
+
+    workspacesApiStub = new WorkspacesApiStub();
+    registerApiClient(WorkspacesApi, workspacesApiStub);
+
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({ config: { ...defaultServerConfig } });
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountName:
+        'billingAccounts/' + defaultServerConfig.freeTierBillingAccountId,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+      googleProject: runtimeApiStub.runtime.googleProject,
+    });
+
+    runtimeStore.set({
+      runtime: runtimeApiStub.runtime,
+      workspaceNamespace: workspaceStubs[0].namespace,
+      runtimeLoaded: true,
+    });
+
+    runtimeDiskStore.set({
+      workspaceNamespace: workspaceStubs[0].namespace,
+      gcePersistentDisk: null,
+    });
+  });
+
+  afterEach(() => {
+    act(() => clearCompoundRuntimeOperations());
+  });
+
+  it('should show loading spinner while loading', async () => {
+    // simulate not done loading
+    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
+
+    const { container } = component();
+    expect(container).toBeInTheDocument();
+
+    await waitFor(() =>
+      // spinner label
+      expect(screen.queryByLabelText('Please Wait')).toBeInTheDocument()
+    );
+
+    runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: true });
+
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders the chosen panel when specified in initialPanelContent', () => {
+    const { container } = component({
+      initialPanelContent: PanelContent.Create,
+    });
+    expect(container).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        /Your analysis environment consists of an application and compute resources./
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should allow creation with defaults when no runtime exists', async () => {
+    setCurrentRuntime(null);
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
+        'n1-standard-4'
+      );
+      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+      expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
+    });
+  });
+
+  it('should show customize after create', async () => {
+    setCurrentRuntime(null);
+
+    component();
+
+    clickExpectedButton('Create');
+
+    // creation closes the panel. re-render with the new runtime state
+    await waitFor(() => {
+      component();
+
+      // now in Customize mode
+
+      const button = screen.getByRole('button', { name: 'Customize' });
+      expect(button).toBeInTheDocument();
+      expectButtonElementEnabled(button);
+    });
+  });
+
+  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
+    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 1000,
+      },
+    });
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .machineType
+      );
+      expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .persistentDisk.size
+      );
+    });
+  });
+
+  it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
+    // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        ...defaultDataprocConfig(),
+        masterMachineType: 'n1-standard-16',
+        masterDiskSize: 999,
+        workerDiskSize: 444,
+        numberOfWorkers: 5,
+      },
+    });
+
+    component();
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } = runtimeApiStub.runtime.dataprocConfig;
+
+      expect(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      ).toMatchObject({
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      });
+    });
+  });
+
+  it('should allow creation when runtime has error status', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.ERROR,
+      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: MIN_DISK_SIZE_GB,
+      },
+      dataprocConfig: null,
+    });
+
+    component();
+
+    clickExpectedButton('Try Again');
+    await waitFor(() =>
+      // Kicks off a deletion to first clear the error status runtime.
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting')
+    );
+  });
+
+  it('should allow creation from error with an update', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.ERROR,
+      errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: MIN_DISK_SIZE_GB,
+      },
+      dataprocConfig: null,
+    });
+
+    const { container } = component();
+
+    await pickMainCpu(container, user, 8);
+    clickExpectedButton('Try Again');
+
+    await waitFor(() =>
+      // Kicks off a deletion to first clear the error status runtime.
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting')
+    );
+  });
+
+  it('should allow creation with GCE with PD config', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(null);
+
+    const { container } = component();
+    clickExpectedButton('Customize');
+
+    await pickMainCpu(container, user, 8);
+    await pickMainRam(container, user, 52);
+    await pickDetachableDiskSize(user, MIN_DISK_SIZE_GB + 10);
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.USER_OVERRIDE
+      );
+      expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
+        machineType: 'n1-highmem-8',
+        gpuConfig: null,
+        persistentDisk: {
+          diskType: 'pd-standard',
+          labels: {},
+          name: 'stub-disk',
+          size: MIN_DISK_SIZE_GB + 10,
+        },
+      });
+      expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+    });
+  });
+
+  it('should allow creation with Dataproc config', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(null);
+
+    const { container } = component();
+    clickExpectedButton('Customize');
+
+    // master settings
+    await pickMainCpu(container, user, 2);
+    await pickMainRam(container, user, 7.5);
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB + 10);
+
+    // worker settings
+    await pickWorkerCpu(container, user, 8);
+    await pickWorkerRam(container, user, 30);
+    await pickWorkerDiskSize(user, 300);
+    await pickNumWorkers(user, 10);
+    await pickNumPreemptibleWorkers(user, 20);
+
+    clickExpectedButton('Create');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.USER_OVERRIDE
+      );
+      expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
+        masterMachineType: 'n1-standard-2',
+        masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
+        workerMachineType: 'n1-standard-8',
+        workerDiskSize: 300,
+        numberOfWorkers: 10,
+        numberOfPreemptibleWorkers: 20,
+      });
+      expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+    });
+  });
+
+  it('should disable the Next button if there are no changes and runtime is running', async () => {
+    setCurrentRuntime(defaultGceRuntimeWithPd());
+    component();
+    const button = screen.getByRole('button', { name: 'Next' });
+    expect(button).toBeInTheDocument();
+    expectButtonElementDisabled(button);
+  });
+
+  it('should show create button if runtime is deleted', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.DELETED,
+    });
+    component();
+    const button = screen.getByRole('button', { name: 'Create' });
+    expect(button).toBeInTheDocument();
+    expectButtonElementEnabled(button);
+  });
+
+  it('should allow runtime deletion', async () => {
+    component({});
+    clickExpectedButton('Delete Environment');
+
+    // confirm that the correct panel is visible
+    await waitFor(() => expectConfirmDeletePanel());
+
+    clickExpectedButton('Delete');
+
+    await waitFor(() => {
+      // Runtime should be deleting, and panel should have closed.
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should allow cancelling runtime deletion', async () => {
+    component({});
+    clickExpectedButton('Delete Environment');
+
+    // confirm that the correct panel is visible
+    await waitFor(() => expectConfirmDeletePanel());
+
+    clickExpectedButton('Cancel');
+
+    await waitFor(() => {
+      // Runtime should still be active, and confirm page should no longer be visible.
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.RUNNING);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByText(confirmDeleteText)).toBeNull();
+    });
+  });
+
+  it('should require PD (prevent standard disk) for GCE', async () => {
+    setCurrentRuntime(defaultGceRuntimeWithPd());
+
+    component();
+
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).not.toBeDisabled();
+
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).toBeDisabled();
+  });
+
+  it('should require standard disk / prevent detachable PD use for Dataproc', async () => {
+    setCurrentRuntime(defaultDataProcRuntime());
+
+    component();
+
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).toBeDisabled();
+
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).not.toBeDisabled();
+  });
+
+  it('should allow Dataproc -> PD transition', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(defaultDataProcRuntime());
+
+    const { container } = component();
+
+    // confirm Dataproc by observing that PD is disabled
+    expect(
+      screen.getByRole('radio', {
+        name: 'Detachable Disk',
+      })
+    ).toBeDisabled();
+
+    await pickComputeType(container, user, ComputeType.Standard);
+
+    await waitFor(() => {
+      // confirm GCE by observing that PD is enabled
+      expect(
+        screen.getByRole('radio', {
+          name: 'Detachable Disk',
+        })
+      ).not.toBeDisabled();
+    });
+
+    clickExpectedButton('Next');
+    clickExpectedButton('Update');
+
+    // after deletion happens, confirm the new runtime state
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+      expect(disksApiStub.disk).toBeTruthy();
+    });
+  });
+
+  it('should render Spark console links for a running cluster', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
+      gceWithPdConfig: null,
+    });
+
+    component();
+    const manageButton = screen.getByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    expect(manageButton).toBeInTheDocument();
+    expectButtonElementEnabled(manageButton);
+    manageButton.click();
+
+    await waitFor(() => screen.getByText('MapReduce History Server'));
+  });
+
+  it('should disable the Spark console for a non-running cluster', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      dataprocConfig: defaultDataprocConfig(),
+      gceConfig: null,
+      gceWithPdConfig: null,
+    });
+
+    component();
+    const manageButton = screen.getByRole('button', {
+      name: 'Manage and monitor Spark console',
+    });
+    expect(manageButton).toBeInTheDocument();
+    expectButtonElementDisabled(manageButton);
+    manageButton.click();
+  });
+
+  it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
+    // set GCE Runtime without PD as current runtime
+    setCurrentRuntime(defaultGceRuntime());
+
+    component();
+
+    expect(
+      screen.queryByText(/only support reattachable persistent disks/)
+    ).toBeInTheDocument();
+
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
+    expect(detachablePdButton).toBeInTheDocument();
+    expect(detachablePdButton).toBeEnabled();
+    expect(detachablePdButton).toHaveProperty('checked');
+
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
+    expect(standardDiskButton).toBeInTheDocument();
+    expect(standardDiskButton).toBeDisabled();
+    expect(standardDiskButton).toHaveProperty('disabled');
   });
 });

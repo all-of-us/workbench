@@ -74,11 +74,7 @@ export const WarningMessage = ({
   children: string | React.ReactNode;
 }) => {
   return (
-    <MessageWithIcon
-      messageType={'warning'}
-      iconSize={iconSize}
-      iconPosition={iconPosition}
-    >
+    <MessageWithIcon {...{ iconSize, iconPosition }} messageType='warning'>
       {children}
     </MessageWithIcon>
   );
@@ -94,11 +90,7 @@ export const ErrorMessage = ({
   children: string | React.ReactNode;
 }) => {
   return (
-    <MessageWithIcon
-      messageType={'error'}
-      iconSize={iconSize}
-      iconPosition={iconPosition}
-    >
+    <MessageWithIcon {...{ iconSize, iconPosition }} messageType='error'>
       {children}
     </MessageWithIcon>
   );
