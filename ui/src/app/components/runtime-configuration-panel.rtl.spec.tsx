@@ -638,14 +638,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeStore.set({ ...runtimeStore.get(), runtime });
   };
 
-  const setCurrentDisk = (disk: Disk) => {
-    disksApiStub.disk = disk;
-    runtimeDiskStore.set({
-      ...runtimeDiskStore.get(),
-      gcePersistentDisk: disk,
-    });
-  };
-
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -1195,70 +1187,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(disksApiStub.disk).toBeTruthy();
     });
   });
-
-  // TODO
-  // it('should allow disk deletion when detaching', async () => {
-  //   const user = userEvent.setup();
-  //
-  //   setCurrentRuntime(defaultGceRuntimeWithPd());
-  //   setCurrentDisk(stubDisk());
-  //
-  //   const { container } = component();
-  //
-  //   await pickComputeType(container, user, ComputeType.Dataproc);
-  //
-  //   await waitFor(() =>
-  //     // confirm Dataproc by observing that PD is disabled
-  //     expect(getDetachableDiskRadio()).toBeDisabled()
-  //   );
-  //
-  //   clickExpectedButton('Next');
-  //
-  //   expect(
-  //     screen.queryByText(/will be unused after you apply this update/)
-  //   ).toBeInTheDocument();
-  //
-  //   const deleteRadio = screen.getByRole('radio', {
-  //     name: 'Delete persistent disk',
-  //   });
-  //   deleteRadio.click();
-  //
-  //   clickExpectedButton('Next');
-  //   clickExpectedButton('Update');
-  //
-  //   // updating closes the panel.  After deletion happens, re-render with the new runtime state
-  //   // runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //   await waitFor(() => {
-  //     // component();
-  //     debugAll();
-  //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-  //     expect(disksApiStub.disk).toBeNull();
-  //   });
-  // });
-
-  //   it('should allow skipping disk deletion when detaching', async () => {
-  //     setCurrentRuntime(defaultGceRuntimeWithPd());
-  // //    setCurrentDisk(existingDisk());
-  //
-  //     const wrapper = component();
-  //     pickComputeType(wrapper, ComputeType.Dataproc);
-  //
-  //     await mustClickButton(wrapper, 'Next');
-  //
-  //     expect(wrapper.text()).toContain(
-  //       'will be unused after you apply this update'
-  //     );
-  //
-  //     // Default option should be NOT to delete.
-  //     await mustClickButton(wrapper, 'Next');
-  //     await mustClickButton(wrapper, 'Update');
-  //     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //
-  //     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-  //
-  //     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-  //     expect(disksApiStub.disk?.name).toEqual(disk.name);
-  //   });
 
   it('should render Spark console links for a running cluster', async () => {
     setCurrentRuntime({
