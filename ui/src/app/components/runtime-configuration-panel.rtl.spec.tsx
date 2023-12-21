@@ -753,16 +753,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const expectConfirmDeletePanel = () =>
     expect(screen.queryByText(confirmDeleteText)).not.toBeNull();
 
-  const getDetachableDiskRadio = () =>
-    screen.getByRole('radio', {
-      name: 'detachableDisk',
-    });
-
-  const getStandardDiskRadio = () =>
-    screen.getByRole('radio', {
-      name: 'standardDisk',
-    });
-
   const component = (
     propOverrides?: Partial<RuntimeConfigurationPanelProps>
   ) => {
@@ -1136,11 +1126,15 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     component();
 
-    const detachablePdButton = getDetachableDiskRadio();
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
     expect(detachablePdButton).toBeInTheDocument();
     expect(detachablePdButton).not.toBeDisabled();
 
-    const standardDiskButton = getStandardDiskRadio();
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
     expect(standardDiskButton).toBeInTheDocument();
     expect(standardDiskButton).toBeDisabled();
   });
@@ -1150,11 +1144,15 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     component();
 
-    const detachablePdButton = getDetachableDiskRadio();
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
     expect(detachablePdButton).toBeInTheDocument();
     expect(detachablePdButton).toBeDisabled();
 
-    const standardDiskButton = getStandardDiskRadio();
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
     expect(standardDiskButton).toBeInTheDocument();
     expect(standardDiskButton).not.toBeDisabled();
   });
@@ -1167,13 +1165,21 @@ describe(RuntimeConfigurationPanel.name, () => {
     const { container } = component();
 
     // confirm Dataproc by observing that PD is disabled
-    expect(getDetachableDiskRadio()).toBeDisabled();
+    expect(
+      screen.getByRole('radio', {
+        name: 'Detachable Disk',
+      })
+    ).toBeDisabled();
 
     await pickComputeType(container, user, ComputeType.Standard);
 
     await waitFor(() => {
       // confirm GCE by observing that PD is enabled
-      expect(getDetachableDiskRadio()).not.toBeDisabled();
+      expect(
+        screen.getByRole('radio', {
+          name: 'Detachable Disk',
+        })
+      ).not.toBeDisabled();
     });
 
     clickExpectedButton('Next');
@@ -1237,12 +1243,16 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.queryByText(/only support reattachable persistent disks/)
     ).toBeInTheDocument();
 
-    const detachablePdButton = getDetachableDiskRadio();
+    const detachablePdButton = screen.getByRole('radio', {
+      name: 'Detachable Disk',
+    });
     expect(detachablePdButton).toBeInTheDocument();
     expect(detachablePdButton).toBeEnabled();
     expect(detachablePdButton).toHaveProperty('checked');
 
-    const standardDiskButton = getStandardDiskRadio();
+    const standardDiskButton = screen.getByRole('radio', {
+      name: 'Standard Disk',
+    });
     expect(standardDiskButton).toBeInTheDocument();
     expect(standardDiskButton).toBeDisabled();
     expect(standardDiskButton).toHaveProperty('disabled');

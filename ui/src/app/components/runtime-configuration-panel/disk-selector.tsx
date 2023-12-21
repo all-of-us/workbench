@@ -79,6 +79,7 @@ export const DiskSelector = ({
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
+            aria-label='Standard Disk'
             name='standardDisk'
             data-test-id='standard-disk-radio'
             style={styles.diskRadio}
@@ -127,6 +128,7 @@ export const DiskSelector = ({
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
+            aria-label='Detachable Disk'
             data-test-id='detachable-disk-radio'
             name='detachableDisk'
             style={styles.diskRadio}
