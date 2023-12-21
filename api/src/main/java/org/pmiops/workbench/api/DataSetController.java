@@ -266,7 +266,6 @@ public class DataSetController implements DataSetApiDelegate {
                     notebookFile.toString().getBytes(StandardCharsets.UTF_8)))
             .text(rawCode));
   }
-  }
 
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
@@ -292,10 +291,10 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    List<String> x = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
-
-    x.forEach(
-        cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+    dataSetService
+        .generateCodeCells(dataSetExportRequest, dbWorkspace)
+        .forEach(
+            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
