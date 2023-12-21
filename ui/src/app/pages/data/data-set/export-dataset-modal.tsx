@@ -151,7 +151,7 @@ export const ExportDatasetModal = ({
   const isCodePreviewLoading = showCodePreview && !codePreview;
 
   // Any state that necessitates disabling all modal controls.
-  const modalLoading =
+  const shouldDisable =
     isNotebooksLoading ||
     loadingNotebook ||
     loadingClipboard ||
@@ -181,7 +181,7 @@ export const ExportDatasetModal = ({
         <RadioButton
           name='genomics-tool'
           style={{ marginRight: '0.375rem' }}
-          disabled={modalLoading}
+          disabled={shouldDisable}
           data-test-id={'genomics-tool-' + genomicsTool}
           checked={genomicsAnalysisTool === genomicsTool}
           onChange={() => onChangeGenomicsAnalysisTool(genomicsTool)}
@@ -350,7 +350,7 @@ export const ExportDatasetModal = ({
           <ModalBody>
             <div style={{ marginTop: '1.5rem' }}>
               <Select
-                isDisabled={modalLoading}
+                isDisabled={shouldDisable}
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
@@ -367,7 +367,7 @@ export const ExportDatasetModal = ({
                   onChange={(v) => setNotebookNameWithoutSuffix(v)}
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
-                  disabled={modalLoading}
+                  disabled={shouldDisable}
                 />
               </label>
             )}
@@ -383,7 +383,7 @@ export const ExportDatasetModal = ({
                     style={{ marginRight: '0.375rem' }}
                     name='kernel-type'
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                    disabled={modalLoading || !creatingNewNotebook}
+                    disabled={shouldDisable || !creatingNewNotebook}
                     checked={kernelType === kernelTypeEnum}
                     onChange={() => onChangeKernelType(kernelTypeEnum)}
                   />
@@ -414,7 +414,7 @@ export const ExportDatasetModal = ({
             <FlexRow style={{ alignItems: 'center' }}>
               <Button
                 type='link'
-                disabled={isCodePreviewLoading || modalLoading}
+                disabled={isCodePreviewLoading || shouldDisable}
                 data-test-id='code-preview-button'
                 onClick={() => onCodePreviewClick()}
                 style={{ padding: 0, margin: 0 }}
@@ -442,7 +442,7 @@ export const ExportDatasetModal = ({
             <Toast ref={toast} />
             <Button
               id='copyCodeButton'
-              disabled={isCodePreviewLoading || modalLoading}
+              disabled={isCodePreviewLoading || shouldDisable}
               type='secondaryOutline'
               onClick={onCopyCodeClick}
               style={{ marginRight: '3rem', minWidth: '120px' }}
@@ -456,7 +456,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!isEmpty(errors) || modalLoading}
+                disabled={!isEmpty(errors) || shouldDisable}
                 onClick={() => exportDataset()}
               >
                 Export
