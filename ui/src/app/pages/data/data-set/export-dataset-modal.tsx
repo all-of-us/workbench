@@ -342,7 +342,7 @@ export const ExportDatasetModal = ({
   return (
     <AnimatedModal
       loading={isExporting || isNotebooksLoading || loadingNotebook}
-      width={!(showCodePreview && codePreview) ? 450 : 1200}
+      width={showCodePreview && codePreview ? 1200 : 450}
     >
       <FlexRow>
         <div style={{ width: 'calc(450px - 3rem)' }}>
