@@ -86,7 +86,6 @@ export const OfferDeleteDiskWithUpdate = ({
               style={{ display: 'inline-block', marginRight: '0.75rem' }}
             >
               <RadioButton
-                //                aria-label='Delete persistent disk'
                 style={{ marginRight: '0.375rem' }}
                 onChange={() => setDeleteDetachedDisk(true)}
                 checked={deleteDetachedDisk}
