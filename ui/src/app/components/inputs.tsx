@@ -345,12 +345,7 @@ export const NumberInput = React.forwardRef(
 
 export const RadioButton = ({ onChange, ...props }) => {
   return (
-    <input
-      type='radio'
-      {...{ ...props, onChange }}
-      aria-label={props.name}
-      onClick={onChange}
-    />
+    <input type='radio' {...props} onChange={onChange} onClick={onChange} />
   );
 };
 
