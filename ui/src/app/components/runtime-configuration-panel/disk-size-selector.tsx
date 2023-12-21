@@ -18,22 +18,20 @@ export const DiskSizeSelector = ({
   diskSize,
   idPrefix,
   style = {},
-}: Props) => {
-  return (
-    <FlexRow style={{ ...styles.labelAndInput, ...style }}>
-      <label style={styles.label} htmlFor={`${idPrefix}-disk-size`}>
-        Disk (GB)
-      </label>
-      <InputNumber
-        id={`${idPrefix}-disk`}
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={diskSize}
-        inputStyle={styles.inputNumber}
-        onChange={({ value }) => onChange(value)}
-      />
-    </FlexRow>
-  );
-};
+}: Props) => (
+  <FlexRow style={{ ...styles.labelAndInput, ...style }}>
+    <label style={styles.label} htmlFor={`${idPrefix}-disk-size`}>
+      Disk (GB)
+    </label>
+    <InputNumber
+      id={`${idPrefix}-disk`}
+      showButtons
+      disabled={disabled}
+      decrementButtonClassName='p-button-secondary'
+      incrementButtonClassName='p-button-secondary'
+      value={diskSize}
+      inputStyle={styles.inputNumber}
+      onChange={({ value }) => onChange(value)}
+    />
+  </FlexRow>
+);
