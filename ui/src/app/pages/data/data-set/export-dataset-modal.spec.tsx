@@ -11,8 +11,7 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import { renderModal } from '../../../../testing/react-test-helpers';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
@@ -21,6 +20,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 
+import { renderModal } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -657,9 +657,7 @@ describe('ExportDatasetModal', () => {
     expect(plinkRadioButton).not.toBeChecked();
 
     clickShowCodePreviewButton();
-    // When clicking see, it should immediately disappear,
-    // so if it is still here, then it was disabled.
-    expect(findSeeCodePreviewButton()).toBeInTheDocument();
+    expect(previewSpy).toHaveBeenCalledTimes(0);
 
     clickExportButton();
     // Should only be called the initial time and not allow a
@@ -700,9 +698,8 @@ describe('ExportDatasetModal', () => {
     expect(plinkRadioButton).not.toBeChecked();
 
     clickShowCodePreviewButton();
-    // When clicking see, it should immediately disappear,
-    // so if it is still here, then it was disabled.
-    expect(findSeeCodePreviewButton()).toBeInTheDocument();
+    // Should only be called on the initial click
+    expect(previewSpy).toHaveBeenCalledTimes(1);
 
     clickExportButton();
     expect(exportSpy).not.toHaveBeenCalled();

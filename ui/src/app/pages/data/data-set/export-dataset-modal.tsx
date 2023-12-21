@@ -16,7 +16,7 @@ import {
 import { Button, IconButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SmallHeader, styles as headerStyles } from 'app/components/headers';
-import { Copy, SnowmanIcon } from 'app/components/icons';
+import { Copy } from 'app/components/icons';
 import { RadioButton, Select, TextInput } from 'app/components/inputs';
 import { ErrorMessage } from 'app/components/messages';
 import {
@@ -25,7 +25,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { Tooltip, TooltipTrigger } from 'app/components/popups';
+import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
@@ -82,10 +82,206 @@ export const ExportDatasetModal = ({
   const [loadingCode, setLoadingCode] = useState(false);
   const [loadingClipboard, setLoadingClipboard] = useState(false);
   const [loadingNotebook, setIsLoadingNotebook] = useState(false);
-  const [loadingPreview, setLoadingPreview] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [, navigateByUrl] = useNavigation();
   const toast = React.useRef(null);
+
+  const createDataSetRequest = (): DataSetRequest => {
+    return {
+      name: dataset ? dataset.name : 'dataset',
+      ...(dataset.id
+        ? { dataSetId: dataset.id }
+        : {
+            dataSetId: dataset.id,
+            includesAllParticipants: dataset.includesAllParticipants,
+            conceptSetIds: dataset.conceptSets.map((cs) => cs.id),
+            cohortIds: dataset.cohorts.map((c) => c.id),
+            domainValuePairs: dataset.domainValuePairs,
+            prePackagedConceptSet: dataset.prePackagedConceptSet,
+          }),
+      domainValuePairs: [],
+    };
+  };
+
+  const hasWgs = () => {
+    return fp.includes(
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+      dataset.prePackagedConceptSet
+    );
+  };
+
+  const createExportDatasetRequest = (): DataSetExportRequest => {
+    return {
+      dataSetRequest: createDataSetRequest(),
+      kernelType,
+      genomicsAnalysisTool,
+      generateGenomicsAnalysisCode: hasWgs(),
+      notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
+      newNotebook: creatingNewNotebook,
+    };
+  };
+
+  const exportDataset = async () => {
+    AnalyticsTracker.DatasetBuilder.Export(kernelType);
+
+    setErrorMsg(null);
+    setIsExporting(true);
+    try {
+      await dataSetApi().exportToNotebook(
+        workspace.namespace,
+        workspace.id,
+        createExportDatasetRequest()
+      );
+      const notebookUrl =
+        `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
+        encodeURIComponentStrict(
+          appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
+        );
+      navigateByUrl(notebookUrl);
+    } catch (e) {
+      console.error(e);
+      setIsExporting(false);
+      setErrorMsg(
+        'The request cannot be completed. Please try again or contact Support in the left hand navigation'
+      );
+    }
+  };
+
+  const isNotebooksLoading = existingNotebooks === undefined;
+  const isCodePreviewLoading = showCodePreview && !codePreview;
+
+  // Any state that necessiatates disabling all modal controls.
+  const modalLoading =
+    isNotebooksLoading ||
+    loadingNotebook ||
+    loadingClipboard ||
+    loadingCode ||
+    isExporting;
+
+  const resetCode = () => {
+    setCodePreview(null);
+    setCodeText(null);
+  };
+
+  const onChangeGenomicsAnalysisTool = (
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
+  ) => {
+    resetCode();
+    setGenomicsAnalysisTool(genomicsTool);
+  };
+  const genomicsToolRadioButton = (
+    displayName: string,
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
+  ) => {
+    return (
+      <label
+        key={'genomics-tool-' + genomicsTool}
+        style={styles.radioButtonLabel}
+      >
+        <RadioButton
+          name='genomics-tool'
+          style={{ marginRight: '0.375rem' }}
+          disabled={loadingNotebook || modalLoading}
+          data-test-id={'genomics-tool-' + genomicsTool}
+          checked={genomicsAnalysisTool === genomicsTool}
+          onChange={() => onChangeGenomicsAnalysisTool(genomicsTool)}
+        />
+        {displayName}
+      </label>
+    );
+  };
+
+  const loadHtmlStringIntoIFrame = (html) => {
+    const placeholder = document.createElement('html');
+    placeholder.innerHTML = html;
+
+    // Remove top padding and margin, because it looks odd with
+    // the copy button above it
+    placeholder.getElementsByTagName('body')[0].style.marginTop = '0';
+    placeholder.getElementsByTagName('body')[0].style.paddingTop = '0';
+    // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
+    placeholder.querySelectorAll('.jp-InputPrompt').forEach((e) => e.remove());
+    return (
+      <iframe
+        id='export-preview-frame'
+        data-testid='export-preview-frame'
+        scrolling='yes'
+        style={{
+          width: '100%',
+          height: '100%',
+          border: '1px solid',
+          borderRadius: '0.5rem',
+        }}
+        srcDoc={placeholder.outerHTML}
+      />
+    );
+  };
+
+  const getCode = () => {
+    setLoadingCode(true);
+    setErrorMsg(null);
+    dataSetApi()
+      .previewExportToNotebook(
+        workspace.namespace,
+        workspace.id,
+        createExportDatasetRequest()
+      )
+      .then((resp) => {
+        setCodePreview(loadHtmlStringIntoIFrame(resp.html));
+        setCodeText(resp.text);
+      })
+      .catch(() =>
+        setErrorMsg(
+          'Could not load code. Please try again or continue exporting to a notebook.'
+        )
+      )
+      .finally(() => setLoadingCode(false));
+  };
+
+  const onCodePreviewClick = () => {
+    console.log('Yoinks!');
+    if (!codePreview) {
+      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+    }
+    setShowCodePreview(!showCodePreview);
+  };
+  const onCopyCodeClick = () => {
+    if (!codeText) {
+      getCode();
+    }
+    setLoadingClipboard(true);
+  };
+
+  const onChangeKernelType = (kernelTypeEnum: KernelTypeEnum) => {
+    resetCode();
+    setKernelType(kernelTypeEnum);
+  };
+
+  const onNotebookSelect = (nameWithoutSuffix) => {
+    setCreatingNewNotebook(nameWithoutSuffix === '');
+    setNotebookNameWithoutSuffix(nameWithoutSuffix);
+    setErrorMsg(null);
+
+    if (nameWithoutSuffix === '') {
+      setCreatingNewNotebook(true);
+    } else {
+      setCreatingNewNotebook(false);
+      setIsLoadingNotebook(true);
+      notebooksApi()
+        .getNotebookKernel(
+          workspace.namespace,
+          workspace.id,
+          appendJupyterNotebookFileSuffix(nameWithoutSuffix)
+        )
+        .then((resp) => setKernelType(resp.kernelType))
+        .catch(() =>
+          setErrorMsg(
+            'Could not fetch notebook metadata. Please try again or create a new notebook.'
+          )
+        )
+        .finally(() => setIsLoadingNotebook(false));
+    }
+  };
 
   useEffect(() => {
     getExistingJupyterNotebookNames(workspace)
@@ -116,192 +312,6 @@ export const ExportDatasetModal = ({
     }
   }, [codeText, loadingClipboard]);
 
-  function createDataSetRequest(): DataSetRequest {
-    return {
-      name: dataset ? dataset.name : 'dataset',
-      ...(dataset.id
-        ? { dataSetId: dataset.id }
-        : {
-            dataSetId: dataset.id,
-            includesAllParticipants: dataset.includesAllParticipants,
-            conceptSetIds: dataset.conceptSets.map((cs) => cs.id),
-            cohortIds: dataset.cohorts.map((c) => c.id),
-            domainValuePairs: dataset.domainValuePairs,
-            prePackagedConceptSet: dataset.prePackagedConceptSet,
-          }),
-      domainValuePairs: [],
-    };
-  }
-
-  function createExportDatasetRequest(): DataSetExportRequest {
-    return {
-      dataSetRequest: createDataSetRequest(),
-      kernelType,
-      genomicsAnalysisTool,
-      generateGenomicsAnalysisCode: hasWgs(),
-      notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
-      newNotebook: creatingNewNotebook,
-    };
-  }
-
-  async function exportDataset() {
-    AnalyticsTracker.DatasetBuilder.Export(kernelType);
-
-    setErrorMsg(null);
-    setIsExporting(true);
-    try {
-      await dataSetApi().exportToNotebook(
-        workspace.namespace,
-        workspace.id,
-        createExportDatasetRequest()
-      );
-      const notebookUrl =
-        `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
-        encodeURIComponentStrict(
-          appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
-        );
-      navigateByUrl(notebookUrl);
-    } catch (e) {
-      console.error(e);
-      setIsExporting(false);
-      setErrorMsg(
-        'The request cannot be completed. Please try again or contact Support in the left hand navigation'
-      );
-    }
-  }
-
-  function genomicsToolRadioButton(
-    displayName: string,
-    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
-  ) {
-    return (
-      <label
-        key={'genomics-tool-' + genomicsTool}
-        style={styles.radioButtonLabel}
-      >
-        <RadioButton
-          name='genomics-tool'
-          style={{ marginRight: '0.375rem' }}
-          disabled={loadingNotebook || modalLoading}
-          data-test-id={'genomics-tool-' + genomicsTool}
-          checked={genomicsAnalysisTool === genomicsTool}
-          onChange={() => onChangeGenomicsAnalysisTool(genomicsTool)}
-        />
-        {displayName}
-      </label>
-    );
-  }
-
-  function getCode() {
-    setLoadingCode(true);
-    setErrorMsg(null);
-    dataSetApi()
-      .previewExportToNotebook(
-        workspace.namespace,
-        workspace.id,
-        createExportDatasetRequest()
-      )
-      .then((resp) => {
-        setCodePreview(loadHtmlStringIntoIFrame(resp.html));
-        setCodeText(resp.text);
-      })
-      .catch(() =>
-        setErrorMsg(
-          'Could not load code. Please try again or continue exporting to a notebook.'
-        )
-      )
-      .finally(() => setLoadingCode(false));
-  }
-  function hasWgs() {
-    return fp.includes(
-      PrePackagedConceptSetEnum.WHOLE_GENOME,
-      dataset.prePackagedConceptSet
-    );
-  }
-
-  function loadHtmlStringIntoIFrame(html) {
-    const placeholder = document.createElement('html');
-    placeholder.innerHTML = html;
-
-    // Remove top padding and margin, because it looks odd with
-    // the copy button above it
-    placeholder.getElementsByTagName('body')[0].style.marginTop = '0';
-    placeholder.getElementsByTagName('body')[0].style.paddingTop = '0';
-    // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
-    placeholder.querySelectorAll('.jp-InputPrompt').forEach((e) => e.remove());
-    return (
-      <iframe
-        id='export-preview-frame'
-        data-testid='export-preview-frame'
-        scrolling='yes'
-        style={{
-          width: '100%',
-          height: '100%',
-          border: '1px solid',
-          borderRadius: '0.5rem',
-        }}
-        srcDoc={placeholder.outerHTML}
-      />
-    );
-  }
-
-  function onCodePreviewClick() {
-    console.log('Yoinks!');
-    if (!codePreview) {
-      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-    }
-    setShowCodePreview(!showCodePreview);
-  }
-  function onCopyCodeClick() {
-    if (!codeText) {
-      getCode();
-    }
-    setLoadingClipboard(true);
-  }
-
-  const onChangeGenomicsAnalysisTool = (
-    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
-  ) => {
-    resetCode();
-    setGenomicsAnalysisTool(genomicsTool);
-  };
-
-  const onChangeKernelType = (kernelTypeEnum: KernelTypeEnum) => {
-    resetCode();
-    setKernelType(kernelTypeEnum);
-  };
-
-  function onNotebookSelect(nameWithoutSuffix) {
-    setCreatingNewNotebook(nameWithoutSuffix === '');
-    setNotebookNameWithoutSuffix(nameWithoutSuffix);
-    setErrorMsg(null);
-
-    if (nameWithoutSuffix === '') {
-      setCreatingNewNotebook(true);
-    } else {
-      setCreatingNewNotebook(false);
-      setIsLoadingNotebook(true);
-      notebooksApi()
-        .getNotebookKernel(
-          workspace.namespace,
-          workspace.id,
-          appendJupyterNotebookFileSuffix(nameWithoutSuffix)
-        )
-        .then((resp) => setKernelType(resp.kernelType))
-        .catch(() =>
-          setErrorMsg(
-            'Could not fetch notebook metadata. Please try again or create a new notebook.'
-          )
-        )
-        .finally(() => setIsLoadingNotebook(false));
-    }
-  }
-
-  const resetCode = () => {
-    setCodePreview(null);
-    setCodeText(null);
-  };
-
   const errors = {
     ...validateNewNotebookName(
       notebookNameWithoutSuffix,
@@ -319,17 +329,6 @@ export const ExportDatasetModal = ({
         }
       : {}),
   };
-
-  const isNotebooksLoading = existingNotebooks === undefined;
-  const isCodePreviewLoading = showCodePreview && !codePreview;
-
-  // Any state that necessiatates disabling all modal controls.
-  const modalLoading =
-    isNotebooksLoading ||
-    loadingNotebook ||
-    loadingClipboard ||
-    loadingCode ||
-    isExporting;
 
   const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
   if (!isNotebooksLoading) {
