@@ -6,7 +6,6 @@ import { Disk, DiskType } from 'generated/fetch';
 import { StyledExternalLink } from 'app/components/buttons';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
@@ -69,15 +68,6 @@ export const DiskSelector = ({
             to learn more.
           </WarningMessage>
           <FlexRow style={styles.diskRow}>
-            <RadioButton
-              aria-label='Detachable Disk'
-              data-test-id='detachable-disk-radio'
-              name='detachableDisk'
-              style={styles.diskRadio}
-              disabled={true}
-              onChange={() => {}}
-              checked={diskConfig.detachable}
-            />
             <FlexColumn>
               <label style={styles.diskLabel}>
                 Reattachable persistent disk
@@ -143,15 +133,6 @@ export const DiskSelector = ({
       ) : (
         <TooltipTrigger content='Reattachable disks are unsupported for this compute type'>
           <FlexRow style={styles.diskRow}>
-            <RadioButton
-              aria-label='Standard Disk'
-              name='standardDisk'
-              data-test-id='standard-disk-radio'
-              style={styles.diskRadio}
-              disabled={true}
-              onChange={() => {}}
-              checked={!diskConfig.detachable}
-            />
             <FlexColumn>
               <label style={styles.diskLabel}>Standard disk</label>
               <span>
