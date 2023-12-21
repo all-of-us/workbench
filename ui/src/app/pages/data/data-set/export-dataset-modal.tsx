@@ -181,7 +181,7 @@ export const ExportDatasetModal = ({
         <RadioButton
           name='genomics-tool'
           style={{ marginRight: '0.375rem' }}
-          disabled={loadingNotebook || modalLoading}
+          disabled={modalLoading}
           data-test-id={'genomics-tool-' + genomicsTool}
           checked={genomicsAnalysisTool === genomicsTool}
           onChange={() => onChangeGenomicsAnalysisTool(genomicsTool)}
@@ -414,7 +414,7 @@ export const ExportDatasetModal = ({
             <FlexRow style={{ alignItems: 'center' }}>
               <Button
                 type='link'
-                disabled={isCodePreviewLoading || loadingCode || modalLoading}
+                disabled={isCodePreviewLoading || modalLoading}
                 data-test-id='code-preview-button'
                 onClick={() => onCodePreviewClick()}
                 style={{ padding: 0, margin: 0 }}
@@ -442,7 +442,7 @@ export const ExportDatasetModal = ({
             <Toast ref={toast} />
             <Button
               id='copyCodeButton'
-              disabled={loadingCode || loadingClipboard}
+              disabled={isCodePreviewLoading || modalLoading}
               type='secondaryOutline'
               onClick={onCopyCodeClick}
               style={{ marginRight: '3rem', minWidth: '120px' }}
