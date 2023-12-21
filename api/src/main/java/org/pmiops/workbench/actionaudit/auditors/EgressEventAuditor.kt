@@ -22,7 +22,10 @@ interface EgressEventAuditor {
      * Decorates a Sumologic-reported high-egress event with Workbench metadata and
      * fires an audit event log in the target workspace for the specified user.
      */
-    fun fireEgressEventForUser(event: SumologicEgressEvent, user: DbUser)
+    fun fireEgressEventForUser(
+        event: SumologicEgressEvent,
+        user: DbUser,
+    )
 
     /**
      * Decorates a high-egress event with remediation metadata and fires an audit event log in the
@@ -30,7 +33,7 @@ interface EgressEventAuditor {
      */
     fun fireRemediateEgressEvent(
         dbEvent: DbEgressEvent,
-        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?
+        escalation: WorkbenchConfig.EgressAlertRemediationPolicy.Escalation?,
     )
 
     /**
@@ -38,7 +41,7 @@ interface EgressEventAuditor {
      */
     fun fireAdminEditEgressEvent(
         previousEvent: DbEgressEvent,
-        updatedEvent: DbEgressEvent
+        updatedEvent: DbEgressEvent,
     )
 
     /**
@@ -51,5 +54,8 @@ interface EgressEventAuditor {
      * Fires an audit event log tracking when a Sumologic-reported high-egress event
      * request did not have a valid API key.
      */
-    fun fireBadApiKey(apiKey: String, request: SumologicEgressEventRequest)
+    fun fireBadApiKey(
+        apiKey: String,
+        request: SumologicEgressEventRequest,
+    )
 }

@@ -7,11 +7,12 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import {
-  rstudioConfigIconId,
-  sasConfigIconId,
-} from 'app/components/help-sidebar-icons';
+  findApp,
+  helpSidebarConfigIdForUIApp,
+  toUIAppType,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
@@ -142,7 +143,7 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
-export const openRStudio = (
+export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
   userApp: UserAppEnvironment,
@@ -150,32 +151,25 @@ export const openRStudio = (
 ) => {
   localizeRStudioApp(workspaceNamespace, userApp);
   navigate([
-    appDisplayPath(workspaceNamespace, workspaceId, UIAppType.RSTUDIO),
+    appDisplayPath(
+      workspaceNamespace,
+      workspaceId,
+      toUIAppType[userApp.appType]
+    ),
   ]);
 };
 
-export const openRStudioOrConfigPanel = (
+export const openAppOrConfigPanel = (
   workspaceNamespace: string,
   workspaceId: string,
   userApps: ListAppsResponse,
+  requestedApp: UIAppType,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  const userApp = findApp(userApps, UIAppType.RSTUDIO);
+  const userApp = findApp(userApps, requestedApp);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, workspaceId, userApp, navigate);
+    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(rstudioConfigIconId);
-  }
-};
-
-export const openSASOrConfigPanel = (
-  workspaceNamespace: string,
-  userApps: ListAppsResponse
-) => {
-  const userApp = findApp(userApps, UIAppType.SAS);
-  if (userApp?.status === AppStatus.RUNNING) {
-    openSAS(workspaceNamespace, userApp);
-  } else {
-    setSidebarActiveIconStore.next(sasConfigIconId);
+    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[requestedApp]);
   }
 };

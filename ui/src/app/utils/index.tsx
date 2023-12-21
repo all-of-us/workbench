@@ -329,7 +329,11 @@ export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
 
-export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
+export function hasNewValidProps<
+  T,
+  // cannot compare objects or arrays
+  U extends string | number | boolean | null | undefined
+>(currProps: T, prevProps: T, fieldsToCompare: ((props: T) => U)[]) {
   for (const fieldGetter of fieldsToCompare) {
     if (!fieldGetter(currProps)) {
       return false;

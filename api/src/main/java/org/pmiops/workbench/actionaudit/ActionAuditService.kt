@@ -9,5 +9,8 @@ interface ActionAuditService {
 
     fun send(events: Collection<ActionAuditEvent>)
 
-    fun logRuntimeException(logger: Logger, exception: RuntimeException)
+    fun logRuntimeException(
+        logger: Logger,
+        exception: RuntimeException,
+    )
 }

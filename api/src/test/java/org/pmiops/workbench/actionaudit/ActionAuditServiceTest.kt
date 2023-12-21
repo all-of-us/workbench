@@ -6,8 +6,6 @@ import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Payload.Type
 import com.google.common.collect.ImmutableList
 import com.google.common.truth.Truth.assertThat
-import java.util.Arrays
-import javax.inject.Provider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -21,6 +19,8 @@ import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.Arrays
+import javax.inject.Provider
 
 @ExtendWith(SpringExtension::class)
 class ActionAuditServiceTest {
@@ -32,13 +32,16 @@ class ActionAuditServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val actionAuditConfig = ActionAuditConfig()
+        val actionAuditConfig =
+            ActionAuditConfig()
                 .apply { logName = "log_path_1" }
 
-        val serverConfig = ServerConfig()
+        val serverConfig =
+            ServerConfig()
                 .apply { projectId = "gcp-project-id" }
 
-        val workbenchConfig = WorkbenchConfig()
+        val workbenchConfig =
+            WorkbenchConfig()
                 .apply { actionAudit = actionAuditConfig }
                 .apply { server = serverConfig }
         whenever(mockConfigProvider.get()).thenReturn(workbenchConfig)
@@ -80,7 +83,7 @@ class ActionAuditServiceTest {
 
             for (key in jsonPayload.dataAsMap.keys) {
                 assertThat(Arrays.stream(AuditColumn.values()).anyMatch { col -> col.toString() == key })
-                        .isTrue()
+                    .isTrue()
             }
         }
     }
@@ -93,16 +96,18 @@ class ActionAuditServiceTest {
             val entryList = firstValue
             assertThat(entryList.size).isEqualTo(2)
 
-            val payloads = entryList
+            val payloads =
+                entryList
                     .map { it.getPayload<JsonPayload>() }
 
             assertThat(
-                    payloads
-                            .map { it.dataAsMap }
-                            .map { it[AuditColumn.ACTION_ID.name] }
-                            .distinct()
-                            .count())
-                    .isEqualTo(1)
+                payloads
+                    .map { it.dataAsMap }
+                    .map { it[AuditColumn.ACTION_ID.name] }
+                    .distinct()
+                    .count(),
+            )
+                .isEqualTo(1)
         }
     }
 
@@ -119,7 +124,8 @@ class ActionAuditServiceTest {
         private const val AGENT_ID_2 = 102L
         private const val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
 
-        private val EVENT_1 = ActionAuditEvent(
+        private val EVENT_1 =
+            ActionAuditEvent(
                 agentEmailMaybe = "a@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 1L,
@@ -130,9 +136,11 @@ class ActionAuditServiceTest {
                 targetPropertyMaybe = "foot",
                 previousValueMaybe = "bare",
                 newValueMaybe = "shod",
-                timestamp = System.currentTimeMillis())
+                timestamp = System.currentTimeMillis(),
+            )
 
-        private val EVENT_2 = ActionAuditEvent(
+        private val EVENT_2 =
+            ActionAuditEvent(
                 agentEmailMaybe = "f@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 2L,
@@ -143,6 +151,7 @@ class ActionAuditServiceTest {
                 targetPropertyMaybe = "height",
                 previousValueMaybe = "yay high",
                 newValueMaybe = "about that tall",
-                timestamp = System.currentTimeMillis())
+                timestamp = System.currentTimeMillis(),
+            )
     }
 }

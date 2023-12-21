@@ -12,5 +12,5 @@ enum class AuditColumn {
     TARGET_ID,
     TARGET_PROPERTY,
     PREV_VALUE,
-    NEW_VALUE
+    NEW_VALUE,
 }

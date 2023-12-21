@@ -107,7 +107,9 @@ public interface ReportingQueryService {
         }
       }
 
-      /** @return */
+      /**
+       * @return
+       */
       @Override
       public boolean hasNext() {
         if (lastResultSetSize < 0) {

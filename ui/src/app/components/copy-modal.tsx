@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
+import { validate } from 'validate.js';
 
 import {
   CdrVersionTiersResponse,
@@ -23,10 +24,10 @@ import { Spinner } from 'app/components/spinners';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCdrVersions } from 'app/utils';
+import { reactStyles, summarizeErrors, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
-import { toDisplay } from 'app/utils/resources';
+import { nameValidationFormat, toDisplay } from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { FlexRow } from './flex';
@@ -449,6 +450,7 @@ const CopyModal = withCdrVersions()(
     }
 
     renderFormBody() {
+      const { resourceType } = this.props;
       const {
         destination,
         workspaceOptions,
@@ -458,6 +460,14 @@ const CopyModal = withCdrVersions()(
         copyErrorMsg,
         newName,
       } = this.state;
+      const errors = validate(
+        {
+          newName: newName?.trim(),
+        },
+        {
+          newName: nameValidationFormat([], resourceType),
+        }
+      );
       return (
         <div>
           <div style={headerStyles.formLabel}>Destination *</div>
@@ -483,6 +493,7 @@ const CopyModal = withCdrVersions()(
             value={newName}
             onChange={(v) => this.setState({ newName: v })}
           />
+          <ValidationError>{summarizeErrors(errors?.newName)}</ValidationError>
           {this.showCdrMismatch(ResourceType.NOTEBOOK) && (
             <NotebookCdrMismatch text={cdrMismatch} />
           )}

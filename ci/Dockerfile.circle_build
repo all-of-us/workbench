@@ -1,5 +1,6 @@
 # To build and deploy, from this directory:
 # $ docker build . -f Dockerfile.circle_build -t us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z .
+# Note: M1 Macs may need to add `--platform linux/x86_64` after `docker build`
 # Test out the new image with:
 # $ docker run -it us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z /bin/bash
 # Update all mentions of us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z in
@@ -8,17 +9,18 @@
 # $ docker push us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z
 # Include your changes to config.yml in the PR that uses the build image.
 
-# This image should be kept synchronized with deploy/Dockerfile.
+# This image should be kept synchronized with deploy/Dockerfile and api/gradle.build
 
 # Note: we depend on dockerize being installed on this image.
 #
-# We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
+# We use OpenJDK, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
 # and https://discuss.circleci.com/t/legacy-convenience-image-deprecation
-FROM cimg/openjdk:11.0-browsers
+FROM cimg/openjdk:17.0-browsers
 
 USER circleci
 
+# keep in sync with deploy/Dockerfile and api/gradle.build
 ENV CLOUD_SDK_VERSION 392.0.0
 
 RUN cd && \
@@ -28,8 +30,15 @@ RUN cd && \
   ~/google-cloud-sdk/bin/gcloud components install app-engine-java && \
   rm -rf gcloud.tgz
 
-RUN sudo apt-get update
-RUN sudo apt-get install gettext ruby default-mysql-client python3-pip wait-for-it
+RUN sudo apt-get update && sudo apt-get install --no-install-recommends -yq \
+  default-mysql-client \
+  gettext \
+  python3-pip \
+  ruby \
+  wait-for-it \
+  && sudo apt-get clean \
+  && sudo rm -rf /var/lib/apt/lists/*
+
 RUN sudo pip install --upgrade pip pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH

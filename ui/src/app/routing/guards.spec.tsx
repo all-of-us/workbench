@@ -1,5 +1,6 @@
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
@@ -11,8 +12,10 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
-import { shouldRedirectToMaybe } from './guards';
+import { confirmAppIsValid, shouldRedirectToMaybe } from './guards';
+import { analysisTabName } from './utils';
 
+const hostPath = 'https://exampleWorkbenchHost';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {
@@ -96,10 +99,25 @@ const allCompleteCtTrainingExpired: AccessModuleStatus[] =
     });
 
 describe('redirectTo', () => {
+  const originalWindowLocation = window.location;
+
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: new URL(window.location.href),
+    });
   });
 
+  afterEach(() => {
+    // Reset window.location to original Window location
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: originalWindowLocation,
+    });
+  });
   test.each([
     [
       'all complete and not expiring',
@@ -221,5 +239,22 @@ describe('redirectTo', () => {
     ],
   ])('%s', (desc, expected: string, profile: Profile) => {
     expect(shouldRedirectToMaybe(profile)).toEqual(expected);
+  });
+
+  it('Should verify App defined in URL is valid', async () => {
+    const appTypes = Object.values(UIAppType);
+
+    // All URLs containing "App" in UIAppType are considered valid and require no redirection.
+    appTypes.forEach((appType: UIAppType) => {
+      window.location.href = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/${appType}`;
+      expect(confirmAppIsValid()).toBeTruthy();
+    });
+  });
+
+  it('Should return false if App defined in URL is not valid', async () => {
+    // If an app from the URL is not listed in UIAppType, it should return false, triggering a redirect.
+    window.location.href = `${hostPath}/workspaces/ws/id/${analysisTabName}/userApp/FakeApp`;
+    const appIsValid = confirmAppIsValid();
+    expect(appIsValid).toBeFalsy();
   });
 });

@@ -2,7 +2,7 @@
 ### Operating System
 We currently only support MacOS and Linux for development and testing.
 ### Prerequisite Software
-  * [Java 11](https://adoptium.net/temurin/releases/)
+  * [Java 17](https://adoptium.net/temurin/releases/)
     * This must be installed, but needn't be the default.
     * See [Developer System Initialization](developer-system-initialization.md) for configuration if your
       system has a different default version of Java

@@ -16,18 +16,17 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { isDateValid } from 'app/utils/dates';
+import { isDateValid, maybeToSingleDate } from 'app/utils/dates';
 
 const MIN_REASON = 10;
 const MAX_REASON = 4000;
 
 interface Props {
-  workspace: string;
+  workspaceNamespace: string;
   onLock: Function;
   onCancel: Function;
 }
-
-export const AdminLockRequest = (props: Props) => {
+export const AdminLockModal = (props: Props) => {
   const [requestReason, setRequestReason] = useState('');
   const [requestDate, setRequestDate] = useState(new Date());
   const [apiError, setApiError] = useState(false);
@@ -58,14 +57,14 @@ export const AdminLockRequest = (props: Props) => {
   );
 
   const onLockWorkspace = () => {
-    const { workspace, onLock } = props;
+    const { workspaceNamespace, onLock } = props;
     const adminLockingRequest = {
       requestReason,
       requestDateInMillis: requestDate.valueOf(),
     };
 
     workspaceAdminApi()
-      .setAdminLockedState(workspace, adminLockingRequest)
+      .setAdminLockedState(workspaceNamespace, adminLockingRequest)
       .then(() => {
         onLock();
       })
@@ -88,17 +87,20 @@ export const AdminLockRequest = (props: Props) => {
 
         {/* Text area to enter the reason for locking workspace */}
         <div>
-          <label style={{ fontWeight: 'bold', color: colors.primary }}>
+          <label
+            style={{ fontWeight: 'bold', color: colors.primary }}
+            htmlFor='LOCKED-REASON'
+          >
             Enter reason for researchers on why workspace access is locked
           </label>
         </div>
         <div style={{ paddingTop: '0.45rem', paddingBottom: '1.5rem' }}>
-          <label style={{ color: colors.primary, paddingBottom: '0.45rem' }}>
+          <div style={{ color: colors.primary, paddingBottom: '0.45rem' }}>
             <i>
               Any message in the input box will automatically be sent to
               researchers when the workspace is locked
             </i>
-          </label>
+          </div>
           <TextAreaWithLengthValidationMessage
             textBoxStyleOverrides={{ width: '24rem' }}
             id='LOCKED-REASON'
@@ -113,7 +115,7 @@ export const AdminLockRequest = (props: Props) => {
           />
         </div>
 
-        {/* Locking workspace request Date*/}
+        {/* Locking workspace request date */}
         <div>
           <div
             style={{
@@ -129,9 +131,7 @@ export const AdminLockRequest = (props: Props) => {
             placeholder='YYYY-MM-DD'
             onChange={(e) => {
               setApiError(false);
-              // ensure that e is a Date - the user may have input a string
-              const eAsDate = new Date(e);
-              setRequestDate(eAsDate);
+              setRequestDate(maybeToSingleDate(e));
             }}
             maxDate={new Date()}
           />

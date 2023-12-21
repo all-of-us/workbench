@@ -12,10 +12,7 @@ import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { userAppsStore, useStore } from 'app/utils/stores';
-import {
-  openRStudioOrConfigPanel,
-  openSASOrConfigPanel,
-} from 'app/utils/user-apps-utils';
+import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -62,17 +59,15 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.Jupyter);
         break;
       case UIAppType.RSTUDIO:
+      case UIAppType.SAS:
         setVisibleModal(VisibleModal.None);
-        openRStudioOrConfigPanel(
+        openAppOrConfigPanel(
           workspace.namespace,
           workspace.id,
           userApps,
+          selectedApp,
           navigate
         );
-        break;
-      case UIAppType.SAS:
-        setVisibleModal(VisibleModal.None);
-        openSASOrConfigPanel(workspace.namespace, userApps);
         break;
     }
   };

@@ -13,6 +13,10 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import {
+  helpSidebarConfigIdForUIApp,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
+import {
   rstudioConfigIconId,
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
@@ -22,7 +26,6 @@ import {
   appDisplayPath,
 } from 'app/routing/utils';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
-import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
@@ -49,6 +52,8 @@ beforeEach(async () => {
   jest.mock('app/services/swagger-fetch-clients');
   mockAppsApi = jest.spyOn(swaggerClients, 'appsApi');
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
+  helpSidebarConfigIdForUIApp[UIAppType.RSTUDIO] = rstudioConfigIconId;
+  helpSidebarConfigIdForUIApp[UIAppType.SAS] = sasConfigIconId;
 });
 
 const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
@@ -117,22 +122,11 @@ test.each([
     renderInteractiveNotebook(pathParameters);
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
-    if (appType === 'RStudio') {
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith([
-          appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
-        ]);
-      });
-    } else if (appType === 'SAS') {
-      // This is temp. Once SAS moves to iframe this if else will be removed
-      await waitFor(() => {
-        expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-        expect(spyWindowOpen).toHaveBeenCalledWith(
-          app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-          '_blank'
-        );
-      });
-    }
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith([
+        appDisplayPath('sampleNameSpace', 'sampleWorkspace', appType),
+      ]);
+    });
   }
 );
 

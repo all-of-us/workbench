@@ -109,7 +109,7 @@ export function initGroup(role: string, items: any) {
     temporal: false,
     mention: TemporalMention.ANY_MENTION,
     time: TemporalTime.DURING_SAME_ENCOUNTER_AS,
-    timeValue: '',
+    timeValue: '1',
     timeFrame: '',
     isRequesting: false,
     status: 'active',
