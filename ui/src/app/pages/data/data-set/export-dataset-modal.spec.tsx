@@ -31,6 +31,7 @@ describe('ExportDatasetModal', () => {
   let testProps;
   let notebooksApiStub;
   let datasetApiStub;
+  let user;
 
   const component = (props) => {
     return renderModal(<ExportDatasetModal {...props} />);
@@ -69,10 +70,8 @@ describe('ExportDatasetModal', () => {
       expect(screen.queryByLabelText('Please Wait')).toBeNull();
     });
 
-  const changeNotebookName = (newNotebookName) => {
-    fireEvent.change(findNotebookNameInput(), {
-      target: { value: newNotebookName },
-    });
+  const changeNotebookName = async (newNotebookName) => {
+    await user.type(findNotebookNameInput(), newNotebookName);
   };
 
   const clickExportButton = () => {
@@ -81,6 +80,10 @@ describe('ExportDatasetModal', () => {
 
   const clickShowCodePreviewButton = () => {
     fireEvent.click(findSeeCodePreviewButton());
+  };
+
+  const clickHideCodePreviewButton = () => {
+    fireEvent.click(findHideCodePreviewButton());
   };
 
   const hoverOverExportButton = () => {
@@ -107,6 +110,8 @@ describe('ExportDatasetModal', () => {
       closeFunction: () => {},
       dataset: dataset,
     };
+
+    user = userEvent.setup();
   });
 
   afterEach(() => {
@@ -131,7 +136,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    changeNotebookName(notebookName);
+    await changeNotebookName(notebookName);
     clickExportButton();
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -159,7 +164,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    changeNotebookName(notebookName);
+    await changeNotebookName(notebookName);
     clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(
@@ -201,7 +206,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    changeNotebookName(existingNotebookName);
+    await changeNotebookName(existingNotebookName);
     clickExportButton();
 
     expect(exportSpy).not.toHaveBeenCalled();
@@ -314,11 +319,11 @@ describe('ExportDatasetModal', () => {
       })
     );
 
-    const rRadioButtonLabel = screen.getByRole('radio', {
+    const rRadioButton = screen.getByRole('radio', {
       name: 'R',
     });
 
-    fireEvent.click(rRadioButtonLabel);
+    fireEvent.click(rRadioButton);
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
@@ -365,11 +370,11 @@ describe('ExportDatasetModal', () => {
     ];
     component(testProps);
 
-    const rRadioButtonLabel = screen.getByRole('radio', {
+    const rRadioButton = screen.getByRole('radio', {
       name: 'R',
     });
 
-    fireEvent.click(rRadioButtonLabel);
+    fireEvent.click(rRadioButton);
 
     const hailRadio = screen.queryByRole('radio', {
       name: 'Hail',
@@ -423,7 +428,7 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    changeNotebookName(notebookName);
+    await changeNotebookName(notebookName);
     clickExportButton();
 
     expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
@@ -501,7 +506,6 @@ describe('ExportDatasetModal', () => {
 
   it('Dataset copied to clipboard when "copy code" button is clicked', async () => {
     // Arrange
-    const user = userEvent.setup();
     datasetApiStub.codePreview = {
       text: '<div id="notebook">print("hello world!")</div>',
     };
@@ -521,7 +525,6 @@ describe('ExportDatasetModal', () => {
 
   it('Dataset copied to clipboard when "copy code" icon button is clicked in expanded view', async () => {
     // Arrange
-    const user = userEvent.setup();
     datasetApiStub.codePreview = {
       text: '<div id="notebook">print("hello world!")</div>',
     };
@@ -542,5 +545,174 @@ describe('ExportDatasetModal', () => {
     );
     // Assert tooltip is shown
     await screen.findByText('Dataset query copied to clipboard');
+  });
+
+  it('Nothing should be clickable when notebooks are loading', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    // UI never finishes loading notebooks
+    notebooksApiStub.getNoteBookList = () => new Promise(() => {});
+
+    component(testProps);
+
+    await changeNotebookName('New Notebook Name');
+    expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
+
+    const rRadioButton = screen.getByRole('radio', {
+      name: 'R',
+    });
+    await user.click(rRadioButton);
+    expect(rRadioButton).not.toBeChecked();
+
+    const plinkRadioButton = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+
+    await user.click(plinkRadioButton);
+    expect(plinkRadioButton).not.toBeChecked();
+
+    clickShowCodePreviewButton();
+
+    expect(previewSpy).not.toHaveBeenCalled();
+
+    clickExportButton();
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    await user.click(findCopyCodeButton());
+    expect(screen.queryByText('Dataset query copied to clipboard')).toBeNull();
+  });
+
+  it('Nothing should be clickable when loading code preview', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    // Preview never resolves
+    datasetApiStub.previewExportToNotebook = () => new Promise(() => {});
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    component(testProps);
+    await waitUntilDoneLoading();
+    clickShowCodePreviewButton();
+
+    await changeNotebookName('New Notebook Name');
+    expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
+
+    const rRadioButton = screen.getByRole('radio', {
+      name: 'R',
+    });
+    await user.click(rRadioButton);
+    expect(rRadioButton).not.toBeChecked();
+
+    const plinkRadioButton = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+
+    await user.click(plinkRadioButton);
+    expect(plinkRadioButton).not.toBeChecked();
+
+    clickHideCodePreviewButton();
+    // When clicking hide, it should immediately disappear,
+    // so if it is still here, then it was disabled.
+    expect(findHideCodePreviewButton()).toBeInTheDocument();
+
+    clickExportButton();
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    await user.click(findCopyCodeButton());
+    expect(screen.queryByText('Dataset query copied to clipboard')).toBeNull();
+  });
+
+  it('Nothing should be clickable when exporting', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+    // Export never resolves
+    const exportSpy = jest
+      .spyOn(dataSetApi(), 'exportToNotebook')
+      .mockImplementation(() => new Promise(() => {}));
+
+    component(testProps);
+    await waitUntilDoneLoading();
+    await changeNotebookName('Notebook Name');
+    clickExportButton();
+
+    await changeNotebookName('New Notebook Name');
+    expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
+
+    const rRadioButton = screen.getByRole('radio', {
+      name: 'R',
+    });
+    await user.click(rRadioButton);
+    expect(rRadioButton).not.toBeChecked();
+
+    const plinkRadioButton = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+
+    await user.click(plinkRadioButton);
+    expect(plinkRadioButton).not.toBeChecked();
+
+    clickShowCodePreviewButton();
+    // When clicking see, it should immediately disappear,
+    // so if it is still here, then it was disabled.
+    expect(findSeeCodePreviewButton()).toBeInTheDocument();
+
+    clickExportButton();
+    // Should only be called the initial time and not allow a
+    // subsequent click.
+    expect(exportSpy).toHaveBeenCalledTimes(1);
+
+    await user.click(findCopyCodeButton());
+    expect(screen.queryByText('Dataset query copied to clipboard')).toBeNull();
+  });
+
+  it('Nothing should be clickable when copying code to clipboard', async () => {
+    testProps.dataset.prePackagedConceptSet = [
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
+    ];
+    // Preview never resolves
+    const previewSpy = jest
+      .spyOn(dataSetApi(), 'previewExportToNotebook')
+      .mockImplementation(() => new Promise(() => {}));
+    // Export never resolves
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    component(testProps);
+    await user.click(findCopyCodeButton());
+
+    await changeNotebookName('New Notebook Name');
+    expect(screen.queryByDisplayValue('New Notebook Name')).toBeNull();
+
+    const rRadioButton = screen.getByRole('radio', {
+      name: 'R',
+    });
+    await user.click(rRadioButton);
+    expect(rRadioButton).not.toBeChecked();
+
+    const plinkRadioButton = screen.getByRole('radio', {
+      name: 'PLINK',
+    });
+    await user.click(plinkRadioButton);
+    expect(plinkRadioButton).not.toBeChecked();
+
+    clickShowCodePreviewButton();
+    // When clicking see, it should immediately disappear,
+    // so if it is still here, then it was disabled.
+    expect(findSeeCodePreviewButton()).toBeInTheDocument();
+
+    clickExportButton();
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    // The button's text becomes a spinner while loading, so you
+    // should not be able to find the button by its original text.
+    expect(
+      screen.queryByRole('button', {
+        name: /copy code/i,
+      })
+    ).not.toBeInTheDocument();
   });
 });

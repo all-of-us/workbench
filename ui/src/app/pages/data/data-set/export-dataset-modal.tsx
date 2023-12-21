@@ -180,6 +180,7 @@ export const ExportDatasetModal = ({
         style={styles.radioButtonLabel}
       >
         <RadioButton
+          name='genomics-tool'
           style={{ marginRight: '0.375rem' }}
           disabled={loadingNotebook || modalLoading}
           data-test-id={'genomics-tool-' + genomicsTool}
@@ -245,6 +246,7 @@ export const ExportDatasetModal = ({
   }
 
   function onCodePreviewClick() {
+    console.log('Yoinks!');
     if (!codePreview) {
       AnalyticsTracker.DatasetBuilder.SeeCodePreview();
     }
@@ -367,6 +369,7 @@ export const ExportDatasetModal = ({
                   onChange={(v) => setNotebookNameWithoutSuffix(v)}
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
+                  disabled={modalLoading}
                 />
               </label>
             )}
@@ -380,6 +383,7 @@ export const ExportDatasetModal = ({
                 <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
                     style={{ marginRight: '0.375rem' }}
+                    name='kernel-type'
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     disabled={modalLoading || !creatingNewNotebook}
                     checked={kernelType === kernelTypeEnum}
@@ -454,7 +458,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!isEmpty(errors) || isNotebooksLoading}
+                disabled={!isEmpty(errors) || modalLoading}
                 onClick={() => exportDataset()}
               >
                 Export
