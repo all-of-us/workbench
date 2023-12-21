@@ -22,16 +22,15 @@ export const DiskSizeSelector = ({
   <FlexRow style={{ ...styles.labelAndInput, ...style }}>
     <label style={styles.label}>Disk (GB)</label>
     <InputNumber
-        aria-label={`${idPrefix}-disk`}
-        id={`${idPrefix}-disk`}
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={diskSize}
-        inputStyle={styles.inputNumber}
-        onChange={({ value }) => onChange(value)}
-      />
-    </FlexRow>
-  );
-};
+      aria-label={`${idPrefix}-disk`}
+      id={`${idPrefix}-disk`}
+      showButtons
+      disabled={disabled}
+      decrementButtonClassName='p-button-secondary'
+      incrementButtonClassName='p-button-secondary'
+      value={diskSize}
+      inputStyle={styles.inputNumber}
+      onChange={({ value }) => onChange(value)}
+    />
+  </FlexRow>
+);
