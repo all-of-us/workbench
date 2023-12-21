@@ -52,9 +52,9 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
     // Clear table googleproject_cost and then insert all entries from BQ
     googleProjectPerCostDao.deleteAll();
+    System.out.println("BQ done deleting done");
     googleProjectPerCostDao.batchInsertProjectPerCost(googleProjectCostList);
 
-    System.out.println("Table updated, create task for queue now");
     List<Long> allUserIds = userService.getAllUserIds();
 
     taskQueueService.groupAndPushFreeTierBilling(allUserIds);
