@@ -4,7 +4,6 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
 import {
-  Disk,
   DisksApi,
   GpuConfig,
   Runtime,
