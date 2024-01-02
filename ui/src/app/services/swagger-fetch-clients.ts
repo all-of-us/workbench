@@ -194,7 +194,7 @@ export function bindApiClients(conf: FetchConfiguration) {
       })()
     );
   }
-  
+
   frozen = true;
 }
 
