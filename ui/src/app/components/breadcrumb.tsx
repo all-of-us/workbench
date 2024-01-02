@@ -418,12 +418,6 @@ export const Breadcrumb = fp.flow(
         () => ({ breadcrumbType: this.props.routeData.breadcrumb })
       );
 
-      console.log('analysisPreviewMatch', !!analysisPreviewMatch);
-      console.log('userAppMatch', !!userAppMatch);
-      console.log('analysisMatch', !!analysisMatch);
-      console.log('nbName', nbName);
-      console.log('breadcrumbType', breadcrumbType);
-
       return getTrail(
         breadcrumbType,
         this.props.workspace,
