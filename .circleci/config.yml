@@ -724,7 +724,8 @@ jobs:
       - attach_workspace:
           at: .
       - steps: << parameters.optional_steps >>
-      - browser-tools/install-browser-tools
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - restore_cache:
           name: "Restore e2e cache"
           keys:
