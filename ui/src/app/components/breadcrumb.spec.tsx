@@ -3,6 +3,7 @@ import { WorkspacesApi } from 'generated/fetch';
 import { getTrail } from 'app/components/breadcrumb';
 import {
   analysisTabName,
+  analysisTabPath,
   appDisplayPath,
   dataTabPath,
 } from 'app/routing/utils';
@@ -35,9 +36,9 @@ describe('getTrail', () => {
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
-      'defaultWorkspace',
-      'Cohort Name',
-      'Participant 77',
+      workspaceDataStub.name,
+      exampleCohortStubs[0].name,
+      cohortReviewStubs[0].cohortName,
     ]);
     expect(trail[3].url).toEqual(
       dataTabPath('testns', 'testwsid') +
@@ -61,21 +62,18 @@ describe('getTrail', () => {
     }
   );
 
-  it('Should display correct trail for App display', () => {
+  it('Should display correct trail for Jupyter', () => {
+    const ns = 'testns';
+    const wsid = 'testwsid';
+    const nbName = 'myNotebook';
+
     const trail = getTrail(
-      BreadcrumbType.UserApp,
+      BreadcrumbType.Analysis,
       workspaceDataStub,
       undefined,
       undefined,
       undefined,
-      {
-        ns: 'testns',
-        wsid: 'testwsid',
-        cid: undefined,
-        crid: undefined,
-        pid: undefined,
-        appType: UIAppType.RSTUDIO,
-      }
+      { ns, wsid, nbName }
     );
 
     const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
@@ -84,12 +82,71 @@ describe('getTrail', () => {
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
-      'defaultWorkspace',
+      workspaceDataStub.name,
+      analysisTabDisplay,
+      nbName,
+    ]);
+    expect(trail[trail.length - 1].url).toEqual(
+      `${analysisTabPath(ns, wsid)}/${nbName}`
+    );
+  });
+
+  it('Should display correct trail for Jupyter preview', () => {
+    const ns = 'testns';
+    const wsid = 'testwsid';
+    const nbName = 'myNotebook';
+
+    const trail = getTrail(
+      BreadcrumbType.AnalysisPreview,
+      workspaceDataStub,
+      undefined,
+      undefined,
+      undefined,
+      { ns, wsid, nbName }
+    );
+
+    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
+      .slice(1)
+      .toLowerCase()}`;
+
+    expect(trail.map((item) => item.label)).toEqual([
+      'Workspaces',
+      workspaceDataStub.name,
+      analysisTabDisplay,
+      nbName,
+    ]);
+    expect(trail[trail.length - 1].url).toEqual(
+      `${analysisTabPath(ns, wsid)}/preview/${nbName}`
+    );
+  });
+
+  it('Should display correct trail for User Apps', () => {
+    const ns = 'testns';
+    const wsid = 'testwsid';
+    const nbName = "don't display this!";
+    const appType = UIAppType.RSTUDIO;
+
+    const trail = getTrail(
+      BreadcrumbType.UserApp,
+      workspaceDataStub,
+      undefined,
+      undefined,
+      undefined,
+      { ns, wsid, nbName, appType }
+    );
+
+    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
+      .slice(1)
+      .toLowerCase()}`;
+
+    expect(trail.map((item) => item.label)).toEqual([
+      'Workspaces',
+      workspaceDataStub.name,
       analysisTabDisplay,
       UIAppType.RSTUDIO,
     ]);
-    expect(trail[3].url).toEqual(
-      appDisplayPath('testns', 'testwsid', UIAppType.RSTUDIO)
+    expect(trail[trail.length - 1].url).toEqual(
+      appDisplayPath(ns, wsid, appType)
     );
   });
 });
