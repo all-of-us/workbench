@@ -899,7 +899,14 @@ workflows:
             - puppeteer-generate-access-tokens
 
   nightly-tests:
-    jobs:
+    triggers: 
+      - schedule: 
+          # Run once every day at 4:00AM UTC  
+          cron: "0 4 * * *" 
+          filters:  
+            branches: 
+              only: 
+                - main    jobs:
       - api-bigquery-test
       - puppeteer-env-setup
       - puppeteer-generate-access-tokens:
