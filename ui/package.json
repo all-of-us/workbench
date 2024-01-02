@@ -35,7 +35,7 @@
     "@terra-ui-packages/components": "0.0.4",
     "@terra-ui-packages/core-utils": "0.0.6",
     "@types/color": "^3.0.5",
-    "@types/enzyme": "^3.10.17",
+    "@types/enzyme": "^3.10.18",
     "@types/jest": "^27.5.2",
     "@types/js-cookie": "^2.2.2",
     "@types/lodash": "^4.14.202",
