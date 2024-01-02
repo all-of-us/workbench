@@ -294,8 +294,8 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
-    notebookFile = addCells(notebookFile, codeCells);
+    notebookFile =
+        addCells(notebookFile, dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
