@@ -257,17 +257,16 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    JSONObject notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
-
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    notebookFile = addCells(notebookFile, codeCells);
+    byte[] notebookHtml =
+        addCells(createNotebookObject(dataSetExportRequest.getKernelType()), codeCells)
+            .toString()
+            .getBytes(StandardCharsets.UTF_8);
 
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
-            .html(
-                notebooksService.convertJupyterNotebookToHtml(
-                    notebookFile.toString().getBytes(StandardCharsets.UTF_8)))
+            .html(notebooksService.convertJupyterNotebookToHtml(notebookHtml))
             .text(String.join(System.lineSeparator(), codeCells)));
   }
 
@@ -295,10 +294,8 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    dataSetService
-        .generateCodeCells(dataSetExportRequest, dbWorkspace)
-        .forEach(
-            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+    List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
+    notebookFile = addCells(notebookFile, codeCells);
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
