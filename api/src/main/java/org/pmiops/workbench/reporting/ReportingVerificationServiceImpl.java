@@ -3,9 +3,7 @@ package org.pmiops.workbench.reporting;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -88,41 +86,32 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
-    // alt: this could be a Map, but we don't need to reference it in that way
-    List<Map.Entry<String, Integer>> tableCounters =
+    // workspace uses a custom table counter
+    boolean workspaceVerified =
+        verifyCount(
+            WorkspaceColumnValueExtractor.TABLE_NAME,
+            (long) reportingQueryService.getWorkspaceCount(),
+            getActualRowCount(WorkspaceColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
+            sb);
+
+    List<String> otherTables =
         List.of(
-            Map.entry(
-                WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getWorkspaceCount()),
-            Map.entry(
-                UserColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(UserColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
-                CohortColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(CohortColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
-                NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(
-                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
-                UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(
-                    UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME)),
-            Map.entry(
-                UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(
-                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)));
+            UserColumnValueExtractor.TABLE_NAME,
+            CohortColumnValueExtractor.TABLE_NAME,
+            NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+            UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
+            UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME);
 
     // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =
-        tableCounters.stream()
-            .allMatch(
-                entry -> {
-                  final String tableName = entry.getKey();
-                  long sourceCount = entry.getValue();
-                  long actualCount = getActualRowCount(tableName, captureSnapshotTime);
-                  return verifyCount(tableName, sourceCount, actualCount, sb);
-                });
+        workspaceVerified
+            && otherTables.stream()
+                .allMatch(
+                    tableName -> {
+                      long sourceCount = reportingQueryService.getTableRowCount(tableName);
+                      long actualCount = getActualRowCount(tableName, captureSnapshotTime);
+                      return verifyCount(tableName, sourceCount, actualCount, sb);
+                    });
 
     logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
@@ -137,7 +126,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             .projectId(getProjectId())
             .dataset(getDataset())
             .uploads(
-                ImmutableList.of(
+                List.of(
                     getUploadResult(
                         snapshot,
                         WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
