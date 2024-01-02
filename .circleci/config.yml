@@ -906,7 +906,8 @@ workflows:
           filters:  
             branches: 
               only: 
-                - main    jobs:
+                - main
+    jobs:
       - api-bigquery-test
       - puppeteer-env-setup
       - puppeteer-generate-access-tokens:
