@@ -651,10 +651,6 @@ export const VariantSearch = withCurrentWorkspace()(
             </TooltipTrigger>
           </div>
         </div>
-        <div style={{ fontSize: '11px' }}>
-          SNP/Indel Variant search is currently a proof of concept and only
-          contains data for chromosome 20
-        </div>
         {!loading && searchResults.length > 1 && variantFilters && (
           <div style={{ position: 'relative' }}>
             <Clickable
