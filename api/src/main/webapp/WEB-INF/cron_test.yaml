@@ -3,5 +3,7 @@ cron:
   schedule: every 24 hours
 - url: /v1/cron/checkFreeTierBillingUsageCloudTask
   schedule: every 24 hours
+- url: /v1/cron/checkFreeTierBillingUsage
+  schedule: every 99999 hours
 
 
