@@ -74,7 +74,6 @@ export interface Environment extends EnvironmentBase {
   // Indicates that the current server is a local server where client-side
   // debugging should be enabled (e.g. console.log, or devtools APIs).
   debug: boolean;
-
   // A prefix to add to the site title (shown in the tab title).
   // Example value: 'Test' would cause the following full title:
   // "Homepage | [Test] All of Us Researcher Workbench"
