@@ -8052,6 +8052,8 @@ components:
       properties:
         html:
           type: string
+        text:
+          type: string
     SurveysResponse:
       required:
       - items
