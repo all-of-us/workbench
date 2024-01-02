@@ -26,23 +26,29 @@ describe('getTrail', () => {
   });
 
   it('works', () => {
+    const ns = 'testns';
+    const wsid = 'testwsid';
+    const cid = '123';
+    const crid = '456';
+    const pid = '789';
+
     const trail = getTrail(
       BreadcrumbType.Participant,
       workspaceDataStub,
       exampleCohortStubs[0],
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
-      { ns: 'testns', wsid: 'testwsid', cid: '88', crid: '99', pid: '77' }
+      { ns, wsid, cid, crid, pid }
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
       workspaceDataStub.name,
-      exampleCohortStubs[0].name,
       cohortReviewStubs[0].cohortName,
+      `Participant ${pid}`,
     ]);
     expect(trail[3].url).toEqual(
       dataTabPath('testns', 'testwsid') +
-        '/cohorts/88/reviews/99/participants/77'
+        `/cohorts/${cid}/reviews/${crid}/participants/${pid}`
     );
   });
 
