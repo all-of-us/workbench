@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
@@ -73,8 +72,6 @@ public class DataSetController implements DataSetApiDelegate {
   public static final String EMPTY_CELL_MARKER = "";
   public static final String WHOLE_GENOME_VALUE = "VCF Files";
 
-  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
-
   private final DataSetService dataSetService;
 
   private final Provider<DbUser> userProvider;
@@ -85,6 +82,15 @@ public class DataSetController implements DataSetApiDelegate {
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  public JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
+    JSONObject newJson = new JSONObject(originalJson.toString());
+
+    codeCells.forEach(
+        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+
+    return newJson;
+  }
 
   @Autowired
   DataSetController(
@@ -255,8 +261,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    codeCells.forEach(
-        cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+    notebookFile = addCells(notebookFile, codeCells);
 
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
