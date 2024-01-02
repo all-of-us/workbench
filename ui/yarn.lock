@@ -2207,10 +2207,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-onclickoutside@^6.7.8":
-  version "6.7.8"
-  resolved "https://registry.yarnpkg.com/@types/react-onclickoutside/-/react-onclickoutside-6.7.8.tgz#3c824709723e049f4cccef184e64fe80b4c023da"
-  integrity sha512-Y2u+SymCfMDL47OMNImdQSyl9AmpA1ARWjT9grh3CGkCh59aJhnjShVxxv6nlD+kxBgNSC5ADx7Bmx50+i/KMw==
+"@types/react-onclickoutside@^6.7.9":
+  version "6.7.9"
+  resolved "https://registry.yarnpkg.com/@types/react-onclickoutside/-/react-onclickoutside-6.7.9.tgz#c29d0796075c636a4040ece86eafadaac258c089"
+  integrity sha512-1Zq0AjKq+w2P1/XzShkbRfpXUEVEP7seOHGdYojYGf6FOCvkUrquZeRRAw3amNoynsanJ5nFTSfoOv41w7oH1w==
   dependencies:
     "@types/react" "*"
 
