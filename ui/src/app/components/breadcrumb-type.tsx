@@ -5,7 +5,7 @@ export enum BreadcrumbType {
   WorkspaceDuplicate = 'WorkspaceDuplicate',
   Analysis = 'Analysis',
   AnalysisPreview = 'AnalysisPreview',
-  App = 'App',
+  UserApp = 'UserApp',
   ConceptSet = 'ConceptSet',
   Cohort = 'Cohort',
   CohortReview = 'CohortReview',

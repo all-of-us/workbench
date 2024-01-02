@@ -63,7 +63,7 @@ describe('getTrail', () => {
 
   it('Should display correct trail for App display', () => {
     const trail = getTrail(
-      BreadcrumbType.App,
+      BreadcrumbType.UserApp,
       workspaceDataStub,
       undefined,
       undefined,

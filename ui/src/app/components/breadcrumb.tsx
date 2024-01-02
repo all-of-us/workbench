@@ -70,7 +70,7 @@ export const getTrail = (
 ): Array<BreadcrumbData> => {
   const { ns, wsid, cid, crid, csid, pid, nbName, appType } = params;
   switch (type) {
-    case BreadcrumbType.App:
+    case BreadcrumbType.UserApp:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,
@@ -374,18 +374,18 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      // must match before analysisMatch - otherwise the analysisMatch will incorrectly match a file named "preview"
+      // WARNING
+      // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
+      const analysisMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
+      });
+
       const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
 
-      // must match before analysisMatch - otherwise the analysisMatch will incorrectly match a file named "userApp"
       const userAppMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
-      });
-
-      const analysisMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
       });
 
       const {
@@ -404,10 +404,11 @@ export const Breadcrumb = fp.flow(
           !!userAppMatch,
           () => ({
             ...userAppMatch.params,
-            breadcrumbType: BreadcrumbType.Analysis,
+            breadcrumbType: BreadcrumbType.UserApp,
           }),
         ],
         [
+          // this check must go after analysisPreviewMatch and userAppMatch
           !!analysisMatch,
           () => ({
             ...analysisMatch.params,
