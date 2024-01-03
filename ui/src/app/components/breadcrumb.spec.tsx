@@ -68,6 +68,10 @@ describe('getTrail', () => {
     }
   );
 
+  const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
+    .slice(1)
+    .toLowerCase()}`;
+
   it('Should display correct trail for Jupyter', () => {
     const ns = 'testns';
     const wsid = 'testwsid';
@@ -81,10 +85,6 @@ describe('getTrail', () => {
       undefined,
       { ns, wsid, nbName }
     );
-
-    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
-      .slice(1)
-      .toLowerCase()}`;
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
@@ -111,10 +111,6 @@ describe('getTrail', () => {
       { ns, wsid, nbName }
     );
 
-    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
-      .slice(1)
-      .toLowerCase()}`;
-
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
       workspaceDataStub.name,
@@ -140,10 +136,6 @@ describe('getTrail', () => {
       undefined,
       { ns, wsid, nbName, appType }
     );
-
-    const analysisTabDisplay = `${analysisTabName[0].toUpperCase()}${analysisTabName
-      .slice(1)
-      .toLowerCase()}`;
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
