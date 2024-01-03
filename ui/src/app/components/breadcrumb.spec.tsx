@@ -137,7 +137,9 @@ describe('getTrail', () => {
       { ns, wsid, nbName, appType }
     );
 
-    expect(trail.map((item) => item.label)).toEqual([
+    const trailLabels: string[] = trail.map((item) => item.label);
+    expect(trailLabels).not.toContain(nbName);
+    expect(trailLabels).toEqual([
       'Workspaces',
       workspaceDataStub.name,
       analysisTabDisplay,
