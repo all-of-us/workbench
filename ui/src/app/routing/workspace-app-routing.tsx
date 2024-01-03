@@ -191,27 +191,6 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${analysisTabName}/userApp/:appType`}
-        guards={[adminLockedGuard(ns, wsid), appIsValidGuard(ns, wsid)]}
-      >
-        <GKEAppRedirectPage
-          key='app'
-          routeData={{
-            pathElementForTitle: 'appType',
-            breadcrumb: BreadcrumbType.UserApp,
-            // The iframe we use to display the Gke App does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            // This is same as the configuration used for Jupyter iframe
-            contentFullHeightOverride: true,
-            pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: analysisTabName,
-            minimizeChrome: true,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
         path={`${path}/${analysisTabName}/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
@@ -229,6 +208,27 @@ export const WorkspaceRoutes = () => {
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.JupyterNotebook}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${analysisTabName}/userApp/:appType`}
+        guards={[adminLockedGuard(ns, wsid), appIsValidGuard(ns, wsid)]}
+      >
+        <GKEAppRedirectPage
+          key='app'
+          routeData={{
+            pathElementForTitle: 'appType',
+            breadcrumb: BreadcrumbType.UserApp,
+            // The iframe we use to display the Gke App does something strange
+            // to the height calculation of the container, which is normally set to auto.
+            // Setting this flag sets the container to 100% so that no content is clipped.
+            // This is same as the configuration used for Jupyter iframe
+            contentFullHeightOverride: true,
+            pageKey: LEONARDO_APP_PAGE_KEY,
+            workspaceNavBarTab: analysisTabName,
+            minimizeChrome: true,
+          }}
         />
       </AppRoute>
       <AppRoute
