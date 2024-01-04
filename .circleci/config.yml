@@ -133,7 +133,7 @@ commands:
       - attach_workspace:
           at: .
       - gcloud-auth-login
-      - deploy:
+      - run:
           working_directory: ~/workbench/deploy
           command: |
             ./project.rb deploy \
@@ -589,7 +589,7 @@ jobs:
       - attach_workspace:
           at: .
       - gcloud-auth-login
-      - deploy:
+      - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
           command: |
@@ -610,7 +610,7 @@ jobs:
       - attach_workspace:
           at: .
       - gcloud-auth-login
-      - deploy:
+      - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
           command: |
