@@ -11,10 +11,9 @@ import {
 
 import {
   fromRuntimeStatus,
-  fromUserAppStatus,
+  fromUserAppStatusWithFallback,
   toUIAppType,
   UIAppType,
-  UserEnvironmentStatus,
 } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import {
@@ -33,7 +32,7 @@ interface CloudEnvironmentRow {
   creator: string;
   createdTime: string;
   lastAccessedTime: string;
-  status: UserEnvironmentStatus;
+  status: string;
 }
 
 const runtimeToRow = (runtime: ListRuntimeResponse): CloudEnvironmentRow => {
@@ -57,7 +56,7 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
     creator,
     createdTime: new Date(createdDate).toDateString(),
     lastAccessedTime: new Date(dateAccessed).toDateString(),
-    status: fromUserAppStatus(status),
+    status: fromUserAppStatusWithFallback(status),
   };
 };
 
