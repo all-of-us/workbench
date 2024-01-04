@@ -9601,7 +9601,7 @@ components:
         workspaceDatabaseId:
           type: integer
           description: |
-            ID used in the workspace table in the MySQL database. Useful for DB queries and Action Audit searches in Stackdriver Logging and BigQuery.
+            ID used in the AoU RWB workspace table. Useful for DB queries and Action Audit searches in Stackdriver Logging and BigQuery.
           format: int64
         collaborators:
           type: array
