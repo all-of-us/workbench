@@ -59,7 +59,9 @@ export const CloudEnvironments = ({
     setRuntimeToDelete(null);
   };
 
-  const hasCloudEnvironments = runtimes?.length > 0 || userApps?.length > 0;
+  const hasRuntimes = runtimes?.length > 0;
+  const hasUserApps = userApps?.length > 0;
+  const hasCloudEnvironments = hasRuntimes || hasUserApps;
 
   return (
     <div>
@@ -90,8 +92,9 @@ export const CloudEnvironments = ({
         <FlexColumn>
           <FlexRow>
             <PurpleLabel style={styles.narrowWithMargin}>
-              Runtime Name
+              Environment Type
             </PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Name</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Creator</PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>
               Created Time
@@ -101,28 +104,32 @@ export const CloudEnvironments = ({
             </PurpleLabel>
             <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
-          {runtimes.map((runtime, i) => (
-            <FlexRow key={i}>
-              <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
-              <div style={styles.narrowWithMargin}>{getCreator(runtime)}</div>
-              <div style={styles.narrowWithMargin}>
-                {new Date(runtime.createdDate).toDateString()}
-              </div>
-              <div style={styles.narrowWithMargin}>
-                {new Date(runtime.dateAccessed).toDateString()}
-              </div>
-              <div style={styles.narrowWithMargin}>{runtime.status}</div>
-              <Button
-                onClick={() => {
-                  setRuntimeToDelete(runtime);
-                  setConfirmDeleteRuntime(true);
-                }}
-                disabled={runtimeToDelete?.runtimeName === runtime.runtimeName}
-              >
-                Delete
-              </Button>
-            </FlexRow>
-          ))}
+          {hasRuntimes &&
+            runtimes.map((runtime, i) => (
+              <FlexRow key={i}>
+                <div style={styles.narrowWithMargin}>Jupyter</div>
+                <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
+                <div style={styles.narrowWithMargin}>{getCreator(runtime)}</div>
+                <div style={styles.narrowWithMargin}>
+                  {new Date(runtime.createdDate).toDateString()}
+                </div>
+                <div style={styles.narrowWithMargin}>
+                  {new Date(runtime.dateAccessed).toDateString()}
+                </div>
+                <div style={styles.narrowWithMargin}>{runtime.status}</div>
+                <Button
+                  onClick={() => {
+                    setRuntimeToDelete(runtime);
+                    setConfirmDeleteRuntime(true);
+                  }}
+                  disabled={
+                    runtimeToDelete?.runtimeName === runtime.runtimeName
+                  }
+                >
+                  Delete
+                </Button>
+              </FlexRow>
+            ))}
         </FlexColumn>
       )}
     </div>
