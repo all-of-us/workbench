@@ -9601,7 +9601,7 @@ components:
         workspaceDatabaseId:
           type: integer
           description: |
-            ID used in the workspace table in the MySQL database. Useful for DB queries and Action Audit searches in Stackdriver Logging and BigQuery.
+            ID used in the AoU RWB workspace table. Useful for DB queries and Action Audit searches in Stackdriver Logging and BigQuery.
           format: int64
         collaborators:
           type: array
@@ -9610,6 +9610,8 @@ components:
             $ref: '#/components/schemas/WorkspaceUserAdminView'
         resources:
           $ref: '#/components/schemas/AdminWorkspaceResources'
+        activeStatus:
+          $ref: '#/components/schemas/WorkspaceActiveStatus'
       description: Admin-visible metadata about a workspace.
     AdminWorkspaceResources:
       type: object
