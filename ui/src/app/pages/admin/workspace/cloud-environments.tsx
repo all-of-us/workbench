@@ -85,7 +85,7 @@ export const CloudEnvironments = ({
       )}
       <h2>Cloud Environments</h2>
       {!hasCloudEnvironments ? (
-        <p>No active Cloud Environments exist for this workspace.</p>
+        <p>No active cloud environments exist for this workspace.</p>
       ) : (
         <FlexColumn>
           <FlexRow>
