@@ -6,7 +6,6 @@ import { Disk, DiskType } from 'generated/fetch';
 import { StyledExternalLink } from 'app/components/buttons';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
@@ -31,9 +30,6 @@ export const DiskSelector = ({
   existingDisk,
   computeType,
 }: Props) => {
-  const disableDetachableReason: string | undefined =
-    computeType === ComputeType.Dataproc &&
-    'Reattachable disks are unsupported for this compute type';
   return (
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
@@ -53,142 +49,102 @@ export const DiskSelector = ({
           </StyledExternalLink>
         </FlexRow>
       </FlexColumn>
-      {computeType === ComputeType.Standard && (
-        <WarningMessage>
-          <AoU /> will now only support reattachable persistent disks as the
-          storage disk option for Standard VMs and will discontinue standard
-          disks. You will continue to use standard disks with Dataproc clusters.
-          Refer to the
-          <a
-            href={
-              'https://support.researchallofus.org/hc/en-us/articles/5140493753620-Persistent-Disk'
-            }
-            target='_blank'
-          >
-            {' '}
-            article{' '}
-          </a>{' '}
-          to learn more.
-        </WarningMessage>
-      )}
-      <TooltipTrigger
-        content={
-          'To create a new Standard VM environment, you will have to use a reattachable persistent disk'
-        }
-        disabled={computeType !== ComputeType.Standard}
-      >
-        <FlexRow style={styles.diskRow}>
-          <RadioButton
-            aria-label='Standard Disk'
-            name='standardDisk'
-            data-test-id='standard-disk-radio'
-            style={styles.diskRadio}
-            disabled={disabled || computeType === ComputeType.Standard}
-            onChange={() =>
-              onChange({
-                ...diskConfig,
-                detachable: false,
-                detachableType: null,
-                existingDiskName: null,
-              })
-            }
-            checked={!diskConfig.detachable}
-          />
-          <FlexColumn>
-            <label style={styles.diskLabel}>Standard disk</label>
-            <span>
-              A standard disk is created and deleted with your cloud
-              environment.
-            </span>
-            {diskConfig.detachable || (
-              <DiskSizeSelector
-                idPrefix='standard'
-                diskSize={diskConfig.size}
-                disabled={disabled || computeType === ComputeType.Standard}
-                style={{ marginTop: '11px' }}
-                onChange={(size: number) =>
-                  onChange(
-                    maybeWithExistingDiskName(
-                      {
-                        ...diskConfig,
-                        size,
-                      },
-                      existingDisk
-                    )
-                  )
-                }
-              />
-            )}
-          </FlexColumn>
-        </FlexRow>
-      </TooltipTrigger>
-      <TooltipTrigger
-        content={disableDetachableReason}
-        disabled={!disableDetachableReason}
-      >
-        <FlexRow style={styles.diskRow}>
-          <RadioButton
-            aria-label='Detachable Disk'
-            data-test-id='detachable-disk-radio'
-            name='detachableDisk'
-            style={styles.diskRadio}
-            onChange={() =>
-              onChange(
-                maybeWithExistingDiskName(
-                  {
-                    ...diskConfig,
-                    size: existingDisk?.size || diskConfig.size,
-                    detachable: true,
-                    detachableType: existingDisk?.diskType || DiskType.STANDARD,
-                  },
-                  existingDisk
-                )
-              )
-            }
-            checked={diskConfig.detachable}
-            disabled={disabled || !!disableDetachableReason}
-          />
-          <FlexColumn>
-            <label style={styles.diskLabel}>Reattachable persistent disk</label>
-            <span>
-              A reattachable disk is saved even when your compute environment is
-              deleted.
-            </span>
-            {diskConfig.detachable && (
-              <FlexRow style={{ ...styles.formGrid2, marginTop: '11px' }}>
-                <FlexRow style={styles.labelAndInput}>
-                  <label
-                    style={{ ...styles.label, minWidth: '4.5rem' }}
-                    htmlFor='disk-type'
-                  >
-                    Disk type
-                  </label>
-                  <Dropdown
-                    id={'disk-type'}
-                    options={[DiskType.STANDARD, DiskType.SSD].map((value) => ({
-                      label: diskTypeLabels[value],
-                      value,
-                    }))}
-                    style={{ width: '150px' }}
+      {computeType === ComputeType.Standard ? (
+        <>
+          <WarningMessage>
+            <AoU /> will now only support reattachable persistent disks as the
+            storage disk option for Standard VMs and will discontinue standard
+            disks. You will continue to use standard disks with Dataproc
+            clusters. Refer to the
+            <a
+              href={
+                'https://support.researchallofus.org/hc/en-us/articles/5140493753620-Persistent-Disk'
+              }
+              target='_blank'
+            >
+              {' '}
+              article{' '}
+            </a>{' '}
+            to learn more.
+          </WarningMessage>
+          <FlexRow style={styles.diskRow}>
+            <FlexColumn>
+              <label style={styles.diskLabel}>
+                Reattachable persistent disk
+              </label>
+              <span>
+                A reattachable disk is saved even when your compute environment
+                is deleted.
+              </span>
+              {diskConfig.detachable && (
+                <FlexRow style={{ ...styles.formGrid2, marginTop: '11px' }}>
+                  <FlexRow style={styles.labelAndInput}>
+                    <label
+                      style={{ ...styles.label, minWidth: '4.5rem' }}
+                      htmlFor='disk-type'
+                    >
+                      Disk type
+                    </label>
+                    <Dropdown
+                      id={'disk-type'}
+                      options={[DiskType.STANDARD, DiskType.SSD].map(
+                        (value) => ({
+                          label: diskTypeLabels[value],
+                          value,
+                        })
+                      )}
+                      style={{ width: '150px' }}
+                      disabled={disabled}
+                      onChange={({ value }) =>
+                        onChange(
+                          maybeWithExistingDiskName(
+                            {
+                              ...diskConfig,
+                              detachableType: value,
+                            },
+                            existingDisk
+                          )
+                        )
+                      }
+                      value={diskConfig.detachableType}
+                    />
+                  </FlexRow>
+                  <DiskSizeSelector
+                    idPrefix='detachable'
+                    diskSize={diskConfig.size}
                     disabled={disabled}
-                    onChange={({ value }) =>
+                    onChange={(size: number) =>
                       onChange(
                         maybeWithExistingDiskName(
                           {
                             ...diskConfig,
-                            detachableType: value,
+                            size,
                           },
                           existingDisk
                         )
                       )
                     }
-                    value={diskConfig.detachableType}
                   />
                 </FlexRow>
+              )}
+            </FlexColumn>
+          </FlexRow>
+        </>
+      ) : (
+        <TooltipTrigger content='Reattachable disks are unsupported for this compute type'>
+          <FlexRow style={styles.diskRow}>
+            <FlexColumn>
+              <label style={styles.diskLabel}>Standard disk</label>
+              <span>
+                A standard disk is created and deleted with your cloud
+                environment.
+              </span>
+              {diskConfig.detachable || (
                 <DiskSizeSelector
-                  idPrefix='detachable'
+                  {...{ disabled }}
+                  idPrefix='standard'
                   diskSize={diskConfig.size}
-                  disabled={disabled}
+                  style={{ marginTop: '11px' }}
                   onChange={(size: number) =>
                     onChange(
                       maybeWithExistingDiskName(
@@ -201,11 +157,11 @@ export const DiskSelector = ({
                     )
                   }
                 />
-              </FlexRow>
-            )}
-          </FlexColumn>
-        </FlexRow>
-      </TooltipTrigger>
+              )}
+            </FlexColumn>
+          </FlexRow>
+        </TooltipTrigger>
+      )}
     </FlexColumn>
   );
 };

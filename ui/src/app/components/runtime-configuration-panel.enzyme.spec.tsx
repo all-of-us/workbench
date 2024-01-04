@@ -240,12 +240,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickMainDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#standard-disk', diskSize);
 
-  const enableDetachable = (wrapper, detachable = true) =>
-    wrapper
-      .find({ name: detachable ? 'detachableDisk' : 'standardDisk' })
-      .first()
-      .simulate('change');
-
   const pickDetachableType = (wrapper, diskType: DiskType) =>
     pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
 
@@ -363,7 +357,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
-    await enableDetachable(wrapper, true);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -490,7 +483,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   );
 
   it('should reattach to an existing disk by default, for deleted VMs', async () => {
-    setCurrentDisk(existingDisk());
+    const disk = existingDisk();
+    setCurrentDisk(disk);
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.DELETED,
@@ -503,10 +497,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
 
     const wrapper = await component();
-
-    const getDetachableRadio = () =>
-      wrapper.find({ name: 'detachableDisk' }).first();
-    expect(getDetachableRadio().prop('checked')).toBeTruthy();
+    expect(getDetachableDiskSize(wrapper)).toEqual(disk.size);
   });
 
   it('should allow configuration via dataproc preset from modified form', async () => {
@@ -1093,7 +1084,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     const wrapper = await component();
     const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
 
-    await enableDetachable(wrapper);
     await pickDetachableType(wrapper, DiskType.STANDARD);
 
     await pickDetachableDiskSize(wrapper, 49);
