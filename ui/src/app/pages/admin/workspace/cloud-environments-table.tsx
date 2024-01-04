@@ -3,10 +3,16 @@ import { useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { AdminWorkspaceResources, ListRuntimeResponse } from 'generated/fetch';
+import {
+  AdminWorkspaceResources,
+  ListRuntimeResponse,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import {
   fromRuntimeStatus,
+  fromUserAppStatus,
+  toUIAppType,
   UIAppType,
   UserEnvironmentStatus,
 } from 'app/components/apps-panel/utils';
@@ -17,6 +23,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { getCreator } from 'app/utils/runtime-utils';
 
@@ -29,14 +36,30 @@ interface CloudEnvironmentRow {
   status: UserEnvironmentStatus;
 }
 
-const runtimeToRow = (runtime: ListRuntimeResponse): CloudEnvironmentRow => ({
-  appType: UIAppType.JUPYTER,
-  name: runtime.runtimeName,
-  creator: getCreator(runtime),
-  createdTime: new Date(runtime.createdDate).toDateString(),
-  lastAccessedTime: new Date(runtime.dateAccessed).toDateString(),
-  status: fromRuntimeStatus(runtime.status),
-});
+const runtimeToRow = (runtime: ListRuntimeResponse): CloudEnvironmentRow => {
+  const { runtimeName, createdDate, dateAccessed, status } = runtime;
+  return {
+    appType: UIAppType.JUPYTER,
+    name: runtimeName,
+    creator: getCreator(runtime),
+    createdTime: new Date(createdDate).toDateString(),
+    lastAccessedTime: new Date(dateAccessed).toDateString(),
+    status: fromRuntimeStatus(status),
+  };
+};
+
+const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
+  const { appType, appName, creator, createdDate, dateAccessed, status } =
+    userApp;
+  return {
+    appType: toUIAppType[appType],
+    name: appName,
+    creator,
+    createdTime: new Date(createdDate).toDateString(),
+    lastAccessedTime: new Date(dateAccessed).toDateString(),
+    status: fromUserAppStatus(status),
+  };
+};
 
 interface Props {
   resources: AdminWorkspaceResources;
@@ -68,11 +91,29 @@ export const CloudEnvironmentsTable = ({
     setRuntimeToDelete(null);
   };
 
-  // const hasRuntimes = runtimes?.length > 0;
-  // const hasUserApps = userApps?.length > 0;
-  // const hasCloudEnvironments = hasRuntimes || hasUserApps;
+  const DeleteButton = ({ row }: { row: CloudEnvironmentRow }) => (
+    <TooltipTrigger
+      content='Deletion is currently only availble for Jupyter.  See RW-8943.'
+      disabled={row.appType === UIAppType.JUPYTER}
+    >
+      <Button
+        disabled={
+          row.appType !== UIAppType.JUPYTER || runtimeToDelete === row.name
+        }
+        onClick={() => {
+          setRuntimeToDelete(row.name);
+          setConfirmDeleteRuntime(true);
+        }}
+      >
+        Delete
+      </Button>
+    </TooltipTrigger>
+  );
 
-  const cloudEnvironments: CloudEnvironmentRow[] = runtimes?.map(runtimeToRow);
+  const cloudEnvironments = [
+    ...runtimes?.map(runtimeToRow),
+    ...userApps?.map(userAppToRow),
+  ];
 
   return (
     <div>
@@ -107,17 +148,7 @@ export const CloudEnvironmentsTable = ({
         <Column field='lastAccessedTime' header='Last Accessed Time' />
         <Column field='status' header='Status' />
         <Column
-          body={(row) => (
-            <Button
-              onClick={() => {
-                setRuntimeToDelete(row.name);
-                setConfirmDeleteRuntime(true);
-              }}
-              disabled={runtimeToDelete === row.name}
-            >
-              Delete
-            </Button>
-          )}
+          body={(row: CloudEnvironmentRow) => <DeleteButton {...{ row }} />}
         />
       </DataTable>
     </div>
