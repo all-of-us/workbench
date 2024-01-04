@@ -33,8 +33,8 @@ interface Props {
   workspaceNamespace: string;
   onDelete: () => void;
 }
-export const Runtimes = ({
-  resources: { runtimes },
+export const CloudEnvironments = ({
+  resources: { runtimes, userApps },
   workspaceNamespace,
   onDelete,
 }: Props) => {
@@ -59,6 +59,8 @@ export const Runtimes = ({
     setRuntimeToDelete(null);
   };
 
+  const hasCloudEnvironments = runtimes?.length > 0 || userApps?.length > 0;
+
   return (
     <div>
       {confirmDeleteRuntime && (
@@ -81,9 +83,9 @@ export const Runtimes = ({
           </ModalFooter>
         </Modal>
       )}
-      <h2>Runtimes</h2>
-      {!runtimes || runtimes.length === 0 ? (
-        <p>No active runtimes exist for this workspace.</p>
+      <h2>Cloud Environments</h2>
+      {!hasCloudEnvironments ? (
+        <p>No active Cloud Environments exist for this workspace.</p>
       ) : (
         <FlexColumn>
           <FlexRow>
