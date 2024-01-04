@@ -20,6 +20,7 @@ import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import {
   AnalysisConfig,
+  maybeWithExistingDiskName,
   withAnalysisConfigDefaults,
 } from 'app/utils/analysis-config';
 import {
@@ -32,6 +33,7 @@ import {
 } from 'app/utils/machines';
 import {
   canUpdateRuntime,
+  DiskConfig,
   RuntimeStatusRequest,
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
@@ -284,15 +286,22 @@ export const CustomizePanel = ({
       </div>
       <DiskSelector
         diskConfig={analysisConfig.diskConfig}
-        onChange={(diskConfig) =>
+        onChange={(change: Partial<DiskConfig>) => {
+          const diskConfig = maybeWithExistingDiskName(
+            {
+              ...analysisConfig.diskConfig,
+              ...change,
+            },
+            gcePersistentDisk
+          );
+
           setAnalysisConfig({
             ...analysisConfig,
             diskConfig,
             detachedDisk: diskConfig.detachable ? null : gcePersistentDisk,
-          })
-        }
+          });
+        }}
         disabled={disableControls}
-        existingDisk={gcePersistentDisk}
         computeType={analysisConfig.computeType}
       />
       {runtimeExists && updateMessaging?.warn && (
