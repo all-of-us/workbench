@@ -12,7 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
-import { LinkButton, StyledExternalLink } from 'app/components/buttons';
+import { LinkButton } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -36,15 +36,13 @@ import {
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { supportUrls } from 'app/utils/zendesk';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
 import { DataProcConfigSelector } from './dataproc-config-selector';
+import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
 import { MachineSelector } from './machine-selector';
-import { PersistentDiskSelector } from './persistent-disk-selector';
 import { PresetSelector } from './preset-selector';
-import { StandardDiskSelector } from './standard-disk-selector';
 import { PanelContent } from './utils';
 
 export interface CustomizePanelProps {
@@ -284,52 +282,19 @@ export const CustomizePanel = ({
           </FlexColumn>
         </FlexRow>
       </div>
-      <FlexColumn
-        style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
-      >
-        <FlexColumn>
-          {analysisConfig.computeType === ComputeType.Dataproc && (
-            <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
-              Master Node Configuration
-            </span>
-          )}
-          <FlexRow style={{ gap: '8px' }}>
-            <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
-              Storage disk options
-            </span>
-            <StyledExternalLink href={supportUrls.persistentDisk}>
-              View documentation
-            </StyledExternalLink>
-          </FlexRow>
-        </FlexColumn>
-        {analysisConfig.computeType === ComputeType.Standard ? (
-          <PersistentDiskSelector
-            diskConfig={analysisConfig.diskConfig}
-            onChange={(diskConfig) =>
-              setAnalysisConfig({
-                ...analysisConfig,
-                diskConfig,
-                detachedDisk: diskConfig.detachable ? null : gcePersistentDisk,
-              })
-            }
-            disabled={disableControls}
-            existingDisk={gcePersistentDisk}
-          />
-        ) : (
-          <StandardDiskSelector
-            diskConfig={analysisConfig.diskConfig}
-            onChange={(diskConfig) =>
-              setAnalysisConfig({
-                ...analysisConfig,
-                diskConfig,
-                detachedDisk: diskConfig.detachable ? null : gcePersistentDisk,
-              })
-            }
-            disabled={disableControls}
-            existingDisk={gcePersistentDisk}
-          />
-        )}
-      </FlexColumn>
+      <DiskSelector
+        diskConfig={analysisConfig.diskConfig}
+        onChange={(diskConfig) =>
+          setAnalysisConfig({
+            ...analysisConfig,
+            diskConfig,
+            detachedDisk: diskConfig.detachable ? null : gcePersistentDisk,
+          })
+        }
+        disabled={disableControls}
+        existingDisk={gcePersistentDisk}
+        computeType={analysisConfig.computeType}
+      />
       {runtimeExists && updateMessaging?.warn && (
         <WarningMessage iconSize={30} iconPosition={'center'}>
           <div>{updateMessaging.warn}</div>
