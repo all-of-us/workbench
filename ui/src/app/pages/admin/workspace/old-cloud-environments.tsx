@@ -33,7 +33,7 @@ interface Props {
   workspaceNamespace: string;
   onDelete: () => void;
 }
-export const CloudEnvironments = ({
+export const OldCloudEnvironments = ({
   resources: { runtimes, userApps },
   workspaceNamespace,
   onDelete,
