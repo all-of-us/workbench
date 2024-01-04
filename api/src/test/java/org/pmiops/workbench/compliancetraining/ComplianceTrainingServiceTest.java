@@ -324,18 +324,29 @@ public class ComplianceTrainingServiceTest {
     user = complianceTrainingService.syncComplianceTrainingStatus();
     var completionTime = currentTimestamp();
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, completionTime);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
+    // All users will now be redirected to Absorb
+    providedWorkbenchConfig.absorb.redirectMoodleUser = true;
     // Time passes and the user re-syncs
     tick();
-
-    providedWorkbenchConfig.absorb.redirectMoodleUser = true;
-    // Absorb has the same data as Moodle
     stubAbsorbAllTrainingsComplete(completionTime.toInstant(), completionTime.toInstant());
+
     // Compliance Training information will come from Absorb now
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion timestamp should not change when the method is called again.
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, completionTime);
+    // Database will show the user is now using Absorb
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
   @Test
@@ -458,6 +469,11 @@ public class ComplianceTrainingServiceTest {
 
     // User syncs training
     user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -493,6 +509,16 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForRt_Absorb));
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForCt_Absorb));
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
   @Test
