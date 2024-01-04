@@ -38,24 +38,6 @@ const runtimeToRow = (runtime: ListRuntimeResponse): CloudEnvironmentRow => ({
   status: fromRuntimeStatus(runtime.status),
 });
 
-//     <Button
-// onClick={() => {
-//   setRuntimeToDelete(runtime);
-//   setConfirmDeleteRuntime(true);
-// }}
-// disabled={
-//   runtimeToDelete?.runtimeName === runtime.runtimeName
-// }
-// >
-// Delete
-// </Button>
-//     <Column
-// body={(disk) => (
-//     <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
-//       Delete
-//     </Button>
-// )}
-
 interface Props {
   resources: AdminWorkspaceResources;
   workspaceNamespace: string;
@@ -66,15 +48,14 @@ export const CloudEnvironmentsTable = ({
   workspaceNamespace,
   onDelete,
 }: Props) => {
-  const [runtimeToDelete, setRuntimeToDelete] =
-    useState<ListRuntimeResponse>(null);
+  const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
 
   const deleteRuntime = () => {
     setConfirmDeleteRuntime(false);
     workspaceAdminApi()
       .deleteRuntimesInWorkspace(workspaceNamespace, {
-        runtimesToDelete: [runtimeToDelete.runtimeName],
+        runtimesToDelete: [runtimeToDelete],
       })
       .then(() => {
         setRuntimeToDelete(null);
@@ -125,6 +106,19 @@ export const CloudEnvironmentsTable = ({
         <Column field='createdTime' header='Created Time' />
         <Column field='lastAccessedTime' header='Last Accessed Time' />
         <Column field='status' header='Status' />
+        <Column
+          body={(row) => (
+            <Button
+              onClick={() => {
+                setRuntimeToDelete(row.name);
+                setConfirmDeleteRuntime(true);
+              }}
+              disabled={runtimeToDelete === row.name}
+            >
+              Delete
+            </Button>
+          )}
+        />
       </DataTable>
     </div>
   );
