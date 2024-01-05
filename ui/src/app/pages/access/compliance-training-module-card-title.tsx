@@ -11,6 +11,7 @@ import {
   isCompliant,
   isExpiringOrExpired,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 export interface ComplianceTrainingModuleCardProps {
   tier: AccessTierShortNames;
@@ -48,6 +49,8 @@ export const ComplianceTrainingModuleCardTitle = ({
         accessModule
       ));
 
+  const { trainingMigrationPauseActive } = serverConfigStore.get().config;
+
   return (
     <>
       <div>
@@ -55,6 +58,14 @@ export const ComplianceTrainingModuleCardTitle = ({
       </div>
       {showHelpText && (
         <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+      )}
+      {trainingMigrationPauseActive && (
+        <p style={{ marginTop: '1rem' }}>
+          Please note: We are currently migrating all trainings to a new
+          platform. You will not be able to access the training until the
+          migration is complete. We expect the migration to complete on&nbsp;
+          <b>February 5th</b>. We apologize for the inconvenience.
+        </p>
       )}
     </>
   );

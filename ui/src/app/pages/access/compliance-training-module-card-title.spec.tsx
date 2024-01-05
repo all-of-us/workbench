@@ -42,10 +42,30 @@ const expectHelpTextToNotExist = async () => {
   try {
     await findHelpText();
     // The above throws an error if the element is not found
-    expect(true).toBeFalsy();
   } catch (e) {
     // Expected behavior, do nothing
+    return;
   }
+  expect(true).toBeFalsy();
+};
+
+const findMigrationText = () => {
+  return screen.findByText(/we are currently migrating all trainings/i);
+};
+
+const expectMigrationTextToExist = async () => {
+  expect(await findMigrationText()).not.toBeNull();
+};
+
+const expectMigrationTextToNotExist = async () => {
+  try {
+    await findMigrationText();
+    // The above throws an error if the element is not found
+  } catch (e) {
+    // Expected behavior, do nothing
+    return;
+  }
+  expect(true).toBeFalsy();
 };
 
 const createProfileWithComplianceTraining = (
@@ -198,5 +218,39 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToNotExist();
+  });
+
+  it('shows migration text if the training migration is happening', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      {
+        ...defaultServerConfig,
+        trainingMigrationPauseActive: true,
+      },
+      true
+    );
+
+    await expectMigrationTextToExist();
+  });
+
+  it('does not show migration text if the training migration is not happening', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      {
+        ...defaultServerConfig,
+        trainingMigrationPauseActive: false,
+      },
+      true
+    );
+
+    await expectMigrationTextToNotExist();
   });
 });
