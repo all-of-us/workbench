@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
+import { AppsApi, AppStatus, AppType, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -92,10 +92,15 @@ describe(CreateGkeAppButton.name, () => {
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
-      await waitFor(() => {
+      const button = await waitFor(() => {
         const createButton = findCreateButton();
         expectButtonElementDisabled(createButton);
+        return createButton;
       });
+
+      await user.pointer([{ pointerName: 'mouse', target: button }]);
+
+      await screen.findByText(`A Cromwell app exists or is being created`);
     });
   });
 
@@ -104,13 +109,13 @@ describe(CreateGkeAppButton.name, () => {
       createAppRequest: defaultCromwellConfig,
       billingStatus: BillingStatus.INACTIVE,
     });
-    let createButton;
-    await waitFor(() => {
-      createButton = findCreateButton();
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
     });
-    expectButtonElementDisabled(createButton);
 
-    await user.pointer([{ pointerName: 'mouse', target: createButton }]);
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
 
     await screen.findByText(
       'You have either run out of initial credits or have an inactive billing account.'
