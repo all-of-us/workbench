@@ -112,44 +112,21 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const localizeRStudioApp = (
-  workspaceNamespace: string,
-  userApp: UserAppEnvironment
-) => {
-  fetchWithErrorModal(() =>
-    localizeUserApp(
-      workspaceNamespace,
-      userApp.appName,
-      userApp.appType,
-      [],
-      false
-    )
-  );
-};
-
-export const openSAS = (
-  workspaceNamespace: string,
-  userApp: UserAppEnvironment
-) => {
-  fetchWithErrorModal(() =>
-    localizeUserApp(
-      workspaceNamespace,
-      userApp.appName,
-      userApp.appType,
-      [],
-      false
-    )
-  );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
-};
-
 export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  localizeRStudioApp(workspaceNamespace, userApp);
+  fetchWithErrorModal(() =>
+    localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      [],
+      false
+    )
+  );
   navigate([
     appDisplayPath(
       workspaceNamespace,
