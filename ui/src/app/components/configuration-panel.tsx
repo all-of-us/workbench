@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { BillingStatus } from 'generated/fetch';
-
 import { cond } from '@terra-ui-packages/core-utils';
 import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import {
@@ -15,7 +13,6 @@ import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,

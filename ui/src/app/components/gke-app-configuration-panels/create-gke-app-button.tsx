@@ -9,11 +9,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import {
-  isAppActive,
-  toAppType,
-  UIAppType,
-} from 'app/components/apps-panel/utils';
+import { isAppActive } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SUPPORT_EMAIL } from 'app/components/support';
