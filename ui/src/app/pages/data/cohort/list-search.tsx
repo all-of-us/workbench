@@ -551,15 +551,11 @@ export const ListSearch = fp.flow(
           if (question) {
             param.name = `${question.name} - ${name}`;
           }
-          param.attributes.push(
-            conceptId === 1585747
-              ? {
-                  name: AttrName.NUM,
-                  operator: Operator.EQUAL,
-                  operands: [value],
-                }
-              : { name: AttrName.CAT, operator: Operator.IN, operands: [value] }
-          );
+          param.attributes.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: [value],
+          });
         }
       }
       if (this.props.searchContext.source === 'cohort') {
