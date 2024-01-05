@@ -496,10 +496,12 @@ public class ComplianceTrainingServiceTest {
     // Time passes
     tick();
 
+    // Lets switch FF for redirect moodle user to Absorb
     providedWorkbenchConfig.absorb.redirectMoodleUser = true;
     var completionDateForRt_Absorb = currentInstant().minusSeconds(130);
     var completionDateForCt_Absorb = currentInstant();
     stubAbsorbAllTrainingsComplete(completionDateForRt_Absorb, completionDateForCt_Absorb);
+
     // Time passes, user syncs training using Absorb
     tick();
     user = complianceTrainingService.syncComplianceTrainingStatus();
@@ -509,6 +511,8 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForRt_Absorb));
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForCt_Absorb));
+
+    // Database should now show that source of training is Absorb
     assertThat(
             getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
                 .get()
