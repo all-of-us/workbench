@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppsApi, AppStatus } from 'generated/fetch';
+import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
@@ -29,6 +29,7 @@ describe(CreateGkeAppButton.name, () => {
     workspaceNamespace: 'aou-rw-test-1',
     onDismiss: () => {},
     username: ProfileStubVariables.PROFILE_STUB.username,
+    billingStatus: BillingStatus.ACTIVE,
   };
 
   const component = async (
