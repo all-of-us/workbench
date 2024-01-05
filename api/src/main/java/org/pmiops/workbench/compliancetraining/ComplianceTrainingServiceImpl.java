@@ -37,10 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
-  //  public static final String rtTrainingCourseId = "9ad49c70-3b72-4789-8282-5794efcd4ce1";
-  public static final String rtTrainingCourseId = "906f2745-1d0a-4d57-a16d-c5268fdb3d21";
-  //  public static final String ctTrainingCourseId = "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d";
-  public static final String ctTrainingCourseId = "76fbd378-200a-4a88-9671-66139d778013";
+  public static final String rtTrainingCourseId = "9ad49c70-3b72-4789-8282-5794efcd4ce1";
+  public static final String ctTrainingCourseId = "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d";
 
   private static final Logger log = Logger.getLogger(ComplianceTrainingServiceImpl.class.getName());
   private final MoodleService moodleService;
@@ -104,12 +102,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public boolean useAbsorb() {
-    System.out.println("In use Absorb");
     if (configProvider.get().absorb.redirectMoodleUser) {
-      System.out.println("In use Absorb: true");
       return true;
     }
-    System.out.println("In use Absorb: false");
     var userHasUsedMoodle =
         userAccessModuleDao.getAllByUser(userProvider.get()).stream()
             .anyMatch(
