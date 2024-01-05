@@ -419,6 +419,7 @@ jobs:
 # PACT_BROKER_PASSWORD environment variables that are
 # stored in Circle CI environment variables. These values must
 # be updated monthly.
+# https://broadworkbench.atlassian.net/wiki/spaces/IRT/pages/2681143308/Pact+Broker+Infrastructure
   api-contract-upload:
     executor: pact-executor
     steps:
