@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import {
+  BillingStatus,
   Disk,
   Runtime,
   RuntimeConfigurationType,
@@ -355,6 +356,7 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     const runtimeCanBeCreated =
       errorMessageContent.length === 0 &&
+      workspace.billingStatus === BillingStatus.ACTIVE &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
