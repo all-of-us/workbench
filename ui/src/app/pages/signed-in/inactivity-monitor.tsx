@@ -5,6 +5,12 @@ import { withErrorModal } from 'app/components/modals';
 import { InactivityModal } from 'app/pages/signed-in/inactivity-modal';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
+import {
+  clearLastActive,
+  getLastActiveEpochMillis,
+  INACTIVITY_CONFIG,
+  setLastActive,
+} from 'app/utils/inactivity';
 import { authStore, useStore } from 'app/utils/stores';
 
 const { useState, useEffect } = React;
@@ -29,43 +35,16 @@ export function debouncer(action, sensitivityMs) {
   };
 }
 
-/*
- * The user's last known active timestamp is stored in localStorage with the key of
- * INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE. This value is checked whenever
- * the application is reloaded. If the difference between the time at reload and the
- * value in local storage is greater than the inactivity timeout period, the user will
- * be signed out of all Google accounts.
- *
- * If the localStorage value is null for whatever reason, we defer to the more secure
- * solution of logging out the user. This should not affect new users since the logout
- * flow is ignored if there is no user session.
- */
-export const INACTIVITY_CONFIG = {
-  TRACKED_EVENTS: ['mousedown', 'keypress', 'scroll', 'click'],
-  LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
-  MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
-};
-
 const getInactivityTimeoutMs = () => {
   return environment.inactivityTimeoutSeconds * 1000;
 };
 
 const getInactivityElapsedMs = () => {
-  const lastActive = window.localStorage.getItem(
-    INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
-  );
-  if (!lastActive) {
-    return null;
-  }
-  return Date.now() - parseInt(lastActive, 10);
+  const lastActive = getLastActiveEpochMillis();
+  return lastActive && Date.now() - lastActive;
 };
 
-const invalidateInactivityCookie = (): void => {
-  window.localStorage.setItem(
-    INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
-    null
-  );
-};
+const invalidateInactivityCookie = (): void => clearLastActive();
 
 const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
   AnalyticsTracker.User.InactivitySignOut();
@@ -157,10 +136,7 @@ export const InactivityMonitor = () => {
         startInactivityTimers();
       };
 
-      localStorage.setItem(
-        INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
-        Date.now().toString()
-      );
+      setLastActive(Date.now());
       resetTimers();
 
       // setTimeout does not necessary track real wall-time. Periodically
@@ -183,10 +159,7 @@ export const InactivityMonitor = () => {
           // elapsed before updating our inactivity time tracker.
           signOutIfLocalStorageInactivityElapsed();
 
-          window.localStorage.setItem(
-            INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
-            Date.now().toString()
-          );
+          setLastActive(Date.now());
           resetTimers();
         },
         false
