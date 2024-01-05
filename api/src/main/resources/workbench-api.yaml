@@ -9624,6 +9624,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ListRuntimeResponse'
+        userApps:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAppEnvironment'
       description: A summary of application-level resources associated with a workspace.
         Includes data about Cohort Builder objects, analysis runtimes, and cloud-storage
         contents.

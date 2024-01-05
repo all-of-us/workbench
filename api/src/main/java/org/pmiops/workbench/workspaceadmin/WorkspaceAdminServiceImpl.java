@@ -229,7 +229,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         new AdminWorkspaceResources()
             .workspaceObjects(getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
             .cloudStorage(adminWorkspaceCloudStorageCounts)
-            .runtimes(workbenchListRuntimeResponses);
+            .runtimes(workbenchListRuntimeResponses)
+            .userApps(
+                leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject()));
 
     final RawlsWorkspaceDetails firecloudWorkspace =
         fireCloudService

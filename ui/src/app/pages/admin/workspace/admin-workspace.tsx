@@ -18,12 +18,12 @@ import { MatchParams } from 'app/utils/stores';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { BasicInformation } from './basic-information';
+import { CloudEnvironmentsTable } from './cloud-environments-table';
 import { CloudStorageObjects } from './cloud-storage-objects';
 import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
 import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
 import { ResearchPurposeSection } from './research-purpose-section';
-import { Runtimes } from './runtimes';
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -127,15 +127,12 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 {cloudStorageTraffic?.receivedBytes && (
                   <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
                 )}
-                {resources && (
-                  <Runtimes
-                    {...{ resources }}
-                    workspaceNamespace={workspace.namespace}
-                    onDelete={() =>
-                      this.populateFederatedWorkspaceInformation()
-                    }
-                  />
-                )}
+                <h2>Cloud Environments</h2>
+                <CloudEnvironmentsTable
+                  {...{ resources }}
+                  workspaceNamespace={workspace.namespace}
+                  onDelete={() => this.populateFederatedWorkspaceInformation()}
+                />
                 <h2>Egress event history</h2>
                 <EgressEventsTable
                   displayPageSize={10}
