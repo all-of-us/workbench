@@ -211,6 +211,21 @@ commands:
             fi
           name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
 
+  halt-directory-check:
+    description: "Exiting job because << parameters.dir_name >> directory is necessary to execute the rest of this job."
+    parameters:
+      dir_name:
+        type: string
+        default: ""
+    steps:
+    - run:
+        command: |
+          if [ ! -d "<< parameters.dir_name >>" ]; then
+            echo "<< parameters.dir_name >> directory does does not exist. Exiting Job."
+            circleci-agent step halt
+          fi
+        name: "Halt job if '<< parameters.dir_name >>' directory does not exist."
+
   launch-local-api:
     description: "Launch local API server"
     steps:
@@ -425,6 +440,8 @@ jobs:
     steps:
     - attach_workspace:
         at: /tmp/workspace
+    - halt-directory-check:
+        dir_name: "/tmp/workspace/pacts"
     - run:
         name: Pact Broker Publish
         working_directory: ~
@@ -436,6 +453,8 @@ jobs:
     steps:
     - attach_workspace:
         at: /tmp/workspace
+    - halt-directory-check:
+        dir_name: "/tmp/workspace/pacts"
     - run:
         name: Pact Broker, can I deploy?
         working_directory: ~
