@@ -3,8 +3,10 @@ import * as React from 'react';
 import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import * as assert from 'assert';
 
 import {
   expectButtonElementDisabled,
@@ -32,6 +34,8 @@ describe(CreateGkeAppButton.name, () => {
     billingStatus: BillingStatus.ACTIVE,
   };
 
+  let user;
+
   const component = async (
     propOverrides?: Partial<CreateGKEAppButtonProps>
   ) => {
@@ -47,6 +51,7 @@ describe(CreateGkeAppButton.name, () => {
 
   beforeEach(() => {
     registerApiClient(AppsApi, new AppsApiStub());
+    user = userEvent.setup();
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -91,5 +96,25 @@ describe(CreateGkeAppButton.name, () => {
         expectButtonElementDisabled(createButton);
       });
     });
+  });
+
+  it('should not allow creating a GKE app when billing status is not active.', async () => {
+    await component({
+      createAppRequest: defaultCromwellConfig,
+      billingStatus: BillingStatus.INACTIVE,
+    });
+    let createButton;
+    await waitFor(() => {
+      createButton = screen.getByRole('button', {
+        name: 'Cromwell cloud environment create button',
+      });
+    });
+    expectButtonElementDisabled(createButton);
+
+    await user.pointer([{ pointerName: 'mouse', target: createButton }]);
+
+    await screen.findByText(
+      'You have either run out of initial credits or have an inactive billing account.'
+    );
   });
 });
