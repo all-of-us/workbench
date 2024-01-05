@@ -211,6 +211,20 @@ commands:
             fi
           name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
 
+  halt-directory-check:
+    description: "Exiting job because depend files in the following path do not exist: << parameters.dir_name >>"
+    parameters:
+      dir_name:
+        type: string
+        default: ""
+    steps:
+    - run:
+        command: |
+          if [ ! -d "<< parameters.dir_name >>" ]; then
+            echo "<< parameters.dir_name >> does not exist."
+          fi
+        name: "Halt job if code in '<< parameters.dir_name >>' directories are not changed"
+
   launch-local-api:
     description: "Launch local API server"
     steps:
@@ -425,6 +439,8 @@ jobs:
     steps:
     - attach_workspace:
         at: /tmp/workspace
+    - halt-directory-check:
+        dir_names: "/tmp/workspace/pacts"
     - run:
         name: Pact Broker Publish
         working_directory: ~
