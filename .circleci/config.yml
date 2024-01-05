@@ -221,7 +221,8 @@ commands:
     - run:
         command: |
           if [ ! -d "<< parameters.dir_name >>" ]; then
-            echo "<< parameters.dir_name >> does not exist."
+            echo "<< parameters.dir_name >> directory does does not exist. Exiting Job."
+            circleci-agent step halt
           fi
         name: "Halt job if code in '<< parameters.dir_name >>' directories are not changed"
 
