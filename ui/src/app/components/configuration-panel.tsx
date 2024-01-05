@@ -70,10 +70,6 @@ export const ConfigurationPanel = fp.flow(
       <div id='configuration-panel-container'>
         {cond(
           [
-            workspace.billingStatus === BillingStatus.INACTIVE,
-            () => <DisabledPanel />,
-          ],
-          [
             appType === UIAppType.JUPYTER,
             () => (
               <div>
