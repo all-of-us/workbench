@@ -78,7 +78,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
           + " AND w.activeStatus = (:status)")
   DbWorkspace findByFirecloudNameAndActiveStatusWithEagerCohorts(
       @Param("ns") String workspaceNamespace,
-      @Param("fcName") String fcName,
+      @Param("fc_TEST_TO_TRIGGER_CI_Name") String fcName,
       @Param("status") short status);
 
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
