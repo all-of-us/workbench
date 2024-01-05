@@ -29,6 +29,8 @@ export const setLastActive = (epochMillis: number): void => {
   );
 };
 
+export const setLastActiveNow = () => setLastActive(Date.now());
+
 export const clearLastActive = (): void => {
   window.localStorage.removeItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE

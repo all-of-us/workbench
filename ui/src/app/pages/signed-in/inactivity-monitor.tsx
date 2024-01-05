@@ -9,7 +9,7 @@ import {
   clearLastActive,
   getLastActiveEpochMillis,
   INACTIVITY_CONFIG,
-  setLastActive,
+  setLastActiveNow,
 } from 'app/utils/inactivity';
 import { authStore, useStore } from 'app/utils/stores';
 
@@ -136,7 +136,7 @@ export const InactivityMonitor = () => {
         startInactivityTimers();
       };
 
-      setLastActive(Date.now());
+      setLastActiveNow();
       resetTimers();
 
       // setTimeout does not necessary track real wall-time. Periodically
@@ -159,7 +159,7 @@ export const InactivityMonitor = () => {
           // elapsed before updating our inactivity time tracker.
           signOutIfLocalStorageInactivityElapsed();
 
-          setLastActive(Date.now());
+          setLastActiveNow();
           resetTimers();
         },
         false
