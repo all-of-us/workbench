@@ -304,7 +304,14 @@ const VariantFilters = ({
                     value.map((val) => +val)
                   )
                 }
-                range={{ min: filters.countMin, max: filters.countMax }}
+                range={{
+                  min: filters.countMin,
+                  max:
+                    // Prevent Nouislider slider error if min/max are the same
+                    filters.countMax === filters.countMin
+                      ? filters.countMax + 1
+                      : filters.countMax,
+                }}
                 start={[
                   formState.countMin ?? filters.countMin,
                   formState.countMax ?? filters.countMax,
@@ -437,29 +444,22 @@ export const VariantSearch = withCurrentWorkspace()(
         sortBy: 'Participant Count',
       });
     const [variantFilters, setVariantFilters] = useState(null);
-    const [resetFilters, setResetFilters] = useState(0);
+    const [resetResults, setResetResults] = useState(0);
 
-    const searchVariants = async (firstPage?: number) => {
+    const searchVariants = async (newSearch: boolean, firstPage?: number) => {
       try {
-        const variantFilterRequest: VariantFilterRequest = {
-          ...selectedFilters,
-          searchTerm: searchTerms.trim(),
-          pageSize,
-          pageToken: !!firstPage ? pageToken : null,
-        };
         const [{ items, nextPageToken, totalSize }, filterResponse] =
           await Promise.all([
-            cohortBuilderApi().findVariants(
-              namespace,
-              id,
-              variantFilterRequest
-            ),
-            !firstPage
-              ? cohortBuilderApi().findVariantFilters(
-                  namespace,
-                  id,
-                  variantFilterRequest
-                )
+            cohortBuilderApi().findVariants(namespace, id, {
+              ...selectedFilters,
+              searchTerm: searchTerms.trim(),
+              pageSize,
+              pageToken: !!firstPage ? pageToken : null,
+            }),
+            newSearch
+              ? cohortBuilderApi().findVariantFilters(namespace, id, {
+                  searchTerm: searchTerms.trim(),
+                })
               : null,
           ]);
         if (filterResponse) {
@@ -480,11 +480,31 @@ export const VariantSearch = withCurrentWorkspace()(
     };
 
     useEffect(() => {
-      if (resetFilters > 0) {
+      if (resetResults > 0) {
         setLoading(true);
-        searchVariants();
+        searchVariants(false);
       }
-    }, [resetFilters]);
+    }, [resetResults]);
+
+    const clearFilters = (callApi: boolean) => {
+      setSelectedFilters({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
+      });
+      setFiltersOpen(false);
+      if (callApi) {
+        setResetResults((prevState) => prevState + 1);
+      }
+    };
 
     const handleInput = (event: any) => {
       const {
@@ -498,12 +518,13 @@ export const VariantSearch = withCurrentWorkspace()(
           ]);
         } else {
           const newInputErrors = validateInputForMySQL(value, searchTrigger);
-          if (inputErrors.length > 0) {
+          if (newInputErrors.length > 0) {
             setInputErrors(newInputErrors);
           } else {
             setLoading(true);
             setSearching(true);
-            searchVariants();
+            clearFilters(false);
+            searchVariants(true);
           }
         }
       }
@@ -520,44 +541,15 @@ export const VariantSearch = withCurrentWorkspace()(
         return;
       }
       setLoadingMore(true);
-      searchVariants(firstPage);
+      searchVariants(false, firstPage);
     };
 
     const clearSearch = () => {
       setSearching(false);
       setSearchTerms('');
       setSearchResults([]);
-      setSelectedFilters({
-        searchTerm: '',
-        geneList: [],
-        consequenceList: [],
-        clinicalSignificanceList: [],
-        countMin: null,
-        countMax: null,
-        numberMin: null,
-        numberMax: null,
-        frequencyMin: null,
-        frequencyMax: null,
-        sortBy: 'Participant Count',
-      });
-    };
-
-    const clearFilters = () => {
-      setSelectedFilters({
-        searchTerm: '',
-        geneList: [],
-        consequenceList: [],
-        clinicalSignificanceList: [],
-        countMin: null,
-        countMax: null,
-        numberMin: null,
-        numberMax: null,
-        frequencyMin: null,
-        frequencyMax: null,
-        sortBy: 'Participant Count',
-      });
-      setFiltersOpen(false);
-      setResetFilters((prevState) => prevState + 1);
+      setVariantFilters(null);
+      clearFilters(false);
     };
 
     const getParamId = (row: Variant) => `param${row.vid}`;
@@ -651,7 +643,7 @@ export const VariantSearch = withCurrentWorkspace()(
             </TooltipTrigger>
           </div>
         </div>
-        {!loading && searchResults.length > 1 && variantFilters && (
+        {!loading && variantFilters && (
           <div style={{ position: 'relative' }}>
             <Clickable
               style={{ color: colors.primary }}
@@ -668,11 +660,11 @@ export const VariantSearch = withCurrentWorkspace()(
                 checkboxFn={handleCheckboxChange}
                 sliderFn={handleSliderChange}
                 sortFn={handleSortByChange}
-                clearFn={() => clearFilters()}
+                clearFn={() => clearFilters(true)}
                 submitFn={() => {
                   setFiltersOpen(false);
                   setLoading(true);
-                  searchVariants();
+                  searchVariants(false);
                 }}
               />
             )}
