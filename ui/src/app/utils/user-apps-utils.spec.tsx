@@ -18,8 +18,10 @@ import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 
+import { getLastActiveEpochMillis, setLastActive } from './inactivity';
 import { userAppsStore } from './stores';
 import * as userAppsUtils from './user-apps-utils';
+import { updateLastActive } from './user-apps-utils';
 
 const fakeCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
@@ -141,5 +143,31 @@ describe('User Apps Helper functions', () => {
       appDisplayPath('ws', 'wsid', UIAppType.RSTUDIO),
     ]);
     expect(setSidebarActiveIconStore.value).toBeNull();
+  });
+});
+
+describe(updateLastActive.name, () => {
+  it('does nothing when there are no userApps', () => {
+    setLastActive(123);
+    updateLastActive([]);
+    expect(getLastActiveEpochMillis()).toEqual(123);
+  });
+
+  it('does nothing when local storage has recorded more recent activity than userApps', () => {
+    setLastActive(12345);
+    updateLastActive([
+      { dateAccessed: new Date(10000).toISOString() },
+      { dateAccessed: new Date(11000).toISOString() },
+    ]);
+    expect(getLastActiveEpochMillis()).toEqual(12345);
+  });
+
+  it('updates the last active value in local storage when the userApps have more recent activity', () => {
+    setLastActive(12345);
+    updateLastActive([
+      { dateAccessed: new Date(10000).toISOString() },
+      { dateAccessed: new Date(13000).toISOString() },
+    ]);
+    expect(getLastActiveEpochMillis()).toEqual(13000);
   });
 });

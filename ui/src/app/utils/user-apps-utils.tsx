@@ -19,8 +19,13 @@ import { appsApi } from 'app/services/swagger-fetch-clients';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
-import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
 import { fetchWithErrorModal } from './errors';
+import { getLastActiveEpochMillis, setLastActive } from './inactivity';
+
+// the polling timeout to use when waiting for a transition (e.g. from Running to Paused)
+const transitionPollingTimeoutMs = 10e3; // 10 sec
+// when we are not waiting for a transition, we still need to poll for activity
+const activityPollingTimeoutMs = 5 * 60e3; // 5 min
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
@@ -28,7 +33,7 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.SAS]: 'SAS',
 };
 
-const appStatusesRequiringUpdates: Array<AppStatus> = [
+const transitionalAppStatuses: Array<AppStatus> = [
   AppStatus.DELETING,
   AppStatus.PROVISIONING,
   AppStatus.STARTING,
@@ -41,11 +46,26 @@ const doUserAppsRequireUpdates = () => {
     !userApps ||
     userApps
       .map((userApp) => userApp.status)
-      .some((appStatus) => appStatusesRequiringUpdates.includes(appStatus))
+      .some((appStatus) => transitionalAppStatuses.includes(appStatus))
   );
 };
 
-export const maybeStartPollingForUserApps = (namespace) => {
+// all integer dates in this function are milliseconds since epoch
+export const updateLastActive = (userApps: ListAppsResponse) => {
+  const localStorageLastActive = getLastActiveEpochMillis();
+
+  const appLastAccessed: number = Math.max(
+    ...userApps.map((app) =>
+      app.dateAccessed ? new Date(app.dateAccessed).valueOf() : 0
+    )
+  );
+
+  if (appLastAccessed > 0 && appLastAccessed > localStorageLastActive) {
+    setLastActive(appLastAccessed);
+  }
+};
+
+export const maybeStartPollingForUserApps = (namespace: string) => {
   const { updating } = userAppsStore.get();
   // Prevents multiple update processes from running concurrently.
   if (updating) {
@@ -57,13 +77,20 @@ export const maybeStartPollingForUserApps = (namespace) => {
     .listAppsInWorkspace(namespace)
     .then((listAppsResponse) => {
       userAppsStore.set({ userApps: listAppsResponse, updating: false });
-      if (doUserAppsRequireUpdates()) {
-        const timeoutID = setTimeout(() => {
-          maybeStartPollingForUserApps(namespace);
-        }, 10 * 1000);
-
-        userAppsStore.set({ ...userAppsStore.get(), timeoutID });
+      if (listAppsResponse) {
+        updateLastActive(listAppsResponse);
       }
+
+      const timeoutID = setTimeout(
+        () => {
+          maybeStartPollingForUserApps(namespace);
+        },
+        doUserAppsRequireUpdates()
+          ? transitionPollingTimeoutMs
+          : activityPollingTimeoutMs
+      );
+
+      userAppsStore.set({ ...userAppsStore.get(), timeoutID });
     });
 };
 
