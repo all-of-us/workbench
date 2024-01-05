@@ -61,12 +61,12 @@ export function CreateGkeAppButton({
   };
 
   const tooltip = cond(
-    [!createEnabled, () => `A ${appTypeString} app exists or is being created`],
     [
       billingStatus !== BillingStatus.ACTIVE,
       () =>
         'You have either run out of initial credits or have an inactive billing account.',
     ],
+    [!createEnabled, () => `A ${appTypeString} app exists or is being created`],
     () => ''
   );
 
@@ -83,7 +83,6 @@ export function CreateGkeAppButton({
       }
     ).then(() => onDismiss());
   };
-  console.log('YYYYYYYYYYYYYY: ', tooltip);
 
   return (
     <TooltipTrigger disabled={createEnabled} content={tooltip}>
