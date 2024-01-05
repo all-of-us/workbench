@@ -8,6 +8,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.4.6
   queue: eddiewebb/queue@volatile
   coverage-reporter: codacy/coverage-reporter@13.13.7
+  pact: trustedshops-public/pact@3.0.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -22,6 +23,9 @@ parameters:
   db-image:
     type: string
     default: "cimg/mysql:5.7"
+  pact-image:
+    type: string
+    default: "pactfoundation/pact-cli:latest"
 
 # -------------------------
 #   ANCHORS
@@ -113,6 +117,14 @@ executors:
       WORKBENCH_ENV: test
       TEST_MODE: integration
       TZ: "America/New_York"
+
+  # Docker image environment with Pact CLI installed
+  pact-executor:
+    environment:
+      <<: *env-default
+    docker:
+    - image: << pipeline.parameters.pact-image >>
+    working_directory: ~
 
 # -------------------------
 #   COMMANDS
@@ -403,6 +415,33 @@ jobs:
           coverage-reports: /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
 
+# Uses basic auth via PACT_BROKER_USERNAME and
+# PACT_BROKER_PASSWORD environment variables that are
+# stored in Circle CI environment variables. These values must
+# be updated monthly.
+# https://broadworkbench.atlassian.net/wiki/spaces/IRT/pages/2681143308/Pact+Broker+Infrastructure
+  api-contract-upload:
+    executor: pact-executor
+    steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: Pact Broker Publish
+        working_directory: ~
+        command: |
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH}
+
+  api-contract-can-i-deploy:
+    executor: pact-executor
+    steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: Pact Broker, can I deploy?
+        working_directory: ~
+        command: |
+          pact-broker can-i-deploy /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1}
+
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
@@ -477,6 +516,21 @@ jobs:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
                 command: ./project.rb bigquerytest
+
+  api-contract-test:
+    executor: workbench-executor
+    steps:
+    - run-api-test:
+        additional_steps:
+        - gcloud-auth-login
+        - run:
+            name: Run Contract tests
+            working_directory: ~/workbench/api
+            command: ./project.rb contracttest
+    - persist_to_workspace:
+        root: ~/workbench/api/build
+        paths:
+        - pacts
 
   ui-unit-test:
     executor: workbench-executor
@@ -807,6 +861,7 @@ workflows:
       - api-unit-test
       - ui-unit-test
       - api-bigquery-test
+      - api-contract-test
       - api-integration-test
       - api-test-coverage:
           requires:
@@ -814,6 +869,12 @@ workflows:
       - ui-test-coverage:
           requires:
           - ui-unit-test
+      - api-contract-upload:
+          requires:
+          - api-contract-test
+      - api-contract-can-i-deploy:
+          requires:
+          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
