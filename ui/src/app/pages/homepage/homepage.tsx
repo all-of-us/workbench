@@ -111,7 +111,7 @@ const WelcomeHeader = () => {
   );
 };
 
-const Workspaces = () => {
+const Workspaces = ({ onChange }: { onChange: () => void }) => {
   const [navigate] = useNavigation();
 
   return (
@@ -150,7 +150,7 @@ const Workspaces = () => {
           See all workspaces
         </span>
       </FlexRow>
-      <RecentWorkspaces />
+      <RecentWorkspaces {...{ onChange }} />
     </FlexColumn>
   );
 };
@@ -306,7 +306,7 @@ export const Homepage = fp.flow(
             <FadeBox style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
-                <Workspaces />
+                <Workspaces onChange={() => this.checkWorkspaces()} />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     <RecentResources
