@@ -209,7 +209,7 @@ commands:
                 fi
               fi
             fi
-          name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
+          name: "Halt job if '<< parameters.dir_names >>' directory does not exist"
 
   halt-directory-check:
     description: "Exiting job because depend files in the following path do not exist: << parameters.dir_name >>"
@@ -453,6 +453,8 @@ jobs:
     steps:
     - attach_workspace:
         at: /tmp/workspace
+    - halt-directory-check:
+        dir_name: "/tmp/workspace/pacts"
     - run:
         name: Pact Broker, can I deploy?
         working_directory: ~
