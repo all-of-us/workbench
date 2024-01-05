@@ -344,7 +344,14 @@ const VariantFilters = ({
                     value.map((val) => +val)
                   )
                 }
-                range={{ min: filters.numberMin, max: filters.numberMax }}
+                range={{
+                  min: filters.numberMin,
+                  max:
+                    // Prevent Nouislider slider error if min/max are the same
+                    filters.numberMax === filters.numberMin
+                      ? filters.numberMax + 1
+                      : filters.numberMax,
+                }}
                 start={[
                   formState.numberMin ?? filters.numberMin,
                   formState.numberMax ?? filters.numberMax,
@@ -377,7 +384,14 @@ const VariantFilters = ({
                     value.map((val) => +val)
                   )
                 }
-                range={{ min: filters.frequencyMin, max: filters.frequencyMax }}
+                range={{
+                  min: filters.frequencyMin,
+                  max:
+                    // Prevent Nouislider slider error if min/max are the same
+                    filters.frequencyMax === filters.frequencyMin
+                      ? filters.frequencyMax + 1
+                      : filters.frequencyMax,
+                }}
                 start={[
                   formState.frequencyMin ?? filters.frequencyMin,
                   formState.frequencyMax ?? filters.frequencyMax,
