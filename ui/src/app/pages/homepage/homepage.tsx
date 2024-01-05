@@ -239,7 +239,7 @@ export const Homepage = fp.flow(
 
     componentDidMount() {
       this.props.hideSpinner();
-      this.loadWorkspaces();
+      this.fetchWorkspaces();
       this.callProfile();
     }
 
@@ -285,7 +285,7 @@ export const Homepage = fp.flow(
       }
     }
 
-    async loadWorkspaces() {
+    async fetchWorkspaces() {
       return fetchWithSystemErrorHandler(() =>
         workspacesApi().getWorkspaces()
       ).then((response) => this.setState({ userWorkspacesResponse: response }));
@@ -306,7 +306,7 @@ export const Homepage = fp.flow(
             <FadeBox style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
-                <Workspaces onChange={() => this.loadWorkspaces()} />
+                <Workspaces onChange={() => this.fetchWorkspaces()} />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     <RecentResources
