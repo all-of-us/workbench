@@ -118,7 +118,7 @@ executors:
       TEST_MODE: integration
       TZ: "America/New_York"
 
-  # Default workbench docker image environment which is used in all jobs
+  # Docker image environment with Pact CLI installed
   pact-executor:
     environment:
       <<: *env-default
@@ -415,6 +415,10 @@ jobs:
           coverage-reports: /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
 
+# Uses basic auth via PACT_BROKER_USERNAME and
+# PACT_BROKER_PASSWORD environment variables that are
+# stored in Circle CI environment variables. These values must
+# be updated monthly.
   api-contract-upload:
     executor: pact-executor
     steps:
@@ -563,7 +567,8 @@ jobs:
 
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
-    executor: pact-executor
+    machine:
+      image: ubuntu-2204:2022.04.1
     steps:
       - run:
           name: Echo
