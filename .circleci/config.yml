@@ -440,7 +440,7 @@ jobs:
     - attach_workspace:
         at: /tmp/workspace
     - halt-directory-check:
-        dir_names: "/tmp/workspace/pacts"
+        dir_name: "/tmp/workspace/pacts"
     - run:
         name: Pact Broker Publish
         working_directory: ~
