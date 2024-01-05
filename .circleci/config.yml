@@ -224,7 +224,7 @@ commands:
             echo "<< parameters.dir_name >> directory does does not exist. Exiting Job."
             circleci-agent step halt
           fi
-        name: "Halt job if code in '<< parameters.dir_name >>' directories are not changed"
+        name: "Halt job if '<< parameters.dir_name >>' directory does not exist."
 
   launch-local-api:
     description: "Launch local API server"
