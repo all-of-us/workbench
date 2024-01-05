@@ -43,6 +43,11 @@ describe(CreateGkeAppButton.name, () => {
     return render(<CreateGkeAppButton {...allProps} />);
   };
 
+  const findCreateButton = () =>
+    screen.getByRole('button', {
+      name: 'Cromwell cloud environment create button',
+    });
+
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
   const createDisabledStatuses = minus(
     ALL_GKE_APP_STATUSES,
@@ -69,9 +74,7 @@ describe(CreateGkeAppButton.name, () => {
       });
 
       const button = await waitFor(() => {
-        const createButton = screen.getByRole('button', {
-          name: 'Cromwell cloud environment create button',
-        });
+        const createButton = findCreateButton();
         expectButtonElementEnabled(createButton);
         return createButton;
       });
@@ -90,9 +93,7 @@ describe(CreateGkeAppButton.name, () => {
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
       await waitFor(() => {
-        const createButton = screen.getByRole('button', {
-          name: 'Cromwell cloud environment create button',
-        });
+        const createButton = findCreateButton();
         expectButtonElementDisabled(createButton);
       });
     });
@@ -105,9 +106,7 @@ describe(CreateGkeAppButton.name, () => {
     });
     let createButton;
     await waitFor(() => {
-      createButton = screen.getByRole('button', {
-        name: 'Cromwell cloud environment create button',
-      });
+      createButton = findCreateButton();
     });
     expectButtonElementDisabled(createButton);
 
