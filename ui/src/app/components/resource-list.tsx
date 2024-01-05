@@ -108,10 +108,6 @@ interface Props {
 export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
   const [tableData, setTableData] = useState<TableData[]>();
 
-  const reloadResources = async () => {
-    await props.onUpdate();
-  };
-
   const getResourceMap = () => {
     const resourceTypeNameListMap = new Map<ResourceType, string[]>();
     props.workspaceResources.map((resource) => {
@@ -136,7 +132,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
       workspace,
       menuOnly: true,
       existingNameList: resourceTypeNameMap.get(getType(resource)),
-      onUpdate: reloadResources,
+      onUpdate: () => props.onUpdate(),
     });
   };
 

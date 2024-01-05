@@ -8,12 +8,15 @@ import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 
+interface Props {
+  onChange: () => void;
+}
 interface State {
   loading: boolean;
   recentWorkspaces: RecentWorkspace[];
 }
 
-export const RecentWorkspaces = class extends React.Component<{}, State> {
+export const RecentWorkspaces = class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -73,7 +76,10 @@ export const RecentWorkspaces = class extends React.Component<{}, State> {
                     key={recentWorkspace.workspace.namespace}
                     workspace={recentWorkspace.workspace}
                     accessLevel={recentWorkspace.accessLevel}
-                    reload={() => this.loadWorkspaces()}
+                    reload={() => {
+                      this.loadWorkspaces();
+                      this.props.onChange();
+                    }}
                   />
                 );
               })}
