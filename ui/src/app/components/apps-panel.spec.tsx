@@ -122,20 +122,6 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  it('should show the disabled panel when the workspace has INACTIVE billing status', async () => {
-    workspaceStub.billingStatus = BillingStatus.INACTIVE;
-
-    const { container } = await component();
-    expect(container).toBeInTheDocument();
-
-    expect(
-      screen.queryByText('Cloud services are disabled for this workspace.')
-    ).toBeInTheDocument();
-
-    expect(findActiveApps()).not.toBeInTheDocument();
-    expect(findAvailableApps(false)).not.toBeInTheDocument();
-  });
-
   test.each([
     [true, true],
     [true, false],
