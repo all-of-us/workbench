@@ -48,13 +48,18 @@ const styles = reactStyles({
   closeButton: { marginLeft: 'auto', alignSelf: 'center' },
 });
 
-const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
-  const { appType, onClick } = props;
+const UnexpandedApp = (props: {
+  appType: UIAppType;
+  onClick: Function;
+  disabled: boolean;
+}) => {
+  const { appType, disabled, onClick } = props;
   return (
     <Clickable
-      {...{ onClick }}
+      {...{ disabled, onClick }}
       data-test-id={`${appType}-unexpanded`}
       propagateDataTestId
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <FlexRow style={styles.availableApp}>
         <AppBanner
@@ -103,9 +108,7 @@ export const AppsPanel = (props: {
     setUserExpandedApps([...userExpandedApps, appType]);
   const showActiveSection = activeApps.length > 0;
 
-  return workspace.billingStatus === BillingStatus.INACTIVE ? (
-    <DisabledPanel />
-  ) : (
+  return (
     <div data-test-id='apps-panel'>
       {activeApps.length > 0 && (
         <FlexColumn>
@@ -150,6 +153,7 @@ export const AppsPanel = (props: {
               <UnexpandedApp
                 appType={availableApp.appType}
                 key={availableApp.appType}
+                disabled={workspace.billingStatus === BillingStatus.INACTIVE}
                 onClick={() =>
                   switchCase(
                     availableApp.appType,
