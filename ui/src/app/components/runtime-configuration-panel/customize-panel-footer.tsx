@@ -7,6 +7,7 @@ import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { canDeleteRuntime } from 'app/utils/runtime-utils';
@@ -16,7 +17,9 @@ import { PanelContent } from './utils';
 export interface CustomizePanelFooterProps {
   disableControls: boolean;
   runtimeCanBeCreated: boolean;
+  runtimeCannotBeCreatedExplanation?: string;
   runtimeCanBeUpdated: boolean;
+  runtimeCannotBeUpdatedExplanation?: string;
   runtimeExists: boolean;
   unattachedPdExists: boolean;
   analysisConfig: AnalysisConfig;
@@ -30,7 +33,9 @@ export interface CustomizePanelFooterProps {
 export const CustomizePanelFooter = ({
   disableControls,
   runtimeCanBeCreated,
+  runtimeCannotBeCreatedExplanation,
   runtimeCanBeUpdated,
+  runtimeCannotBeUpdatedExplanation,
   runtimeExists,
   unattachedPdExists,
   analysisConfig,
@@ -104,30 +109,38 @@ export const CustomizePanelFooter = ({
         [
           runtimeExists,
           () => (
-            <Button
-              aria-label='Next'
-              disabled={!runtimeCanBeUpdated}
-              onClick={() => {
-                if (
-                  existingAnalysisConfig.diskConfig.detachable &&
-                  !analysisConfig.diskConfig.detachable
-                ) {
-                  setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
-                } else {
-                  setPanelContent(PanelContent.ConfirmUpdate);
-                }
-              }}
+            <TooltipTrigger
+              disabled={runtimeCanBeUpdated}
+              content={runtimeCannotBeUpdatedExplanation}
             >
-              Next
-            </Button>
+              <div>
+                <Button
+                  aria-label='Next'
+                  disabled={!runtimeCanBeUpdated}
+                  onClick={() => {
+                    if (
+                      existingAnalysisConfig.diskConfig.detachable &&
+                      !analysisConfig.diskConfig.detachable
+                    ) {
+                      setPanelContent(PanelContent.ConfirmUpdateWithDiskDelete);
+                    } else {
+                      setPanelContent(PanelContent.ConfirmUpdate);
+                    }
+                  }}
+                >
+                  Next
+                </Button>
+              </div>
+            </TooltipTrigger>
           ),
         ],
         [
-          currentRuntime?.errors && currentRuntime.errors.length > 0,
+          currentRuntime?.errors &&
+            currentRuntime.errors.length > 0 &&
+            runtimeCanBeCreated,
           () => (
             <Button
               aria-label='Try Again'
-              disabled={!runtimeCanBeCreated}
               onClick={() => {
                 requestAnalysisConfig(analysisConfig);
                 onClose();
@@ -138,16 +151,23 @@ export const CustomizePanelFooter = ({
           ),
         ],
         () => (
-          <Button
-            aria-label='Create'
-            disabled={!runtimeCanBeCreated}
-            onClick={() => {
-              requestAnalysisConfig(analysisConfig);
-              onClose();
-            }}
+          <TooltipTrigger
+            disabled={runtimeCanBeCreated}
+            content={runtimeCannotBeCreatedExplanation}
           >
-            Create
-          </Button>
+            <div>
+              <Button
+                aria-label='Create'
+                disabled={!runtimeCanBeCreated}
+                onClick={() => {
+                  requestAnalysisConfig(analysisConfig);
+                  onClose();
+                }}
+              >
+                Create
+              </Button>
+            </div>
+          </TooltipTrigger>
         )
       )}
     </FlexRow>
