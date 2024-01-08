@@ -72,7 +72,7 @@
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
     "apiAssetsBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
-    "uiBaseUrl": "https:\/\/test.fake-research-aou.org.com",
+    "uiBaseUrl": "https:\/\/test.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
