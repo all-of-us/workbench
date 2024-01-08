@@ -27,7 +27,7 @@ describe('inactivity last-active accessors', () => {
     ).toEqual('123');
   });
 
-  it('should set the current value', () => {
+  it('should use the current time as the value', () => {
     jest.useFakeTimers();
     setLastActiveNow();
     expect(getLastActiveEpochMillis()).toEqual(Date.now());
