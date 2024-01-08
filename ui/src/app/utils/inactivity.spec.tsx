@@ -28,11 +28,9 @@ describe('inactivity last-active accessors', () => {
   });
 
   it('should set the current value', () => {
+    jest.useFakeTimers();
     setLastActiveNow();
-
-    // assumption: this test takes less than one second to run
-    const oneSecondInMillis = 1e3;
-    const sinceLastActive = Date.now() - getLastActiveEpochMillis();
-    expect(sinceLastActive).toBeLessThan(oneSecondInMillis);
+    expect(getLastActiveEpochMillis()).toEqual(Date.now());
+    jest.useRealTimers();
   });
 });
