@@ -539,7 +539,7 @@ export const ListSearch = fp.flow(
     }
 
     selectItem = (row: any) => {
-      const { conceptId, domainId, group, name, parentId, value } = row;
+      const { domainId, group, name, parentId, value } = row;
       let param = { parameterId: this.getParamId(row), ...row, attributes: [] };
       if (domainId === Domain.SURVEY.toString()) {
         param = {
