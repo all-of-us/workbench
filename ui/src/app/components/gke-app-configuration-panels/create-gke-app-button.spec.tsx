@@ -1,12 +1,11 @@
 import * as React from 'react';
 
-import { AppsApi, AppStatus, AppType, BillingStatus } from 'generated/fetch';
+import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import * as assert from 'assert';
 
 import {
   expectButtonElementDisabled,
