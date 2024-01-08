@@ -44,11 +44,9 @@ const getInactivityElapsedMs = () => {
   return lastActive && Date.now() - lastActive;
 };
 
-const invalidateInactivityCookie = (): void => clearLastActive();
-
 const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
   AnalyticsTracker.User.InactivitySignOut();
-  invalidateInactivityCookie();
+  clearLastActive();
   withErrorModal(
     {
       title: 'Sign Out Error',
@@ -92,7 +90,7 @@ export const InactivityMonitor = () => {
     }
 
     if (!isSignedIn) {
-      invalidateInactivityCookie();
+      clearLastActive();
       return;
     }
 
