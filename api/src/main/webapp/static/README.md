@@ -26,7 +26,7 @@ To manually test updates to any notebook server assets (initialization script, U
   local server config to use your deployed API server for static asset serving:
 
   ```
-  api$ sed -i "s/api-dot-all-of-us-workbench-test.appspot.com/${USER}-dot-\0/" config/config_local.json
+  api$ sed -i "s/api.test.fake-research-aou.org/${USER}-dot-\0/" config/config_local.json
   ```
 
 - Run a **local** API server with this config update and point a local UI to it
