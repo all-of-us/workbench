@@ -27,6 +27,7 @@ import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
 import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
+import { TooltipTrigger } from './popups';
 
 const styles = reactStyles({
   header: {
@@ -41,8 +42,6 @@ const styles = reactStyles({
   },
   availableApp: {
     background: colors.white,
-    marginLeft: '1em',
-    marginBottom: '1em',
     justifyContent: 'center',
   },
   closeButton: { marginLeft: 'auto', alignSelf: 'center' },
@@ -153,30 +152,49 @@ export const AppsPanel = (props: {
                 initialUserAppInfo={findApp(userApps, availableApp.appType)}
               />
             ) : (
-              <UnexpandedApp
-                appType={availableApp.appType}
-                key={availableApp.appType}
-                disabled={workspace.billingStatus === BillingStatus.INACTIVE}
-                onClick={() =>
-                  switchCase(
-                    availableApp.appType,
-                    [
-                      UIAppType.CROMWELL,
-                      () =>
-                        setSidebarActiveIconStore.next(cromwellConfigIconId),
-                    ],
-                    [
-                      UIAppType.RSTUDIO,
-                      () => setSidebarActiveIconStore.next(rstudioConfigIconId),
-                    ],
-                    [
-                      UIAppType.SAS,
-                      () => setSidebarActiveIconStore.next(sasConfigIconId),
-                    ],
-                    () => addToExpandedApps(availableApp.appType)
-                  )
+              <TooltipTrigger
+                disabled={workspace.billingStatus !== BillingStatus.INACTIVE}
+                content={
+                  'You have either run out of initial credits or have an inactive billing account.'
                 }
-              />
+              >
+                <div
+                  style={{
+                    marginLeft: '1rem',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <UnexpandedApp
+                    appType={availableApp.appType}
+                    key={availableApp.appType}
+                    disabled={
+                      workspace.billingStatus === BillingStatus.INACTIVE
+                    }
+                    onClick={() =>
+                      switchCase(
+                        availableApp.appType,
+                        [
+                          UIAppType.CROMWELL,
+                          () =>
+                            setSidebarActiveIconStore.next(
+                              cromwellConfigIconId
+                            ),
+                        ],
+                        [
+                          UIAppType.RSTUDIO,
+                          () =>
+                            setSidebarActiveIconStore.next(rstudioConfigIconId),
+                        ],
+                        [
+                          UIAppType.SAS,
+                          () => setSidebarActiveIconStore.next(sasConfigIconId),
+                        ],
+                        () => addToExpandedApps(availableApp.appType)
+                      )
+                    }
+                  />
+                </div>
+              </TooltipTrigger>
             )
           )}
         </FlexColumn>
