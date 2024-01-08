@@ -5,7 +5,6 @@ import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
-import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
