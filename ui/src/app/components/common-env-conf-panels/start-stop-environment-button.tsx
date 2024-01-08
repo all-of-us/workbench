@@ -37,12 +37,16 @@ export interface StartStopEnvironmentProps {
   // we fail gracefully by presenting an unclickable icon here instead of crashing.
   onPause?: () => void;
   onResume?: () => void;
+  disabled?: boolean;
+  disabledTooltip?: string;
 }
 export const StartStopEnvironmentButton = ({
   appType,
   status,
   onPause,
   onResume,
+  disabled = false,
+  disabledTooltip = '',
 }: StartStopEnvironmentProps) => {
   const userEnvironmentStatus: UserEnvironmentStatus =
     toUserEnvironmentStatusByAppType(status, appType);
@@ -98,7 +102,9 @@ export const StartStopEnvironmentButton = ({
       src: computeNone,
     },
   };
-  const { onClick, ...imgProps } = toProps[userEnvironmentStatus];
+  const { onClick, ...imgProps } = disabled
+    ? { alt: disabledTooltip, src: computeNone, onClick: () => {} }
+    : toProps[userEnvironmentStatus];
 
   // height/width of the icon wrapper are set so that the img element can rotate inside it
   // without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal

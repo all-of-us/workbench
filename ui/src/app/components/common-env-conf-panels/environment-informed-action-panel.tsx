@@ -1,7 +1,13 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
-import { AppStatus, Profile, RuntimeStatus, Workspace } from 'generated/fetch';
+import {
+  AppStatus,
+  BillingStatus,
+  Profile,
+  RuntimeStatus,
+  Workspace,
+} from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
@@ -109,6 +115,8 @@ export const EnvironmentInformedActionPanel = ({
         {appType === UIAppType.JUPYTER && (
           <StartStopEnvironmentButton
             {...{ status, appType, onPause, onResume }}
+            disabled={workspace.billingStatus === BillingStatus.INACTIVE}
+            disabledTooltip='You have either run out of initial credits or have an inactive billing account.'
           />
         )}
         <EnvironmentCostEstimator
