@@ -355,17 +355,28 @@ export const RuntimeConfigurationPanel = fp.flow(
     // Eventually we will be removing this option altogether
 
     const runtimeCanBeCreated =
-      errorMessageContent.length === 0 &&
       workspace.billingStatus === BillingStatus.ACTIVE &&
+      errorMessageContent.length === 0 &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
           !analysisConfig.diskConfig.detachable));
 
+    let runtimeCannotBeCreatedExplanation;
+    if (workspace.billingStatus !== BillingStatus.ACTIVE) {
+      runtimeCannotBeCreatedExplanation =
+        'You have either run out of initial credits or have an inactive billing account.';
+    }
+
     const runtimeCanBeUpdated =
       runtimeCanBeCreated &&
       environmentChanged &&
       canUpdateRuntime(runtimeStatus);
+
+    let runtimeCannotBeUpdatedExplanation;
+    if (!runtimeCanBeCreated) {
+      runtimeCannotBeUpdatedExplanation = runtimeCannotBeCreatedExplanation;
+    }
 
     if (!runtimeLoaded) {
       return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
@@ -490,7 +501,9 @@ export const RuntimeConfigurationPanel = fp.flow(
                   profile,
                   requestAnalysisConfig,
                   runtimeCanBeCreated,
+                  runtimeCannotBeCreatedExplanation,
                   runtimeCanBeUpdated,
+                  runtimeCannotBeUpdatedExplanation,
                   runtimeExists,
                   runtimeStatus,
                   setAnalysisConfig,
