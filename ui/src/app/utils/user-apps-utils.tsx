@@ -111,19 +111,6 @@ export const pauseUserApp = (googleProject, appName, namespace) =>
     .stopApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
 
-const localizeUserApp = (
-  namespace,
-  appName,
-  appType: AppType,
-  fileNames: Array<string>,
-  playgroundMode: boolean
-) =>
-  appsApi().localizeApp(namespace, appName, {
-    fileNames,
-    playgroundMode,
-    appType,
-  });
-
 export const resumeUserApp = (googleProject, appName, namespace) =>
   leoAppsApi()
     .startApp(googleProject, appName)
@@ -138,6 +125,19 @@ export function unattachedDiskExists(
 ) {
   return !app && disk !== undefined;
 }
+
+const localizeUserApp = (
+  namespace: string,
+  appName: string,
+  appType: AppType,
+  fileNames: Array<string>,
+  playgroundMode: boolean
+) =>
+  appsApi().localizeApp(namespace, appName, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
 
 export const openAppInIframe = (
   workspaceNamespace: string,
