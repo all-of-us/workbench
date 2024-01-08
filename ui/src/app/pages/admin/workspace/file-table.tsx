@@ -22,7 +22,6 @@ const styles = reactStyles({
     height: '4.5rem',
   },
   fileDetailsTable: {
-    maxWidth: '1000px',
     marginTop: '1.5rem',
   },
 });
