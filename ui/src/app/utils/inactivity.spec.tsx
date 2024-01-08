@@ -18,16 +18,30 @@ describe('inactivity last-active accessors', () => {
     expect(getLastActiveEpochMillis()).toBeNull();
   });
 
-  it('should store values as epoch milli strings', () => {
+  // implementation detail useful for debugging
+  it('should use the LOCAL_STORAGE_KEY_LAST_ACTIVE location in local storage', () => {
+    expect(
+      window.localStorage.getItem(
+        INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
+      )
+    ).toBeNull();
+
     setLastActive(123);
     expect(
       window.localStorage.getItem(
         INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
       )
-    ).toEqual('123');
+    ).toEqual('123'); // epoch millis as a string
+
+    clearLastActive();
+    expect(
+      window.localStorage.getItem(
+        INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
+      )
+    ).toBeNull();
   });
 
-  it('should use the current time as the value', () => {
+  it('should use the current time as the value for setLastActiveNow()', () => {
     jest.useFakeTimers();
     setLastActiveNow();
     expect(getLastActiveEpochMillis()).toEqual(Date.now());
