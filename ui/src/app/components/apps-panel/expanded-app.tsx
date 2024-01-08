@@ -87,8 +87,12 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
   );
 };
 
-const PauseRuntimeButton = (props: { workspace: Workspace }) => {
+const PauseRuntimeButton = (props: {
+  disabled: boolean;
+  workspace: Workspace;
+}) => {
   const {
+    disabled,
     workspace: { namespace, googleProject },
   } = props;
 
@@ -99,6 +103,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
+      {...{ disabled }}
       externalStatus={fromRuntimeStatus(runtimeStatus)}
       onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -107,15 +112,16 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 };
 
 const JupyterButtonRow = (props: {
+  disabled: boolean;
   workspace: Workspace;
   onClickRuntimeConf: Function;
 }) => {
-  const { workspace, onClickRuntimeConf } = props;
+  const { disabled, workspace, onClickRuntimeConf } = props;
   return (
     <FlexRow>
       <SettingsButton onClick={onClickRuntimeConf} />
-      <PauseRuntimeButton {...{ workspace }} />
-      <NewNotebookButton {...{ workspace }} />
+      <PauseRuntimeButton {...{ disabled, workspace }} />
+      <NewNotebookButton {...{ disabled, workspace }} />
     </FlexRow>
   );
 };
@@ -238,6 +244,7 @@ const SASButtonRow = (props: { userApp: UserAppEnvironment }) => {
 
 interface ExpandedAppProps {
   appType: UIAppType;
+  disabled: boolean;
   initialUserAppInfo: UserAppEnvironment;
   workspace: Workspace;
   onClickRuntimeConf: Function;
@@ -248,6 +255,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
   const {
     appType,
+    disabled,
     initialUserAppInfo,
     workspace,
     onClickRuntimeConf,
@@ -316,7 +324,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         </TooltipTrigger>
       </FlexRow>
       {appType === UIAppType.JUPYTER ? (
-        <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
+        <JupyterButtonRow {...{ disabled, workspace, onClickRuntimeConf }} />
       ) : (
         <FlexColumn>
           <FlexRow style={{ justifyContent: 'center' }}>
