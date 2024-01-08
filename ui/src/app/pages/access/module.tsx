@@ -44,7 +44,7 @@ const ModuleBox = (props: {
   );
 };
 
-export const Module = (props: {
+export interface ModuleProps {
   focused: boolean;
   children?: ReactNode;
   active: boolean;
@@ -55,7 +55,9 @@ export const Module = (props: {
   spinnerProps: WithSpinnerOverlayProps;
   status: AccessModuleStatus;
   style?;
-}) => {
+}
+
+export const Module = (props: ModuleProps) => {
   const {
     focused,
     children,
@@ -68,7 +70,14 @@ export const Module = (props: {
     status,
     style,
   } = props;
-  const { enableRasIdMeLinking } = serverConfigStore.get().config;
+  const { enableRasIdMeLinking, trainingMigrationPauseActive } =
+    serverConfigStore.get().config;
+
+  const deactivateModuleForTrainingMigration =
+    trainingMigrationPauseActive &&
+    (moduleName === AccessModule.COMPLIANCE_TRAINING ||
+      moduleName === AccessModule.CT_COMPLIANCE_TRAINING);
+
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
@@ -92,7 +101,8 @@ export const Module = (props: {
       <ModuleBox
         clickable={
           active &&
-          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY) &&
+          !deactivateModuleForTrainingMigration
         }
         action={() => {
           setShowRefresh(true);
