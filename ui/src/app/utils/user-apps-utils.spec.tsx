@@ -154,11 +154,8 @@ describe(updateLastActive.name, () => {
   });
 
   it('updates the last active value in local storage when local storage is empty', () => {
-    updateLastActive([
-      { dateAccessed: new Date(10000).toISOString() },
-      { dateAccessed: new Date(13000).toISOString() },
-    ]);
-    expect(getLastActiveEpochMillis()).toEqual(13000);
+    updateLastActive([{ dateAccessed: new Date(789654).toISOString() }]);
+    expect(getLastActiveEpochMillis()).toEqual(789654);
   });
 
   it('does nothing when local storage has recorded more recent activity than userApps', () => {
@@ -166,6 +163,7 @@ describe(updateLastActive.name, () => {
     updateLastActive([
       { dateAccessed: new Date(10000).toISOString() },
       { dateAccessed: new Date(11000).toISOString() },
+      { dateAccessed: new Date(12000).toISOString() },
     ]);
     expect(getLastActiveEpochMillis()).toEqual(12345);
   });
