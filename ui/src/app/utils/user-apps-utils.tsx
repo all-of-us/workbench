@@ -52,16 +52,13 @@ const doUserAppsRequireUpdates = () => {
 
 // all integer dates in this function are milliseconds since epoch
 export const updateLastActive = (userApps: ListAppsResponse) => {
-  const localStorageLastActive = getLastActiveEpochMillis() ?? 0;
-
-  const lastActive: number = Math.max(
-    localStorageLastActive,
+  const userAppLastActive: number = Math.max(
     ...userApps.map((app) =>
       app.dateAccessed ? new Date(app.dateAccessed).valueOf() : 0
     )
   );
-  if (lastActive > localStorageLastActive) {
-    setLastActive(lastActive);
+  if (userAppLastActive > getLastActiveEpochMillis() ?? 0) {
+    setLastActive(userAppLastActive);
   }
 };
 
