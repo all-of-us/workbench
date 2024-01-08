@@ -10,8 +10,11 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 import { AppsPanelButton } from './apps-panel-button';
 
-export const NewNotebookButton = (props: { workspace: Workspace }) => {
-  const { workspace } = props;
+export const NewNotebookButton = (props: {
+  disabled: boolean;
+  workspace: Workspace;
+}) => {
+  const { disabled, workspace } = props;
 
   const [showModal, setShowModal] = useState(false);
   const [notebookNameList, setNotebookNameList] = useState<string[]>([]);
@@ -38,6 +41,7 @@ export const NewNotebookButton = (props: { workspace: Workspace }) => {
         />
       )}
       <AppsPanelButton
+        {...{ disabled }}
         onClick={() => setShowModal(true)}
         icon={faPlusCircle}
         buttonText='Create New'
