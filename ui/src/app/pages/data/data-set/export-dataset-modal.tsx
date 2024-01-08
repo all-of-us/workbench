@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import fp from 'lodash/fp';
+import { Toast } from 'primereact/toast';
 
 import {
   BillingStatus,
@@ -12,9 +13,10 @@ import {
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
+import { Button, IconButton } from 'app/components/buttons';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SmallHeader, styles as headerStyles } from 'app/components/headers';
+import { Copy } from 'app/components/icons';
 import { RadioButton, Select, TextInput } from 'app/components/inputs';
 import { ErrorMessage } from 'app/components/messages';
 import {
@@ -75,11 +77,16 @@ export const ExportDatasetModal = ({
   const [notebookNameWithoutSuffix, setNotebookNameWithoutSuffix] =
     useState('');
   const [codePreview, setCodePreview] = useState(null);
+  const [showCodePreview, setShowCodePreview] = useState(false);
+  const [codeText, setCodeText] = useState(null);
+  const [loadingCode, setLoadingCode] = useState(false);
+  const [loadingClipboard, setLoadingClipboard] = useState(false);
   const [loadingNotebook, setIsLoadingNotebook] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [, navigateByUrl] = useNavigation();
+  const toast = React.useRef(null);
 
-  function createDataSetRequest(): DataSetRequest {
+  const createDataSetRequest = (): DataSetRequest => {
     return {
       name: dataset ? dataset.name : 'dataset',
       ...(dataset.id
@@ -94,16 +101,16 @@ export const ExportDatasetModal = ({
           }),
       domainValuePairs: [],
     };
-  }
+  };
 
-  function hasWgs() {
+  const hasWgs = () => {
     return fp.includes(
       PrePackagedConceptSetEnum.WHOLE_GENOME,
       dataset.prePackagedConceptSet
     );
-  }
+  };
 
-  function createExportDatasetRequest(): DataSetExportRequest {
+  const createExportDatasetRequest = (): DataSetExportRequest => {
     return {
       dataSetRequest: createDataSetRequest(),
       kernelType,
@@ -112,9 +119,9 @@ export const ExportDatasetModal = ({
       notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
       newNotebook: creatingNewNotebook,
     };
-  }
+  };
 
-  async function exportDataset() {
+  const exportDataset = async () => {
     AnalyticsTracker.DatasetBuilder.Export(kernelType);
 
     setErrorMsg(null);
@@ -138,12 +145,60 @@ export const ExportDatasetModal = ({
         'The request cannot be completed. Please try again or contact Support in the left hand navigation'
       );
     }
-  }
+  };
 
-  function loadHtmlStringIntoIFrame(html) {
+  const isNotebooksLoading = existingNotebooks === undefined;
+  const isCodePreviewLoading = showCodePreview && !codePreview;
+
+  // Any state that necessitates disabling all modal controls.
+  const shouldDisable =
+    isNotebooksLoading ||
+    loadingNotebook ||
+    loadingClipboard ||
+    loadingCode ||
+    isExporting;
+
+  const resetCode = () => {
+    setCodePreview(null);
+    setCodeText(null);
+  };
+
+  const onChangeGenomicsAnalysisTool = (
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
+  ) => {
+    resetCode();
+    setGenomicsAnalysisTool(genomicsTool);
+  };
+  const genomicsToolRadioButton = (
+    displayName: string,
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
+  ) => {
+    return (
+      <label
+        key={'genomics-tool-' + genomicsTool}
+        style={styles.radioButtonLabel}
+      >
+        <RadioButton
+          name='genomics-tool'
+          style={{ marginRight: '0.375rem' }}
+          disabled={shouldDisable}
+          data-test-id={'genomics-tool-' + genomicsTool}
+          checked={genomicsAnalysisTool === genomicsTool}
+          onChange={() => onChangeGenomicsAnalysisTool(genomicsTool)}
+        />
+        {displayName}
+      </label>
+    );
+  };
+
+  const loadHtmlStringIntoIFrame = (html) => {
     const placeholder = document.createElement('html');
     placeholder.innerHTML = html;
 
+    // Remove top padding and margin, because it looks odd with
+    // the copy button above it
+    placeholder.getElementsByTagName('body')[0].style.marginTop = '0';
+    placeholder.getElementsByTagName('body')[0].style.paddingTop = '0';
     // Remove input column from notebook cells. Also possible to strip this out in Calhoun but requires some API changes
     placeholder.querySelectorAll('.jp-InputPrompt').forEach((e) => e.remove());
     return (
@@ -151,14 +206,19 @@ export const ExportDatasetModal = ({
         id='export-preview-frame'
         data-testid='export-preview-frame'
         scrolling='yes'
-        style={{ width: '100%', height: '100%', border: 'none' }}
+        style={{
+          width: '100%',
+          height: '100%',
+          border: '1px solid',
+          borderRadius: '0.5rem',
+        }}
         srcDoc={placeholder.outerHTML}
       />
     );
-  }
+  };
 
-  function loadCodePreview() {
-    setIsLoadingNotebook(true);
+  const getCode = () => {
+    setLoadingCode(true);
     setErrorMsg(null);
     dataSetApi()
       .previewExportToNotebook(
@@ -166,25 +226,37 @@ export const ExportDatasetModal = ({
         workspace.id,
         createExportDatasetRequest()
       )
-      .then((resp) => setCodePreview(loadHtmlStringIntoIFrame(resp.html)))
+      .then((resp) => {
+        setCodePreview(loadHtmlStringIntoIFrame(resp.html));
+        setCodeText(resp.text);
+      })
       .catch(() =>
         setErrorMsg(
-          'Could not load code preview. Please try again or continue exporting to a notebook.'
+          'Could not load code. Please try again or continue exporting to a notebook.'
         )
       )
-      .finally(() => setIsLoadingNotebook(false));
-  }
+      .finally(() => setLoadingCode(false));
+  };
 
-  function onCodePreviewClick() {
-    if (codePreview) {
-      setCodePreview(null);
-    } else {
+  const onCodePreviewClick = () => {
+    if (!codePreview) {
       AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-      loadCodePreview();
     }
-  }
+    setShowCodePreview(!showCodePreview);
+  };
+  const onCopyCodeClick = () => {
+    if (!codeText) {
+      getCode();
+    }
+    setLoadingClipboard(true);
+  };
 
-  function onNotebookSelect(nameWithoutSuffix) {
+  const onChangeKernelType = (kernelTypeEnum: KernelTypeEnum) => {
+    resetCode();
+    setKernelType(kernelTypeEnum);
+  };
+
+  const onNotebookSelect = (nameWithoutSuffix) => {
     setCreatingNewNotebook(nameWithoutSuffix === '');
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
@@ -208,28 +280,7 @@ export const ExportDatasetModal = ({
         )
         .finally(() => setIsLoadingNotebook(false));
     }
-  }
-
-  function genomicsToolRadioButton(
-    displayName: string,
-    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
-  ) {
-    return (
-      <label
-        key={'genomics-tool-' + genomicsTool}
-        style={styles.radioButtonLabel}
-      >
-        <RadioButton
-          style={{ marginRight: '0.375rem' }}
-          disabled={loadingNotebook}
-          data-test-id={'genomics-tool-' + genomicsTool}
-          checked={genomicsAnalysisTool === genomicsTool}
-          onChange={() => setGenomicsAnalysisTool(genomicsTool)}
-        />
-        {displayName}
-      </label>
-    );
-  }
+  };
 
   useEffect(() => {
     getExistingJupyterNotebookNames(workspace)
@@ -237,11 +288,28 @@ export const ExportDatasetModal = ({
       .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);
 
+  // When code preview is showing, but codePreview does not
+  // have a value, update code.
   useEffect(() => {
-    if (codePreview) {
-      loadCodePreview();
+    if (showCodePreview && !codePreview) {
+      getCode();
     }
-  }, [kernelType, genomicsAnalysisTool]);
+  }, [codePreview, showCodePreview]);
+
+  // If the user is waiting for the code to be copied to the
+  // clipboard, and the code has been loaded, copy the code to the
+  // clipboard and stop waiting.
+  useEffect(() => {
+    if (loadingClipboard && codeText) {
+      setLoadingClipboard(false);
+      navigator.clipboard.writeText(codeText);
+      toast.current.show({
+        severity: 'success',
+        summary: 'Copied to clipboard',
+        detail: 'Dataset query copied to clipboard',
+      });
+    }
+  }, [codeText, loadingClipboard]);
 
   const errors = {
     ...validateNewNotebookName(
@@ -261,8 +329,6 @@ export const ExportDatasetModal = ({
       : {}),
   };
 
-  const isNotebooksLoading = existingNotebooks === undefined;
-
   const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
   if (!isNotebooksLoading) {
     selectOptions.push(
@@ -275,8 +341,8 @@ export const ExportDatasetModal = ({
 
   return (
     <AnimatedModal
-      loading={isExporting || isNotebooksLoading}
-      width={!codePreview ? 450 : 1200}
+      loading={isExporting || isNotebooksLoading || loadingNotebook}
+      width={showCodePreview && codePreview ? 1200 : 450}
     >
       <FlexRow>
         <div style={{ width: 'calc(450px - 3rem)' }}>
@@ -284,6 +350,7 @@ export const ExportDatasetModal = ({
           <ModalBody>
             <div style={{ marginTop: '1.5rem' }}>
               <Select
+                isDisabled={shouldDisable}
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
@@ -300,6 +367,7 @@ export const ExportDatasetModal = ({
                   onChange={(v) => setNotebookNameWithoutSuffix(v)}
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
+                  disabled={shouldDisable}
                 />
               </label>
             )}
@@ -313,10 +381,11 @@ export const ExportDatasetModal = ({
                 <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
                     style={{ marginRight: '0.375rem' }}
+                    name='kernel-type'
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                    disabled={loadingNotebook || !creatingNewNotebook}
+                    disabled={shouldDisable || !creatingNewNotebook}
                     checked={kernelType === kernelTypeEnum}
-                    onChange={() => setKernelType(kernelTypeEnum)}
+                    onChange={() => onChangeKernelType(kernelTypeEnum)}
                   />
                   {kernelTypeEnum}
                 </label>
@@ -342,16 +411,17 @@ export const ExportDatasetModal = ({
               </React.Fragment>
             )}
 
-            <FlexRow style={{ marginTop: '1.5rem', alignItems: 'center' }}>
+            <FlexRow style={{ alignItems: 'center' }}>
               <Button
-                type={'secondarySmall'}
-                disabled={loadingNotebook}
+                type='link'
+                disabled={isCodePreviewLoading || shouldDisable}
                 data-test-id='code-preview-button'
                 onClick={() => onCodePreviewClick()}
+                style={{ padding: 0, margin: 0 }}
               >
-                {codePreview ? 'Hide Code Preview' : 'See Code Preview'}
+                {showCodePreview ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
-              {loadingNotebook && (
+              {isCodePreviewLoading && (
                 <Spinner size={24} style={{ marginLeft: '0.75rem' }} />
               )}
             </FlexRow>
@@ -369,6 +439,16 @@ export const ExportDatasetModal = ({
             >
               Cancel
             </Button>
+            <Toast ref={toast} />
+            <Button
+              id='copyCodeButton'
+              disabled={isCodePreviewLoading || shouldDisable}
+              type='secondaryOutline'
+              onClick={onCopyCodeClick}
+              style={{ marginRight: '3rem', minWidth: '120px' }}
+            >
+              {loadingClipboard ? <Spinner size={18} /> : 'Copy Code'}
+            </Button>
             <TooltipTrigger
               content={summarizeErrors(errors)}
               data-test-id='export-dataset-tooltip'
@@ -376,7 +456,7 @@ export const ExportDatasetModal = ({
               <Button
                 type='primary'
                 data-test-id='export-data-set'
-                disabled={!isEmpty(errors) || isNotebooksLoading}
+                disabled={!isEmpty(errors) || shouldDisable}
                 onClick={() => exportDataset()}
               >
                 Export
@@ -385,8 +465,26 @@ export const ExportDatasetModal = ({
           </ModalFooter>
         </div>
 
-        {codePreview && (
-          <div style={{ flex: 1, marginLeft: '1.5rem' }}>{codePreview}</div>
+        {showCodePreview && codePreview && (
+          <FlexColumn
+            style={{ display: 'flex', flex: 1, marginLeft: '1.5rem' }}
+          >
+            <div
+              style={{
+                alignSelf: 'flex-end',
+                padding: '0 0.5rem',
+                marginBottom: '0.5rem',
+              }}
+            >
+              <IconButton
+                icon={Copy}
+                onClick={onCopyCodeClick}
+                style={{ height: '24px', width: '24px' }}
+                title='Dataset query copy icon button'
+              />
+            </div>
+            {codePreview}
+          </FlexColumn>
         )}
       </FlexRow>
     </AnimatedModal>

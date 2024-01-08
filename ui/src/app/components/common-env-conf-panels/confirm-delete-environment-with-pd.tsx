@@ -81,7 +81,8 @@ export const ConfirmDeleteEnvironmentWithPD = ({
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 4 }}>
           You will continue to incur persistent disk cost at{' '}
           <b>{formatUsd(detachableDiskPricePerMonth(disk))}</b> per month. You
-          can delete your disk at any time via the runtime panel.
+          can delete your disk at any time via the {appType} configuration
+          panel.
         </p>
       </div>
       <div style={styles.confirmWarning}>

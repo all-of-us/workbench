@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Workspace } from 'generated/fetch';
+import { Workspace, WorkspaceActiveStatus } from 'generated/fetch';
 
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
@@ -9,11 +9,15 @@ import { WorkspaceInfoField } from './workspace-info-field';
 
 interface Props {
   workspace: Workspace;
+  activeStatus: WorkspaceActiveStatus;
 }
-export const BasicInformation = ({ workspace }: Props) => (
+export const BasicInformation = ({ workspace, activeStatus }: Props) => (
   <>
     <h3>Basic Information</h3>
     <div className='basic-info' style={{ marginTop: '1.5rem' }}>
+      <WorkspaceInfoField labelText='Active Status'>
+        {activeStatus}
+      </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Workspace Name'>
         {workspace.name}
       </WorkspaceInfoField>

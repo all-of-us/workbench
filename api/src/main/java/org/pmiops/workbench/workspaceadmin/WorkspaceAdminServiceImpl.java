@@ -3,13 +3,11 @@ package org.pmiops.workbench.workspaceadmin;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.monitoring.v3.Point;
-import com.google.monitoring.v3.TimeSeries;
+import com.google.common.collect.Streams;
 import com.google.protobuf.util.Timestamps;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -180,36 +178,41 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace) {
-    CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
     String googleProject = getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    for (TimeSeries timeSeries :
-        cloudMonitoringService.getCloudStorageReceivedBytes(
-            googleProject, TRAILING_TIME_TO_QUERY)) {
-      for (Point point : timeSeries.getPointsList()) {
-        response.addReceivedBytesItem(
-            new TimeSeriesPoint()
-                .timestamp(Timestamps.toMillis(point.getInterval().getEndTime()))
-                .value(point.getValue().getDoubleValue()));
-      }
-    }
 
-    response.getReceivedBytes().sort(Comparator.comparing(TimeSeriesPoint::getTimestamp));
-    return response;
+    return new CloudStorageTraffic()
+        .receivedBytes(
+            Streams.stream(
+                    cloudMonitoringService
+                        .getCloudStorageReceivedBytes(googleProject, TRAILING_TIME_TO_QUERY)
+                        .iterator())
+                .flatMap(timeSeries -> timeSeries.getPointsList().stream())
+                .map(
+                    point ->
+                        new TimeSeriesPoint()
+                            .timestamp(Timestamps.toMillis(point.getInterval().getEndTime()))
+                            .value(point.getValue().getDoubleValue()))
+                .sorted(Comparator.comparing(TimeSeriesPoint::getTimestamp))
+                .toList());
   }
 
   @Override
   public WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
 
+    return dbWorkspace.isActive()
+        ? getActiveWorkspaceAdminView(dbWorkspace, workspaceNamespace)
+        : getDeletedWorkspaceAdminView(dbWorkspace);
+  }
+
+  private WorkspaceAdminView getActiveWorkspaceAdminView(
+      DbWorkspace dbWorkspace, String workspaceNamespace) {
     final String workspaceFirecloudName = dbWorkspace.getFirecloudName();
 
     final List<WorkspaceUserAdminView> collaborators =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, workspaceFirecloudName).stream()
             .map(this::toWorkspaceUserAdminView)
-            .collect(Collectors.toList());
-
-    final AdminWorkspaceObjectsCounts adminWorkspaceObjects =
-        getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId());
+            .toList();
 
     final AdminWorkspaceCloudStorageCounts adminWorkspaceCloudStorageCounts =
         getAdminWorkspaceCloudStorageCounts(
@@ -220,13 +223,15 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
-            .collect(Collectors.toList());
+            .toList();
 
     final AdminWorkspaceResources adminWorkspaceResources =
         new AdminWorkspaceResources()
-            .workspaceObjects(adminWorkspaceObjects)
+            .workspaceObjects(getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
             .cloudStorage(adminWorkspaceCloudStorageCounts)
-            .runtimes(workbenchListRuntimeResponses);
+            .runtimes(workbenchListRuntimeResponses)
+            .userApps(
+                leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject()));
 
     final RawlsWorkspaceDetails firecloudWorkspace =
         fireCloudService
@@ -237,7 +242,15 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .collaborators(collaborators)
-        .resources(adminWorkspaceResources);
+        .resources(adminWorkspaceResources)
+        .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
+  }
+
+  private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
+    return new WorkspaceAdminView()
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
+        .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
+        .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
 
   @Override

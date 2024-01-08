@@ -127,6 +127,20 @@ const buttonVariants = {
     },
     hover: { backgroundColor: colors.primary, color: colors.white },
   },
+  secondaryOutline: {
+    style: {
+      ...styles.baseNew,
+      backgroundColor: 'transparent',
+      color: colors.primary,
+      borderStyle: 'solid',
+      borderWidth: '1px',
+    },
+    disabledStyle: {
+      borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
+      color: colorWithWhiteness(colors.dark, disabledAlpha),
+    },
+    hover: { backgroundColor: colors.primary, color: colors.white },
+  },
   secondaryLight: {
     style: {
       ...styles.baseNew,
@@ -427,6 +441,7 @@ export const IconButton = ({
   hover = {},
   tooltip = '',
   disabled = false,
+  title = '',
   ...props
 }) => {
   return (
@@ -445,7 +460,7 @@ export const IconButton = ({
         disabled={disabled}
         {...props}
       >
-        <Icon disabled={disabled} style={style} />
+        <Icon {...{ title, disabled, style }} />
       </TerraUIInteractive>
     </TooltipTrigger>
   );

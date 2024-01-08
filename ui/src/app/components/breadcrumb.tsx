@@ -9,6 +9,7 @@ import {
   ConceptSet,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
 import {
@@ -69,7 +70,7 @@ export const getTrail = (
 ): Array<BreadcrumbData> => {
   const { ns, wsid, cid, crid, csid, pid, nbName, appType } = params;
   switch (type) {
-    case BreadcrumbType.App:
+    case BreadcrumbType.UserApp:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,
@@ -146,6 +147,25 @@ export const getTrail = (
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
           `${analysisTabPath(ns, wsid)}/${nbName}`
+        ),
+      ];
+    case BreadcrumbType.AnalysisPreview:
+      return [
+        ...getTrail(
+          BreadcrumbType.Workspace,
+          workspace,
+          cohort,
+          cohortReview,
+          conceptSet,
+          params
+        ),
+        new BreadcrumbData(
+          fp.upperFirst(analysisTabName),
+          analysisTabPath(ns, wsid)
+        ),
+        new BreadcrumbData(
+          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
+          `${analysisTabPath(ns, wsid)}/preview/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -354,9 +374,12 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
+      // WARNING
+      // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
       const analysisMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
       });
+
       const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
@@ -365,21 +388,43 @@ export const Breadcrumb = fp.flow(
         path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
       });
 
-      const analysisFileName = analysisMatch
-        ? analysisMatch.params.nbName
-        : analysisPreviewMatch
-        ? analysisPreviewMatch.params.nbName
-        : undefined;
-
-      const appType = userAppMatch ? userAppMatch.params.appType : undefined;
+      const {
+        nbName = '',
+        appType = '',
+        breadcrumbType,
+      } = cond<MatchParams & { breadcrumbType: BreadcrumbType }>(
+        [
+          !!analysisPreviewMatch,
+          () => ({
+            ...analysisPreviewMatch.params,
+            breadcrumbType: BreadcrumbType.AnalysisPreview,
+          }),
+        ],
+        [
+          !!userAppMatch,
+          () => ({
+            ...userAppMatch.params,
+            breadcrumbType: BreadcrumbType.UserApp,
+          }),
+        ],
+        [
+          // this check must go after analysisPreviewMatch and userAppMatch
+          !!analysisMatch,
+          () => ({
+            ...analysisMatch.params,
+            breadcrumbType: BreadcrumbType.Analysis,
+          }),
+        ],
+        () => ({ breadcrumbType: this.props.routeData.breadcrumb })
+      );
 
       return getTrail(
-        this.props.routeData.breadcrumb,
+        breadcrumbType,
         this.props.workspace,
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName: analysisFileName, appType }
+        { ns, wsid, cid, csid, pid, nbName, appType }
       );
     }
 

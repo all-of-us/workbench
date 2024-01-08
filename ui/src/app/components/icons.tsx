@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faCircle } from '@fortawesome/free-regular-svg-icons';
+import { faCircle, faCopy } from '@fortawesome/free-regular-svg-icons';
 import {
   faBan,
   faCaretRight,
@@ -182,6 +182,7 @@ export const Check = (props) => <Icon shape={faCheck} {...props} />;
 export const CheckCircle = (props) => <Icon shape={faCheckCircle} {...props} />;
 export const Circle = (props) => <Icon shape={faCircle} {...props} />;
 export const Clock = (props) => <Icon shape={faClock} {...props} />;
+export const Copy = (props) => <Icon shape={faCopy} {...props} />;
 export const ExclamationTriangle = (props) => (
   <Icon shape={faExclamationTriangle} color={colors.danger} {...props} />
 );

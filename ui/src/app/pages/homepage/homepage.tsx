@@ -111,7 +111,7 @@ const WelcomeHeader = () => {
   );
 };
 
-const Workspaces = () => {
+const Workspaces = ({ onChange }: { onChange: () => void }) => {
   const [navigate] = useNavigation();
 
   return (
@@ -150,7 +150,7 @@ const Workspaces = () => {
           See all workspaces
         </span>
       </FlexRow>
-      <RecentWorkspaces />
+      <RecentWorkspaces {...{ onChange }} />
     </FlexColumn>
   );
 };
@@ -239,7 +239,7 @@ export const Homepage = fp.flow(
 
     componentDidMount() {
       this.props.hideSpinner();
-      this.checkWorkspaces();
+      this.fetchWorkspaces();
       this.callProfile();
     }
 
@@ -285,7 +285,7 @@ export const Homepage = fp.flow(
       }
     }
 
-    async checkWorkspaces() {
+    async fetchWorkspaces() {
       return fetchWithSystemErrorHandler(() =>
         workspacesApi().getWorkspaces()
       ).then((response) => this.setState({ userWorkspacesResponse: response }));
@@ -293,7 +293,7 @@ export const Homepage = fp.flow(
 
     userHasWorkspaces(): boolean {
       const { userWorkspacesResponse } = this.state;
-      return userWorkspacesResponse && userWorkspacesResponse.items.length > 0;
+      return userWorkspacesResponse?.items?.length > 0;
     }
 
     render() {
@@ -306,7 +306,7 @@ export const Homepage = fp.flow(
             <FadeBox style={styles.fadeBox}>
               {/* The elements inside this fadeBox will be changed as part of ongoing homepage redesign work */}
               <FlexColumn style={{ justifyContent: 'flex-start' }}>
-                <Workspaces />
+                <Workspaces onChange={() => this.fetchWorkspaces()} />
                 {userWorkspacesResponse &&
                   (this.userHasWorkspaces() ? (
                     <RecentResources

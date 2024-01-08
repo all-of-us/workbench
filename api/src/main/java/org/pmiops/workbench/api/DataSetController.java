@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
@@ -73,8 +72,6 @@ public class DataSetController implements DataSetApiDelegate {
   public static final String EMPTY_CELL_MARKER = "";
   public static final String WHOLE_GENOME_VALUE = "VCF Files";
 
-  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
-
   private final DataSetService dataSetService;
 
   private final Provider<DbUser> userProvider;
@@ -85,6 +82,15 @@ public class DataSetController implements DataSetApiDelegate {
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  public JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
+    JSONObject newJson = new JSONObject(originalJson.toString());
+
+    codeCells.forEach(
+        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+
+    return newJson;
+  }
 
   @Autowired
   DataSetController(
@@ -251,18 +257,17 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    JSONObject notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
+    List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    dataSetService
-        .generateCodeCells(dataSetExportRequest, dbWorkspace)
-        .forEach(
-            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+    byte[] notebookHtml =
+        addCells(createNotebookObject(dataSetExportRequest.getKernelType()), codeCells)
+            .toString()
+            .getBytes(StandardCharsets.UTF_8);
 
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
-            .html(
-                notebooksService.convertJupyterNotebookToHtml(
-                    notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
+            .html(notebooksService.convertJupyterNotebookToHtml(notebookHtml))
+            .text(String.join(System.lineSeparator(), codeCells)));
   }
 
   @Override
@@ -289,10 +294,8 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    dataSetService
-        .generateCodeCells(dataSetExportRequest, dbWorkspace)
-        .forEach(
-            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+    notebookFile =
+        addCells(notebookFile, dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
