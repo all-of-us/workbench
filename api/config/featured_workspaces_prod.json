@@ -287,6 +287,12 @@
       "namespace": "aou-rw-ed56f93b",
       "id": "regenieldlgwasusingcromwellv7",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Genetic Ancestry",
+      "namespace": "aou-rw-20e5a517",
+      "id": "geneticancestrydemoproject",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
