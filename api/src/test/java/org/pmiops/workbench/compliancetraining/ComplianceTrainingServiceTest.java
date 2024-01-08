@@ -129,6 +129,7 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
+    providedWorkbenchConfig.absorb.redirectMoodleUser = false;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
@@ -313,6 +314,42 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
+  public void testSyncComplianceTrainingStatus_Initial_Moodle_ResyncUsingAbsorbCausesNoChanges()
+      throws Exception {
+    setRTTrainingCompletedWithMoodle();
+
+    // Set up: The user completes and syncs CT training
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(BadgeName.CONTROLLED_TIER_TRAINING, defaultBadgeDetails()));
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+    var completionTime = currentTimestamp();
+    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, completionTime);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+
+    // All users will now be redirected to Absorb
+    providedWorkbenchConfig.absorb.redirectMoodleUser = true;
+    // Time passes and the user re-syncs
+    tick();
+    stubAbsorbAllTrainingsComplete(completionTime.toInstant(), completionTime.toInstant());
+
+    // Compliance Training information will come from Absorb now
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Completion timestamp should not change when the method is called again.
+    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, completionTime);
+    // Database will show the user is now using Absorb
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+  }
+
+  @Test
   public void testSyncComplianceTrainingStatus_Absorb_ResyncCausesNoChanges() throws Exception {
     // Set up: The user completes ands syncs RT training
     var completionTime = currentInstant();
@@ -407,6 +444,85 @@ public class ComplianceTrainingServiceTest {
     // Completion and expiry timestamp should be updated.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiredTrainingUsingAbsorb()
+      throws Exception {
+    // User completes RT training
+    var rtBadge = setRTTrainingCompletedWithMoodle();
+
+    // Time passes
+    tick();
+
+    // User completes CT training
+    BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(
+            BadgeName.REGISTERED_TIER_TRAINING,
+            rtBadge,
+            BadgeName.CONTROLLED_TIER_TRAINING,
+            ctBadge));
+
+    // Time passes
+    tick();
+
+    // User syncs training
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+
+    // The user should be updated in the database with a non-empty completion time.
+    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+
+    // Time passes
+    tick();
+
+    // Deprecate the old training.
+    rtBadge.setValid(false);
+    ctBadge.setValid(false);
+
+    // Time passes
+    tick();
+
+    // Completion timestamp should be wiped out by the expiry timestamp passing.
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
+    assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, null);
+
+    // Time passes
+    tick();
+
+    // Lets switch FF for redirect moodle user to Absorb
+    providedWorkbenchConfig.absorb.redirectMoodleUser = true;
+    var completionDateForRt_Absorb = currentInstant().minusSeconds(130);
+    var completionDateForCt_Absorb = currentInstant();
+    stubAbsorbAllTrainingsComplete(completionDateForRt_Absorb, completionDateForCt_Absorb);
+
+    // Time passes, user syncs training using Absorb
+    tick();
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Completion and expiry timestamp should be updated.
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForRt_Absorb));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(completionDateForCt_Absorb));
+
+    // Database should now show that source of training is Absorb
+    assertThat(
+            getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+    assertThat(
+            getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
+                .get()
+                .getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
   }
 
   @Test

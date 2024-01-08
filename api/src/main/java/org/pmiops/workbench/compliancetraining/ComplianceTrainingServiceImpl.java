@@ -102,6 +102,10 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public boolean useAbsorb() {
+    // If the feature flag is ON, redirect All user to Absorb
+    if (configProvider.get().absorb.redirectMoodleUser) {
+      return true;
+    }
     var userHasUsedMoodle =
         userAccessModuleDao.getAllByUser(userProvider.get()).stream()
             .anyMatch(

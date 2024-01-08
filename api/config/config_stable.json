@@ -93,7 +93,8 @@
   "absorb": {
     "externalDepartmentId": "Development",
     "samlIdentityProviderId": "C03q5hexf",
-    "samlServiceProviderId": "133137951028"
+    "samlServiceProviderId": "133137951028",
+    "redirectMoodleUser": false
   },
   "moodle": {
     "host": "aou.nnlm.gov",
