@@ -383,6 +383,7 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.LR_WHOLE_GENOME_VARIANT,
           Domain.ARRAY_DATA,
           Domain.STRUCTURAL_VARIANT_DATA,
+          Domain.SNP_INDEL_VARIANT,
         ].includes(it.type)
       );
     }
