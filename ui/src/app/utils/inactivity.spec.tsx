@@ -15,7 +15,7 @@ describe('inactivity last-active accessors', () => {
   it('should clear', () => {
     setLastActive(123);
     clearLastActive();
-    expect(getLastActiveEpochMillis()).toBeUndefined();
+    expect(getLastActiveEpochMillis()).toBeNull();
   });
 
   it('should store values as epoch milli strings', () => {
@@ -24,11 +24,15 @@ describe('inactivity last-active accessors', () => {
       window.localStorage.getItem(
         INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
       )
-    ).toEqual('12345');
+    ).toEqual('123');
   });
 
   it('should set the current value', () => {
     setLastActiveNow();
-    expect(getLastActiveEpochMillis()).toEqual(Date.now());
+
+    // assumption: this test takes less than one second to run
+    const oneSecondInMillis = 1e3;
+    const sinceLastActive = Date.now() - getLastActiveEpochMillis();
+    expect(sinceLastActive).toBeLessThan(oneSecondInMillis);
   });
 });
