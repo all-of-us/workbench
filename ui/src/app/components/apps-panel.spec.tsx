@@ -122,6 +122,34 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
+  it('should disable apps when billing is inactive', async () => {
+    // initial state: no apps exist
+    workspaceStub.billingStatus = BillingStatus.INACTIVE;
+
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+
+    const { container } = await component();
+    expect(container).toBeInTheDocument();
+
+    expect(findActiveApps()).not.toBeInTheDocument();
+    expect(findAvailableApps(false)).toBeInTheDocument();
+    // // Click unexpanded Jupyter app
+
+    const jupyter = expectUnexpandedApp('Jupyter');
+    jupyter.click();
+    // Expecting Jupter to be disabled. If it was not, the
+    // "Create New" button would show after clicking on Jupyter.
+    expect(screen.queryByText('Create New')).not.toBeInTheDocument();
+
+    const cromwell = expectUnexpandedApp('Cromwell');
+    cromwell.click();
+    // Expecting GKE Apps, such as Cromwell, to be disabled. If
+    // they were not, the apps panel would close after clicking on
+    // an unexpanded GKE app.
+    expect(findAvailableApps(false)).toBeInTheDocument();
+  });
+
   test.each([
     [true, true],
     [true, false],
