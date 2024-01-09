@@ -133,17 +133,13 @@ export class InstitutionApiStub extends InstitutionApi {
   getPublicInstitutionDetails(): Promise<GetPublicInstitutionDetailsResponse> {
     return new Promise((resolve) => {
       resolve({
-        institutions: this.institutions.map((x) => {
-          return {
-            shortName: x.shortName,
-            displayName: x.displayName,
-            organizationTypeEnum: x.organizationTypeEnum,
-            registeredTierMembershipRequirement: getTierConfig(
-              x,
-              AccessTierShortNames.Registered
-            ).membershipRequirement,
-          };
-        }),
+        institutions: this.institutions.map((inst) => ({
+          ...inst,
+          registeredTierMembershipRequirement: getTierConfig(
+            inst,
+            AccessTierShortNames.Registered
+          ).membershipRequirement,
+        })),
       });
     });
   }
