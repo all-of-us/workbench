@@ -379,6 +379,11 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Boolean> trainingsEnabled() {
+    return ResponseEntity.ok(complianceTrainingService.trainingsEnabled());
+  }
+
+  @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     userService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());

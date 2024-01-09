@@ -51,7 +51,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "defaultFreeCreditsDollarLimit",
       source = "config.billing.defaultFreeCreditsDollarLimit")
-  @Mapping(target = "trainingMigrationPauseActive", source = "config.moodle.trainingMigrationPauseActive")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
   @Mapping(target = "complianceTrainingHost", source = "config.moodle.host")
   @Mapping(target = "absorbSamlIdentityProviderId", source = "config.absorb.samlIdentityProviderId")

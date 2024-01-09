@@ -619,6 +619,31 @@ public class ComplianceTrainingServiceTest {
     assertThat(complianceTrainingService.useAbsorb()).isFalse();
   }
 
+  @Test
+  public void testTrainingsEnabled_TrueWhenMigrationPauseInactive() throws ApiException {
+    setRTTrainingCompletedWithMoodle();
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = false;
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  @Test
+  public void testTrainingsEnabled_TrueWhenMoodleNeverUsed() {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    // setRTTrainingCompletedWithMoodle is not called
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  @Test
+  public void testTrainingsEnabled_FalseWhenMigrationPauseActiveAndUsedMoodle()
+      throws ApiException {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    setRTTrainingCompletedWithMoodle();
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isFalse();
+  }
+
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }

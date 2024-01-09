@@ -9,4 +9,6 @@ public interface ComplianceTrainingService {
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException;
 
   public boolean useAbsorb();
+
+  public boolean trainingsEnabled();
 }

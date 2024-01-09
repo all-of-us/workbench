@@ -498,6 +498,19 @@ paths:
             application/json:
               schema:
                 type: boolean
+  /v1/account/trainings-enabled:
+    get:
+      tags:
+        - profile
+      summary: Whether trainings are enabled for this user. For use during the training migration.
+      operationId: trainingsEnabled
+      responses:
+        200:
+          description: Whether trainings are enabled for this user.
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/account/sync-era-commons-status:
     post:
       tags:
@@ -6771,9 +6784,6 @@ components:
         shibbolethUiBaseUrl:
           type: string
           description: The base URL to use for client-side Shibboleth redirects.
-        trainingMigrationPauseActive:
-          type: boolean
-          description: Whether the Moodle to Absorb migration pause is active.
         enableComplianceTraining:
           type: boolean
           description: Whether the Compliance Training access module is enabled.

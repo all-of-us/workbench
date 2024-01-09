@@ -11,7 +11,6 @@ import {
   isCompliant,
   isExpiringOrExpired,
 } from 'app/utils/access-utils';
-import { serverConfigStore } from 'app/utils/stores';
 
 export interface ComplianceTrainingModuleCardProps {
   tier: AccessTierShortNames;
@@ -23,8 +22,10 @@ export const ComplianceTrainingModuleCardTitle = ({
   profile,
 }: ComplianceTrainingModuleCardProps) => {
   const [useAbsorb, setUseAbsorb] = React.useState(false);
+  const [trainingsEnabled, setTrainingsEnabled] = React.useState(undefined);
   useEffect(() => {
     profileApi().useAbsorb().then(setUseAbsorb);
+    profileApi().trainingsEnabled().then(setTrainingsEnabled);
   }, []);
 
   const { accessModule, trainingTitle, courseTitle } =
@@ -49,8 +50,6 @@ export const ComplianceTrainingModuleCardTitle = ({
         accessModule
       ));
 
-  const { trainingMigrationPauseActive } = serverConfigStore.get().config;
-
   return (
     <>
       <div>
@@ -59,7 +58,7 @@ export const ComplianceTrainingModuleCardTitle = ({
       {showHelpText && (
         <p>Navigate to "My Courses" and select "{courseTitle}"</p>
       )}
-      {trainingMigrationPauseActive && (
+      {trainingsEnabled === false && (
         <p style={{ marginTop: '1rem' }}>
           Please note: We are currently migrating all trainings to a new
           platform. You will not be able to access the training until the

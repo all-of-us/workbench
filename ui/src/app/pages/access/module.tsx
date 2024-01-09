@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
@@ -9,6 +9,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { DARTitle } from 'app/pages/access/dar-title';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import {
   getAccessModuleConfig,
   getStatusText,
@@ -58,6 +59,11 @@ export interface ModuleProps {
 }
 
 export const Module = (props: ModuleProps) => {
+  const [trainingEnabled, setTrainingEnabled] = React.useState(undefined);
+  useEffect(() => {
+    profileApi().trainingsEnabled().then(setTrainingEnabled);
+  }, []);
+
   const {
     focused,
     children,
@@ -70,11 +76,10 @@ export const Module = (props: ModuleProps) => {
     status,
     style,
   } = props;
-  const { enableRasIdMeLinking, trainingMigrationPauseActive } =
-    serverConfigStore.get().config;
+  const { enableRasIdMeLinking } = serverConfigStore.get().config;
 
   const deactivateModuleForTrainingMigration =
-    trainingMigrationPauseActive &&
+    !trainingEnabled &&
     (moduleName === AccessModule.COMPLIANCE_TRAINING ||
       moduleName === AccessModule.CT_COMPLIANCE_TRAINING);
 

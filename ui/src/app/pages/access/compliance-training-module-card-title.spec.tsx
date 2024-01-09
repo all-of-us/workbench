@@ -96,10 +96,12 @@ const createProps = (): ComplianceTrainingModuleCardProps => ({
 const setup = (
   props = createProps(),
   config: ConfigResponse = { ...defaultServerConfig },
-  useAbsorb: boolean = false
+  useAbsorb: boolean = false,
+  trainingsEnabled: boolean = true
 ) => {
   registerApiClient(ProfileApi, new ProfileApiStub());
   profileApi().useAbsorb = () => Promise.resolve(useAbsorb);
+  profileApi().trainingsEnabled = () => Promise.resolve(trainingsEnabled);
   serverConfigStore.set({ config });
   return {
     container: render(<ComplianceTrainingModuleCardTitle {...props} />)
@@ -227,11 +229,9 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
         tier: AccessTierShortNames.Registered,
         profile: createProfileWithComplianceTraining(null, null, null),
       },
-      {
-        ...defaultServerConfig,
-        trainingMigrationPauseActive: true,
-      },
-      true
+      defaultServerConfig,
+      true,
+      false
     );
 
     await expectMigrationTextToExist();
@@ -244,10 +244,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
         tier: AccessTierShortNames.Registered,
         profile: createProfileWithComplianceTraining(null, null, null),
       },
-      {
-        ...defaultServerConfig,
-        trainingMigrationPauseActive: false,
-      },
+      defaultServerConfig,
+      true,
       true
     );
 
