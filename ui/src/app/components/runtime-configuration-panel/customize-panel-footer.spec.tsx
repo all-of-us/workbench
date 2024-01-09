@@ -377,44 +377,44 @@ describe(CustomizePanelFooter.name, () => {
         expect(onClose).not.toHaveBeenCalled();
       },
     ],
-    // [
-    //   'Create',
-    //   'allows',
-    //   'the runtime does not exist and the currentRuntime has no errors', // TODO better names for these!
-    //   {
-    //     unattachedPdExists: false,
-    //     unattachedDiskNeedsRecreate: false,
-    //     runtimeExists: false,
-    //     runtimeCanBeCreated: true,
-    //     currentRuntime: {
-    //       ...currentRuntime,
-    //       errors: [], // be explicit about the lack of errors
-    //     },
-    //   },
-    //   () => {
-    //     expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
-    //     expect(onClose).toHaveBeenCalled();
-    //   },
-    // ],
-    // [
-    //   'Create',
-    //   'disallows',
-    //   'the runtime does not exist and the currentRuntime has no errors, but the runtime cannot be created', // TODO better names for these!
-    //   {
-    //     unattachedPdExists: false,
-    //     unattachedDiskNeedsRecreate: false,
-    //     runtimeExists: false,
-    //     runtimeCanBeCreated: false,
-    //     currentRuntime: {
-    //       ...currentRuntime,
-    //       errors: [], // be explicit about the lack of errors
-    //     },
-    //   },
-    //   () => {
-    //     expect(requestAnalysisConfig).not.toHaveBeenCalled();
-    //     expect(onClose).not.toHaveBeenCalled();
-    //   },
-    // ],
+    [
+      'Create',
+      'allows',
+      'the runtime does not exist and the currentRuntime has no errors', // TODO better names for these!
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: true,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [], // be explicit about the lack of errors
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+        expect(onClose).toHaveBeenCalled();
+      },
+    ],
+    [
+      'Create',
+      'disallows',
+      'the runtime does not exist and the currentRuntime has no errors, but the runtime cannot be created', // TODO better names for these!
+      {
+        unattachedPdExists: false,
+        unattachedDiskNeedsRecreate: false,
+        runtimeExists: false,
+        runtimeCanBeCreated: false,
+        currentRuntime: {
+          ...currentRuntime,
+          errors: [], // be explicit about the lack of errors
+        },
+      },
+      () => {
+        expect(requestAnalysisConfig).not.toHaveBeenCalled();
+        expect(onClose).not.toHaveBeenCalled();
+      },
+    ],
   ])(
     'renders the %s button and %s clicking when %s ',
     async (
