@@ -69,7 +69,7 @@ describe(CreatePanel.name, () => {
     'should recommend an appropriate preset for the %s computeType',
     async (computeType, analysisConfig, expectedText) => {
       await component({ analysisConfig });
-      expect(screen.queryByText(expectedText)).toBeInTheDocument();
+      screen.getByText(expectedText);
     }
   );
 
