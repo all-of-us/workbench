@@ -140,9 +140,7 @@ describe(StartStopEnvironmentButton.name, () => {
     const button = screen.getByAltText('Tooltip for testing disabled');
     await user.pointer([{ pointerName: 'mouse', target: button }]);
     // Show tooltip when hovering over disabled button.
-    expect(
-      screen.queryByText('Tooltip for testing disabled')
-    ).toBeInTheDocument();
+    screen.getByText('Tooltip for testing disabled');
   });
 
   it('does not show disabled tooltip when enabled', async () => {
