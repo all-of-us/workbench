@@ -40,7 +40,7 @@ def service_account_context_for_bq(project, account)
 
   original_account = get_active_gcloud_account()
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
-  key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
+  key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp/colima")
   ServiceAccountContext.new(
     project, account, key_file.path).run do
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
