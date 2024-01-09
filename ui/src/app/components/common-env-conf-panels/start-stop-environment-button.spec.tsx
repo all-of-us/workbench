@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { UIAppType } from 'app/components/apps-panel/utils';
 
 import {
@@ -127,4 +128,16 @@ describe(StartStopEnvironmentButton.name, () => {
       });
     }
   );
+
+  it('shows disabled tooltip when disabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      disabled: true,
+      disabledTooltip: 'Tooltip for testing disabled',
+    });
+    const disabledButton = screen.getByAltText('Tooltip for testing disabled');
+    await user.pointer([{ pointerName: 'mouse', target: disabledButton }]);
+    // Show tooltip when hovering over disabled button.
+    await screen.findByText('Tooltip for testing disabled');
+  });
 });
