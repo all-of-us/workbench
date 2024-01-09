@@ -293,8 +293,6 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
   );
 
-  const billingDisabled = workspace.billingStatus === BillingStatus.INACTIVE;
-
   return (
     <FlexColumn
       style={styles.expandedAppContainer}
