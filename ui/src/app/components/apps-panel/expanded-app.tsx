@@ -93,13 +93,9 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
   );
 };
 
-const PauseRuntimeButton = (props: {
-  disabled: boolean;
-  workspace: Workspace;
-}) => {
+const PauseRuntimeButton = (props: { workspace: Workspace }) => {
   const {
-    disabled,
-    workspace: { namespace, googleProject },
+    workspace: { billingStatus, namespace, googleProject },
   } = props;
 
   const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
@@ -109,7 +105,7 @@ const PauseRuntimeButton = (props: {
 
   return (
     <PauseResumeButton
-      {...{ disabled }}
+      disabled={billingStatus === BillingStatus.INACTIVE}
       externalStatus={fromRuntimeStatus(runtimeStatus)}
       onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -118,16 +114,15 @@ const PauseRuntimeButton = (props: {
 };
 
 const JupyterButtonRow = (props: {
-  disabled: boolean;
   workspace: Workspace;
   onClickRuntimeConf: Function;
 }) => {
-  const { disabled, workspace, onClickRuntimeConf } = props;
+  const { workspace, onClickRuntimeConf } = props;
   return (
     <FlexRow>
       <SettingsButton onClick={onClickRuntimeConf} />
-      <PauseRuntimeButton {...{ disabled, workspace }} />
-      <NewNotebookButton {...{ disabled, workspace }} />
+      <PauseRuntimeButton {...{ workspace }} />
+      <NewNotebookButton {...{ workspace }} />
     </FlexRow>
   );
 };
@@ -260,7 +255,6 @@ const SASButtonRow = (props: {
 
 interface ExpandedAppProps {
   appType: UIAppType;
-  disabled: boolean;
   initialUserAppInfo: UserAppEnvironment;
   workspace: Workspace;
   onClickRuntimeConf: Function;
@@ -271,7 +265,6 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
   const {
     appType,
-    disabled,
     initialUserAppInfo,
     workspace,
     onClickRuntimeConf,
@@ -299,6 +292,8 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
     [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
   );
+
+  const billingDisabled = workspace.billingStatus === BillingStatus.INACTIVE;
 
   return (
     <FlexColumn
@@ -343,7 +338,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         </TooltipTrigger>
       </FlexRow>
       {appType === UIAppType.JUPYTER ? (
-        <JupyterButtonRow {...{ disabled, workspace, onClickRuntimeConf }} />
+        <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
         <FlexColumn>
           <FlexRow style={{ justifyContent: 'center' }}>

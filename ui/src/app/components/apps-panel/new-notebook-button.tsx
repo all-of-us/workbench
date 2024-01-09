@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { Workspace } from 'generated/fetch';
+import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
@@ -10,11 +10,8 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 import { AppsPanelButton } from './apps-panel-button';
 
-export const NewNotebookButton = (props: {
-  disabled: boolean;
-  workspace: Workspace;
-}) => {
-  const { disabled, workspace } = props;
+export const NewNotebookButton = (props: { workspace: Workspace }) => {
+  const { workspace } = props;
 
   const [showModal, setShowModal] = useState(false);
   const [notebookNameList, setNotebookNameList] = useState<string[]>([]);
@@ -41,7 +38,7 @@ export const NewNotebookButton = (props: {
         />
       )}
       <AppsPanelButton
-        {...{ disabled }}
+        disabled={workspace.billingStatus === BillingStatus.INACTIVE}
         onClick={() => setShowModal(true)}
         icon={faPlusCircle}
         buttonText='Create New'

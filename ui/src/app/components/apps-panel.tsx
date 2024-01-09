@@ -124,7 +124,6 @@ export const AppsPanel = (props: {
               appType={activeApp.appType}
               key={activeApp.appType}
               initialUserAppInfo={findApp(userApps, activeApp.appType)}
-              disabled={workspace.billingStatus === BillingStatus.INACTIVE}
             />
           ))}
         </FlexColumn>
@@ -151,7 +150,6 @@ export const AppsPanel = (props: {
                 appType={availableApp.appType}
                 key={availableApp.appType}
                 initialUserAppInfo={findApp(userApps, availableApp.appType)}
-                disabled={workspace.billingStatus === BillingStatus.INACTIVE}
               />
             ) : (
               <TooltipTrigger

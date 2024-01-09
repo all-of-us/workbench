@@ -67,14 +67,12 @@ const onClickDeleteGkeApp = jest.fn();
 
 const component = async (
   appType: UIAppType,
-  initialUserAppInfo: UserAppEnvironment,
-  disabled = false
+  initialUserAppInfo: UserAppEnvironment
 ) =>
   renderModal(
     <ExpandedApp
       {...{
         appType,
-        disabled,
         initialUserAppInfo,
         workspace,
         onClickRuntimeConf,
