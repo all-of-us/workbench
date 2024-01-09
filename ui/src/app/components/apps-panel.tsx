@@ -63,10 +63,7 @@ const UnexpandedApp = (props: {
       <FlexRow style={styles.availableApp}>
         <AppBanner
           {...{ appType }}
-          style={{
-            ...{ marginRight: '1em', padding: '1rem' },
-            ...(disabled && { filter: 'saturate(9) grayscale(1)' }),
-          }}
+          style={{ marginRight: '1em', padding: '1rem' }}
         />
       </FlexRow>
     </Clickable>
