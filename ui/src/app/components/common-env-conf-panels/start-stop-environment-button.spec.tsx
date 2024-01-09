@@ -132,12 +132,32 @@ describe(StartStopEnvironmentButton.name, () => {
   it('shows disabled tooltip when disabled', async () => {
     const user = userEvent.setup();
     await component({
+      status: RuntimeStatus.STOPPED,
+      appType: UIAppType.JUPYTER,
       disabled: true,
       disabledTooltip: 'Tooltip for testing disabled',
     });
-    const disabledButton = screen.getByAltText('Tooltip for testing disabled');
-    await user.pointer([{ pointerName: 'mouse', target: disabledButton }]);
+    const button = screen.getByAltText('Tooltip for testing disabled');
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
     // Show tooltip when hovering over disabled button.
-    await screen.findByText('Tooltip for testing disabled');
+    expect(
+      screen.queryByText('Tooltip for testing disabled')
+    ).toBeInTheDocument();
+  });
+
+  it('does not show disabled tooltip when enabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      status: RuntimeStatus.STOPPED,
+      appType: UIAppType.JUPYTER,
+      disabled: false,
+      disabledTooltip: 'Tooltip for testing disabled',
+    });
+    const button = screen.getByAltText('Environment paused, click to resume');
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
+    // Do not show tooltip when hovering over disabled button.
+    expect(
+      screen.queryByText('Tooltip for testing disabled')
+    ).not.toBeInTheDocument();
   });
 });
