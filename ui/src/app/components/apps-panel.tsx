@@ -21,6 +21,7 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
 import { AppBanner } from './apps-panel/app-banner';
@@ -64,7 +65,7 @@ const UnexpandedApp = (props: {
           {...{ appType }}
           style={{
             ...{ marginRight: '1em', padding: '1rem' },
-            ...(disabled && { filter: 'grayscale(1)' }),
+            ...(disabled && { filter: 'saturate(9) grayscale(1)' }),
           }}
         />
       </FlexRow>
@@ -155,9 +156,7 @@ export const AppsPanel = (props: {
             ) : (
               <TooltipTrigger
                 disabled={workspace.billingStatus !== BillingStatus.INACTIVE}
-                content={
-                  'You have either run out of initial credits or have an inactive billing account.'
-                }
+                content={BILLING_ACCOUNT_DISABLED_TOOLTIP}
               >
                 <div
                   style={{

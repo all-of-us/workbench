@@ -53,6 +53,7 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
+import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
@@ -364,8 +365,7 @@ export const RuntimeConfigurationPanel = fp.flow(
 
     let runtimeCannotBeCreatedExplanation;
     if (workspace.billingStatus !== BillingStatus.ACTIVE) {
-      runtimeCannotBeCreatedExplanation =
-        'You have either run out of initial credits or have an inactive billing account.';
+      runtimeCannotBeCreatedExplanation = BILLING_ACCOUNT_DISABLED_TOOLTIP;
     }
 
     const runtimeCanBeUpdated =
