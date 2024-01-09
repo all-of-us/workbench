@@ -241,13 +241,8 @@ export const TanagraResourceList = fp.flow(
         'none'
       }`;
     } else if (conceptSetTanagra) {
-      const domain =
-        JSON.parse(conceptSetTanagra.criteria.uiConfig)?.title ?? '';
-      const selection =
-        JSON.parse(conceptSetTanagra.criteria.selectionData)?.selected?.[0]
-          ?.name ?? '';
-      displayName = `${domain}: ${selection}`;
-      url = `${urlPrefix}/conceptSets/edit/${conceptSetTanagra.id}`;
+      displayName = conceptSetTanagra.displayName;
+      url = `${urlPrefix}/featureSets/${conceptSetTanagra.id}`;
     } else if (reviewTanagra) {
       displayName = reviewTanagra.displayName;
       url = `${urlPrefix}/reviews/${reviewTanagra.cohort.id}/${reviewTanagra.id}`;
