@@ -119,7 +119,7 @@ describe(CreatePanel.name, () => {
     expect(createButton).toBeInTheDocument();
     await user.pointer([{ pointerName: 'mouse', target: createButton }]);
     // Show tooltip when hovering over disabled button.
-    expect(screen.queryByText('Tooltip for testing')).toBeInTheDocument();
+    screen.getByText('Tooltip for testing');
   });
   it('does not show a tooltip when hovering over createButton if you can create a runtime', async () => {
     const user = userEvent.setup();
