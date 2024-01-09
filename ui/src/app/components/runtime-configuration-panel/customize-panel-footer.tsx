@@ -135,12 +135,11 @@ export const CustomizePanelFooter = ({
           ),
         ],
         [
-          currentRuntime?.errors &&
-            currentRuntime.errors.length > 0 &&
-            runtimeCanBeCreated,
+          currentRuntime?.errors && currentRuntime.errors.length > 0,
           () => (
             <Button
               aria-label='Try Again'
+              disabled={!runtimeCanBeCreated}
               onClick={() => {
                 requestAnalysisConfig(analysisConfig);
                 onClose();
