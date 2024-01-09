@@ -9,7 +9,6 @@ import {
   Institution,
   InstitutionMembershipRequirement,
   InstitutionTierConfig,
-  OrganizationType,
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
@@ -30,10 +29,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { Scroll } from 'app/icons/scroll';
-import {
-  MembershipRequirements,
-  OrganizationTypeOptions,
-} from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -159,6 +154,17 @@ const EnableCtSwitch = (props: {
     />
   );
 };
+
+const MembershipRequirements = [
+  {
+    label: 'Email address is at one of the following domains:',
+    value: InstitutionMembershipRequirement.DOMAINS,
+  },
+  {
+    label: 'Individual email address is listed below:',
+    value: InstitutionMembershipRequirement.ADDRESSES,
+  },
+];
 
 const RequirementDropdown = (props: {
   tierConfig: InstitutionTierConfig;
@@ -389,7 +395,6 @@ interface InstitutionEditState {
   institutionMode: InstitutionMode;
   institution: Institution;
   institutionBeforeEdits: Institution;
-  showOtherInstitutionTextBox: boolean;
   showBackButtonWarning: boolean;
   showApiError: boolean;
   title: string;
@@ -412,7 +417,6 @@ export const AdminInstitutionEdit = fp.flow(
           organizationTypeEnum: null,
         },
         institutionBeforeEdits: null,
-        showOtherInstitutionTextBox: false,
         showBackButtonWarning: false,
         showApiError: false,
         title: '',
@@ -424,8 +428,6 @@ export const AdminInstitutionEdit = fp.flow(
         institutionMode: InstitutionMode.EDIT,
         institution: loadedInstitution,
         institutionBeforeEdits: loadedInstitution,
-        showOtherInstitutionTextBox:
-          loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
         title: loadedInstitution.displayName,
       });
     }
@@ -570,7 +572,6 @@ export const AdminInstitutionEdit = fp.flow(
       return (
         institution.displayName ||
         institution.userInstructions ||
-        institution.organizationTypeEnum ||
         institution.tierConfigs
       );
     }
@@ -641,10 +642,6 @@ export const AdminInstitutionEdit = fp.flow(
         ),
       };
 
-      if (institution.organizationTypeEnum !== OrganizationType.OTHER) {
-        institutionToSave.organizationTypeOtherText = null;
-      }
-
       if (institutionMode === InstitutionMode.EDIT) {
         await institutionApi()
           .updateInstitution(
@@ -670,15 +667,6 @@ export const AdminInstitutionEdit = fp.flow(
       this.setState({ apiErrorMsg: errorMsg, showApiError: true });
     }
 
-    updateInstitutionRole(institutionRole) {
-      this.setState({
-        showOtherInstitutionTextBox: institutionRole === OrganizationType.OTHER,
-      });
-      this.setState(
-        fp.set(['institution', 'organizationTypeEnum'], institutionRole)
-      );
-    }
-
     backButton() {
       if (!this.fieldsNotEdited()) {
         this.setState({ showBackButtonWarning: true });
@@ -700,13 +688,8 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     render() {
-      const { institution, showOtherInstitutionTextBox, title } = this.state;
-      const {
-        displayName,
-        organizationTypeEnum,
-        organizationTypeOtherText,
-        requestAccessUrl,
-      } = institution;
+      const { institution, title } = this.state;
+      const { displayName, requestAccessUrl } = institution;
 
       validate.validators.customEmailAddresses = (
         accessTierShortName: string
@@ -755,10 +738,6 @@ export const AdminInstitutionEdit = fp.flow(
       const errors = validate(
         {
           displayName,
-          organizationTypeEnum,
-          organizationTypeOtherText:
-            organizationTypeEnum !== OrganizationType.OTHER ||
-            organizationTypeOtherText,
           registeredTierEmailAddresses: AccessTierShortNames.Registered,
           controlledTierEmailAddresses: AccessTierShortNames.Controlled,
           registeredTierEmailDomains: AccessTierShortNames.Registered,
@@ -775,8 +754,6 @@ export const AdminInstitutionEdit = fp.flow(
               tooLong: 'must be %{count} characters or less',
             },
           },
-          organizationTypeEnum: { presence: { allowEmpty: false } },
-          organizationTypeOtherText: { truthiness: true },
           registeredTierEmailAddresses: { customEmailAddresses: {} },
           controlledTierEmailAddresses: { customEmailAddresses: {} },
           registeredTierEmailDomains: { customEmailDomains: {} },
@@ -844,35 +821,6 @@ export const AdminInstitutionEdit = fp.flow(
                 >
                   {institution.displayName && errors?.displayName}
                 </div>
-                <label style={styles.label}>Institution Type</label>
-                <Dropdown
-                  appendTo='self'
-                  style={{ width: '24rem' }}
-                  data-test-id='organization-dropdown'
-                  placeholder='Organization Type'
-                  options={OrganizationTypeOptions}
-                  value={institution.organizationTypeEnum}
-                  onChange={(v) => this.updateInstitutionRole(v.value)}
-                />
-                {showOtherInstitutionTextBox && (
-                  <TextInputWithLabel
-                    value={institution.organizationTypeOtherText}
-                    onChange={(v) =>
-                      this.setState(
-                        fp.set(['institution', 'organizationTypeOtherText'], v)
-                      )
-                    }
-                    onBlur={(v) =>
-                      this.setState(
-                        fp.set(
-                          ['institution', 'organizationTypeOtherText'],
-                          v.trim()
-                        )
-                      )
-                    }
-                    inputStyle={{ width: '24rem', marginTop: '1.2rem' }}
-                  />
-                )}
                 <TextInputWithLabel
                   value={requestAccessUrl ?? ''}
                   inputId='requestAccessUrl'
@@ -990,18 +938,11 @@ export const AdminInstitutionEdit = fp.flow(
                         <BulletAlignedUnorderedList>
                           {[
                             errors.displayName,
-                            errors.organizationTypeEnum,
                             errors.registeredTierEmailAddresses,
                             errors.registeredTierEmailDomains,
                             errors.controlledTierEmailAddresses,
                             errors.controlledTierEmailDomains,
                           ].map((e) => e && <li key={e}>{e}</li>)}
-                          {errors.organizationTypeOtherText && (
-                            <li>
-                              Organization Type 'Other' requires additional
-                              information
-                            </li>
-                          )}
                           {errors.requestAccessUrl?.map(
                             (e) => e && <li key={e}>{e}</li>
                           )}

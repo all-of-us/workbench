@@ -3,18 +3,13 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  OrganizationType,
-} from 'generated/fetch';
+import { Institution, InstitutionMembershipRequirement } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { SemiBoldHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { capStringWithEllipsis, reactStyles } from 'app/utils';
@@ -94,18 +89,6 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return <a href={link}>{institution.displayName}</a>;
     }
 
-    renderOrganizationType(institution: Institution) {
-      // This should fail if the organization value is not in list
-      const organizationLabel = OrganizationTypeOptions.filter(
-        (organization) =>
-          organization.value === institution.organizationTypeEnum
-      )[0].label;
-      if (institution.organizationTypeEnum === OrganizationType.OTHER) {
-        return `${organizationLabel} - ${institution.organizationTypeOtherText}`;
-      }
-      return organizationLabel;
-    }
-
     renderAccessTiers(institution: Institution) {
       return fp.flow(
         fp.filter<string>(
@@ -179,13 +162,6 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 bodyStyle={styles.text}
                 headerStyle={styles.header}
                 frozen={true}
-              />
-              <Column
-                field='organizationTypeEnum'
-                header='Institution Type'
-                body={this.renderOrganizationType}
-                bodyStyle={styles.text}
-                headerStyle={styles.header}
               />
               <Column
                 field='accessTiers'
