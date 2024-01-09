@@ -374,8 +374,15 @@ export const RuntimeConfigurationPanel = fp.flow(
       canUpdateRuntime(runtimeStatus);
 
     let runtimeCannotBeUpdatedExplanation;
-    if (!runtimeCanBeCreated) {
-      runtimeCannotBeUpdatedExplanation = runtimeCannotBeCreatedExplanation;
+    if (runtimeCanBeUpdated) {
+      if (!runtimeCanBeCreated) {
+        runtimeCannotBeUpdatedExplanation = runtimeCannotBeCreatedExplanation;
+      } else if (environmentChanged) {
+        runtimeCannotBeUpdatedExplanation =
+          'Runtime cannot be updated, because environment has not changed.';
+      } else {
+        runtimeCannotBeUpdatedExplanation = `Runtime cannot be updated, because it is in the ${runtimeStatus} state.`;
+      }
     }
 
     if (!runtimeLoaded) {
@@ -406,6 +413,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                   profile,
                   requestAnalysisConfig,
                   runtimeCanBeCreated,
+                  runtimeCannotBeCreatedExplanation,
                   runtimeStatus,
                   setPanelContent,
                   workspace,
