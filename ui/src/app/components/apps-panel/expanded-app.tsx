@@ -186,7 +186,7 @@ const RStudioButtonRow = (props: {
   if (billingAccountDisabled) {
     tooltip = BILLING_ACCOUNT_DISABLED_TOOLTIP;
   } else if (userApp?.status !== AppStatus.RUNNING) {
-    ('Environment must be running to launch RStudio');
+    tooltip = 'Environment must be running to launch RStudio';
   }
   return (
     <FlexRow>
