@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 
@@ -59,7 +61,13 @@ describe('AppsList', () => {
     within(firstDataRow).getByAltText('Jupyter');
 
     // // Fourth column of table displays file name with extension
-    within(firstDataRow).getByText(firstNotebook.name);
+    const expectedLink = `${analysisTabPath(
+      workspaceDataStub.namespace,
+      workspaceDataStub.id
+    )}/preview/mockFile.ipynb`;
+    expect(
+      within(firstDataRow).getByRole('link', { name: firstNotebook.name })
+    ).toHaveAttribute('href', expectedLink);
 
     // // Fifth column of notebook table displays last modified time
     within(firstDataRow).getByText(
@@ -69,24 +77,4 @@ describe('AppsList', () => {
     // Sixth column of notebook table displays last modified by
     within(firstDataRow).getByText(firstNotebook.lastModifiedBy);
   });
-
-  // it('should redirect to notebook playground mode when file name of Jupyter App is clicked', async () => {
-  //   currentWorkspaceStore.next(workspaceDataStub);
-  //   const { container } = render(
-  //     <MemoryRouter>
-  //       <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
-  //     </MemoryRouter>
-  //   );
-  //
-  //   const expected = `${analysisTabPath(
-  //     workspaceDataStub.namespace,
-  //     workspaceDataStub.id
-  //   )}/preview/mockFile.ipynb`;
-  //   expect(
-  //     appsFilesTableColumns(container)
-  //       .at(NAME_COLUMN_NUMBER)
-  //       .querySelector('a')
-  //       .prop('href')
-  //   ).toBe(expected);
-  // });
 });
