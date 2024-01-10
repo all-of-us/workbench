@@ -628,16 +628,24 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testTrainingsEnabled_TrueWhenMoodleNeverUsed() {
+  public void testTrainingsEnabled_TrueDuringPauseIfNoTrainingsTaken() {
     providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
-    // setRTTrainingCompletedWithMoodle is not called
+    // The user has taken no trainings
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  public void testTrainingsEnabled_TrueDuringPauseIfUsedAbsorb()
+      throws org.pmiops.workbench.absorb.ApiException, ApiException {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    stubAbsorbAllTrainingsComplete(currentInstant(), currentInstant());
+    user = complianceTrainingService.syncComplianceTrainingStatus();
 
     assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
   }
 
   @Test
-  public void testTrainingsEnabled_FalseWhenMigrationPauseActiveAndUsedMoodle()
-      throws ApiException {
+  public void testTrainingsEnabled_FalseDuringPauseIfUsedMoodle() throws ApiException {
     providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
     setRTTrainingCompletedWithMoodle();
 
