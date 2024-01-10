@@ -16,6 +16,7 @@ import { LinkButton } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { Select } from 'app/components/inputs';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import {
@@ -195,14 +196,17 @@ export const CustomizePanel = ({
               Compute type
             </label>
             <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
-              <Dropdown
+              <Select
+                aria-label='Compute type' // unfortunately needed b/c setting id does not work as expected
                 id='runtime-compute'
-                appendTo='self'
-                disabled={!allowDataproc || disableControls}
-                style={{ width: '15rem' }}
-                options={[ComputeType.Standard, ComputeType.Dataproc]}
+                isDisabled={!allowDataproc || disableControls}
+                // defaultValue={ComputeType.Standard}
                 value={analysisConfig.computeType || ComputeType.Standard}
-                onChange={({ value: computeType }) =>
+                options={[
+                  { value: ComputeType.Standard, label: ComputeType.Standard },
+                  { value: ComputeType.Dataproc, label: ComputeType.Dataproc },
+                ]}
+                onChange={(computeType: ComputeType) =>
                   // When the compute type changes, we need to normalize the config and potentially restore defaults.
                   setAnalysisConfig(
                     withAnalysisConfigDefaults(
