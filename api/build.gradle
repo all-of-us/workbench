@@ -725,12 +725,12 @@ task listProjectAPIs(type: GenerateAPIListingTask)
 def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
 
+// run with "./gradlew reportLibyears"
 libyear {
     configurations = ['compileClasspath']
     failOnError = false // necessary for sam-client
     validator = singleArtifactMustNotBeOlderThan(years(10))
 }
-
 
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
