@@ -16,12 +16,19 @@ export interface Action {
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
-  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
+  menuButtonComponentOverride?: (props: {
+    disabled: boolean;
+    title?: string;
+  }) => JSX.Element;
+  menuButtonTitle?: string;
 }) => {
-  const { actions, disabled, menuButtonComponentOverride } = props;
+  const { actions, disabled, menuButtonTitle, menuButtonComponentOverride } =
+    props;
 
-  const menuButtonComponent: (props: { disabled: boolean }) => JSX.Element =
-    menuButtonComponentOverride ?? SnowmanButton;
+  const menuButtonComponent: (props: {
+    disabled: boolean;
+    title?: string;
+  }) => JSX.Element = menuButtonComponentOverride ?? SnowmanButton;
 
   return (
     <PopupTrigger
@@ -43,7 +50,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {menuButtonComponent({ ...{ disabled } })}
+      {menuButtonComponent({ ...{ disabled }, title: menuButtonTitle })}
     </PopupTrigger>
   );
 };
