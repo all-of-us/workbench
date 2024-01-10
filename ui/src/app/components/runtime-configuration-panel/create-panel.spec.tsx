@@ -92,6 +92,8 @@ describe(CreatePanel.name, () => {
     createButton.click();
     await waitFor(() => {
       expect(requestAnalysisConfig).toHaveBeenCalledWith(defaultAnalysisConfig);
+    });
+    await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
   });
@@ -104,6 +106,8 @@ describe(CreatePanel.name, () => {
     createButton.click();
     await waitFor(() => {
       expect(requestAnalysisConfig).not.toHaveBeenCalled();
+    });
+    await waitFor(() => {
       expect(onClose).not.toHaveBeenCalled();
     });
   });
