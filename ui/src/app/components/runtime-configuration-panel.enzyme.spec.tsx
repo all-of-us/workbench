@@ -11,10 +11,7 @@ import {
 } from 'generated/fetch';
 import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Button, LinkButton } from 'app/components/buttons';
-import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
+import { Button } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import {
@@ -27,7 +24,6 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 import {
-  ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   MIN_DISK_SIZE_GB,

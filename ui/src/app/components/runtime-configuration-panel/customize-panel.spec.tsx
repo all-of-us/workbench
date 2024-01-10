@@ -129,7 +129,7 @@ describe(CustomizePanel.name, () => {
       computeType: ComputeType.Standard, // already the case, but make it explicit
     };
     const user = userEvent.setup();
-    const { container } = await component({
+    await component({
       analysisConfig,
       allowDataproc: true,
     });
@@ -156,7 +156,7 @@ describe(CustomizePanel.name, () => {
       computeType: ComputeType.Dataproc,
     };
     const user = userEvent.setup();
-    const { container } = await component({
+    await component({
       analysisConfig,
       allowDataproc: true,
     });
