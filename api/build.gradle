@@ -729,7 +729,7 @@ def db_port = System.getenv("DB_PORT")
 libyear {
     configurations = ['compileClasspath']
     failOnError = false // necessary for sam-client
-    validator = singleArtifactMustNotBeOlderThan(years(10))
+    validator = singleArtifactMustNotBeOlderThan(years(15))
 }
 
 // See project.rb command: fetch-firecloud-user-profiles
