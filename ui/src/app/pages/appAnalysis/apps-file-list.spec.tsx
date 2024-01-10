@@ -17,13 +17,6 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-const appsFilesTable = (container) =>
-  container
-    .querySelector('[data-test-id="apps-file-list"]')
-    .querySelector('tbody');
-const appsFilesTableColumns = (container) =>
-  appsFilesTable(container).querySelector('td');
-
 const MENU_COLUMN_NUMBER = 0;
 const APPLICATION_COLUMN_NUMBER = 1;
 const NAME_COLUMN_NUMBER = 2;
@@ -50,7 +43,6 @@ describe('AppsList', () => {
     const firstNotebook = NotebooksApiStub.stubNotebookList()[0];
     // First Column : Menu icon
     await waitFor(() => {
-      console.log(screen.logTestingPlaygroundURL());
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
       expect(
         within(firstDataRow).getByTitle('Notebook Action Menu')
