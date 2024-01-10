@@ -102,9 +102,9 @@ describe(StartStopEnvironmentButton.name, () => {
         // clicking does nothing: onPause is not called, and we also continue to display the text
 
         await waitFor(() => {
-          expect(onPause).not.toHaveBeenCalled();
           expect(screen.getByAltText(runningText)).toBeInTheDocument();
         });
+        expect(onPause).not.toHaveBeenCalled();
       });
 
       it('allows resuming a paused app', async () => {
@@ -122,9 +122,9 @@ describe(StartStopEnvironmentButton.name, () => {
         // clicking does nothing: onResume is not called, and we also continue to display the text
 
         await waitFor(() => {
-          expect(onResume).not.toHaveBeenCalled();
           expect(screen.getByAltText(pausedText)).toBeInTheDocument();
         });
+        expect(onResume).not.toHaveBeenCalled();
       });
     }
   );
