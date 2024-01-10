@@ -115,6 +115,8 @@ describe(CustomizePanelFooter.name, () => {
     createButton.click();
     await waitFor(() => {
       expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+    });
+    await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
   });
