@@ -61,6 +61,7 @@ export interface ModuleProps {
 export const Module = (props: ModuleProps) => {
   const [trainingEnabled, setTrainingEnabled] = React.useState(undefined);
   useEffect(() => {
+    // This logic is temporary and will be removed when the training migration is complete
     profileApi().trainingsEnabled().then(setTrainingEnabled);
   }, []);
 

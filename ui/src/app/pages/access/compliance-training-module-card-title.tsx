@@ -24,6 +24,7 @@ export const ComplianceTrainingModuleCardTitle = ({
   const [useAbsorb, setUseAbsorb] = React.useState(false);
   const [trainingsEnabled, setTrainingsEnabled] = React.useState(undefined);
   useEffect(() => {
+    // This logic is temporary and will be removed when the training migration is complete
     profileApi().useAbsorb().then(setUseAbsorb);
     profileApi().trainingsEnabled().then(setTrainingsEnabled);
   }, []);

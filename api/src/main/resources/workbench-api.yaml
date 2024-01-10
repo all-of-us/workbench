@@ -502,7 +502,10 @@ paths:
     get:
       tags:
         - profile
-      summary: Whether trainings are enabled for this user. For use during the training migration.
+      summary: |
+        Whether trainings are enabled for this user.
+        This endpoint is used to assist in the LMS migration.
+        It is temporary and will be removed after the migration.
       operationId: trainingsEnabled
       responses:
         200:
