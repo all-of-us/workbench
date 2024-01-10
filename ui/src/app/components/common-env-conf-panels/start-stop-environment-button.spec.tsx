@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { UIAppType } from 'app/components/apps-panel/utils';
 
 import {
@@ -101,9 +102,9 @@ describe(StartStopEnvironmentButton.name, () => {
         // clicking does nothing: onPause is not called, and we also continue to display the text
 
         await waitFor(() => {
-          expect(onPause).not.toHaveBeenCalled();
           expect(screen.getByAltText(runningText)).toBeInTheDocument();
         });
+        expect(onPause).not.toHaveBeenCalled();
       });
 
       it('allows resuming a paused app', async () => {
@@ -121,10 +122,40 @@ describe(StartStopEnvironmentButton.name, () => {
         // clicking does nothing: onResume is not called, and we also continue to display the text
 
         await waitFor(() => {
-          expect(onResume).not.toHaveBeenCalled();
           expect(screen.getByAltText(pausedText)).toBeInTheDocument();
         });
+        expect(onResume).not.toHaveBeenCalled();
       });
     }
   );
+
+  it('shows disabled tooltip when disabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      status: RuntimeStatus.STOPPED,
+      appType: UIAppType.JUPYTER,
+      disabled: true,
+      disabledTooltip: 'Tooltip for testing disabled',
+    });
+    const button = screen.getByAltText('Tooltip for testing disabled');
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
+    // Show tooltip when hovering over disabled button.
+    screen.getByText('Tooltip for testing disabled');
+  });
+
+  it('does not show disabled tooltip when enabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      status: RuntimeStatus.STOPPED,
+      appType: UIAppType.JUPYTER,
+      disabled: false,
+      disabledTooltip: 'Tooltip for testing disabled',
+    });
+    const button = screen.getByAltText('Environment paused, click to resume');
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
+    // Do not show tooltip when hovering over disabled button.
+    expect(
+      screen.queryByText('Tooltip for testing disabled')
+    ).not.toBeInTheDocument();
+  });
 });

@@ -1,9 +1,15 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { AppType, CreateAppRequest, UserAppEnvironment } from 'generated/fetch';
+import {
+  AppType,
+  BillingStatus,
+  CreateAppRequest,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
-import { canCreateApp } from 'app/components/apps-panel/utils';
+import { cond } from '@terra-ui-packages/core-utils';
+import { isAppActive } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SUPPORT_EMAIL } from 'app/components/support';
@@ -17,6 +23,7 @@ export interface CreateGKEAppButtonProps {
   workspaceNamespace: string;
   onDismiss: () => void;
   username: string;
+  billingStatus: BillingStatus;
 }
 
 export function CreateGkeAppButton({
@@ -25,9 +32,13 @@ export function CreateGkeAppButton({
   workspaceNamespace,
   onDismiss,
   username,
+  billingStatus,
 }: CreateGKEAppButtonProps) {
   const [creatingApp, setCreatingApp] = useState(false);
-  const createEnabled = !creatingApp && canCreateApp(existingApp);
+  const createEnabled =
+    !creatingApp &&
+    !isAppActive(existingApp) &&
+    billingStatus === BillingStatus.ACTIVE;
 
   const appTypeString = appTypeToString[createAppRequest.appType];
 
@@ -45,6 +56,16 @@ export function CreateGkeAppButton({
     onDismiss,
   };
 
+  const tooltip = cond(
+    [
+      billingStatus !== BillingStatus.ACTIVE,
+      () =>
+        'You have either run out of initial credits or have an inactive billing account.',
+    ],
+    [!createEnabled, () => `A ${appTypeString} app exists or is being created`],
+    () => ''
+  );
+
   const onCreate = () => {
     setCreatingApp(true);
     fetchWithErrorModal(
@@ -60,10 +81,7 @@ export function CreateGkeAppButton({
   };
 
   return (
-    <TooltipTrigger
-      disabled={createEnabled}
-      content={`A ${appTypeString} app exists or is being created`}
-    >
+    <TooltipTrigger disabled={createEnabled} content={tooltip}>
       {/* tooltip trigger needs a div for some reason */}
       <div>
         <Button

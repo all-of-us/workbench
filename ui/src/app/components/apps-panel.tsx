@@ -5,7 +5,6 @@ import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
-import { DisabledPanel } from 'app/components/common-env-conf-panels/disabled-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
@@ -22,11 +21,13 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
 import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
 import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
+import { TooltipTrigger } from './popups';
 
 const styles = reactStyles({
   header: {
@@ -41,25 +42,31 @@ const styles = reactStyles({
   },
   availableApp: {
     background: colors.white,
-    marginLeft: '1em',
-    marginBottom: '1em',
     justifyContent: 'center',
   },
   closeButton: { marginLeft: 'auto', alignSelf: 'center' },
 });
 
-const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
-  const { appType, onClick } = props;
+const UnexpandedApp = (props: {
+  appType: UIAppType;
+  onClick: Function;
+  disabled: boolean;
+}) => {
+  const { appType, disabled, onClick } = props;
   return (
     <Clickable
-      {...{ onClick }}
+      {...{ disabled, onClick }}
       data-test-id={`${appType}-unexpanded`}
       propagateDataTestId
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <FlexRow style={styles.availableApp}>
         <AppBanner
           {...{ appType }}
-          style={{ marginRight: '1em', padding: '1rem' }}
+          style={{
+            ...{ marginRight: '1em', padding: '1rem' },
+            ...(disabled && { filter: 'grayscale(1)' }),
+          }}
         />
       </FlexRow>
     </Clickable>
@@ -103,9 +110,7 @@ export const AppsPanel = (props: {
     setUserExpandedApps([...userExpandedApps, appType]);
   const showActiveSection = activeApps.length > 0;
 
-  return workspace.billingStatus === BillingStatus.INACTIVE ? (
-    <DisabledPanel />
-  ) : (
+  return (
     <div data-test-id='apps-panel'>
       {activeApps.length > 0 && (
         <FlexColumn>
@@ -147,29 +152,47 @@ export const AppsPanel = (props: {
                 initialUserAppInfo={findApp(userApps, availableApp.appType)}
               />
             ) : (
-              <UnexpandedApp
-                appType={availableApp.appType}
-                key={availableApp.appType}
-                onClick={() =>
-                  switchCase(
-                    availableApp.appType,
-                    [
-                      UIAppType.CROMWELL,
-                      () =>
-                        setSidebarActiveIconStore.next(cromwellConfigIconId),
-                    ],
-                    [
-                      UIAppType.RSTUDIO,
-                      () => setSidebarActiveIconStore.next(rstudioConfigIconId),
-                    ],
-                    [
-                      UIAppType.SAS,
-                      () => setSidebarActiveIconStore.next(sasConfigIconId),
-                    ],
-                    () => addToExpandedApps(availableApp.appType)
-                  )
-                }
-              />
+              <TooltipTrigger
+                disabled={workspace.billingStatus !== BillingStatus.INACTIVE}
+                content={BILLING_ACCOUNT_DISABLED_TOOLTIP}
+              >
+                <div
+                  style={{
+                    marginLeft: '1rem',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <UnexpandedApp
+                    appType={availableApp.appType}
+                    key={availableApp.appType}
+                    disabled={
+                      workspace.billingStatus === BillingStatus.INACTIVE
+                    }
+                    onClick={() =>
+                      switchCase(
+                        availableApp.appType,
+                        [
+                          UIAppType.CROMWELL,
+                          () =>
+                            setSidebarActiveIconStore.next(
+                              cromwellConfigIconId
+                            ),
+                        ],
+                        [
+                          UIAppType.RSTUDIO,
+                          () =>
+                            setSidebarActiveIconStore.next(rstudioConfigIconId),
+                        ],
+                        [
+                          UIAppType.SAS,
+                          () => setSidebarActiveIconStore.next(sasConfigIconId),
+                        ],
+                        () => addToExpandedApps(availableApp.appType)
+                      )
+                    }
+                  />
+                </div>
+              </TooltipTrigger>
             )
           )}
         </FlexColumn>

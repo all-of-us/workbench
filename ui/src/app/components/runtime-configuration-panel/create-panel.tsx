@@ -7,6 +7,7 @@ import { Button } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType } from 'app/utils/machines';
@@ -21,6 +22,7 @@ export interface CreatePanelProps {
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
+  runtimeCannotBeCreatedExplanation?: string;
   runtimeStatus: RuntimeStatus;
   setPanelContent: (panelContent: PanelContent) => void;
   workspace: Workspace;
@@ -32,6 +34,7 @@ export const CreatePanel = ({
   profile,
   requestAnalysisConfig,
   runtimeCanBeCreated,
+  runtimeCannotBeCreatedExplanation,
   runtimeStatus,
   setPanelContent,
   workspace,
@@ -71,16 +74,23 @@ export const CreatePanel = ({
         <RuntimeSummary {...{ analysisConfig }} />
       </div>
       <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-        <Button
-          aria-label='Create'
-          disabled={!runtimeCanBeCreated}
-          onClick={() => {
-            requestAnalysisConfig(analysisConfig);
-            onClose();
-          }}
+        <TooltipTrigger
+          disabled={runtimeCanBeCreated}
+          content={runtimeCannotBeCreatedExplanation}
         >
-          Create
-        </Button>
+          <div>
+            <Button
+              aria-label='Create'
+              disabled={!runtimeCanBeCreated}
+              onClick={() => {
+                requestAnalysisConfig(analysisConfig);
+                onClose();
+              }}
+            >
+              Create
+            </Button>
+          </div>
+        </TooltipTrigger>
       </FlexRow>
     </>
   );

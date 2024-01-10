@@ -5,6 +5,7 @@ import * as React from 'react';
 import { DiskType, RuntimeStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { toAnalysisConfig } from 'app/utils/analysis-config';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -114,6 +115,8 @@ describe(CustomizePanelFooter.name, () => {
     createButton.click();
     await waitFor(() => {
       expect(requestAnalysisConfig).toHaveBeenCalledWith(analysisConfig);
+    });
+    await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
   });
@@ -430,4 +433,68 @@ describe(CustomizePanelFooter.name, () => {
       await waitFor(expectation);
     }
   );
+
+  it('shows disabled tooltip when "Next" button is disabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      runtimeExists: true,
+      runtimeCanBeUpdated: false,
+      runtimeCannotBeUpdatedExplanation: 'Testing tooltip',
+    });
+    const nextButton = screen.queryByRole('button', {
+      name: 'Next',
+    });
+    expect(nextButton).toBeInTheDocument();
+    await user.pointer([{ pointerName: 'mouse', target: nextButton }]);
+    // Show tooltip when hovering over disabled button.
+    screen.getByText('Testing tooltip');
+  });
+
+  it('does not show disabled tooltip when "Next" button is enabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      runtimeExists: true,
+      runtimeCanBeUpdated: true,
+      runtimeCannotBeUpdatedExplanation: 'Testing tooltip',
+    });
+    const nextButton = screen.queryByRole('button', {
+      name: 'Next',
+    });
+    expect(nextButton).toBeInTheDocument();
+    await user.pointer([{ pointerName: 'mouse', target: nextButton }]);
+    // Show tooltip when hovering over disabled button.
+    expect(screen.queryByText('Testing tooltip')).not.toBeInTheDocument();
+  });
+
+  it('shows disabled tooltip when "Create" button is disabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      runtimeExists: false,
+      runtimeCanBeCreated: false,
+      runtimeCannotBeCreatedExplanation: 'Testing tooltip',
+    });
+    const createButton = screen.queryByRole('button', {
+      name: 'Create',
+    });
+    expect(createButton).toBeInTheDocument();
+    await user.pointer([{ pointerName: 'mouse', target: createButton }]);
+    // Show tooltip when hovering over disabled button.
+    screen.getByText('Testing tooltip');
+  });
+
+  it('does not show disabled tooltip when "Create" button is enabled', async () => {
+    const user = userEvent.setup();
+    await component({
+      runtimeExists: false,
+      runtimeCanBeCreated: true,
+      runtimeCannotBeCreatedExplanation: 'Testing tooltip',
+    });
+    const createButton = screen.queryByRole('button', {
+      name: 'Create',
+    });
+    expect(createButton).toBeInTheDocument();
+    await user.pointer([{ pointerName: 'mouse', target: createButton }]);
+    // Show tooltip when hovering over disabled button.
+    expect(screen.queryByText('Testing tooltip')).not.toBeInTheDocument();
+  });
 });
