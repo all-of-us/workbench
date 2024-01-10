@@ -619,6 +619,39 @@ public class ComplianceTrainingServiceTest {
     assertThat(complianceTrainingService.useAbsorb()).isFalse();
   }
 
+  @Test
+  public void testTrainingsEnabled_TrueWhenMigrationPauseInactive() throws ApiException {
+    setRTTrainingCompletedWithMoodle();
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = false;
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  @Test
+  public void testTrainingsEnabled_TrueDuringPauseIfNoTrainingsTaken() {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    // The user has taken no trainings
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  public void testTrainingsEnabled_TrueDuringPauseIfUsedAbsorb()
+      throws org.pmiops.workbench.absorb.ApiException, ApiException {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    stubAbsorbAllTrainingsComplete(currentInstant(), currentInstant());
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isTrue();
+  }
+
+  @Test
+  public void testTrainingsEnabled_FalseDuringPauseIfUsedMoodle() throws ApiException {
+    providedWorkbenchConfig.moodle.trainingMigrationPauseActive = true;
+    setRTTrainingCompletedWithMoodle();
+
+    assertThat(complianceTrainingService.trainingsEnabled()).isFalse();
+  }
+
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }

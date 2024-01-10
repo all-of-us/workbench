@@ -22,8 +22,11 @@ export const ComplianceTrainingModuleCardTitle = ({
   profile,
 }: ComplianceTrainingModuleCardProps) => {
   const [useAbsorb, setUseAbsorb] = React.useState(false);
+  const [trainingsEnabled, setTrainingsEnabled] = React.useState(undefined);
   useEffect(() => {
+    // This logic is temporary and will be removed when the training migration is complete
     profileApi().useAbsorb().then(setUseAbsorb);
+    profileApi().trainingsEnabled().then(setTrainingsEnabled);
   }, []);
 
   const { accessModule, trainingTitle, courseTitle } =
@@ -55,6 +58,14 @@ export const ComplianceTrainingModuleCardTitle = ({
       </div>
       {showHelpText && (
         <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+      )}
+      {trainingsEnabled === false && (
+        <p style={{ marginTop: '1rem' }}>
+          Please note: We are currently migrating all trainings to a new
+          platform. You will not be able to access the training until the
+          migration is complete. We expect the migration to complete on&nbsp;
+          <b>February 5th</b>. We apologize for the inconvenience.
+        </p>
       )}
     </>
   );

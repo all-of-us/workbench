@@ -106,18 +106,26 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
     if (configProvider.get().absorb.redirectMoodleUser) {
       return true;
     }
-    var userHasUsedMoodle =
-        userAccessModuleDao.getAllByUser(userProvider.get()).stream()
-            .anyMatch(
-                uam ->
-                    complianceTrainingVerificationDao
-                            .getByUserAccessModule(uam)
-                            .map(
-                                DbComplianceTrainingVerification
-                                    ::getComplianceTrainingVerificationSystem)
-                            .orElse(null)
-                        == DbComplianceTrainingVerificationSystem.MOODLE);
-    return !userHasUsedMoodle;
+    return !userHasUsedMoodle();
+  }
+
+  @Override
+  public boolean trainingsEnabled() {
+    boolean migrationPauseActive = configProvider.get().moodle.trainingMigrationPauseActive;
+    return !(migrationPauseActive && userHasUsedMoodle());
+  }
+
+  private boolean userHasUsedMoodle() {
+    return userAccessModuleDao.getAllByUser(userProvider.get()).stream()
+        .anyMatch(
+            uam ->
+                complianceTrainingVerificationDao
+                        .getByUserAccessModule(uam)
+                        .map(
+                            DbComplianceTrainingVerification
+                                ::getComplianceTrainingVerificationSystem)
+                        .orElse(null)
+                    == DbComplianceTrainingVerificationSystem.MOODLE);
   }
 
   /**

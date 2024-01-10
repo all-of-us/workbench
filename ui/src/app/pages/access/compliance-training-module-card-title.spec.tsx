@@ -42,10 +42,30 @@ const expectHelpTextToNotExist = async () => {
   try {
     await findHelpText();
     // The above throws an error if the element is not found
-    expect(true).toBeFalsy();
   } catch (e) {
     // Expected behavior, do nothing
+    return;
   }
+  expect(true).toBeFalsy();
+};
+
+const findMigrationText = () => {
+  return screen.findByText(/we are currently migrating all trainings/i);
+};
+
+const expectMigrationTextToExist = async () => {
+  expect(await findMigrationText()).not.toBeNull();
+};
+
+const expectMigrationTextToNotExist = async () => {
+  try {
+    await findMigrationText();
+    // The above throws an error if the element is not found
+  } catch (e) {
+    // Expected behavior, do nothing
+    return;
+  }
+  expect(true).toBeFalsy();
 };
 
 const createProfileWithComplianceTraining = (
@@ -76,10 +96,12 @@ const createProps = (): ComplianceTrainingModuleCardProps => ({
 const setup = (
   props = createProps(),
   config: ConfigResponse = { ...defaultServerConfig },
-  useAbsorb: boolean = false
+  useAbsorb: boolean = false,
+  trainingsEnabled: boolean = true
 ) => {
   registerApiClient(ProfileApi, new ProfileApiStub());
   profileApi().useAbsorb = () => Promise.resolve(useAbsorb);
+  profileApi().trainingsEnabled = () => Promise.resolve(trainingsEnabled);
   serverConfigStore.set({ config });
   return {
     container: render(<ComplianceTrainingModuleCardTitle {...props} />)
@@ -198,5 +220,35 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToNotExist();
+  });
+
+  it('shows migration text if the training migration is happening', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      defaultServerConfig,
+      true,
+      false
+    );
+
+    await expectMigrationTextToExist();
+  });
+
+  it('does not show migration text if the training migration is not happening', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      defaultServerConfig,
+      true,
+      true
+    );
+
+    await expectMigrationTextToNotExist();
   });
 });

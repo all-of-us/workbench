@@ -264,6 +264,7 @@ public class WorkbenchConfig {
   }
 
   public static class MoodleConfig {
+    public Boolean trainingMigrationPauseActive;
     public String host;
     public String credentialsKeyV2;
   }
