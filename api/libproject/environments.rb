@@ -43,7 +43,7 @@ ENVIRONMENTS = {
     }
   }),
   "all-of-us-workbench-test" => env_with_defaults("test", {
-    :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
+    :api_endpoint_host => "api.test.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :gae_vars => make_gae_vars(0, 10, 'F4_1G'),
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",

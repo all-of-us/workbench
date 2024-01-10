@@ -39,8 +39,8 @@ const local: IEnvConfig = {
 
 // workbench test environment
 const test: IEnvConfig = {
-  LOGIN_URL_DOMAIN_NAME: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
-  API_HOSTNAME: process.env.API_HOSTNAME || 'api-dot-all-of-us-workbench-test.appspot.com',
+  LOGIN_URL_DOMAIN_NAME: process.env.TEST_LOGIN_URL || 'https://test.fake-research-aou.org',
+  API_HOSTNAME: process.env.API_HOSTNAME || 'api.test.fake-research-aou.org',
   EMAIL_DOMAIN_NAME: '@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',

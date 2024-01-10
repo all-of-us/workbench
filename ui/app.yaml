@@ -51,6 +51,7 @@ handlers:
       connect-src
         'self'
         https://api-dot-all-of-us-workbench-test.appspot.com
+        https://api.test.fake-research-aou.org
         https://api-dot-all-of-us-rw-staging.appspot.com
         https://api.staging.fake-research-aou.org
         https://api.stable.fake-research-aou.org
