@@ -3,10 +3,18 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 
-import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
+import {
+  NotebooksApi,
+  UserAppEnvironment,
+  WorkspacesApi,
+} from 'generated/fetch';
 
+import { renderModal } from '../../../testing/react-test-helpers';
 import { RuntimeApiStub } from '../../../testing/stubs/runtime-api-stub';
+import { ExpandedApp } from '../../components/apps-panel/expanded-app';
+import { UIAppType } from '../../components/apps-panel/utils';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -19,30 +27,32 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 // There are two header rows, so this is the first row with data.
 const FIRST_DATA_ROW_NUMBER = 2;
+
+const component = async () =>
+  renderModal(
+    <MemoryRouter>
+      <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
+    </MemoryRouter>
+  );
 describe('AppsList', () => {
   let notebooksApiStub: NotebooksApiStub;
+  let user;
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     notebooksApiStub = new NotebooksApiStub();
     registerApiClient(NotebooksApi, notebooksApiStub);
+    user = userEvent.setup();
   });
 
   it('should render new Analysis tab', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
-    render(
-      <MemoryRouter>
-        <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
-      </MemoryRouter>
-    );
-
+    await component();
     let firstDataRow;
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
     // First Column : Menu icon
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
-      expect(
-        within(firstDataRow).getByTitle('Notebook Action Menu')
-      ).toBeTruthy();
+      within(firstDataRow).getByTitle('Notebook Action Menu');
     });
 
     // Second Column displays the type of Application: In this case Jupyter
@@ -66,24 +76,48 @@ describe('AppsList', () => {
     within(firstDataRow).getByText(firstNotebook.lastModifiedBy);
   });
 
-  it('should render new Analysis tab modal', async () => {
+  it('should not render modal if notebook is greater than or equal to 5Mb', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
-    render(
-      <MemoryRouter>
-        <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
-      </MemoryRouter>
-    );
+    await component();
 
     let firstDataRow;
     notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
-    // First Column : Menu icon
+    let notebookLink;
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
-      expect(
-        within(firstDataRow).getByRole('link', { name: firstNotebook.name })
-      ).toBeTruthy();
+      notebookLink = within(firstDataRow).getByRole('link', {
+        name: firstNotebook.name,
+      });
     });
+
+    await user.click(notebookLink);
+
+    await waitFor(() => {
+      screen.getByText('Notebook file size bigger than 5mb');
+    });
+  });
+
+  it('should not render modal if notebook is less than 5Mb', async () => {
+    currentWorkspaceStore.next(workspaceDataStub);
+    await component();
+
+    let firstDataRow;
+    notebooksApiStub.notebookList[0].sizeInBytes = 4 * 1024 * 1024;
+
+    const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
+    let notebookLink;
+    await waitFor(() => {
+      firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
+      notebookLink = within(firstDataRow).getByRole('link', {
+        name: firstNotebook.name,
+      });
+    });
+
+    await user.click(notebookLink);
+
+    const modalTitle = screen.queryByText('Notebook file size bigger than 5mb');
+    expect(modalTitle).toBeNull();
   });
 });
