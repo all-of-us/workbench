@@ -13,7 +13,11 @@ import colors from 'app/styles/colors';
 import { FlexRow } from './flex';
 import { SnowmanIcon } from './icons';
 
-export const NotebookSizeWarningModal = () => {
+export const NotebookSizeWarningModal = (props: {
+  handleClose?: () => void;
+  handleEdit?: () => void;
+  handlePlayground?: () => void;
+}) => {
   return (
     <Modal width={600}>
       <ModalTitle>
