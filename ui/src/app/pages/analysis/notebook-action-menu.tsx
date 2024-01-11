@@ -225,6 +225,7 @@ export const NotebookActionMenu = fp.flow(
           {menuOnly ? (
             <ResourceActionsMenu
               {...{ menuButtonComponentOverride, actions }}
+              menuButtonTitle='Notebook Action Menu'
               disabled={resource.adminLocked}
             />
           ) : (
