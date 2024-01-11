@@ -34,7 +34,7 @@ export const NotebookSizeWarningModal = (props: {
           how to clear the output of this notebook before you open it:
           <div style={{ padding: '0.5rem 0rem' }}>
             <a
-              href='www.google.com'
+              href='https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them'
               target='_blank'
               style={{ fontWeight: 'bold' }}
             >
