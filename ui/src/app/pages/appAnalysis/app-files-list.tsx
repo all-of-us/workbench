@@ -12,6 +12,7 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
+import { NotebookSizeWarningModal } from 'app/components/notebook-size-warning-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
@@ -194,6 +195,7 @@ export const AppFilesList = withCurrentWorkspace()(
             </DataTable>
           )}
         </FlexColumn>
+        <NotebookSizeWarningModal />
       </FadeBox>
     );
   }

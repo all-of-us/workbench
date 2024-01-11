@@ -42,7 +42,7 @@ function findCloseButton() {
 }
 function findEditButton() {
   return screen.getByRole('button', {
-    name: /run playground mode/i,
+    name: /edit/i,
   });
 }
 function findPlaygroundButton() {

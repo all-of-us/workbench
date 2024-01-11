@@ -18,12 +18,13 @@ export const NotebookSizeWarningModal = (props: {
   handleEdit?: () => void;
   handlePlayground?: () => void;
 }) => {
+  const { handleClose, handleEdit, handlePlayground } = props;
   return (
     <Modal width={600}>
       <ModalTitle>
         <FlexRow>
           <div>Notebook file size bigger than 5mb</div>
-          <CloseButton onClose={() => {}} style={{ marginLeft: 'auto' }} />
+          <CloseButton onClose={handleClose} style={{ marginLeft: 'auto' }} />
         </FlexRow>
       </ModalTitle>
       <ModalBody style={{ color: colors.primary }}>
@@ -44,8 +45,12 @@ export const NotebookSizeWarningModal = (props: {
         </WarningMessage>
       </ModalBody>
       <ModalFooter>
-        <Button type='secondary'>Run playground mode</Button>
-        <Button type='primary'>Edit file</Button>
+        <Button type='secondary' onClick={handlePlayground}>
+          Run playground mode
+        </Button>
+        <Button type='primary' onClick={handleEdit}>
+          Edit file
+        </Button>
       </ModalFooter>
     </Modal>
   );
