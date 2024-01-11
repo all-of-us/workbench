@@ -122,4 +122,16 @@ describe('Notebook Size Warning Modal', () => {
       queryParams: { playgroundMode: true },
     });
   });
+
+  it('should disable buttons (except close) and show a spinner when notebookName is null', async () => {
+    const mockClose = jest.fn();
+    await component({ notebookName: null, handleClose: mockClose });
+    // Looking for spinner label
+    screen.getByLabelText('Please Wait');
+    await user.click(findEditButton());
+    await user.click(findPlaygroundButton());
+    expect(mockNavigate).not.toHaveBeenCalled();
+    await user.click(findCloseButton());
+    expect(mockClose).toHaveBeenCalledTimes(1);
+  });
 });
