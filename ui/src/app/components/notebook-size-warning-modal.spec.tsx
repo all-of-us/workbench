@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
+import { mockNavigate } from 'setupTests';
 
 import {
   NotebooksApi,
@@ -14,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 import { ExpandedApp } from 'app/components/apps-panel/expanded-app';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
-import { analysisTabPath } from 'app/routing/utils';
+import { analysisTabName, analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -29,11 +30,24 @@ import { NotebookSizeWarningModal } from './notebook-size-warning-modal';
 
 // There are two header rows, so this is the first row with data.
 const FIRST_DATA_ROW_NUMBER = 2;
+const mockNamespace = 'mockNamespace';
+const mockWorkspaceId = 'mockNamespace';
+const mockNotebookName = 'mockNamespace';
+const expectedNavigation = [
+  'workspaces',
+  mockNamespace,
+  mockWorkspaceId,
+  analysisTabName,
+  mockNotebookName,
+];
 
-const component = async (handleClose, handleEdit, handlePlayground) =>
+const component = async (handleClose) =>
   renderModal(
     <NotebookSizeWarningModal
-      {...{ handleClose, handleEdit, handlePlayground }}
+      {...{ handleClose }}
+      nameSpace={mockNamespace}
+      workspaceId={mockWorkspaceId}
+      notebookName={mockNotebookName}
     />
   );
 
@@ -53,23 +67,19 @@ function findPlaygroundButton() {
 describe('Notebook Size Warning Modal', () => {
   let user;
   let mockClose;
-  let mockEdit;
-  let mockPlayground;
   beforeEach(() => {
     user = userEvent.setup();
     mockClose = jest.fn();
-    mockEdit = jest.fn();
-    mockPlayground = jest.fn();
   });
 
   it('should render', async () => {
-    await component(mockClose, mockEdit, mockPlayground);
+    await component(mockClose);
     screen.getByText('Notebook file size bigger than 5mb');
     screen.getByText('Opening this notebook', { exact: false });
   });
 
   it('should link to correct support article', async () => {
-    await component(mockClose, mockEdit, mockPlayground);
+    await component(mockClose);
 
     const expectedLink =
       'https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them';
@@ -81,21 +91,24 @@ describe('Notebook Size Warning Modal', () => {
   });
 
   it('should have a functional close button', async () => {
-    await component(mockClose, mockEdit, mockPlayground);
+    await component(mockClose);
     await user.click(findCloseButton());
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
   it('should have a functional edit button', async () => {
-    await component(mockClose, mockEdit, mockPlayground);
+    await component(mockClose);
     await user.click(findEditButton());
-    expect(mockEdit).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
+      playgroundMode: false,
+    });
   });
 
   it('should have a functional playground button', async () => {
-    currentWorkspaceStore.next(workspaceDataStub);
-    await component(mockClose, mockEdit, mockPlayground);
+    await component(mockClose);
     await user.click(findPlaygroundButton());
-    expect(mockPlayground).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
+      playgroundMode: true,
+    });
   });
 });
