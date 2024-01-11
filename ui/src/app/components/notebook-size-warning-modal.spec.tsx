@@ -30,12 +30,10 @@ import { NotebookSizeWarningModal } from './notebook-size-warning-modal';
 // There are two header rows, so this is the first row with data.
 const FIRST_DATA_ROW_NUMBER = 2;
 
-const component = async () =>
+const component = async (handleClose, handleEdit, handlePlayground) =>
   renderModal(
     <NotebookSizeWarningModal
-      handleClose={() => {}}
-      handleEdit={() => {}}
-      handlePlayground={() => {}}
+      {...{ handleClose, handleEdit, handlePlayground }}
     />
   );
 
@@ -52,23 +50,40 @@ function findPlaygroundButton() {
     name: /run playground mode/i,
   });
 }
-describe('AppsList', () => {
-  let notebooksApiStub: NotebooksApiStub;
+describe('Notebook Size Warning Modal', () => {
   let user;
+  let mockClose;
+  let mockEdit;
+  let mockPlayground;
   beforeEach(() => {
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    notebooksApiStub = new NotebooksApiStub();
-    registerApiClient(NotebooksApi, notebooksApiStub);
     user = userEvent.setup();
+    mockClose = jest.fn();
+    mockEdit = jest.fn();
+    mockPlayground = jest.fn();
   });
 
-  it('should notebook size warning modal', async () => {
-    currentWorkspaceStore.next(workspaceDataStub);
-    await component();
+  it('should render', async () => {
+    await component(mockClose, mockEdit, mockPlayground);
     screen.getByText('Notebook file size bigger than 5mb');
     screen.getByText('Opening this notebook', { exact: false });
-    findCloseButton();
-    findEditButton();
-    findPlaygroundButton();
+  });
+
+  it('should have a functional close button', async () => {
+    await component(mockClose, mockEdit, mockPlayground);
+    await user.click(findCloseButton());
+    expect(mockClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should have a functional edit button', async () => {
+    await component(mockClose, mockEdit, mockPlayground);
+    await user.click(findEditButton());
+    expect(mockEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('should have a functional playground button', async () => {
+    currentWorkspaceStore.next(workspaceDataStub);
+    await component(mockClose, mockEdit, mockPlayground);
+    await user.click(findPlaygroundButton());
+    expect(mockPlayground).toHaveBeenCalledTimes(1);
   });
 });
