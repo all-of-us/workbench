@@ -59,7 +59,7 @@ const styles = reactStyles({
     paddingTop: 0,
   },
 });
-
+const notebookSizeThreshold = 5 * 1024 * 1024;
 interface AppFilesListProps extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
@@ -68,6 +68,9 @@ export const AppFilesList = withCurrentWorkspace()(
     const { workspace } = props;
 
     const [filesList, setFilesList] = useState<FileDetail[]>();
+    const [showNotebookSizeWarningModal, setShowNotebookSizeWarningModal] =
+      useState<boolean>(false);
+    const [activeNotebookName, setActiveNotebookName] = useState<string>(null);
 
     const loadNotebooks = withErrorModal(
       {
@@ -114,12 +117,20 @@ export const AppFilesList = withCurrentWorkspace()(
       } = props;
       const { name } = row;
       const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
-      return (
-        <Clickable>
-          <RouterLink to={url} data-test-id='notebook-navigation'>
-            {row.name}
-          </RouterLink>
-        </Clickable>
+      return row.sizeInBytes >= notebookSizeThreshold ? (
+        <RouterLink to={url} data-test-id='notebook-navigation'>
+          {row.name}
+        </RouterLink>
+      ) : (
+        <div
+          onClick={() => {
+            setActiveNotebookName(row.name);
+            setShowNotebookSizeWarningModal(true);
+          }}
+          style={{ color: '#6fb4ff', cursor: 'pointer' }}
+        >
+          {row.name}
+        </div>
       );
     };
 
@@ -195,7 +206,14 @@ export const AppFilesList = withCurrentWorkspace()(
             </DataTable>
           )}
         </FlexColumn>
-        <NotebookSizeWarningModal />
+        {showNotebookSizeWarningModal && (
+          <NotebookSizeWarningModal
+            nameSpace={workspace.namespace}
+            workspaceId={workspace.id}
+            notebookName={activeNotebookName}
+            handleClose={() => {}}
+          />
+        )}
       </FadeBox>
     );
   }

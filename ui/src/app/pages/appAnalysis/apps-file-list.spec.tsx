@@ -76,12 +76,12 @@ describe('AppsList', () => {
     within(firstDataRow).getByText(firstNotebook.lastModifiedBy);
   });
 
-  it('should not render modal if notebook is greater than or equal to 5Mb', async () => {
+  it('should not render modal if notebook is greater than 5MB', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
 
     let firstDataRow;
-    notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024;
+    notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024 + 1;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
     let notebookLink;
@@ -99,12 +99,12 @@ describe('AppsList', () => {
     });
   });
 
-  it('should not render modal if notebook is less than 5Mb', async () => {
+  it('should not render modal if notebook is less or equal to 5MB', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
 
     let firstDataRow;
-    notebooksApiStub.notebookList[0].sizeInBytes = 4 * 1024 * 1024;
+    notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
     let notebookLink;
