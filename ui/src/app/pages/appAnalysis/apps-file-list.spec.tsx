@@ -45,7 +45,7 @@ describe('AppsList', () => {
     // Second Column displays the type of Application: In this case Jupyter
     within(firstDataRow).getByAltText('Jupyter');
 
-    // // Fourth column of table displays file name with extension
+    // Fourth column of table displays file name with extension
     const expectedLink = `${analysisTabPath(
       workspaceDataStub.namespace,
       workspaceDataStub.id
@@ -54,7 +54,7 @@ describe('AppsList', () => {
       within(firstDataRow).getByRole('link', { name: firstNotebook.name })
     ).toHaveAttribute('href', expectedLink);
 
-    // // Fifth column of notebook table displays last modified time
+    // Fifth column of notebook table displays last modified time
     within(firstDataRow).getByText(
       displayDateWithoutHours(firstNotebook.lastModifiedTime)
     );
