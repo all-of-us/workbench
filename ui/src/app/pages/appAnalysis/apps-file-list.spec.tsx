@@ -68,7 +68,7 @@ describe('AppsList', () => {
 
   it('should render new Analysis tab modal', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
-    const { container } = render(
+    render(
       <MemoryRouter>
         <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
       </MemoryRouter>
