@@ -68,6 +68,18 @@ describe('Notebook Size Warning Modal', () => {
     screen.getByText('Opening this notebook', { exact: false });
   });
 
+  it('should link to correct support article', async () => {
+    await component(mockClose, mockEdit, mockPlayground);
+
+    const expectedLink =
+      'https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them';
+    expect(
+      screen.getByRole('link', {
+        name: 'How to clear notebook outputs without editing them',
+      })
+    ).toHaveAttribute('href', expectedLink);
+  });
+
   it('should have a functional close button', async () => {
     await component(mockClose, mockEdit, mockPlayground);
     await user.click(findCloseButton());
