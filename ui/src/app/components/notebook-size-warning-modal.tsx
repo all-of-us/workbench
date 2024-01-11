@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { AppStatus, RuntimeStatus } from 'generated/fetch';
+
 import { Button, CloseButton, IconButton } from 'app/components/buttons';
 import { WarningMessage } from 'app/components/messages';
 import {
@@ -8,17 +10,34 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { analysisTabName } from 'app/routing/utils';
 import colors from 'app/styles/colors';
+import { useNavigation } from 'app/utils/navigation';
 
+import { UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { SnowmanIcon } from './icons';
 
-export const NotebookSizeWarningModal = (props: {
-  handleClose?: () => void;
-  handleEdit?: () => void;
-  handlePlayground?: () => void;
-}) => {
-  const { handleClose, handleEdit, handlePlayground } = props;
+export interface NotebookSizeWarningModalProps {
+  handleClose: () => void;
+  nameSpace: string;
+  workspaceId: string;
+  notebookName: string;
+}
+export const NotebookSizeWarningModal = ({
+  handleClose,
+  nameSpace,
+  workspaceId,
+  notebookName,
+}: NotebookSizeWarningModalProps) => {
+  const [navigate] = useNavigation();
+  const navigationPath = [
+    'workspaces',
+    nameSpace,
+    workspaceId,
+    analysisTabName,
+    notebookName,
+  ];
   return (
     <Modal width={600}>
       <ModalTitle>
@@ -45,10 +64,20 @@ export const NotebookSizeWarningModal = (props: {
         </WarningMessage>
       </ModalBody>
       <ModalFooter>
-        <Button type='secondary' onClick={handlePlayground}>
+        <Button
+          type='secondary'
+          onClick={() =>
+            navigate(navigationPath, { queryParams: { playgroundMode: true } })
+          }
+        >
           Run playground mode
         </Button>
-        <Button type='primary' onClick={handleEdit}>
+        <Button
+          type='primary'
+          onClick={() =>
+            navigate(navigationPath, { queryParams: { playgroundMode: false } })
+          }
+        >
           Edit file
         </Button>
       </ModalFooter>
