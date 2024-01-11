@@ -6,7 +6,6 @@ import { MemoryRouter } from 'react-router';
 import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -16,12 +15,6 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
-
-const MENU_COLUMN_NUMBER = 0;
-const APPLICATION_COLUMN_NUMBER = 1;
-const NAME_COLUMN_NUMBER = 2;
-const MODIFIED_DATE_COLUMN_NUMBER = 3;
-const MODIFIED_BY_COLUMN_NUMBER = 4;
 
 // There are two header rows, so this is the first row with data.
 const FIRST_DATA_ROW_NUMBER = 2;
