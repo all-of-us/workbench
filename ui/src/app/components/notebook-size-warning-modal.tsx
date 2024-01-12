@@ -49,12 +49,20 @@ export const NotebookSizeWarningModal = ({
       </ModalTitle>
       <ModalBody style={{ color: colors.primary, display: 'flex' }}>
         {notebookName ? (
-          <WarningMessage>
-            Opening this notebook may trigger your compute to be suspended
-            because of its size. Please refer to this support article for
-            instructions on how to clear the output of this notebook before you
-            open it:
-            <div style={{ padding: '0.5rem 0rem' }}>
+          <WarningMessage iconPosition='top'>
+            <div>
+              Our system monitors network traffic levels to prevent downloading
+              of unauthorized data. Loading or opening large notebooks may
+              result in a spike to your network traffic that could trigger an
+              egress alert.
+            </div>
+            <div style={{ marginTop: '1rem' }}>
+              To prevent your account from being inadvertently suspended or
+              disabled, it is recommended you clear your notebook output cells
+              (see article below) to minimize notebook size and network traffic.
+            </div>
+
+            <div style={{ marginTop: '1rem' }}>
               <a
                 href='https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them'
                 target='_blank'
@@ -63,7 +71,16 @@ export const NotebookSizeWarningModal = ({
                 How to clear notebook outputs without editing them
               </a>
             </div>
-            Either actions will incur cost and may trigger egress.
+
+            <div style={{ marginTop: '1rem' }}>
+              You may proceed editing or running this notebook in playground
+              mode* but beware that you will incur cost and run the risk of your
+              compute being suspended.
+            </div>
+            <div style={{ marginTop: '1rem' }}>
+              *Playground mode allows users to run their notebooks but does not
+              save any changes.
+            </div>
           </WarningMessage>
         ) : (
           <Spinner style={{ margin: 'auto' }} />
@@ -76,6 +93,7 @@ export const NotebookSizeWarningModal = ({
           onClick={() => {
             navigate(navigationPath, { queryParams: { playgroundMode: true } });
           }}
+          style={{ marginRight: '1rem' }}
         >
           Run playground mode
         </Button>
