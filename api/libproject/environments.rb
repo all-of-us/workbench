@@ -26,7 +26,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "workbench",
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
-    :tanagra_underlay_files => "aou/SR2023Q3R1_test,aou/SC2023Q3R1_test",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
     :tanagra_tag => "0.0.319",
     :accessTiers => {
       "registered" => {
@@ -54,7 +54,7 @@ ENVIRONMENTS = {
     # turn on authN
     :tanagra_auth_disable_checks => "false",
     :tanagra_auth_bearer_token => "true",
-    :tanagra_underlay_files => "aou/SR2023Q3R1_test,aou/SC2023Q3R1_test",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
     :tanagra_tag => "0.0.319",
     :accessTiers => {
       "registered" => {
