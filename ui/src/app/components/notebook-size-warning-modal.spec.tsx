@@ -70,8 +70,8 @@ describe('Notebook Size Warning Modal', () => {
 
   it('should render', async () => {
     await component();
-    screen.getByText('Notebook file size bigger than 5mb');
-    screen.getByText('Opening this notebook', { exact: false });
+    screen.getByText('Notebook file size bigger than 5MB');
+    screen.getByText('Our system monitors network traffic', { exact: false });
   });
 
   it('should link to correct support article', async () => {
