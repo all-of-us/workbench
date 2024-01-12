@@ -1,8 +1,9 @@
 import * as React from 'react';
 
-import { AppsApi, AppStatus } from 'generated/fetch';
+import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 
@@ -29,7 +30,10 @@ describe(CreateGkeAppButton.name, () => {
     workspaceNamespace: 'aou-rw-test-1',
     onDismiss: () => {},
     username: ProfileStubVariables.PROFILE_STUB.username,
+    billingStatus: BillingStatus.ACTIVE,
   };
+
+  let user;
 
   const component = async (
     propOverrides?: Partial<CreateGKEAppButtonProps>
@@ -37,6 +41,11 @@ describe(CreateGkeAppButton.name, () => {
     const allProps = { ...defaultProps, ...propOverrides };
     return render(<CreateGkeAppButton {...allProps} />);
   };
+
+  const findCreateButton = () =>
+    screen.getByRole('button', {
+      name: 'Cromwell cloud environment create button',
+    });
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
   const createDisabledStatuses = minus(
@@ -46,6 +55,7 @@ describe(CreateGkeAppButton.name, () => {
 
   beforeEach(() => {
     registerApiClient(AppsApi, new AppsApiStub());
+    user = userEvent.setup();
   });
   afterEach(() => {
     jest.resetAllMocks();
@@ -63,9 +73,7 @@ describe(CreateGkeAppButton.name, () => {
       });
 
       const button = await waitFor(() => {
-        const createButton = screen.getByRole('button', {
-          name: 'Cromwell cloud environment create button',
-        });
+        const createButton = findCreateButton();
         expectButtonElementEnabled(createButton);
         return createButton;
       });
@@ -83,12 +91,33 @@ describe(CreateGkeAppButton.name, () => {
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
-      await waitFor(() => {
-        const createButton = screen.getByRole('button', {
-          name: 'Cromwell cloud environment create button',
-        });
+      const button = await waitFor(() => {
+        const createButton = findCreateButton();
         expectButtonElementDisabled(createButton);
+        return createButton;
       });
+
+      await user.pointer([{ pointerName: 'mouse', target: button }]);
+
+      await screen.findByText(`A Cromwell app exists or is being created`);
     });
+  });
+
+  it('should not allow creating a GKE app when billing status is not active.', async () => {
+    await component({
+      createAppRequest: defaultCromwellConfig,
+      billingStatus: BillingStatus.INACTIVE,
+    });
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
+    });
+
+    await user.pointer([{ pointerName: 'mouse', target: button }]);
+
+    await screen.findByText(
+      'You have either run out of initial credits or have an inactive billing account.'
+    );
   });
 });

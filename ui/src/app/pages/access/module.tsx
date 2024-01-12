@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
@@ -9,6 +9,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { DARTitle } from 'app/pages/access/dar-title';
+import { profileApi } from 'app/services/swagger-fetch-clients';
 import {
   getAccessModuleConfig,
   getStatusText,
@@ -44,7 +45,7 @@ const ModuleBox = (props: {
   );
 };
 
-export const Module = (props: {
+export interface ModuleProps {
   focused: boolean;
   children?: ReactNode;
   active: boolean;
@@ -55,7 +56,15 @@ export const Module = (props: {
   spinnerProps: WithSpinnerOverlayProps;
   status: AccessModuleStatus;
   style?;
-}) => {
+}
+
+export const Module = (props: ModuleProps) => {
+  const [trainingEnabled, setTrainingEnabled] = React.useState(undefined);
+  useEffect(() => {
+    // This logic is temporary and will be removed when the training migration is complete
+    profileApi().trainingsEnabled().then(setTrainingEnabled);
+  }, []);
+
   const {
     focused,
     children,
@@ -69,6 +78,12 @@ export const Module = (props: {
     style,
   } = props;
   const { enableRasIdMeLinking } = serverConfigStore.get().config;
+
+  const deactivateModuleForTrainingMigration =
+    !trainingEnabled &&
+    (moduleName === AccessModule.COMPLIANCE_TRAINING ||
+      moduleName === AccessModule.CT_COMPLIANCE_TRAINING);
+
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
@@ -92,7 +107,8 @@ export const Module = (props: {
       <ModuleBox
         clickable={
           active &&
-          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY) &&
+          !deactivateModuleForTrainingMigration
         }
         action={() => {
           setShowRefresh(true);

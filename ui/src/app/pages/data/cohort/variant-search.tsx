@@ -704,8 +704,8 @@ export const VariantSearch = withCurrentWorkspace()(
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
               rows={pageSize}
               scrollable
-              scrollHeight='calc(100vh - 450px)'
-              style={{ fontSize: '12px' }}
+              scrollHeight='26rem'
+              style={{ fontSize: '12px', minHeight: '22rem' }}
               totalRecords={totalCount}
               value={displayResults}
             >

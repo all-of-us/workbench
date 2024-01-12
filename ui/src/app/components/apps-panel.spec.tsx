@@ -10,6 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
@@ -80,6 +81,7 @@ describe(AppsPanel.name, () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
   const leoAppsStub = new LeoAppsApiStub();
+  let user;
   beforeEach(() => {
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -94,6 +96,7 @@ describe(AppsPanel.name, () => {
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
+    user = userEvent.setup();
   });
 
   it('should allow a user to expand Jupyter', async () => {
@@ -122,18 +125,42 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  it('should show the disabled panel when the workspace has INACTIVE billing status', async () => {
+  it('should disable apps when billing is inactive', async () => {
+    // initial state: no apps exist
     workspaceStub.billingStatus = BillingStatus.INACTIVE;
+
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
 
     const { container } = await component();
     expect(container).toBeInTheDocument();
 
-    expect(
-      screen.queryByText('Cloud services are disabled for this workspace.')
-    ).toBeInTheDocument();
-
     expect(findActiveApps()).not.toBeInTheDocument();
-    expect(findAvailableApps(false)).not.toBeInTheDocument();
+    expect(findAvailableApps(false)).toBeInTheDocument();
+    // // Click unexpanded Jupyter app
+
+    const jupyter = expectUnexpandedApp('Jupyter');
+    await user.pointer([{ pointerName: 'mouse', target: jupyter }]);
+    // Show tooltip when hovering over disabled Jupyter.
+    await screen.findByText(
+      'You have either run out of initial credits or have an inactive billing account.'
+    );
+    jupyter.click();
+    // Expecting Jupter to be disabled. If it was not, the
+    // "Create New" button would show after clicking on Jupyter.
+    expect(screen.queryByText('Create New')).not.toBeInTheDocument();
+
+    const cromwell = expectUnexpandedApp('Cromwell');
+    await user.pointer([{ pointerName: 'mouse', target: cromwell }]);
+    // Show tooltip when hovering over disabled Jupyter.
+    await screen.findByText(
+      'You have either run out of initial credits or have an inactive billing account.'
+    );
+    cromwell.click();
+    // Expecting GKE Apps, such as Cromwell, to be disabled. If
+    // they were not, the apps panel would close after clicking on
+    // an unexpanded GKE app.
+    expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
   test.each([

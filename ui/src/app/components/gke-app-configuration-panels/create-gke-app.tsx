@@ -81,6 +81,7 @@ export const CreateGkeApp = ({
   CreateAppText = () => null,
 }: CreateGkeAppProps) => {
   const { profile } = profileState;
+  const { billingStatus } = workspace;
 
   const onDismiss = () => {
     onClose();
@@ -171,7 +172,7 @@ export const CreateGkeApp = ({
         )}
         <CreateAppText />
         <CreateGkeAppButton
-          {...{ createAppRequest, onDismiss }}
+          {...{ billingStatus, createAppRequest, onDismiss }}
           existingApp={app}
           workspaceNamespace={workspace.namespace}
           username={profile.username}

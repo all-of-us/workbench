@@ -498,6 +498,22 @@ paths:
             application/json:
               schema:
                 type: boolean
+  /v1/account/trainings-enabled:
+    get:
+      tags:
+        - profile
+      summary: |
+        Whether trainings are enabled for this user.
+        This endpoint is used to assist in the LMS migration.
+        It is temporary and will be removed after the migration.
+      operationId: trainingsEnabled
+      responses:
+        200:
+          description: Whether trainings are enabled for this user.
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/account/sync-era-commons-status:
     post:
       tags:

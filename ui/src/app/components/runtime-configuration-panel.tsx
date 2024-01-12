@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import {
+  BillingStatus,
   Disk,
   Runtime,
   RuntimeConfigurationType,
@@ -52,6 +53,7 @@ import {
   serverConfigStore,
   useStore,
 } from 'app/utils/stores';
+import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
@@ -354,16 +356,34 @@ export const RuntimeConfigurationPanel = fp.flow(
     // Eventually we will be removing this option altogether
 
     const runtimeCanBeCreated =
+      workspace.billingStatus === BillingStatus.ACTIVE &&
       errorMessageContent.length === 0 &&
       ((analysisConfig.computeType === ComputeType.Standard &&
         analysisConfig.diskConfig.detachable) ||
         (analysisConfig.computeType === ComputeType.Dataproc &&
           !analysisConfig.diskConfig.detachable));
 
+    let runtimeCannotBeCreatedExplanation;
+    if (workspace.billingStatus !== BillingStatus.ACTIVE) {
+      runtimeCannotBeCreatedExplanation = BILLING_ACCOUNT_DISABLED_TOOLTIP;
+    }
+
     const runtimeCanBeUpdated =
       runtimeCanBeCreated &&
       environmentChanged &&
       canUpdateRuntime(runtimeStatus);
+
+    let runtimeCannotBeUpdatedExplanation;
+    if (runtimeCanBeUpdated) {
+      if (!runtimeCanBeCreated) {
+        runtimeCannotBeUpdatedExplanation = runtimeCannotBeCreatedExplanation;
+      } else if (environmentChanged) {
+        runtimeCannotBeUpdatedExplanation =
+          'Runtime cannot be updated, because environment has not changed.';
+      } else {
+        runtimeCannotBeUpdatedExplanation = `Runtime cannot be updated, because it is in the ${runtimeStatus} state.`;
+      }
+    }
 
     if (!runtimeLoaded) {
       return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
@@ -393,6 +413,7 @@ export const RuntimeConfigurationPanel = fp.flow(
                   profile,
                   requestAnalysisConfig,
                   runtimeCanBeCreated,
+                  runtimeCannotBeCreatedExplanation,
                   runtimeStatus,
                   setPanelContent,
                   workspace,
@@ -488,7 +509,9 @@ export const RuntimeConfigurationPanel = fp.flow(
                   profile,
                   requestAnalysisConfig,
                   runtimeCanBeCreated,
+                  runtimeCannotBeCreatedExplanation,
                   runtimeCanBeUpdated,
+                  runtimeCannotBeUpdatedExplanation,
                   runtimeExists,
                   runtimeStatus,
                   setAnalysisConfig,

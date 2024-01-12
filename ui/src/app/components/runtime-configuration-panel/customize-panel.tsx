@@ -61,7 +61,9 @@ export interface CustomizePanelProps {
   profile: Profile;
   requestAnalysisConfig: (ac: AnalysisConfig) => void;
   runtimeCanBeCreated: boolean;
+  runtimeCannotBeCreatedExplanation?: string;
   runtimeCanBeUpdated: boolean;
+  runtimeCannotBeUpdatedExplanation?: string;
   runtimeExists: boolean;
   runtimeStatus: RuntimeStatus;
   setAnalysisConfig: (config: AnalysisConfig) => void;
@@ -85,7 +87,9 @@ export const CustomizePanel = ({
   profile,
   requestAnalysisConfig,
   runtimeCanBeCreated,
+  runtimeCannotBeCreatedExplanation,
   runtimeCanBeUpdated,
+  runtimeCannotBeUpdatedExplanation,
   runtimeExists,
   runtimeStatus,
   setAnalysisConfig,
@@ -336,7 +340,9 @@ export const CustomizePanel = ({
           onClose,
           requestAnalysisConfig,
           runtimeCanBeCreated,
+          runtimeCannotBeCreatedExplanation,
           runtimeCanBeUpdated,
+          runtimeCannotBeUpdatedExplanation,
           runtimeExists,
           setPanelContent,
           gcePersistentDisk,

@@ -136,6 +136,7 @@ const styles = reactStyles({
     color: colors.primary,
   },
   navIcons: {
+    alignItems: 'center',
     position: 'absolute',
     right: '0',
     top: '1.125rem',

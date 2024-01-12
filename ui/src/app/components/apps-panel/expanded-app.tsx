@@ -7,7 +7,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
+import {
+  AppStatus,
+  BillingStatus,
+  UserAppEnvironment,
+  Workspace,
+} from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { switchCase } from '@terra-ui-packages/core-utils';
@@ -36,6 +41,7 @@ import {
   RuntimeStatusRequest,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import {
   openAppInIframe,
   pauseUserApp,
@@ -89,7 +95,7 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
 
 const PauseRuntimeButton = (props: { workspace: Workspace }) => {
   const {
-    workspace: { namespace, googleProject },
+    workspace: { billingStatus, namespace, googleProject },
   } = props;
 
   const [runtimeStatus, setRuntimeStatusRequest] = useRuntimeStatus(
@@ -99,6 +105,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
+      disabled={billingStatus === BillingStatus.INACTIVE}
       externalStatus={fromRuntimeStatus(runtimeStatus)}
       onPause={() => setRuntimeStatusRequest(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatusRequest(RuntimeStatusRequest.Start)}
@@ -163,14 +170,24 @@ const CromwellButtonRow = (props: {
   );
 };
 
-const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
-  const { userApp } = props;
+const RStudioButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  billingAccountDisabled: boolean;
+}) => {
+  const { userApp, billingAccountDisabled } = props;
   const [navigate] = useNavigation();
   const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
   };
-  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
+  const launchButtonDisabled =
+    billingAccountDisabled || userApp?.status !== AppStatus.RUNNING;
+  let tooltip;
+  if (billingAccountDisabled) {
+    tooltip = BILLING_ACCOUNT_DISABLED_TOOLTIP;
+  } else if (userApp?.status !== AppStatus.RUNNING) {
+    tooltip = 'Environment must be running to launch RStudio';
+  }
   return (
     <FlexRow>
       <SettingsButton
@@ -179,10 +196,7 @@ const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
         }}
       />
       <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
-      <TooltipTrigger
-        disabled={!launchButtonDisabled}
-        content='Environment must be running to launch RStudio'
-      >
+      <TooltipTrigger disabled={!launchButtonDisabled} content={tooltip}>
         {/* tooltip trigger needs a div for some reason */}
         <div>
           <AppsPanelButton
@@ -198,7 +212,10 @@ const RStudioButtonRow = (props: { userApp: UserAppEnvironment }) => {
   );
 };
 
-const SASButtonRow = (props: { userApp: UserAppEnvironment }) => {
+const SASButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  billingAccountDisabled: boolean;
+}) => {
   const { userApp } = props;
   const [navigate] = useNavigation();
   const { namespace, id } = currentWorkspaceStore.getValue();
@@ -264,6 +281,9 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const displayCromwellDeleteModal = () => {
     setShowCromwellDeleteModal(true);
   };
+
+  const billingAccountDisabled =
+    workspace.billingStatus === BillingStatus.INACTIVE;
 
   const onClickDelete = switchCase(
     appType,
@@ -339,11 +359,21 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             ],
             [
               appType === UIAppType.RSTUDIO,
-              () => <RStudioButtonRow userApp={initialUserAppInfo} />,
+              () => (
+                <RStudioButtonRow
+                  {...{ billingAccountDisabled }}
+                  userApp={initialUserAppInfo}
+                />
+              ),
             ],
             [
               appType === UIAppType.SAS,
-              () => <SASButtonRow userApp={initialUserAppInfo} />,
+              () => (
+                <SASButtonRow
+                  {...{ billingAccountDisabled }}
+                  userApp={initialUserAppInfo}
+                />
+              ),
             ],
 
             () => null
