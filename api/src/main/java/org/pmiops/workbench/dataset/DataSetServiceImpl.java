@@ -1036,7 +1036,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + ".mt'\n"
             // TODO: handle the case where matrix table has already been imported. Currently - it
             // throws a write error
-            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n",
+            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True, array_elements_required=False).write(hail_matrix_table_gcs)\n",
         "# Read Hail Matrix table\n"
             + matrixName
             + " = hl.read_matrix_table(hail_matrix_table_gcs)",
