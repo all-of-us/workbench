@@ -72,7 +72,7 @@ export const AccessRenewalNotificationMaybe = (
     boxStyle = {
       backgroundColor: boxColor,
       height: '5.5rem',
-      width: '690px',
+      width: '630px',
     };
   }
 
@@ -80,13 +80,13 @@ export const AccessRenewalNotificationMaybe = (
   const getText = () => {
     if (!redirectMoodleToAbsorb) {
       return (
-        <div>
+        <div style={{ paddingTop: '5px' }}>
           Time for {accessType} renewal. {timeLeft} <br />
           <div style={{ fontWeight: 800 }}>
-            Note: Training will be unavailable from Jan 26 to Feb 5. If you are
-            unable to complete the training by Jan 26, you will need to wait
-            until Feb 5 to begin.
+            Note: Training will be unavailable from Jan 26 to Feb 5.
           </div>
+          If you are unable to complete the training by Jan 26, you will need to
+          wait until Feb 5 to begin.
         </div>
       );
     }
