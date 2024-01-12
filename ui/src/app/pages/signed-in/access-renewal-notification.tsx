@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { NotificationBanner } from 'app/components/notification-banner';
@@ -8,7 +9,7 @@ import {
   ACCESS_RENEWAL_PATH,
   maybeDaysRemaining,
 } from 'app/utils/access-utils';
-import { profileStore, useStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 export interface AccessRenewalNotificationProps {
   accessTier: AccessTierShortNames;
@@ -61,22 +62,52 @@ export const AccessRenewalNotificationMaybe = (
   );
 
   const iconStyle = { color: iconColor };
-  const boxStyle = { backgroundColor: boxColor };
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
   const fullPagePath = pathname + search;
 
+  const { redirectMoodleToAbsorb } = serverConfigStore.get().config;
+  let boxStyle: CSSProperties = { backgroundColor: boxColor };
+  if (!redirectMoodleToAbsorb) {
+    boxStyle = {
+      backgroundColor: boxColor,
+      height: '5.5rem',
+      width: '630px',
+    };
+  }
+
+  // This is temporary, on Feb 05 we will be reverting to the original text
+  const getText = () => {
+    if (!redirectMoodleToAbsorb) {
+      return (
+        <div style={{ paddingTop: '5px' }}>
+          Time for {accessType} renewal. {timeLeft} <br />
+          <div style={{ fontWeight: 800 }}>
+            Note: Training will be unavailable from Jan 26 to Feb 5.
+          </div>
+          If you are unable to complete the training by Jan 26, you will need to
+          wait until Feb 5 to begin.
+        </div>
+      );
+    }
+    return `Time for ${accessType} renewal. ${timeLeft}`;
+  };
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
   return daysRemaining !== undefined ? (
     <NotificationBanner
       dataTestId='access-renewal-notification'
-      text={`Time for ${accessType} renewal. ${timeLeft}`}
+      text={getText()}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
       bannerTextWidth={
-        props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
+        !redirectMoodleToAbsorb
+          ? '410px'
+          : props.accessTier === AccessTierShortNames.Registered
+          ? '177px'
+          : '250px'
       }
+      textStyle={!redirectMoodleToAbsorb ? { paddingBottom: '5.5rem' } : {}}
       {...{ boxStyle, iconStyle }}
     />
   ) : null;

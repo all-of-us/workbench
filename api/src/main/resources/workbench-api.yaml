@@ -6884,6 +6884,10 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to pause GKE applications.
+        redirectMoodleToAbsorb:
+          type: boolean
+          description: Start redirecting Moodle User to Absorb
+          default: false
     RuntimeImage:
       type: object
       properties:
