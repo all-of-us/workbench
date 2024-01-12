@@ -51,7 +51,6 @@ const styles = reactStyles({
   },
   arrowIcon: {
     height: '1.05rem',
-    marginTop: '-0.3rem',
     width: '1.05rem',
     marginRight: '0.75rem',
   },
@@ -60,6 +59,8 @@ const styles = reactStyles({
     border: 0,
     color: colors.accent,
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
     float: 'left',
     fontSize: '14px',
     height: '3rem',

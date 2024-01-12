@@ -50,16 +50,15 @@ import { Subscription } from 'rxjs/Subscription';
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
-    marginTop: '-0.3rem',
     width: '18px',
   },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
-    display: 'inline-block',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: '2.25rem',
-    lineHeight: '2.4rem',
-    textAlign: 'center',
     width: '2.25rem',
   },
   finishButton: {

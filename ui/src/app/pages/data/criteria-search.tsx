@@ -35,15 +35,15 @@ export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS =
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
-    marginTop: '-0.3rem',
     width: '18px',
   },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: '2.25rem',
-    lineHeight: '2.4rem',
-    textAlign: 'center',
     width: '2.25rem',
   },
   detailExternalLinks: {
