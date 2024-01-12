@@ -23,7 +23,6 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
-import { analysisTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -109,25 +108,28 @@ describe('AppsList', () => {
     });
   });
 
-  it('should not render modal if notebook is less or equal to 5MB', async () => {
+  it('should naviagte to preview if notebook is less or equal to 5MB', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
 
     let firstDataRow;
-    notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024;
+    notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024 - 1;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
     let notebookLink;
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
-      notebookLink = within(firstDataRow).getByRole('link', {
-        name: firstNotebook.name,
-      });
     });
 
+    notebookLink = within(firstDataRow).getByRole('link', {
+      name: firstNotebook.name,
+    });
+    console.log('Link? ', notebookLink);
     await user.click(notebookLink);
 
-    const modalTitle = screen.queryByText('Notebook file size bigger than 5MB');
-    expect(modalTitle).toBeNull();
+    expect(notebookLink).toHaveAttribute(
+      'href',
+      `/workspaces/defaultNamespace/1/analysis/preview/mockFile.ipynb`
+    );
   });
 });
