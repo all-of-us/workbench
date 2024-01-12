@@ -43,7 +43,7 @@ export const NotebookSizeWarningModal = ({
     <Modal width={600}>
       <ModalTitle>
         <FlexRow>
-          <div>Notebook file size bigger than 5mb</div>
+          <div>Notebook file size bigger than 5MB</div>
           <CloseButton onClose={handleClose} style={{ marginLeft: 'auto' }} />
         </FlexRow>
       </ModalTitle>
