@@ -117,7 +117,7 @@ export const AppFilesList = withCurrentWorkspace()(
       } = props;
       const { name } = row;
       const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
-      return row.sizeInBytes >= notebookSizeThreshold ? (
+      return row.sizeInBytes <= notebookSizeThreshold ? (
         <RouterLink to={url} data-test-id='notebook-navigation'>
           {row.name}
         </RouterLink>
