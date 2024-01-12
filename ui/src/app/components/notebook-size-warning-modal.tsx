@@ -1,8 +1,6 @@
 import * as React from 'react';
 
-import { AppStatus, RuntimeStatus } from 'generated/fetch';
-
-import { Button, CloseButton, IconButton } from 'app/components/buttons';
+import { Button, CloseButton } from 'app/components/buttons';
 import { WarningMessage } from 'app/components/messages';
 import {
   Modal,
@@ -14,9 +12,7 @@ import { analysisTabName } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { useNavigation } from 'app/utils/navigation';
 
-import { UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
-import { SnowmanIcon } from './icons';
 import { Spinner } from './spinners';
 
 export interface NotebookSizeWarningModalProps {
@@ -25,6 +21,9 @@ export interface NotebookSizeWarningModalProps {
   workspaceId: string;
   notebookName: string;
 }
+
+const article =
+  'https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them';
 export const NotebookSizeWarningModal = ({
   handleClose,
   nameSpace,
@@ -63,11 +62,7 @@ export const NotebookSizeWarningModal = ({
             </div>
 
             <div style={{ marginTop: '1rem' }}>
-              <a
-                href='https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them'
-                target='_blank'
-                style={{ fontWeight: 'bold' }}
-              >
+              <a href={article} target='_blank' style={{ fontWeight: 'bold' }}>
                 How to clear notebook outputs without editing them
               </a>
             </div>

@@ -7,7 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppBanner } from 'app/components/apps-panel/app-banner';
-import { Clickable, KebabCircleButton } from 'app/components/buttons';
+import { KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -117,7 +117,7 @@ export const AppFilesList = withCurrentWorkspace()(
       } = props;
       const { name } = row;
       const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
-      return row.sizeInBytes <= notebookSizeThreshold ? (
+      return row.sizeInBytes >= notebookSizeThreshold ? (
         <RouterLink to={url} data-test-id='notebook-navigation'>
           {row.name}
         </RouterLink>
