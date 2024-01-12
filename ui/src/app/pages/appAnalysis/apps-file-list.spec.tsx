@@ -13,7 +13,14 @@ import { renderModal } from '../../../testing/react-test-helpers';
 import { RuntimeApiStub } from '../../../testing/stubs/runtime-api-stub';
 import { ExpandedApp } from '../../components/apps-panel/expanded-app';
 import { UIAppType } from '../../components/apps-panel/utils';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  queryByText,
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { analysisTabPath } from 'app/routing/utils';
@@ -29,7 +36,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 const FIRST_DATA_ROW_NUMBER = 2;
 
 const component = async () =>
-  renderModal(
+  render(
     <MemoryRouter>
       <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
     </MemoryRouter>
@@ -52,20 +59,15 @@ describe('AppsList', () => {
     // First Column : Menu icon
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
-      within(firstDataRow).getByTitle('Notebook Action Menu');
     });
+
+    within(firstDataRow).getByTitle('Notebook Action Menu');
 
     // Second Column displays the type of Application: In this case Jupyter
     within(firstDataRow).getByAltText('Jupyter');
 
     // Fourth column of table displays file name with extension
-    const expectedLink = `${analysisTabPath(
-      workspaceDataStub.namespace,
-      workspaceDataStub.id
-    )}/preview/mockFile.ipynb`;
-    expect(
-      within(firstDataRow).getByRole('link', { name: firstNotebook.name })
-    ).toHaveAttribute('href', expectedLink);
+    within(firstDataRow).getByText(firstNotebook.name);
 
     // Fifth column of notebook table displays last modified time
     within(firstDataRow).getByText(
@@ -76,7 +78,7 @@ describe('AppsList', () => {
     within(firstDataRow).getByText(firstNotebook.lastModifiedBy);
   });
 
-  it('should not render modal if notebook is greater than 5MB', async () => {
+  it('should render modal if notebook is greater than 5MB', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
 
@@ -87,15 +89,23 @@ describe('AppsList', () => {
     let notebookLink;
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
-      notebookLink = within(firstDataRow).getByRole('link', {
-        name: firstNotebook.name,
-      });
     });
+
+    notebookLink = within(firstDataRow).getByText(firstNotebook.name);
 
     await user.click(notebookLink);
 
     await waitFor(() => {
-      screen.getByText('Notebook file size bigger than 5mb');
+      screen.getByText('Notebook file size bigger than 5MB');
+    });
+
+    const modalCloseButton = screen.getByAltText('Close');
+    await user.click(modalCloseButton);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Notebook file size bigger than 5MB')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -117,7 +127,7 @@ describe('AppsList', () => {
 
     await user.click(notebookLink);
 
-    const modalTitle = screen.queryByText('Notebook file size bigger than 5mb');
+    const modalTitle = screen.queryByText('Notebook file size bigger than 5MB');
     expect(modalTitle).toBeNull();
   });
 });
