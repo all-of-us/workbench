@@ -9,18 +9,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { renderModal } from '../../../testing/react-test-helpers';
-import { RuntimeApiStub } from '../../../testing/stubs/runtime-api-stub';
-import { ExpandedApp } from '../../components/apps-panel/expanded-app';
-import { UIAppType } from '../../components/apps-panel/utils';
-import {
-  queryByText,
-  render,
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-  within,
-} from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -85,12 +74,12 @@ describe('AppsList', () => {
     notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024 + 1;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
-    let notebookLink;
+
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
     });
 
-    notebookLink = within(firstDataRow).getByText(firstNotebook.name);
+    const notebookLink = within(firstDataRow).getByText(firstNotebook.name);
 
     await user.click(notebookLink);
 
@@ -116,15 +105,12 @@ describe('AppsList', () => {
     notebooksApiStub.notebookList[0].sizeInBytes = 5 * 1024 * 1024 - 1;
 
     const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
-    let notebookLink;
     await waitFor(() => {
       firstDataRow = screen.getAllByRole('row')[FIRST_DATA_ROW_NUMBER];
     });
-
-    notebookLink = within(firstDataRow).getByRole('link', {
+    const notebookLink = within(firstDataRow).getByRole('link', {
       name: firstNotebook.name,
     });
-    console.log('Link? ', notebookLink);
     await user.click(notebookLink);
 
     expect(notebookLink).toHaveAttribute(
