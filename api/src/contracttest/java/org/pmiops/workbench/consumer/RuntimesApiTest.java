@@ -18,6 +18,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 
@@ -40,9 +41,13 @@ class RuntimesApiTest {
                       body.stringType("runtimeName", "sample-cromwell-study");
                       body.stringType("status", "Running");
                       body.stringType("autopauseThreshold", "57");
+                      body.stringType("proxyUrl", "http://www.proxy.com");
                       body.array("errors", errors -> {});
                       body.object(
-                          "cloudContext", context -> context.stringType("cloudprovider", null));
+                          "cloudContext", context -> {
+                            context.stringType("cloudProvider", "GCP");
+                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
+                          });
                       body.object(
                           "auditInfo",
                           context -> {
@@ -70,11 +75,16 @@ class RuntimesApiTest {
     auditInfo.setCreatedDate("Yesterday");
     auditInfo.setDateAccessed("Tuesday");
 
+    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
+    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
+    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
+
     expected.setAuditInfo(auditInfo);
+    expected.setCloudContext(cloudContext);
     expected.setRuntimeName("sample-cromwell-study");
     expected.setErrors(new ArrayList<>());
     expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-    expected.setCloudContext(new LeonardoCloudContext());
+    expected.setProxyUrl("http://www.proxy.com");
 
     LeonardoGetRuntimeResponse response =
         leoRuntimeService.getRuntime("googleProject", "runtimeName");
