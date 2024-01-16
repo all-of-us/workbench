@@ -111,7 +111,7 @@ describe('AppsList', () => {
 
     expect(notebookLink).toHaveAttribute(
       'href',
-      `/workspaces/defaultNamespace/1/analysis/preview/mockFile.ipynb`
+      `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/analysis/preview/${firstNotebook.name}`
     );
   });
 });
