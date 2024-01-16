@@ -24,7 +24,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 class RuntimesApiTest {
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact getApp(PactDslWithProvider builder) {
+  RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
@@ -50,7 +50,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getRuntime")
-  void testGetAppWhenAppExists(MockServer mockServer) throws ApiException {
+  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
