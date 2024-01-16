@@ -32,8 +32,8 @@ describe('Notebook Size Warning Modal', () => {
 
   const defaultProps: NotebookSizeWarningModalProps = {
     handleClose: () => {},
-    nameSpace: 'mockNamespace',
-    workspaceId: 'mockWorkspaceId',
+    namespace: 'mockNamespace',
+    firecloudName: 'mockfirecloudName',
     notebookName: 'mockNotebookName',
   };
 
@@ -75,8 +75,8 @@ describe('Notebook Size Warning Modal', () => {
   it('should have a functional edit button', async () => {
     const expectedNavigation = [
       'workspaces',
-      defaultProps.nameSpace,
-      defaultProps.workspaceId,
+      defaultProps.namespace,
+      defaultProps.firecloudName,
       analysisTabName,
       defaultProps.notebookName,
     ];
@@ -90,8 +90,8 @@ describe('Notebook Size Warning Modal', () => {
   it('should have a functional playground button', async () => {
     const expectedNavigation = [
       'workspaces',
-      defaultProps.nameSpace,
-      defaultProps.workspaceId,
+      defaultProps.namespace,
+      defaultProps.firecloudName,
       analysisTabName,
       defaultProps.notebookName,
     ];
