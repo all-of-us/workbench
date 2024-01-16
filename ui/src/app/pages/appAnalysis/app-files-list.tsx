@@ -208,8 +208,8 @@ export const AppFilesList = withCurrentWorkspace()(
         </FlexColumn>
         {showNotebookSizeWarningModal && (
           <NotebookSizeWarningModal
-            nameSpace={workspace.namespace}
-            workspaceId={workspace.id}
+            namespace={workspace.namespace}
+            firecloudName={workspace.id}
             notebookName={activeNotebookName}
             handleClose={() => {
               setShowNotebookSizeWarningModal(false);
