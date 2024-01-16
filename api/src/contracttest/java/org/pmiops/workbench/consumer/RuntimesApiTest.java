@@ -62,7 +62,8 @@ class RuntimesApiTest {
     expected.setStatus(LeonardoRuntimeStatus.RUNNING);
     expected.setCloudContext(new LeonardoCloudContext());
 
-    LeonardoGetRuntimeResponse response = leoRuntimeService.getRuntime("googleProject", "runtimeName");
+    LeonardoGetRuntimeResponse response =
+        leoRuntimeService.getRuntime("googleProject", "runtimeName");
 
     assertEquals(expected, response);
   }
