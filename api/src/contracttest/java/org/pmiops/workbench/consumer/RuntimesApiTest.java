@@ -29,17 +29,15 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimeName")
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
                     body -> {
-                      body.stringType("appName", "sample-cromwell-study");
-                      body.stringType("status", "RUNNING");
-                      body.stringType("diskName", "disk-123");
-                      body.stringType("appType", "CROMWELL");
+                      body.stringType("runtimeName", "sample-cromwell-study");
+                      body.stringType("status", "Running");
                       body.array("errors", errors -> {});
                       body.object(
                           "cloudContext", context -> context.stringType("cloudprovider", null));
@@ -58,7 +56,6 @@ class RuntimesApiTest {
     LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
     expected.setRuntimeName("sample-cromwell-study");
     expected.setErrors(new ArrayList<>());
-    expected.setRuntimeName("disk-123");
     expected.setStatus(LeonardoRuntimeStatus.RUNNING);
     expected.setCloudContext(new LeonardoCloudContext());
 
