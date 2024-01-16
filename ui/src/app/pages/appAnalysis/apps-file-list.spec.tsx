@@ -3,11 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 
-import {
-  NotebooksApi,
-  UserAppEnvironment,
-  WorkspacesApi,
-} from 'generated/fetch';
+import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

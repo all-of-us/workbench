@@ -6,7 +6,6 @@ import { mockNavigate } from 'setupTests';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { analysisTabName } from 'app/routing/utils';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { renderModal } from 'testing/react-test-helpers';
 
