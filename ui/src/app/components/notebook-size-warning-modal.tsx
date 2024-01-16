@@ -17,7 +17,7 @@ import { Spinner } from './spinners';
 
 export interface NotebookSizeWarningModalProps {
   handleClose: () => void;
-  nameSpace: string;
+  namespace: string;
   workspaceId: string;
   notebookName: string;
 }
@@ -26,14 +26,14 @@ const article =
   'https://support.researchallofus.org/hc/en-us/articles/10916327500436-How-to-clear-notebook-outputs-without-editing-them';
 export const NotebookSizeWarningModal = ({
   handleClose,
-  nameSpace,
+  namespace,
   workspaceId,
   notebookName,
 }: NotebookSizeWarningModalProps) => {
   const [navigate] = useNavigation();
   const navigationPath = [
     'workspaces',
-    nameSpace,
+    namespace,
     workspaceId,
     analysisTabName,
     notebookName,
