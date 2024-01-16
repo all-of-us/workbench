@@ -93,7 +93,7 @@ describe('AppsList', () => {
     });
   });
 
-  it('should naviagte to preview if notebook is less or equal to 5MB', async () => {
+  it('should navigate to preview if notebook is less or equal to 5MB', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
 
