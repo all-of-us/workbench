@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -38,9 +39,17 @@ class RuntimesApiTest {
                     body -> {
                       body.stringType("runtimeName", "sample-cromwell-study");
                       body.stringType("status", "Running");
+                      body.stringType("autopauseThreshold", "57");
                       body.array("errors", errors -> {});
                       body.object(
                           "cloudContext", context -> context.stringType("cloudprovider", null));
+                      body.object(
+                          "auditInfo",
+                          context -> {
+                            context.stringType("creator", "Bugs Bunny");
+                            context.stringType("createdDate", "Yesterday");
+                            context.stringType("dateAccessed", "Tuesday");
+                          });
                     })
                 .build())
         .toPact();
@@ -54,6 +63,14 @@ class RuntimesApiTest {
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
     LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
+    expected.setAutopauseThreshold(57);
+
+    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
+    auditInfo.setCreator("Bugs Bunny");
+    auditInfo.setCreatedDate("Yesterday");
+    auditInfo.setDateAccessed("Tuesday");
+
+    expected.setAuditInfo(auditInfo);
     expected.setRuntimeName("sample-cromwell-study");
     expected.setErrors(new ArrayList<>());
     expected.setStatus(LeonardoRuntimeStatus.RUNNING);
