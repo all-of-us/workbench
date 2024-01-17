@@ -44,7 +44,8 @@ class RuntimesApiTest {
                       body.stringType("proxyUrl", "http://www.proxy.com");
                       body.array("errors", errors -> {});
                       body.object(
-                          "cloudContext", context -> {
+                          "cloudContext",
+                          context -> {
                             context.stringType("cloudProvider", "GCP");
                             context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
                           });
