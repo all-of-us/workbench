@@ -11,7 +11,7 @@ import {
 } from 'app/pages/analysis/util';
 
 export class NotebooksApiStub extends NotebooksApi {
-  notebookList: FileDetail[];
+  public notebookList: FileDetail[];
   public notebookKernel: KernelTypeEnum;
 
   constructor() {

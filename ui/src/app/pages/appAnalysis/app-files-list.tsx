@@ -7,11 +7,12 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppBanner } from 'app/components/apps-panel/app-banner';
-import { Clickable, KebabCircleButton } from 'app/components/buttons';
+import { KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
+import { NotebookSizeWarningModal } from 'app/components/notebook-size-warning-modal';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
@@ -58,7 +59,7 @@ const styles = reactStyles({
     paddingTop: 0,
   },
 });
-
+const notebookSizeThreshold = 5 * 1024 * 1024;
 interface AppFilesListProps extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
@@ -67,6 +68,9 @@ export const AppFilesList = withCurrentWorkspace()(
     const { workspace } = props;
 
     const [filesList, setFilesList] = useState<FileDetail[]>();
+    const [showNotebookSizeWarningModal, setShowNotebookSizeWarningModal] =
+      useState<boolean>(false);
+    const [activeNotebookName, setActiveNotebookName] = useState<string>(null);
 
     const loadNotebooks = withErrorModal(
       {
@@ -113,12 +117,20 @@ export const AppFilesList = withCurrentWorkspace()(
       } = props;
       const { name } = row;
       const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
-      return (
-        <Clickable>
-          <RouterLink to={url} data-test-id='notebook-navigation'>
-            {row.name}
-          </RouterLink>
-        </Clickable>
+      return row.sizeInBytes <= notebookSizeThreshold ? (
+        <RouterLink to={url} data-test-id='notebook-navigation'>
+          {row.name}
+        </RouterLink>
+      ) : (
+        <div
+          onClick={() => {
+            setActiveNotebookName(row.name);
+            setShowNotebookSizeWarningModal(true);
+          }}
+          style={{ color: '#6fb4ff', cursor: 'pointer' }}
+        >
+          {row.name}
+        </div>
       );
     };
 
@@ -194,6 +206,17 @@ export const AppFilesList = withCurrentWorkspace()(
             </DataTable>
           )}
         </FlexColumn>
+        {showNotebookSizeWarningModal && (
+          <NotebookSizeWarningModal
+            namespace={workspace.namespace}
+            firecloudName={workspace.id}
+            notebookName={activeNotebookName}
+            handleClose={() => {
+              setShowNotebookSizeWarningModal(false);
+              setActiveNotebookName(null);
+            }}
+          />
+        )}
       </FadeBox>
     );
   }
