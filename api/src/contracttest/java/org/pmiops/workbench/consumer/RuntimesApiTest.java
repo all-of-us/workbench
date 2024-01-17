@@ -2,6 +2,7 @@ package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -10,7 +11,6 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,6 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 
@@ -114,40 +113,16 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getMissingRuntime")
-  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
-    expected.setAutopauseThreshold(57);
+    ApiException exception = assertThrows(ApiException.class, () ->
+        leoRuntimeService.getRuntime("googleProject", "runtimeName"));
 
-    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
-    auditInfo.setCreator("Bugs Bunny");
-    auditInfo.setCreatedDate("Yesterday");
-    auditInfo.setDateAccessed("Tuesday");
+    assertEquals(exception.getMessage(), "Not Found");
 
-    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
-    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
-    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
-
-    expected.setAuditInfo(auditInfo);
-    expected.setCloudContext(cloudContext);
-    expected.setRuntimeName("sample-cromwell-study");
-
-    LeonardoClusterError error = new LeonardoClusterError();
-    error.setErrorCode(6);
-    error.setErrorMessage("Runtime was not found");
-    error.setTimestamp("Today");
-    expected.setErrors(new ArrayList<>(List.of(error)));
-
-    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-    expected.setProxyUrl("http://www.proxy.com");
-
-    LeonardoGetRuntimeResponse response =
-        leoRuntimeService.getRuntime("googleProject", "runtimeName");
-
-    assertEquals(expected, response);
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
