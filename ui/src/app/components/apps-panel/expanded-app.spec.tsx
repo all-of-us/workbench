@@ -176,6 +176,8 @@ describe('ExpandedApp', () => {
     const canDeleteStatuses = [
       RuntimeStatus.RUNNING,
       RuntimeStatus.STOPPED,
+      RuntimeStatus.STOPPING,
+      RuntimeStatus.STARTING,
       RuntimeStatus.ERROR,
     ];
     test.each(canDeleteStatuses)(

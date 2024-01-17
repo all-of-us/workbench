@@ -28,7 +28,6 @@ const gcePersistentDisk = stubDisk();
 const analysisConfig = toAnalysisConfig(currentRuntime, gcePersistentDisk);
 const existingAnalysisConfig = analysisConfig;
 const defaultProps: CustomizePanelFooterProps = {
-  disableControls: false,
   runtimeCanBeCreated: false,
   runtimeCanBeUpdated: false,
   runtimeExists: false,
@@ -214,6 +213,8 @@ describe(CustomizePanelFooter.name, () => {
   const canDeleteStatuses = [
     RuntimeStatus.RUNNING,
     RuntimeStatus.STOPPED,
+    RuntimeStatus.STOPPING,
+    RuntimeStatus.STARTING,
     RuntimeStatus.ERROR,
   ];
   test.each(canDeleteStatuses)(
@@ -251,20 +252,6 @@ describe(CustomizePanelFooter.name, () => {
       await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
     }
   );
-
-  it('does not allow deleting the environment when controls are disabled', async () => {
-    await component({
-      runtimeExists: true,
-      unattachedPdExists: false,
-      disableControls: true,
-    });
-    const deleteButton = screen.queryByRole('button', {
-      name: 'Delete Environment',
-    });
-    expect(deleteButton).toBeInTheDocument();
-    deleteButton.click();
-    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
-  });
 
   it.each([
     [

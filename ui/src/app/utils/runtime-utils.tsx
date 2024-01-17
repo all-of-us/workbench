@@ -163,6 +163,8 @@ export const canDeleteRuntime = (status: RuntimeStatus) =>
       RuntimeStatus.RUNNING,
       RuntimeStatus.STOPPED,
       RuntimeStatus.ERROR,
+      RuntimeStatus.STARTING,
+      RuntimeStatus.STOPPING,
     ] as Array<RuntimeStatus>
   ).includes(status);
 
