@@ -71,37 +71,11 @@ class RuntimesApiTest {
         .method("GET")
         .path("/api/google/v1/runtimes/googleProject/runtimeName")
         .willRespondWith()
-        .status(200)
+        .status(404)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                    body -> {
-                      body.stringType("runtimeName", "sample-cromwell-study");
-                      body.stringType("status", "Running");
-                      body.stringType("autopauseThreshold", "57");
-                      body.stringType("proxyUrl", "http://www.proxy.com");
-                      body.eachLike(
-                          "errors",
-                          1,
-                          context -> {
-                            context.stringType("errorMessage", "Runtime was not found");
-                            context.numberType("errorCode", 6);
-                            context.stringType("timestamp", "Today");
-                          });
-                      body.object(
-                          "cloudContext",
-                          context -> {
-                            context.stringType("cloudProvider", "GCP");
-                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
-                          });
-                      body.object(
-                          "auditInfo",
-                          context -> {
-                            context.stringType("creator", "Bugs Bunny");
-                            context.stringType("createdDate", "Yesterday");
-                            context.stringType("dateAccessed", "Tuesday");
-                          });
-                    })
+                    body -> {})
                 .build())
         .toPact();
   }
