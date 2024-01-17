@@ -72,10 +72,7 @@ class RuntimesApiTest {
         .willRespondWith()
         .status(404)
         .headers(contentTypeJsonHeader)
-        .body(
-            newJsonBody(
-                    body -> {})
-                .build())
+        .body(newJsonBody(body -> {}).build())
         .toPact();
   }
 
@@ -118,11 +115,11 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    ApiException exception = assertThrows(ApiException.class, () ->
-        leoRuntimeService.getRuntime("googleProject", "runtimeName"));
+    ApiException exception =
+        assertThrows(
+            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimeName"));
 
     assertEquals(exception.getMessage(), "Not Found");
-
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
