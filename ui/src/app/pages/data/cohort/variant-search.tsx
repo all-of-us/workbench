@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
-import { Slider } from 'primereact/slider';
 import Nouislider from 'nouislider-react';
 
 import {
@@ -132,6 +131,21 @@ const searchTooltip = (
   </div>
 );
 
+interface SliderRef {
+  get: () => Array<string>;
+  set: (values: Array<number>) => void;
+}
+let countSlider: SliderRef;
+const sliderRefs: {
+  count: SliderRef,
+  number: SliderRef,
+  frequency: SliderRef,
+} = {
+  count: null,
+  number: null,
+  frequency: null,
+};
+
 const VariantFilters = ({
   filters,
   formState,
@@ -149,11 +163,33 @@ const VariantFilters = ({
   clearFn: Function;
   submitFn: Function;
 }) => {
-  let slider: {
-    get: () => Array<string>;
-    set: (values: Array<number>) => void;
-  };
   const [expanded, setExpanded] = useState([]);
+  const [sliderInputState, setSliderInputState] = useState({
+    countMin: formState.countMin ?? filters.countMin,
+    countMax: formState.countMax ?? filters.countMax,
+    numberMin: formState.numberMin ?? filters.numberMin,
+    numberMax: formState.numberMax ?? filters.numberMax,
+    frequencyMin: formState.frequencyMin ?? filters.frequencyMin,
+    frequencyMax: formState.frequencyMax ?? filters.frequencyMax,
+  });
+
+  useEffect(() => {
+    setSliderInputState({
+      countMin: formState.countMin ?? filters.countMin,
+      countMax: formState.countMax ?? filters.countMax,
+      numberMin: formState.numberMin ?? filters.numberMin,
+      numberMax: formState.numberMax ?? filters.numberMax,
+      frequencyMin: formState.frequencyMin ?? filters.frequencyMin,
+      frequencyMax: formState.frequencyMax ?? filters.frequencyMax,
+    });
+  }, [
+    formState.countMin,
+    formState.countMax,
+    formState.numberMin,
+    formState.numberMax,
+    formState.frequencyMin,
+    formState.frequencyMax,
+  ]);
 
   const toggleExpanded = (section: string) =>
     setExpanded((prevState) =>
@@ -161,6 +197,51 @@ const VariantFilters = ({
         ? prevState.filter((sec) => sec !== section)
         : [...prevState, section]
     );
+
+  const handleMinInputChange = (
+    sliderName: string,
+    range: number[],
+    value: string,
+    blur?: boolean
+  ) => {
+    let newValue = +value;
+    if ((blur && value === '') || newValue < range[0]) {
+      newValue = range[0];
+    } else if (newValue > range[1]) {
+      newValue = range[1];
+    }
+    setSliderInputState((prevState) => ({
+      ...prevState,
+      [`${sliderName}Min`]: blur ? newValue : value,
+    }));
+    sliderFn([`${sliderName}Min`, `${sliderName}Max`], [newValue, range[1]]);
+    console.log(sliderRefs[sliderName]);
+    sliderRefs[sliderName].set([newValue, null]);
+  };
+
+  const handleMaxInputChange = (
+    sliderName: string,
+    range: number[],
+    value: string,
+    blur?: boolean
+  ) => {
+    let newValue = +value;
+    if ((blur && value === '') || newValue > range[1]) {
+      newValue = range[1];
+    } else if (newValue < range[0]) {
+      newValue = range[0];
+    }
+    setSliderInputState((prevState) => ({
+      ...prevState,
+      [`${sliderName}Max`]: blur ? newValue : value,
+    }));
+    sliderFn([`${sliderName}Min`, `${sliderName}Max`], [range[0], newValue]);
+    sliderRefs[sliderName].set([null, newValue]);
+  };
+
+  const handleMinInputBlur = () => {};
+
+  const handleMaxInputBlur = () => {};
 
   return (
     <div
@@ -304,37 +385,77 @@ const VariantFilters = ({
                 <input
                   style={{ width: '4rem' }}
                   type='number'
-                  value={formState.countMin ?? filters.countMin}
+                  value={sliderInputState.countMin}
+                  min={filters.countMin}
+                  max={sliderInputState.countMax}
                   onChange={(e) =>
-                    sliderFn(
-                      ['countMin', 'countMax'],
-                      [e.target.value, formState.countMax ?? filters.countMax]
+                    handleMinInputChange(
+                      'count',
+                      [filters.countMin, sliderInputState.countMax],
+                      e.target.value
+                    )
+                  }
+                  onBlur={(e) =>
+                    handleMinInputChange(
+                      'count',
+                      [filters.countMin, sliderInputState.countMax],
+                      e.target.value,
+                      true
                     )
                   }
                 />
                 <input
                   style={{ float: 'right', width: '4rem' }}
                   type='number'
-                  value={formState.countMax ?? filters.countMax}
+                  value={sliderInputState.countMax}
+                  min={sliderInputState.countMin}
+                  max={filters.countMax}
                   onChange={(e) =>
-                    sliderFn(
-                      ['countMin', 'countMax'],
-                      [formState.countMin ?? filters.countMin, e.target.value]
+                    handleMaxInputChange(
+                      'count',
+                      [sliderInputState.countMin, filters.countMax],
+                      e.target.value
+                    )
+                  }
+                  onBlur={(e) =>
+                    handleMaxInputChange(
+                      'count',
+                      [sliderInputState.countMin, filters.countMax],
+                      e.target.value,
+                      true
                     )
                   }
                 />
               </div>
-              <div style={{ height: '2rem', margin: 'auto', width: '90%' }}>
-                <Slider
-                  style={{ maxWidth: '100%' }}
-                  value={[
-                    formState.countMin ?? filters.countMin,
-                    formState.countMax ?? filters.countMax,
+              <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+                <Nouislider
+                  style={{ marginTop: '3rem' }}
+                  behaviour='drag'
+                  instanceRef={(ref) => {
+                    console.dir(ref);
+                    console.log(ref['noUiSlider']);
+                    sliderRefs.count = ref['noUiSlider'];
+                  }}
+                  onSlide={(value) =>
+                    sliderFn(
+                      ['countMin', 'countMax'],
+                      value.map((val) => +val)
+                    )
+                  }
+                  tooltips
+                  range={{
+                    min: filters.countMin,
+                    max:
+                      // Prevent Nouislider slider error if min/max are the same
+                      filters.countMax === filters.countMin
+                        ? filters.countMax + 1
+                        : filters.countMax,
+                  }}
+                  start={[
+                    filters.countMin,
+                    filters.countMax,
                   ]}
-                  min={filters.countMin}
-                  max={filters.countMax}
-                  onChange={(e) => sliderFn(['countMin', 'countMax'], e.value)}
-                  range
+                  connect
                 />
               </div>
             </>
@@ -362,8 +483,10 @@ const VariantFilters = ({
                     console.log(e.target.value);
                     console.log(+e.target.value >= filters.numberMin);
                     console.log(+e.target.value <= filters.numberMax);
-                    console.log(+e.target.value >= filters.numberMin &&
-                      +e.target.value <= filters.numberMax);
+                    console.log(
+                      +e.target.value >= filters.numberMin &&
+                        +e.target.value <= filters.numberMax
+                    );
                     if (
                       +e.target.value >= filters.numberMin &&
                       +e.target.value <= filters.numberMax
@@ -394,19 +517,30 @@ const VariantFilters = ({
                   max={filters.numberMax}
                 />
               </div>
-              <div style={{ height: '2rem', margin: 'auto', width: '90%' }}>
-                <Slider
-                  style={{ maxWidth: '100%' }}
-                  value={[
+              <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+                <Nouislider
+                  style={{ marginTop: '3rem' }}
+                  behaviour='drag'
+                  onEnd={(value) =>
+                    sliderFn(
+                      ['numberMin', 'numberMax'],
+                      value.map((val) => +val)
+                    )
+                  }
+                  range={{
+                    min: filters.numberMin,
+                    max:
+                      // Prevent Nouislider slider error if min/max are the same
+                      filters.numberMax === filters.numberMin
+                        ? filters.numberMax + 1
+                        : filters.numberMax,
+                  }}
+                  start={[
                     formState.numberMin ?? filters.numberMin,
                     formState.numberMax ?? filters.numberMax,
                   ]}
-                  min={filters.numberMin}
-                  max={filters.numberMax}
-                  onChange={(e) =>
-                    sliderFn(['numberMin', 'numberMax'], e.value)
-                  }
-                  range
+                  tooltips
+                  connect
                 />
               </div>
             </>
@@ -455,19 +589,30 @@ const VariantFilters = ({
                   }
                 />
               </div>
-              <div style={{ height: '2rem', margin: 'auto', width: '90%' }}>
-                <Slider
-                  style={{ maxWidth: '100%' }}
-                  value={[
+              <div style={{ height: '2rem', margin: 'auto', width: '80%' }}>
+                <Nouislider
+                  style={{ marginTop: '3rem' }}
+                  behaviour='drag'
+                  onEnd={(value) =>
+                    sliderFn(
+                      ['frequencyMin', 'frequencyMax'],
+                      value.map((val) => +val)
+                    )
+                  }
+                  range={{
+                    min: filters.frequencyMin,
+                    max:
+                      // Prevent Nouislider slider error if min/max are the same
+                      filters.frequencyMax === filters.frequencyMin
+                        ? filters.frequencyMax + 1
+                        : filters.frequencyMax,
+                  }}
+                  start={[
                     formState.frequencyMin ?? filters.frequencyMin,
                     formState.frequencyMax ?? filters.frequencyMax,
                   ]}
-                  min={filters.frequencyMin}
-                  max={filters.frequencyMax}
-                  onChange={(e) =>
-                    sliderFn(['frequencyMin', 'frequencyMax'], e.value)
-                  }
-                  range
+                  tooltips
+                  connect
                 />
               </div>
             </>
