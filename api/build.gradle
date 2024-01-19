@@ -54,7 +54,6 @@ plugins {
     id 'org.owasp.dependencycheck' version '8.4.2'
     id 'org.springframework.boot' version '2.7.4'
     id 'jacoco'
-    id 'com.libyear.libyear-gradle-plugin' version "0.1.7"
 }
 
 // keep in sync with:
@@ -724,13 +723,6 @@ task listProjectAPIs(type: GenerateAPIListingTask)
 // XML file under src/main/webapp/WEB-INF/appengine-web.xml
 def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
-
-// run with "./gradlew reportLibyears"
-libyear {
-    configurations = ['compileClasspath']
-    failOnError = false // necessary for sam-client
-    validator = singleArtifactMustNotBeOlderThan(years(15))
-}
 
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
