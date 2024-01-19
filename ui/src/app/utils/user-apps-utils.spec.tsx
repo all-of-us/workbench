@@ -8,7 +8,6 @@ import {
   DiskType,
 } from 'generated/fetch';
 
-import { waitFor } from '@testing-library/react';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { appDisplayPath } from 'app/routing/utils';

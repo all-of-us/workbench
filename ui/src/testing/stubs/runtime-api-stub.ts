@@ -1,5 +1,6 @@
 import {
   DataprocConfig,
+  EmptyResponse,
   GceConfig,
   GceWithPdConfig,
   Runtime,
@@ -86,7 +87,7 @@ export class RuntimeApiStub extends RuntimeApi {
   async createRuntime(
     workspaceNamespace: string,
     runtime: Runtime
-  ): Promise<{}> {
+  ): Promise<EmptyResponse> {
     const reqDisk = runtime?.gceWithPdConfig?.persistentDisk;
     if (reqDisk && !reqDisk.name) {
       const dapi = disksApi();
@@ -106,7 +107,7 @@ export class RuntimeApiStub extends RuntimeApi {
   async deleteRuntime(
     workspaceNamespace: string,
     deleteDisk: boolean
-  ): Promise<{}> {
+  ): Promise<EmptyResponse> {
     if (deleteDisk) {
       await disksApi().deleteDisk(
         workspaceNamespace,
@@ -117,8 +118,8 @@ export class RuntimeApiStub extends RuntimeApi {
     return {};
   }
 
-  updateRuntime(): Promise<{}> {
-    return new Promise<{}>((resolve) => {
+  updateRuntime(): Promise<EmptyResponse> {
+    return new Promise((resolve) => {
       // Setting it to Running doesn't really make sense but it reflects
       // what is currently happening in the product.
       this.runtime.status = RuntimeStatus.RUNNING;
