@@ -40,15 +40,11 @@ const transitionalAppStatuses: Array<AppStatus> = [
   AppStatus.STOPPING,
 ];
 
-const doUserAppsRequireUpdates = () => {
-  const { userApps } = userAppsStore.get();
-  return (
-    !userApps ||
-    userApps
-      .map((userApp) => userApp.status)
-      .some((appStatus) => transitionalAppStatuses.includes(appStatus))
-  );
-};
+const doUserAppsRequireUpdates = (userApps: ListAppsResponse) =>
+  !userApps ||
+  userApps
+    .map((userApp) => userApp.status)
+    .some((appStatus) => transitionalAppStatuses.includes(appStatus));
 
 // all integer dates in this function are milliseconds since epoch
 export const updateLastActive = (userApps: ListAppsResponse) => {
@@ -73,7 +69,6 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
   appsApi()
     .listAppsInWorkspace(namespace)
     .then((listAppsResponse) => {
-      userAppsStore.set({ userApps: listAppsResponse, updating: false });
       if (listAppsResponse) {
         updateLastActive(listAppsResponse);
       }
@@ -82,12 +77,16 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
         () => {
           maybeStartPollingForUserApps(namespace);
         },
-        doUserAppsRequireUpdates()
+        doUserAppsRequireUpdates(listAppsResponse)
           ? transitionPollingTimeoutMs
           : activityPollingTimeoutMs
       );
 
-      userAppsStore.set({ ...userAppsStore.get(), timeoutID });
+      userAppsStore.set({
+        userApps: listAppsResponse,
+        updating: false,
+        timeoutID,
+      });
     });
 };
 
