@@ -73,6 +73,8 @@ public class LeonardoCustomEnvVarUtils {
   private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY =
       "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH";
 
+  private static final String ARTIFACT_REGISTRY_DOCKER_REPO_KEY = "ARTIFACT_REGISTRY_DOCKER_REPO";
+
   @VisibleForTesting
   public static final Map<String, String> FASTA_REFERENCE_ENV_VAR_MAP =
       new ImmutableMap.Builder<String, String>()
@@ -199,6 +201,8 @@ public class LeonardoCustomEnvVarUtils {
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     customEnvironmentVariables.putAll(FASTA_REFERENCE_ENV_VAR_MAP);
+    customEnvironmentVariables.put(
+        ARTIFACT_REGISTRY_DOCKER_REPO_KEY, workbenchConfig.artifactRegistryConfig.dockerRepoName);
 
     return customEnvironmentVariables;
   }
