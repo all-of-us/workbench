@@ -6,8 +6,6 @@ import {
   AppType,
   CreateAppRequest,
   DiskType,
-  ListAppsResponse,
-  RuntimeStatus,
 } from 'generated/fetch';
 
 import { waitFor } from '@testing-library/react';
@@ -122,7 +120,7 @@ describe('User Apps Helper functions', () => {
     jest.advanceTimersByTime(20e3);
 
     // it calls list-apps again once but not twice, because we have transitioned
-    await waitFor(() => expect(spyListAppsAPI).toHaveBeenCalledTimes(2));
+    expect(spyListAppsAPI).toHaveBeenCalledTimes(2);
   });
 
   it('Opens Config panel if RStudio App is not running', async () => {
