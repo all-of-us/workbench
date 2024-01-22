@@ -114,4 +114,9 @@ describe('AppsList', () => {
       `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/analysis/preview/${firstNotebook.name}`
     );
   });
+
+  it('should render the wait message navigate to preview if notebook is less or equal to 5MB', async () => {
+    currentWorkspaceStore.next(workspaceDataStub);
+    await component();
+  });
 });

@@ -63,7 +63,30 @@ const styles = reactStyles({
     paddingTop: 0,
   },
 });
+
 const notebookSizeThreshold = 5 * 1024 * 1024;
+
+const WaitingForFiles = () => (
+  <FlexColumn style={{ paddingTop: '0.75rem' }}>
+    <div>
+      <FontAwesomeIcon
+        style={{ color: colors.warning }}
+        icon={faExclamationTriangle}
+        size='2x'
+      />
+    </div>
+    <div>
+      Copying 1 or more notebooks from another workspace. This may take{' '}
+      <b>a few minutes</b>.
+    </div>
+    <div>
+      Please refresh your browser to check again. If you continue to see this
+      message after a few minutes have passed, please contact support at{' '}
+      <SupportMailto />.
+    </div>
+  </FlexColumn>
+);
+
 interface AppFilesListProps extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
@@ -162,7 +185,9 @@ export const AppFilesList = withCurrentWorkspace()(
       return <div>{time}</div>;
     };
 
-    const showWaitingForTransfer =
+    // only show this when we know isTransferComplete === false
+    // and not before we have checked (undefined)
+    const showWaitingForFiles =
       !isTransferComplete && isTransferComplete !== undefined;
 
     return (
@@ -234,26 +259,7 @@ export const AppFilesList = withCurrentWorkspace()(
             )}
           </FlexColumn>
         )}
-        {showWaitingForTransfer && (
-          <FlexColumn style={{ paddingTop: '0.75rem' }}>
-            <div>
-              <FontAwesomeIcon
-                style={{ color: colors.warning }}
-                icon={faExclamationTriangle}
-                size='2x'
-              />
-            </div>
-            <div>
-              Copying 1 or more notebooks from another workspace. This may take{' '}
-              <b>a few minutes</b>.
-            </div>
-            <div>
-              Please refresh your browser to check again. If you continue to see
-              this message after a few minutes have passed, please contact
-              support at <SupportMailto />.
-            </div>
-          </FlexColumn>
-        )}
+        {showWaitingForFiles && <WaitingForFiles />}
         {showNotebookSizeWarningModal && (
           <NotebookSizeWarningModal
             namespace={workspace.namespace}
