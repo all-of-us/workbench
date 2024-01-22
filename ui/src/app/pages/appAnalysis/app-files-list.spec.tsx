@@ -26,10 +26,12 @@ const component = async () =>
     </MemoryRouter>
   );
 describe('AppsList', () => {
+  let workspacesApiStub: WorkspacesApiStub;
   let notebooksApiStub: NotebooksApiStub;
   let user;
   beforeEach(() => {
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    workspacesApiStub = new WorkspacesApiStub();
+    registerApiClient(WorkspacesApi, workspacesApiStub);
     notebooksApiStub = new NotebooksApiStub();
     registerApiClient(NotebooksApi, notebooksApiStub);
     user = userEvent.setup();
@@ -115,8 +117,39 @@ describe('AppsList', () => {
     );
   });
 
-  it('should render the wait message navigate to preview if notebook is less or equal to 5MB', async () => {
+  it('should render WaitingForFiles when a transfer is not complete', async () => {
+    workspacesApiStub.notebookTransferComplete = () => Promise.resolve(false);
     currentWorkspaceStore.next(workspaceDataStub);
     await component();
+
+    const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
+    await waitFor(() =>
+      expect(screen.queryByText(firstNotebook.name)).not.toBeInTheDocument()
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Copying 1 or more notebooks from another workspace/)
+      ).toBeInTheDocument()
+    );
+  });
+
+  it("should not render WaitingForFiles when we don't know whether the transfer is complete", async () => {
+    workspacesApiStub.notebookTransferComplete = () =>
+      Promise.resolve(undefined);
+    currentWorkspaceStore.next(workspaceDataStub);
+    await component();
+
+    const firstNotebook = (await notebooksApiStub.getNoteBookList())[0];
+    await waitFor(() =>
+      // we also do not display the notebook list
+      expect(screen.queryByText(firstNotebook.name)).not.toBeInTheDocument()
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Copying 1 or more notebooks from another workspace/)
+      ).not.toBeInTheDocument()
+    );
   });
 });
