@@ -75,6 +75,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
 import { PanelContent } from './runtime-configuration-panel/utils';
+import { SUPPORT_EMAIL } from './support';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -574,9 +575,7 @@ export const HelpSidebar = fp.flow(
                   Cromwell Cloud Environment
                 </h3>
                 <BetaBadge
-                  tooltipContent={
-                    'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
-                  }
+                  tooltipContent={`We are regularly improving the Cromwell experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
                   style={{
                     marginLeft: '0.5rem',
                     ...styles.cromwellBetaBadge,
@@ -606,9 +605,7 @@ export const HelpSidebar = fp.flow(
                   RStudio Cloud Environment
                 </h3>
                 <BetaBadge
-                  tooltipContent={
-                    'We are regularly improving the RStudio experience. If you have feedback, reach out to support@researchallofus.org'
-                  }
+                  tooltipContent={`We are regularly improving the RStudio experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
                   style={{
                     marginLeft: '0.5rem',
                     ...styles.rstudioBetaBadge,
@@ -638,9 +635,7 @@ export const HelpSidebar = fp.flow(
                   SAS Cloud Environment
                 </h3>
                 <BetaBadge
-                  tooltipContent={
-                    'We are regularly improving the SAS experience. If you have feedback, reach out to support@researchallofus.org'
-                  }
+                  tooltipContent={`We are regularly improving the SAS experience. If you have feedback, reach out to ${SUPPORT_EMAIL}`}
                   style={{
                     marginLeft: '0.5rem',
                     ...styles.sasBetaBadge,
