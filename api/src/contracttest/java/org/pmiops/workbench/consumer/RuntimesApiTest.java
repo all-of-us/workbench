@@ -30,7 +30,7 @@ class RuntimesApiTest {
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
-        .uponReceiving("a request to get that runtime from GSuite")
+        .uponReceiving("a request to get that runtime")
         .method("GET")
         .path("/api/google/v1/runtimes/googleProject/runtimeName")
         .willRespondWith()
