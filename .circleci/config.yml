@@ -446,7 +446,7 @@ jobs:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH}
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH} --consumer-app-version
 
   api-contract-can-i-deploy:
     executor: pact-executor
