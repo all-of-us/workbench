@@ -127,10 +127,8 @@ describe('AppsList', () => {
       expect(screen.queryByText(firstNotebook.name)).not.toBeInTheDocument()
     );
 
-    await waitFor(() =>
-      expect(
-        screen.queryByText(/Copying 1 or more notebooks from another workspace/)
-      ).toBeInTheDocument()
+    await screen.findByText(
+      /Copying 1 or more notebooks from another workspace/
     );
   });
 
