@@ -55,7 +55,7 @@ class RuntimesApiTest {
                           context -> {
                             context.stringType("creator", "Bugs Bunny");
                             context.stringType("createdDate", "Yesterday");
-                            context.stringType("dateAccessed", "Wednesday");
+                            context.stringType("dateAccessed", "Tuesday");
                           });
                     })
                 .build())
