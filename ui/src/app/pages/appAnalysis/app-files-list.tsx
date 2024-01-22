@@ -122,18 +122,18 @@ export const AppFilesList = withCurrentWorkspace()(
       },
       async () => {
         props.showSpinner();
-        if (isTransferComplete) {
-          await listNotebooks(workspace).then(setFilesList);
-        } else {
-          checkTransferComplete();
-        }
+        await listNotebooks(workspace).then(setFilesList);
         props.hideSpinner();
       }
     );
 
     useEffect(() => {
       if (workspace) {
-        loadNotebooks();
+        if (isTransferComplete) {
+          loadNotebooks();
+        } else {
+          checkTransferComplete();
+        }
       }
     }, [workspace, isTransferComplete]);
 
