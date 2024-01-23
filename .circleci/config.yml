@@ -588,7 +588,7 @@ jobs:
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: default # latest stable version
     steps:
       - run:
           name: Echo
@@ -597,7 +597,7 @@ jobs:
 
   e2etests-deploy-ui:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: default # latest stable version
     environment:
       PR_SITE_COUNT: 10
     steps:
@@ -628,7 +628,7 @@ jobs:
             ./src/circle-deploy.sh
   e2etests-run:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: default # latest stable version
     environment:
       PR_SITE_COUNT: 10
     steps:
