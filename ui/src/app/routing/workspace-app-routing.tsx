@@ -104,7 +104,7 @@ const GKEAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(GKEAppLauncher);
-const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
+const AppsListPage = fp.flow(withRouteData)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {

@@ -16,7 +16,6 @@ import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { NotebookSizeWarningModal } from 'app/components/notebook-size-warning-modal';
 import { SupportMailto } from 'app/components/support';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
@@ -87,7 +86,7 @@ const WaitingForFiles = () => (
   </FlexColumn>
 );
 
-interface AppFilesListProps extends WithSpinnerOverlayProps {
+interface AppFilesListProps {
   workspace: WorkspaceData;
 }
 export const AppFilesList = withCurrentWorkspace()(
@@ -106,7 +105,6 @@ export const AppFilesList = withCurrentWorkspace()(
       {
         title: 'Error Loading Files',
         message: 'Please refresh to try again.',
-        onDismiss: () => props.hideSpinner(),
       },
       () =>
         workspacesApi()
@@ -118,13 +116,8 @@ export const AppFilesList = withCurrentWorkspace()(
       {
         title: 'Error Loading Files',
         message: 'Please refresh to try again.',
-        onDismiss: () => props.hideSpinner(),
       },
-      async () => {
-        props.showSpinner();
-        await listNotebooks(workspace).then(setFilesList);
-        props.hideSpinner();
-      }
+      () => listNotebooks(workspace).then(setFilesList)
     );
 
     useEffect(() => {
