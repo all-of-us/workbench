@@ -293,6 +293,7 @@ describe('ExpandedApp', () => {
 
     test.each([
       AppStatus.RUNNING,
+      AppStatus.STOPPED,
       AppStatus.ERROR,
       AppStatus.STATUS_UNSPECIFIED,
     ])('should allow deletion when the app status is %s', async (status) => {
@@ -345,13 +346,7 @@ describe('ExpandedApp', () => {
       }
     });
 
-    test.each([
-      AppStatus.STOPPED,
-      AppStatus.STARTING,
-      AppStatus.STOPPING,
-      undefined,
-      null,
-    ])(
+    test.each([AppStatus.STARTING, AppStatus.STOPPING, undefined, null])(
       'should not allow deletion when the app status is %s',
       async (status) => {
         const appName = 'my-app';
