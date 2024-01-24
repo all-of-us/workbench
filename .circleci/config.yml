@@ -368,6 +368,13 @@ commands:
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
           command: ./project.rb set-access-module-timestamps --profile-user "${ACCESS_TEST_USER}" --ras-user "${RAS_TEST_USER}"
 
+  halt-deploy-check:
+    description: "Halt job when the last commit message contains 'skip-deploy' string"
+    steps:
+      - run:
+          working_directory: ~/workbench/.circleci
+          command: bash ./skip-deploy-checks.sh
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -659,6 +666,7 @@ jobs:
           job-regex: ^ui-deploy-to-test$
           time: '10' # minutes
       - checkout-code
+      - halt-deploy-check
       - attach_workspace:
           at: .
       - gcloud-auth-login
@@ -680,6 +688,7 @@ jobs:
           job-regex: ^api-deploy-to-test$
           time: '10' # minutes
       - checkout-code
+      - halt-deploy-check
       - attach_workspace:
           at: .
       - gcloud-auth-login
