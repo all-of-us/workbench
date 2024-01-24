@@ -3,6 +3,13 @@
 # Keep synchronized with ci/Dockerfile.circle_build and api/gradle.build
 FROM eclipse-temurin:17
 
+# keep in sync with api/gradle.build and ci/Dockerfile.circle_build
+ENV CLOUD_SDK_VERSION 457.0.0
+ENV GRADLE_VERSION 7.6.3
+
+# It never makes sense for Gradle to run a daemon within a docker container.
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
+
 RUN apt-get update \
   && apt-get install --no-install-recommends -yq \
   default-mysql-client \
@@ -23,9 +30,6 @@ RUN npm install --global yarn n
 # Upgrade to Node 18, above installs 12.
 RUN n 18
 
-# keep in sync with api/gradle.build and ci/Dockerfile.circle_build
-ENV CLOUD_SDK_VERSION 392.0.0
-
 WORKDIR /root
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
@@ -33,20 +37,14 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
   ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
   rm -rf gcloud.tgz
 
-ENV PATH=~/node/bin:~/google-cloud-sdk/bin:$PATH
-
 RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /tmp/cloud_sql_proxy \
   && mv /tmp/cloud_sql_proxy /usr/local/bin && chmod +x /usr/local/bin/cloud_sql_proxy
 
-# It never makes sense for Gradle to run a daemon within a docker container.
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
-
-ENV GRADLE_VERSION 7.6.1
-
 RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
   && unzip /tmp/gradle.zip -d /opt/gradle
-ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN gem install activesupport -v 6.1.4.6
 RUN gem install jira-ruby
+
+ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:~/node/bin:~/google-cloud-sdk/bin:${PATH}"
