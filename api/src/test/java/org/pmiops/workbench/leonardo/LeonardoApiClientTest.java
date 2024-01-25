@@ -196,6 +196,7 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.put("WORKSPACE_BUCKET", "gs://" + WORKSPACE_BUCKET);
     customEnvironmentVariables.put("BIGQUERY_STORAGE_API_ENABLED", "true");
     customEnvironmentVariables.put("CDR_STORAGE_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH);
+    customEnvironmentVariables.put("ARTIFACT_REGISTRY_DOCKER_REPO", null);
     customEnvironmentVariables.put(
         "WGS_CRAM_MANIFEST_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH + "/" + WGS_PATH);
     customEnvironmentVariables.putAll(LeonardoCustomEnvVarUtils.FASTA_REFERENCE_ENV_VAR_MAP);

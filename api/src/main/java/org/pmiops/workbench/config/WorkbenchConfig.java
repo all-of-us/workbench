@@ -40,6 +40,7 @@ public class WorkbenchConfig {
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
   public E2ETestUserConfig e2eTestUsers;
   public TermsOfServiceConfig termsOfService;
+  public ArtifactRegistryConfig artifactRegistry;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -73,6 +74,7 @@ public class WorkbenchConfig {
     config.bucketAudit = new BucketAuditConfig();
     config.e2eTestUsers = new E2ETestUserConfig();
     config.termsOfService = new TermsOfServiceConfig();
+    config.artifactRegistry = new ArtifactRegistryConfig();
     return config;
   }
 
@@ -466,5 +468,9 @@ public class WorkbenchConfig {
   public static class TermsOfServiceConfig {
     // which All of Us Terms of Service is considered current
     public int latestAouVersion;
+  }
+
+  public static class ArtifactRegistryConfig {
+    public String dockerRepoName;
   }
 }
