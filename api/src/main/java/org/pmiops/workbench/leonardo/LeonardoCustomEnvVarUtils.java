@@ -202,7 +202,7 @@ public class LeonardoCustomEnvVarUtils {
 
     customEnvironmentVariables.putAll(FASTA_REFERENCE_ENV_VAR_MAP);
     customEnvironmentVariables.put(
-        ARTIFACT_REGISTRY_DOCKER_REPO_KEY, workbenchConfig.artifactRegistryConfig.dockerRepoName);
+        ARTIFACT_REGISTRY_DOCKER_REPO_KEY, workbenchConfig.artifactRegistry.dockerRepoName);
 
     return customEnvironmentVariables;
   }
