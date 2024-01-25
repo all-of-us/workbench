@@ -27,6 +27,41 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 class RuntimesApiTest {
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact createRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to create a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .willRespondWith()
+        .status(200)
+        .headers(contentTypeJsonHeader)
+        .body(
+            newJsonBody(
+                body -> {
+                  body.stringType("runtimeName", "sample-cromwell-study");
+                  body.stringType("status", "Running");
+                  body.stringType("autopauseThreshold", "57");
+                  body.stringType("proxyUrl", "http://www.proxy.com");
+                  body.array("errors", errors -> {});
+                  body.object(
+                      "cloudContext",
+                      context -> {
+                        context.stringType("cloudProvider", "GCP");
+                        context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
+                      });
+                  body.object(
+                      "auditInfo",
+                      context -> {
+                        context.stringType("creator", "Bugs Bunny");
+                        context.stringType("createdDate", "Yesterday");
+                        context.stringType("dateAccessed", "Tuesday");
+                      });
+                })
+                .build())
+        .toPact();
+  }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
@@ -74,6 +109,17 @@ class RuntimesApiTest {
         .headers(contentTypeJsonHeader)
         .body(newJsonBody(body -> {}).build())
         .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createRuntime")
+  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.createRuntime("googleProject", "runtimeName", null);
+
   }
 
   @Test
