@@ -63,7 +63,8 @@ const styles = reactStyles({
   },
 });
 
-const notebookSizeThreshold = 5 * 1024 * 1024;
+const notebookSizeThreshold = 5 * 1024 * 1024; // 5 MB
+const transferCheckInterval = 10e3; // 10 seconds
 
 const WaitingForFiles = () => (
   <FlexColumn style={{ paddingTop: '0.75rem' }}>
@@ -79,9 +80,8 @@ const WaitingForFiles = () => (
       <b>a few minutes</b>.
     </div>
     <div>
-      Please refresh your browser to check again. If you continue to see this
-      message after a few minutes have passed, please contact support at{' '}
-      <SupportMailto />.
+      If you continue to see this message after a few minutes have passed,
+      please contact support at <SupportMailto />.
     </div>
   </FlexColumn>
 );
@@ -96,6 +96,9 @@ export const AppFilesList = withCurrentWorkspace()(
     // are we waiting for a duplicated workspace's files to transfer?
     const [isTransferComplete, setIsTransferComplete] =
       useState<boolean>(undefined);
+    const [transferTimeoutId, setTransferTimeoutId] =
+      useState<NodeJS.Timeout>(undefined);
+
     const [filesList, setFilesList] = useState<FileDetail[]>();
     const [showNotebookSizeWarningModal, setShowNotebookSizeWarningModal] =
       useState<boolean>(false);
@@ -109,7 +112,20 @@ export const AppFilesList = withCurrentWorkspace()(
       () =>
         workspacesApi()
           .notebookTransferComplete(workspace.namespace, workspace.id)
-          .then(setIsTransferComplete)
+          .then((isComplete) => {
+            setIsTransferComplete(isComplete);
+
+            if (!isComplete) {
+              // check again after a delay, if we haven't scheduled a check already
+              if (!transferTimeoutId) {
+                const timeoutId = setTimeout(
+                  checkTransferComplete,
+                  transferCheckInterval
+                );
+                setTransferTimeoutId(timeoutId);
+              }
+            }
+          })
     );
 
     const loadNotebooks = withErrorModal(
@@ -178,8 +194,8 @@ export const AppFilesList = withCurrentWorkspace()(
       return <div>{time}</div>;
     };
 
-    // only show this when we know isTransferComplete === false
-    // and not before we have checked (undefined)
+    // only show this screen when we know that the user needs to wait
+    // but not on initial mount when it's undefined
     const showWaitingForFiles =
       !isTransferComplete && isTransferComplete !== undefined;
 
