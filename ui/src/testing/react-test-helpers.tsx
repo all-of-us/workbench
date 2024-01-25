@@ -7,6 +7,7 @@ import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 import { render, RenderResult, screen } from '@testing-library/react';
+import { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -128,6 +129,24 @@ export const expectButtonElementDisabled = (buttonElement: HTMLElement) =>
 // TODO: is there a common way to describe "elements where we disable by setting the cursor to not-allowed" ?
 export const expectMenuItemElementEnabled = expectButtonElementEnabled;
 export const expectMenuItemElementDisabled = expectButtonElementDisabled;
+
+export const expectReactSelectElementDisabled = async (
+  reactSelectElement: HTMLElement,
+  userEvent: UserEvent
+) => {
+  let clickSuccess = false;
+  let caughtError = false;
+  try {
+    await userEvent.click(reactSelectElement);
+    clickSuccess = true;
+  } catch (e) {
+    caughtError = true;
+    expect(e).toBeInstanceOf(Error);
+    expect(e?.message).toContain('Unable to perform pointer interaction');
+  }
+  expect(caughtError).toBeTruthy();
+  expect(clickSuccess).toBeFalsy();
+};
 
 // When simulate is used with an input element of type checkbox, it will negate its current state.
 export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>

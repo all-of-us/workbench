@@ -129,18 +129,17 @@ describe(CustomizePanel.name, () => {
       computeType: ComputeType.Standard, // already the case, but make it explicit
     };
     const user = userEvent.setup();
-    const { container } = await component({
+    await component({
       analysisConfig,
       allowDataproc: true,
     });
 
-    const dataprocOption = getDropdownOption(
-      container,
-      'runtime-compute',
-      ComputeType.Dataproc,
-      2
-    );
-    user.click(dataprocOption);
+    const dropdown = screen.getByRole('textbox', { name: 'Compute type' });
+    expect(dropdown).toBeInTheDocument();
+    await user.click(dropdown);
+    await user.paste(ComputeType.Dataproc);
+    await user.keyboard('{enter}');
+
     await waitFor(() => {
       expect(setAnalysisConfig).toHaveBeenCalledWith(
         withAnalysisConfigDefaults(
@@ -157,18 +156,16 @@ describe(CustomizePanel.name, () => {
       computeType: ComputeType.Dataproc,
     };
     const user = userEvent.setup();
-    const { container } = await component({
+    await component({
       analysisConfig,
       allowDataproc: true,
     });
 
-    const standardOption = getDropdownOption(
-      container,
-      'runtime-compute',
-      ComputeType.Standard,
-      2
-    );
-    user.click(standardOption);
+    const dropdown = screen.getByRole('textbox', { name: 'Compute type' });
+    expect(dropdown).toBeInTheDocument();
+    await user.click(dropdown);
+    await user.paste(ComputeType.Standard);
+    await user.keyboard('{enter}');
     await waitFor(() => {
       expect(setAnalysisConfig).toHaveBeenCalledWith(
         withAnalysisConfigDefaults(

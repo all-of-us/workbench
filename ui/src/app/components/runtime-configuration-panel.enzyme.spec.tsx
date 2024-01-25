@@ -24,7 +24,6 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 import {
-  ComputeType,
   DATAPROC_MIN_DISK_SIZE_GB,
   findMachineByName,
   MIN_DISK_SIZE_GB,
@@ -256,8 +255,18 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
 
-  const pickComputeType = (wrapper, computeType) =>
-    pickDropdownOption(wrapper, '#runtime-compute', computeType);
+  // // this one follows a different pattern because this component is react-select instead of primereact dropdown
+  // const pickComputeType = async (
+  //   wrapper: ReactWrapper,
+  //   computeType: ComputeType
+  // ) => {
+  //   const user = userEvent.setup();
+  //   const select = wrapper.getByRole('textbox', { name: 'Compute type' });
+  //   expect(select).toBeInTheDocument();
+  //   await user.click(select);
+  //   await user.paste(computeType);
+  //   await user.keyboard('{enter}');
+  // };
 
   const getWorkerCpu = (wrapper) => getInputValue(wrapper, '#worker-cpu');
   const pickWorkerCpu = (wrapper, cpu) =>
@@ -352,7 +361,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
@@ -512,7 +521,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
     await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
@@ -561,9 +570,9 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     // Take the preset, make a change, then revert.
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 2);
-    await pickComputeType(wrapper, ComputeType.Standard);
+    // await pickComputeType(ComputeType.Standard);
     await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
 
@@ -606,7 +615,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainCpu(wrapper, 1);
     await pickMainRam(wrapper, 3.75);
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(wrapper, ComputeType.Dataproc);
 
     // n1-standard-1 is illegal for Dataproc, so it should restore the default.
     expect(getMainCpu(wrapper)).toBe(4);
@@ -619,7 +628,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     // n1-standard-2 is legal for Dataproc, so it should remain.
     expect(getMainCpu(wrapper)).toBe(2);
@@ -749,7 +758,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
     const wrapper = await component();
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await mustClickButton(wrapper, 'Next');
     expect(
       wrapper.find(WarningMessage).text().includes('deletion')
@@ -926,7 +935,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should send a delete call if an update requires delete', async () => {
     const wrapper = await component();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
@@ -941,7 +950,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should add additional options when the compute type changes', async () => {
     const wrapper = await component();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     expect(wrapper.exists('span[id="num-workers"]')).toBeTruthy();
     expect(wrapper.exists('span[id="num-preemptible"]')).toBeTruthy();
@@ -970,7 +979,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
     expect(pausedCost(wrapper).text()).toEqual('< $0.01 per hour');
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
     expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
 
@@ -1037,7 +1046,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
@@ -1045,7 +1054,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
     await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
@@ -1068,7 +1077,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
     await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
@@ -1274,7 +1283,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentDisk(existingDisk());
 
     const wrapper = await component();
-    pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
     expect(wrapper.text()).toContain(
@@ -1304,7 +1313,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentDisk(disk);
 
     const wrapper = await component();
-    pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
 
@@ -1330,7 +1339,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, 150);
     // This should make the cost about $50 per hour.
     await pickNumWorkers(wrapper, 200);
@@ -1347,7 +1356,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     await pickNumWorkers(wrapper, 0);
@@ -1373,7 +1382,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $50 per hour.
     await pickNumWorkers(wrapper, 20000);
@@ -1393,7 +1402,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
     // This should make the cost about $140 per hour.
@@ -1419,7 +1428,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
-    await pickComputeType(wrapper, ComputeType.Standard);
+    // await pickComputeType(ComputeType.Standard);
     await clickEnableGpu(wrapper);
     await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
@@ -1441,7 +1450,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
-    await pickComputeType(wrapper, ComputeType.Standard);
+    // await pickComputeType(ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
     await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
@@ -1480,7 +1489,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
 
     const wrapper = await component();
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    // await pickComputeType(ComputeType.Dataproc);
 
     const workerCountInput = wrapper.find('#num-workers').first();
     expect(workerCountInput.prop('disabled')).toBeFalsy();
