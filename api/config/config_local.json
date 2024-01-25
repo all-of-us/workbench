@@ -179,6 +179,6 @@
     "baseUrl": "http:\/\/localhost:3000"
   },
   "artifactRegistry": {
-    "dockerRepoName": "us-central1-docker.pkg.dev/all-of-us-workbench-test/aou-rw-gar-remote-repo-docker-local"
+    "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-workbench-test\/aou-rw-gar-remote-repo-docker-local"
   }
 }

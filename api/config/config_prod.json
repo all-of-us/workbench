@@ -183,6 +183,6 @@
     "baseUrl": "https:\/\/test.fake-research-aou.org"
   },
   "artifactRegistry": {
-    "dockerRepoName": "us-central1-docker.pkg.dev/all-of-us-rw-prod/aou-rw-gar-remote-repo-docker-prod"
+    "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-prod\/aou-rw-gar-remote-repo-docker-prod"
   }
 }
