@@ -35,7 +35,6 @@ class RuntimesApiTest {
         .path("/api/google/v1/runtimes/googleProject/runtimeName")
         .willRespondWith()
         .status(200)
-        .headers(contentTypeJsonHeader)
         .toPact();
   }
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
