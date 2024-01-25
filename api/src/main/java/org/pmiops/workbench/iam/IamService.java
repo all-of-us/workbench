@@ -3,7 +3,7 @@ package org.pmiops.workbench.iam;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import org.pmiops.workbench.firecloud.ApiException;
+import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 
 public interface IamService {
 
