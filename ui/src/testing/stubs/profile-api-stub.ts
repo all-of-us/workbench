@@ -84,7 +84,6 @@ export class ProfileStubVariables {
   };
 }
 
-// TODO: Port functionality from ProfileServiceStub as needed.
 export class ProfileApiStub extends ProfileApi {
   profile: Profile;
 
