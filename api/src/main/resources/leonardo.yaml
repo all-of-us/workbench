@@ -248,6 +248,10 @@ paths:
       responses:
         "202":
           description: Runtime creation request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRuntimeResponse"
         "400":
           description: Bad Request
           content:
@@ -2052,6 +2056,15 @@ components:
         customEnvironmentVariables:
           type: object
           description: Optional environment variables to be set on the cluster.
+    CreateRuntimeResponse:
+      description: response for create runtime APIs
+      required:
+      - traceId
+      type: object
+      properties:
+        traceId:
+          type: string
+          description: traceId that's useful for debugging.
 
     UpdateGceConfig:
       description: Configuration for Google Compute Engine instances.
