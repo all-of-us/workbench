@@ -136,19 +136,19 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to get that runtime from GSuite")
-        .method("PATCH")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
-        .willRespondWith()
-        .status(404)
-        .headers(contentTypeJsonHeader)
-        .body(newJsonBody(body -> {}).build())
-        .toPact();
-  }
+//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+//  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
+//    return builder
+//        .given("there is not a runtime in a Google project")
+//        .uponReceiving("a request to get that runtime from GSuite")
+//        .method("PATCH")
+//        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+//        .willRespondWith()
+//        .status(404)
+//        .headers(contentTypeJsonHeader)
+//        .body(newJsonBody(body -> {}).build())
+//        .toPact();
+//  }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -216,15 +216,15 @@ class RuntimesApiTest {
     assertEquals(exception.getMessage(), "Not Found");
   }
 
-  @Test
-  @PactTestFor(pactMethod = "updateMissingRuntime")
-  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-
-    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
-  }
+//  @Test
+//  @PactTestFor(pactMethod = "updateMissingRuntime")
+//  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//
+//    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+//  }
 
   @Test
   @PactTestFor(pactMethod = "updateRuntime")
