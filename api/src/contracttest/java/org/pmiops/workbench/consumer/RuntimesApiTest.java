@@ -216,5 +216,25 @@ class RuntimesApiTest {
     assertEquals(exception.getMessage(), "Not Found");
   }
 
+  @Test
+  @PactTestFor(pactMethod = "updateMissingRuntime")
+  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "updateRuntime")
+  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+  }
+
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
