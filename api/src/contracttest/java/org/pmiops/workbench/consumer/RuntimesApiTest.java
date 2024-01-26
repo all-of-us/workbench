@@ -37,6 +37,7 @@ class RuntimesApiTest {
         .status(200)
         .toPact();
   }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
@@ -95,7 +96,6 @@ class RuntimesApiTest {
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
     leoRuntimeService.createRuntime("googleProject", "runtimeName", null);
-
   }
 
   @Test
