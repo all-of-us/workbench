@@ -97,7 +97,7 @@
     "redirectMoodleUser": false
   },
   "moodle": {
-    "trainingMigrationPauseActive": false,
+    "trainingMigrationPauseActive": true,
     "host": "aou.nnlm.gov",
     "credentialsKeyV2": "moodle-prod-key-v2.txt"
   },
@@ -176,8 +176,5 @@
   },
   "tanagra": {
     "baseUrl": "https:\/\/test.fake-research-aou.org"
-  },
-  "artifactRegistry": {
-    "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-stable\/aou-rw-gar-remote-repo-docker-stable"
   }
 }
