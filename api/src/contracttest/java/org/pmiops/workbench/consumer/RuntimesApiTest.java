@@ -140,7 +140,7 @@ class RuntimesApiTest {
   RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to get that runtime")
+        .uponReceiving("a request to get that runtime from GSuite")
         .method("PATCH")
         .path("/api/google/v1/runtimes/googleProject/runtimeName")
         .willRespondWith()
