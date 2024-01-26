@@ -27,7 +27,19 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 class RuntimesApiTest {
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact createRuntime(PactDslWithProvider builder) {
+  RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to create a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .willRespondWith()
+        .status(200)
+        .toPact();
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
@@ -89,8 +101,18 @@ class RuntimesApiTest {
   }
 
   @Test
-  @PactTestFor(pactMethod = "createRuntime")
+  @PactTestFor(pactMethod = "createNewRuntime")
   void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.createRuntime("googleProject", "runtimeName", null);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createDuplicateRuntime")
+  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
