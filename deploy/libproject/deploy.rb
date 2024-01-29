@@ -104,6 +104,7 @@ def setup_and_enter_docker(cmd_name, opts)
 
   # By default Tempfile on OS X does not use a docker-friendly location/
   # use /tmp/colima to make it work with colima, see https://github.com/abiosoft/colima/issues/844 for more details
+  Dir.mkdir("/tmp/colima");
   key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp/colima")
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
