@@ -127,7 +127,7 @@ describe('NotebookLauncher', () => {
       runtimeLoaded: false,
     });
 
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {

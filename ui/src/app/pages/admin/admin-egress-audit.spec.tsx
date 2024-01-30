@@ -37,7 +37,7 @@ describe('AdminEgressAudit', () => {
 
     event = eventsStub.simulateNewEvent();
 
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
