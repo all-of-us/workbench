@@ -22,7 +22,7 @@ describe('EgressEventsTable', () => {
     eventsStub = new EgressEventsAdminApiStub();
     registerApiClient(EgressEventsAdminApi, eventsStub);
 
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {

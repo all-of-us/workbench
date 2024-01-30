@@ -24,7 +24,7 @@ describe('SecuritySuspendedMessage', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers('modern').setSystemTime(now.getTime());
+    jest.useFakeTimers().setSystemTime(now.getTime());
   });
 
   afterEach(() => {

@@ -228,7 +228,7 @@ describe('HelpSidebar', () => {
     });
 
     // mock timers
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
