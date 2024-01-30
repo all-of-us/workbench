@@ -70,9 +70,9 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
-    "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
-    "apiAssetsBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
-    "uiBaseUrl": "https:\/\/all-of-us-workbench-test.appspot.com",
+    "apiBaseUrl": "https:\/\/api.test.fake-research-aou.org",
+    "apiAssetsBaseUrl": "https:\/\/api.test.fake-research-aou.org",
+    "uiBaseUrl": "https:\/\/test.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
@@ -81,7 +81,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login"
+    "loginUrl": "https:\/\/test.fake-research-aou.org/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",

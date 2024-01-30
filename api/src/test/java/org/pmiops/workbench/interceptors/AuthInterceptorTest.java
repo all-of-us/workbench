@@ -106,10 +106,10 @@ public class AuthInterceptorTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
-    workbenchConfig.server.apiBaseUrl = "api-dot-all-of-us-workbench-test.appspot.com";
+    workbenchConfig.server.apiBaseUrl = "api.test.fake-research-aou.org";
     workbenchConfig.access.enableApiUrlCheck = true;
     when(mockRequest.getRequestURL())
-        .thenReturn(new StringBuffer("api-dot-all-of-us-workbench-test.appspot.com"));
+        .thenReturn(new StringBuffer("api.test.fake-research-aou.org"));
 
     user = new DbUser();
     user.setUserId(USER_ID);
