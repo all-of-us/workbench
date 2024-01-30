@@ -64,6 +64,7 @@ const styles = reactStyles({
 });
 
 const notebookSizeThreshold = 5 * 1024 * 1024;
+const transferCheckInterval = 10e3; // 10 seconds
 
 const WaitingForFiles = () => (
   <FlexColumn style={{ paddingTop: '0.75rem' }}>
@@ -89,13 +90,28 @@ const WaitingForFiles = () => (
 interface AppFilesListProps {
   workspace: WorkspaceData;
 }
+
+const onAnalysisTab = (workspace: WorkspaceData) => {
+  // can't use useLocation() because that value is fixed when the component mounts
+  // we need to check the *current* value
+  const { pathname } = window.location;
+  return (
+    workspace && pathname === analysisTabPath(workspace.namespace, workspace.id)
+  );
+};
+
 export const AppFilesList = withCurrentWorkspace()(
   (props: AppFilesListProps) => {
     const { workspace } = props;
 
     // are we waiting for a duplicated workspace's files to transfer?
+    const [checkingTransferComplete, setCheckingTransferComplete] =
+      useState<boolean>(false);
     const [isTransferComplete, setIsTransferComplete] =
-      useState<boolean>(undefined);
+      useState<boolean>(false);
+    const [transferTimeoutId, setTransferTimeoutId] =
+      useState<NodeJS.Timeout>(undefined);
+
     const [filesList, setFilesList] = useState<FileDetail[]>();
     const [showNotebookSizeWarningModal, setShowNotebookSizeWarningModal] =
       useState<boolean>(false);
@@ -106,11 +122,63 @@ export const AppFilesList = withCurrentWorkspace()(
         title: 'Error Loading Files',
         message: 'Please refresh to try again.',
       },
-      () =>
-        workspacesApi()
+      () => {
+        if (!onAnalysisTab(workspace)) {
+          console.log('not on ana tab');
+          clearTimeout(transferTimeoutId);
+          return;
+        }
+
+        // wait for the next scheduled run
+        if (checkingTransferComplete) {
+          return;
+        }
+
+        setCheckingTransferComplete(true);
+
+        console.log(
+          'checkTransferComplete, transferTimeoutId',
+          transferTimeoutId,
+          'at time',
+          (Date.now() / 1000) % 100
+        );
+
+        return workspacesApi()
           .notebookTransferComplete(workspace.namespace, workspace.id)
-          .then(setIsTransferComplete)
+          .then((isComplete) => {
+            console.log(
+              'isComplete',
+              isComplete,
+              'at time',
+              (Date.now() / 1000) % 100
+            );
+            setIsTransferComplete(isComplete);
+
+            if (!isComplete) {
+              // check again after a delay, if we haven't scheduled a check already
+              if (!transferTimeoutId) {
+                const timeoutId = setTimeout(
+                  checkTransferComplete,
+                  transferCheckInterval
+                );
+                console.log(
+                  'set timeoutId',
+                  timeoutId,
+                  'at time',
+                  (Date.now() / 1000) % 100
+                );
+                setTransferTimeoutId(timeoutId);
+              }
+            }
+          })
+          .finally(() => setCheckingTransferComplete(false));
+      }
     );
+
+    useEffect(() => {
+      // cleanup function for unmounting
+      return () => clearTimeout(transferTimeoutId);
+    }, []);
 
     const loadNotebooks = withErrorModal(
       {
@@ -178,8 +246,8 @@ export const AppFilesList = withCurrentWorkspace()(
       return <div>{time}</div>;
     };
 
-    // only show this when we know isTransferComplete === false
-    // and not before we have checked (undefined)
+    // only show this screen when we know that the user needs to wait
+    // but not on initial mount when it's undefined
     const showWaitingForFiles =
       !isTransferComplete && isTransferComplete !== undefined;
 
