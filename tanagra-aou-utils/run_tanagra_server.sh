@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-while getopts ":ad:u:" arg; do
+while getopts ":ad:u:b" arg; do
   case "${arg}" in
     a) # Disable authentication.
       disableAuthChecks=1
@@ -10,6 +10,9 @@ while getopts ":ad:u:" arg; do
       ;;
     u) # tanagra underlay to use
       underlay=${OPTARG}
+      ;;
+    b) # enable debug-jvm for bootRun.
+      debugJvm=1
       ;;
     h | *) # Display help.
       usage
@@ -52,5 +55,12 @@ env | grep GOOGLE_APPLICATION_CREDENTIALS
 
 # run from tanagra folder
 cd tanagra
-# deploy service
-./gradlew -PisMySQL service:bootRun
+
+if [[ ${debugJvm} ]]; then
+   ./gradlew -PisMySQL service:bootRun --debug-jvm
+    echo "Enabling server jvm debug"
+    echo "Listening for transport dt_socket at address: 5005"
+else
+  # deploy service
+  ./gradlew -PisMySQL service:bootRun
+fi
