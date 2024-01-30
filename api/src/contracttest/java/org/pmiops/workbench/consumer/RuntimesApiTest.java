@@ -112,43 +112,43 @@ class RuntimesApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("runtimeName", "sample-cromwell-study");
-                  body.stringType("status", "Running");
-                  body.stringType("autopauseThreshold", "57");
-                  body.stringType("proxyUrl", "http://www.proxy.com");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext",
-                      context -> {
-                        context.stringType("cloudProvider", "GCP");
-                        context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
-                      });
-                  body.object(
-                      "auditInfo",
-                      context -> {
-                        context.stringType("creator", "Bugs Bunny");
-                        context.stringType("createdDate", "Yesterday");
-                        context.stringType("dateAccessed", "Tuesday");
-                      });
-                })
+                    body -> {
+                      body.stringType("runtimeName", "sample-cromwell-study");
+                      body.stringType("status", "Running");
+                      body.stringType("autopauseThreshold", "57");
+                      body.stringType("proxyUrl", "http://www.proxy.com");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext",
+                          context -> {
+                            context.stringType("cloudProvider", "GCP");
+                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
+                          });
+                      body.object(
+                          "auditInfo",
+                          context -> {
+                            context.stringType("creator", "Bugs Bunny");
+                            context.stringType("createdDate", "Yesterday");
+                            context.stringType("dateAccessed", "Tuesday");
+                          });
+                    })
                 .build())
         .toPact();
   }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is not a runtime in a Google project")
-//        .uponReceiving("a request to get that runtime from GSuite")
-//        .method("PATCH")
-//        .path("/api/google/v1/runtimes/googleProject/runtimeName")
-//        .willRespondWith()
-//        .status(404)
-//        .headers(contentTypeJsonHeader)
-//        .body(newJsonBody(body -> {}).build())
-//        .toPact();
-//  }
+  //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  //  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
+  //    return builder
+  //        .given("there is not a runtime in a Google project")
+  //        .uponReceiving("a request to get that runtime from GSuite")
+  //        .method("PATCH")
+  //        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+  //        .willRespondWith()
+  //        .status(404)
+  //        .headers(contentTypeJsonHeader)
+  //        .body(newJsonBody(body -> {}).build())
+  //        .toPact();
+  //  }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -216,15 +216,15 @@ class RuntimesApiTest {
     assertEquals(exception.getMessage(), "Not Found");
   }
 
-//  @Test
-//  @PactTestFor(pactMethod = "updateMissingRuntime")
-//  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
-//  }
+  //  @Test
+  //  @PactTestFor(pactMethod = "updateMissingRuntime")
+  //  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+  //  }
 
   @Test
   @PactTestFor(pactMethod = "updateRuntime")
