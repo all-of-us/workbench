@@ -105,6 +105,10 @@ def dev_up_tanagra(cmd_name, args)
     ->(opts, _) { opts.disable_auth = true },
     "Disable Tanagra AuthN/AuthZ")
   op.add_option(
+    "--debug",
+    ->(opts, _) { opts.debug = true },
+    "Start tanagra in debug mode")
+  op.add_option(
     "--drop-db",
     ->(opts, _) { opts.drop_db = true },
     "Drop Tanagra db")
@@ -146,7 +150,8 @@ def dev_up_tanagra(cmd_name, args)
     end
     dis_auth = op.opts.disable_auth ? '-a ' : ''
     d_db = op.opts.drop_db ? '-d ' : ''
-    args = dis_auth + d_db + "-u #{underlays}"
+    debug = op.opts.debug ? '-b ' : ''
+    args = dis_auth + d_db + debug + "-u #{underlays}"
     common.status "Starting Tanagra API server"
     common.run_inline("./run_tanagra_server.sh #{args}")
   end

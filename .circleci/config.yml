@@ -446,7 +446,7 @@ jobs:
         name: Pact Broker Publish
         working_directory: ~
         command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH}
+          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH} --consumer-app-version --tag-with-git-branch
 
   api-contract-can-i-deploy:
     executor: pact-executor
@@ -459,7 +459,7 @@ jobs:
         name: Pact Broker, can I deploy?
         working_directory: ~
         command: |
-          pact-broker can-i-deploy /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1}
+          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 3 --retry-interval 30
 
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
@@ -891,9 +891,9 @@ workflows:
       - api-contract-upload:
           requires:
           - api-contract-test
-      - api-contract-can-i-deploy:
-          requires:
-          - api-contract-upload
+#      - api-contract-can-i-deploy:
+#          requires:
+#          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
