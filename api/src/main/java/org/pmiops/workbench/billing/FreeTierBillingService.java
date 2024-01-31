@@ -84,7 +84,6 @@ public class FreeTierBillingService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void checkFreeTierBillingUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
-    StringJoiner stringJoiner = new StringJoiner(",");
     String userIdsAsString =
         users.stream()
             .map(user -> Long.toString(user.getUserId()))
