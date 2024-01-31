@@ -53,7 +53,7 @@ class RuntimesApiTest {
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
-        .given("there is a runtime in a Google project from GCP")
+        .given("there is a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
         .method("GET")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
