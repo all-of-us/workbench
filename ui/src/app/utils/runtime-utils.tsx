@@ -157,6 +157,7 @@ export const isVisible = (status: RuntimeStatus) =>
   ).includes(status);
 
 // can the user delete the runtime?
+// matches Leonardo code - ClusterStatus.deletableStatuses
 export const canDeleteRuntime = (status: RuntimeStatus) =>
   (
     [
@@ -165,6 +166,8 @@ export const canDeleteRuntime = (status: RuntimeStatus) =>
       RuntimeStatus.ERROR,
       RuntimeStatus.STARTING,
       RuntimeStatus.STOPPING,
+      RuntimeStatus.UNKNOWN,
+      RuntimeStatus.ERROR,
     ] as Array<RuntimeStatus>
   ).includes(status);
 
