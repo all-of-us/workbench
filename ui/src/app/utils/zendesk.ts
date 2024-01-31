@@ -51,7 +51,6 @@ export const supportUrls: ZendeskUrls = ((env) => {
 
   const article = (id) => `${baseUrl}/articles/${id}`;
   const category = (id) => `${baseUrl}/categories/${id}`;
-  const section = (id) => `${baseUrl}/sections/${id}`;
   const commonUrls = {
     helpCenter: baseUrl,
   };
