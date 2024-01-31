@@ -7,14 +7,8 @@ import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -90,10 +84,14 @@ public class FreeTierBillingService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void checkFreeTierBillingUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
-
+    StringJoiner stringJoiner = new StringJoiner(",");
+    String userIdsAsString =
+        users.stream()
+            .map(user -> Long.toString(user.getUserId()))
+            .collect(Collectors.joining(","));
+    logger.info(String.format("Checking billing usage for Users ids: %s ", userIdsAsString));
     // Current cost in DB
     List<WorkspaceCostView> allCostsInDbForUsers = workspaceDao.getWorkspaceCostViews(users);
-    logger.info(String.format("Retrieved %d workspaces from the DB", allCostsInDbForUsers.size()));
 
     allCostsInDbForUsers =
         findWorkspaceFreeTierUsagesThatWereNotRecentlyUpdated(allCostsInDbForUsers);
@@ -111,6 +109,13 @@ public class FreeTierBillingService {
             .collect(
                 Collectors.toMap(
                     WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
+
+    logger.info(
+        String.format(
+            "Workspaces that require updates: %s",
+            workspaceByProject.values().stream()
+                .map(workspaceId -> Long.toString(workspaceId))
+                .collect(Collectors.joining(","))));
 
     updateFreeTierUsage(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
 
@@ -333,6 +338,8 @@ public class FreeTierBillingService {
     final double previousRemainingBalance = limit - previousCost;
 
     if (remainingBalance < 0 && previousRemainingBalance > 0) {
+      logger.log(
+          Level.INFO, "Free tier Billing Service: Sending email to user " + user.getUserId());
       try {
         mailService.alertUserInitialCreditsExpiration(user);
       } catch (MessagingException e) {
