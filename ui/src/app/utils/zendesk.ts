@@ -58,7 +58,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {
       ...commonUrls,
-      billing: section('360039539411'),
+      billing: article('360039539411'),
       createBillingAccount: article('360039539411'),
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
@@ -74,7 +74,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
-      billing: section('360060301171'),
+      billing: article('360060301171'),
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
@@ -90,7 +90,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
-      billing: section('360044792211'),
+      billing: article('360044792211'),
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
