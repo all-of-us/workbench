@@ -32,7 +32,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project from GCP")
         .uponReceiving("a request to create a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
         .status(200)
         .toPact();
@@ -44,7 +44,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
         .status(200)
         .toPact();
@@ -56,7 +56,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
         .method("GET")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
@@ -92,7 +92,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
         .method("GET")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
         .status(404)
         .headers(contentTypeJsonHeader)
@@ -106,7 +106,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to get that runtime")
         .method("PATCH")
-        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
@@ -142,7 +142,7 @@ class RuntimesApiTest {
   //        .given("there is not a runtime in a Google project")
   //        .uponReceiving("a request to get that runtime from GSuite")
   //        .method("PATCH")
-  //        .path("/api/google/v1/runtimes/googleProject/runtimeName")
+  //        .path("/api/google/v1/runtimes/googleProject/runtimename")
   //        .willRespondWith()
   //        .status(404)
   //        .headers(contentTypeJsonHeader)
@@ -157,7 +157,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    leoRuntimeService.createRuntime("googleProject", "runtimeName", null);
+    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
   }
 
   @Test
@@ -167,7 +167,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    leoRuntimeService.createRuntime("googleProject", "runtimeName", null);
+    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
   }
 
   @Test
@@ -197,7 +197,7 @@ class RuntimesApiTest {
     expected.setProxyUrl("http://www.proxy.com");
 
     LeonardoGetRuntimeResponse response =
-        leoRuntimeService.getRuntime("googleProject", "runtimeName");
+        leoRuntimeService.getRuntime("googleProject", "runtimename");
 
     assertEquals(expected, response);
   }
@@ -211,7 +211,7 @@ class RuntimesApiTest {
 
     ApiException exception =
         assertThrows(
-            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimeName"));
+            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -223,7 +223,7 @@ class RuntimesApiTest {
   //    client.setBasePath(mockServer.getUrl());
   //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
   //
-  //    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+  //    leoRuntimeService.updateRuntime("googleProject", "n", null);
   //  }
 
   @Test
@@ -233,7 +233,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    leoRuntimeService.updateRuntime("googleProject", "runtimeName", null);
+    leoRuntimeService.updateRuntime("googleProject", "runtimename", null);
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
