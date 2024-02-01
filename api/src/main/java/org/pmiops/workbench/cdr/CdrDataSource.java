@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
@@ -20,23 +18,14 @@ import org.springframework.stereotype.Service;
 
 @Service("cdrDataSource")
 public class CdrDataSource extends AbstractRoutingDataSource {
-
-  private static final Logger log = Logger.getLogger(CdrDataSource.class.getName());
-
   private final DbParams params;
-  private final PoolConfiguration basePoolConfig;
-  private final PoolConfiguration cdrPoolConfig;
   private final EntityManagerFactory emFactory;
 
   CdrDataSource(
       DbParams params,
-      @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
-      @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
       // Using CdrDbConfig.cdrEntityManagerFactory would cause a circular dependency.
       @Qualifier("entityManagerFactory") EntityManagerFactory emFactory) {
     this.params = params;
-    this.basePoolConfig = basePoolConfig;
-    this.cdrPoolConfig = cdrPoolConfig;
     this.emFactory = emFactory;
     resetTargetDataSources();
   }
