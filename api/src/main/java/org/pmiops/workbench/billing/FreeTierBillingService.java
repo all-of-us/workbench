@@ -177,11 +177,6 @@ public class FreeTierBillingService {
                         || c.getFreeTierLastUpdated().before(minusMinutes))
             .collect(Collectors.toList());
 
-    logger.info(
-        String.format(
-            "Retrieved %d workspaces from the DB eligible for updates",
-            filteredCostsInDbForUsers.size()));
-
     return filteredCostsInDbForUsers;
   }
 
