@@ -2,11 +2,12 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { DiskType, RuntimeStatus } from 'generated/fetch';
+import { DiskType } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toAnalysisConfig } from 'app/utils/analysis-config';
+import { canDeleteStatuses } from 'app/utils/runtime-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -28,7 +29,6 @@ const gcePersistentDisk = stubDisk();
 const analysisConfig = toAnalysisConfig(currentRuntime, gcePersistentDisk);
 const existingAnalysisConfig = analysisConfig;
 const defaultProps: CustomizePanelFooterProps = {
-  disableControls: false,
   runtimeCanBeCreated: false,
   runtimeCanBeUpdated: false,
   runtimeExists: false,
@@ -211,11 +211,6 @@ describe(CustomizePanelFooter.name, () => {
     });
   });
 
-  const canDeleteStatuses = [
-    RuntimeStatus.RUNNING,
-    RuntimeStatus.STOPPED,
-    RuntimeStatus.ERROR,
-  ];
   test.each(canDeleteStatuses)(
     'it allows deleting the environment when a runtime is %s and no detached PD exists',
     async (status) => {
@@ -251,20 +246,6 @@ describe(CustomizePanelFooter.name, () => {
       await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
     }
   );
-
-  it('does not allow deleting the environment when controls are disabled', async () => {
-    await component({
-      runtimeExists: true,
-      unattachedPdExists: false,
-      disableControls: true,
-    });
-    const deleteButton = screen.queryByRole('button', {
-      name: 'Delete Environment',
-    });
-    expect(deleteButton).toBeInTheDocument();
-    deleteButton.click();
-    await waitFor(() => expect(setPanelContent).not.toHaveBeenCalled());
-  });
 
   it.each([
     [
