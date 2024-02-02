@@ -1397,6 +1397,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorReport"
+
+  "/api/google/v1/resources/{googleProject}/deleteAll":
+    delete:
+      summary: Deletes ALL runtimes, disks and apps associated with the given google project
+      description: deletes all runtimes and apps in a google project
+      operationId: deleteAllResources
+      tags:
+        - resources
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: deleteDisk
+          description: Whether or not disk should be deleted if the runtime is using persistent disk. Default to false if not specified
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "202":
+          description: Resource(s) deletion request accepted
+        "403":
+          description: User does not have permission to perform action on resource(s)
+        "404":
+          description: Resource(s) not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        "500":
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+
+
   /proxy/invalidateToken:
     get:
       summary: Invalidates a token

@@ -56,6 +56,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -75,6 +76,7 @@ public class OfflineRuntimeControllerTest {
   @MockBean({
     FireCloudService.class,
     FreeTierBillingService.class,
+    WorkspaceService.class,
     MailService.class,
   })
   @Import({FakeClockConfiguration.class, OfflineRuntimeController.class, LeonardoMapperImpl.class})
@@ -84,6 +86,7 @@ public class OfflineRuntimeControllerTest {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.firecloud.notebookRuntimeMaxAgeDays = (int) RUNTIME_MAX_AGE.toDays();
       config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) RUNTIME_IDLE_MAX_AGE.toDays();
+      config.billing.accountId = "free-tier";
       return config;
     }
   }
@@ -102,6 +105,8 @@ public class OfflineRuntimeControllerTest {
 
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private FreeTierBillingService mockFreeTierBillingService;
+
+  @Autowired private WorkspaceService mockWorkspaceService;
   @Autowired private MailService mockMailService;
 
   @Autowired private LeonardoMapper leonardoMapper;
@@ -410,7 +415,7 @@ public class OfflineRuntimeControllerTest {
     stubWorkspaceOwners(workspace, ImmutableList.of(user1));
     stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L))));
 
-    when(mockFreeTierBillingService.isFreeTier(workspace)).thenReturn(true);
+    workspace.setBillingAccountName("billingAccounts/free-tier");
     when(mockFreeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
         .thenReturn(123.0);
 

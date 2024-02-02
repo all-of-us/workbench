@@ -125,6 +125,9 @@ public interface LeonardoApiClient {
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
+  void deleteAppAsService(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
+      throws WorkbenchException;
+
   /**
    * @return true if Leonardo service is okay, false otherwise.
    */
@@ -134,4 +137,6 @@ public interface LeonardoApiClient {
 
   /** List all persistent disks in google project */
   List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+
+  void deleteAllResources(String googleProject, boolean deleteDisk);
 }
