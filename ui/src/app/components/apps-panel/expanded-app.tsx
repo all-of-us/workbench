@@ -175,6 +175,7 @@ const RStudioButtonRow = (props: {
   const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
+    setSidebarActiveIconStore.next(null);
   };
   const launchButtonDisabled =
     billingAccountDisabled || userApp?.status !== AppStatus.RUNNING;
@@ -216,6 +217,7 @@ const SASButtonRow = (props: {
 
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
+    setSidebarActiveIconStore.next(null);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;

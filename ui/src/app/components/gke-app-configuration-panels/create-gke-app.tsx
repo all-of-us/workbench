@@ -175,7 +175,10 @@ export const CreateGkeApp = ({
         )}
         <CreateAppText />
         {app?.status === AppStatus.RUNNING && canOpenApp(app?.appType) ? (
-          <OpenGkeAppButton {...{ billingStatus, workspace }} userApp={app} />
+          <OpenGkeAppButton
+            {...{ billingStatus, workspace, onClose }}
+            userApp={app}
+          />
         ) : (
           <CreateGkeAppButton
             {...{ billingStatus, createAppRequest, onDismiss }}

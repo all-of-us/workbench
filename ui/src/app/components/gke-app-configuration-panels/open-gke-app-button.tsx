@@ -11,11 +11,13 @@ export interface OpenGkeAppButtonProps {
   userApp: UserAppEnvironment;
   billingStatus: BillingStatus;
   workspace: Workspace;
+  onClose: () => void;
 }
 export function OpenGkeAppButton({
   userApp,
   billingStatus,
   workspace: { namespace, id },
+  onClose,
 }: OpenGkeAppButtonProps) {
   const [navigate] = useNavigation();
 
@@ -33,7 +35,10 @@ export function OpenGkeAppButton({
         <Button
           id={`${appTypeString}-cloud-environment-open-button`}
           aria-label={`${appTypeString} cloud environment open button`}
-          onClick={() => openAppInIframe(namespace, id, userApp, navigate)}
+          onClick={() => {
+            openAppInIframe(namespace, id, userApp, navigate);
+            onClose();
+          }}
           disabled={!openEnabled}
         >
           Open {appTypeString}
