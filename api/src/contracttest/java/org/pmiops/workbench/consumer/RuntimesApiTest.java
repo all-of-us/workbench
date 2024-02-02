@@ -64,7 +64,7 @@ class RuntimesApiTest {
                     body -> {
                       body.stringType("runtimeName", "sample-cromwell-study");
                       body.stringType("status", "Running");
-                      body.stringType("autopauseThreshold", "57");
+                      body.numberType("autopauseThreshold", 57);
                       body.stringType("proxyUrl", "http://www.proxy.com");
                       body.array("errors", errors -> {});
                       body.object(
