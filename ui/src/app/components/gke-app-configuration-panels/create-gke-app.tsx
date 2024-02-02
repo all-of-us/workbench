@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  AppStatus,
   AppType,
   CreateAppRequest,
   Disk,
@@ -28,12 +29,14 @@ import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
+  canOpenApp,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CreateGkeAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
+import { OpenGkeAppButton } from './open-gke-app-button';
 
 const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
@@ -171,12 +174,16 @@ export const CreateGkeApp = ({
           </LinkButton>
         )}
         <CreateAppText />
-        <CreateGkeAppButton
-          {...{ billingStatus, createAppRequest, onDismiss }}
-          existingApp={app}
-          workspaceNamespace={workspace.namespace}
-          username={profile.username}
-        />
+        {app?.status === AppStatus.RUNNING && canOpenApp(app?.appType) ? (
+          <OpenGkeAppButton {...{ billingStatus, workspace }} userApp={app} />
+        ) : (
+          <CreateGkeAppButton
+            {...{ billingStatus, createAppRequest, onDismiss }}
+            existingApp={app}
+            workspaceNamespace={workspace.namespace}
+            username={profile.username}
+          />
+        )}
       </FlexRow>
     </FlexColumn>
   );

@@ -134,6 +134,9 @@ const localizeUserApp = (
     appType,
   });
 
+export const canOpenApp = (appType: AppType) =>
+  ([AppType.RSTUDIO, AppType.SAS] as AppType[]).includes(appType);
+
 export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
