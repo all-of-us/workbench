@@ -2,6 +2,7 @@ package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -85,19 +86,19 @@ class RuntimesApiTest {
         .toPact();
   }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is not a runtime in a Google project")
-//        .uponReceiving("a request to get that runtime")
-//        .method("GET")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename")
-//        .willRespondWith()
-//        .status(404)
-//        .headers(contentTypeJsonHeader)
-//        .body(newJsonBody(body -> {}).build())
-//        .toPact();
-//  }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to get that runtime")
+        .method("GET")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .willRespondWith()
+        .status(404)
+        .headers(contentTypeJsonHeader)
+        .body(newJsonBody(body -> {}).build())
+        .toPact();
+  }
 
 //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
 //  RequestResponsePact updateRuntime(PactDslWithProvider builder) {
@@ -201,19 +202,19 @@ class RuntimesApiTest {
     assertEquals(expected, response);
   }
 
-//  @Test
-//  @PactTestFor(pactMethod = "getMissingRuntime")
-//  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    ApiException exception =
-//        assertThrows(
-//            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
-//
-//    assertEquals(exception.getMessage(), "Not Found");
-//  }
+  @Test
+  @PactTestFor(pactMethod = "getMissingRuntime")
+  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
+
+    assertEquals(exception.getMessage(), "Not Found");
+  }
 
   //  @Test
   //  @PactTestFor(pactMethod = "updateMissingRuntime")
