@@ -465,4 +465,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
     return tanagraApiProvider.get().createStudy(studyCreateInfo);
   }
+
+  @Override
+  public void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                WorkspaceUtils.isFreeTier(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .map(DbWorkspace::getWorkspaceId)
+        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
+  }
 }

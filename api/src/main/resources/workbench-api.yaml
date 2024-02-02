@@ -4252,6 +4252,27 @@ paths:
           description: Users alerted
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/handleFreeCreditsExpiry:
+    post:
+      tags:
+        - cloudTaskFreeCreditExpiry
+        - cloudTask
+      description: |
+        Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
+      operationId: handleFreeCreditsExpiry
+      security: []
+      requestBody:
+        description: Users that should be alerted about their free credits use.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpiredFreeCreditsEventRequest'
+        required: true
+      responses:
+        200:
+          description: User synchronization ran successfully
+          content: {}
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
@@ -9578,6 +9599,24 @@ components:
           items:
             type: string
       description: Institution-specific access tier membership requirement and configs.
+    ExpiredFreeCreditsEventRequest:
+      required:
+        - users
+      type: object
+      properties:
+        users:
+          type: array
+          description: List of User IDs to check for free credits
+        dbCostByCreator:
+          type: object
+          properties: { }
+          description: |
+            A map of the total cost of the user's workspaces in the database, indexed by the user's email address.
+        liveCostByCreator:
+          type: object
+          properties: { }
+          description: |
+            A map of the total live cost of the user's workspaces, indexed by the user's email address.
     WorkspaceAdminView:
       type: object
       properties:
