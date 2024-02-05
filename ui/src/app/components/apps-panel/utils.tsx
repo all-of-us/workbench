@@ -18,7 +18,7 @@ import {
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
@@ -152,7 +152,7 @@ export const helpSidebarConfigIdForUIApp: Record<
 };
 
 export const openConfigPanelForUIApp = (appType: UIAppType) =>
-  setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
+  sidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
 
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,

@@ -34,7 +34,7 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -235,7 +235,7 @@ export const ConceptListPage = fp.flow(
 
     closeConceptAddModal() {
       this.setState({ conceptAddModalOpen: false });
-      setSidebarActiveIconStore.next(null);
+      sidebarActiveIconStore.next(null);
     }
 
     renderSelection(selection: any, index: number) {
@@ -317,7 +317,7 @@ export const ConceptListPage = fp.flow(
             <Button
               type='link'
               style={{ color: colors.primary, left: 0 }}
-              onClick={() => setSidebarActiveIconStore.next(null)}
+              onClick={() => sidebarActiveIconStore.next(null)}
             >
               Close
             </Button>

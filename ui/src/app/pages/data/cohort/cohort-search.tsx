@@ -41,7 +41,7 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   currentCohortStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import arrowIcon from 'assets/icons/arrow-left-regular.svg';
@@ -571,7 +571,7 @@ export const CohortSearch = fp.flow(
                   type='primary'
                   style={styles.finishButton}
                   disabled={!!selectedIds && selectedIds.length === 0}
-                  onClick={() => setSidebarActiveIconStore.next('criteria')}
+                  onClick={() => sidebarActiveIconStore.next('criteria')}
                 >
                   Finish & Review
                 </Button>

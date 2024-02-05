@@ -31,7 +31,7 @@ import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
   currentWorkspaceStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
   useNavigation,
 } from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
@@ -179,7 +179,7 @@ const RStudioButtonRow = (props: {
   const { namespace, id } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
-    setSidebarActiveIconStore.next(null);
+    sidebarActiveIconStore.next(null);
   };
   const launchButtonDisabled =
     billingAccountDisabled || userApp?.status !== AppStatus.RUNNING;
@@ -221,7 +221,7 @@ const SASButtonRow = (props: {
 
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
-    setSidebarActiveIconStore.next(null);
+    sidebarActiveIconStore.next(null);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;

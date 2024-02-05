@@ -6,7 +6,7 @@ import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { toAnalysisConfig } from 'app/utils/analysis-config';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { runtimeDiskStore, useStore } from 'app/utils/stores';
 
 import { Button, Clickable } from './buttons';
@@ -96,7 +96,7 @@ export const RuntimeInitializerModal = ({
           data-test-id='runtime-initializer-configure'
           type='secondary'
           onClick={() => {
-            setSidebarActiveIconStore.next('runtimeConfig');
+            sidebarActiveIconStore.next('runtimeConfig');
             cancel();
           }}
         >

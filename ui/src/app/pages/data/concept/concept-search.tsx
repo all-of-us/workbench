@@ -51,7 +51,7 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
 import { MatchParams } from 'app/utils/stores';
@@ -629,7 +629,7 @@ export const ConceptSearch = fp.flow(
                 <Button
                   style={{ float: 'right', marginBottom: '3rem' }}
                   disabled={this.disableFinishButton}
-                  onClick={() => setSidebarActiveIconStore.next('concept')}
+                  onClick={() => sidebarActiveIconStore.next('concept')}
                 >
                   Finish & Review
                 </Button>

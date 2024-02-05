@@ -25,7 +25,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType, findMachineByName, Machine } from 'app/utils/machines';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
@@ -88,7 +88,7 @@ export const CreateGkeApp = ({
 
   const onDismiss = () => {
     onClose();
-    setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+    setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
   };
 
   const defaultConfig = switchCase(

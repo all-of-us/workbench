@@ -57,9 +57,7 @@ export const attributesSelectionStore = new BehaviorSubject<Criteria>(
 export const currentCohortSearchContextStore = new BehaviorSubject<any>(
   undefined
 );
-export const setSidebarActiveIconStore = new BehaviorSubject<SidebarIconId>(
-  null
-);
+export const sidebarActiveIconStore = new BehaviorSubject<SidebarIconId>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export const useNavigation = () => {

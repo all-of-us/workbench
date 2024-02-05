@@ -59,7 +59,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   currentConceptStore,
   NavigationProps,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
@@ -319,7 +319,7 @@ export const HelpSidebar = fp.flow(
     );
 
     setActiveIcon(activeIcon: SidebarIconId) {
-      setSidebarActiveIconStore.next(activeIcon);
+      sidebarActiveIconStore.next(activeIcon);
       // let the Config Panels use their own logic
       this.setState({
         runtimeConfPanelInitialState: null,
@@ -328,7 +328,7 @@ export const HelpSidebar = fp.flow(
     }
 
     openRuntimeConfigWithState(runtimeConfPanelInitialState: PanelContent) {
-      setSidebarActiveIconStore.next('runtimeConfig');
+      sidebarActiveIconStore.next('runtimeConfig');
       this.setState({ runtimeConfPanelInitialState });
     }
 
@@ -336,7 +336,7 @@ export const HelpSidebar = fp.flow(
       icon: SidebarIconId,
       gkeAppConfPanelInitialState: GKEAppPanelContent
     ) {
-      setSidebarActiveIconStore.next(icon);
+      sidebarActiveIconStore.next(icon);
       this.setState({ gkeAppConfPanelInitialState });
     }
 
@@ -359,7 +359,7 @@ export const HelpSidebar = fp.flow(
         )
       );
       this.subscriptions.push(
-        setSidebarActiveIconStore.subscribe((activeIcon) => {
+        sidebarActiveIconStore.subscribe((activeIcon) => {
           this.setState({ activeIcon });
           if (activeIcon) {
             localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
