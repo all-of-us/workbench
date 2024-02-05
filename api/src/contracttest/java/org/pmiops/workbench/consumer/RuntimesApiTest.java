@@ -45,6 +45,9 @@ class RuntimesApiTest {
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .body(newJsonBody(
+            body -> body.stringType("fudge", "maple")
+        ).build())
         .willRespondWith()
         .status(200)
         .toPact();
