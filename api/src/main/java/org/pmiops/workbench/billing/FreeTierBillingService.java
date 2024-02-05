@@ -111,7 +111,7 @@ public class FreeTierBillingService {
 
     logger.info(
         String.format(
-            "Workspaces that require updates: %s",
+            "FreeTierBillingUsage: Workspace ids that require updates: %s",
             workspaceByProject.values().stream()
                 .map(workspaceId -> Long.toString(workspaceId))
                 .collect(Collectors.joining(","))));
@@ -438,10 +438,6 @@ public class FreeTierBillingService {
                                                     .numberOfDaysToConsiderForFreeTierUsageUpdate)
                                             .toMillis()))))
             .collect(Collectors.toList());
-
-    logger.info(
-        String.format("Workspaces that require update %d", workspacesThatRequireUpdate.size()));
-
     return workspacesThatRequireUpdate;
   }
 
