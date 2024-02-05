@@ -23,6 +23,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
@@ -159,11 +160,20 @@ class RuntimesApiTest {
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
 
+    request.setLabels({});
+
+    LeonardoUserJupyterExtensionConfig config = new LeonardoUserJupyterExtensionConfig();
+    config.setNbExtensions({});
+    config.setServerExtensions({});
+    config.setCombinedExtensions({});
+    config.setLabExtensions({});
+
+    request.setUserJupyterExtensionConfig(config);
     request.setJupyterUserScriptUri("http://string.com");
     request.setJupyterStartUserScriptUri("http://start.com");
+    request.setRuntimeConfig({});
     request.setAutopause(true);
     request.setAutopauseThreshold(100);
-    request.setRuntimeConfig("string");
     request.setDefaultClientId("string");
     request.setToolDockerImage("string");
 
