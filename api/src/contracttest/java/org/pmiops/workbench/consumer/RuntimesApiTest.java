@@ -162,19 +162,26 @@ class RuntimesApiTest {
           .toPact();
     }
 
-  //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  //  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
-  //    return builder
-  //        .given("there is not a runtime in a Google project")
-  //        .uponReceiving("a request to get that runtime from GSuite")
-  //        .method("PATCH")
-  //        .path("/api/google/v1/runtimes/googleProject/runtimename")
-  //        .willRespondWith()
-  //        .status(404)
-  //        .headers(contentTypeJsonHeader)
-  //        .body(newJsonBody(body -> {}).build())
-  //        .toPact();
-  //  }
+    @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+    RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
+      return builder
+          .given("there is not a runtime in a Google project")
+          .uponReceiving("a request to get that runtime from GSuite")
+          .method("PATCH")
+          .path("/api/google/v1/runtimes/googleProject/runtimename")
+          .body(
+              newJsonBody(
+                  body -> {
+                    body.booleanType("allowStop", true);
+                    body.booleanType("autopause", true);
+                    body.numberType("autopauseThreshold", 57);
+                  })
+                  .build())
+          .willRespondWith()
+          .status(409)
+          .headers(contentTypeJsonHeader)
+          .toPact();
+    }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -262,15 +269,23 @@ class RuntimesApiTest {
     assertEquals(exception.getMessage(), "Not Found");
   }
 
-  //  @Test
-  //  @PactTestFor(pactMethod = "updateMissingRuntime")
-  //  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-  //    ApiClient client = new ApiClient();
-  //    client.setBasePath(mockServer.getUrl());
-  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-  //
-  //    leoRuntimeService.updateRuntime("googleProject", "n", null);
-  //  }
+    @Test
+    @PactTestFor(pactMethod = "updateMissingRuntime")
+    void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+      ApiClient client = new ApiClient();
+      client.setBasePath(mockServer.getUrl());
+      RuntimesApi leoRuntimeService = new RuntimesApi(client);
+      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+      request.setAllowStop(true);
+      request.setAutopause(true);
+      request.setAutopauseThreshold(200);
+
+      assertThrows(
+          Exception.class,
+          () -> {
+            leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+          });
+    }
 
     @Test
     @PactTestFor(pactMethod = "updateRuntime")
