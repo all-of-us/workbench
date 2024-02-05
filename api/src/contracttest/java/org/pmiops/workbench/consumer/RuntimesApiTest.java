@@ -27,7 +27,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
 
-  LeonardoCreateRuntimeRequest getLeonardoCreateRuntimeRequest(){
+  LeonardoCreateRuntimeRequest getLeonardoCreateRuntimeRequest() {
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
     request.setJupyterUserScriptUri("http://string.com");
     request.setJupyterStartUserScriptUri("http://start.com");
@@ -40,25 +40,30 @@ class RuntimesApiTest {
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
-  LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
-  return builder
-      .given("there is a runtime in a Google project")
-      .uponReceiving("a request to create a runtime")
-      .method("POST")
-      .path("/api/google/v1/runtimes/googleProject/runtimename")
-      .body(newJsonBody(
-          body -> {
-            body.stringType("jupyterUserScriptUri", "http://string.com");
-            body.stringType("jupyterStartUserScriptUri", "http://string.com");
-            body.booleanType("autopause", true);
-            body.numberType("autopauseThreshold", 57);
-            body.stringType("defaultClientId", "string");
-            body.stringType("toolDockerImage", "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-          }).build())
-      .willRespondWith()
-      .status(409)
-      .toPact();
-}
+    LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to create a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.stringType("jupyterUserScriptUri", "http://string.com");
+                      body.stringType("jupyterStartUserScriptUri", "http://string.com");
+                      body.booleanType("autopause", true);
+                      body.numberType("autopauseThreshold", 57);
+                      body.stringType("defaultClientId", "string");
+                      body.stringType(
+                          "toolDockerImage",
+                          "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+                    })
+                .build())
+        .willRespondWith()
+        .status(409)
+        .toPact();
+  }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
@@ -67,15 +72,19 @@ class RuntimesApiTest {
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
-        .body(newJsonBody(
+        .body(
+            newJsonBody(
                     body -> {
                       body.stringType("jupyterUserScriptUri", "http://string.com");
                       body.stringType("jupyterStartUserScriptUri", "http://string.com");
                       body.booleanType("autopause", true);
                       body.numberType("autopauseThreshold", 57);
                       body.stringType("defaultClientId", "string");
-                      body.stringType("toolDockerImage", "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-                    }).build())
+                      body.stringType(
+                          "toolDockerImage",
+                          "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+                    })
+                .build())
         .willRespondWith()
         .status(202)
         .toPact();
@@ -131,41 +140,41 @@ class RuntimesApiTest {
         .toPact();
   }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact updateRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is a runtime in a Google project")
-//        .uponReceiving("a request to get that runtime")
-//        .method("PATCH")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename")
-//        .willRespondWith()
-//        .status(200)
-//        .headers(contentTypeJsonHeader)
-//        .body(
-//            newJsonBody(
-//                    body -> {
-//                      body.stringType("runtimeName", "sample-cromwell-study");
-//                      body.stringType("status", "Running");
-//                      body.stringType("autopauseThreshold", "57");
-//                      body.stringType("proxyUrl", "http://www.proxy.com");
-//                      body.array("errors", errors -> {});
-//                      body.object(
-//                          "cloudContext",
-//                          context -> {
-//                            context.stringType("cloudProvider", "GCP");
-//                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
-//                          });
-//                      body.object(
-//                          "auditInfo",
-//                          context -> {
-//                            context.stringType("creator", "Bugs Bunny");
-//                            context.stringType("createdDate", "Yesterday");
-//                            context.stringType("dateAccessed", "Tuesday");
-//                          });
-//                    })
-//                .build())
-//        .toPact();
-//  }
+  //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  //  RequestResponsePact updateRuntime(PactDslWithProvider builder) {
+  //    return builder
+  //        .given("there is a runtime in a Google project")
+  //        .uponReceiving("a request to get that runtime")
+  //        .method("PATCH")
+  //        .path("/api/google/v1/runtimes/googleProject/runtimename")
+  //        .willRespondWith()
+  //        .status(200)
+  //        .headers(contentTypeJsonHeader)
+  //        .body(
+  //            newJsonBody(
+  //                    body -> {
+  //                      body.stringType("runtimeName", "sample-cromwell-study");
+  //                      body.stringType("status", "Running");
+  //                      body.stringType("autopauseThreshold", "57");
+  //                      body.stringType("proxyUrl", "http://www.proxy.com");
+  //                      body.array("errors", errors -> {});
+  //                      body.object(
+  //                          "cloudContext",
+  //                          context -> {
+  //                            context.stringType("cloudProvider", "GCP");
+  //                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
+  //                          });
+  //                      body.object(
+  //                          "auditInfo",
+  //                          context -> {
+  //                            context.stringType("creator", "Bugs Bunny");
+  //                            context.stringType("createdDate", "Yesterday");
+  //                            context.stringType("dateAccessed", "Tuesday");
+  //                          });
+  //                    })
+  //                .build())
+  //        .toPact();
+  //  }
 
   //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   //  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
@@ -196,8 +205,7 @@ class RuntimesApiTest {
     request.setDefaultClientId("string");
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-
-    leoRuntimeService.createRuntime("googleProject", "runtimename",request);
+    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
   }
 
   @Test
@@ -274,15 +282,15 @@ class RuntimesApiTest {
   //    leoRuntimeService.updateRuntime("googleProject", "n", null);
   //  }
 
-//  @Test
-//  @PactTestFor(pactMethod = "updateRuntime")
-//  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    leoRuntimeService.updateRuntime("googleProject", "runtimename", null);
-//  }
+  //  @Test
+  //  @PactTestFor(pactMethod = "updateRuntime")
+  //  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    leoRuntimeService.updateRuntime("googleProject", "runtimename", null);
+  //  }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
