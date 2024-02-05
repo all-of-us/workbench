@@ -38,18 +38,27 @@ class RuntimesApiTest {
     return request;
   }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is a runtime in a Google project from GCP")
-//        .uponReceiving("a request to create a runtime")
-//        .method("POST")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename")
-//        .willRespondWith()
-//        .status(200)
-//        .toPact();
-//  }
-
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
+  LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
+  return builder
+      .given("there is a runtime in a Google project")
+      .uponReceiving("a request to create a runtime")
+      .method("POST")
+      .path("/api/google/v1/runtimes/googleProject/runtimename")
+      .body(newJsonBody(
+          body -> {
+            body.stringType("jupyterUserScriptUri", "http://string.com");
+            body.stringType("jupyterStartUserScriptUri", "http://string.com");
+            body.booleanType("autopause", true);
+            body.numberType("autopauseThreshold", 57);
+            body.stringType("defaultClientId", "string");
+            body.stringType("toolDockerImage", "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+          }).build())
+      .willRespondWith()
+      .status(409)
+      .toPact();
+}
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
@@ -179,19 +188,35 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
+    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+    request.setJupyterUserScriptUri("http://string.com");
+    request.setJupyterStartUserScriptUri("http://start.com");
+    request.setAutopause(true);
+    request.setAutopauseThreshold(57);
+    request.setDefaultClientId("string");
+    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    leoRuntimeService.createRuntime("googleProject", "runtimename",getLeonardoCreateRuntimeRequest());
+
+    leoRuntimeService.createRuntime("googleProject", "runtimename",request);
   }
-//
-//  @Test
-//  @PactTestFor(pactMethod = "createDuplicateRuntime")
-//  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
-//  }
+
+  @Test
+  @PactTestFor(pactMethod = "createDuplicateRuntime")
+  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+    request.setJupyterUserScriptUri("http://string.com");
+    request.setJupyterStartUserScriptUri("http://start.com");
+    request.setAutopause(true);
+    request.setAutopauseThreshold(57);
+    request.setDefaultClientId("string");
+    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+
+    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+  }
 
   @Test
   @PactTestFor(pactMethod = "getRuntime")
