@@ -74,8 +74,9 @@ describe(OpenGkeAppButton.name, () => {
           UIAppType.CROMWELL
         ),
       ]);
-      expect(onClose).toHaveBeenCalled();
     });
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
   it('should not allow creating a GKE app when billing status is not active.', async () => {
