@@ -29,7 +29,11 @@ import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  setSidebarActiveIconStore,
+  useNavigation,
+} from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
