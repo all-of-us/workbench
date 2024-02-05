@@ -65,7 +65,7 @@ class RuntimesApiTest {
                       body.booleanType("autopause", true);
                       body.numberType("autopauseThreshold", 57);
                       body.stringType("defaultClientId", "string");
-                      body.stringType("toolDockerImage", "string");
+                      body.stringType("toolDockerImage", "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
                     }).build())
         .willRespondWith()
         .status(200)
