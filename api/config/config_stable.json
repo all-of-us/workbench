@@ -94,7 +94,7 @@
     "externalDepartmentId": "Development",
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028",
-    "redirectMoodleUser": false
+    "redirectMoodleUser": true
   },
   "moodle": {
     "trainingMigrationPauseActive": true,

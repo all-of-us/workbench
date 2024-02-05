@@ -94,7 +94,7 @@
     "externalDepartmentId": "Researchers",
     "samlIdentityProviderId": "C02celxus",
     "samlServiceProviderId": "638082479253",
-    "redirectMoodleUser": false
+    "redirectMoodleUser": true
   },
   "moodle": {
     "trainingMigrationPauseActive": true,
