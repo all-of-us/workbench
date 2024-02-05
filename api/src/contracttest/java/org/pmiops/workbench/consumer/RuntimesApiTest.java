@@ -160,18 +160,18 @@ class RuntimesApiTest {
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
 
-    request.setLabels({});
+    request.setLabels(null);
 
     LeonardoUserJupyterExtensionConfig config = new LeonardoUserJupyterExtensionConfig();
-    config.setNbExtensions({});
-    config.setServerExtensions({});
-    config.setCombinedExtensions({});
-    config.setLabExtensions({});
+    config.setNbExtensions(null);
+    config.setServerExtensions(null);
+    config.setCombinedExtensions(null);
+    config.setLabExtensions(null);
 
     request.setUserJupyterExtensionConfig(config);
     request.setJupyterUserScriptUri("http://string.com");
     request.setJupyterStartUserScriptUri("http://start.com");
-    request.setRuntimeConfig({});
+    request.setRuntimeConfig(null);
     request.setAutopause(true);
     request.setAutopauseThreshold(100);
     request.setDefaultClientId("string");
