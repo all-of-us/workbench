@@ -23,10 +23,20 @@ import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
+
+  LeonardoCreateRuntimeRequest getLeonardoCreateRuntimeRequest(){
+    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+    request.setJupyterUserScriptUri("http://string.com");
+    request.setJupyterStartUserScriptUri("http://start.com");
+    request.setAutopause(true);
+    request.setAutopauseThreshold(57);
+    request.setDefaultClientId("string");
+    request.setToolDockerImage("string");
+    return request;
+  }
 
 //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
 //  RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
@@ -42,11 +52,21 @@ class RuntimesApiTest {
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
+    LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
     return builder
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .body(newJsonBody(
+                    body -> {
+                      body.stringType("jupyterUserScriptUri", "http://string.com");
+                      body.stringType("jupyterStartUserScriptUri", "http://string.com");
+                      body.booleanType("autopause", true);
+                      body.numberType("autopauseThreshold", 57);
+                      body.stringType("defaultClientId", "string");
+                      body.stringType("toolDockerImage", "string");
+                    }).build())
         .willRespondWith()
         .status(200)
         .toPact();
@@ -158,26 +178,9 @@ class RuntimesApiTest {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
 
-    request.setLabels(null);
 
-    LeonardoUserJupyterExtensionConfig config = new LeonardoUserJupyterExtensionConfig();
-    config.setNbExtensions(null);
-    config.setServerExtensions(null);
-    config.setCombinedExtensions(null);
-    config.setLabExtensions(null);
-
-    request.setUserJupyterExtensionConfig(config);
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setRuntimeConfig(null);
-    request.setAutopause(true);
-    request.setAutopauseThreshold(100);
-    request.setDefaultClientId("string");
-    request.setToolDockerImage("string");
-
-    leoRuntimeService.createRuntime("googleProject", "runtimename",request);
+    leoRuntimeService.createRuntime("googleProject", "runtimename",getLeonardoCreateRuntimeRequest());
   }
 //
 //  @Test
