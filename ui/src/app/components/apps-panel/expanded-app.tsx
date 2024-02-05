@@ -270,17 +270,13 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ? canDeleteRuntime(runtime?.status)
       : canDeleteApp(initialUserAppInfo);
 
-  const displayCromwellDeleteModal = () => {
-    setShowCromwellDeleteModal(true);
-  };
-
   const billingAccountDisabled =
     workspace.billingStatus === BillingStatus.INACTIVE;
 
   const onClickDelete = switchCase(
     appType,
     [UIAppType.JUPYTER, () => onClickDeleteRuntime],
-    [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
+    [UIAppType.CROMWELL, () => () => setShowCromwellDeleteModal(true)],
     [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
     [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
   );
@@ -309,7 +305,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         }
         <TooltipTrigger
           disabled={trashEnabled}
-          content='Your application must be running in order to be deleted.'
+          content='Your application is not in a deleteable state.'
         >
           <Clickable
             aria-label={`Delete ${appType} Environment`}
