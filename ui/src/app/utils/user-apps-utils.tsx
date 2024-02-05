@@ -134,8 +134,14 @@ const localizeUserApp = (
     appType,
   });
 
-export const canOpenApp = (appType: AppType) =>
-  ([AppType.RSTUDIO, AppType.SAS] as AppType[]).includes(appType);
+// does this app have a UI that the user can interact with?
+export const isInteractiveUIApp = (appType: UIAppType) =>
+  (
+    [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS] as UIAppType[]
+  ).includes(appType);
+
+export const isInteractiveUserApp = (appType: AppType) =>
+  isInteractiveUIApp(toUIAppType[appType]);
 
 export const openAppInIframe = (
   workspaceNamespace: string,

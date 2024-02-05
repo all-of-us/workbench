@@ -29,7 +29,7 @@ import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
-  canOpenApp,
+  isInteractiveUserApp,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -174,7 +174,8 @@ export const CreateGkeApp = ({
           </LinkButton>
         )}
         <CreateAppText />
-        {app?.status === AppStatus.RUNNING && canOpenApp(app?.appType) ? (
+        {app?.status === AppStatus.RUNNING &&
+        isInteractiveUserApp(app?.appType) ? (
           <OpenGkeAppButton
             {...{ billingStatus, workspace, onClose }}
             userApp={app}
