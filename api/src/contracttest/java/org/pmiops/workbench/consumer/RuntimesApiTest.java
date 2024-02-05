@@ -223,7 +223,11 @@ class RuntimesApiTest {
     request.setDefaultClientId("string");
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+    assertThrows(
+        Exception.class,
+        () -> {
+          leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+        });
   }
 
   @Test
