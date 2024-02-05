@@ -94,10 +94,10 @@
     "externalDepartmentId": "Researchers",
     "samlIdentityProviderId": "C02celxus",
     "samlServiceProviderId": "638082479253",
-    "redirectMoodleUser": false
+    "redirectMoodleUser": true
   },
   "moodle": {
-    "trainingMigrationPauseActive": true,
+    "trainingMigrationPauseActive": false,
     "host": "aou.nnlm.gov",
     "credentialsKeyV2": "moodle-key-v2.txt"
   },
