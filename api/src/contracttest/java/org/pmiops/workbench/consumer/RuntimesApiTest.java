@@ -145,7 +145,7 @@ class RuntimesApiTest {
     RequestResponsePact updateRuntime(PactDslWithProvider builder) {
       return builder
           .given("there is a runtime in a Google project")
-          .uponReceiving("a request to get that runtime")
+          .uponReceiving("a request to update that runtime")
           .method("PATCH")
           .path("/api/google/v1/runtimes/googleProject/runtimename")
           .body(
