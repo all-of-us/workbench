@@ -20,6 +20,7 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 
@@ -46,7 +47,7 @@ class RuntimesApiTest {
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .body(newJsonBody(
-            body -> body.stringType("fudge", "maple")
+            body -> body.stringType("jupyterUserScriptUri")
         ).build())
         .willRespondWith()
         .status(200)
@@ -159,8 +160,10 @@ class RuntimesApiTest {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    LeonardoCreateRuntimeRequest x = new LeonardoCreateRuntimeRequest();
+    x.setJupyterUserScriptUri("hi");
 
-    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
+    leoRuntimeService.createRuntime("googleProject", "runtimename",x);
   }
 //
 //  @Test
