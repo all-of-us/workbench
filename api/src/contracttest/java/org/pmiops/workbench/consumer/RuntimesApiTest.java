@@ -41,7 +41,7 @@ class RuntimesApiTest {
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     return builder
-        .given("there is not a runtime in a Google project from GCP")
+        .given("there is not a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
