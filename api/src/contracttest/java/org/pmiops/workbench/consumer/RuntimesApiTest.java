@@ -38,17 +38,17 @@ class RuntimesApiTest {
 //        .toPact();
 //  }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is not a runtime in a Google project from GCP")
-//        .uponReceiving("a request to create a runtime")
-//        .method("POST")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename")
-//        .willRespondWith()
-//        .status(200)
-//        .toPact();
-//  }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project from GCP")
+        .uponReceiving("a request to create a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .willRespondWith()
+        .status(200)
+        .toPact();
+  }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
@@ -150,15 +150,15 @@ class RuntimesApiTest {
   //        .toPact();
   //  }
 
-//  @Test
-//  @PactTestFor(pactMethod = "createNewRuntime")
-//  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
-//  }
+  @Test
+  @PactTestFor(pactMethod = "createNewRuntime")
+  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.createRuntime("googleProject", "runtimename", null);
+  }
 //
 //  @Test
 //  @PactTestFor(pactMethod = "createDuplicateRuntime")
