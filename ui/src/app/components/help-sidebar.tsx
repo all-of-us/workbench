@@ -173,6 +173,7 @@ const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
   'runtimeConfig',
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
   'terminal',
 ] as SidebarIconId[];
 

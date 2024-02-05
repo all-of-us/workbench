@@ -9,14 +9,13 @@ import {
 
 import {
   findApp,
-  helpSidebarConfigIdForUIApp,
+  openConfigPanelForUIApp,
   toUIAppType,
   UIAppType,
 } from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
@@ -170,6 +169,6 @@ export const openAppOrConfigPanel = (
   if (userApp?.status === AppStatus.RUNNING) {
     openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[requestedApp]);
+    openConfigPanelForUIApp(requestedApp);
   }
 };

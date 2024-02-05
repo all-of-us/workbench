@@ -14,8 +14,7 @@ import {
   Workspace,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
@@ -30,11 +29,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {
-  currentWorkspaceStore,
-  setSidebarActiveIconStore,
-  useNavigation,
-} from 'app/utils/navigation';
+import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { useRuntimeStatus } from 'app/utils/runtime-hooks';
 import {
   canDeleteRuntime,
@@ -58,6 +53,7 @@ import {
   fromRuntimeStatus,
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
+  openConfigPanelForUIApp,
   UIAppType,
 } from './utils';
 
@@ -162,7 +158,7 @@ const CromwellButtonRow = (props: {
   return (
     <FlexRow>
       <SettingsButton
-        onClick={() => setSidebarActiveIconStore.next(cromwellConfigIconId)}
+        onClick={() => openConfigPanelForUIApp(UIAppType.CROMWELL)}
         data-test-id='Cromwell-settings-button'
       />
       <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
@@ -191,9 +187,7 @@ const RStudioButtonRow = (props: {
   return (
     <FlexRow>
       <SettingsButton
-        onClick={() => {
-          setSidebarActiveIconStore.next(rstudioConfigIconId);
-        }}
+        onClick={() => openConfigPanelForUIApp(UIAppType.RSTUDIO)}
       />
       <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
       <TooltipTrigger disabled={!launchButtonDisabled} content={tooltip}>
@@ -228,11 +222,7 @@ const SASButtonRow = (props: {
 
   return (
     <FlexRow>
-      <SettingsButton
-        onClick={() => {
-          setSidebarActiveIconStore.next(sasConfigIconId);
-        }}
-      />
+      <SettingsButton onClick={() => openConfigPanelForUIApp(UIAppType.SAS)} />
       <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
