@@ -68,7 +68,7 @@ class RuntimesApiTest {
                       body.stringType("toolDockerImage", "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
                     }).build())
         .willRespondWith()
-        .status(200)
+        .status(202)
         .toPact();
   }
 
