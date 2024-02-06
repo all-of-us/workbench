@@ -1,13 +1,18 @@
 import * as React from 'react';
 import { mockNavigate } from 'setupTests';
 
-import { AppsApi, AppStatus, AppType, BillingStatus } from 'generated/fetch';
+import {
+  AppsApi,
+  AppStatus,
+  BillingStatus,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
+import { UIAppType } from '../apps-panel/utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appDisplayPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import {
   expectButtonElementDisabled,
@@ -40,9 +45,9 @@ describe(OpenGkeAppButton.name, () => {
     return render(<OpenGkeAppButton {...allProps} />);
   };
 
-  const findOpenButton = (appType: AppType) =>
+  const findOpenButton = (appType: string) =>
     screen.getByRole('button', {
-      name: `${appTypeToString[appType]} cloud environment open button`,
+      name: `${appType} cloud environment open button`,
     });
 
   beforeEach(() => {
@@ -53,48 +58,53 @@ describe(OpenGkeAppButton.name, () => {
     jest.resetAllMocks();
   });
 
-  it('should allow opening a running GKE app', async () => {
-    const onClose = jest.fn();
-    const userApp = createListAppsRStudioResponse({
-      status: AppStatus.RUNNING,
-    });
-    await component({ userApp, onClose });
+  describe.each([
+    [
+      UIAppType.RSTUDIO,
+      { ...createListAppsRStudioResponse(), status: AppStatus.RUNNING },
+    ],
+    [
+      UIAppType.SAS,
+      { ...createListAppsSASResponse(), status: AppStatus.RUNNING },
+    ],
+  ])('%s', (appType: UIAppType, userApp: UserAppEnvironment) => {
+    it(`should allow opening a running ${appType} app`, async () => {
+      const onClose = jest.fn();
+      await component({ userApp, onClose });
 
-    const button = await waitFor(() => {
-      const openButton = findOpenButton(userApp.appType);
-      expectButtonElementEnabled(openButton);
-      return openButton;
-    });
+      const button = await waitFor(() => {
+        const openButton = findOpenButton(appType);
+        expectButtonElementEnabled(openButton);
+        return openButton;
+      });
 
-    button.click();
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith([
-        appDisplayPath(
-          WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-          WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-          appTypeToString[userApp.appType]
-        ),
-      ]);
-    });
+      button.click();
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith([
+          appDisplayPath(
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+            appType
+          ),
+        ]);
+      });
 
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
-  });
-
-  it('should not allow creating a GKE app when billing status is not active.', async () => {
-    const userApp = createListAppsSASResponse({
-      status: AppStatus.RUNNING,
-    });
-    await component({ userApp, billingStatus: BillingStatus.INACTIVE });
-    const button = await waitFor(() => {
-      const openButton = findOpenButton(userApp.appType);
-      expectButtonElementDisabled(openButton);
-      return openButton;
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
+    it(`should not allow creating a running ${appType} app when billing status is not active.`, async () => {
+      await component({ userApp, billingStatus: BillingStatus.INACTIVE });
+      const button = await waitFor(() => {
+        const openButton = findOpenButton(appType);
+        expectButtonElementDisabled(openButton);
+        return openButton;
+      });
 
-    await screen.findByText(
-      'You have either run out of initial credits or have an inactive billing account.'
-    );
+      await user.pointer([{ pointerName: 'mouse', target: button }]);
+
+      await screen.findByText(
+        'You have either run out of initial credits or have an inactive billing account.'
+      );
+    });
   });
 });
