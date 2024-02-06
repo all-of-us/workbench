@@ -18,6 +18,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.model.GceConfig;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
@@ -173,7 +174,6 @@ class RuntimesApiTest {
                   body -> {
                     body.booleanType("allowStop", true);
                     body.object("runtimeConfig", runtimeConfig -> {
-                      runtimeConfig.stringType("cloudService","gce");
                       runtimeConfig.stringType("machineType","n1-highmem-16");
                       runtimeConfig.numberType("diskSize",500);
                     });
@@ -278,8 +278,10 @@ class RuntimesApiTest {
       RuntimesApi leoRuntimeService = new RuntimesApi(client);
       LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
       request.setAllowStop(true);
-      request.setAutopause(true);
-      request.setAutopauseThreshold(200);
+      GceConfig config = new GceConfig();
+      config.setMachineType("n1-highmem-16");
+      config.setDiskSize(500);
+      request.setRuntimeConfig(config);
 
       assertThrows(
           Exception.class,
