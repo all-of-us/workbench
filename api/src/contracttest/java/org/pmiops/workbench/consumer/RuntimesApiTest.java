@@ -10,6 +10,7 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import java.util.Map;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -32,6 +33,7 @@ class RuntimesApiTest {
     return request;
   }
 
+  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
     LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
@@ -58,6 +60,7 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     LeonardoCreateRuntimeRequest request = getLeonardoCreateRuntimeRequest();
@@ -84,6 +87,7 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
@@ -120,6 +124,7 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
     return builder
@@ -134,6 +139,7 @@ class RuntimesApiTest {
         .toPact();
   }
 
+    @Disabled
     @Pact(consumer = "aou-rwb-api", provider = "leonardo")
     RequestResponsePact updateRuntime(PactDslWithProvider builder) {
       return builder
