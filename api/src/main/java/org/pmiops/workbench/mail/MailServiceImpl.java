@@ -677,6 +677,10 @@ public class MailServiceImpl implements MailService {
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
     keyAndMessage.setKey(apiKey);
     keyAndMessage.setMessage(msg);
+
+    // log "to oneuser" but don't log if this is going to multiple users
+    String maybeLogToAddr = toAddresses.size() == 1 ? " to " + toAddresses.get(0).getEmail() : "";
+
     do {
       retries--;
       Pair<Status, String> attempt = trySend(keyAndMessage);
@@ -686,14 +690,14 @@ public class MailServiceImpl implements MailService {
           log.log(
               Level.WARNING,
               String.format(
-                  "ApiException: Email '%s' not sent: %s",
-                  description, attempt.getRight().toString()));
+                  "ApiException: Email '%s' not sent%s: %s",
+                  description, maybeLogToAddr, attempt.getRight().toString()));
           if (retries == 0) {
             log.log(
                 Level.SEVERE,
                 String.format(
-                    "ApiException: On Last Attempt! Email '%s' not sent: %s",
-                    description, attempt.getRight().toString()));
+                    "ApiException: On Last Attempt! Email '%s' not sent%s: %s",
+                    description, maybeLogToAddr, attempt.getRight().toString()));
             throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
           break;
@@ -702,18 +706,20 @@ public class MailServiceImpl implements MailService {
           log.log(
               Level.SEVERE,
               String.format(
-                  "Messaging Exception: Email '%s' not sent: %s",
-                  description, attempt.getRight().toString()));
+                  "Messaging Exception: Email '%s' not sent%s: %s",
+                  description, maybeLogToAddr, attempt.getRight().toString()));
           throw new MessagingException("Sending email failed: " + attempt.getRight());
 
         case SUCCESSFUL:
-          log.log(Level.INFO, String.format("Email '%s' was sent.", description));
+          log.log(Level.INFO, String.format("Email '%s' was sent%s.", description, maybeLogToAddr));
           return;
 
         default:
           if (retries == 0) {
             log.log(
-                Level.SEVERE, String.format("Email '%s' was not sent. Default case.", description));
+                Level.SEVERE,
+                String.format(
+                    "Email '%s' was not sent%s. Default case.", description, maybeLogToAddr));
             throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
       }
