@@ -1,6 +1,7 @@
 package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.com.dius.pact.consumer.MockServer;
@@ -9,6 +10,8 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -141,169 +144,182 @@ class RuntimesApiTest {
         .toPact();
   }
 
-    @Disabled
-    @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-    RequestResponsePact updateRuntime(PactDslWithProvider builder) {
-      return builder
-          .given("there is a runtime in a Google project")
-          .uponReceiving("a request to update that runtime")
-          .method("PATCH")
-          .path("/api/google/v1/runtimes/googleProject/runtimename")
-          .body(
-              newJsonBody(
-                  body -> {
-                    body.booleanType("allowStop", true);
-                    body.booleanType("autopause", true);
-                    body.numberType("autopauseThreshold", 57);
-                  })
-                  .build())
-          .willRespondWith()
-          .status(202)
-          .headers(contentTypeJsonHeader)
-          .toPact();
-    }
+  @Disabled
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact updateRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to update that runtime")
+        .method("PATCH")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.booleanType("allowStop", true);
+                      body.booleanType("autopause", true);
+                      body.numberType("autopauseThreshold", 57);
+                    })
+                .build())
+        .willRespondWith()
+        .status(202)
+        .headers(contentTypeJsonHeader)
+        .toPact();
+  }
 
-    @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-    RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
-      return builder
-          .given("there is not a runtime in a Google project")
-          .uponReceiving("a request to update that runtime")
-          .method("PATCH")
-          .path("/api/google/v1/runtimes/googleProject/runtimename")
-          .body(
-              newJsonBody(
-                  body -> {
-                    body.booleanType("allowStop", true);
-                    body.object("runtimeConfig", runtimeConfig -> {
-                      runtimeConfig.stringType("cloudService","GCE");
-                      runtimeConfig.numberType("diskSize",500);
-                    });
-                  })
-                  .build())
-          .willRespondWith()
-          .status(409)
-          .toPact();
-    }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to update that runtime")
+        .method("PATCH")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.booleanType("allowStop", true);
+                      body.object(
+                          "runtimeConfig",
+                          runtimeConfig -> {
+                            runtimeConfig.stringType("cloudService", "GCE");
+                            runtimeConfig.numberType("diskSize", 500);
+                          });
+                      body.array("labelsToDelete", arr -> arr.stringValue("deletableLabel"));
+                      body.object(
+                          "labelsToUpsert",
+                          labels -> {
+                            labels.stringValue("key1", "ke1Updated");
+                          });
+                    })
+                .build())
+        .willRespondWith()
+        .status(409)
+        .toPact();
+  }
 
-//  @Test
-//  @PactTestFor(pactMethod = "createNewRuntime")
-//  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-//    request.setJupyterUserScriptUri("http://string.com");
-//    request.setJupyterStartUserScriptUri("http://start.com");
-//    request.setAutopause(true);
-//    request.setAutopauseThreshold(57);
-//    request.setDefaultClientId("string");
-//    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-//
-//    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
-//  }
-//
-//  @Test
-//  @PactTestFor(pactMethod = "createDuplicateRuntime")
-//  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-//    request.setJupyterUserScriptUri("http://string.com");
-//    request.setJupyterStartUserScriptUri("http://start.com");
-//    request.setAutopause(true);
-//    request.setAutopauseThreshold(57);
-//    request.setDefaultClientId("string");
-//    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-//
-//    assertThrows(
-//        Exception.class,
-//        () -> {
-//          leoRuntimeService.createRuntime("googleProject", "runtimename", request);
-//        });
-//  }
-//
-//  @Test
-//  @PactTestFor(pactMethod = "getRuntime")
-//  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
-//    expected.setAutopauseThreshold(57);
-//
-//    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
-//    auditInfo.setCreator("Bugs Bunny");
-//    auditInfo.setCreatedDate("Yesterday");
-//    auditInfo.setDateAccessed("Tuesday");
-//
-//    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
-//    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
-//    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
-//
-//    expected.setAuditInfo(auditInfo);
-//    expected.setCloudContext(cloudContext);
-//    expected.setRuntimeName("sample-cromwell-study");
-//    expected.setErrors(new ArrayList<>());
-//    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-//    expected.setProxyUrl("http://www.proxy.com");
-//
-//    LeonardoGetRuntimeResponse response =
-//        leoRuntimeService.getRuntime("googleProject", "runtimename");
-//
-//    assertEquals(expected, response);
-//  }
-//
-//  @Test
-//  @PactTestFor(pactMethod = "getMissingRuntime")
-//  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//
-//    ApiException exception =
-//        assertThrows(
-//            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
-//
-//    assertEquals(exception.getMessage(), "Not Found");
-//  }
+  //  @Test
+  //  @PactTestFor(pactMethod = "createNewRuntime")
+  //  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+  //    request.setJupyterUserScriptUri("http://string.com");
+  //    request.setJupyterStartUserScriptUri("http://start.com");
+  //    request.setAutopause(true);
+  //    request.setAutopauseThreshold(57);
+  //    request.setDefaultClientId("string");
+  //
+  // request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+  //
+  //    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+  //  }
+  //
+  //  @Test
+  //  @PactTestFor(pactMethod = "createDuplicateRuntime")
+  //  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+  //    request.setJupyterUserScriptUri("http://string.com");
+  //    request.setJupyterStartUserScriptUri("http://start.com");
+  //    request.setAutopause(true);
+  //    request.setAutopauseThreshold(57);
+  //    request.setDefaultClientId("string");
+  //
+  // request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+  //
+  //    assertThrows(
+  //        Exception.class,
+  //        () -> {
+  //          leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+  //        });
+  //  }
+  //
+  //  @Test
+  //  @PactTestFor(pactMethod = "getRuntime")
+  //  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
+  //    expected.setAutopauseThreshold(57);
+  //
+  //    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
+  //    auditInfo.setCreator("Bugs Bunny");
+  //    auditInfo.setCreatedDate("Yesterday");
+  //    auditInfo.setDateAccessed("Tuesday");
+  //
+  //    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
+  //    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
+  //    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
+  //
+  //    expected.setAuditInfo(auditInfo);
+  //    expected.setCloudContext(cloudContext);
+  //    expected.setRuntimeName("sample-cromwell-study");
+  //    expected.setErrors(new ArrayList<>());
+  //    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
+  //    expected.setProxyUrl("http://www.proxy.com");
+  //
+  //    LeonardoGetRuntimeResponse response =
+  //        leoRuntimeService.getRuntime("googleProject", "runtimename");
+  //
+  //    assertEquals(expected, response);
+  //  }
+  //
+  //  @Test
+  //  @PactTestFor(pactMethod = "getMissingRuntime")
+  //  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
+  //    ApiClient client = new ApiClient();
+  //    client.setBasePath(mockServer.getUrl());
+  //    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //
+  //    ApiException exception =
+  //        assertThrows(
+  //            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject",
+  // "runtimename"));
+  //
+  //    assertEquals(exception.getMessage(), "Not Found");
+  //  }
 
-    @Test
-    @PactTestFor(pactMethod = "updateMissingRuntime")
-    void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-      ApiClient client = new ApiClient();
-      client.setBasePath(mockServer.getUrl());
-      RuntimesApi leoRuntimeService = new RuntimesApi(client);
-      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
-      request.setAllowStop(true);
-      LeonardoUpdateGceConfig config = new LeonardoUpdateGceConfig();
-      config.setCloudService(CloudServiceEnum.GCE);
-      config.setDiskSize(500);
-      request.setRuntimeConfig(config);
+  @Test
+  @PactTestFor(pactMethod = "updateMissingRuntime")
+  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+    request.setAllowStop(true);
+    LeonardoUpdateGceConfig config = new LeonardoUpdateGceConfig();
+    config.setCloudService(CloudServiceEnum.GCE);
+    config.setDiskSize(500);
+    request.setRuntimeConfig(config);
+    request.setLabelsToDelete(new ArrayList<>(Arrays.asList("deletableLabel")));
+    request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
 
-      assertThrows(
-          Exception.class,
-          () -> {
-            leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
-          });
-    }
+    assertThrows(
+        Exception.class,
+        () -> {
+          leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+        });
+  }
 
-//    @Test
-//    @PactTestFor(pactMethod = "updateRuntime")
-//    void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-//      ApiClient client = new ApiClient();
-//      client.setBasePath(mockServer.getUrl());
-//      RuntimesApi leoRuntimeService = new RuntimesApi(client);
-//      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
-//      request.setAllowStop(true);
-//      request.setAutopause(true);
-//      request.setAutopauseThreshold(200);
-//
-//      leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
-//    }
+  //    @Test
+  //    @PactTestFor(pactMethod = "updateRuntime")
+  //    void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+  //      ApiClient client = new ApiClient();
+  //      client.setBasePath(mockServer.getUrl());
+  //      RuntimesApi leoRuntimeService = new RuntimesApi(client);
+  //      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+  //      request.setAllowStop(true);
+  //      request.setAutopause(true);
+  //      request.setAutopauseThreshold(200);
+  //
+  //      leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+  //    }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
