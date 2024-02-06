@@ -17,8 +17,9 @@ import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
-import org.pmiops.workbench.model.GceConfig;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
@@ -174,7 +175,7 @@ class RuntimesApiTest {
                   body -> {
                     body.booleanType("allowStop", true);
                     body.object("runtimeConfig", runtimeConfig -> {
-                      runtimeConfig.stringType("machineType","n1-highmem-16");
+                      runtimeConfig.stringType("cloudService","GCE");
                       runtimeConfig.numberType("diskSize",500);
                     });
                   })
@@ -278,8 +279,8 @@ class RuntimesApiTest {
       RuntimesApi leoRuntimeService = new RuntimesApi(client);
       LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
       request.setAllowStop(true);
-      GceConfig config = new GceConfig();
-      config.setMachineType("n1-highmem-16");
+      LeonardoUpdateGceConfig config = new LeonardoUpdateGceConfig();
+      config.setCloudService(CloudServiceEnum.GCE);
       config.setDiskSize(500);
       request.setRuntimeConfig(config);
 
