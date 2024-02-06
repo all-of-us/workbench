@@ -181,6 +181,7 @@ class RuntimesApiTest {
                           "runtimeConfig",
                           runtimeConfig -> {
                             runtimeConfig.stringType("cloudService", "GCE");
+                            runtimeConfig.stringType("machineType","n1-highmem-16");
                             runtimeConfig.numberType("diskSize", 500);
                           });
                       body.array("labelsToDelete", arr -> arr.stringValue("deletableLabel"));
@@ -296,6 +297,7 @@ class RuntimesApiTest {
     LeonardoUpdateGceConfig config = new LeonardoUpdateGceConfig();
     config.setCloudService(CloudServiceEnum.GCE);
     config.setDiskSize(500);
+    config.setMachineType("n1-highmem-16");
     request.setRuntimeConfig(config);
     request.setLabelsToDelete(new ArrayList<>(Arrays.asList("deletableLabel")));
     request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
