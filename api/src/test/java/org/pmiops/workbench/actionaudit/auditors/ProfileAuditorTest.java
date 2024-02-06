@@ -46,12 +46,11 @@ public class ProfileAuditorTest {
   @Mock private Provider<String> mockActionIdProvider;
 
   private ProfileAuditorImpl profileAuditAdapter;
-  private DbUser user;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    user = new DbUser();
+    DbUser user = new DbUser();
     user.setUserId(USER_ID);
     user.setUsername(USER_EMAIL);
 
