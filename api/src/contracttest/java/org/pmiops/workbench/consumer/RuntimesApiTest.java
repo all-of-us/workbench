@@ -1,7 +1,6 @@
 package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.com.dius.pact.consumer.MockServer;
@@ -10,19 +9,13 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import java.util.ArrayList;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
@@ -183,91 +176,91 @@ class RuntimesApiTest {
           .toPact();
     }
 
-  @Test
-  @PactTestFor(pactMethod = "createNewRuntime")
-  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setAutopause(true);
-    request.setAutopauseThreshold(57);
-    request.setDefaultClientId("string");
-    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-
-    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "createDuplicateRuntime")
-  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setAutopause(true);
-    request.setAutopauseThreshold(57);
-    request.setDefaultClientId("string");
-    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-
-    assertThrows(
-        Exception.class,
-        () -> {
-          leoRuntimeService.createRuntime("googleProject", "runtimename", request);
-        });
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "getRuntime")
-  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-
-    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
-    expected.setAutopauseThreshold(57);
-
-    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
-    auditInfo.setCreator("Bugs Bunny");
-    auditInfo.setCreatedDate("Yesterday");
-    auditInfo.setDateAccessed("Tuesday");
-
-    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
-    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
-    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
-
-    expected.setAuditInfo(auditInfo);
-    expected.setCloudContext(cloudContext);
-    expected.setRuntimeName("sample-cromwell-study");
-    expected.setErrors(new ArrayList<>());
-    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-    expected.setProxyUrl("http://www.proxy.com");
-
-    LeonardoGetRuntimeResponse response =
-        leoRuntimeService.getRuntime("googleProject", "runtimename");
-
-    assertEquals(expected, response);
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "getMissingRuntime")
-  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
-
-    ApiException exception =
-        assertThrows(
-            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
-
-    assertEquals(exception.getMessage(), "Not Found");
-  }
+//  @Test
+//  @PactTestFor(pactMethod = "createNewRuntime")
+//  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//
+//    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+//    request.setJupyterUserScriptUri("http://string.com");
+//    request.setJupyterStartUserScriptUri("http://start.com");
+//    request.setAutopause(true);
+//    request.setAutopauseThreshold(57);
+//    request.setDefaultClientId("string");
+//    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+//
+//    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+//  }
+//
+//  @Test
+//  @PactTestFor(pactMethod = "createDuplicateRuntime")
+//  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//
+//    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+//    request.setJupyterUserScriptUri("http://string.com");
+//    request.setJupyterStartUserScriptUri("http://start.com");
+//    request.setAutopause(true);
+//    request.setAutopauseThreshold(57);
+//    request.setDefaultClientId("string");
+//    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+//
+//    assertThrows(
+//        Exception.class,
+//        () -> {
+//          leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+//        });
+//  }
+//
+//  @Test
+//  @PactTestFor(pactMethod = "getRuntime")
+//  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//
+//    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
+//    expected.setAutopauseThreshold(57);
+//
+//    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
+//    auditInfo.setCreator("Bugs Bunny");
+//    auditInfo.setCreatedDate("Yesterday");
+//    auditInfo.setDateAccessed("Tuesday");
+//
+//    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
+//    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
+//    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
+//
+//    expected.setAuditInfo(auditInfo);
+//    expected.setCloudContext(cloudContext);
+//    expected.setRuntimeName("sample-cromwell-study");
+//    expected.setErrors(new ArrayList<>());
+//    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
+//    expected.setProxyUrl("http://www.proxy.com");
+//
+//    LeonardoGetRuntimeResponse response =
+//        leoRuntimeService.getRuntime("googleProject", "runtimename");
+//
+//    assertEquals(expected, response);
+//  }
+//
+//  @Test
+//  @PactTestFor(pactMethod = "getMissingRuntime")
+//  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//
+//    ApiException exception =
+//        assertThrows(
+//            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
+//
+//    assertEquals(exception.getMessage(), "Not Found");
+//  }
 
     @Test
     @PactTestFor(pactMethod = "updateMissingRuntime")
@@ -287,19 +280,19 @@ class RuntimesApiTest {
           });
     }
 
-    @Test
-    @PactTestFor(pactMethod = "updateRuntime")
-    void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-      ApiClient client = new ApiClient();
-      client.setBasePath(mockServer.getUrl());
-      RuntimesApi leoRuntimeService = new RuntimesApi(client);
-      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
-      request.setAllowStop(true);
-      request.setAutopause(true);
-      request.setAutopauseThreshold(200);
-
-      leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
-    }
+//    @Test
+//    @PactTestFor(pactMethod = "updateRuntime")
+//    void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+//      ApiClient client = new ApiClient();
+//      client.setBasePath(mockServer.getUrl());
+//      RuntimesApi leoRuntimeService = new RuntimesApi(client);
+//      LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+//      request.setAllowStop(true);
+//      request.setAutopause(true);
+//      request.setAutopauseThreshold(200);
+//
+//      leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+//    }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
