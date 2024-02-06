@@ -16,38 +16,39 @@ import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { CommonCreateGkeAppProps } from './create-gke-app';
-import { CreateRStudio } from './create-rstudio';
+import { CromwellPanel } from './cromwell-panel';
+import { CommonGKEAppPanelProps } from './gke-app-config-panel-main';
 
-const onClose = jest.fn();
-const freeTierBillingAccountId = 'freetier';
-export const defaultProps: CommonCreateGkeAppProps = {
-  onClose,
-  creatorFreeCreditsRemaining: null,
-  workspace: {
-    ...workspaceStubs[0],
-    accessLevel: WorkspaceAccessLevel.WRITER,
-    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-  },
-  profileState: {
-    profile: ProfileStubVariables.PROFILE_STUB,
-    load: jest.fn(),
-    reload: jest.fn(),
-    updateCache: jest.fn(),
-  },
-  app: undefined,
-  disk: undefined,
-  onClickDeleteGkeApp: jest.fn(),
-  onClickDeleteUnattachedPersistentDisk: jest.fn(),
-};
+// tests for behavior specific to Cromwell.  For behavior common to all GKE Apps, see create-gke-app.spec
+describe(CromwellPanel.name, () => {
+  const onClose = jest.fn();
+  const freeTierBillingAccountId = 'freetier';
 
-// tests for behavior specific to RStudio.  For behavior common to all GKE Apps, see create-gke-app.spec
-describe(CreateRStudio.name, () => {
+  const defaultProps: CommonGKEAppPanelProps = {
+    onClose,
+    creatorFreeCreditsRemaining: null,
+    workspace: {
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    },
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
+    app: undefined,
+    disk: undefined,
+    onClickDeleteGkeApp: jest.fn(),
+    onClickDeleteUnattachedPersistentDisk: jest.fn(),
+  };
+
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
-    render(<CreateRStudio {...{ ...defaultProps, ...propOverrides }} />);
+  const component = async (propOverrides?: Partial<CommonGKEAppPanelProps>) =>
+    render(<CromwellPanel {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
@@ -65,13 +66,13 @@ describe(CreateRStudio.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
+  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
       '$0.40 per hour'
     );
     expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
-      '$0.21 per hour'
+      '$0.20 per hour'
     );
   });
 });

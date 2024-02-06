@@ -13,23 +13,26 @@ import { findApp, toUIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';
-import { CreateCromwell } from './gke-app-configuration-panels/create-cromwell';
-import { CreateGkeAppProps } from './gke-app-configuration-panels/create-gke-app';
-import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
-import { CreateSAS } from './gke-app-configuration-panels/create-sas';
+import { SASPanel } from './gke-app-configuration-panels/create-sas';
+import { CromwellPanel } from './gke-app-configuration-panels/cromwell-panel';
+import {
+  CommonGKEAppPanelProps,
+  GKEAppConfigPanelMainProps,
+} from './gke-app-configuration-panels/gke-app-config-panel-main';
+import { RStudioPanel } from './gke-app-configuration-panels/rstudio-panel';
 
-type InjectedProps =
+type WrapperInjectedProps =
   | 'app'
   | 'disk'
   | 'onClickDeleteGkeApp'
   | 'onClickDeleteUnattachedPersistentDisk';
 
-export type GkeAppConfigurationPanelProps = {
+export type GKEAppConfigPanelWrapperProps = {
   appType: AppType;
   workspaceNamespace: string;
   onClose: () => void;
   initialPanelContent: GKEAppPanelContent | null;
-} & Omit<CreateGkeAppProps, InjectedProps>;
+} & Omit<GKEAppConfigPanelMainProps, WrapperInjectedProps>;
 
 export enum GKEAppPanelContent {
   CREATE,
@@ -37,13 +40,13 @@ export enum GKEAppPanelContent {
   DELETE_GKE_APP,
 }
 
-export const GKEAppConfigurationPanel = ({
+export const GKEAppConfigPanelWrapper = ({
   appType,
   workspaceNamespace,
   onClose,
   initialPanelContent,
   ...props
-}: GkeAppConfigurationPanelProps) => {
+}: GKEAppConfigPanelWrapperProps) => {
   const [gkeAppsInWorkspace, setGkeAppsInWorkspace] = useState<
     UserAppEnvironment[] | undefined
   >();
@@ -130,7 +133,7 @@ export const GKEAppConfigurationPanel = ({
     setPanelContent(GKEAppPanelContent.CREATE);
   };
 
-  const createAppProps = {
+  const commonProps: CommonGKEAppPanelProps = {
     ...props,
     app,
     disk,
@@ -145,9 +148,9 @@ export const GKEAppConfigurationPanel = ({
       () =>
         switchCase(
           appType,
-          [AppType.CROMWELL, () => <CreateCromwell {...createAppProps} />],
-          [AppType.RSTUDIO, () => <CreateRStudio {...createAppProps} />],
-          [AppType.SAS, () => <CreateSAS {...createAppProps} />]
+          [AppType.CROMWELL, () => <CromwellPanel {...commonProps} />],
+          [AppType.RSTUDIO, () => <RStudioPanel {...commonProps} />],
+          [AppType.SAS, () => <SASPanel {...commonProps} />]
         ),
     ],
     [

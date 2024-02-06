@@ -20,11 +20,11 @@ import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import {
   CreateGkeAppButton,
-  CreateGKEAppButtonProps,
+  CreateGkeAppButtonProps,
 } from './create-gke-app-button';
 
 describe(CreateGkeAppButton.name, () => {
-  const defaultProps: CreateGKEAppButtonProps = {
+  const defaultProps: CreateGkeAppButtonProps = {
     createAppRequest: defaultCromwellConfig,
     existingApp: null,
     workspaceNamespace: 'aou-rw-test-1',
@@ -36,7 +36,7 @@ describe(CreateGkeAppButton.name, () => {
   let user;
 
   const component = async (
-    propOverrides?: Partial<CreateGKEAppButtonProps>
+    propOverrides?: Partial<CreateGkeAppButtonProps>
   ) => {
     const allProps = { ...defaultProps, ...propOverrides };
     return render(<CreateGkeAppButton {...allProps} />);

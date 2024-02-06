@@ -16,12 +16,12 @@ import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { CommonCreateGkeAppProps } from './create-gke-app';
-import { CreateSAS } from './create-sas';
+import { SASPanel } from './create-sas';
+import { CommonGKEAppPanelProps } from './gke-app-config-panel-main';
 
 const onClose = jest.fn();
 const freeTierBillingAccountId = 'freetier';
-export const defaultProps: CommonCreateGkeAppProps = {
+export const defaultProps: CommonGKEAppPanelProps = {
   onClose,
   creatorFreeCreditsRemaining: null,
   workspace: {
@@ -43,11 +43,11 @@ export const defaultProps: CommonCreateGkeAppProps = {
 };
 
 // tests for behavior specific to SAS.  For behavior common to all GKE Apps, see create-gke-app.spec
-describe(CreateSAS.name, () => {
+describe(SASPanel.name, () => {
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
-    render(<CreateSAS {...{ ...defaultProps, ...propOverrides }} />);
+  const component = async (propOverrides?: Partial<CommonGKEAppPanelProps>) =>
+    render(<SASPanel {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();

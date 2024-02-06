@@ -2,8 +2,11 @@ import * as React from 'react';
 
 import { AppType } from 'generated/fetch';
 
-import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
+import {
+  CommonGKEAppPanelProps,
+  GKEAppConfigPanelMain,
+} from './gke-app-config-panel-main';
 
-export const CreateSAS = (props: CommonCreateGkeAppProps) => (
-  <CreateGkeApp {...props} appType={AppType.SAS} />
+export const SASPanel = (props: CommonGKEAppPanelProps) => (
+  <GKEAppConfigPanelMain {...props} appType={AppType.SAS} />
 );

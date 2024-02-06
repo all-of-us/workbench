@@ -16,39 +16,38 @@ import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { CreateCromwell } from './create-cromwell';
-import { CommonCreateGkeAppProps } from './create-gke-app';
+import { CommonGKEAppPanelProps } from './gke-app-config-panel-main';
+import { RStudioPanel } from './rstudio-panel';
 
-// tests for behavior specific to Cromwell.  For behavior common to all GKE Apps, see create-gke-app.spec
-describe(CreateCromwell.name, () => {
-  const onClose = jest.fn();
-  const freeTierBillingAccountId = 'freetier';
+const onClose = jest.fn();
+const freeTierBillingAccountId = 'freetier';
+export const defaultProps: CommonGKEAppPanelProps = {
+  onClose,
+  creatorFreeCreditsRemaining: null,
+  workspace: {
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.WRITER,
+    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+  },
+  profileState: {
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load: jest.fn(),
+    reload: jest.fn(),
+    updateCache: jest.fn(),
+  },
+  app: undefined,
+  disk: undefined,
+  onClickDeleteGkeApp: jest.fn(),
+  onClickDeleteUnattachedPersistentDisk: jest.fn(),
+};
 
-  const defaultProps: CommonCreateGkeAppProps = {
-    onClose,
-    creatorFreeCreditsRemaining: null,
-    workspace: {
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    },
-    profileState: {
-      profile: ProfileStubVariables.PROFILE_STUB,
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    },
-    app: undefined,
-    disk: undefined,
-    onClickDeleteGkeApp: jest.fn(),
-    onClickDeleteUnattachedPersistentDisk: jest.fn(),
-  };
-
+// tests for behavior specific to RStudio.  For behavior common to all GKE Apps, see create-gke-app.spec
+describe(RStudioPanel.name, () => {
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
-    render(<CreateCromwell {...{ ...defaultProps, ...propOverrides }} />);
+  const component = async (propOverrides?: Partial<CommonGKEAppPanelProps>) =>
+    render(<RStudioPanel {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
@@ -66,13 +65,13 @@ describe(CreateCromwell.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+  it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
       '$0.40 per hour'
     );
     expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
-      '$0.20 per hour'
+      '$0.21 per hour'
     );
   });
 });

@@ -42,6 +42,7 @@ import {
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import {
+  isInteractiveUIApp,
   openAppInIframe,
   pauseUserApp,
   resumeUserApp,
@@ -152,99 +153,49 @@ const PauseUserAppButton = (props: {
   );
 };
 
-// TODO generalize as UserAppButtonRow?
-const CromwellButtonRow = (props: {
-  userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  const { userApp, workspaceNamespace } = props;
-
-  return (
-    <FlexRow>
-      <SettingsButton
-        onClick={() => openConfigPanelForUIApp(UIAppType.CROMWELL)}
-        data-test-id='Cromwell-settings-button'
-      />
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
-    </FlexRow>
-  );
-};
-
-const RStudioButtonRow = (props: {
+const UserAppButtonRow = (props: {
+  appType: UIAppType;
   userApp: UserAppEnvironment;
   billingAccountDisabled: boolean;
 }) => {
-  const { userApp, billingAccountDisabled } = props;
+  const { appType, userApp, billingAccountDisabled } = props;
   const [navigate] = useNavigation();
   const { namespace, id } = currentWorkspaceStore.getValue();
+
   const onClickLaunch = async () => {
     openAppInIframe(namespace, id, userApp, navigate);
     sidebarActiveIconStore.next(null);
   };
+
   const launchButtonDisabled =
     billingAccountDisabled || userApp?.status !== AppStatus.RUNNING;
-  let tooltip;
-  if (billingAccountDisabled) {
-    tooltip = BILLING_ACCOUNT_DISABLED_TOOLTIP;
-  } else if (userApp?.status !== AppStatus.RUNNING) {
-    tooltip = 'Environment must be running to launch RStudio';
-  }
-  return (
-    <FlexRow>
-      <SettingsButton
-        onClick={() => openConfigPanelForUIApp(UIAppType.RSTUDIO)}
-      />
-      <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
-      <TooltipTrigger disabled={!launchButtonDisabled} content={tooltip}>
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            onClick={onClickLaunch}
-            disabled={launchButtonDisabled}
-            icon={faRocket}
-            buttonText='Open RStudio'
-            data-test-id='open-RStudio-button'
-          />
-        </div>
-      </TooltipTrigger>
-    </FlexRow>
+
+  const tooltip = cond(
+    [billingAccountDisabled, BILLING_ACCOUNT_DISABLED_TOOLTIP],
+    [
+      userApp?.status !== AppStatus.RUNNING,
+      `Environment must be running to launch ${appType}`,
+    ]
   );
-};
-
-const SASButtonRow = (props: {
-  userApp: UserAppEnvironment;
-  billingAccountDisabled: boolean;
-}) => {
-  const { userApp } = props;
-  const [navigate] = useNavigation();
-  const { namespace, id } = currentWorkspaceStore.getValue();
-
-  const onClickLaunch = async () => {
-    openAppInIframe(namespace, id, userApp, navigate);
-    sidebarActiveIconStore.next(null);
-  };
-
-  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
 
   return (
     <FlexRow>
-      <SettingsButton onClick={() => openConfigPanelForUIApp(UIAppType.SAS)} />
+      <SettingsButton onClick={() => openConfigPanelForUIApp(appType)} />
       <PauseUserAppButton userApp={userApp} workspaceNamespace={namespace} />
-      <TooltipTrigger
-        disabled={!launchButtonDisabled}
-        content='Environment must be running to launch SAS'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            onClick={onClickLaunch}
-            disabled={launchButtonDisabled}
-            icon={faRocket}
-            buttonText='Open SAS'
-            data-test-id='open-SAS-button'
-          />
-        </div>
-      </TooltipTrigger>
+      {isInteractiveUIApp(appType) && (
+        <TooltipTrigger disabled={!launchButtonDisabled} content={tooltip}>
+          {/* tooltip trigger needs a div for some reason */}
+          <div>
+            <AppsPanelButton
+              onClick={onClickLaunch}
+              disabled={launchButtonDisabled}
+              icon={faRocket}
+              buttonText={`Open ${appType}`}
+              data-test-id={`open-${appType}-button`}
+            />
+          </div>
+        </TooltipTrigger>
+      )}
     </FlexRow>
   );
 };
@@ -339,37 +290,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
               userSuspended={false}
             />
           </FlexRow>
-          {cond<React.ReactNode>(
-            [
-              appType === UIAppType.CROMWELL,
-              () => (
-                <CromwellButtonRow
-                  userApp={initialUserAppInfo}
-                  workspaceNamespace={workspace.namespace}
-                />
-              ),
-            ],
-            [
-              appType === UIAppType.RSTUDIO,
-              () => (
-                <RStudioButtonRow
-                  {...{ billingAccountDisabled }}
-                  userApp={initialUserAppInfo}
-                />
-              ),
-            ],
-            [
-              appType === UIAppType.SAS,
-              () => (
-                <SASButtonRow
-                  {...{ billingAccountDisabled }}
-                  userApp={initialUserAppInfo}
-                />
-              ),
-            ],
-
-            () => null
-          )}
+          <UserAppButtonRow
+            {...{ appType, billingAccountDisabled }}
+            userApp={initialUserAppInfo}
+          />
         </FlexColumn>
       )}
       {showCromwellDeleteModal && (

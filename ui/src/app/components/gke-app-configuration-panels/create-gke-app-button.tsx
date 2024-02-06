@@ -17,7 +17,7 @@ import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { NotificationStore } from 'app/utils/stores';
 import { appTypeToString, createUserApp } from 'app/utils/user-apps-utils';
 
-export interface CreateGKEAppButtonProps {
+export interface CreateGkeAppButtonProps {
   createAppRequest: CreateAppRequest;
   existingApp: UserAppEnvironment | null | undefined;
   workspaceNamespace: string;
@@ -25,15 +25,14 @@ export interface CreateGKEAppButtonProps {
   username: string;
   billingStatus: BillingStatus;
 }
-
-export function CreateGkeAppButton({
+export const CreateGkeAppButton = ({
   createAppRequest,
   existingApp,
   workspaceNamespace,
   onDismiss,
   username,
   billingStatus,
-}: CreateGKEAppButtonProps) {
+}: CreateGkeAppButtonProps) => {
   const [creatingApp, setCreatingApp] = useState(false);
   const createEnabled =
     !creatingApp &&
@@ -95,4 +94,4 @@ export function CreateGkeAppButton({
       </div>
     </TooltipTrigger>
   );
-}
+};

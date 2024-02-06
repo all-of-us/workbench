@@ -5,9 +5,9 @@ import * as fp from 'lodash/fp';
 import { cond } from '@terra-ui-packages/core-utils';
 import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import {
-  GKEAppConfigurationPanel,
-  GkeAppConfigurationPanelProps,
-} from 'app/components/gke-app-configuration-panel';
+  GKEAppConfigPanelWrapper,
+  GKEAppConfigPanelWrapperProps,
+} from 'app/components/gke-app-config-panel-wrapper';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
@@ -22,7 +22,7 @@ export interface ConfigurationPanelProps {
   onClose: () => void;
   appType: UIAppType;
   runtimeConfPanelInitialState?: RuntimeConfigurationPanelProps['initialPanelContent'];
-  gkeAppConfPanelInitialState?: GkeAppConfigurationPanelProps['initialPanelContent'];
+  gkeAppConfPanelInitialState?: GKEAppConfigPanelWrapperProps['initialPanelContent'];
 }
 
 export const ConfigurationPanel = fp.flow(
@@ -78,7 +78,7 @@ export const ConfigurationPanel = fp.flow(
             ),
           ],
           () => (
-            <GKEAppConfigurationPanel
+            <GKEAppConfigPanelWrapper
               {...{
                 onClose,
                 creatorFreeCreditsRemaining,

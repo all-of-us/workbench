@@ -10,7 +10,10 @@ import {
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
 
-import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
+import {
+  CommonGKEAppPanelProps,
+  GKEAppConfigPanelMain,
+} from './gke-app-config-panel-main';
 
 const cromwellSupportArticles = [
   {
@@ -78,8 +81,8 @@ const CreateAppText = () => (
   </div>
 );
 
-export const CreateCromwell = (props: CommonCreateGkeAppProps) => (
-  <CreateGkeApp
+export const CromwellPanel = (props: CommonGKEAppPanelProps) => (
+  <GKEAppConfigPanelMain
     {...{
       ...props,
       introText,

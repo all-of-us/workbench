@@ -22,7 +22,7 @@ import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
-import { GKEAppPanelContent } from 'app/components/gke-app-configuration-panel';
+import { GKEAppPanelContent } from 'app/components/gke-app-config-panel-wrapper';
 import {
   cromwellConfigIconId,
   HelpSidebarIcons,

@@ -42,7 +42,7 @@ const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
-export interface CreateGkeAppProps {
+export interface GKEAppConfigPanelMainProps {
   appType: AppType;
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
@@ -65,10 +65,10 @@ type ToOmit =
   | 'SupportNote'
   | 'CreateAppText';
 
-// for use by the individual gke app creation components, e.g. CreateCromwell
-export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
+// for use by the individual gke app creation components, e.g. CromwellPanel
+export type CommonGKEAppPanelProps = Omit<GKEAppConfigPanelMainProps, ToOmit>;
 
-export const CreateGkeApp = ({
+export const GKEAppConfigPanelMain = ({
   appType,
   onClose,
   creatorFreeCreditsRemaining,
@@ -82,7 +82,7 @@ export const CreateGkeApp = ({
   CostNote = () => null,
   SupportNote = () => null,
   CreateAppText = () => null,
-}: CreateGkeAppProps) => {
+}: GKEAppConfigPanelMainProps) => {
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
