@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { mockNavigate } from 'setupTests';
 
-import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
+import { AppsApi, AppStatus, AppType, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import {
   expectButtonElementDisabled,
@@ -15,7 +15,8 @@ import {
 } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
-  createListAppsCromwellResponse,
+  createListAppsRStudioResponse,
+  createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 import {
   workspaceStubs,
@@ -39,9 +40,9 @@ describe(OpenGkeAppButton.name, () => {
     return render(<OpenGkeAppButton {...allProps} />);
   };
 
-  const findOpenButton = () =>
+  const findOpenButton = (appType: AppType) =>
     screen.getByRole('button', {
-      name: 'Cromwell cloud environment open button',
+      name: `${appTypeToString[appType]} cloud environment open button`,
     });
 
   beforeEach(() => {
@@ -54,13 +55,13 @@ describe(OpenGkeAppButton.name, () => {
 
   it('should allow opening a running GKE app', async () => {
     const onClose = jest.fn();
-    await component({
-      userApp: createListAppsCromwellResponse({ status: AppStatus.RUNNING }),
-      onClose,
+    const userApp = createListAppsRStudioResponse({
+      status: AppStatus.RUNNING,
     });
+    await component({ userApp, onClose });
 
     const button = await waitFor(() => {
-      const openButton = findOpenButton();
+      const openButton = findOpenButton(userApp.appType);
       expectButtonElementEnabled(openButton);
       return openButton;
     });
@@ -71,7 +72,7 @@ describe(OpenGkeAppButton.name, () => {
         appDisplayPath(
           WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
           WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-          UIAppType.CROMWELL
+          appTypeToString[userApp.appType]
         ),
       ]);
     });
@@ -80,12 +81,12 @@ describe(OpenGkeAppButton.name, () => {
   });
 
   it('should not allow creating a GKE app when billing status is not active.', async () => {
-    await component({
-      userApp: createListAppsCromwellResponse({ status: AppStatus.RUNNING }),
-      billingStatus: BillingStatus.INACTIVE,
+    const userApp = createListAppsSASResponse({
+      status: AppStatus.RUNNING,
     });
+    await component({ userApp, billingStatus: BillingStatus.INACTIVE });
     const button = await waitFor(() => {
-      const openButton = findOpenButton();
+      const openButton = findOpenButton(userApp.appType);
       expectButtonElementDisabled(openButton);
       return openButton;
     });
