@@ -174,8 +174,8 @@ export const CreateGkeApp = ({
           </LinkButton>
         )}
         <CreateAppText />
-        {app?.status === AppStatus.RUNNING &&
-        isInteractiveUserApp(app?.appType) ? (
+        {isInteractiveUserApp(app?.appType) &&
+        app?.status === AppStatus.RUNNING ? (
           <OpenGkeAppButton
             {...{ billingStatus, workspace, onClose }}
             userApp={app}
