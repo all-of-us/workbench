@@ -10,13 +10,13 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { formatUsd } from 'app/utils/numbers';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { EnvironmentCostEstimator } from './environment-cost-estimator';

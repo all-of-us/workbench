@@ -10,13 +10,6 @@ import {
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import {
-  canDeleteApp,
-  defaultCromwellConfig,
-  defaultRStudioConfig,
-  defaultSASConfig,
-  toUIAppType,
-} from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
@@ -29,7 +22,12 @@ import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
+  canDeleteApp,
+  defaultCromwellConfig,
+  defaultRStudioConfig,
+  defaultSASConfig,
   isInteractiveUserApp,
+  toUIAppType,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -42,7 +40,7 @@ const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
-export interface CreateGkeAppProps {
+export interface GKEAppConfigPanelMainProps {
   appType: AppType;
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
@@ -65,10 +63,10 @@ type ToOmit =
   | 'SupportNote'
   | 'CreateAppText';
 
-// for use by the individual gke app creation components, e.g. CreateCromwell
-export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
+// for use by the individual gke app creation components, e.g. CromwellPanel
+export type CommonGKEAppPanelProps = Omit<GKEAppConfigPanelMainProps, ToOmit>;
 
-export const CreateGkeApp = ({
+export const GKEAppConfigPanelMain = ({
   appType,
   onClose,
   creatorFreeCreditsRemaining,
@@ -82,7 +80,7 @@ export const CreateGkeApp = ({
   CostNote = () => null,
   SupportNote = () => null,
   CreateAppText = () => null,
-}: CreateGkeAppProps) => {
+}: GKEAppConfigPanelMainProps) => {
   const { profile } = profileState;
   const { billingStatus } = workspace;
 

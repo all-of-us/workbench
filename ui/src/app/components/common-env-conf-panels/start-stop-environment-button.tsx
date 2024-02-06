@@ -3,21 +3,22 @@ import { CSSProperties } from 'react';
 
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
-import {
-  toUserEnvironmentStatusByAppType,
-  UIAppType,
-  UserEnvironmentStatus,
-} from 'app/components/apps-panel/utils';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { addOpacity } from 'app/styles/colors';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import computeError from 'assets/icons/compute-error.svg';
 import computeNone from 'assets/icons/compute-none.svg';
 import computeRunning from 'assets/icons/compute-running.svg';
 import computeStarting from 'assets/icons/compute-starting.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeStopping from 'assets/icons/compute-stopping.svg';
+
+import {
+  toUserEnvironmentStatusByAppType,
+  UserEnvironmentStatus,
+} from './user-environment-status';
 
 interface ImgProps {
   alt: string;

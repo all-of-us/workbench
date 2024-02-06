@@ -15,16 +15,16 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
-import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
+import {
+  findApp,
+  maybeStartPollingForUserApps,
+  openConfigPanelForUIApp,
+  UIAppType,
+} from 'app/utils/user-apps-utils';
 
 import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import {
-  findApp,
-  getAppsByDisplayGroup,
-  openConfigPanelForUIApp,
-  UIAppType,
-} from './apps-panel/utils';
+import { getAppsByDisplayGroup } from './apps-panel/utils';
 import { TooltipTrigger } from './popups';
 
 const styles = reactStyles({

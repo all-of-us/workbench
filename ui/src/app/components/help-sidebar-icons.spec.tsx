@@ -13,6 +13,7 @@ import {
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import {
   createListAppsCromwellResponse,
@@ -20,7 +21,6 @@ import {
   createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 
-import { UIAppType } from './apps-panel/utils';
 import { UserAppIcon } from './help-sidebar-icons';
 
 const getIconConfig = (iconId, label): IconConfig => {

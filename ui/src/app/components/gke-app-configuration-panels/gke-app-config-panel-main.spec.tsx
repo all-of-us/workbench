@@ -11,14 +11,14 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 import {
+  appTypeToString,
   defaultCromwellConfig,
   defaultRStudioConfig,
   defaultSASConfig,
-} from 'app/components/apps-panel/utils';
-import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore } from 'app/utils/stores';
-import { appTypeToString } from 'app/utils/user-apps-utils';
+} from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';
@@ -37,14 +37,14 @@ import {
 } from 'testing/stubs/workspaces';
 
 import {
-  CommonCreateGkeAppProps,
-  CreateGkeApp,
-  CreateGkeAppProps,
-} from './create-gke-app';
+  CommonGKEAppPanelProps,
+  GKEAppConfigPanelMain,
+  GKEAppConfigPanelMainProps,
+} from './gke-app-config-panel-main';
 
 const onClose = jest.fn();
 const freeTierBillingAccountId = 'freetier';
-export const defaultProps: CommonCreateGkeAppProps = {
+export const defaultProps: CommonGKEAppPanelProps = {
   onClose,
   creatorFreeCreditsRemaining: null,
   workspace: {
@@ -66,15 +66,17 @@ export const defaultProps: CommonCreateGkeAppProps = {
 };
 
 // tests for behavior common to all GKE Apps.  For app-specific tests, see e.g. create-cromwell-spec
-describe(CreateGkeApp.name, () => {
+describe(GKEAppConfigPanelMain.name, () => {
   let disksApiStub: DisksApiStub;
 
   const component = async (
     appType: AppType,
-    propOverrides?: Partial<CreateGkeAppProps>
+    propOverrides?: Partial<GKEAppConfigPanelMainProps>
   ) =>
     render(
-      <CreateGkeApp {...{ ...defaultProps, appType, ...propOverrides }} />
+      <GKEAppConfigPanelMain
+        {...{ ...defaultProps, appType, ...propOverrides }}
+      />
     );
 
   beforeEach(async () => {

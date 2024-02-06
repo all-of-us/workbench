@@ -24,11 +24,11 @@ import {
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
 import {
-  GKEAppConfigurationPanel,
-  GkeAppConfigurationPanelProps,
+  GKEAppConfigPanelWrapper,
+  GKEAppConfigPanelWrapperProps,
   GKEAppPanelContent,
-} from './gke-app-configuration-panel';
-import { defaultProps as rstudioDefaultProps } from './gke-app-configuration-panels/create-rstudio.spec';
+} from './gke-app-config-panel-wrapper';
+import { defaultProps as rstudioDefaultProps } from './gke-app-configuration-panels/rstudio-panel.spec';
 
 // component text for selectors
 
@@ -49,7 +49,7 @@ const validateInitialLoadingSpinner = async () => {
   });
 };
 
-describe(GKEAppConfigurationPanel.name, () => {
+describe(GKEAppConfigPanelWrapper.name, () => {
   beforeEach(() => {
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
@@ -69,7 +69,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([]));
   });
 
-  const defaultProps: GkeAppConfigurationPanelProps = {
+  const defaultProps: GKEAppConfigPanelWrapperProps = {
     appType: AppType.RSTUDIO,
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
@@ -82,13 +82,13 @@ describe(GKEAppConfigurationPanel.name, () => {
   };
 
   const createWrapper = (
-    propOverrides: Partial<GkeAppConfigurationPanelProps> = {}
+    propOverrides: Partial<GKEAppConfigPanelWrapperProps> = {}
   ) => {
     const props = {
       ...defaultProps,
       ...propOverrides,
     };
-    return render(<GKEAppConfigurationPanel {...props} />);
+    return render(<GKEAppConfigPanelWrapper {...props} />);
   };
 
   it('should show a loading spinner while waiting for the list apps API call to return', async () => {

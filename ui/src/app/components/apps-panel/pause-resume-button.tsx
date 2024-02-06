@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { faPause, faPlay, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
+import { UserEnvironmentStatus } from 'app/components/common-env-conf-panels/user-environment-status';
 
 import { AppsPanelButton } from './apps-panel-button';
-import { UserEnvironmentStatus } from './utils';
 
 interface Props {
   externalStatus: UserEnvironmentStatus;

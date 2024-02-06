@@ -34,6 +34,7 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { appAssets, findApp, UIAppType } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -42,7 +43,6 @@ import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
 import { AppStatusIndicator } from './app-status-indicator';
-import { appAssets, findApp, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';

@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { IconButton } from 'app/components/buttons';
 import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -37,7 +36,7 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
+import { openAppOrConfigPanel, UIAppType } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';

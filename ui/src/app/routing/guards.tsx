@@ -4,7 +4,6 @@ import { AccessModule, Profile } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { Guard } from 'app/components/app-router';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,
@@ -25,6 +24,7 @@ import {
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
 import { authStore, MatchParams, profileStore } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import { AuthorityMissing } from './authority-missing';
 import { analysisTabName, analysisTabPath, workspacePath } from './utils';

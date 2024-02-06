@@ -4,7 +4,10 @@ import { AppType } from 'generated/fetch';
 
 import { InfoMessage } from 'app/components/messages';
 
-import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
+import {
+  CommonGKEAppPanelProps,
+  GKEAppConfigPanelMain,
+} from './gke-app-config-panel-main';
 
 const SupportNote = () => (
   <InfoMessage>
@@ -19,8 +22,8 @@ const SupportNote = () => (
   </InfoMessage>
 );
 
-export const CreateRStudio = (props: CommonCreateGkeAppProps) => (
-  <CreateGkeApp
+export const RStudioPanel = (props: CommonGKEAppPanelProps) => (
+  <GKEAppConfigPanelMain
     {...{
       ...props,
       SupportNote,

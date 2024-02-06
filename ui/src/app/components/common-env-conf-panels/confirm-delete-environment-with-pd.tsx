@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Disk } from 'generated/fetch';
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -11,6 +10,7 @@ import { RadioButton } from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import { detachableDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import { BackupFilesHelpSection } from './backup-files-help-section';
 import { styles } from './styles';

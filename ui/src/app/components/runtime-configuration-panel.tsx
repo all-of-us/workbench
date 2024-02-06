@@ -54,9 +54,9 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
-import { UIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';

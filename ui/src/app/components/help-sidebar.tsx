@@ -16,13 +16,12 @@ import {
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { AppsPanel } from 'app/components/apps-panel';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
-import { GKEAppPanelContent } from 'app/components/gke-app-configuration-panel';
+import { GKEAppPanelContent } from 'app/components/gke-app-config-panel-wrapper';
 import {
   cromwellConfigIconId,
   HelpSidebarIcons,
@@ -70,6 +69,7 @@ import {
   runtimeStore,
   withGenomicExtractionJobs,
 } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';

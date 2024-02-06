@@ -15,11 +15,11 @@ import {
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { analysisTabPath, appDisplayPath } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
+import { toAppType, UIAppType } from 'app/utils/user-apps-utils';
 
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
