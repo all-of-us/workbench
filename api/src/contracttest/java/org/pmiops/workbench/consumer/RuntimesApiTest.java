@@ -165,20 +165,22 @@ class RuntimesApiTest {
     RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
       return builder
           .given("there is not a runtime in a Google project")
-          .uponReceiving("a request to get that runtime from GSuite")
+          .uponReceiving("a request to update that runtime")
           .method("PATCH")
           .path("/api/google/v1/runtimes/googleProject/runtimename")
           .body(
               newJsonBody(
                   body -> {
                     body.booleanType("allowStop", true);
-                    body.booleanType("autopause", true);
-                    body.numberType("autopauseThreshold", 57);
+                    body.object("runtimeConfig", runtimeConfig -> {
+                      runtimeConfig.stringType("cloudService","gce");
+                      runtimeConfig.stringType("machineType","n1-highmem-16");
+                      runtimeConfig.numberType("diskSize",500);
+                    });
                   })
                   .build())
           .willRespondWith()
           .status(409)
-          .headers(contentTypeJsonHeader)
           .toPact();
     }
 
