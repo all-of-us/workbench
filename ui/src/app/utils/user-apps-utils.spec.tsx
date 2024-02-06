@@ -140,7 +140,7 @@ describe('User Apps Helper functions', () => {
 
     // Since RStudio is NOT in running state this will open the RStudio config side panel and
     // There will be no navigation to any other page
-    expect(mockNavigate).not.toBeCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
     expect(sidebarActiveIconStore.value).toBe(rstudioConfigIconId);
   });
 

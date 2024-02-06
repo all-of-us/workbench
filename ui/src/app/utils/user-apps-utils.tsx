@@ -8,14 +8,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import cromwellBanner from 'app/assets/user-apps/Cromwell-banner.png';
-import cromwellIcon from 'app/assets/user-apps/Cromwell-icon.png';
-import jupyterBanner from 'app/assets/user-apps/Jupyter-banner.png';
-import jupyterIcon from 'app/assets/user-apps/Jupyter-icon.png';
-import rStudioBanner from 'app/assets/user-apps/RStudio-banner.png';
-import rStudioIcon from 'app/assets/user-apps/RStudio-icon.png';
-import sasBanner from 'app/assets/user-apps/SAS-banner.png';
-import sasIcon from 'app/assets/user-apps/SAS-icon.png';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
@@ -26,6 +19,14 @@ import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import { userAppsStore } from 'app/utils/stores';
+import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
+import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
+import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
+import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
+import rStudioBanner from 'assets/user-apps/RStudio-banner.png';
+import rStudioIcon from 'assets/user-apps/RStudio-icon.png';
+import sasBanner from 'assets/user-apps/SAS-banner.png';
+import sasIcon from 'assets/user-apps/SAS-icon.png';
 
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
@@ -247,16 +248,17 @@ export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.RSTUDIO]: UIAppType.RSTUDIO,
   [AppType.SAS]: UIAppType.SAS,
 };
-export const helpSidebarConfigIdForUIApp: Record<
-  Exclude<UIAppType, UIAppType.JUPYTER>,
-  SidebarIconId
-> = {
-  [UIAppType.SAS]: sasConfigIconId,
-  [UIAppType.RSTUDIO]: rstudioConfigIconId,
-  [UIAppType.CROMWELL]: cromwellConfigIconId,
+
+export const openConfigPanelForUIApp = (appType: UIAppType) => {
+  const iconId = switchCase<UIAppType, SidebarIconId>(
+    appType,
+    [UIAppType.SAS, () => sasConfigIconId],
+    [UIAppType.RSTUDIO, () => rstudioConfigIconId],
+    [UIAppType.CROMWELL, () => cromwellConfigIconId]
+  );
+  sidebarActiveIconStore.next(iconId);
 };
-export const openConfigPanelForUIApp = (appType: UIAppType) =>
-  sidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
+
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType

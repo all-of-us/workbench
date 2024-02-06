@@ -8,10 +8,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import {
-  helpSidebarConfigIdForUIApp,
-  UIAppType,
-} from '../../utils/user-apps-utils';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -52,8 +48,6 @@ beforeEach(async () => {
   jest.mock('app/services/swagger-fetch-clients');
   mockAppsApi = jest.spyOn(swaggerClients, 'appsApi');
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
-  helpSidebarConfigIdForUIApp[UIAppType.RSTUDIO] = rstudioConfigIconId;
-  helpSidebarConfigIdForUIApp[UIAppType.SAS] = sasConfigIconId;
 });
 
 const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
