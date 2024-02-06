@@ -11,14 +11,14 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 import {
+  appTypeToString,
   defaultCromwellConfig,
   defaultRStudioConfig,
   defaultSASConfig,
-} from 'app/components/apps-panel/utils';
-import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore } from 'app/utils/stores';
-import { appTypeToString } from 'app/utils/user-apps-utils';
+} from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';

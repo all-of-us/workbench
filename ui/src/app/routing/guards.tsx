@@ -2,9 +2,9 @@ import { matchPath } from 'react-router-dom';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
+import { UIAppType } from '../utils/user-apps-utils';
 import { cond } from '@terra-ui-packages/core-utils';
 import { Guard } from 'app/components/app-router';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,

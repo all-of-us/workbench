@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from '../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';

@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
+import { defaultCromwellConfig } from '../../utils/user-apps-utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import {

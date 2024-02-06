@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from '../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import {
   Modal,

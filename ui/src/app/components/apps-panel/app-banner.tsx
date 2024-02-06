@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
-import { appAssets, UIAppType } from './utils';
+import { appAssets, UIAppType } from '../../utils/user-apps-utils';
 
 export const AppBanner = (props: {
   appType: UIAppType;

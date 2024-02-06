@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import { Disk } from 'generated/fetch';
 
+import { UIAppType } from '../../utils/user-apps-utils';
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';

@@ -5,9 +5,9 @@ import {
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
   UserEnvironmentStatus,
-} from './utils';
+} from './user-environment-status';
 
-describe('AppsPanel utils', () => {
+describe('UserEnvironmentStatus', () => {
   test.each([
     [RuntimeStatus.RUNNING, UserEnvironmentStatus.RUNNING],
     [RuntimeStatus.STOPPING, UserEnvironmentStatus.PAUSING],

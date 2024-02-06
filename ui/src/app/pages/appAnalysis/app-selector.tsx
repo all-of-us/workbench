@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { BillingStatus } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import colors from 'app/styles/colors';
@@ -12,7 +11,7 @@ import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { userAppsStore, useStore } from 'app/utils/stores';
-import { openAppOrConfigPanel } from 'app/utils/user-apps-utils';
+import { openAppOrConfigPanel, UIAppType } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 

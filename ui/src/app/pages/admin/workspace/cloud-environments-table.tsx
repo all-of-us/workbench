@@ -12,9 +12,8 @@ import {
 import {
   fromRuntimeStatus,
   fromUserAppStatusWithFallback,
-  toUIAppType,
-  UIAppType,
-} from 'app/components/apps-panel/utils';
+} from '../../../components/common-env-conf-panels/user-environment-status';
+import { toUIAppType, UIAppType } from '../../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import {
   Modal,

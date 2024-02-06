@@ -11,7 +11,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from '../../utils/user-apps-utils';
 import { LinkButton } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';

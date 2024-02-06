@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
+import { toAppType, UIAppType } from '../utils/user-apps-utils';
 import { cond } from '@terra-ui-packages/core-utils';
-import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import {
   GKEAppConfigPanelWrapper,
   GKEAppConfigPanelWrapperProps,

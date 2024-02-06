@@ -6,7 +6,7 @@ import * as fp from 'lodash/fp';
 
 import { AppStatus } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
+import { findApp, UIAppType } from '../../utils/user-apps-utils';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import {
   ErrorMode,

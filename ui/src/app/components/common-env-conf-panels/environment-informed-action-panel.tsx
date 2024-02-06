@@ -9,8 +9,8 @@ import {
   Workspace,
 } from 'generated/fetch';
 
+import { UIAppType } from '../../utils/user-apps-utils';
 import { cond } from '@terra-ui-packages/core-utils';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import colors, { colorWithWhiteness } from 'app/styles/colors';

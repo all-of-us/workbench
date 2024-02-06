@@ -1,6 +1,6 @@
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from '../utils/user-apps-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,

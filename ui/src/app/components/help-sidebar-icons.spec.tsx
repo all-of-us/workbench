@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { AppStatus } from 'generated/fetch';
 
+import { UIAppType } from '../utils/user-apps-utils';
 import { render, screen } from '@testing-library/react';
 import {
   cromwellConfigIconId,
@@ -20,7 +21,6 @@ import {
   createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 
-import { UIAppType } from './apps-panel/utils';
 import { UserAppIcon } from './help-sidebar-icons';
 
 const getIconConfig = (iconId, label): IconConfig => {

@@ -14,6 +14,11 @@ import {
   Workspace,
 } from 'generated/fetch';
 
+import {
+  fromRuntimeStatus,
+  fromUserAppStatus,
+  fromUserAppStatusWithFallback,
+} from '../common-env-conf-panels/user-environment-status';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
@@ -42,10 +47,13 @@ import {
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import {
+  canDeleteApp,
   isInteractiveUIApp,
   openAppInIframe,
+  openConfigPanelForUIApp,
   pauseUserApp,
   resumeUserApp,
+  UIAppType,
 } from 'app/utils/user-apps-utils';
 
 import { AppBanner } from './app-banner';
@@ -53,14 +61,6 @@ import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
 import { RuntimeCost } from './runtime-cost';
-import {
-  canDeleteApp,
-  fromRuntimeStatus,
-  fromUserAppStatus,
-  fromUserAppStatusWithFallback,
-  openConfigPanelForUIApp,
-  UIAppType,
-} from './utils';
 
 const styles = reactStyles({
   expandedAppContainer: {

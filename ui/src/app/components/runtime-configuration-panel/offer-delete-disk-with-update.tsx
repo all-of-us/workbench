@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Disk } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from '../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import { BackupFilesHelpSection } from 'app/components/common-env-conf-panels/backup-files-help-section';
 import { styles } from 'app/components/common-env-conf-panels/styles';

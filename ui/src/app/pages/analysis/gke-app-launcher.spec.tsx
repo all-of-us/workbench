@@ -12,10 +12,10 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { toAppType, UIAppType } from '../../utils/user-apps-utils';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { analysisTabPath, appDisplayPath } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';

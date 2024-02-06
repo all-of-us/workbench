@@ -22,6 +22,7 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
+import { appAssets, findApp, UIAppType } from '../utils/user-apps-utils';
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { workspacePath } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -42,7 +43,6 @@ import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
 import { AppStatusIndicator } from './app-status-indicator';
-import { appAssets, findApp, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';

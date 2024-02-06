@@ -8,7 +8,6 @@ import {
   DiskType,
 } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { appDisplayPath } from 'app/routing/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -18,8 +17,13 @@ import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
 import { userAppsStore } from './stores';
-import * as userAppsUtils from './user-apps-utils';
-import { updateLastActive } from './user-apps-utils';
+import {
+  createUserApp,
+  maybeStartPollingForUserApps,
+  openAppOrConfigPanel,
+  UIAppType,
+  updateLastActive,
+} from './user-apps-utils';
 
 const fakeCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
@@ -54,7 +58,7 @@ describe('User Apps Helper functions', () => {
       .spyOn(appsApi(), 'createApp')
       .mockImplementationOnce(() => Promise.resolve({}));
     const spyListAppsAPI = jest.spyOn(appsApi(), 'listAppsInWorkspace');
-    await userAppsUtils.createUserApp('fakeNameSpace', fakeCromwellConfig);
+    await createUserApp('fakeNameSpace', fakeCromwellConfig);
     expect(spyListAppsAPI).toHaveBeenCalledTimes(1);
   });
 
@@ -64,14 +68,14 @@ describe('User Apps Helper functions', () => {
       .spyOn(appsApi(), 'createApp')
       .mockImplementationOnce(() => Promise.resolve({}));
     const spyListAppsAPI = jest.spyOn(appsApi(), 'listAppsInWorkspace');
-    await userAppsUtils.createUserApp('fakeNameSpace', fakeCromwellConfig);
+    await createUserApp('fakeNameSpace', fakeCromwellConfig);
     expect(spyListAppsAPI).toHaveBeenCalledTimes(0);
   });
 
   it('Update User Apps with an existing update process', async () => {
     userAppsStore.set({ updating: true });
     const spyListAppsAPI = jest.spyOn(appsApi(), 'listAppsInWorkspace');
-    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
+    await maybeStartPollingForUserApps('fakeNameSpace');
     expect(spyListAppsAPI).toHaveBeenCalledTimes(0);
   });
 
@@ -83,7 +87,7 @@ describe('User Apps Helper functions', () => {
           { status: AppStatus.RUNNING, appType: AppType.CROMWELL },
         ])
       );
-    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
+    await maybeStartPollingForUserApps('fakeNameSpace');
     expect(spyListAppsAPI).toHaveBeenCalledTimes(1);
 
     // advance by 2x the transition polling timeout value
@@ -112,7 +116,7 @@ describe('User Apps Helper functions', () => {
           { status: AppStatus.RUNNING, appType: AppType.CROMWELL },
         ])
       );
-    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
+    await maybeStartPollingForUserApps('fakeNameSpace');
     expect(spyListAppsAPI).toHaveBeenCalledTimes(1);
 
     // advance by 2x the transition polling timeout value
@@ -126,7 +130,7 @@ describe('User Apps Helper functions', () => {
     const navigate = mockNavigate;
     expect(sidebarActiveIconStore.value).toBeNull();
 
-    userAppsUtils.openAppOrConfigPanel(
+    openAppOrConfigPanel(
       'ws',
       'wsid',
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
@@ -144,7 +148,7 @@ describe('User Apps Helper functions', () => {
     const navigate = mockNavigate;
     expect(sidebarActiveIconStore.value).toBeNull();
 
-    userAppsUtils.openAppOrConfigPanel(
+    openAppOrConfigPanel(
       'ws',
       'wsid',
       [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],

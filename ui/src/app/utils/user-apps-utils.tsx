@@ -3,16 +3,25 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
+  DiskType,
   ListAppsResponse,
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import cromwellBanner from 'app/assets/user-apps/Cromwell-banner.png';
+import cromwellIcon from 'app/assets/user-apps/Cromwell-icon.png';
+import jupyterBanner from 'app/assets/user-apps/Jupyter-banner.png';
+import jupyterIcon from 'app/assets/user-apps/Jupyter-icon.png';
+import rStudioBanner from 'app/assets/user-apps/RStudio-banner.png';
+import rStudioIcon from 'app/assets/user-apps/RStudio-icon.png';
+import sasBanner from 'app/assets/user-apps/SAS-banner.png';
+import sasIcon from 'app/assets/user-apps/SAS-icon.png';
 import {
-  findApp,
-  openConfigPanelForUIApp,
-  toUIAppType,
-  UIAppType,
-} from 'app/components/apps-panel/utils';
+  cromwellConfigIconId,
+  rstudioConfigIconId,
+  sasConfigIconId,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
@@ -20,6 +29,8 @@ import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
+import { DEFAULT_MACHINE_NAME } from './machines';
+import { sidebarActiveIconStore } from './navigation';
 
 // the polling timeout to use when waiting for a transition (e.g. from Running to Paused)
 const transitionPollingTimeoutMs = 10e3; // 10 sec
@@ -134,6 +145,123 @@ const localizeUserApp = (
     appType,
   });
 
+// Eventually we will need to align this with the API's AppType
+export enum UIAppType {
+  JUPYTER = 'Jupyter',
+  RSTUDIO = 'RStudio',
+  CROMWELL = 'Cromwell',
+  SAS = 'SAS',
+}
+
+interface AppAssets {
+  appType: UIAppType;
+  banner: string;
+  icon: string;
+}
+
+export const appAssets: AppAssets[] = [
+  {
+    appType: UIAppType.JUPYTER,
+    banner: jupyterBanner,
+    icon: jupyterIcon,
+  },
+  {
+    appType: UIAppType.RSTUDIO,
+    banner: rStudioBanner,
+    icon: rStudioIcon,
+  },
+  {
+    appType: UIAppType.CROMWELL,
+    banner: cromwellBanner,
+    icon: cromwellIcon,
+  },
+  {
+    appType: UIAppType.SAS,
+    banner: sasBanner,
+    icon: sasIcon,
+  },
+];
+// TODO replace with better defaults?
+export const defaultCromwellConfig: CreateAppRequest = {
+  appType: AppType.CROMWELL,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 50,
+    diskType: DiskType.STANDARD,
+  },
+};
+// TODO replace with better defaults?
+export const defaultRStudioConfig: CreateAppRequest = {
+  appType: AppType.RSTUDIO,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.STANDARD,
+  },
+};
+// TODO replace with better defaults?
+export const defaultSASConfig: CreateAppRequest = {
+  appType: AppType.SAS,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 250,
+    diskType: DiskType.STANDARD,
+  },
+};
+const isVisible = (status: AppStatus): boolean =>
+  status && status !== AppStatus.DELETED;
+export const isAppActive = (app: UserAppEnvironment): boolean =>
+  isVisible(app?.status);
+// matches Leonardo code
+// https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
+export const isDeletable = (status: AppStatus): boolean =>
+  (
+    [
+      AppStatus.STATUS_UNSPECIFIED,
+      AppStatus.RUNNING,
+      AppStatus.ERROR,
+    ] as Array<AppStatus>
+  ).includes(status);
+export const canDeleteApp = (app: UserAppEnvironment): boolean =>
+  app && isDeletable(app.status);
+export const toAppType: Record<UIAppType, AppType | null> = {
+  [UIAppType.CROMWELL]: AppType.CROMWELL,
+  [UIAppType.RSTUDIO]: AppType.RSTUDIO,
+  [UIAppType.SAS]: AppType.SAS,
+  [UIAppType.JUPYTER]: null,
+};
+export const toUIAppType: Record<AppType, UIAppType> = {
+  [AppType.CROMWELL]: UIAppType.CROMWELL,
+  [AppType.RSTUDIO]: UIAppType.RSTUDIO,
+  [AppType.SAS]: UIAppType.SAS,
+};
+export const helpSidebarConfigIdForUIApp: Record<
+  Exclude<UIAppType, UIAppType.JUPYTER>,
+  SidebarIconId
+> = {
+  [UIAppType.SAS]: sasConfigIconId,
+  [UIAppType.RSTUDIO]: rstudioConfigIconId,
+  [UIAppType.CROMWELL]: cromwellConfigIconId,
+};
+export const openConfigPanelForUIApp = (appType: UIAppType) =>
+  sidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
+export const findApp = (
+  apps: UserAppEnvironment[] | null | undefined,
+  appType: UIAppType
+): UserAppEnvironment | undefined =>
+  apps?.find((app) => app.appType === toAppType[appType]);
 // does this app have a UI that the user can interact with?
 export const isInteractiveUIApp = (appType: UIAppType) =>
   (

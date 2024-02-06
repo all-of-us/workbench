@@ -8,14 +8,14 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import {
+  helpSidebarConfigIdForUIApp,
+  UIAppType,
+} from '../../utils/user-apps-utils';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import {
-  helpSidebarConfigIdForUIApp,
-  UIAppType,
-} from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
   sasConfigIconId,
