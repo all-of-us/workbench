@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { faPause, faPlay, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 
-import { UserEnvironmentStatus } from '../common-env-conf-panels/user-environment-status';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
+import { UserEnvironmentStatus } from 'app/components/common-env-conf-panels/user-environment-status';
 
 import { AppsPanelButton } from './apps-panel-button';
 

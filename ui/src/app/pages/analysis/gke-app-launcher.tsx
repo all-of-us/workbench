@@ -6,7 +6,6 @@ import * as fp from 'lodash/fp';
 
 import { AppStatus } from 'generated/fetch';
 
-import { findApp, UIAppType } from '../../utils/user-apps-utils';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import {
   ErrorMode,
@@ -16,6 +15,7 @@ import { analysisTabPath } from 'app/routing/utils';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams, userAppsStore, useStore } from 'app/utils/stores';
+import { findApp, UIAppType } from 'app/utils/user-apps-utils';
 
 interface Props
   extends WithSpinnerOverlayProps,

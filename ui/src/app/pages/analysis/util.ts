@@ -1,6 +1,5 @@
 import { FileDetail, Workspace } from 'generated/fetch';
 
-import { UIAppType } from '../../utils/user-apps-utils';
 import { cond } from '@terra-ui-packages/core-utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import {
@@ -9,6 +8,7 @@ import {
   RMD_FILE_EXT,
   SAS_FILE_EXT,
 } from 'app/utils/constants';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
   if (filename?.endsWith(JUPYTER_FILE_EXT)) {

@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import { AppStatus } from 'generated/fetch';
 
-import { UIAppType } from '../utils/user-apps-utils';
 import { render, screen } from '@testing-library/react';
 import {
   cromwellConfigIconId,
@@ -14,6 +13,7 @@ import {
   sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import {
   createListAppsCromwellResponse,

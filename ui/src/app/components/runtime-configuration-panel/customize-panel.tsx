@@ -11,7 +11,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { UIAppType } from '../../utils/user-apps-utils';
 import { LinkButton } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { styles } from 'app/components/common-env-conf-panels/styles';
@@ -37,6 +36,7 @@ import {
   RuntimeStatusRequest,
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';

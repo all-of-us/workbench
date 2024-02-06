@@ -14,7 +14,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { UIAppType } from '../utils/user-apps-utils';
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { AppsPanel } from 'app/components/apps-panel';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
@@ -70,6 +69,7 @@ import {
   runtimeStore,
   withGenomicExtractionJobs,
 } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';

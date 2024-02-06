@@ -4,11 +4,11 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { UIAppType } from '../../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksAdminApi } from 'app/services/swagger-fetch-clients';
 import { fetchWithErrorModal } from 'app/utils/errors';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import moment from 'moment';
 
 interface Props {

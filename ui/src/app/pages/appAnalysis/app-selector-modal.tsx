@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
-import { UIAppType } from '../../utils/user-apps-utils';
 import { Button } from 'app/components/buttons';
 import {
   Modal,
@@ -12,6 +11,7 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { serverConfigStore, useStore } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 const styles = reactStyles({
   appsLabel: {

@@ -1,6 +1,5 @@
 import { WorkspacesApi } from 'generated/fetch';
 
-import { UIAppType } from '../utils/user-apps-utils';
 import { getTrail } from 'app/components/breadcrumb';
 import {
   analysisTabName,
@@ -10,6 +9,7 @@ import {
 } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import { cohortReviewStubs } from 'testing/stubs/cohort-review-service-stub';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';

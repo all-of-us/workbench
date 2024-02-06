@@ -10,7 +10,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { UIAppType } from '../utils/user-apps-utils';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
@@ -55,6 +54,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
+import { UIAppType } from 'app/utils/user-apps-utils';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';

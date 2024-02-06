@@ -1,6 +1,5 @@
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
-import { UIAppType } from '../utils/user-apps-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
@@ -8,6 +7,7 @@ import {
 } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
 import { serverConfigStore } from 'app/utils/stores';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';

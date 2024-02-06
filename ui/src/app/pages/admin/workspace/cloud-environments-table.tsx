@@ -9,12 +9,11 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { Button } from 'app/components/buttons';
 import {
   fromRuntimeStatus,
   fromUserAppStatusWithFallback,
-} from '../../../components/common-env-conf-panels/user-environment-status';
-import { toUIAppType, UIAppType } from '../../../utils/user-apps-utils';
-import { Button } from 'app/components/buttons';
+} from 'app/components/common-env-conf-panels/user-environment-status';
 import {
   Modal,
   ModalBody,
@@ -24,6 +23,7 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { getCreator } from 'app/utils/runtime-utils';
+import { toUIAppType, UIAppType } from 'app/utils/user-apps-utils';
 
 interface CloudEnvironmentRow {
   appType: UIAppType;

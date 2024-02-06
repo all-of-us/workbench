@@ -8,11 +8,11 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { UIAppType } from '../../utils/user-apps-utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appDisplayPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { UIAppType } from 'app/utils/user-apps-utils';
 
 import {
   expectButtonElementDisabled,

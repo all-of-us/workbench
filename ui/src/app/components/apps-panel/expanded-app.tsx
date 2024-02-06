@@ -14,15 +14,15 @@ import {
   Workspace,
 } from 'generated/fetch';
 
-import {
-  fromRuntimeStatus,
-  fromUserAppStatus,
-  fromUserAppStatusWithFallback,
-} from '../common-env-conf-panels/user-environment-status';
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
+import {
+  fromRuntimeStatus,
+  fromUserAppStatus,
+  fromUserAppStatusWithFallback,
+} from 'app/components/common-env-conf-panels/user-environment-status';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,

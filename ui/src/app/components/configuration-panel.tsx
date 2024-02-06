@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { toAppType, UIAppType } from '../utils/user-apps-utils';
 import { cond } from '@terra-ui-packages/core-utils';
 import {
   GKEAppConfigPanelWrapper,
@@ -11,6 +10,7 @@ import {
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
+import { toAppType, UIAppType } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import {

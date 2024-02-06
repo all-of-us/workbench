@@ -22,7 +22,6 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
-import { appAssets, findApp, UIAppType } from '../utils/user-apps-utils';
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { workspacePath } from 'app/routing/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -35,6 +34,7 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { appAssets, findApp, UIAppType } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
