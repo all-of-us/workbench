@@ -177,6 +177,8 @@ class RuntimesApiTest {
             newJsonBody(
                     body -> {
                       body.booleanType("allowStop", true);
+                      body.booleanType("autopause", true);
+                      body.numberType("autopauseThreshold", 523);
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
@@ -294,6 +296,8 @@ class RuntimesApiTest {
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
     LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
     request.setAllowStop(true);
+    request.setAutopause(true);
+    request.setAutopauseThreshold(523);
     LeonardoUpdateGceConfig config = new LeonardoUpdateGceConfig();
     config.setCloudService(CloudServiceEnum.GCE);
     config.setDiskSize(500);
