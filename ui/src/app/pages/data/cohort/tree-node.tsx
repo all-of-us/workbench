@@ -24,7 +24,7 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore,
   currentWorkspaceStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 
 export const COPE_SURVEY_GROUP_NAME =
@@ -392,7 +392,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     event.stopPropagation();
     delete node.children;
     attributesSelectionStore.next(node);
-    setSidebarActiveIconStore.next('criteria');
+    sidebarActiveIconStore.next('criteria');
   }
 
   get showCode() {

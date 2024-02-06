@@ -3,18 +3,11 @@ import { useEffect, useState } from 'react';
 
 import { BillingStatus, Workspace } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import {
-  cromwellConfigIconId,
-  rstudioConfigIconId,
-  sasConfigIconId,
-  SidebarIconId,
-} from 'app/components/help-sidebar-icons';
+import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   runtimeStore,
   serverConfigStore,
@@ -26,7 +19,12 @@ import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
 import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
+import {
+  findApp,
+  getAppsByDisplayGroup,
+  openConfigPanelForUIApp,
+  UIAppType,
+} from './apps-panel/utils';
 import { TooltipTrigger } from './popups';
 
 const styles = reactStyles({
@@ -169,26 +167,9 @@ export const AppsPanel = (props: {
                       workspace.billingStatus === BillingStatus.INACTIVE
                     }
                     onClick={() =>
-                      switchCase(
-                        availableApp.appType,
-                        [
-                          UIAppType.CROMWELL,
-                          () =>
-                            setSidebarActiveIconStore.next(
-                              cromwellConfigIconId
-                            ),
-                        ],
-                        [
-                          UIAppType.RSTUDIO,
-                          () =>
-                            setSidebarActiveIconStore.next(rstudioConfigIconId),
-                        ],
-                        [
-                          UIAppType.SAS,
-                          () => setSidebarActiveIconStore.next(sasConfigIconId),
-                        ],
-                        () => addToExpandedApps(availableApp.appType)
-                      )
+                      availableApp.appType === UIAppType.JUPYTER
+                        ? addToExpandedApps(availableApp.appType)
+                        : openConfigPanelForUIApp(availableApp.appType)
                     }
                   />
                 </div>

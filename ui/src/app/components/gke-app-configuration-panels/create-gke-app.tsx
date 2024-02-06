@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  AppStatus,
   AppType,
   CreateAppRequest,
   Disk,
@@ -24,16 +25,18 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { ComputeType, findMachineByName, Machine } from 'app/utils/machines';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
   appTypeToString,
+  isInteractiveUserApp,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CreateGkeAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
+import { OpenGkeAppButton } from './open-gke-app-button';
 
 const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
@@ -85,7 +88,7 @@ export const CreateGkeApp = ({
 
   const onDismiss = () => {
     onClose();
-    setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+    setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
   };
 
   const defaultConfig = switchCase(
@@ -171,12 +174,20 @@ export const CreateGkeApp = ({
           </LinkButton>
         )}
         <CreateAppText />
-        <CreateGkeAppButton
-          {...{ billingStatus, createAppRequest, onDismiss }}
-          existingApp={app}
-          workspaceNamespace={workspace.namespace}
-          username={profile.username}
-        />
+        {isInteractiveUserApp(app?.appType) &&
+        app?.status === AppStatus.RUNNING ? (
+          <OpenGkeAppButton
+            {...{ billingStatus, workspace, onClose }}
+            userApp={app}
+          />
+        ) : (
+          <CreateGkeAppButton
+            {...{ billingStatus, createAppRequest, onDismiss }}
+            existingApp={app}
+            workspaceNamespace={workspace.namespace}
+            username={profile.username}
+          />
+        )}
       </FlexRow>
     </FlexColumn>
   );

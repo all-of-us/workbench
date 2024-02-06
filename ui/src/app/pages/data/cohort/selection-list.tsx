@@ -23,7 +23,7 @@ import {
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import times from 'assets/icons/times-light.svg';
@@ -277,7 +277,7 @@ export const SelectionList = fp.flow(
         (attributesSelection) => {
           this.setState({ attributesSelection });
           if (!!attributesSelection) {
-            setSidebarActiveIconStore.next('criteria');
+            sidebarActiveIconStore.next('criteria');
           }
         }
       );
@@ -347,7 +347,7 @@ export const SelectionList = fp.flow(
 
     closeSidebar() {
       attributesSelectionStore.next(undefined);
-      setSidebarActiveIconStore.next(null);
+      sidebarActiveIconStore.next(null);
     }
 
     get showModifierButton() {

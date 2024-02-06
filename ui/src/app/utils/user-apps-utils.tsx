@@ -9,14 +9,13 @@ import {
 
 import {
   findApp,
-  helpSidebarConfigIdForUIApp,
+  openConfigPanelForUIApp,
   toUIAppType,
   UIAppType,
 } from 'app/components/apps-panel/utils';
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
@@ -135,6 +134,15 @@ const localizeUserApp = (
     appType,
   });
 
+// does this app have a UI that the user can interact with?
+export const isInteractiveUIApp = (appType: UIAppType) =>
+  (
+    [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS] as UIAppType[]
+  ).includes(appType);
+
+export const isInteractiveUserApp = (appType: AppType) =>
+  isInteractiveUIApp(toUIAppType[appType]);
+
 export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
@@ -170,6 +178,6 @@ export const openAppOrConfigPanel = (
   if (userApp?.status === AppStatus.RUNNING) {
     openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
   } else {
-    setSidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[requestedApp]);
+    openConfigPanelForUIApp(requestedApp);
   }
 };

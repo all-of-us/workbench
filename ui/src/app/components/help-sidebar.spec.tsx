@@ -31,7 +31,7 @@ import {
   currentCohortCriteriaStore,
   currentCohortReviewStore,
   currentWorkspaceStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {
   cdrVersionStore,
@@ -186,7 +186,7 @@ describe('HelpSidebar', () => {
   };
 
   const setActiveIcon = async (wrapper, activeIconKey) => {
-    setSidebarActiveIconStore.next(activeIconKey);
+    sidebarActiveIconStore.next(activeIconKey);
     await waitForFakeTimersAndUpdate(wrapper);
   };
 

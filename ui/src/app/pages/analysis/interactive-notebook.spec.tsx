@@ -28,7 +28,7 @@ import {
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import {
   currentWorkspaceStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams, userAppsStore } from 'app/utils/stores';
 
@@ -156,9 +156,9 @@ test.each([
     await user.click(editButton);
     expect(spyWindowOpen).toHaveBeenCalledTimes(0);
     if (appType === AppType.RSTUDIO) {
-      expect(setSidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
+      expect(sidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
     } else if (appType === AppType.SAS) {
-      expect(setSidebarActiveIconStore.value).toEqual(sasConfigIconId);
+      expect(sidebarActiveIconStore.value).toEqual(sasConfigIconId);
     } else {
       fail(`Unknown app type ${appType}`);
     }

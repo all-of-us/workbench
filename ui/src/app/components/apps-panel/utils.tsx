@@ -12,10 +12,13 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import {
+  cromwellConfigIconId,
   rstudioConfigIconId,
   sasConfigIconId,
+  SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
@@ -140,12 +143,17 @@ export const toUIAppType: Record<AppType, UIAppType> = {
 };
 
 export const helpSidebarConfigIdForUIApp: Record<
-  Exclude<UIAppType, UIAppType.CROMWELL | UIAppType.JUPYTER>,
-  string
+  Exclude<UIAppType, UIAppType.JUPYTER>,
+  SidebarIconId
 > = {
   [UIAppType.SAS]: sasConfigIconId,
   [UIAppType.RSTUDIO]: rstudioConfigIconId,
+  [UIAppType.CROMWELL]: cromwellConfigIconId,
 };
+
+export const openConfigPanelForUIApp = (appType: UIAppType) =>
+  sidebarActiveIconStore.next(helpSidebarConfigIdForUIApp[appType]);
+
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType
