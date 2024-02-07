@@ -14,7 +14,6 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -32,19 +31,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
-
-  LeonardoCreateRuntimeRequest getLeonardoCreateRuntimeRequest() {
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setAutopause(true);
-    request.setAutopauseThreshold(57);
-    request.setDefaultClientId("string");
-    request.setToolDockerImage("string");
-    return request;
-  }
-
-  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
     return builder
@@ -70,7 +56,6 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     return builder
@@ -96,7 +81,6 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
@@ -133,7 +117,6 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
     return builder
@@ -148,7 +131,6 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Disabled
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact updateRuntime(PactDslWithProvider builder) {
     return builder
@@ -198,6 +180,19 @@ class RuntimesApiTest {
         .status(404)
         .toPact();
   }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to delete that runtime")
+        .method("DELETE")
+        .path("/api/google/v1/runtimes/googleProject/runtimename?deleteDisk=true")
+        .willRespondWith()
+        .status(202)
+        .toPact();
+  }
+
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -320,6 +315,16 @@ class RuntimesApiTest {
     request.setAutopauseThreshold(200);
 
     leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "deleteRuntime")
+  void testDeleteRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.deleteRuntime("googleProject", "runtimename", true);
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
