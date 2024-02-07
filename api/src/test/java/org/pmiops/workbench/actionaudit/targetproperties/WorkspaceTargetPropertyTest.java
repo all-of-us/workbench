@@ -98,12 +98,12 @@ public class WorkspaceTargetPropertyTest {
         "I really like the cloud.",
         changesByPropertyName
             .get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName())
-            .getPreviousValue());
+            .previousValue());
     assertEquals(
         "I changed my mind",
         changesByPropertyName
             .get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName())
-            .getNewValue());
+            .newValue());
   }
 
   @Test
@@ -117,9 +117,9 @@ public class WorkspaceTargetPropertyTest {
         "1",
         changesByName
             .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
-            .getPreviousValue());
+            .previousValue());
     assertNull(
-        changesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).getNewValue());
+        changesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).newValue());
 
     Map<String, PreviousNewValuePair> reverseChangesByName =
         TargetPropertyExtractor.getChangedValuesByName(
@@ -128,12 +128,12 @@ public class WorkspaceTargetPropertyTest {
     assertNull(
         reverseChangesByName
             .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
-            .getPreviousValue());
+            .previousValue());
     assertEquals(
         "1",
         reverseChangesByName
             .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
-            .getNewValue());
+            .newValue());
   }
 
   @Test
