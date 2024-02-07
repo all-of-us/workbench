@@ -39,7 +39,7 @@ import {
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
-import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -93,8 +93,8 @@ interface TableData {
   menu: JSX.Element;
   resourceType: string;
   resourceName: string;
+  lastModifiedForSorting: number;
   formattedLastModified: string;
-  lastModifiedDateAsString: string;
   createdBy: string;
   cdrVersionName: string;
   resource: WorkspaceResource;
@@ -184,10 +184,8 @@ export const TanagraResourceList = fp.flow(
                   menu: <ResourceActionsMenu actions={actions(r)} />,
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
+                  lastModifiedForSorting: r.lastModifiedEpochMillis,
                   formattedLastModified: displayDateWithoutHours(
-                    r.lastModifiedEpochMillis
-                  ),
-                  lastModifiedDateAsString: displayDate(
                     r.lastModifiedEpochMillis
                   ),
                   cdrVersionName: getCdrVersionName(r),
@@ -301,7 +299,7 @@ export const TanagraResourceList = fp.flow(
               field='formattedLastModified'
               header='Last Modified Date'
               style={styles.modifiedDateColumn}
-              sortField={'lastModifiedDateAsString'}
+              sortField='lastModifiedForSorting'
               sortable
             />
             {props.recentResourceSource && (
