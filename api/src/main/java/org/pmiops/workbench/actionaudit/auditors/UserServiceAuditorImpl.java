@@ -132,10 +132,10 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetIdMaybe(targetUserId);
 
     if (previousDollarQuota != null) {
-      builder.setPreviousValueMaybe(previousDollarQuota.toString());
+      builder.previousValueMaybe(previousDollarQuota.toString());
     }
     if (newDollarQuota != null) {
-      builder.setNewValueMaybe(newDollarQuota.toString());
+      builder.newValueMaybe(newDollarQuota.toString());
     }
 
     actionAuditService.send(builder.build());

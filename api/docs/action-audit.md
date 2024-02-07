@@ -37,7 +37,7 @@ agent type. These are listed in the [AgentType](../src/main/java/org/pmiops/work
 ### Target Properties
 In the schema we have a place for optional key-value string pairs describing
 the target being operated on. In order to pull these from application objects, there's a Model-backed
-Target Propoerty [interface](../src/main/java/org/pmiops/workbench/actionaudit/targetproperties/ModelBackedTargetProperty.kt).
+Target Property [interface](../src/main/java/org/pmiops/workbench/actionaudit/targetproperties/ModelBackedTargetProperty.kt).
 This interface describes a contract that an enum type can implement in order to provide all available values,
 as well as a map from old to new values for actions that wish to capture those events.
 
