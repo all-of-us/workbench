@@ -93,8 +93,8 @@ interface TableData {
   menu: JSX.Element;
   resourceType: string;
   resourceName: string;
+  lastModifiedForSorting: number;
   formattedLastModified: string;
-  lastModifiedDateAsString: string;
   createdBy: string;
   cdrVersionName: string;
   resource: WorkspaceResource;
@@ -184,10 +184,8 @@ export const TanagraResourceList = fp.flow(
                   menu: <ResourceActionsMenu actions={actions(r)} />,
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
+                  lastModifiedForSorting: r.lastModifiedEpochMillis,
                   formattedLastModified: displayDateWithoutHours(
-                    r.lastModifiedEpochMillis
-                  ),
-                  lastModifiedDateAsString: displayDate(
                     r.lastModifiedEpochMillis
                   ),
                   cdrVersionName: getCdrVersionName(r),
@@ -301,7 +299,7 @@ export const TanagraResourceList = fp.flow(
               field='formattedLastModified'
               header='Last Modified Date'
               style={styles.modifiedDateColumn}
-              sortField={'lastModifiedDateAsString'}
+              sortField='lastModifiedForSorting'
               sortable
             />
             {props.recentResourceSource && (
