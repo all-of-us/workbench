@@ -241,11 +241,11 @@ export const AppFilesList = withCurrentWorkspace()(
                   style={styles.columns}
                   headerStyle={styles.tableHeader}
                   header='Name'
-                  field={'name'}
+                  field='name'
                   body={displayName}
                   bodyStyle={styles.rows}
                   filter
-                  filterPlaceholder={'Search Name'}
+                  filterPlaceholder='Search Name'
                   filterHeaderStyle={{ paddingTop: '0rem' }}
                   sortable
                 />
@@ -255,6 +255,7 @@ export const AppFilesList = withCurrentWorkspace()(
                   bodyStyle={styles.rows}
                   header='Last Modified Time'
                   body={displayLastModifiedTime}
+                  sortField='lastModifiedTime'
                 />
                 <Column
                   headerStyle={styles.tableHeader}
