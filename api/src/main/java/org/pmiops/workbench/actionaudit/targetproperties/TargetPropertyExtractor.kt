@@ -2,7 +2,6 @@ package org.pmiops.workbench.actionaudit.targetproperties
 
 import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Workspace
-import kotlin.reflect.KClass
 
 class TargetPropertyExtractor {
     companion object {
@@ -36,17 +35,16 @@ class TargetPropertyExtractor {
         }
 
         @JvmStatic
-        fun getTargetPropertyEnum(targetClass: KClass<out Any>): KClass<out Any> {
-            val map: Map<KClass<out Any>, KClass<out Any>> =
-                getTargetPropertyEnumByTargetClass()
+        fun getTargetPropertyEnum(targetClass: Class<out Any>): Class<out Any> {
+            val map = getTargetPropertyEnumByTargetClass()
             return map[targetClass] ?: error("Source class $targetClass not found")
         }
 
         @JvmStatic
-        fun getTargetPropertyEnumByTargetClass(): Map<KClass<out Any>, KClass<out Any>> {
+        fun getTargetPropertyEnumByTargetClass(): Map<Class<out Any>, Class<out Any>> {
             return mapOf(
-                Workspace::class to WorkspaceTargetProperty::class,
-                Profile::class to ProfileTargetProperty::class,
+                Workspace::class.java to WorkspaceTargetProperty::class.java,
+                Profile::class.java to ProfileTargetProperty::class.java,
             )
         }
     }

@@ -49,11 +49,11 @@ class TargetPropertyExtractorTest {
     @Test fun testGetTargetPropertyEnumByTargetClass() {
         val result = TargetPropertyExtractor.getTargetPropertyEnumByTargetClass()
         assertThat(result).hasSize(2)
-        assertThat(result[Workspace::class]!!.java).isEqualTo(WorkspaceTargetProperty::class.java)
+        assertThat(result[Workspace::class.java]!!).isEqualTo(WorkspaceTargetProperty::class.java)
     }
 
     @Test fun testGetPropertyEnum() {
-        val result = TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class).java
+        val result = TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class.java)
         assertThat(result).isEqualTo(WorkspaceTargetProperty::class.java)
     }
 }
