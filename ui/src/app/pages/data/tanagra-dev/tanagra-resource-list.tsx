@@ -39,7 +39,7 @@ import {
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
-import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
+import { displayDateWithoutHours } from 'app/utils/dates';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
