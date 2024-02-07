@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.Workspace
-import kotlin.reflect.KClass
 
 class TargetPropertyExtractorTest {
     private var workspace: Workspace? = null
@@ -48,15 +47,13 @@ class TargetPropertyExtractorTest {
     }
 
     @Test fun testGetTargetPropertyEnumByTargetClass() {
-        val result: Map<KClass<out Any>, KClass<out Any>> =
-            TargetPropertyExtractor.getTargetPropertyEnumByTargetClass()
+        val result = TargetPropertyExtractor.getTargetPropertyEnumByTargetClass()
         assertThat(result).hasSize(2)
-        assertThat(result[Workspace::class]).isEqualTo(WorkspaceTargetProperty::class)
+        assertThat(result[Workspace::class]!!.java).isEqualTo(WorkspaceTargetProperty::class.java)
     }
 
     @Test fun testGetPropertyEnum() {
-        val result: KClass<out Any> =
-            TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class)
-        assertThat(result).isEqualTo(WorkspaceTargetProperty::class)
+        val result = TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class).java
+        assertThat(result).isEqualTo(WorkspaceTargetProperty::class.java)
     }
 }
