@@ -195,7 +195,7 @@ class RuntimesApiTest {
                     })
                 .build())
         .willRespondWith()
-        .status(409)
+        .status(404)
         .toPact();
   }
 
