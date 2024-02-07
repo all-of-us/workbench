@@ -194,6 +194,18 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to delete that runtime")
+        .method("DELETE")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .query("deleteDisk=true")
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -321,6 +333,16 @@ class RuntimesApiTest {
   @Test
   @PactTestFor(pactMethod = "deleteRuntime")
   void testDeleteRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.deleteRuntime("googleProject", "runtimename", true);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "deleteMissingRuntime")
+  void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
