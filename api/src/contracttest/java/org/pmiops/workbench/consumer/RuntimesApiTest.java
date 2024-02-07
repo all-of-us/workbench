@@ -166,7 +166,6 @@ class RuntimesApiTest {
                 .build())
         .willRespondWith()
         .status(202)
-        .headers(contentTypeJsonHeader)
         .toPact();
   }
 
