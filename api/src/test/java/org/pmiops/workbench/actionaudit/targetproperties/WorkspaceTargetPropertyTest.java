@@ -92,7 +92,7 @@ public class WorkspaceTargetPropertyTest {
         TargetPropertyExtractor.getChangedValuesByName(
             WorkspaceTargetProperty.values(), workspace1, workspace2);
 
-    assertTrue(changesByPropertyName.size() > 0);
+    assertTrue(!changesByPropertyName.isEmpty());
 
     assertEquals(
         "I really like the cloud.",
