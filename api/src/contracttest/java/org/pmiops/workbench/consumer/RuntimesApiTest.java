@@ -187,7 +187,8 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to delete that runtime")
         .method("DELETE")
-        .path("/api/google/v1/runtimes/googleProject/runtimename?deleteDisk=true")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .query("deleteDisk=true")
         .willRespondWith()
         .status(202)
         .toPact();
