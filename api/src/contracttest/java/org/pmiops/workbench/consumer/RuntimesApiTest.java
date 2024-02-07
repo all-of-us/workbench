@@ -347,7 +347,9 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi leoRuntimeService = new RuntimesApi(client);
 
-    leoRuntimeService.deleteRuntime("googleProject", "runtimename", true);
+    assertThrows(
+        Exception.class,
+        () -> leoRuntimeService.deleteRuntime("googleProject", "runtimename", true));
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
