@@ -308,19 +308,19 @@ class RuntimesApiTest {
         () -> leoRuntimeService.updateRuntime("googleProject", "runtimename", request));
   }
 
-      @Test
-      @PactTestFor(pactMethod = "updateRuntime")
-      void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-        ApiClient client = new ApiClient();
-        client.setBasePath(mockServer.getUrl());
-        RuntimesApi leoRuntimeService = new RuntimesApi(client);
-        LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
-        request.setAllowStop(true);
-        request.setAutopause(true);
-        request.setAutopauseThreshold(200);
+  @Test
+  @PactTestFor(pactMethod = "updateRuntime")
+  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+    request.setAllowStop(true);
+    request.setAutopause(true);
+    request.setAutopauseThreshold(200);
 
-        leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
-      }
+    leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+  }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
