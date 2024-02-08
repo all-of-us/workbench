@@ -10,11 +10,10 @@ import org.pmiops.workbench.model.Workspace;
 
 class TargetPropertyExtractorTest {
   private Workspace workspace;
-  private ResearchPurpose researchPurpose1;
 
   @BeforeEach
   void setUp() {
-    researchPurpose1 =
+    var researchPurpose1 =
         new ResearchPurpose()
             .intendedStudy("stubbed toes")
             .additionalNotes("I really like the cloud.");
