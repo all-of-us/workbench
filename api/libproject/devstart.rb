@@ -1460,6 +1460,10 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_dir and opts.impersonated_usernames)}
   op.parse.validate
 
+  unless File.exist?(op.opts.output_token_dir)
+    raise ArgumentError.new("The token output directory #{op.opts.output_token_dir} does not exist")
+  end
+
   usernames = op.opts.impersonated_usernames.split(',').uniq
   token_filenames = usernames.map{ |u| "#{op.opts.output_token_dir}/#{u}.json" }
   if can_skip_token_generation(token_filenames)
