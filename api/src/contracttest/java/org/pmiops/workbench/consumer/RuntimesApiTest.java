@@ -207,6 +207,18 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to stop that runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .willRespondWith()
+        .status(202)
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
   void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
@@ -350,6 +362,16 @@ class RuntimesApiTest {
     assertThrows(
         Exception.class,
         () -> leoRuntimeService.deleteRuntime("googleProject", "runtimename", true));
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "stopRuntime")
+  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    leoRuntimeService.stopRuntime("googleProject", "runtimename");
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
