@@ -219,6 +219,18 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to stop that runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
   void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
@@ -375,7 +387,7 @@ class RuntimesApiTest {
   }
 
   @Test
-  @PactTestFor(pactMethod = "deleteMissingRuntime")
+  @PactTestFor(pactMethod = "stopMissingRuntime")
   void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
