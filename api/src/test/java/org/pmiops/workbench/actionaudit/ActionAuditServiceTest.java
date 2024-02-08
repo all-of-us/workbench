@@ -120,30 +120,32 @@ public class ActionAuditServiceTest {
   private static final String ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf";
 
   private static final ActionAuditEvent EVENT_1 =
-      new ActionAuditEvent(
-          System.currentTimeMillis(),
-          AgentType.USER,
-          AGENT_ID_1,
-          "a@b.co",
-          ACTION_ID,
-          ActionType.EDIT,
-          TargetType.DATASET,
-          "foot",
-          1L,
-          "bare",
-          "shod");
+      new ActionAuditEvent.Builder()
+          .agentEmailMaybe("a@b.co")
+          .targetType(TargetType.DATASET)
+          .targetIdMaybe(1L)
+          .agentType(AgentType.USER)
+          .agentIdMaybe(AGENT_ID_1)
+          .actionId(ACTION_ID)
+          .actionType(ActionType.EDIT)
+          .targetPropertyMaybe("foot")
+          .previousValueMaybe("bare")
+          .newValueMaybe("shod")
+          .timestamp(System.currentTimeMillis())
+          .build();
 
   private static final ActionAuditEvent EVENT_2 =
-      new ActionAuditEvent(
-          System.currentTimeMillis(),
-          AgentType.USER,
-          AGENT_ID_2,
-          "f@b.co",
-          ACTION_ID,
-          ActionType.EDIT,
-          TargetType.DATASET,
-          "height",
-          2L,
-          "yay high",
-          "about that tall");
+      new ActionAuditEvent.Builder()
+          .agentEmailMaybe("f@b.co")
+          .targetType(TargetType.DATASET)
+          .targetIdMaybe(2L)
+          .agentType(AgentType.USER)
+          .agentIdMaybe(AGENT_ID_2)
+          .actionId(ACTION_ID)
+          .actionType(ActionType.EDIT)
+          .targetPropertyMaybe("height")
+          .previousValueMaybe("yay high")
+          .newValueMaybe("about that tall")
+          .timestamp(System.currentTimeMillis())
+          .build();
 }
