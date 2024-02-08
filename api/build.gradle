@@ -893,11 +893,6 @@ compileKotlin {
         jvmTarget = 17
     }
 }
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = 17
-    }
-}
 
 dependencies {
     testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
