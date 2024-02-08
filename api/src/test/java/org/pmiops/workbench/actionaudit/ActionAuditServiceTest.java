@@ -11,7 +11,10 @@ import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Payload.Type;
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,9 +62,7 @@ public class ActionAuditServiceTest {
     ArgumentCaptor<List<LogEntry>> captor = ArgumentCaptor.forClass(List.class);
     verify(mockLogging).write(captor.capture());
     List<LogEntry> entryList = captor.getValue();
-
     assertThat(entryList.size()).isEqualTo(1);
-
     JsonPayload jsonPayload = entryList.get(0).getPayload();
 
     assertThat(jsonPayload.getType()).isEqualTo(Type.JSON);
@@ -78,14 +79,34 @@ public class ActionAuditServiceTest {
   public void testSendsExpectedColumnNames() {
     stubWorkbenchConfig();
     actionAuditService.send(EVENT_1);
-    verify(mockLogging).write(any());
+    ArgumentCaptor<List<LogEntry>> captor = ArgumentCaptor.forClass(List.class);
+    verify(mockLogging).write(captor.capture());
+    List<LogEntry> entryList = captor.getValue();
+    assertThat(entryList.size()).isEqualTo(1);
+    JsonPayload jsonPayload = entryList.get(0).getPayload();
+
+    Set<String> auditColumns =
+        Arrays.stream(AuditColumn.values()).map(AuditColumn::toString).collect(Collectors.toSet());
+    jsonPayload.getDataAsMap().keySet().forEach(key -> assertThat(auditColumns.contains(key)));
   }
 
   @Test
   public void testSendsMultipleEventsAsSingleAction() {
     stubWorkbenchConfig();
     actionAuditService.send(ImmutableList.of(EVENT_1, EVENT_2));
-    verify(mockLogging).write(any());
+    ArgumentCaptor<List<LogEntry>> captor = ArgumentCaptor.forClass(List.class);
+    verify(mockLogging).write(captor.capture());
+    List<LogEntry> entryList = captor.getValue();
+    assertThat(entryList.size()).isEqualTo(2);
+
+    assertThat(
+            entryList.stream()
+                .map(LogEntry::getPayload)
+                .map(payload -> ((JsonPayload) payload).getDataAsMap())
+                .map(m -> m.get(AuditColumn.ACTION_ID.name()))
+                .distinct()
+                .count())
+        .isEqualTo(1);
   }
 
   @Test
