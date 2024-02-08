@@ -213,7 +213,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to stop that runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
         .willRespondWith()
         .status(202)
         .toPact();
