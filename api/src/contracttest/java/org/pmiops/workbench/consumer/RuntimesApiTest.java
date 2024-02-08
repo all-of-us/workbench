@@ -236,7 +236,7 @@ class RuntimesApiTest {
   void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
     request.setJupyterUserScriptUri("http://string.com");
@@ -247,7 +247,7 @@ class RuntimesApiTest {
 
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    leoRuntimeService.createRuntime("googleProject", "runtimename", request);
+    api.createRuntime("googleProject", "runtimename", request);
   }
 
   @Test
@@ -255,7 +255,7 @@ class RuntimesApiTest {
   void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
     request.setJupyterUserScriptUri("http://string.com");
@@ -268,7 +268,7 @@ class RuntimesApiTest {
 
     assertThrows(
         Exception.class,
-        () -> leoRuntimeService.createRuntime("googleProject", "runtimename", request));
+        () -> api.createRuntime("googleProject", "runtimename", request));
   }
 
   @Test
@@ -276,7 +276,7 @@ class RuntimesApiTest {
   void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
     expected.setAutopauseThreshold(57);
@@ -298,7 +298,7 @@ class RuntimesApiTest {
     expected.setProxyUrl("http://www.proxy.com");
 
     LeonardoGetRuntimeResponse response =
-        leoRuntimeService.getRuntime("googleProject", "runtimename");
+        api.getRuntime("googleProject", "runtimename");
 
     assertEquals(expected, response);
   }
@@ -308,11 +308,11 @@ class RuntimesApiTest {
   void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     ApiException exception =
         assertThrows(
-            ApiException.class, () -> leoRuntimeService.getRuntime("googleProject", "runtimename"));
+            ApiException.class, () -> api.getRuntime("googleProject", "runtimename"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -322,7 +322,7 @@ class RuntimesApiTest {
   void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
     LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
     request.setAllowStop(true);
     request.setAutopause(true);
@@ -337,7 +337,7 @@ class RuntimesApiTest {
 
     assertThrows(
         Exception.class,
-        () -> leoRuntimeService.updateRuntime("googleProject", "runtimename", request));
+        () -> api.updateRuntime("googleProject", "runtimename", request));
   }
 
   @Test
@@ -345,13 +345,13 @@ class RuntimesApiTest {
   void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
     LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
     request.setAllowStop(true);
     request.setAutopause(true);
     request.setAutopauseThreshold(200);
 
-    leoRuntimeService.updateRuntime("googleProject", "runtimename", request);
+    api.updateRuntime("googleProject", "runtimename", request);
   }
 
   @Test
@@ -359,9 +359,9 @@ class RuntimesApiTest {
   void testDeleteRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
-    leoRuntimeService.deleteRuntime("googleProject", "runtimename", true);
+    api.deleteRuntime("googleProject", "runtimename", true);
   }
 
   @Test
@@ -369,11 +369,11 @@ class RuntimesApiTest {
   void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     assertThrows(
         Exception.class,
-        () -> leoRuntimeService.deleteRuntime("googleProject", "runtimename", true));
+        () -> api.deleteRuntime("googleProject", "runtimename", true));
   }
 
   @Test
@@ -381,9 +381,9 @@ class RuntimesApiTest {
   void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
-    leoRuntimeService.stopRuntime("googleProject", "runtimename");
+    api.stopRuntime("googleProject", "runtimename");
   }
 
   @Test
@@ -391,10 +391,10 @@ class RuntimesApiTest {
   void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
-    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+    RuntimesApi api = new RuntimesApi(client);
 
     assertThrows(
-        Exception.class, () -> leoRuntimeService.stopRuntime("googleProject", "runtimename"));
+        Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
