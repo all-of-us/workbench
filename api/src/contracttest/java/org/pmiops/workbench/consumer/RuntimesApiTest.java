@@ -222,7 +222,7 @@ class RuntimesApiTest {
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
     return builder
-        .given("there is a runtime in a Google project")
+        .given("there is not a runtime in a Google project")
         .uponReceiving("a request to stop that runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
