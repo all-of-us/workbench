@@ -44,17 +44,4 @@ class TargetPropertyExtractorTest {
         .isEqualTo("DbWorkspace 1");
     assertThat(propertyValuesByName).hasSize(19);
   }
-
-  @Test
-  void testGetTargetPropertyEnumByTargetClass() {
-    var result = TargetPropertyExtractor.getTargetPropertyEnumByTargetClass();
-    assertThat(result).hasSize(2);
-    assertThat(result.get(Workspace.class)).isEqualTo(WorkspaceTargetProperty.class);
-  }
-
-  @Test
-  void testGetPropertyEnum() {
-    var result = TargetPropertyExtractor.getTargetPropertyEnum(Workspace.class);
-    assertThat(result).isEqualTo(WorkspaceTargetProperty.class);
-  }
 }

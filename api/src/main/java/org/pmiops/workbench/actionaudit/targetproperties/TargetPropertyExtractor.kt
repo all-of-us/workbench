@@ -1,9 +1,5 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
-import com.google.common.annotations.VisibleForTesting
-import org.pmiops.workbench.model.Profile
-import org.pmiops.workbench.model.Workspace
-
 class TargetPropertyExtractor {
     companion object {
         @JvmStatic
@@ -33,22 +29,6 @@ class TargetPropertyExtractor {
                 }
                 .filter { it.second.valueChanged }
                 .toMap()
-        }
-
-        @VisibleForTesting
-        @JvmStatic
-        fun getTargetPropertyEnum(targetClass: Class<out Any>): Class<out Any> {
-            val map = getTargetPropertyEnumByTargetClass()
-            return map[targetClass] ?: error("Source class $targetClass not found")
-        }
-
-        @VisibleForTesting
-        @JvmStatic
-        fun getTargetPropertyEnumByTargetClass(): Map<Class<out Any>, Class<out Any>> {
-            return mapOf(
-                Workspace::class.java to WorkspaceTargetProperty::class.java,
-                Profile::class.java to ProfileTargetProperty::class.java,
-            )
         }
     }
 }
