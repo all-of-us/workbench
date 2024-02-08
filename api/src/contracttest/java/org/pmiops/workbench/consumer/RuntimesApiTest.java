@@ -85,7 +85,7 @@ class RuntimesApiTest {
   RequestResponsePact getRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
-        .uponReceiving("a request to get that runtime")
+        .uponReceiving("a request to get a runtime")
         .method("GET")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
@@ -121,7 +121,7 @@ class RuntimesApiTest {
   RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to get that runtime")
+        .uponReceiving("a request to get a runtime")
         .method("GET")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .willRespondWith()
@@ -135,7 +135,7 @@ class RuntimesApiTest {
   RequestResponsePact updateRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
-        .uponReceiving("a request to update that runtime")
+        .uponReceiving("a request to update a runtime")
         .method("PATCH")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .body(
@@ -155,7 +155,7 @@ class RuntimesApiTest {
   RequestResponsePact updateMissingRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to update that runtime")
+        .uponReceiving("a request to update a runtime")
         .method("PATCH")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .body(
@@ -185,7 +185,7 @@ class RuntimesApiTest {
   RequestResponsePact deleteRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
-        .uponReceiving("a request to delete that runtime")
+        .uponReceiving("a request to delete a runtime")
         .method("DELETE")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .query("deleteDisk=true")
@@ -198,7 +198,7 @@ class RuntimesApiTest {
   RequestResponsePact deleteMissingRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to delete that runtime")
+        .uponReceiving("a request to delete a runtime")
         .method("DELETE")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
         .query("deleteDisk=true")
@@ -211,7 +211,7 @@ class RuntimesApiTest {
   RequestResponsePact stopRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is a runtime in a Google project")
-        .uponReceiving("a request to stop that runtime")
+        .uponReceiving("a request to stop a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
         .willRespondWith()
@@ -223,7 +223,7 @@ class RuntimesApiTest {
   RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
     return builder
         .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to stop that runtime")
+        .uponReceiving("a request to stop a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
         .willRespondWith()
