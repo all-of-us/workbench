@@ -374,5 +374,16 @@ class RuntimesApiTest {
     leoRuntimeService.stopRuntime("googleProject", "runtimename");
   }
 
+  @Test
+  @PactTestFor(pactMethod = "deleteMissingRuntime")
+  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi leoRuntimeService = new RuntimesApi(client);
+
+    assertThrows(
+        Exception.class, () -> leoRuntimeService.stopRuntime("googleProject", "runtimename"));
+  }
+
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
