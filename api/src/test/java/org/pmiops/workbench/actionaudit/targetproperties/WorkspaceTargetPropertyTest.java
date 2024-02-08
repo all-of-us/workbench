@@ -1,9 +1,12 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,11 +91,23 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testMapsChanges() {
+    var workspace1Properties =
+        TargetPropertyExtractor.getPropertyValuesByName(
+            WorkspaceTargetProperty.values(), workspace1);
+    var workspace2Properties =
+        TargetPropertyExtractor.getPropertyValuesByName(
+            WorkspaceTargetProperty.values(), workspace2);
+
     Map<String, PreviousNewValuePair> changesByPropertyName =
         TargetPropertyExtractor.getChangedValuesByName(
             WorkspaceTargetProperty.values(), workspace1, workspace2);
 
-    assertTrue(!changesByPropertyName.isEmpty());
+    assertFalse(changesByPropertyName.isEmpty());
+
+    var allKeys = Sets.union(workspace1Properties.keySet(), workspace2Properties.keySet());
+    var matchingEntries =
+        Sets.intersection(workspace1Properties.entrySet(), workspace2Properties.entrySet());
+    assertThat(changesByPropertyName).hasSize(allKeys.size() - matchingEntries.size());
 
     assertEquals(
         "I really like the cloud.",
