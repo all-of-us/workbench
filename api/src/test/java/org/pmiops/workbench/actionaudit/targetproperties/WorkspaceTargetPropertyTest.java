@@ -24,12 +24,12 @@ public class WorkspaceTargetPropertyTest {
   public void setUp() {
     ResearchPurpose researchPurposeAllFieldsPopulated =
         new ResearchPurpose()
-            .intendedStudy("stubbed toes")
-            .additionalNotes("I really like the cloud.")
             .diseaseOfFocus("Chicken Pox")
             .otherPopulationDetails("cool people")
             .populationDetails(List.of(SpecificPopulationEnum.ACCESS_TO_CARE))
             .reasonForAllOfUs("a triple dog dare")
+            .intendedStudy("stubbed toes")
+            .additionalNotes("I really like the cloud.")
             .timeRequested(101L)
             .timeReviewed(111L)
             .anticipatedFindings("cool stuff")
