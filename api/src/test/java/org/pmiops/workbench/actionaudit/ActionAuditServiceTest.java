@@ -119,7 +119,8 @@ public class ActionAuditServiceTest {
   private static final long AGENT_ID_2 = 102L;
   private static final String ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf";
 
-  private static final ActionAuditEvent EVENT_1 = ActionAuditEvent.builder()
+  private static final ActionAuditEvent EVENT_1 =
+      ActionAuditEvent.builder()
           .agentEmailMaybe("a@b.co")
           .targetType(TargetType.DATASET)
           .targetIdMaybe(1L)
@@ -133,7 +134,8 @@ public class ActionAuditServiceTest {
           .timestamp(System.currentTimeMillis())
           .build();
 
-  private static final ActionAuditEvent EVENT_2 = ActionAuditEvent.builder()
+  private static final ActionAuditEvent EVENT_2 =
+      ActionAuditEvent.builder()
           .agentEmailMaybe("f@b.co")
           .targetType(TargetType.DATASET)
           .targetIdMaybe(2L)
