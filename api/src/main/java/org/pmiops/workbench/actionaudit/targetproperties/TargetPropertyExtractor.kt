@@ -24,7 +24,7 @@ class TargetPropertyExtractor {
                     it.propertyName to
                         PreviousNewValuePair(it.extractor.invoke(previousTarget), it.extractor.invoke(newTarget))
                 }
-                .filter { it.second.isValueChanged() }
+                .filter { it.second.hasValueChanged() }
                 .toMap()
         }
     }
