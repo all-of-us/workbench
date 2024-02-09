@@ -73,13 +73,3 @@ enum class EgressEscalationTargetProperty
         ),
         SUSPEND_COMPUTE_DURATION_MIN("suspend_duration", { it.suspendCompute?.durationMinutes?.toString() }),
     }
-
-/**
- * A simple comment property relating to a high-egress event received by the Workbench.
- * This property is used to convey non-structured information about the inbound event, e.g.
- * when the event JSON failed to parse or when an associated workspace could not be found.
- */
-enum class EgressEventCommentTargetProperty
-    constructor(override val propertyName: String) : SimpleTargetProperty {
-        COMMENT("comment"),
-    }

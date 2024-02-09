@@ -22,12 +22,9 @@ class TargetPropertyExtractor {
             return enumValues
                 .map {
                     it.propertyName to
-                        PreviousNewValuePair(
-                            previousValue = it.extractor.invoke(previousTarget),
-                            newValue = it.extractor.invoke(newTarget),
-                        )
+                        PreviousNewValuePair(it.extractor.invoke(previousTarget), it.extractor.invoke(newTarget))
                 }
-                .filter { it.second.valueChanged }
+                .filter { it.second.isValueChanged() }
                 .toMap()
         }
     }
