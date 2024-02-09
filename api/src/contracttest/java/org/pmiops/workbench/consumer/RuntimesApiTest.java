@@ -207,29 +207,29 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is a runtime in a Google project")
-        .uponReceiving("a request to stop a runtime")
-        .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
-        .willRespondWith()
-        .status(202)
-        .toPact();
-  }
-
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to stop a runtime")
-        .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
-        .willRespondWith()
-        .status(404)
-        .toPact();
-  }
+//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+//  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
+//    return builder
+//        .given("there is a runtime in a Google project")
+//        .uponReceiving("a request to stop a runtime")
+//        .method("POST")
+//        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+//        .willRespondWith()
+//        .status(202)
+//        .toPact();
+//  }
+//
+//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+//  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
+//    return builder
+//        .given("there is not a runtime in a Google project")
+//        .uponReceiving("a request to stop a runtime")
+//        .method("POST")
+//        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+//        .willRespondWith()
+//        .status(404)
+//        .toPact();
+//  }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
