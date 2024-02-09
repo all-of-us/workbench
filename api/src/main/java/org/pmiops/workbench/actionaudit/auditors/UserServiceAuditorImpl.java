@@ -1,5 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
+import static org.pmiops.workbench.audit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -37,7 +39,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       ActionAuditService actionAuditService,
       Clock clock,
       Provider<DbUser> dbUserProvider,
-      @Qualifier("ACTION_ID") Provider<String> actionIdProvider) {
+      @Qualifier(ACTION_ID_BEAN) Provider<String> actionIdProvider) {
     this.actionAuditService = actionAuditService;
     this.clock = clock;
     this.dbUserProvider = dbUserProvider;

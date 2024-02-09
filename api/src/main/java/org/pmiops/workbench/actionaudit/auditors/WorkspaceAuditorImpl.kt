@@ -8,6 +8,7 @@ import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
 import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration.Companion.ACTION_ID_BEAN
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
@@ -26,7 +27,7 @@ class WorkspaceAuditorImpl
         private val userProvider: Provider<DbUser>,
         private val actionAuditService: ActionAuditService,
         private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>,
+        @Qualifier(ACTION_ID_BEAN) private val actionIdProvider: Provider<String>,
     ) : WorkspaceAuditor {
         override fun fireCreateAction(
             createdWorkspace: Workspace,
