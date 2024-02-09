@@ -219,17 +219,17 @@ class RuntimesApiTest {
         .toPact();
   }
 //
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is not a runtime in a Google project")
-//        .uponReceiving("a request to stop a runtime")
-//        .method("POST")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
-//        .willRespondWith()
-//        .status(404)
-//        .toPact();
-//  }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to stop a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
@@ -386,16 +386,16 @@ class RuntimesApiTest {
     api.stopRuntime("googleProject", "runtimename");
   }
 
-//  @Test
-//  @PactTestFor(pactMethod = "stopMissingRuntime")
-//  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi api = new RuntimesApi(client);
-//
-//    assertThrows(
-//        Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
-//  }
+  @Test
+  @PactTestFor(pactMethod = "stopMissingRuntime")
+  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    assertThrows(
+        Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
+  }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
