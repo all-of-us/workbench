@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -102,7 +104,7 @@ public class WorkspaceAuditorTest {
             .otherPurpose(true)
             .otherPurposeDetails("deriving lottery numbers")
             .ethics(false)
-            .populationDetails(Collections.emptyList())
+            .populationDetails(List.of(SpecificPopulationEnum.AGE_CHILDREN))
             .populationHealth(true)
             .reasonForAllOfUs("the biggest data")
             .reviewRequested(false)
