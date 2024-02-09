@@ -53,9 +53,9 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
     actionAuditService.send(
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
-            .agentType(agent.getAgentType())
-            .agentIdMaybe(agent.getIdMaybe())
-            .agentEmailMaybe(agent.getEmailMaybe())
+            .agentType(agent.agentType())
+            .agentIdMaybe(agent.idMaybe())
+            .agentEmailMaybe(agent.emailMaybe())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)
             .targetType(TargetType.ACCOUNT)

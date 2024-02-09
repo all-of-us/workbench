@@ -217,12 +217,7 @@ class WorkspaceAuditorImpl
                 logger.info("No user available for this action.")
                 null
             } else {
-                CommonAuditEventInfo(
-                    actionId = actionIdProvider.get(),
-                    userId = dbUser.userId,
-                    userEmail = dbUser.username,
-                    timestamp = clock.millis(),
-                )
+                CommonAuditEventInfo(actionIdProvider.get(), dbUser.userId, dbUser.username, clock.millis())
             }
         }
 
