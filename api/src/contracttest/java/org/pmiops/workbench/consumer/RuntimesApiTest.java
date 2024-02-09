@@ -207,17 +207,17 @@ class RuntimesApiTest {
         .toPact();
   }
 
-//  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-//  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
-//    return builder
-//        .given("there is a runtime in a Google project")
-//        .uponReceiving("a request to stop a runtime")
-//        .method("POST")
-//        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
-//        .willRespondWith()
-//        .status(202)
-//        .toPact();
-//  }
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to stop a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+        .willRespondWith()
+        .status(202)
+        .toPact();
+  }
 //
 //  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
 //  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
@@ -376,15 +376,15 @@ class RuntimesApiTest {
         () -> api.deleteRuntime("googleProject", "runtimename", true));
   }
 
-//  @Test
-//  @PactTestFor(pactMethod = "stopRuntime")
-//  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-//    ApiClient client = new ApiClient();
-//    client.setBasePath(mockServer.getUrl());
-//    RuntimesApi api = new RuntimesApi(client);
-//
-//    api.stopRuntime("googleProject", "runtimename");
-//  }
+  @Test
+  @PactTestFor(pactMethod = "stopRuntime")
+  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    api.stopRuntime("googleProject", "runtimename");
+  }
 
 //  @Test
 //  @PactTestFor(pactMethod = "stopMissingRuntime")
