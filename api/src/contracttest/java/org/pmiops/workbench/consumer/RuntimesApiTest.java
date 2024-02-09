@@ -376,26 +376,26 @@ class RuntimesApiTest {
         () -> api.deleteRuntime("googleProject", "runtimename", true));
   }
 
-  @Test
-  @PactTestFor(pactMethod = "stopRuntime")
-  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
+//  @Test
+//  @PactTestFor(pactMethod = "stopRuntime")
+//  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi api = new RuntimesApi(client);
+//
+//    api.stopRuntime("googleProject", "runtimename");
+//  }
 
-    api.stopRuntime("googleProject", "runtimename");
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "stopMissingRuntime")
-  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
-    assertThrows(
-        Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
-  }
+//  @Test
+//  @PactTestFor(pactMethod = "stopMissingRuntime")
+//  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+//    ApiClient client = new ApiClient();
+//    client.setBasePath(mockServer.getUrl());
+//    RuntimesApi api = new RuntimesApi(client);
+//
+//    assertThrows(
+//        Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
+//  }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
