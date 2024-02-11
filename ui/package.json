@@ -51,7 +51,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
     "nouislider": "^14.1.1",
-    "nouislider-react": "^3.3.7",
+    "nouislider-react": "^3.4.2",
     "oidc-client-ts": "^2.3.0",
     "outdated-browser-rework": "^2.8.0",
     "portable-fetch": "^3.0.0",
