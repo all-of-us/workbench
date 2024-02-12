@@ -151,7 +151,7 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Your new All of Us Researcher Workbench Account",
-        "Welcome for " + userForLogging(user),
+        String.format("Welcome for %s", userForLogging(user)),
         htmlMessage);
   }
 
@@ -172,7 +172,8 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(contactEmail),
         Collections.emptyList(),
         "Instructions from your institution on using the Researcher Workbench",
-        "Institution user instructions for " + userForLogging(username, contactEmail),
+        String.format(
+            "Institution user instructions for %s", userForLogging(username, contactEmail)),
         htmlMessage);
   }
 
@@ -276,7 +277,8 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Your access to All of Us " + capitalizedAccessTierShortName + " Tier Data has expired",
+        String.format(
+            "Your access to All of Us %s Tier Data has expired", capitalizedAccessTierShortName),
         logMsg,
         htmlMessage);
   }
@@ -385,7 +387,7 @@ public class MailServiceImpl implements MailService {
         List.of(dbUser.getContactEmail()),
         Collections.emptyList(),
         "Researcher satisfaction survey for the All of Us Researcher Workbench",
-        "New user satisfaction survey email for " + userForLogging(dbUser),
+        String.format("New user satisfaction survey email for %s", userForLogging(dbUser)),
         htmlMessage);
   }
 
@@ -436,7 +438,7 @@ public class MailServiceImpl implements MailService {
         Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(Collections.emptyList()),
         Collections.emptyList(),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
-        "Egress remediation email for " + userForLogging(dbUser),
+        String.format("Egress remediation email for %s", userForLogging(dbUser)),
         htmlMessage);
   }
 
@@ -612,7 +614,7 @@ public class MailServiceImpl implements MailService {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
     } catch (AddressException e) {
-      throw new ServerErrorException("Email: " + contactEmail + " is invalid.");
+      throw new ServerErrorException(String.format("Email: %s is invalid.", contactEmail));
     }
 
     final RecipientAddress toAddress = new RecipientAddress();
@@ -669,6 +671,7 @@ public class MailServiceImpl implements MailService {
       retries--;
       Pair<Status, String> attempt = trySend(keyAndMessage);
       Status status = Status.valueOf(attempt.getLeft().toString());
+      String defaultFailureMessage = String.format("Sending email failed: %s", attempt.getRight());
       switch (status) {
         case API_ERROR:
           log.log(
@@ -681,7 +684,7 @@ public class MailServiceImpl implements MailService {
                 String.format(
                     "ApiException: On Last Attempt! Email '%s' not sent: %s",
                     descriptionForLog, attempt.getRight()));
-            throw new MessagingException("Sending email failed: " + attempt.getRight());
+            throw new MessagingException(defaultFailureMessage);
           }
           break;
 
@@ -690,8 +693,8 @@ public class MailServiceImpl implements MailService {
               Level.SEVERE,
               String.format(
                   "Messaging Exception: Email '%s' not sent: %s",
-                  descriptionForLog, attempt.getRight().toString()));
-          throw new MessagingException("Sending email failed: " + attempt.getRight());
+                  descriptionForLog, attempt.getRight()));
+          throw new MessagingException(defaultFailureMessage);
 
         case SUCCESSFUL:
           log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
@@ -702,7 +705,7 @@ public class MailServiceImpl implements MailService {
             log.log(
                 Level.SEVERE,
                 String.format("Email '%s' was not sent. Default case.", descriptionForLog));
-            throw new MessagingException("Sending email failed: " + attempt.getRight());
+            throw new MessagingException(defaultFailureMessage);
           }
       }
     } while (retries > 0);
