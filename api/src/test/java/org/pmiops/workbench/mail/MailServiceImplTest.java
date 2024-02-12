@@ -53,6 +53,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 public class MailServiceImplTest {
   private static final String CONTACT_EMAIL = "bob@example.com";
+  private static final String INVALID_EMAIL = "Nota valid email";
   private static final String PASSWORD = "secretpassword";
   private static final String INSTITUTION_NAME = "BROAD Institute";
   private static final String FULL_USER_NAME = "bob@researchallofus.org";
@@ -97,63 +98,60 @@ public class MailServiceImplTest {
     when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
     verify(mockMandrillApi, times(1)).send(any());
   }
 
   @Test
-  public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
+  public void testSendWelcomeEmail_throwsApiException() throws ApiException {
     doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
     verify(mockMandrillApi, times(3)).send(any());
   }
 
   @Test
-  public void testSendWelcomeEmail_invalidEmail_RtAndCt() throws MessagingException {
+  public void testSendWelcomeEmail_invalidEmail_RtAndCt() {
+    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     ServerErrorException exception =
         assertThrows(
             ServerErrorException.class,
-            () ->
-                mailService.sendWelcomeEmail(
-                    "Nota valid email", PASSWORD, INSTITUTION_NAME, true, true));
+            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, true));
     assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
   }
 
   @Test
   public void testSendWelcomeEmail_invalidEmail_OnlyRt() throws MessagingException {
+    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () ->
-            mailService.sendWelcomeEmail(
-                "Nota valid email", PASSWORD, INSTITUTION_NAME, true, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, false));
   }
 
   @Test
   public void testSendWelcomeEmail_invalidEmail_NoRtOrCt() throws MessagingException {
+    DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () ->
-            mailService.sendWelcomeEmail(
-                "Nota valid email", PASSWORD, INSTITUTION_NAME, false, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, false, false));
   }
 
   @Test
   public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, INSTITUTION_NAME, true, true);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, INSTITUTION_NAME, true, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, false);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, INSTITUTION_NAME, false, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, false, false);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
@@ -192,9 +190,9 @@ public class MailServiceImplTest {
             new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
 
     String gotHtml = gotMessage.getHtml();
-    assertThat(gotHtml).contains("username@research.org");
+    assertThat(gotHtml).contains(FULL_USER_NAME);
     assertThat(gotHtml).contains("given name family name");
-    assertThat(gotHtml).contains("user@contact.com");
+    assertThat(gotHtml).contains(CONTACT_EMAIL);
     assertThat(gotHtml)
         .contains("Is this work NIH-funded and eligible for the STRIDES Program?: No");
   }
@@ -218,9 +216,9 @@ public class MailServiceImplTest {
             new RecipientAddress().email(FROM_EMAIL).type(RecipientType.CC));
 
     String gotHtml = gotMessage.getHtml();
-    assertThat(gotHtml).contains("username@research.org");
+    assertThat(gotHtml).contains(FULL_USER_NAME);
     assertThat(gotHtml).contains("given name family name");
-    assertThat(gotHtml).contains("user@contact.com");
+    assertThat(gotHtml).contains(CONTACT_EMAIL);
     assertThat(gotHtml)
         .contains("Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
   }
@@ -302,7 +300,8 @@ public class MailServiceImplTest {
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
-    assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
+    assertThat(gotHtml)
+        .contains(String.format("%s's initial credits ($20.00 remaining)", FULL_USER_NAME));
     assertThat(gotHtml).contains("Jupyter");
     assertThat(gotHtml).contains(ATTACHED_DISK_STATUS);
     assertThat(gotHtml).doesNotContain("${");
@@ -343,7 +342,8 @@ public class MailServiceImplTest {
     String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
-    assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
+    assertThat(gotHtml)
+        .contains(String.format("%s's initial credits ($20.00 remaining)", FULL_USER_NAME));
     assertThat(gotHtml).contains("Jupyter");
     assertThat(gotHtml).contains(DETACHED_DISK_STATUS);
     assertThat(gotHtml).doesNotContain("${");
@@ -372,8 +372,8 @@ public class MailServiceImplTest {
     DbUser user = new DbUser();
     user.setFamilyName("family name");
     user.setGivenName("given name");
-    user.setContactEmail("user@contact.com");
-    user.setUsername("username@research.org");
+    user.setContactEmail(CONTACT_EMAIL);
+    user.setUsername(FULL_USER_NAME);
     return user;
   }
 
