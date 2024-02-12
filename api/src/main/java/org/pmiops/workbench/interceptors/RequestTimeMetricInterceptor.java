@@ -5,8 +5,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -29,7 +30,7 @@ public class RequestTimeMetricInterceptor implements AsyncHandlerInterceptor {
 
   @Override
   public boolean preHandle(
-      HttpServletRequest request, HttpServletResponse response, Object handler) {
+          HttpServletRequest request, HttpServletResponse response, Object handler) {
     if (shouldSkip(request, handler)) {
       return true;
     }

@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;

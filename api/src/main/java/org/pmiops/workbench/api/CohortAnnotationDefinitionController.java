@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;

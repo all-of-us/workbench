@@ -15,8 +15,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -96,7 +97,7 @@ public class TracingInterceptor implements AsyncHandlerInterceptor {
 
   @Override
   public void afterCompletion(
-      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+          HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
     if (request.getAttribute(RequestAttribute.TRACE.toString()) != null) {
       ((Scope) request.getAttribute(RequestAttribute.TRACE.toString())).close();
     }

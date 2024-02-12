@@ -1,7 +1,10 @@
 package org.pmiops.workbench.cdr;
 
 import org.hibernate.dialect.MySQL5Dialect;
-import org.hibernate.dialect.function.SQLFunctionTemplate;
+//import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.query.spi.QueryEngine;
+import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
 public class CommonTestDialect extends MySQL5Dialect {
@@ -12,15 +15,26 @@ public class CommonTestDialect extends MySQL5Dialect {
     // added with nothing; this will work for single-word query patterns only.
     // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
 
-    registerFunction(
-        "match",
-        new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "LOCATE(REPLACE(?2, '+'), ?1)"));
+//    registerFunction(
+//        "match",
+//        new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "LOCATE(REPLACE(?2, '+'), ?1)"));
+//
+//    registerFunction(
+//        "matchConcept",
+//        new SQLFunctionTemplate(
+//            StandardBasicTypes.DOUBLE,
+//            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
+  }
 
-    registerFunction(
-        "matchConcept",
-        new SQLFunctionTemplate(
-            StandardBasicTypes.DOUBLE,
-            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
+  @Override
+  public void initializeFunctionRegistry(QueryEngine queryEngine) {
+
+    super.initializeFunctionRegistry(queryEngine);
+    BasicTypeRegistry basicTypeRegistry = queryEngine.getTypeConfiguration().getBasicTypeRegistry();
+    SqmFunctionRegistry functionRegistry = queryEngine.getSqmFunctionRegistry();
+    functionRegistry.registerPattern("match", "LOCATE(REPLACE(?2, '+'), ?1)", basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
+    functionRegistry.registerPattern("matchConcept", "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))", basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
+
   }
 
   @Override

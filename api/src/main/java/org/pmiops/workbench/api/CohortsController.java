@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.db.dao.CohortDao;

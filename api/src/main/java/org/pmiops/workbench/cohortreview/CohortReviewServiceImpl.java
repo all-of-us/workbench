@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
