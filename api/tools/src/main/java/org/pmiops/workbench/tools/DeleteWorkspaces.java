@@ -12,7 +12,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditorImpl;
-import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.GoogleConfig;
@@ -34,13 +33,14 @@ import org.springframework.context.annotation.Import;
 
 @Import({
   ActionAuditServiceImpl.class,
-  ActionAuditSpringConfiguration.class, // injects com.google.cloud.logging.Logging
   BillingProjectAuditorImpl.class,
   CommonMappers.class,
   FireCloudServiceImpl.class,
   FirecloudApiClientFactory.class,
   FirecloudMapperImpl.class,
-  GoogleConfig.class, // injects com.google.cloud.iam.credentials.v1.IamCredentialsClient
+  // injects com.google.cloud.logging.Logging and
+  // com.google.cloud.iam.credentials.v1.IamCredentialsClient
+  GoogleConfig.class,
   ImpersonatedFirecloudServiceImpl.class,
   ImpersonatedWorkspaceServiceImpl.class,
   RawlsApiClientFactory.class,

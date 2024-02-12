@@ -15,11 +15,11 @@ import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
-import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.CacheAccessModuleConfiguration;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.google.GoogleConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
   AccessModuleNameMapperImpl.class,
   AccessModuleServiceImpl.class,
   ActionAuditServiceImpl.class,
-  ActionAuditSpringConfiguration.class, // injects com.google.cloud.logging.Logging
+  GoogleConfig.class, // injects com.google.cloud.logging.Logging
   CacheAccessModuleConfiguration.class, // injects List<DbAccessModule>
   CommonMappers.class,
   UserAccessModuleMapperImpl.class,

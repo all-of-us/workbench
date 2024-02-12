@@ -11,6 +11,8 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.cloud.logging.Logging;
+import com.google.cloud.logging.LoggingOptions;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -43,6 +45,11 @@ public class GoogleConfig {
   @Bean
   public MetricServiceClient getMetricServiceClient() throws IOException {
     return MetricServiceClient.create();
+  }
+
+  @Bean
+  public Logging getLogging() {
+    return LoggingOptions.getDefaultInstance().getService();
   }
 
   @Bean(END_USER_CLOUD_BILLING)
