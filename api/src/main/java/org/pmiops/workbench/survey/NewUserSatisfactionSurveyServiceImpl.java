@@ -126,13 +126,12 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   public void emailNewUserSatisfactionSurveyLinks() {
     // Logic in this call is duplicated from eligibleToTakeSurvey to improve cron performance.
     // If you update one, you should update the other.
-    final List<DbUser> eligibleUsers = userDao.findUsers();
-    //        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
-    //            Timestamp.from(
-    //                clock.instant().minus(TWO_WEEKS_DAYS + TWO_MONTHS_DAYS, ChronoUnit.DAYS)),
-    //            Timestamp.from(clock.instant().minus(TWO_WEEKS_DAYS, ChronoUnit.DAYS)));
+    final List<DbUser> eligibleUsers =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(
+                clock.instant().minus(TWO_WEEKS_DAYS + TWO_MONTHS_DAYS, ChronoUnit.DAYS)),
+            Timestamp.from(clock.instant().minus(TWO_WEEKS_DAYS, ChronoUnit.DAYS)));
     int errorCount = 0;
-    int tempHack = 0;
     for (DbUser user : eligibleUsers) {
       DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
           newUserSatisfactionSurveyOneTimeCodeDao.save(
@@ -144,10 +143,7 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
               dbNewUserSatisfactionSurveyOneTimeCode.getId().toString());
 
       try {
-        tempHack++;
-        if (tempHack % 2 == 1) {
-          throw new MessagingException("JOEL HACK TEST");
-        } else mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
+        mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
       } catch (MessagingException e) {
         errorCount++;
         logger.log(
