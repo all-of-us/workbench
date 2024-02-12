@@ -8012,10 +8012,10 @@ normalize-url@^6.0.1:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-6.1.0.tgz#40d0885b535deffe3f3147bec877d05fe4c5668a"
   integrity sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==
 
-nouislider-react@^3.3.7:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/nouislider-react/-/nouislider-react-3.4.1.tgz#cb0fc3d77ed8f7818cf52b614f0d67f3e16275d4"
-  integrity sha512-ryVbcApz6sELqPPiWwEOq5pkwhHYoNSxmGpP/HXHptpB6A6XedMrM/BP5W/rHRtBBaFK7vJTCTTma6gKviEiNg==
+nouislider-react@^3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/nouislider-react/-/nouislider-react-3.4.2.tgz#d27ababb19da617d21368d57f25f5fce94abb1b3"
+  integrity sha512-7YsyHY/j7yxaoNzt4PGZMoJLdh/e8aY5rYZ5xxpBv9LAs/gqt+M/Lk9SAi05+XF4mI749B2ISZjHdEIZUMWY6g==
   dependencies:
     nouislider "^14.6.3"
 
