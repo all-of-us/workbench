@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.transaction.Transactional;
 import org.apache.arrow.util.VisibleForTesting;
@@ -35,6 +37,9 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
 
   @VisibleForTesting static final int TWO_WEEKS_DAYS = 2 * 7;
   @VisibleForTesting static final int TWO_MONTHS_DAYS = 61;
+
+  private final Logger logger =
+      Logger.getLogger(NewUserSatisfactionSurveyServiceImpl.class.getName());
 
   @Autowired
   public NewUserSatisfactionSurveyServiceImpl(
@@ -135,14 +140,23 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
               "%s?surveyCode=%s",
               workbenchConfigProvider.get().server.uiBaseUrl,
               dbNewUserSatisfactionSurveyOneTimeCode.getId().toString());
+
+      int errorCount = 0;
       try {
         mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
       } catch (MessagingException e) {
-        throw new ServerErrorException(
+        errorCount++;
+        logger.log(
+            Level.WARNING,
             String.format(
                 "Failed to send new user satisfaction survey email to user %s with code %s",
                 user.getUserId(), dbNewUserSatisfactionSurveyOneTimeCode.getId()),
             e);
+      }
+
+      if (errorCount > 0) {
+        throw new ServerErrorException(
+            String.format("Failed to send %d new user satisfaction survey emails", errorCount));
       }
     }
   }
