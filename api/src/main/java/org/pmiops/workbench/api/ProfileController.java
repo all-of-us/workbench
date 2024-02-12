@@ -334,9 +334,8 @@ public class ProfileController implements ProfileApiDelegate {
               && eraRequiredForTier(userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
 
       mail.sendWelcomeEmail(
-          user.getContactEmail(),
+          user,
           googleUser.getPassword(),
-          user.getUsername(),
           userInstitution.getDisplayName(),
           showEraStepInRT,
           showEraStepInCT);

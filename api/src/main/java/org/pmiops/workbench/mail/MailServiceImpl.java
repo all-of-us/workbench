@@ -5,7 +5,6 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.google.common.html.HtmlEscapers;
@@ -59,8 +58,8 @@ import org.springframework.util.StringUtils;
 @Service
 public class MailServiceImpl implements MailService {
 
-  public static final ImmutableMap<EgressRemediationAction, String> EGRESS_REMEDIATION_ACTION_MAP =
-      ImmutableMap.of(
+  public static final Map<EgressRemediationAction, String> EGRESS_REMEDIATION_ACTION_MAP =
+      Map.of(
           EgressRemediationAction.DISABLE_USER,
           "Your account has been disabled pending manual review by the <i>All of Us</i> "
               + "security team.",
@@ -136,9 +135,8 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendWelcomeEmail(
-      final String contactEmail,
+      final DbUser user,
       final String password,
-      final String username,
       final String institutionName,
       final Boolean showEraStepInRt,
       final Boolean showEraStepInCt)
@@ -147,13 +145,13 @@ public class MailServiceImpl implements MailService {
         buildHtml(
             WELCOME_RESOURCE,
             welcomeMessageSubstitutionMap(
-                password, username, institutionName, showEraStepInRt, showEraStepInCt));
+                password, user.getUsername(), institutionName, showEraStepInRt, showEraStepInCt));
 
     sendWithRetries(
-        Collections.singletonList(contactEmail),
+        Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Your new All of Us Researcher Workbench Account",
-        String.format("Welcome for %s", username),
+        "Welcome for " + userForLogging(user),
         htmlMessage);
   }
 
@@ -174,7 +172,7 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(contactEmail),
         Collections.emptyList(),
         "Instructions from your institution on using the Researcher Workbench",
-        String.format("Institution user instructions for %s", contactEmail),
+        "Institution user instructions for " + userForLogging(username, contactEmail),
         htmlMessage);
   }
 
@@ -186,7 +184,7 @@ public class MailServiceImpl implements MailService {
     final String logMsg =
         String.format(
             "User %s has passed the %.2f initial credits dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
-            user.getUsername(), threshold, currentUsage, remainingBalance);
+            userForLogging(user), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
     final String htmlMessage =
@@ -200,7 +198,7 @@ public class MailServiceImpl implements MailService {
         String.format(
             "Reminder - %s Initial credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
-        String.format("User %s passed an initial credits dollar threshold", user.getUsername()),
+        String.format("User %s passed an initial credits dollar threshold", userForLogging(user)),
         htmlMessage);
   }
 
@@ -208,7 +206,7 @@ public class MailServiceImpl implements MailService {
   public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
 
     final String expirationMsg =
-        String.format("Initial credits have expired for User %s", user.getUsername());
+        String.format("Initial credits have expired for User %s", userForLogging(user));
     log.info(expirationMsg);
 
     final String htmlMessage =
@@ -232,10 +230,9 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            "%s Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            "%s Tier access expiration will occur for user %s in %d days (on %s).",
             capitalizedAccessTierShortName,
-            user.getUsername(),
-            user.getContactEmail(),
+            userForLogging(user),
             daysRemaining,
             formatCentralTime(expirationTime));
     log.info(logMsg);
@@ -253,10 +250,8 @@ public class MailServiceImpl implements MailService {
             + " Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
-            "User %s (%s) will lose " + tierShortName + " tier access in %d days",
-            user.getUsername(),
-            user.getContactEmail(),
-            daysRemaining),
+            "User %s will lose %s tier access in %d days",
+            userForLogging(user), tierShortName, daysRemaining),
         htmlMessage);
   }
 
@@ -267,9 +262,9 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            capitalizedAccessTierShortName + " Tier access expired for user %s (%s) on %s.",
-            user.getUsername(),
-            user.getContactEmail(),
+            "%s Tier access expired for user %s on %s.",
+            capitalizedAccessTierShortName,
+            userForLogging(user),
             formatCentralTime(expirationTime));
     log.info(logMsg);
 
@@ -282,10 +277,7 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Your access to All of Us " + capitalizedAccessTierShortName + " Tier Data has expired",
-        String.format(
-            capitalizedAccessTierShortName + " Tier access expired for user %s (%s)",
-            user.getUsername(),
-            user.getContactEmail()),
+        logMsg,
         htmlMessage);
   }
 
@@ -335,9 +327,9 @@ public class MailServiceImpl implements MailService {
                 .build());
     sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,
-        ImmutableList.of(),
-        ImmutableList.of(),
-        users.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        users.stream().map(DbUser::getContactEmail).toList(),
         "Reminder - Unused Disk in your Workspace",
         "Unused disk notification",
         htmlMessage);
@@ -361,9 +353,7 @@ public class MailServiceImpl implements MailService {
         receiptEmails,
         Collections.singletonList(workbenchConfigProvider.get().mandrill.fromEmail),
         "Request to set up Google Cloud Billing Account for All of Us Workbench",
-        String.format(
-            " User %s (%s) requests billing setup from Carasoft.",
-            dbUser.getUsername(), dbUser.getContactEmail()),
+        String.format(" User %s requests billing setup from Carasoft.", userForLogging(dbUser)),
         htmlMessage);
   }
 
@@ -392,10 +382,10 @@ public class MailServiceImpl implements MailService {
                 .build());
 
     sendWithRetries(
-        ImmutableList.of(dbUser.getContactEmail()),
-        ImmutableList.of(),
+        List.of(dbUser.getContactEmail()),
+        Collections.emptyList(),
         "Researcher satisfaction survey for the All of Us Researcher Workbench",
-        String.format("New user satisfaction survey email for %s", dbUser.getUsername()),
+        "New user satisfaction survey email for " + userForLogging(dbUser),
         htmlMessage);
   }
 
@@ -406,16 +396,14 @@ public class MailServiceImpl implements MailService {
     WorkbenchConfig config = workbenchConfigProvider.get();
     List<String> ccSupportMaybe =
         config.featureFlags.ccSupportWhenAdminLocking
-            ? ImmutableList.of(config.mandrill.fromEmail)
+            ? List.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
     final String ownersInfoStr =
-        owners.stream()
-            .map(o -> String.format("%s (%s)", o.getUsername(), o.getContactEmail()))
-            .collect(Collectors.joining(", "));
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
 
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).collect(Collectors.toList()),
+        owners.stream().map(DbUser::getContactEmail).toList(),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
@@ -444,11 +432,11 @@ public class MailServiceImpl implements MailService {
         workbenchConfigProvider.get().egressAlertRemediationPolicy;
     sendWithRetries(
         egressPolicy.notifyFromEmail,
-        ImmutableList.of(dbUser.getContactEmail()),
-        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(ImmutableList.of()),
-        ImmutableList.of(),
+        List.of(dbUser.getContactEmail()),
+        Optional.ofNullable(egressPolicy.notifyCcEmails).orElse(Collections.emptyList()),
+        Collections.emptyList(),
         "[Response Required] AoU Researcher Workbench High Data Egress Alert",
-        String.format("Egress remediation email for %s", dbUser.getUsername()),
+        "Egress remediation email for " + userForLogging(dbUser),
         htmlMessage);
   }
 
@@ -474,8 +462,8 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private String getRTSteps(Boolean showEraStepInRT) {
-    StringBuffer rtSteps = new StringBuffer();
+  private String getRTSteps(boolean showEraStepInRT) {
+    StringBuilder rtSteps = new StringBuilder();
     encloseInLiTag(rtSteps, TWO_STEP_VERIFICATION);
     encloseInLiTag(rtSteps, LOGIN_GOV);
     if (showEraStepInRT) {
@@ -485,8 +473,8 @@ public class MailServiceImpl implements MailService {
     return rtSteps.toString();
   }
 
-  private String getCTSteps(Boolean showEraStepInCT, String institutionName) {
-    StringBuffer ctSteps = new StringBuffer();
+  private String getCTSteps(boolean showEraStepInCT, String institutionName) {
+    StringBuilder ctSteps = new StringBuilder();
     encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institutionName));
     if (showEraStepInCT) {
       encloseInLiTag(ctSteps, ERA_COMMON);
@@ -495,8 +483,8 @@ public class MailServiceImpl implements MailService {
     return ctSteps.toString();
   }
 
-  private StringBuffer encloseInLiTag(StringBuffer steps, String step) {
-    return steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
+  private void encloseInLiTag(StringBuilder steps, String step) {
+    steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
@@ -636,16 +624,16 @@ public class MailServiceImpl implements MailService {
       List<String> toRecipientEmails,
       List<String> ccRecipientEmails,
       String subject,
-      String description,
+      String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
     sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,
         toRecipientEmails,
         ccRecipientEmails,
-        ImmutableList.of(),
+        Collections.emptyList(),
         subject,
-        description,
+        descriptionForLog,
         htmlMessage);
   }
 
@@ -655,7 +643,7 @@ public class MailServiceImpl implements MailService {
       List<String> ccRecipientEmails,
       List<String> bccRecipientEmails,
       String subject,
-      String description,
+      String descriptionForLog,
       String htmlMessage)
       throws MessagingException {
     List<RecipientAddress> toAddresses =
@@ -663,7 +651,7 @@ public class MailServiceImpl implements MailService {
                 toRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.TO)),
                 ccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.CC)),
                 bccRecipientEmails.stream().map(e -> validatedRecipient(e, RecipientType.BCC)))
-            .collect(Collectors.toList());
+            .toList();
     final MandrillMessage msg =
         new MandrillMessage()
             .to(toAddresses)
@@ -686,14 +674,13 @@ public class MailServiceImpl implements MailService {
           log.log(
               Level.WARNING,
               String.format(
-                  "ApiException: Email '%s' not sent: %s",
-                  description, attempt.getRight().toString()));
+                  "ApiException: Email '%s' not sent: %s", descriptionForLog, attempt.getRight()));
           if (retries == 0) {
             log.log(
                 Level.SEVERE,
                 String.format(
                     "ApiException: On Last Attempt! Email '%s' not sent: %s",
-                    description, attempt.getRight().toString()));
+                    descriptionForLog, attempt.getRight()));
             throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
           break;
@@ -703,17 +690,18 @@ public class MailServiceImpl implements MailService {
               Level.SEVERE,
               String.format(
                   "Messaging Exception: Email '%s' not sent: %s",
-                  description, attempt.getRight().toString()));
+                  descriptionForLog, attempt.getRight().toString()));
           throw new MessagingException("Sending email failed: " + attempt.getRight());
 
         case SUCCESSFUL:
-          log.log(Level.INFO, String.format("Email '%s' was sent.", description));
+          log.log(Level.INFO, String.format("Email '%s' was sent.", descriptionForLog));
           return;
 
         default:
           if (retries == 0) {
             log.log(
-                Level.SEVERE, String.format("Email '%s' was not sent. Default case.", description));
+                Level.SEVERE,
+                String.format("Email '%s' was not sent. Default case.", descriptionForLog));
             throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
       }
@@ -747,17 +735,12 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getBadgeImage(String tierShortName) {
-    String imageURL;
-    switch (tierShortName) {
-      case REGISTERED_TIER_SHORT_NAME:
-        imageURL = "registered-tier-badge.png";
-        break;
-      case CONTROLLED_TIER_SHORT_NAME:
-        imageURL = "controlled-tier-badge.png";
-        break;
-      default:
-        imageURL = null;
-    }
+    String imageURL =
+        switch (tierShortName) {
+          case REGISTERED_TIER_SHORT_NAME -> "registered-tier-badge.png";
+          case CONTROLLED_TIER_SHORT_NAME -> "controlled-tier-badge.png";
+          default -> null;
+        };
 
     return cloudStorageClientProvider.get().getImageUrl(imageURL);
   }
@@ -820,5 +803,13 @@ public class MailServiceImpl implements MailService {
 
   private String href(String url, String text) {
     return String.format("<a href=\"%s\">%s</a>", url, text);
+  }
+
+  private String userForLogging(String username, String contactEmail) {
+    return String.format("%s (%s)", username, contactEmail);
+  }
+
+  private String userForLogging(DbUser user) {
+    return userForLogging(user.getUsername(), user.getContactEmail());
   }
 }
