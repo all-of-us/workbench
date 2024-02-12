@@ -206,9 +206,9 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
 
-    final String expirationMsg =
+    final String logMsg =
         String.format("Initial credits have expired for User %s", userForLogging(user));
-    log.info(expirationMsg);
+    log.info(logMsg);
 
     final String htmlMessage =
         buildHtml(
@@ -218,7 +218,7 @@ public class MailServiceImpl implements MailService {
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Alert - Initial credit expiration in All of Us Researcher Workbench",
-        expirationMsg,
+        logMsg,
         htmlMessage);
   }
 
@@ -401,7 +401,7 @@ public class MailServiceImpl implements MailService {
             ? List.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
-    final String ownersInfoStr =
+    final String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
 
     sendWithRetries(
@@ -410,7 +410,7 @@ public class MailServiceImpl implements MailService {
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersInfoStr),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
@@ -485,8 +485,8 @@ public class MailServiceImpl implements MailService {
     return ctSteps.toString();
   }
 
-  private void encloseInLiTag(StringBuilder steps, String step) {
-    steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
+  private StringBuilder encloseInLiTag(StringBuilder steps, String step) {
+    return steps.append(OPEN_LI_TAG).append(step).append(CLOSE_LI_TAG);
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
