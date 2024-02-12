@@ -8,6 +8,7 @@ import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration.Companion.ACTION_ID_BEAN
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +23,7 @@ class ProfileAuditorImpl
     constructor(
         private val actionAuditService: ActionAuditService,
         private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>,
+        @Qualifier(ACTION_ID_BEAN) private val actionIdProvider: Provider<String>,
     ) : ProfileAuditor {
         override fun fireCreateAction(createdProfile: Profile) {
             val propertiesByName: Map<String, String?> =
