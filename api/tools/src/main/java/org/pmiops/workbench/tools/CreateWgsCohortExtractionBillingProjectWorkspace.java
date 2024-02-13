@@ -116,7 +116,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
     if (!response.isSuccessful()) {
       throw new RuntimeException(
           "Could not fetch Pet Service Account. Try fetching manually by querying "
-              + request.urlString()
+              + request.url()
               + "with the Extraction SA Access Token (printed above).");
     }
 
