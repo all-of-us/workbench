@@ -163,11 +163,16 @@ public class ManageLeonardoRuntimes {
     // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
     // we get all available information for debugging.
     RuntimesApi client = newApiClient(apiUrl);
-     ApiResponse<Object> resp = client.getApiClient().execute(client.getRuntimeCall(
-        googleProject,
-        runtimeName,
-        /* progressListener */ null,
-        /* progressRequestListener */ null), Object.class);
+    ApiResponse<Object> resp =
+        client
+            .getApiClient()
+            .execute(
+                client.getRuntimeCall(
+                    googleProject,
+                    runtimeName,
+                    /* progressListener */ null,
+                    /* progressRequestListener */ null),
+                Object.class);
 
     // Parse the response as well so we can log specific structured fields.
     LeonardoGetRuntimeResponse runtime =

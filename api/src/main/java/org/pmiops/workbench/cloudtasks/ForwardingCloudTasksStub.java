@@ -9,17 +9,17 @@ import com.google.cloud.tasks.v2.CreateTaskRequest;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.cloud.tasks.v2.stub.CloudTasksStub;
-import com.squareup.okhttp3.Callback;
-import com.squareup.okhttp3.Headers;
-import com.squareup.okhttp3.MediaType;
-import com.squareup.okhttp3.OkHttpClient;
-import com.squareup.okhttp3.Request;
-import com.squareup.okhttp3.RequestBody;
-import com.squareup.okhttp3.Response;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okhttp3.Callback;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Stateless Cloud Tasks stub which immediately forwards all incoming tasks for execution. Tasks are
