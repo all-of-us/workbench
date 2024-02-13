@@ -37,7 +37,7 @@ public class LeonardoConfig {
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
-  private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceAPiClient";
+  private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
 
   private static final Logger log = Logger.getLogger(LeonardoConfig.class.getName());
 
