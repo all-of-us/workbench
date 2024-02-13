@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.transaction.Transactional;
 import org.apache.arrow.util.VisibleForTesting;
@@ -36,9 +35,6 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
 
   @VisibleForTesting static final int TWO_WEEKS_DAYS = 2 * 7;
   @VisibleForTesting static final int TWO_MONTHS_DAYS = 61;
-
-  private final Logger logger =
-      Logger.getLogger(NewUserSatisfactionSurveyServiceImpl.class.getName());
 
   @Autowired
   public NewUserSatisfactionSurveyServiceImpl(
