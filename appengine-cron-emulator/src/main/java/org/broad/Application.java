@@ -2,10 +2,10 @@ package org.broad;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.squareup.okhttp3.Call;
+import com.squareup.okhttp3.OkHttpClient;
+import com.squareup.okhttp3.Request;
+import com.squareup.okhttp3.Response;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
