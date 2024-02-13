@@ -126,6 +126,7 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
             Timestamp.from(
                 clock.instant().minus(TWO_WEEKS_DAYS + TWO_MONTHS_DAYS, ChronoUnit.DAYS)),
             Timestamp.from(clock.instant().minus(TWO_WEEKS_DAYS, ChronoUnit.DAYS)));
+    int errorCount = 0;
     for (DbUser user : eligibleUsers) {
       DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
           newUserSatisfactionSurveyOneTimeCodeDao.save(
@@ -135,15 +136,17 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
               "%s?surveyCode=%s",
               workbenchConfigProvider.get().server.uiBaseUrl,
               dbNewUserSatisfactionSurveyOneTimeCode.getId().toString());
+
       try {
         mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
       } catch (MessagingException e) {
-        throw new ServerErrorException(
-            String.format(
-                "Failed to send new user satisfaction survey email to user %s with code %s",
-                user.getUserId(), dbNewUserSatisfactionSurveyOneTimeCode.getId()),
-            e);
+        errorCount++;
       }
+    }
+
+    if (errorCount > 0) {
+      throw new ServerErrorException(
+          String.format("Failed to send %d new user satisfaction survey emails", errorCount));
     }
   }
 }
