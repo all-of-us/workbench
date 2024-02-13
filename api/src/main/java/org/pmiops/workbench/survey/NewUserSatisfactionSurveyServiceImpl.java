@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.transaction.Transactional;
@@ -146,12 +145,6 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
         mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
       } catch (MessagingException e) {
         errorCount++;
-        logger.log(
-            Level.WARNING,
-            String.format(
-                "Failed to send new user satisfaction survey email to user %s with code %s",
-                user.getUserId(), dbNewUserSatisfactionSurveyOneTimeCode.getId()),
-            e);
       }
     }
 
