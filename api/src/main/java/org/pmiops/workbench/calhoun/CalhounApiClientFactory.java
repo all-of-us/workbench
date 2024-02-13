@@ -1,6 +1,5 @@
 package org.pmiops.workbench.calhoun;
 
-import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,7 @@ public class CalhounApiClientFactory {
     apiClient.setBasePath(workbenchConfig.firecloud.calhounBaseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 }

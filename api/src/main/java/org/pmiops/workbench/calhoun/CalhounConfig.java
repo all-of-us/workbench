@@ -1,6 +1,5 @@
 package org.pmiops.workbench.calhoun;
 
-import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -23,9 +22,7 @@ public class CalhounConfig {
       WorkbenchConfig config) {
     ApiClient apiClient = factory.newCalhounApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(config.firecloud.lenientTimeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
     return apiClient;
   }
 

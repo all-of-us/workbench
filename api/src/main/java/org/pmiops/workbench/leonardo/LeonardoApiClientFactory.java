@@ -2,7 +2,6 @@ package org.pmiops.workbench.leonardo;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
@@ -56,9 +55,7 @@ public class LeonardoApiClientFactory {
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 
@@ -74,9 +71,7 @@ public class LeonardoApiClientFactory {
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 }

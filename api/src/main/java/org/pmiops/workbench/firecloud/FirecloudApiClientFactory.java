@@ -6,7 +6,6 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
@@ -92,9 +91,7 @@ public class FirecloudApiClientFactory {
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 }
