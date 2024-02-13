@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -65,19 +66,18 @@ public class ForwardingCloudTasksStub extends CloudTasksStub {
             String.format(
                 "asynchronously forwarding task request for queue '%s', to handler '%s'",
                 queueName.getQueue(), apiReq.url()));
-        OkHttpClient client = new OkHttpClient();
-        client.setReadTimeout(10, TimeUnit.MINUTES);
+        OkHttpClient client = new OkHttpClient.Builder().readTimeout(10, TimeUnit.MINUTES).build();
         client
             .newCall(apiReq)
             .enqueue(
                 new Callback() {
                   @Override
-                  public void onFailure(Request request, IOException e) {
+                  public void onFailure(Call call, IOException e) {
                     log.log(Level.SEVERE, "task execution failed", e);
                   }
 
                   @Override
-                  public void onResponse(Response response) {}
+                  public void onResponse(Call call, Response response) {}
                 });
         return ApiFutures.immediateFuture(request.getTask());
       }
