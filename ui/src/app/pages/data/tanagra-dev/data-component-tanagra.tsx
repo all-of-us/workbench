@@ -105,11 +105,13 @@ const mapTanagraWorkspaceResource = ({
   cohort,
   conceptSet,
   review,
+  lastModified,
   workspace,
 }: {
   cohort?: Cohort;
   conceptSet?: ConceptSet;
   review?: Review;
+  lastModified: Date;
   workspace: WorkspaceData;
 }): TanagraWorkspaceResource => ({
   workspaceNamespace: workspace.namespace,
@@ -121,7 +123,7 @@ const mapTanagraWorkspaceResource = ({
   cohortTanagra: cohort,
   conceptSetTanagra: conceptSet,
   reviewTanagra: review,
-  lastModifiedEpochMillis: workspace.lastModifiedTime,
+  lastModifiedEpochMillis: lastModified.getTime(),
   adminLocked: workspace.adminLocked,
 });
 
@@ -178,13 +180,25 @@ export const DataComponentTanagra = fp.flow(
       }
       setResourceList([
         ...cohorts.map((cohort) =>
-          mapTanagraWorkspaceResource({ cohort, workspace })
+          mapTanagraWorkspaceResource({
+            cohort,
+            lastModified: cohort.lastModified,
+            workspace,
+          })
         ),
         ...conceptSets.map((conceptSet) =>
-          mapTanagraWorkspaceResource({ conceptSet, workspace })
+          mapTanagraWorkspaceResource({
+            conceptSet,
+            lastModified: conceptSet.lastModified,
+            workspace,
+          })
         ),
         ...reviews.map((review) =>
-          mapTanagraWorkspaceResource({ review, workspace })
+          mapTanagraWorkspaceResource({
+            review,
+            lastModified: review.lastModified,
+            workspace,
+          })
         ),
       ]);
     } catch (error) {
