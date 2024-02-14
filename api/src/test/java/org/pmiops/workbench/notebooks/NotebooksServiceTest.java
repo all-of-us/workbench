@@ -589,6 +589,31 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testConvertSasNotebookToHtml() {
+    String workspaceNamespace = "workspaceNamespace";
+    String workspaceName = "workspaceName";
+    String notebookName = "notebookName.sas";
+    String expectedHtml = "SAS notebook content";
+
+    // Mock the necessary dependencies
+    when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
+        .thenReturn(
+            new RawlsWorkspaceResponse()
+                .workspace(new RawlsWorkspaceDetails().bucketName(BUCKET_NAME)));
+    when(mockCloudStorageClient.getBlob(BUCKET_NAME, NotebookUtils.withNotebookPath(notebookName)))
+        .thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1L);
+    when(mockBlob.getContent()).thenReturn(expectedHtml.getBytes());
+
+    // Act
+    String actualHtml =
+        notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+
+    // Assert
+    assertThat(expectedHtml).isEqualTo(actualHtml);
+  }
+
+  @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     stubNotebookToJson("test_disallowsRemoteImage.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
