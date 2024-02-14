@@ -325,6 +325,8 @@ public class NotebooksServiceImpl implements NotebooksService {
       converter = this::convertJupyterNotebookToHtml;
     } else if (NotebookUtils.isRStudioFile(notebookName)) {
       converter = this::convertRstudioNotebookToHtml;
+    } else if (NotebookUtils.isSasFile(notebookName)) {
+      converter = this::convertSasNotebookToHtml;
     } else {
       throw new NotImplementedException(
           String.format("Converting %s to read-only HTML is not supported", notebookName));
@@ -382,5 +384,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
     return PREVIEW_SANITIZER.sanitize(fireCloudService.staticRstudioNotebooksConvert(notebook));
+  }
+
+  private String convertSasNotebookToHtml(byte[] notebook) {
+    // Implement your SAS to HTML conversion here
+    // For now, let's just return the notebook content as a string
+    return new String(notebook, StandardCharsets.UTF_8);
   }
 }

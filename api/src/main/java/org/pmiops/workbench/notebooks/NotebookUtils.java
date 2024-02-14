@@ -64,7 +64,7 @@ public class NotebookUtils {
     return isRmdNotebook(nameWithFileExtension) || isRScriptFile(nameWithFileExtension);
   }
 
-  private static boolean isSasFile(String nameWithFileExtension) {
+  public static boolean isSasFile(String nameWithFileExtension) {
     return nameWithFileExtension.endsWith(SAS_EXTENSION);
   }
 
