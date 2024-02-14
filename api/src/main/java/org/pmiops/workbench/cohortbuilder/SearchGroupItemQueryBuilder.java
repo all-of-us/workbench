@@ -207,7 +207,7 @@ public final class SearchGroupItemQueryBuilder {
       "SELECT person_id\n"
           + "FROM `${projectId}.${dataSetId}.cb_variant_to_person`\n"
           + "CROSS JOIN UNNEST(person_ids) AS person_id\n"
-          + "WHERE vid IN UNNEST(%s)";
+          + "WHERE vid IN unnest(%s)";
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
