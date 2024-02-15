@@ -10,7 +10,7 @@ buildscript {
         GSON_VERSION = '2.9.0'
         HIBERNATE_VERSION = '5.6.9.Final'
         JACKSON_DATABIND_VERSION = '2.13.4'
-        JACKSON_VERSION = '2.13.4'
+        JACKSON_VERSION = '2.16.1'
         KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
         LOGBACK_VERSION = '1.2.13'
