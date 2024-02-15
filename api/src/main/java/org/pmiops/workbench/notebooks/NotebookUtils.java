@@ -3,6 +3,7 @@ package org.pmiops.workbench.notebooks;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.regex.Pattern;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.springframework.util.StringUtils;
 
 /** Notebook files operation utils */
 public class NotebookUtils {
@@ -53,11 +54,11 @@ public class NotebookUtils {
   }
 
   public static boolean isRmdNotebook(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
+    return StringUtils.endsWithIgnoreCase(nameWithFileExtension, R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
   public static boolean isRScriptFile(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(R_SCRIPT_EXTENSION);
+    return StringUtils.endsWithIgnoreCase(nameWithFileExtension, R_SCRIPT_EXTENSION);
   }
 
   public static boolean isRStudioFile(String nameWithFileExtension) {
@@ -65,7 +66,7 @@ public class NotebookUtils {
   }
 
   private static boolean isSasFile(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(SAS_EXTENSION);
+    return StringUtils.endsWithIgnoreCase(nameWithFileExtension, SAS_EXTENSION);
   }
 
   /** Appends file type extension e.g. ipynb if the file does not have one. */
@@ -94,19 +95,22 @@ public class NotebookUtils {
   }
 
   private static String withRMarkdownExtension(String notebookName) {
-    return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
+
+    return StringUtils.endsWithIgnoreCase(notebookName, R_MARKDOWN_NOTEBOOK_EXTENSION)
         ? notebookName
         : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
   private static String withRFileExtension(String notebookName) {
-    return notebookName.endsWith(R_SCRIPT_EXTENSION)
+    return StringUtils.endsWithIgnoreCase(notebookName, R_SCRIPT_EXTENSION)
         ? notebookName
         : notebookName.concat(R_SCRIPT_EXTENSION);
   }
 
   private static String withSasExtension(String notebookName) {
-    return notebookName.endsWith(SAS_EXTENSION) ? notebookName : notebookName.concat(SAS_EXTENSION);
+    return StringUtils.endsWithIgnoreCase(notebookName, SAS_EXTENSION)
+        ? notebookName
+        : notebookName.concat(SAS_EXTENSION);
   }
 
   public static String withNotebookPath(String notebookName) {

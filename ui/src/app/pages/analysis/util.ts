@@ -11,7 +11,7 @@ import {
 } from 'app/utils/constants';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
-  if (filename?.endsWith(JUPYTER_FILE_EXT)) {
+  if (filename?.toLowerCase().endsWith(JUPYTER_FILE_EXT)) {
     return filename.substring(0, filename.length - JUPYTER_FILE_EXT.length);
   }
 
@@ -19,7 +19,7 @@ export function dropJupyterNotebookFileSuffix(filename: string) {
 }
 
 export function appendJupyterNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(JUPYTER_FILE_EXT)) {
+  if (filename && !filename.toLowerCase().endsWith(JUPYTER_FILE_EXT)) {
     return filename + JUPYTER_FILE_EXT;
   }
 
@@ -27,7 +27,7 @@ export function appendJupyterNotebookFileSuffix(filename: string) {
 }
 
 export function appendRStudioNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(RMD_FILE_EXT)) {
+  if (filename && !filename.toLowerCase().endsWith(RMD_FILE_EXT)) {
     return filename + RMD_FILE_EXT;
   }
 
@@ -35,7 +35,7 @@ export function appendRStudioNotebookFileSuffix(filename: string) {
 }
 
 export function appendRScriptSuffix(filename: string) {
-  if (filename && !filename.endsWith(R_SCRIPT_EXT)) {
+  if (filename && !filename.toLowerCase().endsWith(R_SCRIPT_EXT)) {
     return filename + R_SCRIPT_EXT;
   }
 
@@ -43,7 +43,7 @@ export function appendRScriptSuffix(filename: string) {
 }
 
 export function appendSasSuffix(filename: string) {
-  if (filename && !filename.endsWith(SAS_FILE_EXT)) {
+  if (filename && !filename.toLowerCase().endsWith(SAS_FILE_EXT)) {
     return filename + SAS_FILE_EXT;
   }
 
@@ -54,6 +54,7 @@ export function appendAnalysisFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
+  oldFileName = oldFileName?.toLowerCase();
   return cond(
     [
       oldFileName.endsWith(JUPYTER_FILE_EXT),
@@ -93,7 +94,7 @@ const appsExtensionMap = [
 ];
 
 export const getAppInfoFromFileName = (name: string) => {
-  return appsExtensionMap.find((app) => name.endsWith(app.extension));
+  return appsExtensionMap.find((app) => name.toLowerCase().endsWith(app.extension));
 };
 
 export const listNotebooks = (workspace: Workspace): Promise<FileDetail[]> => {
