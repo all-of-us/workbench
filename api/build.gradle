@@ -21,6 +21,7 @@ buildscript {
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.23'
+        SPRING_SECURITY_VERSION = '5.8.9'
         SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
 
@@ -483,8 +484,9 @@ dependencies {
     }
 
     implementation "org.springframework.retry:spring-retry"
-    implementation "org.springframework.security:spring-security-core"
-    implementation "org.springframework.security:spring-security-web"
+    implementation "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
+    implementation "org.springframework.security:spring-security-crypto:$project.ext.SPRING_SECURITY_VERSION"
+    implementation "org.springframework.security:spring-security-web:$project.ext.SPRING_SECURITY_VERSION"
 
     // updated versions of transitive dependencies to resolve vulnerabilities
 
