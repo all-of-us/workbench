@@ -1,5 +1,6 @@
 package org.pmiops.workbench.compliancetraining;
 
+import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -9,7 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;

@@ -5,12 +5,12 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
+import jakarta.inject.Provider;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;

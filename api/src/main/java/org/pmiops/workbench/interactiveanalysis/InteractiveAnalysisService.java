@@ -1,6 +1,7 @@
 package org.pmiops.workbench.interactiveanalysis;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.inject.Provider;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
@@ -11,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;

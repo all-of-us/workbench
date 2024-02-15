@@ -145,6 +145,7 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
                     'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
                     'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
                     'hideGenerationTimestamp': 'true',
+                    'jakarta': 'true',
             ]
         }
         // Validation only works for Swagger 2 - skip.
@@ -212,6 +213,7 @@ swaggerSources {
                     'delegatePattern': 'true',
                     'dateLibrary'    : 'java8',
                     'hideGenerationTimestamp': 'true',
+                    'jakarta': 'true',
             ]
         }
     }
@@ -411,7 +413,6 @@ dependencies {
     implementation "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
     implementation "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
     implementation 'io.swagger:swagger-annotations:1.6.7'
-    implementation "javax.inject:javax.inject:1"
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation "org.apache.commons:commons-collections4:4.4"
@@ -448,7 +449,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.21.7'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
-    implementation "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+    implementation "org.hibernate:hibernate-core-jakarta:$project.ext.HIBERNATE_VERSION"
 
     implementation('org.apache.tomcat:tomcat-jdbc:10.0.23')
     implementation("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
@@ -494,8 +495,12 @@ dependencies {
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
-    implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+
+    implementation "jakarta.inject:jakarta.inject-api:2.0.1"
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
     // updated 13 Dec 2023 to most recent passing Sam on 13 Dec
     implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-c0263cf") {
@@ -516,7 +521,7 @@ dependencies {
     generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
     generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
     generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
+    generatedCompile "jakarta.xml.bind:jakarta.xml.bind-api:4.0.1"
 
     // Swagger3 codegen deps
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
@@ -533,7 +538,7 @@ dependencies {
     generatedCompile 'io.springfox:springfox-oas:3.0.0'
 
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
     __tools__Implementation 'commons-cli:commons-cli:1.5.0'
     __tools__Implementation 'com.opencsv:opencsv:5.7.0'
@@ -891,7 +896,7 @@ dependencies {
       replacedBy("jakarta.transaction:jakarta.transaction-api")
     }
     module("org.springframework:spring-jcl") { replacedBy("commons-logging:commons-logging") }
-    module("javax.servlet:servlet-api") { replacedBy("javax.servlet:javax.servlet-api") }
+    module("javax.servlet:servlet-api") { replacedBy("jakarta.servlet:jakarta.servlet-api") }
     module("org.apache.tomcat:tomcat-juli") {
       replacedBy("org.apache.tomcat.embed:tomcat-embed-core")
     }

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.test;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 public class Providers {
 

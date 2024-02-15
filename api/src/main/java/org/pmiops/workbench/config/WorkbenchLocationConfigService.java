@@ -1,6 +1,6 @@
 package org.pmiops.workbench.config;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.springframework.stereotype.Service;
 
 @Service

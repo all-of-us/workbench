@@ -1,9 +1,9 @@
 package org.pmiops.workbench.moodle;
 
+import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;

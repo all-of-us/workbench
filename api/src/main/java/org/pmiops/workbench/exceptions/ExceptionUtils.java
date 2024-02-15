@@ -2,9 +2,9 @@ package org.pmiops.workbench.exceptions;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.springframework.http.HttpStatus;
 

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exfiltration;
 
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,7 +13,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;

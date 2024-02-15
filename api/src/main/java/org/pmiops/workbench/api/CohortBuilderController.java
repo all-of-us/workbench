@@ -1,12 +1,12 @@
 package org.pmiops.workbench.api;
 
 import com.google.gson.Gson;
+import jakarta.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
