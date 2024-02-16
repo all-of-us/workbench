@@ -8218,6 +8218,9 @@ components:
         rasLinkLoginGovBypassTime:
           type: integer
           format: int64
+        identityBypassTime:
+          type: integer
+          format: int64
         complianceTrainingBypassTime:
           type: integer
           format: int64

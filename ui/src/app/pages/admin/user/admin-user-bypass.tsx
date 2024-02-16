@@ -48,6 +48,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.rasLinkLoginGovBypassTime
       ? [AccessModule.RAS_LINK_LOGIN_GOV]
       : []),
+    ...(user.identityBypassTime ? [AccessModule.IDENTITY] : []),
     ...(user.profileConfirmationBypassTime
       ? [AccessModule.PROFILE_CONFIRMATION]
       : []),
@@ -86,7 +87,7 @@ const moduleToToggleProps: Record<
     'data-test-id': 'ras-link-login-gov-toggle',
   },
   [AccessModule.IDENTITY]: {
-    name: 'Identity Verification',
+    name: 'Identity Verification!!!',
     'data-test-id': 'identity-toggle',
   },
   [AccessModule.PROFILE_CONFIRMATION]: {
@@ -137,6 +138,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
       user,
       user: { username },
     } = this.props;
+    console.log('What are selected modules? ', selectedModules);
     const changedModules = fp.xor(getBypassedModules(user), selectedModules);
     this.setState({ isSaving: true });
     try {
@@ -184,6 +186,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
   }
 
   render() {
+    console.log('Hi');
     const { selectedModules, isPopupOpen, isSaving } = this.state;
 
     const bypassToggleProps = orderedAccessModules
@@ -194,6 +197,9 @@ export class AdminUserBypass extends React.Component<Props, State> {
           module: module,
         };
       });
+
+    console.log('What are selectedModules? ', selectedModules);
+    console.log('What are bypassToggleProps? ', bypassToggleProps);
 
     return (
       <PopupTrigger
@@ -232,7 +238,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
                 onClick={() => this.save()}
                 disabled={!this.hasEdited()}
               >
-                Save
+                Save!!!
               </Button>
             </div>
             {isSaving && <SpinnerOverlay />}
