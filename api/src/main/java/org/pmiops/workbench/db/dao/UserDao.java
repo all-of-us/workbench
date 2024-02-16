@@ -249,6 +249,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'IDENTITY' "
-              + ") as uami ON u.user_id = uami.user_id " )
+              + ") as uami ON u.user_id = uami.user_id ")
   List<DbAdminTableUser> getAdminTableUsers();
 }
