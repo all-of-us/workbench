@@ -55,7 +55,7 @@ const redirectToRegisteredTrainingMoodle = async () => {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`;
-  window.open(url, '_blank');
+  window.open(url, '_blank').focus();
 };
 
 const redirectToTrainingAbsorb = async () => {
@@ -72,7 +72,7 @@ const redirectToTrainingAbsorb = async () => {
   url.searchParams.set('spid', absorbSamlServiceProviderId);
   url.searchParams.set('forceauthn', 'false');
   url.searchParams.set('hd', gsuiteDomain);
-  window.open(url.toString(), '_blank');
+  window.open(url.toString(), '_blank').focus();
 };
 
 export async function redirectToRegisteredTraining() {
@@ -93,7 +93,7 @@ const redirectToControlledTrainingMoodle = async () => {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`;
-  window.open(url, '_blank');
+  window.open(url, '_blank').focus();
 };
 
 export async function redirectToControlledTraining() {
@@ -125,7 +125,7 @@ export const getTwoFactorSetupUrl = (): string => {
 
 export const redirectToTwoFactorSetup = (): void => {
   AnalyticsTracker.Registration.TwoFactorAuth();
-  window.open(getTwoFactorSetupUrl(), '_blank');
+  window.open(getTwoFactorSetupUrl(), '_blank').focus();
 };
 
 export const NIH_CALLBACK_PATH = '/nih-callback';
@@ -140,7 +140,7 @@ export const redirectToNiH = (): void => {
     encodeURIComponent(
       window.location.origin.toString() + NIH_CALLBACK_PATH + '?token={token}'
     );
-  window.open(url, '_blank');
+  window.open(url, '_blank').focus();
 };
 
 export const RAS_CALLBACK_PATH = '/ras-callback';
@@ -163,7 +163,7 @@ export const redirectToRas = (openInNewTab: boolean = true): void => {
     buildRasRedirectUrl() +
     '&response_type=code&scope=openid+profile+email+federated_identities';
 
-  openInNewTab ? window.open(url, '_blank') : <Redirect to={url} />;
+  openInNewTab ? window.open(url, '_blank').focus() : <Redirect to={url} />;
 };
 
 export const DATA_ACCESS_REQUIREMENTS_PATH = '/data-access-requirements';
