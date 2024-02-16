@@ -10,7 +10,7 @@ buildscript {
         GSON_VERSION = '2.9.0'
         HIBERNATE_VERSION = '5.6.9.Final'
         JACKSON_DATABIND_VERSION = '2.13.4'
-        JACKSON_VERSION = '2.13.4'
+        JACKSON_VERSION = '2.16.1'
         KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
         LOGBACK_VERSION = '1.2.13'
@@ -19,8 +19,9 @@ buildscript {
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
-        SPRING_BOOT_VERSION = '2.7.4'
+        SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.23'
+        SPRING_SECURITY_VERSION = '5.8.9'
         SWAGGER_3_CODEGEN_VERSION = '3.0.34'
     }
 
@@ -425,7 +426,7 @@ dependencies {
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
-    implementation 'mysql:mysql-connector-java:8.0.30'
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation "org.apache.commons:commons-collections4:4.4"
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
@@ -483,8 +484,9 @@ dependencies {
     }
 
     implementation "org.springframework.retry:spring-retry"
-    implementation "org.springframework.security:spring-security-core"
-    implementation "org.springframework.security:spring-security-web"
+    implementation "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
+    implementation "org.springframework.security:spring-security-crypto:$project.ext.SPRING_SECURITY_VERSION"
+    implementation "org.springframework.security:spring-security-web:$project.ext.SPRING_SECURITY_VERSION"
 
     // updated versions of transitive dependencies to resolve vulnerabilities
 
