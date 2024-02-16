@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
@@ -9,7 +9,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { DARTitle } from 'app/pages/access/dar-title';
-import { profileApi } from 'app/services/swagger-fetch-clients';
 import {
   getAccessModuleConfig,
   getStatusText,
@@ -59,12 +58,6 @@ export interface ModuleProps {
 }
 
 export const Module = (props: ModuleProps) => {
-  const [trainingEnabled, setTrainingEnabled] = React.useState(undefined);
-  useEffect(() => {
-    // This logic is temporary and will be removed when the training migration is complete
-    profileApi().trainingsEnabled().then(setTrainingEnabled);
-  }, []);
-
   const {
     focused,
     children,
@@ -79,18 +72,20 @@ export const Module = (props: ModuleProps) => {
   } = props;
   const { enableRasIdMeLinking } = serverConfigStore.get().config;
 
-  const deactivateModuleForTrainingMigration =
-    !trainingEnabled &&
-    (moduleName === AccessModule.COMPLIANCE_TRAINING ||
-      moduleName === AccessModule.CT_COMPLIANCE_TRAINING);
-
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
+  const [disabled, setDisabled] = useState(false);
+
   const { refreshAction, isEnabledInEnvironment } =
     getAccessModuleConfig(moduleName);
 
+  const enableTrainingComponent = () => {
+    setInterval(function () {
+      setDisabled(false);
+    }, 3000);
+  };
   return isEnabledInEnvironment ? (
     <FlexRow data-test-id={`module-${moduleName}`} {...{ style }}>
       <FlexRow style={styles.moduleCTA}>
@@ -108,11 +103,13 @@ export const Module = (props: ModuleProps) => {
         clickable={
           active &&
           !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY) &&
-          !deactivateModuleForTrainingMigration
+          disabled
         }
         action={() => {
+          setDisabled(true);
           setShowRefresh(true);
           moduleAction();
+          enableTrainingComponent();
         }}
       >
         <ModuleIcon

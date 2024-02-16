@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { AccessModule, ConfigResponse, ProfileApi } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Module, ModuleProps } from 'app/pages/access/module';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
@@ -61,66 +61,5 @@ describe(Module.name, () => {
 
     // Assert the module is not clickable
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-  });
-
-  it('does not deactivate RT training when the training migration pause is not happening', async () => {
-    setup(
-      {
-        ...createProps(),
-        moduleName: AccessModule.COMPLIANCE_TRAINING,
-      },
-      defaultServerConfig,
-      true
-    );
-
-    // Assert the module is clickable
-    await waitFor(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument();
-    });
-  });
-
-  it('deactivates CT training during the training migration pause', () => {
-    setup(
-      {
-        ...createProps(),
-        moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
-      },
-      defaultServerConfig,
-      false
-    );
-
-    // Assert the module is not clickable
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-  });
-
-  it('does not deactivate CT training when the training migration pause is not happening', async () => {
-    setup(
-      {
-        ...createProps(),
-        moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
-      },
-      defaultServerConfig,
-      true
-    );
-
-    // Assert the module is clickable
-    await waitFor(() => {
-      expect(screen.getByRole('button')).toBeInTheDocument();
-    });
-  });
-
-  it('does not deactivate non-training modules during the training migration pause', () => {
-    setup(
-      {
-        ...createProps(),
-        // Arbitrary non-training module
-        moduleName: AccessModule.ERA_COMMONS,
-      },
-      defaultServerConfig,
-      false
-    );
-
-    // Assert the module is clickable
-    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });
