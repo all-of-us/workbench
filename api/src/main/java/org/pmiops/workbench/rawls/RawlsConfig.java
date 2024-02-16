@@ -3,7 +3,6 @@ package org.pmiops.workbench.rawls;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -57,9 +56,7 @@ public class RawlsConfig {
       WorkbenchConfig config) {
     ApiClient apiClient = factory.newRawlsApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(config.firecloud.lenientTimeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
     return apiClient;
   }
 

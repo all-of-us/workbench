@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import okhttp3.Call;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -163,7 +164,7 @@ public class ManageLeonardoRuntimes {
     // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
     // we get all available information for debugging.
     RuntimesApi client = newApiClient(apiUrl);
-    com.squareup.okhttp.Call call =
+    Call call =
         client.getRuntimeCall(
             googleProject,
             runtimeName,

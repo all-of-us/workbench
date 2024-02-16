@@ -16,7 +16,7 @@ buildscript {
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         MOCKITO_KOTLIN_VERSION = '4.1.0'
-        OKHTTP_VERSION = '2.7.5'
+        OKHTTP_VERSION = '4.12.0'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
@@ -417,8 +417,8 @@ dependencies {
     implementation "com.github.java-json-tools:json-patch:1.13"
     implementation "com.github.rholder:guava-retrying:2.0.0"
     implementation 'org.javers:javers-core:5.15.0'
-    implementation "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
-    implementation "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+    implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
+    implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
     implementation "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
     implementation "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
     implementation "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
@@ -525,8 +525,8 @@ dependencies {
     generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
     generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
     generatedCompile "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
-    generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-    generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+    generatedCompile "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
+    generatedCompile "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
