@@ -48,6 +48,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.rasLinkLoginGovBypassTime
       ? [AccessModule.RAS_LINK_LOGIN_GOV]
       : []),
+    ...(user.identityBypassTime ? [AccessModule.IDENTITY] : []),
     ...(user.profileConfirmationBypassTime
       ? [AccessModule.PROFILE_CONFIRMATION]
       : []),
