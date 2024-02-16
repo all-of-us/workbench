@@ -215,7 +215,7 @@ export const getAccessModuleConfig = (
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableRasLoginGovLinking,
-        adminPageTitle: 'Verify your identity with Login.gov',
+        adminPageTitle: 'Verify your identity',
         refreshAction: () => redirectToRas(false),
       }),
     ],
