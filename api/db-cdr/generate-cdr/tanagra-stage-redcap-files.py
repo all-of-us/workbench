@@ -231,7 +231,7 @@ def open_writers_with_headers(name):
     dialect.delimiter = "|"
     dialect.quoting = csv.QUOTE_MINIMAL
     file_prefix = home_dir + "/" + name
-    csv_file = open(file_prefix + ".csv", 'w')
+    csv_file = open(file_prefix + ".csv", 'w', encoding="utf8")
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers, dialect=dialect)
     csv_writer.writeheader()
     return csv_writer, csv_file
