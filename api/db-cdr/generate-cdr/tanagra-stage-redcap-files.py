@@ -1,15 +1,18 @@
+"""Module that loads redcap files into BQ."""
+
 import argparse
 import csv
 import os
 import shutil
 from collections import OrderedDict
-from google.cloud import bigquery
-from google.cloud import storage
 from io import StringIO
 from os import listdir
 from os.path import isfile, join
+from google.cloud import bigquery
+from google.cloud import storage
 
-# ./project.rb tanagra-stage-redcap-files --project all-of-us-workbench-test --date 2022-09-22 --dataset SR2023Q3R2
+# ./project.rb tanagra-stage-redcap-files \
+# --project all-of-us-workbench-test --date 2022-09-22 --dataset SR2023Q3R2
 
 # These are redcap files for all surveys except cope
 # Note: We only read in the Winter Minute Survey since all prior survey
@@ -82,7 +85,7 @@ exclude_list = ["record_id", "_intro", "textbox", "freetext", "_outro",
                 "cdc_covid_xx_symptom_cope_350_dose17",
                 "cdc_covid_xx_type_dose17_other"]
 
-home_dir = "../csv"
+HOME_DIR = "../csv"
 
 
 def main():
@@ -93,9 +96,9 @@ def main():
     files_exist(date)
 
     # setup csv directory to hold output csv files
-    if os.path.exists(home_dir):
-        shutil.rmtree(home_dir)
-    os.mkdir(home_dir)
+    if os.path.exists(HOME_DIR):
+        shutil.rmtree(HOME_DIR)
+    os.mkdir(HOME_DIR)
 
     for name in surveys:
         rows = read_csv(get_filename(name, date))
@@ -136,10 +139,10 @@ def main():
     storage_client = storage.Client.from_service_account_json(
         '../../sa-key.json')
     bucket = storage_client.get_bucket('all-of-us-workbench-private-cloudsql')
-    files = [f for f in listdir(home_dir) if isfile(join(home_dir, f))]
+    files = [f for f in listdir(HOME_DIR) if isfile(join(HOME_DIR, f))]
     for f in files:
         blob = bucket.blob(dataset + '/cdr_csv_files/' + f)
-        blob.upload_from_filename(home_dir + "/" + f)
+        blob.upload_from_filename(HOME_DIR + "/" + f)
 
     # These files are static and never change moving forward
     bucket.copy_blob(bucket.blob('redcap/tanagra_cope_staged.csv'),
@@ -147,7 +150,7 @@ def main():
                      dataset + '/cdr_csv_files/tanagra_cope_staged.csv')
 
     # when done remove directory and all files
-    shutil.rmtree(home_dir)
+    shutil.rmtree(HOME_DIR)
     
     # Construct a BigQuery client object.
     client = bigquery.Client(project=project)
@@ -230,7 +233,7 @@ def open_writers_with_headers(name):
     dialect = csv.unix_dialect
     dialect.delimiter = "|"
     dialect.quoting = csv.QUOTE_MINIMAL
-    file_prefix = home_dir + "/" + name
+    file_prefix = HOME_DIR + "/" + name
     csv_file = open(file_prefix + ".csv", 'w', encoding="utf8")
     csv_writer = csv.DictWriter(csv_file, fieldnames=headers, dialect=dialect)
     csv_writer.writeheader()
@@ -249,27 +252,9 @@ def parse_row_columns(row):
     return concept_code, topic, " ".join(codes_list), concept_code_rename
 
 
-def parse_family_health_row_columns(row):
-    concept_code = row['concept_code']
-    survey_name = row['survey_name']
-    topic = row['topic']
-    answers = row['answers']
-    return concept_code, survey_name, topic, answers
-
-
 def flush_and_close_files(csv_file):
     csv_file.flush()
     csv_file.close()
-
-
-def rewrite_dictionary(master_dictionary, previous_key, new_entry):
-    new_dictionary = OrderedDict()
-    for key in master_dictionary:
-        new_dictionary[master_dictionary.get(key)[
-            'concept_code']] = master_dictionary.get(key)
-        if previous_key == key:
-            new_dictionary[new_entry.get('concept_code')] = new_entry
-    return new_dictionary
 
 
 if __name__ == '__main__':
