@@ -62,7 +62,7 @@ const redirectToTrainingAbsorb = async () => {
   url.searchParams.set('spid', absorbSamlServiceProviderId);
   url.searchParams.set('forceauthn', 'false');
   url.searchParams.set('hd', gsuiteDomain);
-  window.open(url.toString(), '_blank').focus();
+  window.open(url.toString(), '_blank');
   await profileApi().updatePageVisits({ page: 'absorb' });
 };
 
