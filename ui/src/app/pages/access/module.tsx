@@ -102,8 +102,8 @@ export const Module = (props: ModuleProps) => {
       <ModuleBox
         clickable={
           active &&
-          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY) &&
-          disabled
+          !disabled &&
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
         }
         action={() => {
           setDisabled(true);
