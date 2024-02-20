@@ -13,9 +13,8 @@ import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 public interface MailService {
 
   void sendWelcomeEmail(
-      final String contactEmail,
+      final DbUser user,
       final String password,
-      final String username,
       final String institutionName,
       final Boolean showEraStepInRt,
       final Boolean showEraStepInCt)

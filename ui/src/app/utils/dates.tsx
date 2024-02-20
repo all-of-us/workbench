@@ -7,7 +7,8 @@ export const plusDays = (date: number, days: number): number =>
   date + MILLIS_PER_DAY * days;
 export const nowPlusDays = (days: number) => plusDays(Date.now(), days);
 
-// To convert datetime strings into human-readable dates
+// To convert datetime strings into human-readable dates in the format
+// 08/11/23, 11:26 AM
 export function displayDate(time: number): string {
   const date = new Date(time);
   // datetime formatting to slice off weekday from readable date string
@@ -21,6 +22,8 @@ export function displayDate(time: number): string {
   });
 }
 
+// To convert datetime strings into human-readable dates in the format
+// Feb 14, 2022
 export function displayDateWithoutHours(time: number): string {
   if (!time) {
     return null;

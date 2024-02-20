@@ -49,8 +49,8 @@ export interface EnvironmentBase {
 
   // Environment flags: UI-specific feature flags
   //
-  // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
-  // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
+  // WARNING: Please think *very* carefully before adding a new environment flag here! Instead of
+  // this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such

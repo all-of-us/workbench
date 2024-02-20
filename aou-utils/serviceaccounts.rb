@@ -30,7 +30,11 @@ class ServiceAccountContext
       if TEST_SERVICE_ACCOUNTS.include? @service_account
         @keyfile_path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
       else
-        @keyfile_path = "#{Dir.tmpdir()}/#{@service_account}-key.json"
+        # By default Tempfile on OS X does not use a docker-friendly location/
+        # use /tmp/colima to make it work with colima, see https://github.com/abiosoft/colima/issues/844 for more details
+        colima_path = "/tmp/colima"
+        Dir.mkdir(colima_path) unless File.exists?(colima_path)
+        @keyfile_path = Tempfile.new(["#{@service_account}-key", ".json"], colima_path).path
       end
     end
   end

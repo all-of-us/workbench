@@ -157,14 +157,18 @@ export const isVisible = (status: RuntimeStatus) =>
   ).includes(status);
 
 // can the user delete the runtime?
+// matches deletableStatuses in https://github.com/DataBiosphere/leonardo/blob/7bb268a685bf90f5a2dcbb0f751e5bb786525abe/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala
+export const canDeleteStatuses: RuntimeStatus[] = [
+  RuntimeStatus.RUNNING,
+  RuntimeStatus.STOPPED,
+  RuntimeStatus.ERROR,
+  RuntimeStatus.STARTING,
+  RuntimeStatus.STOPPING,
+  RuntimeStatus.UNKNOWN,
+  RuntimeStatus.ERROR,
+];
 export const canDeleteRuntime = (status: RuntimeStatus) =>
-  (
-    [
-      RuntimeStatus.RUNNING,
-      RuntimeStatus.STOPPED,
-      RuntimeStatus.ERROR,
-    ] as Array<RuntimeStatus>
-  ).includes(status);
+  canDeleteStatuses.includes(status);
 
 // can the user update the runtime?
 export const canUpdateRuntime = (status: RuntimeStatus) =>

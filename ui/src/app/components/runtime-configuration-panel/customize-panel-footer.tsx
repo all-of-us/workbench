@@ -15,7 +15,6 @@ import { canDeleteRuntime } from 'app/utils/runtime-utils';
 import { PanelContent } from './utils';
 
 export interface CustomizePanelFooterProps {
-  disableControls: boolean;
   runtimeCanBeCreated: boolean;
   runtimeCannotBeCreatedExplanation?: string;
   runtimeCanBeUpdated: boolean;
@@ -31,7 +30,6 @@ export interface CustomizePanelFooterProps {
   setPanelContent: (pc: PanelContent) => void;
 }
 export const CustomizePanelFooter = ({
-  disableControls,
   runtimeCanBeCreated,
   runtimeCannotBeCreatedExplanation,
   runtimeCanBeUpdated,
@@ -95,12 +93,12 @@ export const CustomizePanelFooter = ({
       <LinkButton
         style={{
           ...styles.deleteLink,
-          ...(disableControls || !canDeleteRuntime(currentRuntime?.status)
+          ...(!canDeleteRuntime(currentRuntime?.status)
             ? { color: colorWithWhiteness(colors.dark, 0.4) }
             : {}),
         }}
         aria-label='Delete Environment'
-        disabled={disableControls || !canDeleteRuntime(currentRuntime?.status)}
+        disabled={!canDeleteRuntime(currentRuntime?.status)}
         onClick={() => setPanelContent(PanelContent.DeleteRuntime)}
       >
         Delete Environment

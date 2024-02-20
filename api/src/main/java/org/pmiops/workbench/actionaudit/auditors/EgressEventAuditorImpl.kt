@@ -10,6 +10,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.EgressEscalationTargetP
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration.Companion.ACTION_ID_BEAN
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
@@ -38,7 +39,7 @@ class EgressEventAuditorImpl
         private val workspaceDao: WorkspaceDao,
         private val userDao: UserDao,
         private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>,
+        @Qualifier(ACTION_ID_BEAN) private val actionIdProvider: Provider<String>,
     ) : EgressEventAuditor {
         override fun fireEgressEvent(event: SumologicEgressEvent) {
             val dbWorkspace = getDbWorkspace(event)

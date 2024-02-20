@@ -43,7 +43,7 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -568,7 +568,7 @@ export const ListSearch = fp.flow(
 
     setAttributes(node: any) {
       attributesSelectionStore.next(node);
-      setSidebarActiveIconStore.next('criteria');
+      sidebarActiveIconStore.next('criteria');
     }
 
     showHierarchy = (row: any) => {

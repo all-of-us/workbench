@@ -22,7 +22,7 @@ import {
   currentCohortCriteriaStore,
   currentCohortStore,
   currentConceptStore,
-  setSidebarActiveIconStore,
+  sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import arrowIcon from 'assets/icons/arrow-left-regular.svg';
@@ -270,7 +270,7 @@ export const CriteriaSearch = fp.flow(
 
     closeSidebar() {
       attributesSelectionStore.next(undefined);
-      setSidebarActiveIconStore.next(null);
+      sidebarActiveIconStore.next(null);
     }
 
     addSelection = (selectCriteria) => {

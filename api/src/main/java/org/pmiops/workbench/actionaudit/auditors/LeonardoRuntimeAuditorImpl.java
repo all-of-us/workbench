@@ -1,5 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
+import static org.pmiops.workbench.audit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
+
 import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +25,7 @@ public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
 
   @Autowired
   public LeonardoRuntimeAuditorImpl(
-      @Qualifier("ACTION_ID") Provider<String> actionIdProvider,
+      @Qualifier(ACTION_ID_BEAN) Provider<String> actionIdProvider,
       ActionAuditService actionAuditService,
       Clock clock,
       Provider<DbUser> userProvider) {

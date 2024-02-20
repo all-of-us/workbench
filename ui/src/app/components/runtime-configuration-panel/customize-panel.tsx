@@ -335,7 +335,6 @@ export const CustomizePanel = ({
         {...{
           analysisConfig,
           currentRuntime,
-          disableControls,
           existingAnalysisConfig,
           onClose,
           requestAnalysisConfig,

@@ -28,7 +28,7 @@ a workspace, there are 20 or so fields and boolean options selectable. Since we 
 a massive number of columns in the table, and since we can't use neseted fields in BigQuery
 when sending a JsonPayload, we cheat by using many events for this action. These are then
 tied together by an Action ID, which is a random GUID string. Auditors can inject a
-`Provider<String>` with the qualifier `@Qualifier("ACTION_ID")` to generate new action IDs.
+`Provider<String>` with the qualifier `@Qualifier(ACTION_ID_BEAN)` to generate new action IDs.
 
 ### Agent Types
 There are a handful of agent types in the stytem. By far the majority of actions use a USER

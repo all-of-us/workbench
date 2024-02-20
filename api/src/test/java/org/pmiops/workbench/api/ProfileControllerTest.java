@@ -1001,7 +1001,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
@@ -1009,7 +1009,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
     verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1019,7 +1019,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doNothing()
         .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
@@ -1027,7 +1027,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
     verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1035,7 +1035,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);
@@ -1054,7 +1054,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
     verify(mockMailService)
         .sendInstitutionUserInstructions(
             CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
@@ -1075,7 +1075,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);

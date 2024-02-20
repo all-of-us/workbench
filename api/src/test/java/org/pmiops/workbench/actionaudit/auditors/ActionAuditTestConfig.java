@@ -1,5 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
+import static org.pmiops.workbench.audit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
+
 import java.time.Clock;
 import java.time.Instant;
 import org.pmiops.workbench.db.model.DbUser;
@@ -24,7 +26,7 @@ public class ActionAuditTestConfig {
     return administrator;
   }
 
-  @Bean(name = "ACTION_ID")
+  @Bean(name = ACTION_ID_BEAN)
   public String getActionId() {
     return ACTION_ID;
   }

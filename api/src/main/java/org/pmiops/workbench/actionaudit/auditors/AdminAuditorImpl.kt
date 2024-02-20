@@ -5,6 +5,7 @@ import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration.Companion.ACTION_ID_BEAN
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.AccessReason
 import org.pmiops.workbench.model.AdminLockingRequest
@@ -23,7 +24,7 @@ class AdminAuditorImpl
         private val userProvider: Provider<DbUser>,
         private val actionAuditService: ActionAuditService,
         private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>,
+        @Qualifier(ACTION_ID_BEAN) private val actionIdProvider: Provider<String>,
     ) : AdminAuditor {
         override fun fireViewNotebookAction(
             workspaceNamespace: String,

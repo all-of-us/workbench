@@ -23,6 +23,7 @@ import {
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { canDeleteStatuses } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 import {
@@ -173,11 +174,6 @@ describe('ExpandedApp', () => {
       }
     );
 
-    const canDeleteStatuses = [
-      RuntimeStatus.RUNNING,
-      RuntimeStatus.STOPPED,
-      RuntimeStatus.ERROR,
-    ];
     test.each(canDeleteStatuses)(
       'should allow deletion when the Jupyter app status is %s',
       async (status) => {

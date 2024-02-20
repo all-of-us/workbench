@@ -10,12 +10,16 @@ import java.util.UUID
 
 @Configuration
 open class ActionAuditSpringConfiguration {
+    companion object {
+        const val ACTION_ID_BEAN = "ACTION_ID"
+    }
+
     open val cloudLogging: Logging
         @Bean
         get() = LoggingOptions.getDefaultInstance().service
 
     open val actionId: String
-        @Bean(name = ["ACTION_ID"])
+        @Bean(name = [ACTION_ID_BEAN])
         @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
         get() {
             return UUID.randomUUID().toString()
