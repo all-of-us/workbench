@@ -31,7 +31,7 @@ class AppsApiTest {
   //                .build())
   //        .toPact();
   //  }
-  //
+
   //  @Test
   //  @PactTestFor(pactMethod = "getApp")
   //  void testGetAppWhenAppExists(MockServer mockServer) throws ApiException {
