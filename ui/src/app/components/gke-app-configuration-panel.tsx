@@ -1,13 +1,17 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
+import { AppType, Disk } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { Spinner } from 'app/components/spinners';
-import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
-import { notificationStore } from 'app/utils/stores';
-import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
+import { disksApi } from 'app/services/swagger-fetch-clients';
+import { notificationStore, userAppsStore, useStore } from 'app/utils/stores';
+import {
+  deleteUserApp,
+  findDisk,
+  maybeStartPollingForUserApps,
+} from 'app/utils/user-apps-utils';
 
 import { findApp, toUIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
@@ -44,11 +48,7 @@ export const GKEAppConfigurationPanel = ({
   initialPanelContent,
   ...props
 }: GkeAppConfigurationPanelProps) => {
-  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] = useState<
-    UserAppEnvironment[] | undefined
-  >();
-  const [listAppsInWorkspaceError, setListAppsInWorkspaceError] =
-    useState<Error>();
+  const { userApps } = useStore(userAppsStore);
 
   const [ownedDisksInWorkspace, setOwnedDisksInWorkspace] = useState<
     Disk[] | undefined
@@ -61,17 +61,7 @@ export const GKEAppConfigurationPanel = ({
   );
 
   useEffect(() => {
-    appsApi()
-      .listAppsInWorkspace(workspaceNamespace)
-      .then(setGkeAppsInWorkspace)
-      .catch((e) => {
-        setListAppsInWorkspaceError(e);
-        notificationStore.set({
-          title: 'Unable to load applications',
-          message:
-            'An error occurred trying to load your applications. Please try again.',
-        });
-      });
+    maybeStartPollingForUserApps(workspaceNamespace);
 
     disksApi()
       .listOwnedDisksInWorkspace(workspaceNamespace)
@@ -86,16 +76,16 @@ export const GKEAppConfigurationPanel = ({
       });
   }, []);
 
-  if (listAppsInWorkspaceError || listOwnedDisksInWorkspaceError) {
+  if (listOwnedDisksInWorkspaceError) {
     return null;
   }
 
   // loading
-  if (gkeAppsInWorkspace === undefined || ownedDisksInWorkspace === undefined) {
+  if (userApps === undefined || ownedDisksInWorkspace === undefined) {
     return <Spinner />;
   }
 
-  const app = findApp(gkeAppsInWorkspace, toUIAppType[appType]);
+  const app = findApp(userApps, toUIAppType[appType]);
   const disk = findDisk(ownedDisksInWorkspace, appType);
 
   const onClickDeleteGkeApp = () =>
