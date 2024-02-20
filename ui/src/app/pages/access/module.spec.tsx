@@ -8,10 +8,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Module, ModuleProps } from 'app/pages/access/module';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
-import {
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -36,11 +33,9 @@ const createProps = (): ModuleProps => ({
 
 const setup = (
   props = createProps(),
-  config: ConfigResponse = { ...defaultServerConfig },
-  trainingsEnabled: boolean = true
+  config: ConfigResponse = { ...defaultServerConfig }
 ) => {
   registerApiClient(ProfileApi, new ProfileApiStub());
-  profileApi().trainingsEnabled = () => Promise.resolve(trainingsEnabled);
   serverConfigStore.set({ config });
   return {
     container: render(<Module {...props} />).container,
@@ -49,17 +44,14 @@ const setup = (
 };
 
 describe(Module.name, () => {
-  it('deactivates RT training during the training migration pause', () => {
+  it('RT training should be active and clickable', () => {
     setup(
       {
         ...createProps(),
         moduleName: AccessModule.COMPLIANCE_TRAINING,
       },
-      defaultServerConfig,
-      false
+      defaultServerConfig
     );
-
-    // Assert the module is not clickable
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).toBeInTheDocument();
   });
 });
