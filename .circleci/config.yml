@@ -6,7 +6,7 @@ version: 2.1
 # https://circleci.com/orbs/registry/
 orbs:
   browser-tools: circleci/browser-tools@1.4.6
-  queue: eddiewebb/queue@2.2.2
+  queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
   pact: trustedshops-public/pact@3.0.1
 
