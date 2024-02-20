@@ -86,8 +86,9 @@ exclude_list = ["record_id", "_intro", "textbox", "freetext", "_outro",
 
 HOME_DIR = "../csv"
 
-"""Main function that creates and inserts redcap data"""
+
 def main():
+    """Main function that creates and inserts redcap data"""
     # parse all provided args
     project, date, dataset = parse_args()
 
@@ -184,8 +185,9 @@ def main():
     destination_table = client.get_table(table_id)  # Make an API request.
     print("Loaded {} rows.".format(destination_table.num_rows))
 
-"""Parse args"""
+
 def parse_args():
+    """Parse args"""
     parser = argparse.ArgumentParser(prog='tanagra-stage-redcap-files',
                                      usage='%(prog)s --project <project> --date <date> --dataset <dataset>',
                                      description='Generate csv files')
@@ -198,37 +200,42 @@ def parse_args():
     arg = parser.parse_args()
     return arg.project, arg.date, arg.dataset
 
-"""Read csv"""
+
 def read_csv(file):
+    """Read csv"""
     blob = get_blob(file)
     blob = blob.download_as_string()
     blob = blob.decode('utf-8-sig')
     blob = StringIO(blob)  # tranform bytes to string
     return csv.DictReader(blob)  # then use csv library to read the content
 
-"""Check if files exist"""
+
 def files_exist(date):
+    """Check if files exist"""
     for name in surveys:
         file = get_filename(name, date)
         blob = get_blob(file)
         if not blob.exists():
             raise Exception(file + " does not exist!")
 
-"""Get file name"""
+
 def get_filename(name, date):
+    """Get file name"""
     file = name + '_' + date + '.csv'
     return file
 
-"""Get blob"""
+
 def get_blob(file):
+    """Get blob"""
     storage_client = storage.Client.from_service_account_json(
         '../../sa-key.json')
     bucket = storage_client.get_bucket(
         'all-of-us-workbench-private-cloudsql')
     return bucket.blob('redcap/' + file)
 
-"""Open writer with headers"""
+
 def open_writers_with_headers(name):
+    """Open writer with headers"""
     dialect = csv.unix_dialect
     dialect.delimiter = "|"
     dialect.quoting = csv.QUOTE_MINIMAL
@@ -238,8 +245,9 @@ def open_writers_with_headers(name):
     csv_writer.writeheader()
     return csv_writer, csv_file
 
-"""Parse row columns"""
+
 def parse_row_columns(row):
+    """Parse row columns"""
     concept_code = row['Variable / Field Name']
     topic = row['Section Header'].replace('\n', ' ').replace('"', '')
     answers = row['Choices, Calculations, OR Slider Labels']
@@ -250,8 +258,9 @@ def parse_row_columns(row):
         codes_list.append(code.split(",")[0])
     return concept_code, topic, " ".join(codes_list), concept_code_rename
 
-"""Flush and close files"""
+
 def flush_and_close_files(csv_file):
+    """Flush and close files"""
     csv_file.flush()
     csv_file.close()
 
