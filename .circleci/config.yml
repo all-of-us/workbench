@@ -130,6 +130,14 @@ executors:
     - image: << pipeline.parameters.pact-image >>
     working_directory: ~
 
+  # Docker image for Tanagra deploys that require Java 11
+  tanagra-executor:
+    environment:
+      <<: *env-default
+    docker:
+    - image: circleci/openjdk:11-jdk-buster-node
+    working_directory: ~/workbench
+
 # -------------------------
 #   COMMANDS
 # Refers to https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
@@ -775,6 +783,19 @@ jobs:
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
               --key-file << pipeline.parameters.circle-service-account-key >> \
+              --promote
+
+  tanagra-deploy-to-test:
+    executor: tanagra-executor
+    steps:
+      - checkout-code
+      - gcloud-auth-login
+      - run:
+          name: Deploy Tanagra API and UI to "test" App Engine
+          working_directory: ~/workbench
+          command: |
+            deploy/project.rb deploy-tanagra \
+              --project all-of-us-workbench-test \
               --promote
 
   # In staging, we deploy all at once in order to track and control the
