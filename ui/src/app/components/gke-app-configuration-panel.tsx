@@ -91,7 +91,7 @@ export const GKEAppConfigurationPanel = ({
   const onClickDeleteGkeApp = () =>
     setPanelContent(GKEAppPanelContent.DELETE_GKE_APP);
 
-  const onConfirmDeleteGKEApp = async (deletePDSelected) => {
+  const onConfirmDeleteGKEApp = async (deletePDSelected: boolean) => {
     await deleteUserApp(workspaceNamespace, app.appName, deletePDSelected);
     onClose();
   };
