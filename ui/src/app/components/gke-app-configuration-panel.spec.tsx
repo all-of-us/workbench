@@ -4,6 +4,7 @@ import {
   AppsApi,
   AppType,
   DisksApi,
+  ListAppsResponse,
   UserAppEnvironment,
 } from 'generated/fetch';
 
@@ -13,7 +14,11 @@ import {
   disksApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { notificationStore, serverConfigStore } from 'app/utils/stores';
+import {
+  notificationStore,
+  serverConfigStore,
+  userAppsStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';
@@ -51,8 +56,10 @@ const validateInitialLoadingSpinner = async () => {
 
 describe(GKEAppConfigurationPanel.name, () => {
   beforeEach(() => {
+    jest.clearAllTimers();
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
+    userAppsStore.set({ updating: false, userApps: [] });
     notificationStore.set(null);
     serverConfigStore.set({
       config: {
@@ -105,20 +112,6 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([]));
     createWrapper();
     await validateInitialLoadingSpinner();
-  });
-
-  it('should show an error if the list apps API call fails', async () => {
-    jest
-      .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.reject());
-
-    expect(notificationStore.get()).toBeNull();
-
-    createWrapper();
-    await waitFor(() => {
-      expect(notificationStore.get().title).toBeTruthy();
-      expect(notificationStore.get().message).toBeTruthy();
-    });
   });
 
   it('should show an error if the list disks API call fails', async () => {

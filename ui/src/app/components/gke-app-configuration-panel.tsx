@@ -157,7 +157,7 @@ export const GKEAppConfigurationPanel = ({
           <ConfirmDeleteEnvironmentWithPD
             onConfirm={onConfirmDeleteGKEApp}
             onCancel={onClose}
-            appType={toUIAppType[app.appType]}
+            appType={toUIAppType[app?.appType]}
             usingDataproc={false}
             disk={disk}
           />
