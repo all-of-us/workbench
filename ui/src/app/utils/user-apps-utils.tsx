@@ -52,7 +52,7 @@ export const updateLastActive = (userApps: ListAppsResponse) => {
       app.dateAccessed ? new Date(app.dateAccessed).valueOf() : 0
     )
   );
-  if (userAppLastActive > getLastActiveEpochMillis() ?? 0) {
+  if (userAppLastActive > (getLastActiveEpochMillis() ?? 0)) {
     setLastActive(userAppLastActive);
   }
 };
