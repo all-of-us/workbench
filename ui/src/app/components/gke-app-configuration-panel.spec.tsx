@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   AppsApi,
+  AppStatus,
   AppType,
   DisksApi,
   UserAppEnvironment,
@@ -24,9 +25,11 @@ import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
+  createListAppsRStudioResponse,
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
+import { UIAppType } from './apps-panel/utils';
 import {
   GKEAppConfigurationPanel,
   GkeAppConfigurationPanelProps,
@@ -52,6 +55,16 @@ const validateInitialLoadingSpinner = async () => {
     expect(screen.queryByLabelText('Please Wait')).toBeNull();
   });
 };
+
+const findOpenButton = (appType: string): HTMLElement =>
+  screen.queryByRole('button', {
+    name: `${appType} cloud environment open button`,
+  });
+
+const findCreateButton = (appType: string): HTMLElement =>
+  screen.queryByRole('button', {
+    name: `${appType}  cloud environment create button`,
+  });
 
 describe(GKEAppConfigurationPanel.name, () => {
   beforeEach(() => {
@@ -504,6 +517,54 @@ describe(GKEAppConfigurationPanel.name, () => {
     await waitFor(() => {
       expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
       expect(screen.queryByText(deleteUnattachedPdRegex)).toBeNull();
+    });
+  });
+
+  it('should update the Create panel when the app changes status', async () => {
+    // Setup: an RStudio disk exists and the current app is RStudio
+    const workspaceNamespace = 'aou-rw-1234';
+    const runningApp = {
+      ...createListAppsRStudioResponse(),
+      status: AppStatus.RUNNING,
+    };
+    jest
+      .spyOn(appsApi(), 'listAppsInWorkspace')
+      .mockImplementationOnce(
+        (): Promise<any> => Promise.resolve([runningApp])
+      );
+
+    createWrapper({
+      appType: AppType.RSTUDIO,
+      workspaceNamespace,
+    });
+
+    // expect to see the open button because the app is running
+    await waitFor(() => {
+      expect(findOpenButton(UIAppType.RSTUDIO)).not.toBeNull();
+    });
+    // expect NOT to see the create button because the app is running
+    await waitFor(() => {
+      expect(findCreateButton(UIAppType.RSTUDIO)).toBeNull();
+    });
+
+    const deletingApp = {
+      ...runningApp,
+      status: AppStatus.DELETING,
+    };
+    jest
+      .spyOn(appsApi(), 'listAppsInWorkspace')
+      .mockImplementationOnce(
+        (): Promise<any> => Promise.resolve([deletingApp])
+      );
+
+    // expect to see the create button because the app is deleting
+    await waitFor(() => {
+      expect(findCreateButton(UIAppType.RSTUDIO)).toBeNull();
+    });
+
+    // expect NOT to see the open button because the app is deleting
+    await waitFor(() => {
+      expect(findOpenButton(UIAppType.RSTUDIO)).not.toBeNull();
     });
   });
 });
