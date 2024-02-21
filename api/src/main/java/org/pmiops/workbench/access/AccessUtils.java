@@ -1,6 +1,5 @@
 package org.pmiops.workbench.access;
 
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +28,7 @@ public class AccessUtils {
   // missing ERA_COMMONS (special-cased)
   // see also: AccessModuleServiceImpl.isModuleEnabledInEnvironment()
   static final List<DbAccessModuleName> REQUIRED_MODULES_FOR_REGISTERED_TIER =
-      ImmutableList.of(
+      List.of(
           DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
           DbAccessModuleName.PROFILE_CONFIRMATION,
           DbAccessModuleName.PUBLICATION_CONFIRMATION,
