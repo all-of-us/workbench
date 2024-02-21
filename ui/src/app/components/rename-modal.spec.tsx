@@ -34,6 +34,9 @@ describe('should show error if new name already exist', () => {
     ['123.ipynb', '123.ipynb'],
     ['123.Rmd', '123'],
     ['123.Rmd', '123.Rmd'],
+    ['123.Rmd', '123.rMD'],
+    ['123.R', '123.r'],
+    ['123.R', '123.R'],
   ])(
     'Old analysis file name %s, new analysis file name %s',
     async (oldFilename, newFilename) => {
@@ -59,4 +62,71 @@ describe('should show error if new name already exist', () => {
       ).toEqual('New name already exists');
     }
   );
+});
+
+describe('RenameModal', () => {
+  let renameModal: RenameModal;
+
+  beforeEach(() => {
+    renameModal = new RenameModal({
+      existingNames: [],
+      oldName: '',
+      onCancel: () => {},
+      onRename: () => {},
+      resourceType: ResourceType.NOTEBOOK,
+    });
+  });
+
+  describe('generateNewName', () => {
+    it('should append suffix based on oldName format for notebooks', () => {
+      const newName = renameModal.generateNewName(
+        'newName',
+        'oldName.RMD',
+        ResourceType.NOTEBOOK
+      );
+      expect(newName).toEqual('newname.rmd');
+    });
+
+    it('should not append suffix for non-notebook resources', () => {
+      const newName = renameModal.generateNewName(
+        'newName',
+        'oldName.R',
+        ResourceType.DATASET
+      );
+      expect(newName).toEqual('newname');
+    });
+  });
+
+  describe('validateNewName', () => {
+    it('should return no errors for valid new name', () => {
+      const errors = renameModal.validateNewName(
+        'newName.ipynb',
+        'oldName.ipynb',
+        ResourceType.NOTEBOOK,
+        ['existingName.ipynb']
+      );
+      expect(errors).toBeUndefined();
+    });
+
+    it('should return errors for duplicate new name', () => {
+      const errors = renameModal.validateNewName(
+        'existingName.ipynb',
+        'oldName.ipynb',
+        ResourceType.NOTEBOOK,
+        ['existingName.ipynb']
+      );
+      expect(errors).toBeDefined();
+      expect(errors.newName).toBeDefined();
+    });
+
+    it('should return errors for invalid new name format', () => {
+      const errors = renameModal.validateNewName(
+        'invalid name',
+        'oldName.ipynb',
+        ResourceType.NOTEBOOK,
+        ['existingName.ipynb']
+      );
+      expect(errors).toBeUndefined();
+    });
+  });
 });

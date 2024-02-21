@@ -16,7 +16,7 @@ import {
 describe(appendAnalysisFileSuffixByOldName.name, () => {
   it('should append Rmd if old file is Rmd file', () => {
     expect(appendAnalysisFileSuffixByOldName('test', 'old.Rmd')).toEqual(
-      'test.Rmd'
+      'test.rmd'
     );
   });
 

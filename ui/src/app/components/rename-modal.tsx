@@ -54,6 +54,40 @@ export class RenameModal extends React.Component<Props, States> {
       saving: false,
     };
   }
+  generateNewName(
+    newName: string,
+    oldName: string,
+    resourceType: ResourceType
+  ): string {
+    // Append .ipynb, .Rmd, .R, .sas to the filename (if needed) based on the oldName format
+    return resourceType === ResourceType.NOTEBOOK
+      ? appendAnalysisFileSuffixByOldName(
+          newName?.toLowerCase().trim(),
+          oldName.toLowerCase()
+        )
+      : newName?.toLowerCase().trim();
+  }
+
+  validateNewName(
+    newName: string,
+    oldName: string,
+    resourceType: ResourceType,
+    existingNames: string[]
+  ) {
+    const lowerCaseExistingNames = existingNames.map((name) =>
+      name.toLowerCase()
+    );
+    const formattedNewName = this.generateNewName(
+      newName,
+      oldName,
+      resourceType
+    );
+    const errors = validate(
+      { newName: formattedNewName },
+      { newName: nameValidationFormat(lowerCaseExistingNames, resourceType) }
+    );
+    return errors;
+  }
 
   onRename() {
     this.setState({ saving: true });
@@ -70,17 +104,12 @@ export class RenameModal extends React.Component<Props, States> {
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
-    const errors = validate(
-      {
-        newName:
-          // Append .ipynb, .Rmd, .R, .sas to the filename (if needed) based on the oldName format
-          resourceType === ResourceType.NOTEBOOK
-            ? appendAnalysisFileSuffixByOldName(newName?.trim(), oldName)
-            : newName?.trim(),
-      },
-      {
-        newName: nameValidationFormat(existingNames, resourceType),
-      }
+
+    const errors = this.validateNewName(
+      newName,
+      oldName,
+      resourceType,
+      existingNames
     );
     return (
       <Modal loading={saving}>
