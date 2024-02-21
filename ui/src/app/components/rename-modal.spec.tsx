@@ -79,7 +79,7 @@ describe('RenameModal', () => {
 
   describe('generateNewName', () => {
     it('should append suffix based on oldName format for notebooks', () => {
-      const newName = renameModal.generateNewName(
+      const newName = renameModal.generateNewNameForValidation(
         'newName',
         'oldName.RMD',
         ResourceType.NOTEBOOK
@@ -88,7 +88,7 @@ describe('RenameModal', () => {
     });
 
     it('should not append suffix for non-notebook resources', () => {
-      const newName = renameModal.generateNewName(
+      const newName = renameModal.generateNewNameForValidation(
         'newName',
         'oldName.R',
         ResourceType.DATASET

@@ -54,7 +54,7 @@ export class RenameModal extends React.Component<Props, States> {
       saving: false,
     };
   }
-  generateNewName(
+  generateNewNameForValidation(
     newName: string,
     oldName: string,
     resourceType: ResourceType
@@ -77,7 +77,7 @@ export class RenameModal extends React.Component<Props, States> {
     const lowerCaseExistingNames = existingNames.map((name) =>
       name.toLowerCase()
     );
-    const formattedNewName = this.generateNewName(
+    const formattedNewName = this.generateNewNameForValidation(
       newName,
       oldName,
       resourceType

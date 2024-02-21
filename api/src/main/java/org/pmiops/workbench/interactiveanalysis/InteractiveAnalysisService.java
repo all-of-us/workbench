@@ -57,7 +57,7 @@ public class InteractiveAnalysisService {
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
 
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "(?i)\\.(Rmd|R)$";
-  @VisibleForTesting static final String SAS_DELOC_PATTERN = "(?i)\\.sas$";
+  @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.sas$";
 
   static final Map<AppType, String> GKE_DELOC_PATTERNS =
       Map.of(AppType.RSTUDIO, RSTUDIO_DELOC_PATTERN, AppType.SAS, SAS_DELOC_PATTERN);
