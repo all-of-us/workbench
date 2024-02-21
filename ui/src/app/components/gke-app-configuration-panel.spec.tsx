@@ -4,7 +4,6 @@ import {
   AppsApi,
   AppType,
   DisksApi,
-  ListAppsResponse,
   UserAppEnvironment,
 } from 'generated/fetch';
 
