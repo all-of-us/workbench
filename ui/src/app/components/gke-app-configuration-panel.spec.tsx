@@ -521,7 +521,6 @@ describe(GKEAppConfigurationPanel.name, () => {
   });
 
   it('should update the Create panel when the app changes status', async () => {
-    // Setup: an RStudio disk exists and the current app is RStudio
     const workspaceNamespace = 'aou-rw-1234';
     const runningApp = {
       ...createListAppsRStudioResponse(),
