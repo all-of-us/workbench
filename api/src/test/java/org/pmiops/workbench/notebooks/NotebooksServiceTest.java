@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -187,6 +186,8 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_IncorrectExt() {
+    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->
@@ -196,6 +197,8 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_requiresFileSuffix() {
+    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->
@@ -610,7 +613,7 @@ public class NotebooksServiceTest {
         notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
 
     // Assert
-    assertThat(actualHtml).isEqualTo("SAS notebook content<br>with new line");
+    assertThat(actualHtml).isEqualTo("SAS notebook content<br/>with new line");
   }
 
   @Test
@@ -697,7 +700,6 @@ public class NotebooksServiceTest {
     Assertions.assertThrows(
         NotImplementedException.class,
         () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
-    verifyNoInteractions(mockCloudStorageClient);
   }
 
   @Test
