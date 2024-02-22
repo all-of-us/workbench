@@ -217,11 +217,12 @@ export const AppFilesList = withCurrentWorkspace()(
             </FlexRow>
             {workspace && filesList && (
               <DataTable
+                rowsPerPageOptions={[10, 15, 25, 50]}
                 data-test-id='apps-file-list'
                 filterDisplay='row'
                 value={filesList}
                 paginator
-                rows={5}
+                rows={10}
                 style={{ paddingBottom: '10rem' }}
               >
                 <Column
