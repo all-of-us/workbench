@@ -31,9 +31,8 @@ public class NotebookUtilsTest {
 
   @Test
   public void testAppendFileExtension_unsupported() {
-    // lower case of Rmd which is not a supported file format
     assertThrows(
         NotImplementedException.class,
-        () -> NotebookUtils.appendFileExtensionIfMissing("from.rmd", "new"));
+        () -> NotebookUtils.appendFileExtensionIfMissing("from.rm", "new"));
   }
 }
