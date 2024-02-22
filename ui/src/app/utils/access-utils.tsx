@@ -49,17 +49,7 @@ export enum DARPageMode {
 
 const { useState, useEffect } = React;
 
-const redirectToRegisteredTrainingMoodle = async () => {
-  await profileApi().updatePageVisits({ page: 'moodle' });
-  const {
-    config: { complianceTrainingHost },
-  } = serverConfigStore.get();
-  const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`;
-  window.open(url, '_blank');
-};
-
 const redirectToTrainingAbsorb = async () => {
-  await profileApi().updatePageVisits({ page: 'absorb' });
   const {
     config: {
       absorbSamlIdentityProviderId,
@@ -73,39 +63,17 @@ const redirectToTrainingAbsorb = async () => {
   url.searchParams.set('forceauthn', 'false');
   url.searchParams.set('hd', gsuiteDomain);
   window.open(url.toString(), '_blank');
+  await profileApi().updatePageVisits({ page: 'absorb' });
 };
 
 export async function redirectToRegisteredTraining() {
   AnalyticsTracker.Registration.RegisteredTraining();
-
-  const useAbsorb = await profileApi().useAbsorb();
-
-  if (useAbsorb) {
-    await redirectToTrainingAbsorb();
-  } else {
-    await redirectToRegisteredTrainingMoodle();
-  }
+  await redirectToTrainingAbsorb();
 }
-
-const redirectToControlledTrainingMoodle = async () => {
-  await profileApi().updatePageVisits({ page: 'moodle' });
-  const {
-    config: { complianceTrainingHost },
-  } = serverConfigStore.get();
-  const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`;
-  window.open(url, '_blank');
-};
 
 export async function redirectToControlledTraining() {
   AnalyticsTracker.Registration.ControlledTraining();
-
-  const useAbsorb = await profileApi().useAbsorb();
-
-  if (useAbsorb) {
-    await redirectToTrainingAbsorb();
-  } else {
-    await redirectToControlledTrainingMoodle();
-  }
+  await redirectToTrainingAbsorb();
 }
 
 export const getTwoFactorSetupUrl = (): string => {

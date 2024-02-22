@@ -229,6 +229,8 @@ export const RenewalCardBody = ({
   const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
     useState(true);
 
+  const [disabled, setDisabled] = useState(false);
+
   const { duccSignedVersion } = profile;
 
   const { renewalTimeEstimate } = getAccessModuleConfig(
@@ -411,9 +413,14 @@ export const RenewalCardBody = ({
               {...{ moduleStatus, duccSignedVersion }}
               actionButtonText='Complete Training'
               completedButtonText='Completed'
+              disabled={disabled}
               onClick={() => {
+                setDisabled(true);
                 setTrainingRefreshButtonDisabled(false);
                 redirectToRegisteredTraining();
+                setInterval(() => {
+                  setDisabled(false);
+                }, 3000);
               }}
             />
             {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
