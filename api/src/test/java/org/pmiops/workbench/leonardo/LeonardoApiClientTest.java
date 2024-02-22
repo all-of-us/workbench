@@ -245,6 +245,27 @@ public class LeonardoApiClientTest {
   }
 
   @Test
+  public void testCreateAppSuccess_autodeleteEnabled() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    leonardoApiClient.createApp(
+        createAppRequest
+            .persistentDiskRequest(persistentDiskRequest.name("pd-name"))
+            .autodeleteEnabled(true)
+            .autodeleteThreshold(10),
+        testWorkspace);
+    verify(userAppsApi)
+        .createApp(
+            eq(GOOGLE_PROJECT_ID),
+            startsWith(getAppName(AppType.RSTUDIO)),
+            createAppRequestArgumentCaptor.capture());
+
+    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+
+    assertThat(createAppRequest.isAutodeleteEnabled()).isTrue();
+    assertThat(createAppRequest.getAutodeleteThreshold()).isEqualTo(10);
+  }
+
+  @Test
   public void testCreateAppSuccess_newPd() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
     leonardoApiClient.createApp(
