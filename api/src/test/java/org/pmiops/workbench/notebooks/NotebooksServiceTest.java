@@ -186,7 +186,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_IncorrectExt() {
-    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    mockBlobsForHtml();
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
@@ -197,7 +197,8 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_requiresFileSuffix() {
-    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    mockBlobsForHtml();
+
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
