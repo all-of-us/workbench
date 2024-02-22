@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -307,6 +306,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
+  @Override
   public String convertJupyterNotebookToHtml(byte[] notebook) {
     // We need to send a byte array so the ApiClient attaches the body as is instead
     // of serializing it through Gson which it will do for Strings.
@@ -350,7 +350,8 @@ public class NotebooksServiceImpl implements NotebooksService {
       return convertSasNotebookToHtml(blob.getContent());
     } else {
       throw new NotImplementedException(
-          String.format("Converting %s to read-only HTML is not supported", notebookNameWithFileExtension));
+          String.format(
+              "Converting %s to read-only HTML is not supported", notebookNameWithFileExtension));
     }
   }
 

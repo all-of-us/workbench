@@ -593,7 +593,7 @@ public class NotebooksServiceTest {
     String workspaceNamespace = "workspaceNamespace";
     String workspaceName = "workspaceName";
     String notebookName = "notebookName.sas";
-    String expectedHtml = "SAS notebook content";
+    String sasNotebookContent = "SAS notebook content\nwith new line";
 
     // Mock the necessary dependencies
     when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
@@ -602,15 +602,15 @@ public class NotebooksServiceTest {
                 .workspace(new RawlsWorkspaceDetails().bucketName(BUCKET_NAME)));
     when(mockCloudStorageClient.getBlob(BUCKET_NAME, NotebookUtils.withNotebookPath(notebookName)))
         .thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1L);
-    when(mockBlob.getContent()).thenReturn(expectedHtml.getBytes());
+    when(mockBlob.getSize()).thenReturn((long) sasNotebookContent.length());
+    when(mockBlob.getContent()).thenReturn(sasNotebookContent.getBytes());
 
     // Act
     String actualHtml =
         notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
 
     // Assert
-    assertThat(expectedHtml).isEqualTo(actualHtml);
+    assertThat(actualHtml).isEqualTo("SAS notebook content<br>with new line");
   }
 
   @Test
