@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { AppType, Disk } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
+import { findApp, toUIAppType } from 'app/components/apps-panel/utils';
 import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import { notificationStore, userAppsStore, useStore } from 'app/utils/stores';
@@ -13,7 +14,6 @@ import {
   maybeStartPollingForUserApps,
 } from 'app/utils/user-apps-utils';
 
-import { findApp, toUIAppType } from './apps-panel/utils';
 import { ConfirmDelete } from './common-env-conf-panels/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './common-env-conf-panels/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './common-env-conf-panels/confirm-delete-unattached-pd';

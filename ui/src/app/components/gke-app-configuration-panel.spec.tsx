@@ -9,6 +9,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   appsApi,
   disksApi,
@@ -32,7 +33,6 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
-import { UIAppType } from './apps-panel/utils';
 import {
   GKEAppConfigurationPanel,
   GkeAppConfigurationPanelProps,
