@@ -893,6 +893,41 @@ Common.register_command({
   :fn => ->(*args) { stage_redcap_files("stage-redcap-files", *args) }
 })
 
+def tanagra_stage_redcap_files(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project name - Required"
+  )
+  op.add_option(
+      "--date [date]",
+      ->(opts, v) { opts.date = v},
+      "Redcap file date - Required."
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name - Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.date and opts.dataset }
+  op.parse.validate
+  
+  env = ENVIRONMENTS[op.opts.project]
+  cdr_source = env.fetch(:source_cdr_project)
+
+  common = Common.new
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{python tanagra-stage-redcap-files.py --project #{cdr_source} --date #{op.opts.date} --dataset #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "tanagra-stage-redcap-files",
+  :description => "Cleanup redcap files for CDR indices ingestion.",
+  :fn => ->(*args) { tanagra_stage_redcap_files("tanagra-stage-redcap-files", *args) }
+})
+
 def build_cb_criteria_demographics(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false

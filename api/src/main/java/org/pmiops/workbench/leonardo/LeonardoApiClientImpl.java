@@ -604,7 +604,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .diskConfig(diskRequest)
         .customEnvironmentVariables(appCustomEnvVars)
         .workspaceId(dbWorkspace.getFirecloudUuid())
-        .labels(appLabels);
+        .labels(appLabels)
+        .autodeleteThreshold(createAppRequest.getAutodeleteThreshold());
+    if (createAppRequest.isAutodeleteEnabled() != null) {
+      leonardoCreateAppRequest.autodeleteEnabled(true);
+    }
 
     leonardoRetryHandler.run(
         (context) -> {

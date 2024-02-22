@@ -2489,6 +2489,13 @@ components:
           items:
             type: string
           description: Extra arguments to pass to the application. Only used if appType is CUSTOM.
+        autodeleteThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the app is
+            deleted. When autodeleteEnabled is true, a positive integer is required
+        autodeleteEnabled:
+          type: boolean
+          description: Whether to turn on autodelete
 
     GetAppResponse:
       description: the configuration of an app
@@ -2528,6 +2535,13 @@ components:
         labels:
           type: object
           description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
+        autodeleteEnabled:
+          type: boolean
+          description: Whether to turn on autodelete
+        autodeleteThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the app is
+            deleted. When autodeleteEnabled is true, a positive integer is required
 
     ListAppResponse:
       description: the configuration of an app
@@ -2564,6 +2578,13 @@ components:
         labels:
           type: object
           description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
+        autodeleteEnabled:
+          type: boolean
+          description: Whether to turn on autodelete
+        autodeleteThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the app is
+            deleted. When autodeleteEnabled is true, a positive integer is required
 
     CloudContext:
       description: Cloud platform which holds context for a workspace.

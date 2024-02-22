@@ -1,6 +1,5 @@
 package org.pmiops.workbench.shibboleth;
 
-import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
@@ -21,9 +20,7 @@ public class ShibbolethConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.shibbolethApiBaseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return new ShibbolethApi(apiClient);
   }
