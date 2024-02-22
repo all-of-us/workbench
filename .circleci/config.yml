@@ -984,6 +984,8 @@ workflows:
       - api-bigquery-test
       - api-contract-test
       - api-integration-test
+#      Temp addition to test Tanagra job before merging
+      - tanagra-deploy-to-test
       - api-test-coverage:
           requires:
           - api-unit-test
