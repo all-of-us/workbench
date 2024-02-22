@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -319,17 +318,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
-
-    final Function<byte[], String> converter;
-    if (NotebookUtils.isJupyterNotebook(notebookName)) {
-      converter = this::convertJupyterNotebookToHtml;
-    } else if (NotebookUtils.isRStudioFile(notebookName)) {
-      converter = this::convertRstudioNotebookToHtml;
-    } else {
-      throw new NotImplementedException(
-          String.format("Converting %s to read-only HTML is not supported", notebookName));
-    }
-
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
@@ -337,19 +325,12 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return converter.apply(blob.getContent());
+    return getReadOnlyHtml(blob, notebookName);
   }
 
   @Override
   public String adminGetReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
-    if (!(NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
-        || NotebookUtils.isRStudioFile(notebookNameWithFileExtension))) {
-      throw new NotImplementedException(
-          String.format(
-              "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
-    }
-
     String bucketName =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceName)
@@ -357,9 +338,21 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
-    return NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
-        ? convertJupyterNotebookToHtml(blob.getContent())
-        : convertRstudioNotebookToHtml(blob.getContent());
+    return getReadOnlyHtml(blob, notebookNameWithFileExtension);
+  }
+
+  private String getReadOnlyHtml(Blob blob, String notebookNameWithFileExtension) {
+    if (NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+      return convertJupyterNotebookToHtml(blob.getContent());
+    } else if (NotebookUtils.isRStudioFile(notebookNameWithFileExtension)) {
+      return convertRstudioNotebookToHtml(blob.getContent());
+    } else if (NotebookUtils.isSasFile(notebookNameWithFileExtension)) {
+      return convertSasNotebookToHtml(blob.getContent());
+    } else {
+      throw new NotImplementedException(
+          String.format(
+              "Converting %s to read-only HTML is not supported", notebookNameWithFileExtension));
+    }
   }
 
   private GoogleCloudLocators getNotebookLocators(
@@ -382,5 +375,10 @@ public class NotebooksServiceImpl implements NotebooksService {
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
     return PREVIEW_SANITIZER.sanitize(fireCloudService.staticRstudioNotebooksConvert(notebook));
+  }
+
+  private String convertSasNotebookToHtml(byte[] notebook) {
+    // preserve newline
+    return new String(notebook, StandardCharsets.UTF_8).replace("\n", "<br/>");
   }
 }
