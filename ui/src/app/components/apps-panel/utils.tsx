@@ -17,7 +17,7 @@ import {
   sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
-import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import {DEFAULT_AUTODELETE_THRESHOLD_MINUTES, DEFAULT_MACHINE_NAME} from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
@@ -77,6 +77,8 @@ export const defaultCromwellConfig: CreateAppRequest = {
     size: 50,
     diskType: DiskType.STANDARD,
   },
+  autodeleteEnabled: false,
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES
 };
 
 // TODO replace with better defaults?

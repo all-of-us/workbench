@@ -27,7 +27,18 @@ export const AutopauseMinuteThresholds = new Map([
   [10 * 24 * 60, '10 days'],
 ]);
 
+export const AutodeleteMinuteThresholds = new Map([
+  [1 * 24 * 60, '1 day'],
+  [3 * 24 * 60, '3 days'],
+  [7 * 24 * 60, '7 days (default)'],
+  [15 * 24 * 60, '15 days'],
+  [30 * 24 * 60, '30 days']
+]);
+
 export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
+
+// 7 days
+export const DEFAULT_AUTODELETE_THRESHOLD_MINUTES = 7 * 24 * 60;
 
 export interface Machine {
   name: string;

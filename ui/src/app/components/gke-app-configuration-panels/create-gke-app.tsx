@@ -14,7 +14,7 @@ import {
   canDeleteApp,
   defaultCromwellConfig,
   defaultRStudioConfig,
-  defaultSASConfig,
+  defaultSASConfig, isAppActive,
   toUIAppType,
 } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
@@ -24,7 +24,13 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { AnalysisConfig } from 'app/utils/analysis-config';
-import { ComputeType, findMachineByName, Machine } from 'app/utils/machines';
+import {
+  AutodeleteMinuteThresholds,
+  ComputeType,
+  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+  findMachineByName,
+  Machine
+} from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {
@@ -37,7 +43,9 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { CreateGkeAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
 import { OpenGkeAppButton } from './open-gke-app-button';
-
+import { Dropdown } from 'primereact/dropdown';
+import {CheckBox} from "app/components/inputs";
+import {getWholeDaysFromNow} from "app/utils/dates";
 const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
@@ -121,10 +129,21 @@ export const CreateGkeApp = ({
     autopauseThreshold: undefined,
   };
 
-  const createAppRequest: CreateAppRequest = {
+  const [createAppRequest, setCreateAppRequest] = React.useState<CreateAppRequest>({
     ...defaultConfig,
     persistentDiskRequest,
-  };
+  });
+
+  const [autodeleteDropdownChecked, setAutodeleteDropdownChecked] = React.useState(false);
+
+  const autodeleteRemainingDays: number = (() => {
+    if (app?.autodeleteEnabled && app.dateAccessed && app.autodeleteThreshold) {
+      const dateAccessed = new Date(app.dateAccessed);
+      const autodeleteDate = new Date(dateAccessed.getTime() + app.autodeleteThreshold * 60 * 1000);
+      return getWholeDaysFromNow(autodeleteDate.getTime());
+    }
+    return null;
+  })();
 
   return (
     <FlexColumn
@@ -151,6 +170,62 @@ export const CreateGkeApp = ({
         />
       </div>
       <SupportNote />
+      <FlexRow
+        style={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '2rem',
+        }}
+      >
+        <FlexRow>
+          <CheckBox
+            disabled={isAppActive(app)}
+            onChange={(autodeleteEnabled) => {
+              setCreateAppRequest(prevState => ({
+                ...prevState,
+                autodeleteEnabled
+              }));
+              setAutodeleteDropdownChecked(autodeleteEnabled)
+            }}
+            style={{ marginRight: '0.5rem', zoom: 1.5  }}
+          />
+          <FlexColumn>
+          <label style={styles.label} htmlFor='gke-autodelete-label'>
+            Automatically delete after idle for
+          </label>
+            <p style={{ marginTop: '0' }}>
+           Your persistent disk will not be deleted.
+            </p>
+          </FlexColumn>
+          <FlexColumn>
+          <Dropdown
+            id='gke-autodelete'
+            appendTo='self'
+            disabled={isAppActive(app) || !autodeleteDropdownChecked}
+            options={Array.from(AutodeleteMinuteThresholds.entries()).map(
+              (entry) => ({
+                label: entry[1],
+                value: entry[0],
+              })
+            )}
+            value={
+              createAppRequest.autodeleteThreshold ||
+              DEFAULT_AUTODELETE_THRESHOLD_MINUTES
+            }
+            onChange={(e) => {
+              setCreateAppRequest(prevState => ({
+                ...prevState,
+                autodeleteThreshold: e.value
+              }));
+            }}
+            style={{ marginLeft: '1rem' }}
+          />
+            {autodeleteRemainingDays && (
+              <p style={{ marginTop: '0', marginLeft: '1rem' }}>{`The app will be deleted in ${autodeleteRemainingDays} days.`}</p>
+            )}
+          </FlexColumn>
+        </FlexRow>
+      </FlexRow>
       <FlexRow
         style={{
           alignItems: 'center',

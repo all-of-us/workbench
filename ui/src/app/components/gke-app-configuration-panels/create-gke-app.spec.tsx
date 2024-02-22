@@ -65,6 +65,16 @@ export const defaultProps: CommonCreateGkeAppProps = {
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
+const defaultApp: UserAppEnvironment = {
+  appName: 'all-of-us-rstudio-123',
+  googleProject: 'test-project',
+  diskName: 'test-disk',
+  status: 'RUNNING',
+  appType: AppType.RSTUDIO,
+  dateAccessed: new Date().toISOString(),
+  autodeleteEnabled: false,
+};
+
 // tests for behavior common to all GKE Apps.  For app-specific tests, see e.g. create-cromwell-spec
 describe(CreateGkeApp.name, () => {
   let disksApiStub: DisksApiStub;
@@ -220,6 +230,23 @@ describe(CreateGkeApp.name, () => {
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
+      });
+
+      it('should correctly calculate autodeleteRemainingDays', async () => {
+        const dateAccessed = new Date();
+        const autodeleteThreshold = 10080; // 7 days in minutes
+
+        await component(appType, {
+          app: {
+            ...defaultApp,
+            autodeleteEnabled: true,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        });
+
+        // The expected remaining days is 7 because the autodeleteThreshold is 7 days and the dateAccessed is now
+        expect(screen.queryByText(/The app will be deleted in 7 dayss/)).toBeInTheDocument();
       });
     }
   );
