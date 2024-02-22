@@ -22,21 +22,6 @@ export const PersistentDiskSelector = ({
   onChange,
 }: Props) => (
   <>
-    <WarningMessage>
-      <AoU /> will now only support reattachable persistent disks as the storage
-      disk option for Standard VMs and will discontinue standard disks. You will
-      continue to use standard disks with Dataproc clusters. Refer to the
-      <a
-        href={
-          'https://support.researchallofus.org/hc/en-us/articles/5140493753620-Persistent-Disk'
-        }
-        target='_blank'
-      >
-        {' '}
-        article{' '}
-      </a>{' '}
-      to learn more.
-    </WarningMessage>
     <FlexRow style={styles.diskRow}>
       <FlexColumn>
         <label style={styles.diskLabel}>Reattachable persistent disk</label>
