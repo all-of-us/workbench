@@ -5,8 +5,6 @@ import { DiskType } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { WarningMessage } from 'app/components/messages';
-import { AoU } from 'app/components/text-wrappers';
 import { DiskConfig, diskTypeLabels } from 'app/utils/runtime-utils';
 
 import { DiskSizeSelector } from './disk-size-selector';
@@ -22,21 +20,6 @@ export const PersistentDiskSelector = ({
   onChange,
 }: Props) => (
   <>
-    <WarningMessage>
-      <AoU /> will now only support reattachable persistent disks as the storage
-      disk option for Standard VMs and will discontinue standard disks. You will
-      continue to use standard disks with Dataproc clusters. Refer to the
-      <a
-        href={
-          'https://support.researchallofus.org/hc/en-us/articles/5140493753620-Persistent-Disk'
-        }
-        target='_blank'
-      >
-        {' '}
-        article{' '}
-      </a>{' '}
-      to learn more.
-    </WarningMessage>
     <FlexRow style={styles.diskRow}>
       <FlexColumn>
         <label style={styles.diskLabel}>Reattachable persistent disk</label>
