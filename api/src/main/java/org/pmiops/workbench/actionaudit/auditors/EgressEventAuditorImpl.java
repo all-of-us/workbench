@@ -225,6 +225,11 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     fireEventSet(baseEventBuilder, null, comment);
   }
 
+  /**
+   * Creates and fires a set of events derived from the given base event, incorporating audit rows
+   * to record properties of the egress event and a human-readable comment. Either the egress event
+   * or the comment may be null, in which case those row(s) won't be generated.
+   */
   private void fireEventSet(
       ActionAuditEvent.Builder baseEventBuilder,
       @Nullable SumologicEgressEvent egressEvent,
@@ -256,8 +261,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
 
   private void fireRemediationEventSet(
       ActionAuditEvent.Builder baseEventBuilder,
-      DbEgressEvent egressEvent,
-      WorkbenchConfig.EgressAlertRemediationPolicy.Escalation escalation) {
+      @Nullable DbEgressEvent egressEvent,
+      @Nullable WorkbenchConfig.EgressAlertRemediationPolicy.Escalation escalation) {
     var events = new ArrayList<ActionAuditEvent>();
     if (egressEvent != null) {
       var propertyValues =
@@ -290,13 +295,17 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     actionAuditService.send(events);
   }
 
+  /**
+   * Returns an ActionAuditEvent suitable for logging system-level error messages, e.g. when an
+   * inbound high-egress event refers to an inactive workspace or when the request JSON could not be
+   * successfully parsed.
+   */
   private ActionAuditEvent.Builder getGenericBaseEventBuilder() {
     return ActionAuditEvent.builder()
         .timestamp(clock.millis())
         .actionId(actionIdProvider.get())
         .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)
         .agentType(AgentType.SYSTEM)
-        .targetType(TargetType.WORKSPACE)
-        .targetIdMaybe(null);
+        .targetType(TargetType.WORKSPACE);
   }
 }
