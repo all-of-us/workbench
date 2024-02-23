@@ -415,9 +415,11 @@ export const RenewalCardBody = ({
               completedButtonText='Completed'
               disabled={disabled}
               onClick={() => {
+                // disable action to prevent double-clicking
                 setDisabled(true);
                 setTrainingRefreshButtonDisabled(false);
                 redirectToRegisteredTraining();
+                // re-enable after a wait
                 setInterval(() => {
                   setDisabled(false);
                 }, 3000);
