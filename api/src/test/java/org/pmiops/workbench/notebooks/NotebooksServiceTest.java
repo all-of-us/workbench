@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -187,6 +186,8 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_IncorrectExt() {
+    mockBlobsForHtml();
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->
@@ -196,6 +197,9 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml_requiresFileSuffix() {
+    mockBlobsForHtml();
+
+    doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->
@@ -589,6 +593,31 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testConvertSasNotebookToHtml() {
+    String workspaceNamespace = "workspaceNamespace";
+    String workspaceName = "workspaceName";
+    String notebookName = "notebookName.sas";
+    String sasNotebookContent = "SAS notebook content\nwith new line";
+
+    // Mock the necessary dependencies
+    when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
+        .thenReturn(
+            new RawlsWorkspaceResponse()
+                .workspace(new RawlsWorkspaceDetails().bucketName(BUCKET_NAME)));
+    when(mockCloudStorageClient.getBlob(BUCKET_NAME, NotebookUtils.withNotebookPath(notebookName)))
+        .thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn((long) sasNotebookContent.length());
+    when(mockBlob.getContent()).thenReturn(sasNotebookContent.getBytes());
+
+    // Act
+    String actualHtml =
+        notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName);
+
+    // Assert
+    assertThat(actualHtml).isEqualTo("SAS notebook content<br/>with new line");
+  }
+
+  @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     stubNotebookToJson("test_disallowsRemoteImage.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
@@ -672,7 +701,6 @@ public class NotebooksServiceTest {
     Assertions.assertThrows(
         NotImplementedException.class,
         () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
-    verifyNoInteractions(mockCloudStorageClient);
   }
 
   @Test

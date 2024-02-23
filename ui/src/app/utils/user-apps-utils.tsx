@@ -52,7 +52,7 @@ export const updateLastActive = (userApps: ListAppsResponse) => {
       app.dateAccessed ? new Date(app.dateAccessed).valueOf() : 0
     )
   );
-  if (userAppLastActive > getLastActiveEpochMillis() ?? 0) {
+  if (userAppLastActive > (getLastActiveEpochMillis() ?? 0)) {
     setLastActive(userAppLastActive);
   }
 };
@@ -89,24 +89,36 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
     });
 };
 
-export const createUserApp = (namespace, config: CreateAppRequest) =>
+export const createUserApp = (namespace: string, config: CreateAppRequest) =>
   appsApi()
     .createApp(namespace, config)
     .then(() => {
       maybeStartPollingForUserApps(namespace);
     });
 
-export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) =>
+export const deleteUserApp = (
+  namespace: string,
+  appName: string,
+  deleteDiskWithUserApp: boolean
+) =>
   appsApi()
     .deleteApp(namespace, appName, deleteDiskWithUserApp)
     .then(() => maybeStartPollingForUserApps(namespace));
 
-export const pauseUserApp = (googleProject, appName, namespace) =>
+export const pauseUserApp = (
+  googleProject: string,
+  appName: string,
+  namespace: string
+) =>
   leoAppsApi()
     .stopApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
 
-export const resumeUserApp = (googleProject, appName, namespace) =>
+export const resumeUserApp = (
+  googleProject: string,
+  appName: string,
+  namespace: string
+) =>
   leoAppsApi()
     .startApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));

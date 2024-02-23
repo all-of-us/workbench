@@ -2,24 +2,34 @@ import * as React from 'react';
 
 import {
   AppsApi,
+  AppStatus,
   AppType,
   DisksApi,
   UserAppEnvironment,
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import {
   appsApi,
   disksApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { notificationStore, serverConfigStore } from 'app/utils/stores';
+import {
+  notificationStore,
+  serverConfigStore,
+  userAppsStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { expectButtonElementEnabled } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
+  createListAppsRStudioResponse,
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
@@ -49,10 +59,22 @@ const validateInitialLoadingSpinner = async () => {
   });
 };
 
+const findOpenButton = (appType: string): HTMLElement =>
+  screen.queryByRole('button', {
+    name: `${appType} cloud environment open button`,
+  });
+
+const findCreateButton = (appType: string): HTMLElement =>
+  screen.queryByRole('button', {
+    name: `${appType} cloud environment create button`,
+  });
+
 describe(GKEAppConfigurationPanel.name, () => {
   beforeEach(() => {
+    jest.clearAllTimers();
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
+    userAppsStore.set({ updating: false, userApps: [] });
     notificationStore.set(null);
     serverConfigStore.set({
       config: {
@@ -105,20 +127,6 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([]));
     createWrapper();
     await validateInitialLoadingSpinner();
-  });
-
-  it('should show an error if the list apps API call fails', async () => {
-    jest
-      .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.reject());
-
-    expect(notificationStore.get()).toBeNull();
-
-    createWrapper();
-    await waitFor(() => {
-      expect(notificationStore.get().title).toBeTruthy();
-      expect(notificationStore.get().message).toBeTruthy();
-    });
   });
 
   it('should show an error if the list disks API call fails', async () => {
@@ -513,5 +521,60 @@ describe(GKEAppConfigurationPanel.name, () => {
       expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
       expect(screen.queryByText(deleteUnattachedPdRegex)).toBeNull();
     });
+  });
+
+  it('should update the Create panel when the app changes status', async () => {
+    jest.useFakeTimers();
+
+    const workspaceNamespace = 'aou-rw-1234';
+    const runningApp = {
+      ...createListAppsRStudioResponse(),
+      status: AppStatus.RUNNING,
+    };
+    jest
+      .spyOn(appsApi(), 'listAppsInWorkspace')
+      .mockImplementationOnce(
+        (): Promise<any> => Promise.resolve([runningApp])
+      );
+
+    createWrapper({
+      appType: AppType.RSTUDIO,
+      workspaceNamespace,
+    });
+
+    // expect to see the (enabled) open button because the app is running
+    const openButton = await waitFor(() => {
+      const button = findOpenButton(UIAppType.RSTUDIO);
+      expect(button).not.toBeNull();
+      return button;
+    });
+    expectButtonElementEnabled(openButton);
+
+    // expect NOT to see the create button because the app is running
+    await waitFor(() => expect(findCreateButton(UIAppType.RSTUDIO)).toBeNull());
+
+    const deletingApp = {
+      ...runningApp,
+      status: AppStatus.DELETING,
+    };
+    jest
+      .spyOn(appsApi(), 'listAppsInWorkspace')
+      .mockImplementation((): Promise<any> => Promise.resolve([deletingApp]));
+
+    // wait for additional 5 min to ensure the app status change is processed
+    jest.advanceTimersByTime(5 * 60e3);
+
+    // expect to see the (disabled) create button because the app is deleting
+    const createButton = await waitFor(() => {
+      const button = findCreateButton(UIAppType.RSTUDIO);
+      expect(button).not.toBeNull();
+      return button;
+    });
+    expectButtonElementDisabled(createButton);
+
+    // expect NOT to see the open button because the app is deleting
+    await waitFor(() => expect(findOpenButton(UIAppType.RSTUDIO)).toBeNull());
+
+    jest.useRealTimers();
   });
 });

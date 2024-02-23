@@ -151,6 +151,7 @@ export const AppsPanel = (props: {
               />
             ) : (
               <TooltipTrigger
+                key={availableApp.appType}
                 disabled={workspace.billingStatus !== BillingStatus.INACTIVE}
                 content={BILLING_ACCOUNT_DISABLED_TOOLTIP}
               >
