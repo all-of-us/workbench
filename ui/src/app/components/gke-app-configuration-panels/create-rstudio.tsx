@@ -4,10 +4,6 @@ import { AppType } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { InfoMessage } from 'app/components/messages';
-import {
-  RSTUDIO_HOW_TO_DATASET_BUILDER_LINK,
-  RSTUDIO_HOW_TO_RUN_LINK,
-} from 'app/utils/aou_external_links';
 import { supportUrls } from 'app/utils/zendesk';
 
 import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
