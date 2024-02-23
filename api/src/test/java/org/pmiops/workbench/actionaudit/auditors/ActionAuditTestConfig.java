@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
-import static org.pmiops.workbench.audit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
+import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
 
 import java.time.Clock;
 import java.time.Instant;
