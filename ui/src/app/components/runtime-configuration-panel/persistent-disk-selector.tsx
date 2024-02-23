@@ -5,8 +5,6 @@ import { DiskType } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { WarningMessage } from 'app/components/messages';
-import { AoU } from 'app/components/text-wrappers';
 import { DiskConfig, diskTypeLabels } from 'app/utils/runtime-utils';
 
 import { DiskSizeSelector } from './disk-size-selector';
