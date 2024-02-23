@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { NotificationBanner } from 'app/components/notification-banner';
@@ -9,7 +8,7 @@ import {
   ACCESS_RENEWAL_PATH,
   maybeDaysRemaining,
 } from 'app/utils/access-utils';
-import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { profileStore, useStore } from 'app/utils/stores';
 
 export interface AccessRenewalNotificationProps {
   accessTier: AccessTierShortNames;
