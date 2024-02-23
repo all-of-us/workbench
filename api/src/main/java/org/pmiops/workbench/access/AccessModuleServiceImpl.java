@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -129,7 +128,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         .map(this::maybeReturnAccessModule)
         .filter(Optional::isPresent)
         .map(Optional::get)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override
@@ -252,22 +251,15 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private boolean isModuleEnabledInEnvironment(AccessModule module) {
     final AccessConfig accessConfig = configProvider.get().access;
 
-    switch (module) {
-      case ERA_COMMONS:
-        return accessConfig.enableEraCommons;
+    return switch (module) {
+      case ERA_COMMONS -> accessConfig.enableEraCommons;
         // RT Compliance training  and CT Compliance training modules are
         // controlled by the same feature flag COMPLIANCE_TRAINING
-      case COMPLIANCE_TRAINING:
-      case CT_COMPLIANCE_TRAINING:
-        return accessConfig.enableComplianceTraining;
-      case IDENTITY:
-        return accessConfig.enableRasLoginGovLinking;
-      case RAS_LINK_LOGIN_GOV:
-        return accessConfig.enableRasLoginGovLinking;
-      case RAS_LINK_ID_ME:
-        return accessConfig.enableRasIdMeLinking;
-      default:
-        return true;
-    }
+      case COMPLIANCE_TRAINING, CT_COMPLIANCE_TRAINING -> accessConfig.enableComplianceTraining;
+      case RAS_LINK_LOGIN_GOV -> accessConfig.enableRasLoginGovLinking;
+      case RAS_LINK_ID_ME -> accessConfig.enableRasIdMeLinking;
+      case IDENTITY -> accessConfig.enableRasLoginGovLinking || accessConfig.enableRasIdMeLinking;
+      default -> true;
+    };
   }
 }
