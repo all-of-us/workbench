@@ -6,7 +6,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
@@ -42,7 +42,7 @@ public class LeonardoRuntimeAuditorImpl implements LeonardoRuntimeAuditor {
         runtimeNames.stream()
             .map(
                 runtimeName ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .timestamp(clock.millis())
                         .actionId(actionId)
                         .agentType(AgentType.ADMINISTRATOR)

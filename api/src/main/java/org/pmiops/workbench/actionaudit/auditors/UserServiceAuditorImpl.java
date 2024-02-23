@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -53,7 +54,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       List<DbAccessTier> newAccessTiers,
       Agent agent) {
     actionAuditService.send(
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(agent.agentType())
             .agentIdMaybe(agent.idMaybe())
@@ -80,7 +81,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       Optional<Instant> newBypassTime) {
     DbUser adminUser = dbUserProvider.get();
     Builder eventBuilder =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
             .agentIdMaybe(adminUser.getUserId())
@@ -101,7 +102,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   @Override
   public void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion) {
     actionAuditService.send(
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.USER)
             .agentIdMaybe(targetUser.getUserId())
@@ -120,7 +121,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
     DbUser adminUser = dbUserProvider.get();
     Builder builder =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
             .agentIdMaybe(adminUser.getUserId())

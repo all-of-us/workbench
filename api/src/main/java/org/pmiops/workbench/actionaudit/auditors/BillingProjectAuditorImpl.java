@@ -5,7 +5,6 @@ import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.AC
 import java.time.Clock;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
-import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
@@ -33,7 +32,7 @@ public class BillingProjectAuditorImpl implements BillingProjectAuditor {
   @Override
   public void fireDeleteAction(String billingProjectName) {
     ActionAuditEvent event =
-        new Builder()
+        ActionAuditEvent.builder()
             .actionId(actionIdProvider.get())
             .actionType(ActionType.DELETE)
             .agentType(AgentType.SYSTEM)

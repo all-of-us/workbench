@@ -13,6 +13,10 @@ public record ActionAuditEvent(
     String previousValueMaybe,
     String newValueMaybe) {
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   public static class Builder {
     private Long timestamp;
     private AgentType agentType;

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
-import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
@@ -58,7 +57,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
         propertyValues.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .actionId(info.actionId())
                         .agentEmailMaybe(info.userEmail())
                         .actionType(ActionType.CREATE)
@@ -90,7 +89,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
         propertyToChangedValue.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .actionId(info.actionId())
                         .agentEmailMaybe(info.userEmail())
                         .actionType(ActionType.EDIT)
@@ -115,7 +114,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     CommonAuditEventInfo info = getAuditEventInfo();
     if (info == null) return;
     ActionAuditEvent event =
-        new Builder()
+        ActionAuditEvent.builder()
             .actionId(info.actionId())
             .agentEmailMaybe(info.userEmail())
             .actionType(ActionType.DELETE)
@@ -139,7 +138,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     CommonAuditEventInfo info = getAuditEventInfo();
     if (info == null) return;
     ActionAuditEvent sourceEvent =
-        new Builder()
+        ActionAuditEvent.builder()
             .actionId(info.actionId())
             .agentEmailMaybe(info.userEmail())
             .actionType(ActionType.DUPLICATE_FROM)
@@ -156,7 +155,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
         destinationPropertyValues.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .actionId(info.actionId())
                         .agentEmailMaybe(info.userEmail())
                         .actionType(ActionType.DUPLICATE_TO)
@@ -186,7 +185,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     CommonAuditEventInfo info = getAuditEventInfo();
     if (info == null) return;
     ActionAuditEvent workspaceTargetEvent =
-        new Builder()
+        ActionAuditEvent.builder()
             .actionId(info.actionId())
             .actionType(ActionType.COLLABORATE)
             .agentType(AgentType.USER)
@@ -200,7 +199,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
         aclStringsByUserId.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .actionId(info.actionId())
                         .actionType(ActionType.COLLABORATE)
                         .agentType(AgentType.USER)

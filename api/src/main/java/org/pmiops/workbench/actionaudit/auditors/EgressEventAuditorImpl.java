@@ -123,7 +123,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
       long agentId, String agentEmail, DbWorkspace dbWorkspace, SumologicEgressEvent event) {
     String actionId = actionIdProvider.get();
     Builder baseEventBuilder =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .actionId(actionId)
             .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)
@@ -157,7 +157,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     var dbWorkspaceMaybe = Optional.ofNullable(dbEvent.getWorkspace());
     var actionId = actionIdProvider.get();
     Builder baseEventBuilder =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .actionId(actionId)
             .actionType(ActionType.REMEDIATE_HIGH_EGRESS_EVENT)
@@ -179,7 +179,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
         changesByProperty.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .timestamp(clock.millis())
                         .actionId(actionId)
                         .actionType(ActionType.EDIT)
@@ -301,7 +301,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
    * successfully parsed.
    */
   private Builder getGenericBaseEventBuilder() {
-    return new Builder()
+    return ActionAuditEvent.builder()
         .timestamp(clock.millis())
         .actionId(actionIdProvider.get())
         .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)

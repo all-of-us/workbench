@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
-import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -52,7 +51,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
         propertiesByName.entrySet().stream()
             .map(
                 property ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .timestamp(clock.millis())
                         .actionId(actionIdProvider.get())
                         .actionType(ActionType.CREATE)
@@ -79,7 +78,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
         propertiesByName.entrySet().stream()
             .map(
                 entry ->
-                    new Builder()
+                    ActionAuditEvent.builder()
                         .timestamp(clock.millis())
                         .actionId(actionIdProvider.get())
                         .actionType(ActionType.EDIT)
@@ -102,7 +101,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
   @Override
   public void fireDeleteAction(long userId, String userEmail) {
     ActionAuditEvent deleteProfileEvent =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.DELETE)
@@ -119,7 +118,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
   @Override
   public void fireLoginAction(DbUser dbUser) {
     ActionAuditEvent loginEvent =
-        new Builder()
+        ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .actionId(actionIdProvider.get())
             .actionType(ActionType.LOGIN)
