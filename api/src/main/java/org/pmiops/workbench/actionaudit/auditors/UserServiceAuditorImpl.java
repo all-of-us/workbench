@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.ActionAuditEvent;
+import org.pmiops.workbench.actionaudit.AAEBuilder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -53,7 +53,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       List<DbAccessTier> newAccessTiers,
       Agent agent) {
     actionAuditService.send(
-        ActionAuditEvent.builder()
+        new AAEBuilder()
             .timestamp(clock.millis())
             .agentType(agent.agentType())
             .agentIdMaybe(agent.idMaybe())
@@ -79,8 +79,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       Optional<Instant> previousBypassTime,
       Optional<Instant> newBypassTime) {
     DbUser adminUser = dbUserProvider.get();
-    ActionAuditEvent.Builder eventBuilder =
-        ActionAuditEvent.builder()
+    AAEBuilder eventBuilder =
+        new AAEBuilder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
             .agentIdMaybe(adminUser.getUserId())
@@ -101,7 +101,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   @Override
   public void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion) {
     actionAuditService.send(
-        ActionAuditEvent.builder()
+        new AAEBuilder()
             .timestamp(clock.millis())
             .agentType(AgentType.USER)
             .agentIdMaybe(targetUser.getUserId())
@@ -119,8 +119,8 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   public void fireSetFreeTierDollarLimitOverride(
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
     DbUser adminUser = dbUserProvider.get();
-    ActionAuditEvent.Builder builder =
-        ActionAuditEvent.builder()
+    AAEBuilder builder =
+        new AAEBuilder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
             .agentIdMaybe(adminUser.getUserId())

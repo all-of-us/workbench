@@ -17,13 +17,13 @@ public class ActionAuditEventTest {
 
   @Test
   public void testActionAuditEventBuilder_throwsOnMissingValues() {
-    assertThrows(IllegalArgumentException.class, () -> ActionAuditEvent.builder().build());
+    assertThrows(IllegalArgumentException.class, () -> new AAEBuilder().build());
   }
 
   @Test
   public void testActionAuditEventBuilder_constructsEvent() {
     ActionAuditEvent event =
-        ActionAuditEvent.builder()
+        new AAEBuilder()
             .timestamp(TIMESTAMP)
             .agentType(AgentType.USER)
             .actionId(ACTION_ID)
@@ -34,15 +34,15 @@ public class ActionAuditEventTest {
             .targetPropertyMaybe(TARGET_PROPERTY)
             .newValueMaybe(NEW_VALUE)
             .build();
-    assertThat(event.getTimestamp()).isEqualTo(TIMESTAMP);
-    assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
-    assertThat(event.getActionId()).isEqualTo(ACTION_ID);
-    assertThat(event.getActionType()).isEqualTo(ActionType.EDIT);
-    assertThat(event.getAgentIdMaybe()).isEqualTo(USER_ID);
-    assertThat(event.getAgentEmailMaybe()).isEqualTo(USER_EMAIL);
-    assertThat(event.getTargetType()).isEqualTo(TargetType.COHORT);
-    assertThat(event.getTargetPropertyMaybe()).isEqualTo(TARGET_PROPERTY);
-    assertThat(event.getPreviousValueMaybe()).isNull();
-    assertThat(event.getNewValueMaybe()).isEqualTo(NEW_VALUE);
+    assertThat(event.timestamp()).isEqualTo(TIMESTAMP);
+    assertThat(event.agentType()).isEqualTo(AgentType.USER);
+    assertThat(event.actionId()).isEqualTo(ACTION_ID);
+    assertThat(event.actionType()).isEqualTo(ActionType.EDIT);
+    assertThat(event.agentIdMaybe()).isEqualTo(USER_ID);
+    assertThat(event.agentEmailMaybe()).isEqualTo(USER_EMAIL);
+    assertThat(event.targetType()).isEqualTo(TargetType.COHORT);
+    assertThat(event.targetPropertyMaybe()).isEqualTo(TARGET_PROPERTY);
+    assertThat(event.previousValueMaybe()).isNull();
+    assertThat(event.newValueMaybe()).isEqualTo(NEW_VALUE);
   }
 }
