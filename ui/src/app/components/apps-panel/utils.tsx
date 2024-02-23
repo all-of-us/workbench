@@ -96,6 +96,8 @@ export const defaultRStudioConfig: CreateAppRequest = {
     size: 100,
     diskType: DiskType.STANDARD,
   },
+  autodeleteEnabled: false,
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES
 };
 
 // TODO replace with better defaults?
@@ -110,6 +112,8 @@ export const defaultSASConfig: CreateAppRequest = {
     size: 250,
     diskType: DiskType.STANDARD,
   },
+  autodeleteEnabled: false,
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES
 };
 
 const isVisible = (status: AppStatus): boolean =>
