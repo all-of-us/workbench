@@ -18,6 +18,7 @@ interface ZendeskUrls {
   workspaceBucket: string;
   rStudioHowToRun: string;
   rStudioHowToDataset: string;
+  cromwellInformation: string;
 }
 
 const zendeskConfigs = {
@@ -57,6 +58,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
     helpCenter: baseUrl,
     rStudioHowToRun: article('22078658566804'),
     rStudioHowToDataset: article('360039585831'),
+    cromwellInformation: article('14428263737620'),
   };
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {
