@@ -218,13 +218,11 @@ export const CreateGkeApp = ({
             </p>
           </FlexColumn>
           <TooltipTrigger side='top' content={autodeleteToolTip}>
-            <div>
-              <ClrIcon
-                className='is-solid'
-                style={{ marginRight: '0.5rem', marginTop: '0.3rem', zoom: 1.2 }}
-                shape='info-standard'
-                />
-              </div>
+            <ClrIcon
+              className='is-solid'
+              style={{ marginRight: '0.5rem', marginTop: '0.3rem', zoom: 1.2 }}
+              shape='info-standard'
+            />
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown

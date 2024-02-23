@@ -81,6 +81,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
   autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
@@ -97,7 +98,8 @@ export const defaultRStudioConfig: CreateAppRequest = {
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
 // TODO replace with better defaults?
@@ -113,7 +115,8 @@ export const defaultSASConfig: CreateAppRequest = {
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
 const isVisible = (status: AppStatus): boolean =>
