@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -79,7 +80,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
         workspaceService.getFirecloudUserRoles(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    // The user's runtime name is used as a common VM prefix across all Leo machine types, and covers the following situations:
+    // The user's runtime name is used as a common VM prefix across all Leo machine types, and
+    // covers the following situations:
     // 1. GCE VMs: all-of-us-<user_id>
     // 2. Dataproc master nodes: all-of-us-<user_id>-m
     // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
@@ -195,9 +197,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
 
   @Override
   public void fireFailedToParseEgressEventRequest(SumologicEgressEventRequest request) {
-    fireEventSet(
+    fireEventSetWithoutEgressEvent(
         getGenericBaseEventBuilder(),
-        null,
         String.format(
             "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
             request.getEventsJsonArray()));
@@ -205,9 +206,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
 
   @Override
   public void fireBadApiKey(String apiKey, SumologicEgressEventRequest request) {
-    fireEventSet(
+    fireEventSetWithoutEgressEvent(
         getGenericBaseEventBuilder(),
-        null,
         String.format(
             "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
             apiKey, request.toString()));
@@ -220,8 +220,15 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
         String.format("Failed to find workspace for high-egress event: %s", event.toString()));
   }
 
+  private void fireEventSetWithoutEgressEvent(
+      ActionAuditEvent.Builder baseEventBuilder, @Nullable String comment) {
+    fireEventSet(baseEventBuilder, null, comment);
+  }
+
   private void fireEventSet(
-      ActionAuditEvent.Builder baseEventBuilder, SumologicEgressEvent egressEvent, String comment) {
+      ActionAuditEvent.Builder baseEventBuilder,
+      @Nullable SumologicEgressEvent egressEvent,
+      @Nullable String comment) {
     var events = new ArrayList<ActionAuditEvent>();
     if (egressEvent != null) {
       var propertyValues =
