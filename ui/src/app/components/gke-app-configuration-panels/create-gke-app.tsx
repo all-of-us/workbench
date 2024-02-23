@@ -187,12 +187,10 @@ export const CreateGkeApp = ({
           {...{ appType, machine, persistentDiskRequest }}
         />
       </div>
-      <SupportNote />
       <div style={{ ...styles.controlSection }}>
         <FlexRow
           style={{
             alignItems: 'center',
-            gap: '2rem',
           }}
         >
           <CheckBox
@@ -222,7 +220,7 @@ export const CreateGkeApp = ({
           <TooltipTrigger side='top' content={autodeleteToolTip}>
             <ClrIcon
               className='is-solid'
-              style={{ marginRight: '0.5rem', marginTop: '0.5rem', zoom: 1.2 }}
+              style={{ marginRight: '0.5rem', marginTop: '0.3rem', zoom: 1.2 }}
               shape='info-standard'
             />
           </TooltipTrigger>
@@ -258,6 +256,7 @@ export const CreateGkeApp = ({
           </FlexColumn>
         </FlexRow>
       </div>
+      <SupportNote />
       <FlexRow
         style={{
           alignItems: 'center',
