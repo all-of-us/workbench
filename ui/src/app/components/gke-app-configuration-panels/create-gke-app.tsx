@@ -221,10 +221,14 @@ export const CreateGkeApp = ({
             <div>
               <ClrIcon
                 className='is-solid'
-                style={{ marginRight: '0.5rem', marginTop: '0.3rem', zoom: 1.2 }}
+                style={{
+                  marginRight: '0.5rem',
+                  marginTop: '0.3rem',
+                  zoom: 1.2,
+                }}
                 shape='info-standard'
-                />
-              </div>
+              />
+            </div>
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown
