@@ -49,7 +49,7 @@ export enum DARPageMode {
 
 const { useState, useEffect } = React;
 
-const redirectToTrainingAbsorb = async () => {
+const redirectToTraining = async () => {
   const {
     config: {
       absorbSamlIdentityProviderId,
@@ -68,12 +68,12 @@ const redirectToTrainingAbsorb = async () => {
 
 export async function redirectToRegisteredTraining() {
   AnalyticsTracker.Registration.RegisteredTraining();
-  await redirectToTrainingAbsorb();
+  await redirectToTraining();
 }
 
 export async function redirectToControlledTraining() {
   AnalyticsTracker.Registration.ControlledTraining();
-  await redirectToTrainingAbsorb();
+  await redirectToTraining();
 }
 
 export const getTwoFactorSetupUrl = (): string => {
