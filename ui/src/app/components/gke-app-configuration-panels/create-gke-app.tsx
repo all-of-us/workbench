@@ -80,20 +80,20 @@ type ToOmit =
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
 export const CreateGkeApp = ({
-                               appType,
-                               onClose,
-                               creatorFreeCreditsRemaining,
-                               workspace,
-                               profileState,
-                               app,
-                               disk,
-                               onClickDeleteGkeApp,
-                               onClickDeleteUnattachedPersistentDisk,
-                               introText = defaultIntroText,
-                               CostNote = () => null,
-                               SupportNote = () => null,
-                               CreateAppText = () => null,
-                             }: CreateGkeAppProps) => {
+  appType,
+  onClose,
+  creatorFreeCreditsRemaining,
+  workspace,
+  profileState,
+  app,
+  disk,
+  onClickDeleteGkeApp,
+  onClickDeleteUnattachedPersistentDisk,
+  introText = defaultIntroText,
+  CostNote = () => null,
+  SupportNote = () => null,
+  CreateAppText = () => null,
+}: CreateGkeAppProps) => {
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
