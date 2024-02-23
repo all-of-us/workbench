@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -216,6 +217,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     actionAuditService.send(allEvents);
   }
 
+  @Nullable
   private CommonAuditEventInfo getAuditEventInfo() {
     DbUser dbUser = userProvider.get();
     if (dbUser == null) {
