@@ -80,20 +80,20 @@ type ToOmit =
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
 export const CreateGkeApp = ({
-  appType,
-  onClose,
-  creatorFreeCreditsRemaining,
-  workspace,
-  profileState,
-  app,
-  disk,
-  onClickDeleteGkeApp,
-  onClickDeleteUnattachedPersistentDisk,
-  introText = defaultIntroText,
-  CostNote = () => null,
-  SupportNote = () => null,
-  CreateAppText = () => null,
-}: CreateGkeAppProps) => {
+                               appType,
+                               onClose,
+                               creatorFreeCreditsRemaining,
+                               workspace,
+                               profileState,
+                               app,
+                               disk,
+                               onClickDeleteGkeApp,
+                               onClickDeleteUnattachedPersistentDisk,
+                               introText = defaultIntroText,
+                               CostNote = () => null,
+                               SupportNote = () => null,
+                               CreateAppText = () => null,
+                             }: CreateGkeAppProps) => {
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
@@ -218,11 +218,17 @@ export const CreateGkeApp = ({
             </p>
           </FlexColumn>
           <TooltipTrigger side='top' content={autodeleteToolTip}>
-            <ClrIcon
-              className='is-solid'
-              style={{ marginRight: '0.5rem', marginTop: '0.3rem', zoom: 1.2 }}
-              shape='info-standard'
-            />
+            <div>
+              <ClrIcon
+                className='is-solid'
+                style={{
+                  marginRight: '0.5rem',
+                  marginTop: '0.3rem',
+                  zoom: 1.2,
+                }}
+                shape='info-standard'
+              />
+            </div>
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown
