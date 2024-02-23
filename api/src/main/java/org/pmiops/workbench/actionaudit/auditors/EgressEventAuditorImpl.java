@@ -78,6 +78,11 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     var userRoles =
         workspaceService.getFirecloudUserRoles(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+
+    // The user's runtime name is used as a common VM prefix across all Leo machine types, and covers the following situations:
+    // 1. GCE VMs: all-of-us-<user_id>
+    // 2. Dataproc master nodes: all-of-us-<user_id>-m
+    // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
     var vmOwner =
         userRoles.stream()
             .map(UserRole::getEmail)
@@ -90,6 +95,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
       agentEmail = vmOwner.getUsername();
       agentId = vmOwner.getUserId();
     } else {
+      // If the VM prefix doesn't match a user on the workspace, we'll still log an
+      // event in the target workspace, but with nulled-out user info.
       logger.warning(
           String.format(
               "Could not find a user for VM name %s in namespace %s",
