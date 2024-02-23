@@ -233,8 +233,14 @@ describe(CreateGkeApp.name, () => {
       });
 
       it('should correctly calculate autodeleteRemainingDays', async () => {
-        const dateAccessed = new Date();
-        const autodeleteThreshold = 10080; // 7 days in minutes
+        // dateAccessed is exact 2 days ago from the current date at the start of the day (midnight
+        const now = new Date();
+        const dateAccessed = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() - 2
+        );
+        const autodeleteThreshold = 7 * 24 * 60; // 7 days in minutes
 
         await component(appType, {
           app: {
@@ -245,8 +251,26 @@ describe(CreateGkeApp.name, () => {
           },
         });
 
-        // The expected remaining days is 7 because the autodeleteThreshold is 7 days and the dateAccessed is now
-        expect(screen.queryByText(/The app will be deleted in 7 dayss/)).toBeInTheDocument();
+        // The expected remaining days is 4 because the autodeleteThreshold is 7 days and the dateAccessed is 2 days ago
+        expect(
+          screen.queryByLabelText('autodelete-remaning-days-text')
+        ).toHaveTextContent('4 days remain until deletion');
+      });
+
+      it('should not show autodeleteRemainingDays when app is not running', async () => {
+        // Render the component with the app not running
+        await component(appType, {
+          app: undefined,
+          disk: undefined,
+        });
+
+        // Query for the autodeleteRemainingDays text
+        const autodeleteRemainingDaysText = screen.queryByLabelText(
+          'autodelete-remaning-days-text'
+        );
+
+        // Assert that the autodeleteRemainingDays text is not in the document
+        expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
       });
     }
   );

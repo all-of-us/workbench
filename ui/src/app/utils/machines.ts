@@ -28,11 +28,11 @@ export const AutopauseMinuteThresholds = new Map([
 ]);
 
 export const AutodeleteMinuteThresholds = new Map([
-  [1 * 24 * 60, '1 day'],
-  [3 * 24 * 60, '3 days'],
-  [7 * 24 * 60, '7 days (default)'],
-  [15 * 24 * 60, '15 days'],
-  [30 * 24 * 60, '30 days']
+  [1 * 24 * 60, 'Idle for 1 day'],
+  [3 * 24 * 60, 'Idle for 3 days'],
+  [7 * 24 * 60, 'Idle for 7 days'],
+  [15 * 24 * 60, 'Idle for 15 days'],
+  [30 * 24 * 60, 'Idle for 30 days'],
 ]);
 
 export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
