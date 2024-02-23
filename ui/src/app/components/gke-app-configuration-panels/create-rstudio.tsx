@@ -8,17 +8,18 @@ import {
   RSTUDIO_HOW_TO_DATASET_BUILDER_LINK,
   RSTUDIO_HOW_TO_RUN_LINK,
 } from 'app/utils/aou_external_links';
+import { supportUrls } from 'app/utils/zendesk';
 
 import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
 
 const rStudioSupportArticles = [
   {
     text: 'How to run RStudio in All of Us Researcher Workbench',
-    link: RSTUDIO_HOW_TO_RUN_LINK,
+    link: supportUrls.rStudioHowToRun,
   },
   {
     text: 'How to use Dataset Builder with RStudio',
-    link: RSTUDIO_HOW_TO_DATASET_BUILDER_LINK,
+    link: supportUrls.rStudioHowToDataset,
   },
 ];
 
