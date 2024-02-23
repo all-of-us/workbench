@@ -6,8 +6,8 @@ import java.time.Clock;
 import java.util.Date;
 import java.util.Map;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.AAEBuilder;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
@@ -60,7 +60,7 @@ public class AdminAuditorImpl implements AdminAuditor {
         props.entrySet().stream()
             .map(
                 entry ->
-                    new AAEBuilder()
+                    new Builder()
                         .actionId(actionId)
                         .actionType(ActionType.VIEW)
                         .agentType(AgentType.ADMINISTRATOR)
@@ -96,7 +96,7 @@ public class AdminAuditorImpl implements AdminAuditor {
         props.entrySet().stream()
             .map(
                 entry ->
-                    new AAEBuilder()
+                    new Builder()
                         .actionId(actionId)
                         .actionType(ActionType.EDIT)
                         .agentType(AgentType.ADMINISTRATOR)
@@ -120,7 +120,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     long timestamp = clock.millis();
 
     ActionAuditEvent event =
-        new AAEBuilder()
+        new Builder()
             .actionId(actionId)
             .actionType(ActionType.EDIT)
             .agentType(AgentType.ADMINISTRATOR)

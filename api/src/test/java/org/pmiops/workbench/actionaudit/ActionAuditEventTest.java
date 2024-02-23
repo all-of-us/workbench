@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 
 public class ActionAuditEventTest {
 
@@ -17,13 +18,13 @@ public class ActionAuditEventTest {
 
   @Test
   public void testActionAuditEventBuilder_throwsOnMissingValues() {
-    assertThrows(IllegalArgumentException.class, () -> new AAEBuilder().build());
+    assertThrows(IllegalArgumentException.class, () -> new Builder().build());
   }
 
   @Test
   public void testActionAuditEventBuilder_constructsEvent() {
     ActionAuditEvent event =
-        new AAEBuilder()
+        new Builder()
             .timestamp(TIMESTAMP)
             .agentType(AgentType.USER)
             .actionId(ACTION_ID)

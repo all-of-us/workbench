@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.actionaudit.AAEBuilder;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
@@ -122,8 +122,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
   private void fireEvent(
       long agentId, String agentEmail, DbWorkspace dbWorkspace, SumologicEgressEvent event) {
     String actionId = actionIdProvider.get();
-    AAEBuilder baseEventBuilder =
-        new AAEBuilder()
+    Builder baseEventBuilder =
+        new Builder()
             .timestamp(clock.millis())
             .actionId(actionId)
             .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)
@@ -156,8 +156,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
       DbEgressEvent dbEvent, WorkbenchConfig.EgressAlertRemediationPolicy.Escalation escalation) {
     var dbWorkspaceMaybe = Optional.ofNullable(dbEvent.getWorkspace());
     var actionId = actionIdProvider.get();
-    AAEBuilder baseEventBuilder =
-        new AAEBuilder()
+    Builder baseEventBuilder =
+        new Builder()
             .timestamp(clock.millis())
             .actionId(actionId)
             .actionType(ActionType.REMEDIATE_HIGH_EGRESS_EVENT)
@@ -179,7 +179,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
         changesByProperty.entrySet().stream()
             .map(
                 entry ->
-                    new AAEBuilder()
+                    new Builder()
                         .timestamp(clock.millis())
                         .actionId(actionId)
                         .actionType(ActionType.EDIT)
@@ -221,8 +221,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
         String.format("Failed to find workspace for high-egress event: %s", event.toString()));
   }
 
-  private void fireEventSetWithoutEgressEvent(
-      AAEBuilder baseEventBuilder, @Nullable String comment) {
+  private void fireEventSetWithoutEgressEvent(Builder baseEventBuilder, @Nullable String comment) {
     fireEventSet(baseEventBuilder, null, comment);
   }
 
@@ -232,7 +231,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
    * or the comment may be null, in which case those row(s) won't be generated.
    */
   private void fireEventSet(
-      AAEBuilder baseEventBuilder,
+      Builder baseEventBuilder,
       @Nullable SumologicEgressEvent egressEvent,
       @Nullable String comment) {
     var events = new ArrayList<ActionAuditEvent>();
@@ -261,7 +260,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
   }
 
   private void fireRemediationEventSet(
-      AAEBuilder baseEventBuilder,
+      Builder baseEventBuilder,
       @Nullable DbEgressEvent egressEvent,
       @Nullable WorkbenchConfig.EgressAlertRemediationPolicy.Escalation escalation) {
     var events = new ArrayList<ActionAuditEvent>();
@@ -301,8 +300,8 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
    * inbound high-egress event refers to an inactive workspace or when the request JSON could not be
    * successfully parsed.
    */
-  private AAEBuilder getGenericBaseEventBuilder() {
-    return new AAEBuilder()
+  private Builder getGenericBaseEventBuilder() {
+    return new Builder()
         .timestamp(clock.millis())
         .actionId(actionIdProvider.get())
         .actionType(ActionType.DETECT_HIGH_EGRESS_EVENT)
