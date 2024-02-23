@@ -61,53 +61,23 @@ export const AccessRenewalNotificationMaybe = (
     () => [colors.notificationBanner.expiring_within_one_week, colors.danger]
   );
 
+  const boxStyle = { backgroundColor: boxColor };
   const iconStyle = { color: iconColor };
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
   const fullPagePath = pathname + search;
 
-  const { redirectMoodleToAbsorb } = serverConfigStore.get().config;
-  let boxStyle: CSSProperties = { backgroundColor: boxColor };
-  if (!redirectMoodleToAbsorb) {
-    boxStyle = {
-      backgroundColor: boxColor,
-      height: '5.5rem',
-      width: '630px',
-    };
-  }
-
-  // This is temporary, on Feb 05 we will be reverting to the original text
-  const getText = () => {
-    if (!redirectMoodleToAbsorb) {
-      return (
-        <div style={{ paddingTop: '5px' }}>
-          Time for {accessType} renewal. {timeLeft} <br />
-          <div style={{ fontWeight: 800 }}>
-            Note: Training will be unavailable from Jan 26 to Feb 5.
-          </div>
-          If you are unable to complete the training by Jan 26, you will need to
-          wait until Feb 5 to begin.
-        </div>
-      );
-    }
-    return `Time for ${accessType} renewal. ${timeLeft}`;
-  };
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
   return daysRemaining !== undefined ? (
     <NotificationBanner
       dataTestId='access-renewal-notification'
-      text={getText()}
+      text={`Time for ${accessType} renewal. ${timeLeft}`}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
       bannerTextWidth={
-        !redirectMoodleToAbsorb
-          ? '410px'
-          : props.accessTier === AccessTierShortNames.Registered
-          ? '177px'
-          : '250px'
+        props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
       }
-      textStyle={!redirectMoodleToAbsorb ? { paddingBottom: '5.5rem' } : {}}
       {...{ boxStyle, iconStyle }}
     />
   ) : null;
