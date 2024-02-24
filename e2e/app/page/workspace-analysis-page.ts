@@ -12,6 +12,7 @@ import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
 import Button from 'app/element/button';
 import SelectMenu from 'app/component/select-menu';
+import { ElementType } from 'app/xpath-options';
 import { environmentTimeout } from 'utils/timeout-constants';
 
 const PageTitle = 'View Analysis Files';
@@ -41,7 +42,11 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const appSelectorButton = Button.findByName(this.page, { normalizeSpace: 'Choose an App' });
     await appSelectorButton.click();
 
-    const appSelectorOptions = SelectMenu.findByName(this.page, { normalizeSpace: 'Choose One' });
+    const appSelectorOptions = SelectMenu.findByName(this.page, {
+      type: ElementType.Dropdown,
+      name: 'Select an application',
+      ancestorLevel: 2
+    });
     await appSelectorOptions.select('Jupyter');
 
     const nextButton = Button.findByName(this.page, { name: 'Next' });
