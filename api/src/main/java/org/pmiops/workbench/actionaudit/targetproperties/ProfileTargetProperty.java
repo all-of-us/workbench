@@ -21,7 +21,7 @@ public enum ProfileTargetProperty implements ModelBackedTargetProperty<Profile> 
   DEMOGRAPHIC_SURVEY(
       "demographic_survey_is_present",
       profile -> PropertyUtils.toStringOrNull(profile.getDemographicSurvey())),
-  ADDRESS("address_is_present", profile -> PropertyUtils.toStringOrNull(profile.getAddress()));
+  ADDRESS("address_is_present", PropertyUtils.stringOrNullExtractor(Profile::getAddress));
 
   private final String propertyName;
   private final Function<Profile, String> extractor;

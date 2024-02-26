@@ -17,7 +17,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.DbEgressEventTargetProp
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEscalationTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty;
-import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor;
+import org.pmiops.workbench.actionaudit.targetproperties.ModelBackedTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -169,7 +169,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
   @Override
   public void fireAdminEditEgressEvent(DbEgressEvent previousEvent, DbEgressEvent updatedEvent) {
     var changesByProperty =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             DbEgressEventTargetProperty.values(), previousEvent, updatedEvent);
     var dbWorkspaceMaybe = Optional.ofNullable(updatedEvent.getWorkspace());
     var actionId = actionIdProvider.get();
@@ -237,7 +237,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     var events = new ArrayList<ActionAuditEvent>();
     if (egressEvent != null) {
       var propertyValues =
-          TargetPropertyExtractor.getPropertyValuesByName(
+          ModelBackedTargetProperty.getPropertyValuesByName(
               EgressEventTargetProperty.values(), egressEvent);
       events.addAll(
           propertyValues.entrySet().stream()
@@ -266,7 +266,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     var events = new ArrayList<ActionAuditEvent>();
     if (egressEvent != null) {
       var propertyValues =
-          TargetPropertyExtractor.getPropertyValuesByName(
+          ModelBackedTargetProperty.getPropertyValuesByName(
               DbEgressEventTargetProperty.values(), egressEvent);
       events.addAll(
           propertyValues.entrySet().stream()
@@ -280,7 +280,7 @@ public class EgressEventAuditorImpl implements EgressEventAuditor {
     }
     if (escalation != null) {
       var propertyValues =
-          TargetPropertyExtractor.getPropertyValuesByName(
+          ModelBackedTargetProperty.getPropertyValuesByName(
               EgressEscalationTargetProperty.values(), escalation);
       events.addAll(
           propertyValues.entrySet().stream()

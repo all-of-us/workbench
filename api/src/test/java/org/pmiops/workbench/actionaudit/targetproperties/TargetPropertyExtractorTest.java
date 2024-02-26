@@ -38,7 +38,7 @@ class TargetPropertyExtractorTest {
   @Test
   void testGetsWorkspaceProperties() {
     var propertyValuesByName =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), workspace);
     assertThat(propertyValuesByName.get(WorkspaceTargetProperty.NAME.getPropertyName()))
         .isEqualTo("DbWorkspace 1");

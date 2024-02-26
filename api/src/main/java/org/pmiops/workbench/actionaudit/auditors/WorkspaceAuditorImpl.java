@@ -17,7 +17,7 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
-import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor;
+import org.pmiops.workbench.actionaudit.targetproperties.ModelBackedTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -51,7 +51,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     CommonAuditEventInfo info = getAuditEventInfo();
     if (info == null) return;
     Map<String, String> propertyValues =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), createdWorkspace);
     List<ActionAuditEvent> events =
         propertyValues.entrySet().stream()
@@ -83,7 +83,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     CommonAuditEventInfo info = getAuditEventInfo();
     if (info == null) return;
     var propertyToChangedValue =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             WorkspaceTargetProperty.values(), previousWorkspace, editedWorkspace);
     List<ActionAuditEvent> actionAuditEvents =
         propertyToChangedValue.entrySet().stream()
@@ -149,7 +149,7 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
             .timestamp(info.timestamp())
             .build();
     Map<String, String> destinationPropertyValues =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), destinationWorkspace);
     List<ActionAuditEvent> destinationEvents =
         destinationPropertyValues.entrySet().stream()
