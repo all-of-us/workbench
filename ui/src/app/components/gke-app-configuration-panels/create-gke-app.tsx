@@ -31,7 +31,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
-  AutodeleteMinuteThresholds,
+  AutodeleteDaysThresholds,
   ComputeType,
   DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
   findMachineByName,
@@ -154,7 +154,7 @@ export const CreateGkeApp = ({
 
   const autodeleteToolTip = (
     <div>
-      This feature will help you reduce small incurred fees
+      Deleting the environment when not in use will help reduce costs.
       <br />
       Reset Timer: Open the application to reset the timer
       <br />
@@ -235,12 +235,10 @@ export const CreateGkeApp = ({
               aria-label={`gke-autodelete-dropdown`}
               appendTo='self'
               disabled={isAppActive(app) || !autodeleteDropdownChecked}
-              options={Array.from(AutodeleteMinuteThresholds.entries()).map(
-                (entry) => ({
-                  label: entry[1],
-                  value: entry[0],
-                })
-              )}
+              options={AutodeleteDaysThresholds.map((days) => ({
+                value: days * 24 * 60,
+                label: `Idle for ${days} days`,
+              }))}
               value={
                 createAppRequest.autodeleteThreshold ||
                 DEFAULT_AUTODELETE_THRESHOLD_MINUTES
@@ -255,7 +253,7 @@ export const CreateGkeApp = ({
             />
             {autodeleteRemainingDays && (
               <p
-                aria-label={`autodelete-remaning-days-text`}
+                aria-label={`Autodelete remaining days`}
                 style={{ marginTop: '0', marginLeft: '1rem' }}
               >{` ${autodeleteRemainingDays} days remain until deletion.`}</p>
             )}
