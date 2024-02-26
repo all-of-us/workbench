@@ -17,8 +17,7 @@ public enum EgressEscalationTargetProperty implements ModelBackedTargetProperty<
   SUSPEND_COMPUTE_DURATION_MIN(
       "suspend_duration",
       escalation ->
-          Optional.ofNullable(escalation)
-              .flatMap(e -> Optional.ofNullable(e.suspendCompute))
+          Optional.ofNullable(escalation.suspendCompute)
               .flatMap(s -> Optional.ofNullable(s.durationMinutes))
               .map(Object::toString)
               .orElse(null));
