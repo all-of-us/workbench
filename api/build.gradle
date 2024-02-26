@@ -8,8 +8,7 @@ buildscript {
     ext {
         GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.9.0'
-        HIBERNATE_VERSION = '5.6.9.Final'
-        JACKSON_DATABIND_VERSION = '2.13.4'
+        HIBERNATE_VERSION = '5.6.15.Final'
         JACKSON_VERSION = '2.16.1'
         KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
@@ -20,9 +19,9 @@ buildscript {
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
-        SPRING_FRAMEWORK_VERSION = '5.3.23'
-        SPRING_SECURITY_VERSION = '5.8.9'
-        SWAGGER_3_CODEGEN_VERSION = '3.0.34'
+        SPRING_FRAMEWORK_VERSION = '5.3.32'
+        SPRING_SECURITY_VERSION = '6.2.2'
+        SWAGGER_3_CODEGEN_VERSION = '3.0.52'
     }
 
     repositories {
@@ -411,7 +410,7 @@ dependencies {
     implementation "ch.qos.logback:logback-core:$project.ext.LOGBACK_VERSION"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
@@ -430,7 +429,7 @@ dependencies {
     implementation "org.apache.commons:commons-collections4:4.4"
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
-    implementation "org.apache.httpcomponents:httpclient:4.5.13"
+    implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
     implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     implementation "commons-codec:commons-codec:1.15"
     implementation 'com.auth0:java-jwt:3.19.2'
