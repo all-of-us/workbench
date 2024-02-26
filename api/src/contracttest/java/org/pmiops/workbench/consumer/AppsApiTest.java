@@ -1,5 +1,6 @@
 package org.pmiops.workbench.consumer;
 
+import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray;
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,35 +42,37 @@ class AppsApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appType", "RSTUDIO");
-                  body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                  body.object("labels", labels -> labels.stringType("key1", "value1"));
-                  body.stringType("descriptorPath", "descriptor/path");
-                  body.object("diskConfig", diskConfig -> {
-                    diskConfig.stringType("diskType", "SSD");
-                    diskConfig.numberType("size", 100);
-                  });
-                  body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                  body.array("extraArgs", extraArgs -> {});
-                  body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                  body.stringType("workspaceId", "Workspace123");
-                })
+                    body -> {
+                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+                      body.object("labels", labels -> labels.stringType("key1", "value1"));
+                      body.stringType("descriptorPath", "descriptor/path");
+                      body.object(
+                          "diskConfig",
+                          diskConfig -> {
+                            diskConfig.stringType("diskType", "SSD");
+                            diskConfig.numberType("size", 100);
+                          });
+                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+                      body.array("extraArgs", extraArgs -> {});
+                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
+                      body.stringType("workspaceId", "Workspace123");
+                    })
                 .build())
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appName", "sample-app");
-                  body.stringType("status", "RUNNING");
-                  body.stringType("diskName", "disk-123");
-                  body.stringType("appType", "RSTUDIO");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext", context -> context.stringType("cloudprovider", null));
-                })
+                    body -> {
+                      body.stringType("appName", "sample-app");
+                      body.stringType("status", "RUNNING");
+                      body.stringType("diskName", "disk-123");
+                      body.stringType("appType", "RSTUDIO");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext", context -> context.stringType("cloudprovider", null));
+                    })
                 .build())
         .toPact();
   }
@@ -84,20 +87,22 @@ class AppsApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appType", "RSTUDIO");
-                  body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                  body.object("labels", labels -> labels.stringType("key1", "value1"));
-                  body.stringType("descriptorPath", "descriptor/path");
-                  body.object("diskConfig", diskConfig -> {
-                    diskConfig.stringType("diskType", "SSD");
-                    diskConfig.numberType("size", 100);
-                  });
-                  body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                  body.array("extraArgs", extraArgs -> {});
-                  body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                  body.stringType("workspaceId", "Workspace123");
-                })
+                    body -> {
+                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+                      body.object("labels", labels -> labels.stringType("key1", "value1"));
+                      body.stringType("descriptorPath", "descriptor/path");
+                      body.object(
+                          "diskConfig",
+                          diskConfig -> {
+                            diskConfig.stringType("diskType", "SSD");
+                            diskConfig.numberType("size", 100);
+                          });
+                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+                      body.array("extraArgs", extraArgs -> {});
+                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
+                      body.stringType("workspaceId", "Workspace123");
+                    })
                 .build())
         .willRespondWith()
         .status(409)
@@ -174,6 +179,39 @@ class AppsApiTest {
         .toPact();
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact listAppsByProject(PactDslWithProvider builder) {
+    return builder
+        .given("there is a Google project")
+        .uponReceiving("a request to list apps")
+        .method("GET")
+        .path("/api/google/v1/apps/googleProject")
+        .matchQuery("includeDeleted", "false")
+        .matchQuery("includeLabels", "")
+        .matchQuery("role", "creator")
+        .willRespondWith()
+        .status(200)
+        .headers(contentTypeJsonHeader)
+        .body(newJsonArray(array -> {}).build())
+        .toPact();
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact listAppsByMissingProject(PactDslWithProvider builder) {
+    return builder
+        .given("there is a Google project")
+        .uponReceiving("a request to list apps")
+        .method("GET")
+        .path("/api/google/v1/apps/googleProject")
+        .matchQuery("includeDeleted", "false")
+        .matchQuery("includeLabels", "")
+        .matchQuery("role", "creator")
+        .willRespondWith()
+        .status(404)
+        .headers(contentTypeJsonHeader)
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "createNewApp")
   void testCreateAppWhenAppDoesNotExist(MockServer mockServer) throws ApiException {
@@ -186,7 +224,8 @@ class AppsApiTest {
     request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
     request.setLabels(Map.ofEntries(entry("key1", "value1")));
     request.setDescriptorPath("descriptor/path");
-    request.setDiskConfig(new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
+    request.setDiskConfig(
+        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
     request.setCustomEnvironmentVariables(new ArrayList<>());
     request.setExtraArgs(new ArrayList<>());
     request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
@@ -207,7 +246,8 @@ class AppsApiTest {
     request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
     request.setLabels(Map.ofEntries(entry("key1", "value1")));
     request.setDescriptorPath("descriptor/path");
-    request.setDiskConfig(new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
+    request.setDiskConfig(
+        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
     request.setCustomEnvironmentVariables(new ArrayList<>());
     request.setExtraArgs(new ArrayList<>());
     request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
@@ -249,7 +289,6 @@ class AppsApiTest {
     assertEquals(exception.getMessage(), "Not Found");
   }
 
-
   @Test
   @PactTestFor(pactMethod = "deleteApp")
   void testDeleteAppWhenAppExists(MockServer mockServer) throws ApiException {
@@ -269,6 +308,29 @@ class AppsApiTest {
 
     ApiException exception =
         assertThrows(ApiException.class, () -> api.deleteApp("googleProject", "appname", false));
+
+    assertEquals(exception.getMessage(), "Not Found");
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "listAppsByProject")
+  void testListAppWhenGoogleProjectExists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi api = new AppsApi(client);
+
+    api.listAppByProject("googleProject", null, false, "", "creator");
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "listAppsByMissingProject")
+  void testListAppWhenGoogleProjectDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi api = new AppsApi(client);
+
+    ApiException exception =
+        assertThrows(ApiException.class, () -> api.listAppByProject("googleProject", null, false, "", "creator"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
