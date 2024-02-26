@@ -253,6 +253,27 @@ describe(CreateGkeApp.name, () => {
         ).toHaveTextContent('5 days remain until deletion');
       });
 
+      it('should show correct message when autodeleteRemainingDays is 0', async () => {
+        const now = new Date();
+        now.setDate(now.getDate() - 2); // Subtract 2 days
+        const dateAccessed = now;
+        const autodeleteThreshold = 2 * 24 * 60; // 2 days in minutes.
+
+        await component(appType, {
+          app: {
+            ...defaultApp,
+            autodeleteEnabled: true,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        });
+
+        // The expected remaining days is 4 because the autodeleteThreshold is 7 days and the dateAccessed is 2 days ago
+        expect(
+          screen.queryByLabelText('Autodelete remaining days')
+        ).toHaveTextContent('0 days remain until deletion');
+      });
+
       it('should not show autodeleteRemainingDays when app is not running', async () => {
         // Render the component with the app not running
         await component(appType, {

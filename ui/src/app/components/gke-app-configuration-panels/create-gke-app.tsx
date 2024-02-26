@@ -252,7 +252,7 @@ export const CreateGkeApp = ({
               }}
               style={{ marginLeft: '1rem' }}
             />
-            {autodeleteRemainingDays !== null  && (
+            {autodeleteRemainingDays !== null && (
               <p
                 aria-label={`Autodelete remaining days`}
                 style={{ marginTop: '0', marginLeft: '1rem' }}
