@@ -90,24 +90,28 @@ export const CloudEnvironmentsTable = ({
     setRuntimeToDelete(null);
   };
 
-  const DeleteButton = ({ row }: { row: CloudEnvironmentRow }) => (
-    <TooltipTrigger
-      content='Deletion is currently only availble for Jupyter.  See RW-8943.'
-      disabled={row.appType === UIAppType.JUPYTER}
-    >
-      <Button
-        disabled={
-          row.appType !== UIAppType.JUPYTER || runtimeToDelete === row.name
-        }
-        onClick={() => {
-          setRuntimeToDelete(row.name);
-          setConfirmDeleteRuntime(true);
-        }}
-      >
-        Delete
-      </Button>
-    </TooltipTrigger>
-  );
+  const DeleteButton = ({ row }: { row: CloudEnvironmentRow }) => {
+    const tooltipContent =
+      row.appType === UIAppType.JUPYTER
+        ? 'The persistent disk will not be deleted.'
+        : 'Deletion is currently only available for Jupyter.  See RW-8943.';
+
+    return (
+      <TooltipTrigger content={tooltipContent}>
+        <Button
+          disabled={
+            row.appType !== UIAppType.JUPYTER || runtimeToDelete === row.name
+          }
+          onClick={() => {
+            setRuntimeToDelete(row.name);
+            setConfirmDeleteRuntime(true);
+          }}
+        >
+          Delete
+        </Button>
+      </TooltipTrigger>
+    );
+  };
 
   const cloudEnvironments = [
     ...runtimes?.map(runtimeToRow),
