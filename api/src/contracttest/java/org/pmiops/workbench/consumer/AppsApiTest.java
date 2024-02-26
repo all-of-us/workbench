@@ -199,7 +199,7 @@ class AppsApiTest {
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact listAppsByMissingProject(PactDslWithProvider builder) {
     return builder
-        .given("there is a Google project")
+        .given("there is not a Google project")
         .uponReceiving("a request to list apps")
         .method("GET")
         .path("/api/google/v1/apps/googleProject")
