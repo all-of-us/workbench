@@ -136,10 +136,11 @@ export const CreateGkeApp = ({
     React.useState<CreateAppRequest>({
       ...defaultConfig,
       persistentDiskRequest,
+      autodeleteEnabled:
+        app?.autodeleteEnabled ?? defaultConfig.autodeleteEnabled,
+      autodeleteThreshold:
+        app?.autodeleteThreshold ?? defaultConfig.autodeleteThreshold,
     });
-
-  const [autodeleteDropdownChecked, setAutodeleteDropdownChecked] =
-    React.useState(false);
 
   const autodeleteRemainingDays: number = (() => {
     if (app?.autodeleteEnabled && app.dateAccessed && app.autodeleteThreshold) {
@@ -205,7 +206,6 @@ export const CreateGkeApp = ({
                 ...prevState,
                 autodeleteEnabled,
               }));
-              setAutodeleteDropdownChecked(autodeleteEnabled);
             }}
             style={{ marginRight: '1rem', zoom: 1.5 }}
           />
@@ -234,7 +234,7 @@ export const CreateGkeApp = ({
             <Dropdown
               aria-label={`gke-autodelete-dropdown`}
               appendTo='self'
-              disabled={isAppActive(app) || !autodeleteDropdownChecked}
+              disabled={isAppActive(app) || !createAppRequest.autodeleteEnabled}
               options={AutodeleteDaysThresholds.map((days) => ({
                 value: days * 24 * 60,
                 label: `Idle for ${days} days`,
