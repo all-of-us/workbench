@@ -75,6 +75,37 @@ class AppsApiTest {
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact createDuplicateApp(PactDslWithProvider builder) {
+    return builder
+        .given("there is an app in a Google project")
+        .uponReceiving("a request to create an app")
+        .method("POST")
+        .path("/api/google/v1/apps/googleProject/appname")
+        .headers(contentTypeJsonHeader)
+        .body(
+            newJsonBody(
+                body -> {
+                  body.stringType("appType", "RSTUDIO");
+                  body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+                  body.object("labels", labels -> labels.stringType("key1", "value1"));
+                  body.stringType("descriptorPath", "descriptor/path");
+                  body.object("diskConfig", diskConfig -> {
+                    diskConfig.stringType("diskType", "SSD");
+                    diskConfig.numberType("size", 100);
+                  });
+                  body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+                  body.array("extraArgs", extraArgs -> {});
+                  body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
+                  body.stringType("workspaceId", "Workspace123");
+                })
+                .build())
+        .willRespondWith()
+        .status(409)
+        .headers(contentTypeJsonHeader)
+        .toPact();
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getApp(PactDslWithProvider builder) {
     return builder
         .given("there is an app in a Google project")
@@ -132,6 +163,27 @@ class AppsApiTest {
     request.setWorkspaceId("Workspace123");
 
     api.createApp("googleProject", "appname", request);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createDuplicateApp")
+  void testCreateAppWhenAppDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi api = new AppsApi(client);
+
+    LeonardoCreateAppRequest request = new LeonardoCreateAppRequest();
+    request.setAppType(LeonardoAppType.RSTUDIO);
+    request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
+    request.setLabels(Map.ofEntries(entry("key1", "value1")));
+    request.setDescriptorPath("descriptor/path");
+    request.setDiskConfig(new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
+    request.setCustomEnvironmentVariables(new ArrayList<>());
+    request.setExtraArgs(new ArrayList<>());
+    request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
+    request.setWorkspaceId("Workspace123");
+
+    assertThrows(Exception.class, () -> api.createApp("googleProject", "appname", request));
   }
 
   @Test
