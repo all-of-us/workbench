@@ -1,7 +1,5 @@
 import '@testing-library/jest-dom';
 
-import * as fp from 'lodash/fp';
-
 import { AppType, ListDisksResponse } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
@@ -12,6 +10,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { toUIAppType, UIAppType } from 'app/components/apps-panel/utils';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
@@ -33,8 +32,11 @@ const convertDate = (originalDate: string) => {
   return date.format('YYYY-MM-DD HH:mm');
 };
 
-const getEnvironmentType = (gceRuntime: boolean, appType: AppType) => {
-  return gceRuntime ? 'Jupyter' : fp.capitalize(appType.toString());
+const getEnvironmentType = (
+  gceRuntime: boolean,
+  appType: AppType
+): UIAppType => {
+  return gceRuntime ? UIAppType.JUPYTER : toUIAppType[appType];
 };
 
 let mockDisks: ListDisksResponse;

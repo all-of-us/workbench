@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { Disk, ListDisksResponse } from 'generated/fetch';
+
+import { toUIAppType, UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksAdminApi } from 'app/services/swagger-fetch-clients';
@@ -18,7 +19,7 @@ interface Props {
 export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [disks, setDisks] = useState([]);
+  const [disks, setDisks] = useState<ListDisksResponse>([]);
 
   const refreshDisks = () => {
     setLoading(true);
@@ -47,7 +48,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   ) : (
     <DataTable value={disks} emptyMessage='No disks found'>
       <Column
-        body={(disk) => (
+        body={(disk: Disk) => (
           <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
             Delete
           </Button>
@@ -58,13 +59,15 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       <Column
         field='createdDate'
         header='Date Created'
-        body={(disk) => moment(disk.createdDate).format('YYYY-MM-DD HH:mm')}
+        body={(disk: Disk) =>
+          moment(disk.createdDate).format('YYYY-MM-DD HH:mm')
+        }
       />
       <Column field='status' header='Status' />
       <Column
         header='Environment Type'
-        body={(disk) =>
-          fp.capitalize(disk.gceRuntime ? UIAppType.JUPYTER : disk.appType)
+        body={(disk: Disk) =>
+          disk.gceRuntime ? UIAppType.JUPYTER : toUIAppType[disk.appType]
         }
       />
       <Column field='size' header='Size (GB)' />
