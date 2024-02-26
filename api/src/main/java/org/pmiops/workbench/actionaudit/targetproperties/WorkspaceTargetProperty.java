@@ -1,8 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
@@ -56,12 +54,13 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
       workspace -> workspace.getResearchPurpose().getOtherPopulationDetails()),
   POPULATION_DETAILS(
       "population_details",
-      workspace ->
-          Stream.ofNullable(workspace.getResearchPurpose().getPopulationDetails())
-              .flatMap(List::stream)
-              .map(SpecificPopulationEnum::toString)
-              .reduce((a, b) -> a + ", " + b)
-              .orElse(null)),
+      workspace -> {
+        var populationDetails = workspace.getResearchPurpose().getPopulationDetails();
+        if (populationDetails == null) return null;
+
+        var pdStrings = populationDetails.stream().map(SpecificPopulationEnum::toString).toList();
+        return String.join(", ", pdStrings);
+      }),
   POPULATION_HEALTH(
       "population_health",
       workspace ->
