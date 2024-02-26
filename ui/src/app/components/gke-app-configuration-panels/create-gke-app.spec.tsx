@@ -247,7 +247,6 @@ describe(CreateGkeApp.name, () => {
           },
         });
 
-        // The expected remaining days is 4 because the autodeleteThreshold is 7 days and the dateAccessed is 2 days ago
         expect(
           screen.queryByLabelText('Autodelete remaining days')
         ).toHaveTextContent('5 days remain until deletion');
@@ -268,10 +267,10 @@ describe(CreateGkeApp.name, () => {
           },
         });
 
-        // The expected remaining days is 4 because the autodeleteThreshold is 7 days and the dateAccessed is 2 days ago
+        // less than 1 day (0 days) remaining until deletion.
         expect(
           screen.queryByLabelText('Autodelete remaining days')
-        ).toHaveTextContent('0 days remain until deletion');
+        ).toHaveTextContent('App will be deleted within 1 day');
       });
 
       it('should not show autodeleteRemainingDays when app is not running', async () => {

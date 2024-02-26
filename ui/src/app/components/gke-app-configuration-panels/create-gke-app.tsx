@@ -257,7 +257,9 @@ export const CreateGkeApp = ({
                 aria-label={`Autodelete remaining days`}
                 style={{ marginTop: '0', marginLeft: '1rem' }}
               >
-                {`${autodeleteRemainingDays} days remain until deletion.`}
+                {autodeleteRemainingDays > 0
+                  ? `${autodeleteRemainingDays} days remain until deletion.`
+                  : 'App will be deleted within 1 day.'}
               </p>
             )}
           </FlexColumn>
