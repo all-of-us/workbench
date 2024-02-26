@@ -144,6 +144,36 @@ class AppsApiTest {
         .toPact();
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteApp(PactDslWithProvider builder) {
+    return builder
+        .given("there is an app in a Google project")
+        .uponReceiving("a request to delete an app")
+        .method("DELETE")
+        .path("/api/google/v1/apps/googleProject/appname")
+        .query("deleteDisk=false")
+        .willRespondWith()
+        .status(200)
+        .headers(contentTypeJsonHeader)
+        .body(newJsonBody(body -> {}).build())
+        .toPact();
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteMissingApp(PactDslWithProvider builder) {
+    return builder
+        .given("there is not an app in a Google project")
+        .uponReceiving("a request to delete an app")
+        .method("DELETE")
+        .path("/api/google/v1/apps/googleProject/appname")
+        .query("deleteDisk=false")
+        .willRespondWith()
+        .status(404)
+        .headers(contentTypeJsonHeader)
+        .body(newJsonBody(body -> {}).build())
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "createNewApp")
   void testCreateAppWhenAppDoesNotExist(MockServer mockServer) throws ApiException {
@@ -215,6 +245,30 @@ class AppsApiTest {
 
     ApiException exception =
         assertThrows(ApiException.class, () -> api.getApp("googleProject", "appname"));
+
+    assertEquals(exception.getMessage(), "Not Found");
+  }
+
+
+  @Test
+  @PactTestFor(pactMethod = "deleteApp")
+  void testDeleteAppWhenAppExists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi api = new AppsApi(client);
+
+    api.deleteApp("googleProject", "appname", false);
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "deleteMissingApp")
+  void testDeleteAppWhenAppDoesNotExist(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    AppsApi api = new AppsApi(client);
+
+    ApiException exception =
+        assertThrows(ApiException.class, () -> api.deleteApp("googleProject", "appname", false));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
