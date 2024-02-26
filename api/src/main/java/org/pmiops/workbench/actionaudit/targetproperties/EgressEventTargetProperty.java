@@ -9,13 +9,14 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
  * directly relate to values from an EgressEvent object instance.
  */
 public enum EgressEventTargetProperty implements ModelBackedTargetProperty<SumologicEgressEvent> {
-  EGRESS_MIB("egress_mib", event -> PropertyUtils.toStringOrNull(event.getEgressMib())),
+  EGRESS_MIB("egress_mib", PropertyUtils.stringOrNull(SumologicEgressEvent::getEgressMib)),
   TIME_WINDOW_START(
       "time_window_start",
       event ->
           event.getTimeWindowStart() != null ? event.getTimeWindowStart().toString() : "[no time]"),
   TIME_WINDOW_DURATION(
-      "time_window_duration", event -> PropertyUtils.toStringOrNull(event.getTimeWindowDuration())),
+      "time_window_duration",
+      PropertyUtils.stringOrNull(SumologicEgressEvent::getTimeWindowDuration)),
   VM_NAME("vm_prefix", SumologicEgressEvent::getVmPrefix);
 
   private final String propertyName;

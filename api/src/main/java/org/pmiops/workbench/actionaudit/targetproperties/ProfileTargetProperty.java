@@ -13,15 +13,13 @@ public enum ProfileTargetProperty implements ModelBackedTargetProperty<Profile> 
       "access_tier_short_names", profile -> String.join(",", profile.getAccessTierShortNames())),
   GIVEN_NAME("given_name", Profile::getGivenName),
   FAMILY_NAME("family_name", Profile::getFamilyName),
-  DISABLED("disabled", profile -> PropertyUtils.toStringOrNull(profile.isDisabled())),
+  DISABLED("disabled", PropertyUtils.stringOrNull(Profile::isDisabled)),
   AREA_OF_RESEARCH("area_of_research", Profile::getAreaOfResearch),
   AFFILIATION(
-      "affiliation",
-      profile -> PropertyUtils.toStringOrNull(profile.getVerifiedInstitutionalAffiliation())),
+      "affiliation", PropertyUtils.stringOrNull(Profile::getVerifiedInstitutionalAffiliation)),
   DEMOGRAPHIC_SURVEY(
-      "demographic_survey_is_present",
-      profile -> PropertyUtils.toStringOrNull(profile.getDemographicSurvey())),
-  ADDRESS("address_is_present", PropertyUtils.stringOrNullExtractor(Profile::getAddress));
+      "demographic_survey_is_present", PropertyUtils.stringOrNull(Profile::getDemographicSurvey)),
+  ADDRESS("address_is_present", PropertyUtils.stringOrNull(Profile::getAddress));
 
   private final String propertyName;
   private final Function<Profile, String> extractor;
