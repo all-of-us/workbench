@@ -1,7 +1,5 @@
 import '@testing-library/jest-dom';
 
-import * as fp from 'lodash/fp';
-
 import { AppType, ListDisksResponse } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
