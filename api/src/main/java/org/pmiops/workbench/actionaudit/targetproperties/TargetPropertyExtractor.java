@@ -10,8 +10,9 @@ public class TargetPropertyExtractor {
       Map<String, String> getPropertyValuesByName(E[] enumValues, T target) {
     Map<String, String> result = new HashMap<>();
     for (E e : enumValues) {
-      if (e.getExtractor().apply(target) != null) {
-        result.put(e.getPropertyName(), e.getExtractor().apply(target));
+      var propertyValue = e.getExtractor().apply(target);
+      if (propertyValue != null) {
+        result.put(e.getPropertyName(), propertyValue);
       }
     }
     return result;
