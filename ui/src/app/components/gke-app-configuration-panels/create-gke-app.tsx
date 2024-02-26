@@ -148,6 +148,7 @@ export const CreateGkeApp = ({
       const autodeleteDate = new Date(
         dateAccessed.getTime() + app.autodeleteThreshold * 60 * 1000
       );
+
       return getWholeDaysFromNow(autodeleteDate.getTime());
     }
     return null;
@@ -251,11 +252,13 @@ export const CreateGkeApp = ({
               }}
               style={{ marginLeft: '1rem' }}
             />
-            {autodeleteRemainingDays && (
+            {autodeleteRemainingDays !== null  && (
               <p
                 aria-label={`Autodelete remaining days`}
                 style={{ marginTop: '0', marginLeft: '1rem' }}
-              >{` ${autodeleteRemainingDays} days remain until deletion.`}</p>
+              >
+                {`${autodeleteRemainingDays} days remain until deletion.`}
+              </p>
             )}
           </FlexColumn>
         </FlexRow>
