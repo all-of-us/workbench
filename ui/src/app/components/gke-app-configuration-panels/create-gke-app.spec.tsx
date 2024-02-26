@@ -257,7 +257,7 @@ describe(CreateGkeApp.name, () => {
         const now = new Date();
         now.setDate(now.getDate() - 2); // Subtract 2 days
         const dateAccessed = now;
-        const autodeleteThreshold = 2 * 24 * 60; // 2 days in minutes.
+        const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
 
         await component(appType, {
           app: {
