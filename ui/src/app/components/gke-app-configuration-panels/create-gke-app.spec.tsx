@@ -233,14 +233,10 @@ describe(CreateGkeApp.name, () => {
       });
 
       it('should correctly calculate autodeleteRemainingDays', async () => {
-        // dateAccessed is exact 2 days ago from the current date at the start of the day (midnight
         const now = new Date();
-        const dateAccessed = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate() - 2
-        );
-        const autodeleteThreshold = 7 * 24 * 60 + 3; // 7 days plus a small buffer in minutes
+        // dateAccessed is exact 2 days ago from the current date at the start of the day (midnight
+        const dateAccessed = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+        const autodeleteThreshold = 7 * 24 * 60; // 7 days in minutes
 
         await component(appType, {
           app: {
