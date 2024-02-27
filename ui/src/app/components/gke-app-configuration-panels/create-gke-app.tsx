@@ -161,7 +161,8 @@ export const CreateGkeApp = ({
       Reset Timer: Open the application to reset the timer
       <br />
       Disable Auto-Delete: Uncheck the box if you do not want your app to be
-      deleted
+      deleted. Disabling the auto-delete feature of a running environment is not
+      currently possible
     </div>
   );
 
@@ -233,7 +234,7 @@ export const CreateGkeApp = ({
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown
-              aria-label={`gke-autodelete-dropdown`}
+              aria-label={`Auto-deletion time limit`}
               appendTo='self'
               disabled={isAppActive(app) || !createAppRequest.autodeleteEnabled}
               options={AutodeleteDaysThresholds.map((days) => ({
