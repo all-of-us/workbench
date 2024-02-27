@@ -65,6 +65,16 @@ export const defaultProps: CommonCreateGkeAppProps = {
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
+const defaultApp: UserAppEnvironment = {
+  appName: 'all-of-us-rstudio-123',
+  googleProject: 'test-project',
+  diskName: 'test-disk',
+  status: 'RUNNING',
+  appType: AppType.RSTUDIO,
+  dateAccessed: new Date().toISOString(),
+  autodeleteEnabled: false,
+};
+
 // tests for behavior common to all GKE Apps.  For app-specific tests, see e.g. create-cromwell-spec
 describe(CreateGkeApp.name, () => {
   let disksApiStub: DisksApiStub;
@@ -220,6 +230,63 @@ describe(CreateGkeApp.name, () => {
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
+      });
+
+      it('should correctly calculate autodeleteRemainingDays', async () => {
+        const now = new Date();
+        now.setDate(now.getDate() - 2); // Subtract 2 days
+        const dateAccessed = now;
+        const autodeleteThreshold = 7 * 24 * 60 + 1; // 7 days in minutes plus a small buffer
+
+        await component(appType, {
+          app: {
+            ...defaultApp,
+            autodeleteEnabled: true,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        });
+
+        expect(
+          screen.queryByLabelText('Autodelete remaining days')
+        ).toHaveTextContent('5 days remain until deletion');
+      });
+
+      it('should show correct message when autodeleteRemainingDays is 0', async () => {
+        const now = new Date();
+        now.setDate(now.getDate() - 2); // Subtract 2 days
+        const dateAccessed = now;
+        const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
+
+        await component(appType, {
+          app: {
+            ...defaultApp,
+            autodeleteEnabled: true,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        });
+
+        // less than 1 day (0 days) remaining until deletion.
+        expect(
+          screen.queryByLabelText('Autodelete remaining days')
+        ).toHaveTextContent('App will be deleted within 1 day');
+      });
+
+      it('should not show autodeleteRemainingDays when app is not running', async () => {
+        // Render the component with the app not running
+        await component(appType, {
+          app: undefined,
+          disk: undefined,
+        });
+
+        // Query for the autodeleteRemainingDays text
+        const autodeleteRemainingDaysText = screen.queryByLabelText(
+          'Autodelete remaining days'
+        );
+
+        // Assert that the autodeleteRemainingDays text is not in the document
+        expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
       });
     }
   );
