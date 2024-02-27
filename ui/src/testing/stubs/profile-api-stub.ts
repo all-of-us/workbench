@@ -149,12 +149,4 @@ export class ProfileApiStub extends ProfileApi {
       taken: false,
     });
   }
-
-  public useAbsorb() {
-    return Promise.resolve(true);
-  }
-
-  public trainingsEnabled() {
-    return Promise.resolve(true);
-  }
 }

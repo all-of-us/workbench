@@ -82,8 +82,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   /**
    * Syncs the current user's training status from the relevant LMS (Learning Management System).
    */
-  public DbUser syncComplianceTrainingStatus()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException {
+  public DbUser syncComplianceTrainingStatus() throws NotFoundException, ApiException {
     DbUser user = userProvider.get();
 
     log.info(String.format("Syncing compliance training status for user %s", user.getUsername()));
@@ -93,39 +92,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       return user;
     }
 
-    if (useAbsorb()) {
-      return syncComplianceTrainingStatusAbsorb(user, Agent.asUser(user));
-    } else {
-      return syncComplianceTrainingStatusMoodle(user, Agent.asUser(user));
-    }
-  }
-
-  @Override
-  public boolean useAbsorb() {
-    // If the feature flag is ON, redirect All user to Absorb
-    if (configProvider.get().absorb.redirectMoodleUser) {
-      return true;
-    }
-    return !userHasUsedMoodle();
-  }
-
-  @Override
-  public boolean trainingsEnabled() {
-    boolean migrationPauseActive = configProvider.get().moodle.trainingMigrationPauseActive;
-    return !(migrationPauseActive && userHasUsedMoodle());
-  }
-
-  private boolean userHasUsedMoodle() {
-    return userAccessModuleDao.getAllByUser(userProvider.get()).stream()
-        .anyMatch(
-            uam ->
-                complianceTrainingVerificationDao
-                        .getByUserAccessModule(uam)
-                        .map(
-                            DbComplianceTrainingVerification
-                                ::getComplianceTrainingVerificationSystem)
-                        .orElse(null)
-                    == DbComplianceTrainingVerificationSystem.MOODLE);
+    return syncComplianceTrainingStatusAbsorb(user, Agent.asUser(user));
   }
 
   /**

@@ -5,10 +5,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 
 public interface ComplianceTrainingService {
-  public DbUser syncComplianceTrainingStatus()
+  DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException;
 
-  public boolean useAbsorb();
-
-  public boolean trainingsEnabled();
 }

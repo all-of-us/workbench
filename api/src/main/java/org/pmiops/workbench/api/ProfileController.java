@@ -374,12 +374,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Boolean> useAbsorb() {
-    return ResponseEntity.ok(complianceTrainingService.useAbsorb());
+    return ResponseEntity.ok(true);
   }
 
   @Override
   public ResponseEntity<Boolean> trainingsEnabled() {
-    return ResponseEntity.ok(complianceTrainingService.trainingsEnabled());
+    return ResponseEntity.ok(true);
   }
 
   @Override
