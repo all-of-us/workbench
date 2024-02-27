@@ -137,8 +137,8 @@ executors:
   tanagra-executor:
     environment:
       <<: *env-default
-      Username: "dolbeew"
-      Password: ${TANAGRA_DEPLOY_TOKEN}
+      USERNAME: "dolbeew"
+      PASSWORD: ${TANAGRA_DEPLOY_TOKEN}
     docker:
     - image: << pipeline.parameters.tanagra-image >>
     working_directory: ~/workbench
