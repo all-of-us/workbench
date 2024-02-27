@@ -61,7 +61,7 @@ public method on this service generates event(s) for a single action.
 
 ## ActionAuditService
 The
-[ActionAuditServiceImpl](../src/main/java/org/pmiops/workbench/actionaudit/ActionAuditServiceImpl.kt)
+[ActionAuditServiceImpl](../src/main/java/org/pmiops/workbench/actionaudit/ActionAuditServiceImpl.java)
 handles translating `ActionAuditEvent`s into `LogEntry` object for
 passing on to Cloud Logging. It writes to a log named `workbench-action-audit-$env`, where
 `$env` is the running environment according to the JSON configuration.
