@@ -137,8 +137,6 @@ executors:
   tanagra-executor:
     environment:
       <<: *env-default
-      USERNAME: "dolbeew"
-      PASSWORD: ${TANAGRA_DEPLOY_TOKEN}
     docker:
     - image: << pipeline.parameters.tanagra-image >>
     working_directory: ~/workbench
@@ -801,6 +799,9 @@ jobs:
       - run:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
+          environment:
+            GITHUB_USERNAME: "dolbeew"
+            GITHUB_TOKEN: ${TANAGRA_DEPLOY_TOKEN}
           command: |
             deploy/project.rb deploy-tanagra \
               --project all-of-us-workbench-test \
