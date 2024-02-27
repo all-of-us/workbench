@@ -1,6 +1,12 @@
 import * as fp from 'lodash/fp';
 
-import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import {
+  Disk,
+  DiskType,
+  PersistentDiskRequest,
+  Runtime,
+  RuntimeConfigurationType,
+} from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -51,7 +57,7 @@ export const runtimePresets: {
   },
 };
 
-export const applyPresetOverride = (runtime) => {
+export const applyPresetOverride = (runtime: Runtime): Runtime => {
   if (!runtime) {
     return runtime;
   }
@@ -84,4 +90,23 @@ export const applyPresetOverride = (runtime) => {
   }
 
   return runtime;
+};
+
+export const maybeWithPersistentDisk = (
+  runtime: Runtime,
+  persistentDisk: Disk | PersistentDiskRequest | null | undefined
+): Runtime => {
+  if (!runtime || !persistentDisk || !runtime.gceConfig) {
+    return runtime;
+  }
+  // TODO: why not all fields?
+  const { name, size, diskType } = persistentDisk;
+  return {
+    ...runtime,
+    gceConfig: null, // TODO: why not undefined?
+    gceWithPdConfig: {
+      ...runtime.gceConfig, // note: gceConfig.diskSize is discarded.  this is what we want.
+      persistentDisk: { name, size, diskType },
+    },
+  };
 };
