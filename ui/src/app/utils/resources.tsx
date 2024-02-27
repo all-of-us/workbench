@@ -12,7 +12,6 @@ import {
 } from 'generated/fetch';
 
 import { cond, switchCase } from '@terra-ui-packages/core-utils';
-
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 
@@ -34,13 +33,12 @@ export function toDisplay(resourceType: ResourceType): string {
   return switchCase(
     resourceType,
     [ResourceType.COHORT, () => 'Cohort'],
-    [ResourceType.COHORTREVIEW, () => 'Cohort Review'],
-    [ResourceType.CONCEPTSET, () => 'Concept Set'],
+    [ResourceType.COHORT_REVIEW, () => 'Cohort Review'],
+    [ResourceType.CONCEPT_SET, () => 'Concept Set'],
     [ResourceType.DATASET, () => 'Dataset'],
     [ResourceType.NOTEBOOK, () => 'Notebook'],
-
-    [ResourceType.COHORTSEARCHGROUP, () => 'Group'],
-    [ResourceType.COHORTSEARCHITEM, () => 'Item'],
+    [ResourceType.COHORT_SEARCH_GROUP, () => 'Group'],
+    [ResourceType.COHORT_SEARCH_ITEM, () => 'Item'],
     [ResourceType.WORKSPACE, () => 'Workspace']
   );
 }
@@ -91,32 +89,32 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isCohort(resource),
       () => ({
-        url: `${workspacePrefix}/data/cohorts/build`,
+        url: `${dataTabPrefix}/cohorts/build`,
         queryParams: { cohortId: resource.cohort.id },
       }),
     ],
     [
       isCohortReview(resource),
       () => ({
-        url: `${workspacePrefix}/data/cohorts/${resource.cohortReview.cohortId}/reviews/${resource.cohortReview.cohortReviewId}`,
+        url: `${dataTabPrefix}/cohorts/${resource.cohortReview.cohortId}/reviews/${resource.cohortReview.cohortReviewId}`,
       }),
     ],
     [
       isConceptSet(resource),
       () => ({
-        url: `${workspacePrefix}/data/concepts/sets/${resource.conceptSet.id}`,
+        url: `${dataTabPrefix}/concepts/sets/${resource.conceptSet.id}`,
       }),
     ],
     [
       isDataSet(resource),
       () => ({
-        url: `${workspacePrefix}/data/data-sets/${resource.dataSet.id}`,
+        url: `${dataTabPrefix}/data-sets/${resource.dataSet.id}`,
       }),
     ],
     [
       isNotebook(resource),
       () => ({
-        url: `${workspacePrefix}/${analysisTabName}/preview/${encodeURIComponentStrict(
+        url: `${analysisTabPrefix}/preview/${encodeURIComponentStrict(
           resource.notebook.name
         )}`,
       }),
@@ -127,8 +125,8 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
 export function getType(resource: WorkspaceResource): ResourceType {
   return cond(
     [isCohort(resource), () => ResourceType.COHORT],
-    [isCohortReview(resource), () => ResourceType.COHORTREVIEW],
-    [isConceptSet(resource), () => ResourceType.CONCEPTSET],
+    [isCohortReview(resource), () => ResourceType.COHORT_REVIEW],
+    [isConceptSet(resource), () => ResourceType.CONCEPT_SET],
     [isDataSet(resource), () => ResourceType.DATASET],
     [isNotebook(resource), () => ResourceType.NOTEBOOK]
   );
