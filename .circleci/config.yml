@@ -800,11 +800,9 @@ jobs:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
           environment:
-            USERNAME: "dolbeew"
-            PASSWORD: ${TANAGRA_DEPLOY_TOKEN}
+            GITHUB_TOKEN: $TANAGRA_DEPLOY_TOKEN
           command: |
-            echo $USERNAME
-            echo $PASSWORD
+            echo $GITHUB_TOKEN
             deploy/project.rb deploy-tanagra \
               --project all-of-us-workbench-test \
               --promote
