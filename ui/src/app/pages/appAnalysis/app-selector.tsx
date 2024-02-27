@@ -53,22 +53,18 @@ export const AppSelector = (props: AppSelectorProps) => {
   };
 
   const onNext = () => {
-    switch (selectedApp) {
-      case UIAppType.JUPYTER:
-        AnalyticsTracker.Notebooks.OpenCreateModal();
-        setVisibleModal(VisibleModal.Jupyter);
-        break;
-      case UIAppType.RSTUDIO:
-      case UIAppType.SAS:
-        setVisibleModal(VisibleModal.None);
-        openAppOrConfigPanel(
-          workspace.namespace,
-          workspace.id,
-          userApps,
-          selectedApp,
-          navigate
-        );
-        break;
+    if (selectedApp === UIAppType.JUPYTER) {
+      AnalyticsTracker.Notebooks.OpenCreateModal();
+      setVisibleModal(VisibleModal.Jupyter);
+    } else {
+      setVisibleModal(VisibleModal.None);
+      openAppOrConfigPanel(
+        workspace.namespace,
+        workspace.id,
+        userApps,
+        selectedApp,
+        navigate
+      );
     }
   };
 
