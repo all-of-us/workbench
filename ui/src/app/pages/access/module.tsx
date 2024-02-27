@@ -81,11 +81,6 @@ export const Module = (props: ModuleProps) => {
   const { refreshAction, isEnabledInEnvironment } =
     getAccessModuleConfig(moduleName);
 
-  const enableTrainingComponent = () => {
-    setInterval(function () {
-      setDisabled(false);
-    }, 3000);
-  };
   return isEnabledInEnvironment ? (
     <FlexRow data-test-id={`module-${moduleName}`} {...{ style }}>
       <FlexRow style={styles.moduleCTA}>
@@ -106,10 +101,14 @@ export const Module = (props: ModuleProps) => {
           !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
         }
         action={() => {
+          // disable action to prevent double-clicking
           setDisabled(true);
           setShowRefresh(true);
           moduleAction();
-          enableTrainingComponent();
+          // re-enable action after a wait
+          setInterval(function () {
+            setDisabled(false);
+          }, 3000);
         }}
       >
         <ModuleIcon

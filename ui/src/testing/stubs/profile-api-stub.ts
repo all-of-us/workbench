@@ -151,7 +151,7 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public useAbsorb() {
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   }
 
   public trainingsEnabled() {
