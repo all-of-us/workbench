@@ -800,7 +800,7 @@ jobs:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
           environment:
-            GITHUB_TOKEN: "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"
+            GITHUB_TOKEN: echo $TANAGRA_DEPLOY_TOKEN
           command: |
             echo $GITHUB_TOKEN
             deploy/project.rb deploy-tanagra \
