@@ -3,6 +3,7 @@ package org.pmiops.workbench.actionaudit.targetproperties;
 import java.util.function.Function;
 
 public class PropertyUtils {
+  private PropertyUtils() {}
 
   /**
    * Returns a property extractor to transform a member field of an entity object to String or null.
@@ -12,11 +13,12 @@ public class PropertyUtils {
    *
    * @param entityExtractor a function to extract a member field from an entity object
    * @return a function to transform the extracted field of the entity to String or null
-   * @param <T> the type of the entity object
+   * @param <E> the type of the entity object (e.g., Profile)
+   * @param <V> the type of the field of the entity object (e.g., Address)
    */
-  static <T> Function<T, String> stringOrNull(Function<T, Object> entityExtractor) {
+  static <E, V> Function<E, String> stringOrNull(Function<E, V> entityExtractor) {
     return entity -> {
-      var value = entityExtractor.apply(entity);
+      V value = entityExtractor.apply(entity);
       return value == null ? null : value.toString();
     };
   }
