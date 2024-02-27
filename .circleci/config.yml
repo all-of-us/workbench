@@ -137,6 +137,7 @@ executors:
   tanagra-executor:
     environment:
       <<: *env-default
+      GITHUB_USERNAME: "dolbeew"
       GITHUB_TOKEN: ${TANAGRA_DEPLOY_TOKEN}
     docker:
     - image: << pipeline.parameters.tanagra-image >>
