@@ -799,10 +799,7 @@ jobs:
       - run:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
-          environment:
-            GITHUB_TOKEN: echo $TANAGRA_DEPLOY_TOKEN
           command: |
-            echo $GITHUB_TOKEN
             deploy/project.rb deploy-tanagra \
               --project all-of-us-workbench-test \
               --promote
