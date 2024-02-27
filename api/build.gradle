@@ -38,7 +38,7 @@ plugins {
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
 
     // required even though we have removed our own Kotlin code - transitive dependency?
-    id 'org.jetbrains.kotlin.jvm' version '1.8.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
 
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
