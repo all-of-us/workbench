@@ -137,6 +137,7 @@ executors:
   tanagra-executor:
     environment:
       <<: *env-default
+      GITHUB_TOKEN: ${TANAGRA_DEPLOY_TOKEN}
     docker:
     - image: << pipeline.parameters.tanagra-image >>
     working_directory: ~/workbench
@@ -793,9 +794,9 @@ jobs:
     steps:
       - checkout-code
       - gcloud-auth-login
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:V9ffgjQ0LUc2zI1W6NdusFDlDERSygYSEG86hhvDZeY"
+#      - add_ssh_keys:
+#          fingerprints:
+#            - "SHA256:V9ffgjQ0LUc2zI1W6NdusFDlDERSygYSEG86hhvDZeY"
       - run:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
