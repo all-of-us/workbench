@@ -17,20 +17,20 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
   ACCESS_TIER_SHORT_NAME("access_tier_short_name", Workspace::getAccessTierShortName),
   ADDITIONAL_NOTES(
       "additional_notes", workspace -> workspace.getResearchPurpose().getAdditionalNotes()),
-  APPROVED("approved", stringOrNull(ResearchPurpose::isApproved)),
-  ANCESTRY("ancestry", stringOrNull(ResearchPurpose::isAncestry)),
+  APPROVED("approved", rpStringOrNull(ResearchPurpose::isApproved)),
+  ANCESTRY("ancestry", rpStringOrNull(ResearchPurpose::isAncestry)),
   ANTICIPATED_FINDINGS(
       "anticipated_findings", workspace -> workspace.getResearchPurpose().getAnticipatedFindings()),
-  COMMERCIAL_PURPOSE("commercial_purpose", stringOrNull(ResearchPurpose::isCommercialPurpose)),
-  CONTROL_SET("control_set", stringOrNull(ResearchPurpose::isControlSet)),
+  COMMERCIAL_PURPOSE("commercial_purpose", rpStringOrNull(ResearchPurpose::isCommercialPurpose)),
+  CONTROL_SET("control_set", rpStringOrNull(ResearchPurpose::isControlSet)),
   DISEASE_FOCUSED_RESEARCH(
-      "disease_focused_research", stringOrNull(ResearchPurpose::isDiseaseFocusedResearch)),
+      "disease_focused_research", rpStringOrNull(ResearchPurpose::isDiseaseFocusedResearch)),
   DISEASE_OF_FOCUS(
       "disease_of_focus", workspace -> workspace.getResearchPurpose().getDiseaseOfFocus()),
-  DRUG_DEVELOPMENT("drug_development", stringOrNull(ResearchPurpose::isDrugDevelopment)),
-  EDUCATIONAL("educational", stringOrNull(ResearchPurpose::isEducational)),
+  DRUG_DEVELOPMENT("drug_development", rpStringOrNull(ResearchPurpose::isDrugDevelopment)),
+  EDUCATIONAL("educational", rpStringOrNull(ResearchPurpose::isEducational)),
   INTENDED_STUDY("intended_study", workspace -> workspace.getResearchPurpose().getIntendedStudy()),
-  METHODS_DEVELOPMENT("methods_development", stringOrNull(ResearchPurpose::isMethodsDevelopment)),
+  METHODS_DEVELOPMENT("methods_development", rpStringOrNull(ResearchPurpose::isMethodsDevelopment)),
   OTHER_POPULATION_DETAILS(
       "other_population_details",
       workspace -> workspace.getResearchPurpose().getOtherPopulationDetails()),
@@ -43,13 +43,13 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
         var pdStrings = populationDetails.stream().map(SpecificPopulationEnum::toString).toList();
         return String.join(", ", pdStrings);
       }),
-  POPULATION_HEALTH("population_health", stringOrNull(ResearchPurpose::isPopulationHealth)),
+  POPULATION_HEALTH("population_health", rpStringOrNull(ResearchPurpose::isPopulationHealth)),
   REASON_FOR_ALL_OF_US(
       "reason_for_all_of_us", workspace -> workspace.getResearchPurpose().getReasonForAllOfUs()),
-  REVIEW_REQUESTED("review_requested", stringOrNull(ResearchPurpose::isReviewRequested)),
-  SOCIAL_BEHAVIORAL("social_behavioral", stringOrNull(ResearchPurpose::isSocialBehavioral)),
-  TIME_REQUESTED("time_requested", stringOrNull(ResearchPurpose::getTimeRequested)),
-  TIME_REVIEWED("time_reviewed", stringOrNull(ResearchPurpose::getTimeReviewed)),
+  REVIEW_REQUESTED("review_requested", rpStringOrNull(ResearchPurpose::isReviewRequested)),
+  SOCIAL_BEHAVIORAL("social_behavioral", rpStringOrNull(ResearchPurpose::isSocialBehavioral)),
+  TIME_REQUESTED("time_requested", rpStringOrNull(ResearchPurpose::getTimeRequested)),
+  TIME_REVIEWED("time_reviewed", rpStringOrNull(ResearchPurpose::getTimeReviewed)),
   PUBLISHED("published", PropertyUtils.stringOrNull(Workspace::isPublished));
 
   private final String propertyName;
@@ -60,7 +60,8 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
     this.extractor = extractor;
   }
 
-  static Function<Workspace, String> stringOrNull(Function<ResearchPurpose, Object> rpExtractor) {
+  // a specialized version of stringOrNull that extracts from a ResearchPurpose
+  static Function<Workspace, String> rpStringOrNull(Function<ResearchPurpose, Object> rpExtractor) {
     return PropertyUtils.stringOrNull(
         workspace -> rpExtractor.apply(workspace.getResearchPurpose()));
   }
