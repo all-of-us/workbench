@@ -39,9 +39,9 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
       workspace -> {
         var populationDetails = workspace.getResearchPurpose().getPopulationDetails();
         if (populationDetails == null) return null;
-
-        var pdStrings = populationDetails.stream().map(SpecificPopulationEnum::toString).toList();
-        return String.join(", ", pdStrings);
+        Iterable<String> pdIterable =
+            () -> populationDetails.stream().map(SpecificPopulationEnum::toString).iterator();
+        return String.join(", ", pdIterable);
       }),
   POPULATION_HEALTH("population_health", rpStringOrNull(ResearchPurpose::isPopulationHealth)),
   REASON_FOR_ALL_OF_US(
