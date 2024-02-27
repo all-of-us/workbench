@@ -10,11 +10,9 @@ buildscript {
         GSON_VERSION = '2.9.0'
         HIBERNATE_VERSION = '5.6.15.Final'
         JACKSON_VERSION = '2.16.1'
-        KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
-        MOCKITO_KOTLIN_VERSION = '4.1.0'
         OKHTTP_VERSION = '4.12.0'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
@@ -27,12 +25,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
-    // https://github.com/spring-projects/spring-boot/issues/26864
-    // https://github.com/spring-projects/spring-boot/issues/26946
-    // https://github.com/spring-projects/spring-boot/issues/26947
-    // https://github.com/spring-projects/spring-boot/commit/cd808d2f189a7a550adec286c1722b5b6f1c19e7
-    project.getExtensions().getExtraProperties().set('kotlin.version', '1.8.20') // KOTLIN_VERSION
 }
 
 plugins {
@@ -44,7 +36,10 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '6.23.3'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
-    id 'org.jetbrains.kotlin.jvm' version '1.8.20' // KOTLIN_VERSION
+
+    // required even though we have removed our own Kotlin code - transitive dependency?
+    id 'org.jetbrains.kotlin.jvm' version '1.8.20'
+
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
@@ -63,8 +58,6 @@ plugins {
 // in this file:
 // * sourceCompatibility
 // * targetCompatibility
-// * compileKotlin.kotlinOptions.jvmTarget
-// * compileTestKotlin.kotlinOptions.jvmTarget
 if (JavaVersion.current() != JavaVersion.VERSION_17) {
      throw new GradleException(
             "This build must be run with Java 17. " +
@@ -253,10 +246,6 @@ spotless {
             exclude 'build/**'
         }
     }
-
-    kotlin {
-        ktlint()
-    }
 }
 
 test {
@@ -412,7 +401,6 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_VERSION"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
     implementation "com.github.rholder:guava-retrying:2.0.0"
     implementation 'org.javers:javers-core:5.15.0'
@@ -461,10 +449,6 @@ dependencies {
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
     implementation "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
-
-    // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
-    // Kotlin dep, resulting in massive logspam.
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
 
     implementation('org.apache.tomcat:tomcat-jdbc:10.0.23')
     implementation("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
@@ -548,8 +532,6 @@ dependencies {
     generatedCompile 'org.threeten:threetenbp:1.6.2'
     generatedCompile 'io.springfox:springfox-oas:3.0.0'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
-
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
@@ -562,10 +544,6 @@ dependencies {
     testImplementation 'com.h2database:h2:1.4.194'
     testImplementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$project.ext.KOTLIN_VERSION"
-
-    // Use Mockito for testing only.
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
     // Test deps
     testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
@@ -884,16 +862,6 @@ task backfillGSuiteUserData(type: JavaExec) {
         args Eval.me(appArgs)
     }
 }
-//
-// Kotlin Plugin compiler arguments
-// https://kotlinlang.org/docs/reference/using-gradle.html#compiler-options
-//
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = 17
-    }
-}
 
 dependencies {
     testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
@@ -930,9 +898,6 @@ dependencies {
   }
 }
 
-compileGeneratedKotlin {
-  dependsOn(generateSwaggerCode)
-}
 explodeWar {
   dependsOn(bootWar)
 }
