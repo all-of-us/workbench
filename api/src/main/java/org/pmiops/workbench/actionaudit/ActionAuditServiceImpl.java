@@ -7,7 +7,6 @@ import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,10 +41,9 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   @Override
   public void send(Collection<ActionAuditEvent> events) {
     try {
-      Iterator<LogEntry> logEntryIterator =
-          events.stream().map(this::auditEventToLogEntry).iterator();
-      if (logEntryIterator.hasNext()) {
-        cloudLogging.write(() -> logEntryIterator);
+      List<LogEntry> logEntries = events.stream().map(this::auditEventToLogEntry).toList();
+      if (!logEntries.isEmpty()) {
+        cloudLogging.write(logEntries);
       }
     } catch (RuntimeException e) {
       SERVICE_LOGGER.log(
