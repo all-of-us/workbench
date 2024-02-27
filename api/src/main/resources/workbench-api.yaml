@@ -6888,6 +6888,10 @@ components:
           type: boolean
           description: Start redirecting Moodle User to Absorb
           default: false
+        enableVariantSelectAll:
+          type: boolean
+          default: false
+          description: Enable variant select all
     RuntimeImage:
       type: object
       properties:

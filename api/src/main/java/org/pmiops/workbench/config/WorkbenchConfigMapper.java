@@ -78,5 +78,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
+  @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

@@ -337,6 +337,8 @@ public class WorkbenchConfig {
     public boolean enableDataExplorer;
     // If true, allow users to pause their GKE apps
     public boolean enableGKEAppPausing;
+    // If true, enable variant select all
+    public boolean enableVariantSelectAll;
   }
 
   public static class ActionAuditConfig {
