@@ -20,8 +20,8 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   private static final String MONITORED_RESOURCE_TYPE = "global";
   private static final MonitoredResource MONITORED_RESOURCE =
       MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE).build();
-  private static final Logger SERVICE_LOGGER =
-      Logger.getLogger(ActionAuditServiceImpl.class.getName());
+
+  private static final Logger LOG = Logger.getLogger(ActionAuditServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Logging cloudLogging;
@@ -40,8 +40,7 @@ public class ActionAuditServiceImpl implements ActionAuditService {
         cloudLogging.write(logEntries);
       }
     } catch (RuntimeException e) {
-      SERVICE_LOGGER.log(
-          Level.SEVERE, "Exception encountered writing log entries to Cloud Logging.", e);
+      LOG.log(Level.SEVERE, "Exception encountered writing log entries to Cloud Logging.", e);
     }
   }
 
