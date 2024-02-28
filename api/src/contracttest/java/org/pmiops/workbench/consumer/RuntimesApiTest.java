@@ -2,6 +2,7 @@ package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -356,7 +357,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.deleteRuntime("googleProject", "runtimename", true);
+    assertDoesNotThrow(() -> api.deleteRuntime("googleProject", "runtimename", true));
   }
 
   @Test
@@ -376,7 +377,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.stopRuntime("googleProject", "runtimename");
+    assertDoesNotThrow(() -> api.stopRuntime("googleProject", "runtimename"));
   }
 
   @Test
