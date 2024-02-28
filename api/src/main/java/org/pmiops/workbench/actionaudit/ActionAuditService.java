@@ -1,11 +1,11 @@
 package org.pmiops.workbench.actionaudit;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 public interface ActionAuditService {
   default void send(ActionAuditEvent event) {
-    send(List.of(event));
+    send(Set.of(event));
   }
 
   void send(Collection<ActionAuditEvent> events);
