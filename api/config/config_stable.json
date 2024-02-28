@@ -122,7 +122,7 @@
     "enableEventDateModifier": false,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableRStudioGKEApp": true,
+    "enableRStudioGKEApp": false,
     "enableSasGKEApp": true,
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
