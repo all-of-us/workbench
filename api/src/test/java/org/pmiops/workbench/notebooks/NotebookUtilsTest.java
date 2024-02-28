@@ -34,5 +34,11 @@ public class NotebookUtilsTest {
     assertThrows(
         NotImplementedException.class,
         () -> NotebookUtils.appendFileExtensionIfMissing("from.rm", "new"));
+    assertThrows(
+        NotImplementedException.class,
+        () -> NotebookUtils.appendFileExtensionIfMissing("from.IPyNB", "new"));
+    assertThrows(
+        NotImplementedException.class,
+        () -> NotebookUtils.appendFileExtensionIfMissing("from.SAS", "new"));
   }
 }
