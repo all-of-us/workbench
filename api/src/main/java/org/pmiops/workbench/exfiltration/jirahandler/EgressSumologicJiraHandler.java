@@ -70,7 +70,7 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
           String.format(
               "User App name: %s, App type: %s\n",
               originalEvent.getSrcGkeServiceName(),
-              appServiceNameToAppType(originalEvent.getSrcGkeServiceName()));
+              appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).get());
     } else {
       jiraDescription =
           String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix());
