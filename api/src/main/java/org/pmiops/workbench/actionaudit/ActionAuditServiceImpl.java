@@ -54,6 +54,8 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   }
 
   private JsonPayload toJsonPayload(ActionAuditEvent auditEvent) {
+    // allow null values so that JSON columns are populated and BQ schema
+    // doesn't have gaps that need to be added later via daily migration
     HashMap<String, Object> jsonValuesByColumn = new HashMap<>();
     jsonValuesByColumn.put(AuditColumn.TIMESTAMP.name(), auditEvent.timestamp());
     jsonValuesByColumn.put(AuditColumn.ACTION_ID.name(), auditEvent.actionId());
