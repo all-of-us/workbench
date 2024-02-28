@@ -75,7 +75,7 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testExtractsStringPropertiesFromWorkspace() {
     Map<String, String> propertiesByName =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), workspace1);
 
     assertEquals(WorkspaceTargetProperty.values().length, propertiesByName.size());
@@ -92,14 +92,14 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testMapsChanges() {
     var workspace1Properties =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), workspace1);
     var workspace2Properties =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), workspace2);
 
     Map<String, PreviousNewValuePair> changesByPropertyName =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             WorkspaceTargetProperty.values(), workspace1, workspace2);
 
     assertFalse(changesByPropertyName.isEmpty());
@@ -125,7 +125,7 @@ public class WorkspaceTargetPropertyTest {
   public void testHandlesMissingValues() {
     workspace2.setCdrVersionId(null);
     Map<String, PreviousNewValuePair> changesByName =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             WorkspaceTargetProperty.values(), workspace1, workspace2);
 
     assertEquals(
@@ -137,7 +137,7 @@ public class WorkspaceTargetPropertyTest {
         changesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).newValue());
 
     Map<String, PreviousNewValuePair> reverseChangesByName =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             WorkspaceTargetProperty.values(), workspace2, workspace1);
 
     assertNull(
@@ -154,7 +154,7 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testComparisonToSelfIsEmpty() {
     assertTrue(
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
                 WorkspaceTargetProperty.values(), workspace1, workspace1)
             .isEmpty());
   }

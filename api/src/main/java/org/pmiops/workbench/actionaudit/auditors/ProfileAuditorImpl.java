@@ -13,9 +13,9 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
+import org.pmiops.workbench.actionaudit.targetproperties.ModelBackedTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.PreviousNewValuePair;
 import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty;
-import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
   @Override
   public void fireCreateAction(Profile createdProfile) {
     Map<String, String> propertiesByName =
-        TargetPropertyExtractor.getPropertyValuesByName(
+        ModelBackedTargetProperty.getPropertyValuesByName(
             ProfileTargetProperty.values(), createdProfile);
 
     // We can't rely on the UserProvider here since the user didn't exist when it
@@ -71,7 +71,7 @@ public class ProfileAuditorImpl implements ProfileAuditor {
   @Override
   public void fireUpdateAction(Profile previousProfile, Profile updatedProfile, Agent agent) {
     Map<String, PreviousNewValuePair> propertiesByName =
-        TargetPropertyExtractor.getChangedValuesByName(
+        ModelBackedTargetProperty.getChangedValuesByName(
             ProfileTargetProperty.values(), previousProfile, updatedProfile);
 
     List<ActionAuditEvent> events =
