@@ -53,11 +53,13 @@ public class NotebookUtils {
   }
 
   public static boolean isRmdNotebook(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
+    return nameWithFileExtension
+        .toLowerCase()
+        .endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION.toLowerCase());
   }
 
   public static boolean isRScriptFile(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(R_SCRIPT_EXTENSION);
+    return nameWithFileExtension.toLowerCase().endsWith(R_SCRIPT_EXTENSION.toLowerCase());
   }
 
   public static boolean isRStudioFile(String nameWithFileExtension) {
@@ -94,15 +96,13 @@ public class NotebookUtils {
   }
 
   private static String withRMarkdownExtension(String notebookName) {
-    return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
+    return isRmdNotebook(notebookName)
         ? notebookName
         : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
   private static String withRFileExtension(String notebookName) {
-    return notebookName.endsWith(R_SCRIPT_EXTENSION)
-        ? notebookName
-        : notebookName.concat(R_SCRIPT_EXTENSION);
+    return isRScriptFile(notebookName) ? notebookName : notebookName.concat(R_SCRIPT_EXTENSION);
   }
 
   private static String withSasExtension(String notebookName) {

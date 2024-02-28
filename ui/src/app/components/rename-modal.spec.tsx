@@ -9,7 +9,7 @@ import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
 import { RenameModal } from './rename-modal';
 
-describe('RenameModal', () => {
+describe(RenameModal.name, () => {
   const existingNames = [];
 
   it('should display description only if props hideDescription is set to true', () => {
@@ -34,6 +34,9 @@ describe('should show error if new name already exist', () => {
     ['123.ipynb', '123.ipynb'],
     ['123.Rmd', '123'],
     ['123.Rmd', '123.Rmd'],
+    ['123.R', '123'],
+    ['123.R', '123.R'],
+    ['test.Rmd', 'test'],
   ])(
     'Old analysis file name %s, new analysis file name %s',
     async (oldFilename, newFilename) => {
@@ -59,4 +62,71 @@ describe('should show error if new name already exist', () => {
       ).toEqual('New name already exists');
     }
   );
+
+  let renameModal: RenameModal;
+
+  beforeEach(() => {
+    renameModal = new RenameModal({
+      existingNames: [],
+      oldName: '',
+      onCancel: () => {},
+      onRename: () => {},
+      resourceType: ResourceType.NOTEBOOK,
+    });
+  });
+
+  describe('validateNewName', () => {
+    it('should return no errors for valid new name', () => {
+      const errors = renameModal.validateNewName(
+        ['existingName.ipynb'],
+        'oldName.ipynb',
+        'newName.ipynb',
+        ResourceType.NOTEBOOK
+      );
+      expect(errors).toBeUndefined();
+    });
+
+    it('should return errors for duplicate new name', () => {
+      const errors = renameModal.validateNewName(
+        ['existingName.ipynb'],
+        'oldName.ipynb',
+        'existingName.ipynb',
+        ResourceType.NOTEBOOK
+      );
+      expect(errors).toBeDefined();
+      expect(errors.newName).toEqual(['New name already exists']);
+    });
+
+    it('should return errors for duplicate R file new name case insensitive', () => {
+      const errors = renameModal.validateNewName(
+        ['existingName.r'],
+        'oldName.r',
+        'existingName.R',
+        ResourceType.NOTEBOOK
+      );
+      expect(errors).toBeDefined();
+      expect(errors.newName).toEqual(['New name already exists']);
+    });
+
+    it('should return errors for duplicate R file new name case insensitive', () => {
+      const errors = renameModal.validateNewName(
+        ['existingname.R'],
+        'oldName.r',
+        'existingName.R',
+        ResourceType.NOTEBOOK
+      );
+      expect(errors).toBeDefined();
+      expect(errors.newName).toEqual(['New name already exists']);
+    });
+
+    it('should not return errors for rename R file case insensitive', () => {
+      const errors = renameModal.validateNewName(
+        ['oldName.r'],
+        'oldName.r',
+        'oldName.R',
+        ResourceType.NOTEBOOK
+      );
+      expect(errors).toBeUndefined();
+    });
+  });
 });

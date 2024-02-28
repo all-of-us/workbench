@@ -13,7 +13,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
@@ -55,6 +54,87 @@ export class RenameModal extends React.Component<Props, States> {
     };
   }
 
+  getFileNameWithoutExtension(name: string) {
+    const lastDotIndex = name?.lastIndexOf('.');
+    return lastDotIndex === -1 ? name : name?.slice(0, lastDotIndex);
+  }
+
+  getFileExtension(name: string) {
+    const lastDotIndex = name?.lastIndexOf('.');
+    return lastDotIndex === -1 ? '' : name?.slice(lastDotIndex);
+  }
+
+  validateNewName(
+    existingNames: string[],
+    oldName: string,
+    newName: string,
+    resourceType: ResourceType
+  ) {
+    const { lowerCaseNames, newNameNoExtension } =
+      this.getFilteredListOfFileNamesWithoutExtension(
+        existingNames,
+        oldName,
+        newName
+      );
+
+    const errors = validate(
+      { newName: newNameNoExtension },
+      {
+        newName: nameValidationFormat(lowerCaseNames, resourceType),
+      }
+    );
+    return errors;
+  }
+
+  private getFilteredListOfFileNamesWithoutExtension(
+    existingNames: string[],
+    oldName,
+    newName: string
+  ) {
+    const oldNameExtension = this.getFileExtension(oldName);
+    const oldNameNoExtension = this.getFileNameWithoutExtension(oldName);
+
+    const newNameExtension = this.getFileExtension(newName);
+    let newNameNoExtension = this.getFileNameWithoutExtension(newName || '');
+
+    // Filtering only files that have the same extension as the original file and stripping file extensions from the names
+    const filteredExistingNamesNoExtension = existingNames
+      .filter(
+        (name) =>
+          this.getFileExtension(name).toLowerCase() ===
+          oldNameExtension.toLowerCase()
+      )
+      .map(this.getFileNameWithoutExtension);
+
+    // No need to show error if the new name is the same as the old name but the extension has different case
+    // User could be fixing a typo in the extension
+    // Example: newName.r -> newName.R
+    const isSameNameNoExtension = newNameNoExtension === oldNameNoExtension;
+    const isDifferentNameCaseSensitive = newName ? newName !== oldName : true;
+    const isSameExtensionCaseInsensitive =
+      newNameExtension?.toLowerCase() === oldNameExtension.toLowerCase();
+
+    if (
+      isSameNameNoExtension &&
+      isSameExtensionCaseInsensitive &&
+      isDifferentNameCaseSensitive
+    ) {
+      const index =
+        filteredExistingNamesNoExtension.indexOf(newNameNoExtension);
+      if (index !== -1) {
+        filteredExistingNamesNoExtension.splice(index, 1);
+      }
+    }
+
+    // Make all names lowercase for case-insensitive comparison
+    newNameNoExtension = newNameNoExtension.toLowerCase();
+    const lowerCaseNames = filteredExistingNamesNoExtension.map((name) =>
+      name.toLowerCase()
+    );
+
+    return { lowerCaseNames, newNameNoExtension };
+  }
+
   onRename() {
     this.setState({ saving: true });
     this.props.onRename(
@@ -70,17 +150,12 @@ export class RenameModal extends React.Component<Props, States> {
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
-    const errors = validate(
-      {
-        newName:
-          // Append .ipynb, .Rmd, .R, .sas to the filename (if needed) based on the oldName format
-          resourceType === ResourceType.NOTEBOOK
-            ? appendAnalysisFileSuffixByOldName(newName?.trim(), oldName)
-            : newName?.trim(),
-      },
-      {
-        newName: nameValidationFormat(existingNames, resourceType),
-      }
+
+    const errors = this.validateNewName(
+      existingNames,
+      oldName,
+      newName,
+      resourceType
     );
     return (
       <Modal loading={saving}>
