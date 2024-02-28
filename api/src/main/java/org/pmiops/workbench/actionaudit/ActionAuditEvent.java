@@ -18,7 +18,7 @@ public record ActionAuditEvent(
   }
 
   public static class Builder {
-    private Long timestamp;
+    private long timestamp;
     private AgentType agentType;
     private Long agentIdMaybe;
     private String agentEmailMaybe;
@@ -30,7 +30,7 @@ public record ActionAuditEvent(
     private String previousValueMaybe;
     private String newValueMaybe;
 
-    public Builder timestamp(Long timestamp) {
+    public Builder timestamp(long timestamp) {
       this.timestamp = timestamp;
       return this;
     }
@@ -86,11 +86,7 @@ public record ActionAuditEvent(
     }
 
     private void verifyRequiredFields() {
-      if (timestamp == null
-          || agentType == null
-          || actionId == null
-          || actionType == null
-          || targetType == null) {
+      if (agentType == null || actionId == null || actionType == null || targetType == null) {
         throw new IllegalArgumentException("Missing required arguments.");
       }
     }
