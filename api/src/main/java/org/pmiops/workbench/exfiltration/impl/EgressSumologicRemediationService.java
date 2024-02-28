@@ -72,9 +72,15 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   @Override
-  protected void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
-      throws MessagingException {
-    mailService.sendEgressRemediationEmail(user, action);
+  protected void sendEgressRemediationEmail(
+      DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
+    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    String serviceName =
+        StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())
+                && appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).isPresent()
+            ? appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).get().toString()
+            : "Jupyter";
+    mailService.sendEgressRemediationEmail(user, action, serviceName);
   }
 
   @Override

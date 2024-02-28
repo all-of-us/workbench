@@ -360,15 +360,24 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
+  public void sendEgressRemediationEmail(
+      DbUser dbUser, EgressRemediationAction action, String environmentName)
       throws MessagingException {
-    sendEgressRemediationEmailWithContent(dbUser, action, EGRESS_REMEDIATION_RESOURCE);
+    sendEgressRemediationEmailWithContent(
+        dbUser,
+        EGRESS_REMEDIATION_RESOURCE,
+        getEgressRemediationEmailTemplate(dbUser, action)
+            .put(EmailSubstitutionField.ENVIRONMENT_TYPE, environmentName)
+            .build());
   }
 
   @Override
   public void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
-    sendEgressRemediationEmailWithContent(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
+    sendEgressRemediationEmailWithContent(
+        dbUser,
+        FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL,
+        getEgressRemediationEmailTemplate(dbUser, action).build());
   }
 
   @Override
@@ -416,19 +425,22 @@ public class MailServiceImpl implements MailService {
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
-  private void sendEgressRemediationEmailWithContent(
-      DbUser dbUser, EgressRemediationAction action, String remediationEmail)
-      throws MessagingException {
+  ImmutableMap.Builder<EmailSubstitutionField, String> getEgressRemediationEmailTemplate(
+      DbUser dbUser, EgressRemediationAction action) {
     String remediationDescription = EGRESS_REMEDIATION_ACTION_MAP.get(action);
-    String htmlMessage =
-        buildHtml(
-            remediationEmail,
-            ImmutableMap.<EmailSubstitutionField, String>builder()
-                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-                .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
-                .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription)
-                .build());
+    return ImmutableMap.<EmailSubstitutionField, String>builder()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.USERNAME, dbUser.getUsername())
+        .put(EmailSubstitutionField.EGRESS_REMEDIATION_DESCRIPTION, remediationDescription);
+  }
+
+  private void sendEgressRemediationEmailWithContent(
+      DbUser dbUser,
+      String remediationEmail,
+      Map<EmailSubstitutionField, String> getEgressRemediationEmailContent)
+      throws MessagingException {
+    String htmlMessage = buildHtml(remediationEmail, getEgressRemediationEmailContent);
 
     EgressAlertRemediationPolicy egressPolicy =
         workbenchConfigProvider.get().egressAlertRemediationPolicy;
