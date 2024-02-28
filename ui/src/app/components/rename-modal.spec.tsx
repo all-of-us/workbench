@@ -97,7 +97,7 @@ describe('should show error if new name already exist', () => {
       expect(errors.newName).toEqual(['New name already exists']);
     });
 
-    it('should return errors for duplicate R file new name case insensitive', () => {
+    it('should return errors when the new name for an R file is a case-sensitive duplicate of an existing file', () => {
       const errors = renameModal.validateNewName(
         ['existingName.r'],
         'oldName.r',
@@ -108,7 +108,7 @@ describe('should show error if new name already exist', () => {
       expect(errors.newName).toEqual(['New name already exists']);
     });
 
-    it('should return errors for duplicate R file new name case insensitive', () => {
+    it('should return errors when the new name for an R file is a case-insensitive match with an existing file', () => {
       const errors = renameModal.validateNewName(
         ['existingname.R'],
         'oldName.r',
@@ -119,7 +119,7 @@ describe('should show error if new name already exist', () => {
       expect(errors.newName).toEqual(['New name already exists']);
     });
 
-    it('should not return errors for rename R file case insensitive', () => {
+    it('should not return errors when renaming an R file with a case-insensitive name change', () => {
       const errors = renameModal.validateNewName(
         ['oldName.r'],
         'oldName.r',
