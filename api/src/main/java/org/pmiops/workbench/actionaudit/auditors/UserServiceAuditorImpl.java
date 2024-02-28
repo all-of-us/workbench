@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -79,7 +80,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
       Optional<Instant> previousBypassTime,
       Optional<Instant> newBypassTime) {
     DbUser adminUser = dbUserProvider.get();
-    ActionAuditEvent.Builder eventBuilder =
+    Builder eventBuilder =
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
@@ -119,7 +120,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   public void fireSetFreeTierDollarLimitOverride(
       Long targetUserId, @Nullable Double previousDollarQuota, @Nullable Double newDollarQuota) {
     DbUser adminUser = dbUserProvider.get();
-    ActionAuditEvent.Builder builder =
+    Builder builder =
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
@@ -132,10 +133,10 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .targetIdMaybe(targetUserId);
 
     if (previousDollarQuota != null) {
-      builder.setPreviousValueMaybe(previousDollarQuota.toString());
+      builder.previousValueMaybe(previousDollarQuota.toString());
     }
     if (newDollarQuota != null) {
-      builder.setNewValueMaybe(newDollarQuota.toString());
+      builder.newValueMaybe(newDollarQuota.toString());
     }
 
     actionAuditService.send(builder.build());
