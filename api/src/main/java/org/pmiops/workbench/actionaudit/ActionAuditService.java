@@ -1,12 +1,12 @@
 package org.pmiops.workbench.actionaudit;
 
 import java.util.Collection;
-import java.util.logging.Logger;
+import java.util.List;
 
 public interface ActionAuditService {
-  void send(ActionAuditEvent event);
+  default void send(ActionAuditEvent event) {
+    send(List.of(event));
+  }
 
   void send(Collection<ActionAuditEvent> events);
-
-  void logRuntimeException(Logger logger, RuntimeException exception);
 }

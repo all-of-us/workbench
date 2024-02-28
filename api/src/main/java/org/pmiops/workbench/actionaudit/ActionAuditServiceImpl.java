@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,11 +30,6 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   public ActionAuditServiceImpl(Provider<WorkbenchConfig> configProvider, Logging cloudLogging) {
     this.configProvider = configProvider;
     this.cloudLogging = cloudLogging;
-  }
-
-  @Override
-  public void send(@Nullable ActionAuditEvent event) {
-    if (event != null) send(List.of(event));
   }
 
   @Override
@@ -74,10 +68,5 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     jsonValuesByColumn.put(AuditColumn.PREV_VALUE.name(), auditEvent.previousValueMaybe());
     jsonValuesByColumn.put(AuditColumn.NEW_VALUE.name(), auditEvent.newValueMaybe());
     return JsonPayload.of(jsonValuesByColumn);
-  }
-
-  @Override
-  public void logRuntimeException(Logger logger, RuntimeException exception) {
-    logger.log(Level.WARNING, "Exception encountered during audit.", exception);
   }
 }
