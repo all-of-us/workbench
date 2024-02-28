@@ -9,7 +9,7 @@ import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
 import { RenameModal } from './rename-modal';
 
-describe('RenameModal', () => {
+describe(RenameModal.name, () => {
   const existingNames = [];
 
   it('should display description only if props hideDescription is set to true', () => {
@@ -62,9 +62,7 @@ describe('should show error if new name already exist', () => {
       ).toEqual('New name already exists');
     }
   );
-});
 
-describe('RenameModal', () => {
   let renameModal: RenameModal;
 
   beforeEach(() => {
@@ -110,15 +108,15 @@ describe('RenameModal', () => {
       expect(errors.newName).toEqual(['New name already exists']);
     });
 
-    // Is this correct?
     it('should return errors for duplicate R file new name case insensitive', () => {
       const errors = renameModal.validateNewName(
-        ['existingname.r'],
+        ['existingname.R'],
         'oldName.r',
         'existingName.R',
         ResourceType.NOTEBOOK
       );
-      expect(errors).toBeUndefined();
+      expect(errors).toBeDefined();
+      expect(errors.newName).toEqual(['New name already exists']);
     });
 
     it('should not return errors for rename R file case insensitive', () => {

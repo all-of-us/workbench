@@ -70,7 +70,7 @@ export class RenameModal extends React.Component<Props, States> {
     newName: string,
     resourceType: ResourceType
   ) {
-    const { filteredExistingNamesNoExtension, newNameNoExtension } =
+    const { lowerCaseNames, newNameNoExtension } =
       this.getFilteredListOfFileNamesWithoutExtension(
         existingNames,
         oldName,
@@ -80,10 +80,7 @@ export class RenameModal extends React.Component<Props, States> {
     const errors = validate(
       { newName: newNameNoExtension },
       {
-        newName: nameValidationFormat(
-          filteredExistingNamesNoExtension,
-          resourceType
-        ),
+        newName: nameValidationFormat(lowerCaseNames, resourceType),
       }
     );
     return errors;
@@ -98,7 +95,7 @@ export class RenameModal extends React.Component<Props, States> {
     const oldNameNoExtension = this.getFileNameWithoutExtension(oldName);
 
     const newNameExtension = this.getFileExtension(newName);
-    const newNameNoExtension = this.getFileNameWithoutExtension(newName || '');
+    let newNameNoExtension = this.getFileNameWithoutExtension(newName || '');
 
     // Filtering only files that have the same extension as the original file and stripping file extensions from the names
     const filteredExistingNamesNoExtension = existingNames
@@ -128,7 +125,14 @@ export class RenameModal extends React.Component<Props, States> {
         filteredExistingNamesNoExtension.splice(index, 1);
       }
     }
-    return { filteredExistingNamesNoExtension, newNameNoExtension };
+
+    // Make all names lowercase for case-insensitive comparison
+    newNameNoExtension = newNameNoExtension.toLowerCase();
+    const lowerCaseNames = filteredExistingNamesNoExtension.map((name) =>
+      name.toLowerCase()
+    );
+
+    return { lowerCaseNames, newNameNoExtension };
   }
 
   onRename() {
