@@ -293,6 +293,12 @@
       "namespace": "aou-rw-20e5a517",
       "id": "geneticancestrydemoproject",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "All of Us v7 GWAS on LDL Cholesterol with Regenie",
+      "namespace": "aou-rw-407ce3b0",
+      "id": "allofusv7gwasonldlcholesterolwithregenie",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
