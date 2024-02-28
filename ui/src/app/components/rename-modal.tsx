@@ -13,7 +13,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
@@ -54,39 +53,82 @@ export class RenameModal extends React.Component<Props, States> {
       saving: false,
     };
   }
-  generateNewNameForValidation(
-    newName: string,
-    oldName: string,
-    resourceType: ResourceType
-  ): string {
-    // Append .ipynb, .Rmd, .R, .sas to the filename (if needed) based on the oldName format
-    return resourceType === ResourceType.NOTEBOOK
-      ? appendAnalysisFileSuffixByOldName(
-          newName?.toLowerCase().trim(),
-          oldName.toLowerCase()
-        )
-      : newName?.toLowerCase().trim();
+
+  getFileNameWithoutExtension(name: string) {
+    const lastDotIndex = name?.lastIndexOf('.');
+    return lastDotIndex === -1 ? name : name?.slice(0, lastDotIndex);
+  }
+
+  getFileExtension(name: string) {
+    const lastDotIndex = name?.lastIndexOf('.');
+    return lastDotIndex === -1 ? '' : name?.slice(lastDotIndex);
   }
 
   validateNewName(
-    newName: string,
+    existingNames: string[],
     oldName: string,
-    resourceType: ResourceType,
-    existingNames: string[]
+    newName: string,
+    resourceType: ResourceType
   ) {
-    const lowerCaseExistingNames = existingNames.map((name) =>
-      name.toLowerCase()
-    );
-    const formattedNewName = this.generateNewNameForValidation(
-      newName,
-      oldName,
-      resourceType
-    );
+    const { filteredExistingNamesNoExtension, newNameNoExtension } =
+      this.getFilteredListOfFileNamesWithoutExtension(
+        existingNames,
+        oldName,
+        newName
+      );
+
     const errors = validate(
-      { newName: formattedNewName },
-      { newName: nameValidationFormat(lowerCaseExistingNames, resourceType) }
+      { newName: newNameNoExtension },
+      {
+        newName: nameValidationFormat(
+          filteredExistingNamesNoExtension,
+          resourceType
+        ),
+      }
     );
     return errors;
+  }
+
+  private getFilteredListOfFileNamesWithoutExtension(
+    existingNames: string[],
+    oldName,
+    newName: string
+  ) {
+    const oldNameExtension = this.getFileExtension(oldName);
+    const oldNameNoExtension = this.getFileNameWithoutExtension(oldName);
+
+    const newNameExtension = this.getFileExtension(newName);
+    const newNameNoExtension = this.getFileNameWithoutExtension(newName || '');
+
+    // Filtering only files that have the same extension as the original file and stripping file extensions from the names
+    const filteredExistingNamesNoExtension = existingNames
+      .filter(
+        (name) =>
+          this.getFileExtension(name).toLowerCase() ===
+          oldNameExtension.toLowerCase()
+      )
+      .map(this.getFileNameWithoutExtension);
+
+    // No need to show error if the new name is the same as the old name but the extension has different case
+    // User could be fixing a typo in the extension
+    // Example: newName.r -> newName.R
+    const isSameNameNoExtension = newNameNoExtension === oldNameNoExtension;
+    const isDifferentNameCaseSensitive = newName ? newName !== oldName : true;
+    const isSameExtensionCaseInsensitive =
+      newNameExtension?.toLowerCase() === oldNameExtension.toLowerCase();
+
+    if (
+      isSameNameNoExtension &&
+      isSameExtensionCaseInsensitive &&
+      isDifferentNameCaseSensitive
+    ) {
+      const index =
+        filteredExistingNamesNoExtension.indexOf(newNameNoExtension);
+      if (index !== -1) {
+        filteredExistingNamesNoExtension.splice(index, 1);
+      }
+    }
+    return { filteredExistingNamesNoExtension, newNameNoExtension };
   }
 
   onRename() {
@@ -106,10 +148,10 @@ export class RenameModal extends React.Component<Props, States> {
     }
 
     const errors = this.validateNewName(
-      newName,
+      existingNames,
       oldName,
-      resourceType,
-      existingNames
+      newName,
+      resourceType
     );
     return (
       <Modal loading={saving}>

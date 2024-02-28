@@ -338,8 +338,8 @@ export enum Country {
 }
 
 export const JUPYTER_FILE_EXT = '.ipynb';
-export const RMD_FILE_EXT = '.rmd';
-export const R_SCRIPT_EXT = '.r';
+export const RMD_FILE_EXT = '.Rmd';
+export const R_SCRIPT_EXT = '.R';
 
 export const SAS_FILE_EXT = '.sas';
 export const GKE_APP_PROXY_PATH_SUFFIX = 'app';
