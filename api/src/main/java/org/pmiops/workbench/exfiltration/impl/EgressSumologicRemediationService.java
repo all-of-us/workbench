@@ -3,8 +3,10 @@ package org.pmiops.workbench.exfiltration.impl;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
+import com.google.common.base.Strings;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
@@ -72,9 +74,13 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   @Override
-  protected void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
-      throws MessagingException {
-    mailService.sendEgressRemediationEmail(user, action);
+  protected void sendEgressRemediationEmail(
+      DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
+    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    Optional<AppType> appTypeOpt =
+        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()));
+    String serviceName = appTypeOpt.isPresent() ? appTypeOpt.get().toString() : "Jupyter";
+    mailService.sendEgressRemediationEmail(user, action, serviceName);
   }
 
   @Override

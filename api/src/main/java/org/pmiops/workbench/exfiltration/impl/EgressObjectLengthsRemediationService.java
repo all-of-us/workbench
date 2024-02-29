@@ -57,8 +57,8 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
   }
 
   @Override
-  protected void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
-      throws MessagingException {
+  protected void sendEgressRemediationEmail(
+      DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     disableUser(user);
     mailService.sendFileLengthsEgressRemediationEmail(user, action);
   }

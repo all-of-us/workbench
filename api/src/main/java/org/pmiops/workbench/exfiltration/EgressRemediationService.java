@@ -122,7 +122,7 @@ public abstract class EgressRemediationService {
 
           if (shouldNotifyForEvent(event)) {
             try {
-              sendEgressRemediationEmail(user, action);
+              sendEgressRemediationEmail(user, action, event);
             } catch (MessagingException ex) {
               throw new ServerErrorException("failed to send egress remediation email", ex);
             }
@@ -149,8 +149,8 @@ public abstract class EgressRemediationService {
     return action;
   }
 
-  protected abstract void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
-      throws MessagingException;
+  protected abstract void sendEgressRemediationEmail(
+      DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException;
 
   protected abstract void logEvent(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;

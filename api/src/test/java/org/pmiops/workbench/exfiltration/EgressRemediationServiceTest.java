@@ -382,7 +382,8 @@ public class EgressRemediationServiceTest {
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
-        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+        .sendEgressRemediationEmail(
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("Jupyter"));
   }
 
   @Test
@@ -400,7 +401,8 @@ public class EgressRemediationServiceTest {
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
-        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+        .sendEgressRemediationEmail(
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("RSTUDIO"));
   }
 
   @Test
@@ -433,7 +435,7 @@ public class EgressRemediationServiceTest {
     assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
 
     verify(mockMailService)
-        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER));
+        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.DISABLE_USER), eq("Jupyter"));
   }
 
   @Test
@@ -469,7 +471,8 @@ public class EgressRemediationServiceTest {
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
     verify(mockMailService)
-        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+        .sendEgressRemediationEmail(
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("Jupyter"));
   }
 
   @Test
