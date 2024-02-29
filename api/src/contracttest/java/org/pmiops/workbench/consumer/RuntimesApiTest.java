@@ -39,7 +39,6 @@ class RuntimesApiTest {
             body.numberType("autopauseThreshold");
             body.stringType("defaultClientId");
             body.stringType("toolDockerImage");
-            body.stringType("welderRegistry");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
