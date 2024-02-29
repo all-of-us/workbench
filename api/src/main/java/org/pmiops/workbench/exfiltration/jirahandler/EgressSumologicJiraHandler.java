@@ -65,18 +65,14 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    String jiraDescription = "";
     String serviceName = originalEvent.getSrcGkeServiceName();
-    if (StringUtils.isNotEmpty(serviceName)) {
-      jiraDescription =
-          String.format(
-              "User App name: %s, App type: %s\n",
-              serviceName,
-              appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]"));
-    } else {
-      jiraDescription =
-          String.format("Jupyter server VM prefix: %s\n", originalEvent.getVmPrefix());
-    }
+    String jiraDescription =
+        StringUtils.isNotEmpty(serviceName)
+            ? String.format(
+                "User App name: %s, App type: %s\n",
+                serviceName,
+                appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]"))
+            : String.format("Jupyter server VM prefix: %s\n", originalEvent.getVmPrefix());
     return Stream.concat(
         Stream.of(
             JiraContent.text(jiraDescription),
