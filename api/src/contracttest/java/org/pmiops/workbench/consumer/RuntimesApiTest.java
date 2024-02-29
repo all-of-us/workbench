@@ -149,7 +149,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    assertDoesNotThrow(() ->  api.getRuntime("googleProject", "exampleruntimename"));
+    assertDoesNotThrow(() -> api.getRuntime("googleProject", "exampleruntimename"));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -236,7 +236,8 @@ class RuntimesApiTest {
                           });
                       body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
                       body.object(
-                          "labelsToUpsert", labels -> labels.stringValue("randomKey", "randomValue"));
+                          "labelsToUpsert",
+                          labels -> labels.stringValue("randomKey", "randomValue"));
                     })
                 .build())
         .willRespondWith()
