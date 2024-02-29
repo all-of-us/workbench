@@ -125,7 +125,8 @@
     "enableRStudioGKEApp": true,
     "enableSasGKEApp": true,
     "enableDataExplorer": false,
-    "enableGKEAppPausing": true
+    "enableGKEAppPausing": true,
+    "enableVariantSelectAll": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

@@ -227,7 +227,8 @@ public class MailServiceImplTest {
   public void testSendEgressRemediationEmail_suspendCompute() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.notifyFromEmail = "egress@aou.com";
     DbUser user = createDbUser();
-    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.SUSPEND_COMPUTE);
+    mailService.sendEgressRemediationEmail(
+        user, EgressRemediationAction.SUSPEND_COMPUTE, "Jupyter");
 
     verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
@@ -249,7 +250,7 @@ public class MailServiceImplTest {
     workbenchConfig.egressAlertRemediationPolicy.notifyCcEmails =
         ImmutableList.of("egress-cc@aou.com");
     DbUser user = createDbUser();
-    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER);
+    mailService.sendEgressRemediationEmail(user, EgressRemediationAction.DISABLE_USER, "Jupyter");
 
     verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
     MandrillApiKeyAndMessage got = mandrillCaptor.getValue();

@@ -61,11 +61,11 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
-    assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
-    assertThat(event.getAgentIdMaybe()).isEqualTo(user.getUserId());
-    assertThat(event.getAgentEmailMaybe()).isEqualTo(user.getUsername());
-    assertThat(event.getPreviousValueMaybe()).isEmpty();
-    assertThat(event.getNewValueMaybe()).isEqualTo(registeredTier.getShortName());
+    assertThat(event.agentType()).isEqualTo(AgentType.USER);
+    assertThat(event.agentIdMaybe()).isEqualTo(user.getUserId());
+    assertThat(event.agentEmailMaybe()).isEqualTo(user.getUsername());
+    assertThat(event.previousValueMaybe()).isEmpty();
+    assertThat(event.newValueMaybe()).isEqualTo(registeredTier.getShortName());
   }
 
   @Test
@@ -79,11 +79,11 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
-    assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
-    assertThat(event.getAgentIdMaybe()).isEqualTo(user.getUserId());
-    assertThat(event.getAgentEmailMaybe()).isEqualTo(user.getUsername());
-    assertThat(event.getPreviousValueMaybe()).isEqualTo(registeredTier.getShortName());
-    assertThat(event.getNewValueMaybe()).isEmpty();
+    assertThat(event.agentType()).isEqualTo(AgentType.USER);
+    assertThat(event.agentIdMaybe()).isEqualTo(user.getUserId());
+    assertThat(event.agentEmailMaybe()).isEqualTo(user.getUsername());
+    assertThat(event.previousValueMaybe()).isEqualTo(registeredTier.getShortName());
+    assertThat(event.newValueMaybe()).isEmpty();
   }
 
   @Test
@@ -98,13 +98,13 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
-    assertThat(event.getAgentType()).isEqualTo(AgentType.SYSTEM);
-    assertThat(event.getAgentIdMaybe()).isNull();
-    assertThat(event.getAgentEmailMaybe()).isNull();
-    assertThat(event.getPreviousValueMaybe()).isEqualTo(registeredTier.getShortName());
+    assertThat(event.agentType()).isEqualTo(AgentType.SYSTEM);
+    assertThat(event.agentIdMaybe()).isNull();
+    assertThat(event.agentEmailMaybe()).isNull();
+    assertThat(event.previousValueMaybe()).isEqualTo(registeredTier.getShortName());
     List<String> expected =
         ImmutableList.of(registeredTier.getShortName(), controlledTier.getShortName());
-    assertThat(split(event.getNewValueMaybe())).containsExactlyElementsIn(expected);
+    assertThat(split(event.newValueMaybe())).containsExactlyElementsIn(expected);
   }
 
   private Iterable<String> split(String input) {
@@ -119,14 +119,14 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
-    assertThat(eventSent.getActionType()).isEqualTo(ActionType.EDIT);
-    assertThat(eventSent.getAgentType()).isEqualTo(AgentType.ADMINISTRATOR);
-    assertThat(eventSent.getTargetType()).isEqualTo(TargetType.ACCOUNT);
-    assertThat(eventSent.getTargetIdMaybe()).isEqualTo(user.getUserId());
-    assertThat(eventSent.getTargetPropertyMaybe())
+    assertThat(eventSent.actionType()).isEqualTo(ActionType.EDIT);
+    assertThat(eventSent.agentType()).isEqualTo(AgentType.ADMINISTRATOR);
+    assertThat(eventSent.targetType()).isEqualTo(TargetType.ACCOUNT);
+    assertThat(eventSent.targetIdMaybe()).isEqualTo(user.getUserId());
+    assertThat(eventSent.targetPropertyMaybe())
         .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
-    assertThat(eventSent.getPreviousValueMaybe()).isNull();
-    assertThat(eventSent.getNewValueMaybe()).isEqualTo("123.45");
+    assertThat(eventSent.previousValueMaybe()).isNull();
+    assertThat(eventSent.newValueMaybe()).isEqualTo("123.45");
   }
 
   @Test
@@ -136,13 +136,13 @@ public class UserServiceAuditorTest {
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent eventSent = eventArg.getValue();
-    assertThat(eventSent.getActionType()).isEqualTo(ActionType.EDIT);
-    assertThat(eventSent.getAgentType()).isEqualTo(AgentType.ADMINISTRATOR);
-    assertThat(eventSent.getTargetType()).isEqualTo(TargetType.ACCOUNT);
-    assertThat(eventSent.getTargetIdMaybe()).isEqualTo(user.getUserId());
-    assertThat(eventSent.getTargetPropertyMaybe())
+    assertThat(eventSent.actionType()).isEqualTo(ActionType.EDIT);
+    assertThat(eventSent.agentType()).isEqualTo(AgentType.ADMINISTRATOR);
+    assertThat(eventSent.targetType()).isEqualTo(TargetType.ACCOUNT);
+    assertThat(eventSent.targetIdMaybe()).isEqualTo(user.getUserId());
+    assertThat(eventSent.targetPropertyMaybe())
         .isEqualTo(AccountTargetProperty.FREE_TIER_DOLLAR_QUOTA.getPropertyName());
-    assertThat(eventSent.getPreviousValueMaybe()).isEqualTo("123.45");
-    assertThat(eventSent.getNewValueMaybe()).isEqualTo("500.0");
+    assertThat(eventSent.previousValueMaybe()).isEqualTo("123.45");
+    assertThat(eventSent.newValueMaybe()).isEqualTo("500.0");
   }
 }

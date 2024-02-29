@@ -58,26 +58,7 @@ describe(redirectToRegisteredTraining.name, () => {
     windowOpenSpy = jest.spyOn(window, 'open');
   });
 
-  it('Redirects to Moodle if Absorb is disabled', async () => {
-    const complianceTrainingHost = 'moodle.org';
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        complianceTrainingHost,
-      },
-    });
-
-    profileApi().useAbsorb = () => Promise.resolve(false);
-
-    await redirectToRegisteredTraining();
-
-    expect(windowOpenSpy).toHaveBeenCalledWith(
-      `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`,
-      '_blank'
-    );
-  });
-
-  it('Redirects to Absorb if Absorb is enabled', async () => {
+  it('Redirects to Absorb', async () => {
     const absorbSamlIdentityProviderId = 'fake1';
     const absorbSamlServiceProviderId = 'fake2';
     const gsuiteDomain = 'gmail.com';
@@ -89,8 +70,6 @@ describe(redirectToRegisteredTraining.name, () => {
         gsuiteDomain,
       },
     });
-
-    profileApi().useAbsorb = () => Promise.resolve(true);
 
     await redirectToControlledTraining();
 
@@ -111,26 +90,7 @@ describe(redirectToControlledTraining.name, () => {
     windowOpenSpy = jest.spyOn(window, 'open');
   });
 
-  it('Redirects to Moodle if Absorb is disabled', async () => {
-    const complianceTrainingHost = 'moodle.org';
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        complianceTrainingHost,
-      },
-    });
-
-    profileApi().useAbsorb = () => Promise.resolve(false);
-
-    await redirectToControlledTraining();
-
-    expect(windowOpenSpy).toHaveBeenCalledWith(
-      `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`,
-      '_blank'
-    );
-  });
-
-  it('Redirects to Absorb if Absorb is enabled', async () => {
+  it('Redirects to Absorb', async () => {
     const absorbSamlIdentityProviderId = 'fake1';
     const absorbSamlServiceProviderId = 'fake2';
     const gsuiteDomain = 'gmail.com';
@@ -142,8 +102,6 @@ describe(redirectToControlledTraining.name, () => {
         gsuiteDomain,
       },
     });
-
-    profileApi().useAbsorb = () => Promise.resolve(true);
 
     await redirectToControlledTraining();
 

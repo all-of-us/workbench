@@ -45,9 +45,6 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERA_COMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWO_FACTOR_AUTH] : []),
-    ...(user.rasLinkLoginGovBypassTime
-      ? [AccessModule.RAS_LINK_LOGIN_GOV]
-      : []),
     ...(user.identityBypassTime ? [AccessModule.IDENTITY] : []),
     ...(user.profileConfirmationBypassTime
       ? [AccessModule.PROFILE_CONFIRMATION]

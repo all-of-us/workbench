@@ -16,6 +16,9 @@ interface ZendeskUrls {
   researchPurpose: string;
   workingWithData: string;
   workspaceBucket: string;
+  rStudioHowToRun: string;
+  rStudioHowToDataset: string;
+  cromwellInformation: string;
 }
 
 const zendeskConfigs = {
@@ -53,6 +56,9 @@ export const supportUrls: ZendeskUrls = ((env) => {
   const category = (id) => `${baseUrl}/categories/${id}`;
   const commonUrls = {
     helpCenter: baseUrl,
+    rStudioHowToRun: article('22078658566804'),
+    rStudioHowToDataset: article('360039585831'),
+    cromwellInformation: article('14428263737620'),
   };
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {

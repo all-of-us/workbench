@@ -19,6 +19,7 @@ import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
@@ -64,17 +65,14 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    String jiraDescription = "";
-    if (StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())) {
-      jiraDescription =
-          String.format(
-              "User App name: %s, App type: %s\n",
-              originalEvent.getSrcGkeServiceName(),
-              appServiceNameToAppType(originalEvent.getSrcGkeServiceName()));
-    } else {
-      jiraDescription =
-          String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix());
-    }
+    String serviceName = originalEvent.getSrcGkeServiceName();
+    String jiraDescription =
+        StringUtils.isNotEmpty(serviceName)
+            ? String.format(
+                "User App name: %s, App type: %s\n",
+                serviceName,
+                appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]"))
+            : String.format("Jupyter server VM prefix: %s\n", originalEvent.getVmPrefix());
     return Stream.concat(
         Stream.of(
             JiraContent.text(jiraDescription),

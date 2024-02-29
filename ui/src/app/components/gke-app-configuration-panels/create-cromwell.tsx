@@ -5,17 +5,17 @@ import { AppType } from 'generated/fetch';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { WarningMessage } from 'app/components/messages';
 import {
-  CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
+import { supportUrls } from 'app/utils/zendesk';
 
 import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
 
 const cromwellSupportArticles = [
   {
     text: 'How to run Cromwell in All of Us workbench?',
-    link: CROMWELL_INFORMATION_LINK,
+    link: supportUrls.cromwellInformation,
   },
   {
     text: 'Cromwell documentation',
@@ -38,7 +38,7 @@ const CostNote = () => (
     cost for interactions with the workflow.
     <a
       style={{ marginLeft: '0.25rem' }}
-      href={CROMWELL_INFORMATION_LINK}
+      href={supportUrls.cromwellInformation}
       target={'_blank'}
     >
       Learn more{' '}

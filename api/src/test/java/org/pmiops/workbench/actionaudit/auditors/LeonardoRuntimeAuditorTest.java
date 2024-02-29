@@ -75,15 +75,15 @@ public class LeonardoRuntimeAuditorTest {
     assertThat(eventsSent).hasSize(RUNTIME_NAMES.size());
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
+    assertThat(firstEvent.map(ActionAuditEvent::actionType).orElse(null))
         .isEqualTo(ActionType.DELETE);
-    assertThat(firstEvent.map(ActionAuditEvent::getTargetPropertyMaybe).orElse(null))
+    assertThat(firstEvent.map(ActionAuditEvent::targetPropertyMaybe).orElse(null))
         .isEqualTo(BILLING_PROJECT_ID);
-    assertThat(firstEvent.map(ActionAuditEvent::getNewValueMaybe).orElse(null))
+    assertThat(firstEvent.map(ActionAuditEvent::newValueMaybe).orElse(null))
         .isEqualTo(RUNTIME_NAMES.get(0));
     assertThat(
             eventsSent.stream()
-                .map(ActionAuditEvent::getActionType)
+                .map(ActionAuditEvent::actionType)
                 .collect(Collectors.toSet())
                 .size())
         .isEqualTo(1);

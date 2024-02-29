@@ -3,11 +3,12 @@ package org.pmiops.workbench.exfiltration.impl;
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
+import com.google.common.base.Strings;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
@@ -72,9 +73,14 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   @Override
-  protected void sendEgressRemediationEmail(DbUser user, EgressRemediationAction action)
-      throws MessagingException {
-    mailService.sendEgressRemediationEmail(user, action);
+  protected void sendEgressRemediationEmail(
+      DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
+    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    String environmentType =
+        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
+            .map(AppType::toString)
+            .orElse("Jupyter");
+    mailService.sendEgressRemediationEmail(user, action, environmentType);
   }
 
   @Override
@@ -108,11 +114,8 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   private boolean isCromwellApp(DbEgressEvent event) {
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    return StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())
-        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).isPresent()
-        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName())
-            .get()
-            .equals(AppType.CROMWELL);
+    String serviceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    return serviceName != null
+        && appServiceNameToAppType(serviceName).equals(Optional.of(AppType.CROMWELL));
   }
 }

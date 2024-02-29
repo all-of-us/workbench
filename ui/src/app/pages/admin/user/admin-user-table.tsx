@@ -231,7 +231,7 @@ export const AdminUserTable = withUserProfile()(
           dataAccess: this.dataAccessContents(user),
           bypass: (
             <AdminUserBypass
-              user={{ ...user }}
+              {...{ user }}
               onBypassModuleUpdate={() => this.loadProfiles()}
             />
           ),

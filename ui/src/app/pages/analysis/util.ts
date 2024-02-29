@@ -27,7 +27,10 @@ export function appendJupyterNotebookFileSuffix(filename: string) {
 }
 
 export function appendRStudioNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(RMD_FILE_EXT)) {
+  if (
+    filename &&
+    !filename.toLowerCase().endsWith(RMD_FILE_EXT.toLowerCase())
+  ) {
     return filename + RMD_FILE_EXT;
   }
 
@@ -35,7 +38,10 @@ export function appendRStudioNotebookFileSuffix(filename: string) {
 }
 
 export function appendRScriptSuffix(filename: string) {
-  if (filename && !filename.endsWith(R_SCRIPT_EXT)) {
+  if (
+    filename &&
+    !filename.toLowerCase().endsWith(R_SCRIPT_EXT.toLowerCase())
+  ) {
     return filename + R_SCRIPT_EXT;
   }
 
@@ -60,10 +66,13 @@ export function appendAnalysisFileSuffixByOldName(
       () => appendJupyterNotebookFileSuffix(filename),
     ],
     [
-      oldFileName.endsWith(RMD_FILE_EXT),
+      oldFileName.toLowerCase().endsWith(RMD_FILE_EXT.toLowerCase()),
       () => appendRStudioNotebookFileSuffix(filename),
     ],
-    [oldFileName.endsWith(R_SCRIPT_EXT), () => appendRScriptSuffix(filename)],
+    [
+      oldFileName.toLowerCase().endsWith(R_SCRIPT_EXT.toLowerCase()),
+      () => appendRScriptSuffix(filename),
+    ],
     [oldFileName.endsWith(SAS_FILE_EXT), () => appendSasSuffix(filename)],
     () => filename
   );
@@ -93,7 +102,9 @@ const appsExtensionMap = [
 ];
 
 export const getAppInfoFromFileName = (name: string) => {
-  return appsExtensionMap.find((app) => name.endsWith(app.extension));
+  return appsExtensionMap.find((app) =>
+    name.toLowerCase().endsWith(app.extension.toLowerCase())
+  );
 };
 
 export const listNotebooks = (workspace: Workspace): Promise<FileDetail[]> => {

@@ -6888,6 +6888,10 @@ components:
           type: boolean
           description: Start redirecting Moodle User to Absorb
           default: false
+        enableVariantSelectAll:
+          type: boolean
+          default: false
+          description: Enable variant select all
     RuntimeImage:
       type: object
       properties:
@@ -8576,6 +8580,13 @@ components:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         persistentDiskRequest:
           $ref: '#/components/schemas/PersistentDiskRequest'
+        autodeleteEnabled:
+          type: boolean
+          description: Whether to turn on autodelete
+        autodeleteThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the app is
+            deleted. When autodeleteEnabled is true, a positive integer is required
       description: Create User App request body
     UserAppEnvironment:
       type: object
@@ -8602,6 +8613,13 @@ components:
           description: The number of minutes of idle time to elapse before the cluster
             is autopaused. If autopause is set to false, this value is disregarded.
             A value of 0 is equivalent to autopause being turned off.
+        autodeleteEnabled:
+          type: boolean
+          description: Whether to turn on autodelete
+        autodeleteThreshold:
+          type: integer
+          description: The number of minutes of idle time to elapse before the app is
+            deleted. When autodeleteEnabled is true, a positive integer is required
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         proxyUrls:

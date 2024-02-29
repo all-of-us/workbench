@@ -56,7 +56,8 @@ public interface MailService {
       throws MessagingException;
 
   void sendEgressRemediationEmail(
-      final DbUser user, EgressRemediationAction egressRemediationAction) throws MessagingException;
+      final DbUser user, EgressRemediationAction egressRemediationAction, String environmentType)
+      throws MessagingException;
 
   void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
       throws MessagingException;

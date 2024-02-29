@@ -40,6 +40,8 @@ public interface WorkbenchConfigMapper {
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
+  // deprecated, for removal
+  @Mapping(target = "redirectMoodleToAbsorb", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
@@ -76,6 +78,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
-  @Mapping(target = "redirectMoodleToAbsorb", source = "config.absorb.redirectMoodleUser")
+  @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

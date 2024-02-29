@@ -25,11 +25,6 @@ export class ProfileStubVariables {
     areaOfResearch: 'things',
     generalDiscoverySources: [],
     partnerDiscoverySources: [],
-    complianceTrainingCompletionTime: null,
-    complianceTrainingBypassTime: null,
-    eraCommonsCompletionTime: null,
-    eraCommonsBypassTime: null,
-    rasLinkLoginGovBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,
@@ -156,7 +151,7 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public useAbsorb() {
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   }
 
   public trainingsEnabled() {

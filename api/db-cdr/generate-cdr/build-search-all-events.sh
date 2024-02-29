@@ -378,6 +378,17 @@ else
 fi
 
 ##############################################################
+# Observation - Update cb_search_all_events for the Life Functioning
+# Survey. The Life Functioning Survey is part of the Basics Survey
+# and we want it's questions and answers to show in Basics.
+##############################################################
+echo "cb_search_all_events - update survey_concept_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+ SET survey_concept_id = 1586134
+ WHERE survey_concept_id = 705190"
+
+##############################################################
 # Observation - Update cb_search_all_events for The Basics,
 # Overall Health and Lifestyle surveys. Each of these surveys
 # having missing survey_conduct rows. We need to update the

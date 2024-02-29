@@ -147,11 +147,11 @@ public class WorkspaceAuditorTest {
     assertThat(eventsSent).hasSize(WorkspaceTargetProperty.values().length);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
+    assertThat(firstEvent.map(ActionAuditEvent::actionType).orElse(null))
         .isEqualTo(ActionType.CREATE);
     assertThat(
             eventsSent.stream()
-                .map(ActionAuditEvent::getActionType)
+                .map(ActionAuditEvent::actionType)
                 .collect(Collectors.toSet())
                 .size())
         .isEqualTo(1);
@@ -162,8 +162,8 @@ public class WorkspaceAuditorTest {
     workspaceAuditor.fireDeleteAction(dbWorkspace1);
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
-    assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
-    assertThat(eventSent.getTimestamp()).isEqualTo(ActionAuditTestConfig.INSTANT.toEpochMilli());
+    assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
+    assertThat(eventSent.timestamp()).isEqualTo(ActionAuditTestConfig.INSTANT.toEpochMilli());
   }
 
   @Test
@@ -179,12 +179,11 @@ public class WorkspaceAuditorTest {
     assertThat(eventsSent).hasSize(expectedEvents);
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
-        .isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
 
     assertThat(
             eventsSent.stream()
-                .map(ActionAuditEvent::getTargetType)
+                .map(ActionAuditEvent::targetType)
                 .allMatch(t -> t.equals(TargetType.WORKSPACE)))
         .isTrue();
 
@@ -192,7 +191,7 @@ public class WorkspaceAuditorTest {
         ImmutableSet.of(ActionType.DUPLICATE_FROM, ActionType.DUPLICATE_TO);
     ImmutableSet<ActionType> actualActionTypes =
         eventsSent.stream()
-            .map(ActionAuditEvent::getActionType)
+            .map(ActionAuditEvent::actionType)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(actualActionTypes).containsExactlyElementsIn(expectedActionTypes);
   }
@@ -217,40 +216,38 @@ public class WorkspaceAuditorTest {
 
     Map<String, Long> countByTargetType =
         eventsSent.stream()
-            .collect(
-                Collectors.groupingBy(e -> e.getTargetType().toString(), Collectors.counting()));
+            .collect(Collectors.groupingBy(e -> e.targetType().toString(), Collectors.counting()));
 
     assertThat(countByTargetType.get(TargetType.WORKSPACE.toString())).isEqualTo(1);
     assertThat(countByTargetType.get(TargetType.USER.toString())).isEqualTo(3);
 
     Optional<String> targetPropertyMaybe =
         eventsSent.stream()
-            .filter(e -> e.getTargetType() == TargetType.USER)
+            .filter(e -> e.targetType() == TargetType.USER)
             .findFirst()
-            .flatMap(e -> Optional.ofNullable(e.getTargetPropertyMaybe()));
+            .flatMap(e -> Optional.ofNullable(e.targetPropertyMaybe()));
 
     assertThat(targetPropertyMaybe.isPresent()).isTrue();
     assertThat(targetPropertyMaybe.get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
-        .isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
 
     Optional<ActionAuditEvent> readerEventMaybe =
         eventsSent.stream()
             .filter(
                 e ->
-                    e.getTargetType() == TargetType.USER
-                        && e.getTargetIdMaybe() != null
-                        && e.getTargetIdMaybe().equals(ADDED_USER_ID))
+                    e.targetType() == TargetType.USER
+                        && e.targetIdMaybe() != null
+                        && e.targetIdMaybe().equals(ADDED_USER_ID))
             .findFirst();
     assertThat(readerEventMaybe.isPresent()).isTrue();
-    assertThat(readerEventMaybe.get().getTargetPropertyMaybe()).isNotNull();
-    assertThat(readerEventMaybe.get().getTargetPropertyMaybe())
+    assertThat(readerEventMaybe.get().targetPropertyMaybe()).isNotNull();
+    assertThat(readerEventMaybe.get().targetPropertyMaybe())
         .isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
-    assertThat(readerEventMaybe.get().getNewValueMaybe())
+    assertThat(readerEventMaybe.get().newValueMaybe())
         .isEqualTo(WorkspaceAccessLevel.READER.toString());
-    assertThat(readerEventMaybe.get().getPreviousValueMaybe()).isNull();
+    assertThat(readerEventMaybe.get().previousValueMaybe()).isNull();
   }
 
   @Test

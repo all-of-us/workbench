@@ -69,9 +69,8 @@ public class ProfileAuditorTest {
     verify(mockActionAuditService).send(captor.capture());
     List<ActionAuditEvent> sentEvents = captor.getValue();
     assertEquals(ProfileTargetProperty.values().length, sentEvents.size());
-    assertTrue(
-        sentEvents.stream().allMatch(event -> event.getActionType().equals(ActionType.CREATE)));
-    assertEquals(1, sentEvents.stream().map(ActionAuditEvent::getActionId).distinct().count());
+    assertTrue(sentEvents.stream().allMatch(event -> event.actionType().equals(ActionType.CREATE)));
+    assertEquals(1, sentEvents.stream().map(ActionAuditEvent::actionId).distinct().count());
   }
 
   private Profile buildProfile() {
@@ -119,14 +118,14 @@ public class ProfileAuditorTest {
     verify(mockActionAuditService).send(captor.capture());
     ActionAuditEvent eventSent = captor.getValue();
 
-    assertEquals(TargetType.PROFILE, eventSent.getTargetType());
-    assertEquals(AgentType.USER, eventSent.getAgentType());
-    assertEquals(USER_ID, eventSent.getAgentIdMaybe());
-    assertEquals(USER_ID, eventSent.getTargetIdMaybe());
-    assertEquals(ActionType.DELETE, eventSent.getActionType());
-    assertEquals(Y2K_EPOCH_MILLIS, eventSent.getTimestamp());
-    assertNull(eventSent.getTargetPropertyMaybe());
-    assertNull(eventSent.getNewValueMaybe());
-    assertNull(eventSent.getPreviousValueMaybe());
+    assertEquals(TargetType.PROFILE, eventSent.targetType());
+    assertEquals(AgentType.USER, eventSent.agentType());
+    assertEquals(USER_ID, eventSent.agentIdMaybe());
+    assertEquals(USER_ID, eventSent.targetIdMaybe());
+    assertEquals(ActionType.DELETE, eventSent.actionType());
+    assertEquals(Y2K_EPOCH_MILLIS, eventSent.timestamp());
+    assertNull(eventSent.targetPropertyMaybe());
+    assertNull(eventSent.newValueMaybe());
+    assertNull(eventSent.previousValueMaybe());
   }
 }

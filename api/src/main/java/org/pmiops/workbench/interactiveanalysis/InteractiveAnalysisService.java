@@ -56,7 +56,7 @@ public class InteractiveAnalysisService {
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
 
-  @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "\\.(Rmd|R)$";
+  @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "(?i)\\.(Rmd|R)$";
   @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.sas$";
 
   static final Map<AppType, String> GKE_DELOC_PATTERNS =

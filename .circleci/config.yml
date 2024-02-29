@@ -35,7 +35,7 @@ anchors:
     JAVA_TOOL_OPTIONS: -Xmx2g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     # https://stackoverflow.com/questions/38967991/why-are-my-gradle-builds-dying-with-exit-code-137
-    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
     TERM: dumb
 
   env-db: &env-db
@@ -403,17 +403,20 @@ jobs:
                 working_directory: ~/workbench/api
                 command: |
                   mv "./build/jacoco/test.exec" "./build/jacoco/test_$CIRCLE_NODE_INDEX.exec"
-            - run:
-                name: Lint Java code
-                working_directory: ~/workbench/api
-                command: |
-                  if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-                    ./gradlew spotlessCheck
-                  fi
       - persist_to_workspace:
           root: .
           paths:
             - api
+
+  api-lint:
+    executor: workbench-executor
+    steps:
+     - run-api-test:
+          additional_steps:
+            - run:
+                name: Lint Java code
+                working_directory: ~/workbench/api
+                command: ./gradlew spotlessCheck
 
   ui-test-coverage:
     #Jest Coverage Upload
@@ -571,19 +574,34 @@ jobs:
           name: Run React jest tests
           working_directory: ~/workbench/ui
           command: NODE_OPTIONS=--max_old_space_size=4096 yarn test --runInBand
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ui
+
+  ui-lint:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+      - checkout-code
+      - run:
+          name: Download Swagger CLI
+          working_directory: ~/workbench
+          command: ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      - ui-cache
+      - run:
+          name: Yarn deps
+          working_directory: ~/workbench/ui
+          command: yarn deps test
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
       - run:
-          # Lint last; it's more important to surface test failures early.
           name: Lint typescript
           working_directory: ~/workbench/ui
           command: yarn run lint --max-warnings 0
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ui
+
 
   # Playground job. Re-run with ssh enabled to play with Circle's machine image.
   playground:
@@ -876,8 +894,10 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
+      - api-lint
       - api-local-test
       - api-unit-test
+      - ui-lint
       - ui-unit-test
       - api-bigquery-test
       - api-contract-test

@@ -118,15 +118,15 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.USER);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
-    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentEmailMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_EMAIL);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
@@ -134,18 +134,18 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly("12.3");
     assertThat(
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEventTargetProperty.VM_NAME.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly(EGRESS_EVENT_VM_PREFIX);
   }
@@ -166,15 +166,15 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.USER);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
-    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentEmailMaybe()).collect(Collectors.toSet()))
         .containsExactly(USER_EMAIL);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
@@ -182,18 +182,18 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly("12.3");
     assertThat(
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEventTargetProperty.VM_NAME.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly(EGRESS_EVENT_VM_PREFIX);
   }
@@ -217,13 +217,13 @@ public class EgressEventAuditorTest {
     // for the egress event.
     assertThat(
             events.stream()
-                .map(event -> event.getAgentEmailMaybe())
+                .map(event -> event.agentEmailMaybe())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet()))
         .isEmpty();
     assertThat(
             events.stream()
-                .map(event -> event.getTargetIdMaybe())
+                .map(event -> event.targetIdMaybe())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet()))
         .isEmpty();
@@ -234,9 +234,9 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .findFirst()
                 .get())
         .contains("Failed to find workspace");
@@ -255,11 +255,11 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.SYSTEM);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
@@ -267,19 +267,19 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .isEmpty();
     assertThat(
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
                                 .getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .isEmpty();
   }
@@ -300,11 +300,11 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.SYSTEM);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
@@ -312,19 +312,19 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly("suspend_compute");
     assertThat(
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
                                 .getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly("15");
   }
@@ -344,11 +344,11 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.SYSTEM);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.REMEDIATE_HIGH_EGRESS_EVENT);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
@@ -356,19 +356,19 @@ public class EgressEventAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.REMEDIATION.getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .collect(Collectors.toSet()))
         .containsExactly("disable_user");
     assertThat(
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
+                        event.targetPropertyMaybe()
                             == EgressEscalationTargetProperty.SUSPEND_COMPUTE_DURATION_MIN
                                 .getPropertyName())
-                .map(event -> event.getNewValueMaybe())
+                .map(event -> event.newValueMaybe())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()))
         .isEmpty();
@@ -391,20 +391,20 @@ public class EgressEventAuditorTest {
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
-    assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.ADMINISTRATOR);
-    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.agentEmailMaybe()).collect(Collectors.toSet()))
         .containsExactly(ActionAuditTestConfig.ADMINISTRATOR_EMAIL);
-    assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.actionType()).collect(Collectors.toSet()))
         .containsExactly(ActionType.EDIT);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
+    assertThat(events.stream().map(event -> event.targetIdMaybe()).collect(Collectors.toSet()))
         .containsExactly(WORKSPACE_ID);
 
     assertThat(events).hasSize(1);
     ActionAuditEvent event = Iterables.getOnlyElement(events);
-    assertThat(event.getTargetPropertyMaybe()).isEqualTo("status");
-    assertThat(event.getPreviousValueMaybe()).isEqualTo(DbEgressEventStatus.REMEDIATED.toString());
-    assertThat(event.getNewValueMaybe())
+    assertThat(event.targetPropertyMaybe()).isEqualTo("status");
+    assertThat(event.previousValueMaybe()).isEqualTo(DbEgressEventStatus.REMEDIATED.toString());
+    assertThat(event.newValueMaybe())
         .isEqualTo(DbEgressEventStatus.VERIFIED_FALSE_POSITIVE.toString());
   }
 
@@ -423,8 +423,8 @@ public class EgressEventAuditorTest {
                     event ->
                         EgressEventCommentTargetProperty.COMMENT
                             .getPropertyName()
-                            .equals(event.getTargetPropertyMaybe()))
-                .map(event -> event.getNewValueMaybe())
+                            .equals(event.targetPropertyMaybe()))
+                .map(event -> event.newValueMaybe())
                 .findFirst()
                 .get())
         .contains("Failed to parse egress event");
@@ -444,8 +444,8 @@ public class EgressEventAuditorTest {
                     event ->
                         EgressEventCommentTargetProperty.COMMENT
                             .getPropertyName()
-                            .equals(event.getTargetPropertyMaybe()))
-                .map(event -> event.getNewValueMaybe())
+                            .equals(event.targetPropertyMaybe()))
+                .map(event -> event.newValueMaybe())
                 .findFirst()
                 .get())
         .contains("Received bad API key");
