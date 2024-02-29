@@ -27,6 +27,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
 
@@ -106,6 +107,11 @@ const styles = reactStyles({
     color: colorWithWhiteness(colors.success, -0.5),
     opacity: 0.4,
     cursor: 'not-allowed',
+  },
+  excludeIcon: {
+    marginRight: '0.125rem',
+    color: colors.danger,
+    cursor: 'pointer',
   },
 });
 
@@ -645,6 +651,8 @@ export const VariantSearch = withCurrentWorkspace()(
     const [searchTerms, setSearchTerms] = useState('');
     const [totalCount, setTotalCount] = useState(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [selectAllResults, setSelectAllResults] = useState(false);
+    const [excludeFromSelectAll, setExcludeFromSelectAll] = useState([]);
     const [selectedFilters, setSelectedFilters] =
       useState<VariantFilterRequest>({
         searchTerm: '',
@@ -772,26 +780,35 @@ export const VariantSearch = withCurrentWorkspace()(
 
     const isSelected = (row: any) => {
       const paramId = getParamId(row);
-      return selectedIds.includes(paramId);
+      return (
+        selectedIds.includes(paramId) ||
+        (selectAllResults && !excludeFromSelectAll.includes(row.vid))
+      );
     };
 
     const selectItem = (row: any) => {
-      const param = {
-        parameterId: getParamId(row),
-        parentId: null,
-        type: CriteriaType.NONE,
-        name: `Variant ${row.vid}`,
-        group: false,
-        domainId: Domain.SNP_INDEL_VARIANT,
-        hasAttributes: false,
-        selectable: true,
-        variantId: row.vid,
-        attributes: [],
-      };
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        `Select ${domainToTitle(row.domainId)} - '${row.name}'`
-      );
-      select(param);
+      if (selectAllResults) {
+        setExcludeFromSelectAll((prevState) =>
+          prevState.filter((excluded) => excluded !== row.vid)
+        );
+      } else {
+        const param = {
+          parameterId: getParamId(row),
+          parentId: null,
+          type: CriteriaType.NONE,
+          name: `Variant ${row.vid}`,
+          group: false,
+          domainId: Domain.SNP_INDEL_VARIANT,
+          hasAttributes: false,
+          selectable: true,
+          variantId: row.vid,
+          attributes: [],
+        };
+        AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select ${domainToTitle(row.domainId)} - '${row.name}'`
+        );
+        select(param);
+      }
     };
 
     const handleCheckboxChange = (
@@ -818,6 +835,16 @@ export const VariantSearch = withCurrentWorkspace()(
         ...prevState,
         sortBy: value,
       }));
+
+    const handleSelectAllChange = (checked: boolean) => {
+      if (checked) {
+        // Add filter object to criteria selection list
+      } else {
+        // Clear the excludes list when unchecked
+        setExcludeFromSelectAll([]);
+      }
+      setSelectAllResults(checked);
+    };
 
     const displayResults = searchResults?.slice(first, first + pageSize);
     return (
@@ -884,6 +911,19 @@ export const VariantSearch = withCurrentWorkspace()(
                 }}
               />
             )}
+            {serverConfigStore.get().config.enableVariantSelectAll && (
+              <div style={{ display: 'flex' }}>
+                <input
+                  style={{ marginRight: '0.25rem' }}
+                  type='checkbox'
+                  name='selectAllResults'
+                  checked={selectAllResults}
+                  disabled={searchResults.length === 0}
+                  onChange={(e) => handleSelectAllChange(e.target.checked)}
+                />
+                Select All Results
+              </div>
+            )}
           </div>
         )}
         {loading ? (
@@ -918,11 +958,27 @@ export const VariantSearch = withCurrentWorkspace()(
                 body={(variant) => (
                   <div title={variant.vid}>
                     {isSelected(variant) ? (
-                      <ClrIcon
-                        style={styles.selectedIcon}
-                        shape='check-circle'
-                        size='20'
-                      />
+                      <>
+                        <ClrIcon
+                          style={styles.selectedIcon}
+                          shape='check-circle'
+                          size='20'
+                        />
+                        {selectAllResults &&
+                          !excludeFromSelectAll.includes(variant.vid) && (
+                            <ClrIcon
+                              style={styles.excludeIcon}
+                              shape='times-circle'
+                              size='20'
+                              onClick={() =>
+                                setExcludeFromSelectAll((prevState) => [
+                                  ...prevState,
+                                  variant.vid,
+                                ])
+                              }
+                            />
+                          )}
+                      </>
                     ) : (
                       <ClrIcon
                         style={styles.selectIcon}
