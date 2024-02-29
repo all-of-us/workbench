@@ -1,6 +1,6 @@
 package org.pmiops.workbench.shibboleth;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

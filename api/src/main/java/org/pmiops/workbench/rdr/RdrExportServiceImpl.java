@@ -1,6 +1,7 @@
 package org.pmiops.workbench.rdr;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.inject.Provider;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -10,7 +11,6 @@ import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.RdrExportDao;

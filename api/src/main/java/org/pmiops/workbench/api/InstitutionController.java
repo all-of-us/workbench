@@ -2,7 +2,7 @@ package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;

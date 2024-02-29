@@ -26,7 +26,7 @@ To define a query that uses a foreign key, there are a couple of options. First,
 
 ## DB Models
 
-DB Models represent a single row of a single table in the database, possibly with extender tables attached. We denote DB models by prefixing `Db` to the name of the database table. DB models heavily use `javax.persistence` annotations to describe where in the database table each part of the model lives.
+DB Models represent a single row of a single table in the database, possibly with extender tables attached. We denote DB models by prefixing `Db` to the name of the database table. DB models heavily use `jakarta.persistence` annotations to describe where in the database table each part of the model lives.
 
 In order to automatically gather data from extender tables, we use the `@JoinColumn`, `@OneToOne`, `@OneToMany`, `@ManyToOne`, and `@MappedBy` annotations. Documentation and blogs on the usage of these annotations can be found in these links:
 

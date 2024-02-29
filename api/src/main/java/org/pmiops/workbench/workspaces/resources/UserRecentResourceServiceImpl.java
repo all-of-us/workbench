@@ -1,10 +1,10 @@
 package org.pmiops.workbench.workspaces.resources;
 
+import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.dao.CohortReviewDao;

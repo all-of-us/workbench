@@ -9,6 +9,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLa
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import jakarta.inject.Provider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.model.FeaturedWorkspacesConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;

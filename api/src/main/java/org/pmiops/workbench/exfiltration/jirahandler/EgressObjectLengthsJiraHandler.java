@@ -2,12 +2,12 @@ package org.pmiops.workbench.exfiltration.jirahandler;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
 
+import jakarta.inject.Provider;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;

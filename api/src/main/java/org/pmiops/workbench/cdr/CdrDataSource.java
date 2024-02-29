@@ -2,14 +2,14 @@ package org.pmiops.workbench.cdr;
 
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import jakarta.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
