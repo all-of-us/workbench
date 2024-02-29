@@ -361,13 +361,13 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendEgressRemediationEmail(
-      DbUser dbUser, EgressRemediationAction action, String environmentName)
+      DbUser dbUser, EgressRemediationAction action, String environmentType)
       throws MessagingException {
     sendEgressRemediationEmailWithContent(
         dbUser,
         EGRESS_REMEDIATION_RESOURCE,
         getEgressRemediationEmailTemplate(dbUser, action)
-            .put(EmailSubstitutionField.ENVIRONMENT_TYPE, environmentName)
+            .put(EmailSubstitutionField.ENVIRONMENT_TYPE, environmentType)
             .build());
   }
 
