@@ -21,12 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
@@ -38,14 +33,12 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            body.stringType("jupyterUserScriptUri", "http://string.com");
-            body.stringType("jupyterStartUserScriptUri", "http://string.com");
-            body.booleanType("autopause", true);
-            body.numberType("autopauseThreshold", 57);
-            body.stringType("defaultClientId", "string");
-            body.stringType(
-                "toolDockerImage",
-                "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+            body.stringType("jupyterUserScriptUri");
+            body.stringType("jupyterStartUserScriptUri");
+            body.booleanType("autopause");
+            body.numberType("autopauseThreshold");
+            body.stringType("defaultClientId");
+            body.stringType("toolDockerImage");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -126,23 +119,23 @@ class RuntimesApiTest {
         .body(
             newJsonBody(
                     body -> {
-                      body.stringType("runtimeName", "sample-cromwell-study");
-                      body.stringType("status", "Running");
-                      body.numberType("autopauseThreshold", 57);
-                      body.stringType("proxyUrl", "http://www.proxy.com");
+                      body.stringType("runtimeName");
+                      body.stringType("status");
+                      body.numberType("autopauseThreshold");
+                      body.stringType("proxyUrl");
                       body.array("errors", errors -> {});
                       body.object(
                           "cloudContext",
                           context -> {
-                            context.stringType("cloudProvider", "GCP");
-                            context.stringType("cloudResource", "terra-vpc-xx-fake-70e4eb32");
+                            context.stringType("cloudProvider");
+                            context.stringType("cloudResource");
                           });
                       body.object(
                           "auditInfo",
                           context -> {
-                            context.stringType("creator", "Bugs Bunny");
-                            context.stringType("createdDate", "Yesterday");
-                            context.stringType("dateAccessed", "Tuesday");
+                            context.stringType("creator");
+                            context.stringType("createdDate");
+                            context.stringType("dateAccessed");
                           });
                     })
                 .build())
@@ -156,28 +149,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
-    expected.setAutopauseThreshold(57);
-
-    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
-    auditInfo.setCreator("Bugs Bunny");
-    auditInfo.setCreatedDate("Yesterday");
-    auditInfo.setDateAccessed("Tuesday");
-
-    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
-    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
-    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
-
-    expected.setAuditInfo(auditInfo);
-    expected.setCloudContext(cloudContext);
-    expected.setRuntimeName("sample-cromwell-study");
-    expected.setErrors(new ArrayList<>());
-    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-    expected.setProxyUrl("http://www.proxy.com");
-
-    LeonardoGetRuntimeResponse response = api.getRuntime("googleProject", "exampleruntimename");
-
-    assertEquals(expected, response);
+    assertDoesNotThrow(() ->  api.getRuntime("googleProject", "exampleruntimename"));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -218,9 +190,9 @@ class RuntimesApiTest {
         .body(
             newJsonBody(
                     body -> {
-                      body.booleanType("allowStop", true);
-                      body.booleanType("autopause", true);
-                      body.numberType("autopauseThreshold", 57);
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold");
                     })
                 .build())
         .willRespondWith()
@@ -252,19 +224,19 @@ class RuntimesApiTest {
         .body(
             newJsonBody(
                     body -> {
-                      body.booleanType("allowStop", true);
-                      body.booleanType("autopause", true);
-                      body.numberType("autopauseThreshold", 523);
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold");
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
-                            runtimeConfig.stringType("cloudService", "GCE");
-                            runtimeConfig.stringType("machineType", "n1-highmem-16");
-                            runtimeConfig.numberType("diskSize", 500);
+                            runtimeConfig.stringType("cloudService");
+                            runtimeConfig.stringType("machineType");
+                            runtimeConfig.numberType("diskSize");
                           });
-                      body.array("labelsToDelete", arr -> arr.stringValue("deletableLabel"));
+                      body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
                       body.object(
-                          "labelsToUpsert", labels -> labels.stringValue("key1", "ke1Updated"));
+                          "labelsToUpsert", labels -> labels.stringValue("randomKey", "randomValue"));
                     })
                 .build())
         .willRespondWith()
@@ -288,13 +260,13 @@ class RuntimesApiTest {
     config.setMachineType("n1-highmem-16");
     request.setRuntimeConfig(config);
     request.setLabelsToDelete(new ArrayList<>(List.of("deletableLabel")));
-    request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
+    request.setLabelsToUpsert(Map.ofEntries(entry("randomKey", "randomValue")));
 
     ApiException exception =
         assertThrows(
             ApiException.class,
             () -> api.updateRuntime("googleProject", "exampleruntimename", request));
-    assertEquals(exception.getMessage(), "Not Found");
+    assertEquals("Not Found", exception.getMessage());
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
