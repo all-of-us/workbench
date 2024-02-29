@@ -51,7 +51,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(createBody.build())
         .willRespondWith()
         .status(409)
@@ -64,7 +64,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to create a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(createBody.build())
         .willRespondWith()
         .status(202)
@@ -77,7 +77,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to get a runtime")
         .method("GET")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
@@ -113,7 +113,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to get a runtime")
         .method("GET")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .willRespondWith()
         .status(404)
         .headers(contentTypeJsonHeader)
@@ -127,7 +127,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to update a runtime")
         .method("PATCH")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
                     body -> {
@@ -147,7 +147,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to update a runtime")
         .method("PATCH")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
                     body -> {
@@ -177,7 +177,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to delete a runtime")
         .method("DELETE")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .query("deleteDisk=true")
         .willRespondWith()
         .status(202)
@@ -190,7 +190,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to delete a runtime")
         .method("DELETE")
-        .path("/api/google/v1/runtimes/googleProject/runtimename")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .query("deleteDisk=true")
         .willRespondWith()
         .status(404)
@@ -203,7 +203,7 @@ class RuntimesApiTest {
         .given("there is a runtime in a Google project")
         .uponReceiving("a request to stop a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
         .willRespondWith()
         .status(202)
         .toPact();
@@ -216,7 +216,7 @@ class RuntimesApiTest {
         .given("there is not a runtime in a Google project")
         .uponReceiving("a request to stop a runtime")
         .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/runtimename/stop")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
         .willRespondWith()
         .status(404)
         .toPact();
