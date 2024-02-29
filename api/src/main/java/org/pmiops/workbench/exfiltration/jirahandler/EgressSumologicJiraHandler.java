@@ -68,9 +68,11 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     String jiraDescription = "";
     String serviceName = originalEvent.getSrcGkeServiceName();
     if (StringUtils.isNotEmpty(serviceName)) {
-      String appType =
-          appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]");
-      jiraDescription = String.format("User App name: %s, App type: %s\n", serviceName, appType);
+      jiraDescription =
+          String.format(
+              "User App name: %s, App type: %s\n",
+              serviceName,
+              appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]"));
     } else {
       jiraDescription =
           String.format("Jupyter server VM prefix: %s\n", originalEvent.getVmPrefix());
