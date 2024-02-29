@@ -32,7 +32,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
-  LambdaDslJsonBody createBody =
+
+  static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
+  static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
             body.stringType("jupyterUserScriptUri", "http://string.com");
@@ -58,6 +60,25 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Test
+  @PactTestFor(pactMethod = "createDuplicateRuntime")
+  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+    request.setJupyterUserScriptUri("http://string.com");
+    request.setJupyterStartUserScriptUri("http://start.com");
+    request.setAutopause(true);
+    request.setAutopauseThreshold(57);
+    request.setDefaultClientId("string");
+
+    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+
+    assertThrows(Exception.class, () -> api.createRuntime("googleProject", "runtimename", request));
+  }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewRuntime(PactDslWithProvider builder) {
     return builder
@@ -69,6 +90,25 @@ class RuntimesApiTest {
         .willRespondWith()
         .status(202)
         .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "createNewRuntime")
+  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
+    request.setJupyterUserScriptUri("http://string.com");
+    request.setJupyterStartUserScriptUri("http://start.com");
+    request.setAutopause(true);
+    request.setAutopauseThreshold(57);
+    request.setDefaultClientId("string");
+
+    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+
+    api.createRuntime("googleProject", "runtimename", request);
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -107,6 +147,37 @@ class RuntimesApiTest {
         .toPact();
   }
 
+  @Test
+  @PactTestFor(pactMethod = "getRuntime")
+  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
+    expected.setAutopauseThreshold(57);
+
+    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
+    auditInfo.setCreator("Bugs Bunny");
+    auditInfo.setCreatedDate("Yesterday");
+    auditInfo.setDateAccessed("Tuesday");
+
+    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
+    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
+    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
+
+    expected.setAuditInfo(auditInfo);
+    expected.setCloudContext(cloudContext);
+    expected.setRuntimeName("sample-cromwell-study");
+    expected.setErrors(new ArrayList<>());
+    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
+    expected.setProxyUrl("http://www.proxy.com");
+
+    LeonardoGetRuntimeResponse response = api.getRuntime("googleProject", "runtimename");
+
+    assertEquals(expected, response);
+  }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getMissingRuntime(PactDslWithProvider builder) {
     return builder
@@ -119,6 +190,19 @@ class RuntimesApiTest {
         .headers(contentTypeJsonHeader)
         .body(newJsonBody(body -> {}).build())
         .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "getMissingRuntime")
+  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+
+    ApiException exception =
+        assertThrows(ApiException.class, () -> api.getRuntime("googleProject", "runtimename"));
+
+    assertEquals(exception.getMessage(), "Not Found");
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -139,6 +223,20 @@ class RuntimesApiTest {
         .willRespondWith()
         .status(202)
         .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "updateRuntime")
+  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    RuntimesApi api = new RuntimesApi(client);
+    LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
+    request.setAllowStop(true);
+    request.setAutopause(true);
+    request.setAutopauseThreshold(200);
+
+    api.updateRuntime("googleProject", "runtimename", request);
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -171,139 +269,6 @@ class RuntimesApiTest {
         .toPact();
   }
 
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact deleteRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is a runtime in a Google project")
-        .uponReceiving("a request to delete a runtime")
-        .method("DELETE")
-        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
-        .query("deleteDisk=true")
-        .willRespondWith()
-        .status(202)
-        .toPact();
-  }
-
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact deleteMissingRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to delete a runtime")
-        .method("DELETE")
-        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
-        .query("deleteDisk=true")
-        .willRespondWith()
-        .status(404)
-        .toPact();
-  }
-
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is a runtime in a Google project")
-        .uponReceiving("a request to stop a runtime")
-        .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
-        .willRespondWith()
-        .status(202)
-        .toPact();
-  }
-
-  //
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
-    return builder
-        .given("there is not a runtime in a Google project")
-        .uponReceiving("a request to stop a runtime")
-        .method("POST")
-        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
-        .willRespondWith()
-        .status(404)
-        .toPact();
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "createNewRuntime")
-  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setAutopause(true);
-    request.setAutopauseThreshold(57);
-    request.setDefaultClientId("string");
-
-    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-
-    api.createRuntime("googleProject", "runtimename", request);
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "createDuplicateRuntime")
-  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
-    LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
-    request.setAutopause(true);
-    request.setAutopauseThreshold(57);
-    request.setDefaultClientId("string");
-
-    request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-
-    assertThrows(Exception.class, () -> api.createRuntime("googleProject", "runtimename", request));
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "getRuntime")
-  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
-    LeonardoGetRuntimeResponse expected = new LeonardoGetRuntimeResponse();
-    expected.setAutopauseThreshold(57);
-
-    LeonardoAuditInfo auditInfo = new LeonardoAuditInfo();
-    auditInfo.setCreator("Bugs Bunny");
-    auditInfo.setCreatedDate("Yesterday");
-    auditInfo.setDateAccessed("Tuesday");
-
-    LeonardoCloudContext cloudContext = new LeonardoCloudContext();
-    cloudContext.setCloudProvider(LeonardoCloudProvider.GCP);
-    cloudContext.setCloudResource("terra-vpc-xx-fake-70e4eb32");
-
-    expected.setAuditInfo(auditInfo);
-    expected.setCloudContext(cloudContext);
-    expected.setRuntimeName("sample-cromwell-study");
-    expected.setErrors(new ArrayList<>());
-    expected.setStatus(LeonardoRuntimeStatus.RUNNING);
-    expected.setProxyUrl("http://www.proxy.com");
-
-    LeonardoGetRuntimeResponse response = api.getRuntime("googleProject", "runtimename");
-
-    assertEquals(expected, response);
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "getMissingRuntime")
-  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
-    ApiException exception =
-        assertThrows(ApiException.class, () -> api.getRuntime("googleProject", "runtimename"));
-
-    assertEquals(exception.getMessage(), "Not Found");
-  }
-
   @Test
   @PactTestFor(pactMethod = "updateMissingRuntime")
   void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
@@ -325,18 +290,17 @@ class RuntimesApiTest {
     assertThrows(Exception.class, () -> api.updateRuntime("googleProject", "runtimename", request));
   }
 
-  @Test
-  @PactTestFor(pactMethod = "updateRuntime")
-  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-    LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
-    request.setAllowStop(true);
-    request.setAutopause(true);
-    request.setAutopauseThreshold(200);
-
-    api.updateRuntime("googleProject", "runtimename", request);
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to delete a runtime")
+        .method("DELETE")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
+        .query("deleteDisk=true")
+        .willRespondWith()
+        .status(202)
+        .toPact();
   }
 
   @Test
@@ -349,6 +313,19 @@ class RuntimesApiTest {
     api.deleteRuntime("googleProject", "runtimename", true);
   }
 
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact deleteMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to delete a runtime")
+        .method("DELETE")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
+        .query("deleteDisk=true")
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "deleteMissingRuntime")
   void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
@@ -357,6 +334,18 @@ class RuntimesApiTest {
     RuntimesApi api = new RuntimesApi(client);
 
     assertThrows(Exception.class, () -> api.deleteRuntime("googleProject", "runtimename", true));
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is a runtime in a Google project")
+        .uponReceiving("a request to stop a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
+        .willRespondWith()
+        .status(202)
+        .toPact();
   }
 
   @Test
@@ -369,6 +358,19 @@ class RuntimesApiTest {
     api.stopRuntime("googleProject", "runtimename");
   }
 
+  //
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact stopMissingRuntime(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a runtime in a Google project")
+        .uponReceiving("a request to stop a runtime")
+        .method("POST")
+        .path("/api/google/v1/runtimes/googleProject/exampleruntimename/stop")
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
+
   @Test
   @PactTestFor(pactMethod = "stopMissingRuntime")
   void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
@@ -378,6 +380,4 @@ class RuntimesApiTest {
 
     assertThrows(Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
   }
-
-  static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
 }
