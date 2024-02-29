@@ -395,6 +395,10 @@ dependencies {
 
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
+    implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION")
+    implementation("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION")
+
     implementation "ch.qos.logback:logback-classic:$project.ext.LOGBACK_VERSION"
     implementation "ch.qos.logback:logback-core:$project.ext.LOGBACK_VERSION"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
@@ -418,7 +422,6 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
-    implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
     implementation "commons-codec:commons-codec:1.15"
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'io.netty:netty-common:4.1.82.Final'
@@ -450,21 +453,7 @@ dependencies {
 
     implementation "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
 
-    implementation('org.apache.tomcat:tomcat-jdbc:10.0.23')
-    implementation("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc:$project.ext.SPRING_BOOT_VERSION") {
-        exclude group: 'com.zaxxer', module: 'HikariCP'
-    }
-
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
-        exclude module: 'spring-boot-starter-tomcat'
-        exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-    }
-
-    implementation("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
-        exclude module: 'spring-boot-starter-tomcat'
-        exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-    }
+    implementation 'org.apache.tomcat:tomcat-jdbc:10.0.23'
 
     implementation "org.springframework.retry:spring-retry"
     implementation "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
@@ -546,10 +535,7 @@ dependencies {
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
     // Test deps
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-        exclude group: 'com.vaadin.external.google', module: 'android-json'
-    }
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION"
 }
 
 tasks.compileJava {
