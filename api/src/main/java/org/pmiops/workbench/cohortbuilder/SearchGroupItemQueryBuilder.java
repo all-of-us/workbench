@@ -168,8 +168,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String TEMPORAL_SQL =
       "SELECT person_id, visit_occurrence_id, entry_date%s\n"
           + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "WHERE %s\n"
-          + "AND person_id IN (%s)\n";
+          + "WHERE %s\n";
   private static final String RANK_1_SQL =
       ", RANK() OVER (PARTITION BY person_id ORDER BY entry_date%s) rn";
   private static final String TEMPORAL_RANK_1_SQL =
@@ -391,14 +390,14 @@ public final class SearchGroupItemQueryBuilder {
     // if modifiers exists we need to add them again to the inner temporal sql
     conditionsSql = conditionsSql + getAgeDateAndEncounterSql(queryParams, modifiers);
     if (TemporalMention.ANY_MENTION.equals(mention)) {
-      return String.format(TEMPORAL_SQL, "", conditionsSql, modifiedSql);
+      return String.format(TEMPORAL_SQL, "", conditionsSql);
     } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
       String rank1Sql = String.format(RANK_1_SQL, "");
-      String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql, modifiedSql);
+      String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql);
       return String.format(TEMPORAL_RANK_1_SQL, temporalSql);
     }
     String rank1Sql = String.format(RANK_1_SQL, DESC);
-    String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql, modifiedSql);
+    String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql);
     return String.format(TEMPORAL_RANK_1_SQL, temporalSql);
   }
 
