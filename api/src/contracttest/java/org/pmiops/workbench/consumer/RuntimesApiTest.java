@@ -76,7 +76,7 @@ class RuntimesApiTest {
 
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    assertThrows(Exception.class, () -> api.createRuntime("googleProject", "runtimename", request));
+    assertThrows(Exception.class, () -> api.createRuntime("googleProject", "exampleruntimename", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -108,7 +108,7 @@ class RuntimesApiTest {
 
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    api.createRuntime("googleProject", "runtimename", request);
+    api.createRuntime("googleProject", "exampleruntimename", request);
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -173,7 +173,7 @@ class RuntimesApiTest {
     expected.setStatus(LeonardoRuntimeStatus.RUNNING);
     expected.setProxyUrl("http://www.proxy.com");
 
-    LeonardoGetRuntimeResponse response = api.getRuntime("googleProject", "runtimename");
+    LeonardoGetRuntimeResponse response = api.getRuntime("googleProject", "exampleruntimename");
 
     assertEquals(expected, response);
   }
@@ -200,7 +200,7 @@ class RuntimesApiTest {
     RuntimesApi api = new RuntimesApi(client);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> api.getRuntime("googleProject", "runtimename"));
+        assertThrows(ApiException.class, () -> api.getRuntime("googleProject", "exampleruntimename"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -236,7 +236,7 @@ class RuntimesApiTest {
     request.setAutopause(true);
     request.setAutopauseThreshold(200);
 
-    api.updateRuntime("googleProject", "runtimename", request);
+    api.updateRuntime("googleProject", "exampleruntimename", request);
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -287,7 +287,7 @@ class RuntimesApiTest {
     request.setLabelsToDelete(new ArrayList<>(List.of("deletableLabel")));
     request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
 
-    assertThrows(Exception.class, () -> api.updateRuntime("googleProject", "runtimename", request));
+    assertThrows(Exception.class, () -> api.updateRuntime("googleProject", "exampleruntimename", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -310,7 +310,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.deleteRuntime("googleProject", "runtimename", true);
+    api.deleteRuntime("googleProject", "exampleruntimename", true);
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -333,7 +333,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    assertThrows(Exception.class, () -> api.deleteRuntime("googleProject", "runtimename", true));
+    assertThrows(Exception.class, () -> api.deleteRuntime("googleProject", "exampleruntimename", true));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -355,7 +355,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.stopRuntime("googleProject", "runtimename");
+    api.stopRuntime("googleProject", "exampleruntimename");
   }
 
   //
@@ -378,6 +378,6 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    assertThrows(Exception.class, () -> api.stopRuntime("googleProject", "runtimename"));
+    assertThrows(Exception.class, () -> api.stopRuntime("googleProject", "exampleruntimename"));
   }
 }
