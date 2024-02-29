@@ -13,7 +13,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -319,7 +319,7 @@ class RuntimesApiTest {
     config.setDiskSize(500);
     config.setMachineType("n1-highmem-16");
     request.setRuntimeConfig(config);
-    request.setLabelsToDelete(new ArrayList<>(Arrays.asList("deletableLabel")));
+    request.setLabelsToDelete(new ArrayList<>(List.of("deletableLabel")));
     request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
 
     assertThrows(Exception.class, () -> api.updateRuntime("googleProject", "runtimename", request));
