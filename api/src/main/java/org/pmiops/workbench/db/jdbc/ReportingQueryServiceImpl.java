@@ -22,7 +22,6 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
 import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -627,11 +627,15 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
       FieldValues.getDateTime(row, "stopTime").ifPresent(res::setStopTime);
       FieldValues.getString(row, "customEnvironmentVariables")
           .ifPresent(res::setEnvironmentVariables);
-      Optional<String> appName = FieldValues.getString(row, "appName");
-      if (appName.isPresent()) {
-        res.setAppName(appName.get());
-        res.setAppType(appServiceNameToAppType(appName.get()).get().toString());
-      }
+      FieldValues.getString(row, "appName")
+          .ifPresent(
+              appName -> {
+                res.setAppName(appName);
+                res.setAppType(
+                    appServiceNameToAppType(appName)
+                        .map(AppType::toString)
+                        .orElse("[unknown app type]"));
+              });
       queryResults.add(res);
     }
 

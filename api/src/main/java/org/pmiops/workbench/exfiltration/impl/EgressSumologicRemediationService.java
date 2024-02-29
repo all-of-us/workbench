@@ -6,10 +6,8 @@ import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToApp
 import com.google.common.base.Strings;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
-import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
@@ -77,9 +75,10 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   protected void sendEgressRemediationEmail(
       DbUser user, EgressRemediationAction action, DbEgressEvent event) throws MessagingException {
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    Optional<AppType> appTypeOpt =
-        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()));
-    String serviceName = appTypeOpt.isPresent() ? appTypeOpt.get().toString() : "Jupyter";
+    String serviceName =
+        appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
+            .map(AppType::toString)
+            .orElse("Jupyter");
     mailService.sendEgressRemediationEmail(user, action, serviceName);
   }
 
@@ -114,11 +113,11 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   private boolean isCromwellApp(DbEgressEvent event) {
-    SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
-    return StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())
-        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName()).isPresent()
-        && appServiceNameToAppType(originalEvent.getSrcGkeServiceName())
-            .get()
-            .equals(AppType.CROMWELL);
+    AppType typeOrNull =
+        appServiceNameToAppType(
+                Strings.nullToEmpty(
+                    egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName()))
+            .orElse(null);
+    return typeOrNull == AppType.CROMWELL;
   }
 }
