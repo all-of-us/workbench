@@ -11,6 +11,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -31,6 +32,19 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
+  LambdaDslJsonBody createBody =
+      newJsonBody(
+          (body) -> {
+            body.stringType("jupyterUserScriptUri", "http://string.com");
+            body.stringType("jupyterStartUserScriptUri", "http://string.com");
+            body.booleanType("autopause", true);
+            body.numberType("autopauseThreshold", 57);
+            body.stringType("defaultClientId", "string");
+            body.stringType(
+                "toolDockerImage",
+                "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
+          });
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
     return builder
@@ -38,19 +52,7 @@ class RuntimesApiTest {
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("jupyterUserScriptUri", "http://string.com");
-                      body.stringType("jupyterStartUserScriptUri", "http://string.com");
-                      body.booleanType("autopause", true);
-                      body.numberType("autopauseThreshold", 57);
-                      body.stringType("defaultClientId", "string");
-                      body.stringType(
-                          "toolDockerImage",
-                          "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-                    })
-                .build())
+        .body(createBody.build())
         .willRespondWith()
         .status(409)
         .toPact();
@@ -63,19 +65,7 @@ class RuntimesApiTest {
         .uponReceiving("a request to create a runtime")
         .method("POST")
         .path("/api/google/v1/runtimes/googleProject/runtimename")
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("jupyterUserScriptUri", "http://string.com");
-                      body.stringType("jupyterStartUserScriptUri", "http://string.com");
-                      body.booleanType("autopause", true);
-                      body.numberType("autopauseThreshold", 57);
-                      body.stringType("defaultClientId", "string");
-                      body.stringType(
-                          "toolDockerImage",
-                          "us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
-                    })
-                .build())
+        .body(createBody.build())
         .willRespondWith()
         .status(202)
         .toPact();
