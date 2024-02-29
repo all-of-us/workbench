@@ -2,6 +2,7 @@ package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -76,7 +77,8 @@ class RuntimesApiTest {
 
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    assertThrows(Exception.class, () -> api.createRuntime("googleProject", "exampleruntimename", request));
+    assertThrows(
+        Exception.class, () -> api.createRuntime("googleProject", "exampleruntimename", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -108,7 +110,7 @@ class RuntimesApiTest {
 
     request.setToolDockerImage("us.gcr.io/broad-dsp-gcr-public/anvil-rstudio-bioconductor:3.18.0");
 
-    api.createRuntime("googleProject", "exampleruntimename", request);
+    assertDoesNotThrow(() -> api.createRuntime("googleProject", "exampleruntimename", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -200,7 +202,8 @@ class RuntimesApiTest {
     RuntimesApi api = new RuntimesApi(client);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> api.getRuntime("googleProject", "exampleruntimename"));
+        assertThrows(
+            ApiException.class, () -> api.getRuntime("googleProject", "exampleruntimename"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -236,7 +239,7 @@ class RuntimesApiTest {
     request.setAutopause(true);
     request.setAutopauseThreshold(200);
 
-    api.updateRuntime("googleProject", "exampleruntimename", request);
+    assertDoesNotThrow(() -> api.updateRuntime("googleProject", "exampleruntimename", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -271,7 +274,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateMissingRuntime")
-  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
@@ -287,7 +290,11 @@ class RuntimesApiTest {
     request.setLabelsToDelete(new ArrayList<>(List.of("deletableLabel")));
     request.setLabelsToUpsert(Map.ofEntries(entry("key1", "ke1Updated")));
 
-    assertThrows(Exception.class, () -> api.updateRuntime("googleProject", "exampleruntimename", request));
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () -> api.updateRuntime("googleProject", "exampleruntimename", request));
+    assertEquals(exception.getMessage(), "Not Found");
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -310,7 +317,7 @@ class RuntimesApiTest {
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.deleteRuntime("googleProject", "exampleruntimename", true);
+    assertDoesNotThrow(() -> api.deleteRuntime("googleProject", "exampleruntimename", true));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -328,12 +335,16 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "deleteMissingRuntime")
-  void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    assertThrows(Exception.class, () -> api.deleteRuntime("googleProject", "exampleruntimename", true));
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () -> api.deleteRuntime("googleProject", "exampleruntimename", true));
+    assertEquals(exception.getMessage(), "Not Found");
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -350,12 +361,12 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "stopRuntime")
-  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
+  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    api.stopRuntime("googleProject", "exampleruntimename");
+    assertDoesNotThrow(() -> api.stopRuntime("googleProject", "exampleruntimename"));
   }
 
   //
@@ -373,11 +384,14 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "stopMissingRuntime")
-  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
+  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     RuntimesApi api = new RuntimesApi(client);
 
-    assertThrows(Exception.class, () -> api.stopRuntime("googleProject", "exampleruntimename"));
+    ApiException exception =
+        assertThrows(
+            ApiException.class, () -> api.stopRuntime("googleProject", "exampleruntimename"));
+    assertEquals(exception.getMessage(), "Not Found");
   }
 }
