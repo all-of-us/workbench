@@ -112,10 +112,10 @@ public class EgressEventServiceImpl implements EgressEventService {
         && event.getVmPrefix().startsWith("all-of-us")) {
       return gceVmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
     }
+    String serviceName = event.getSrcGkeServiceName();
     // This is the GKE case
-    if (StringUtils.isNotEmpty(event.getSrcGkeServiceName())) {
-      return gkeServiceNameToUserDatabaseId(event.getSrcGkeServiceName())
-          .flatMap(userService::getByDatabaseId);
+    if (StringUtils.isNotEmpty(serviceName)) {
+      return gkeServiceNameToUserDatabaseId(serviceName).flatMap(userService::getByDatabaseId);
     }
     return Optional.empty();
   }

@@ -6,6 +6,7 @@ import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToApp
 import com.google.common.base.Strings;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -113,11 +114,8 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
   }
 
   private boolean isCromwellApp(DbEgressEvent event) {
-    AppType typeOrNull =
-        appServiceNameToAppType(
-                Strings.nullToEmpty(
-                    egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName()))
-            .orElse(null);
-    return typeOrNull == AppType.CROMWELL;
+    String serviceName = egressEventMapper.toSumoLogicEvent(event).getSrcGkeServiceName();
+    return serviceName != null
+        && appServiceNameToAppType(serviceName).equals(Optional.of(AppType.CROMWELL));
   }
 }

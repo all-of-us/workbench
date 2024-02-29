@@ -69,9 +69,7 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     String serviceName = originalEvent.getSrcGkeServiceName();
     if (StringUtils.isNotEmpty(serviceName)) {
       String appType =
-          appServiceNameToAppType(originalEvent.getSrcGkeServiceName())
-              .map(AppType::toString)
-              .orElse("[unknown]");
+          appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]");
       jiraDescription = String.format("User App name: %s, App type: %s\n", serviceName, appType);
     } else {
       jiraDescription =
