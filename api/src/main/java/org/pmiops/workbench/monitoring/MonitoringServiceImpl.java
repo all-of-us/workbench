@@ -37,13 +37,13 @@ public class MonitoringServiceImpl implements MonitoringService {
     this.baggage = baggage;
   }
 
-  private void initStatsConfigurationIdempotent() {
-    if (!viewsAreRegistered) {
-      registerMetricViews();
-      viewsAreRegistered = true;
-    }
-    otlpGrpcMetricExporter.export(sdkMeterProvider.collectAllMetrics());
-  }
+//  private void initStatsConfigurationIdempotent() {
+//    if (!viewsAreRegistered) {
+//      registerMetricViews();
+//      viewsAreRegistered = true;
+//    }
+//    MetricProducer metricProducer = sdkMeterProvider.getMetricProducer();
+//    otlpGrpcMetricExporter.export(metricProducer.collectAllMetrics());  }
 
   private void registerMetricViews() {
     // TODO: Implement the equivalent of registering views in OpenTelemetry
@@ -51,7 +51,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
   @Override
   public void recordValues(Map<Metric, Number> metricToValue, Map<AttributeKey<?>, Object> tags) {
-    initStatsConfigurationIdempotent();
+//    initStatsConfigurationIdempotent();
     if (metricToValue.isEmpty()) {
       logger.warning("recordValue() called with empty map.");
       return;
@@ -65,7 +65,7 @@ public class MonitoringServiceImpl implements MonitoringService {
         LongCounter longCounter = meter.counterBuilder(metric.getName()).build();
         longCounter.add(value.longValue(), baggageBuilder.build());
       } else if (metric.getMeasureClass().equals(Double.class)) {
-        DoubleCounter doubleCounter = meter.counterBuilder(metric.getName()).build();
+        DoubleCounter doubleCounter = meter.histogramBuilder(metric.getName()).build();
         doubleCounter.add(value.doubleValue(), baggageBuilder.build());
       } else {
         logger.log(
