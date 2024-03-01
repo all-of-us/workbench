@@ -1,11 +1,13 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import java.io.IOException;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -54,27 +56,31 @@ public class StackdriverStatsExporterService {
   public void createAndRegister() {
     if (!initialized) {
       try {
-        final StackdriverStatsConfiguration configuration = makeStackdriverStatsConfiguration();
-        StackdriverStatsExporter.createAndRegister(configuration);
-        logger.info(
-            String.format(
-                "Configured StackDriver exports with configuration:\n%s",
-                configuration.toString()));
+        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.getDefault();
+        BatchSpanProcessor spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
+        SdkTracerProvider tracerProvider =
+            SdkTracerProvider.builder().addSpanProcessor(spanProcessor).build();
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(tracerProvider)
+            .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+            .buildAndRegisterGlobal();
+        logger.info("Configured StackDriver exports");
         initialized = true;
-      } catch (IOException e) {
+      } catch (Exception e) {
         logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
       }
     }
   }
 
-  @VisibleForTesting
-  public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
-    return StackdriverStatsConfiguration.builder()
-        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
-        .setProjectId(getProjectId())
-        .setMonitoredResource(getMonitoringMonitoredResource())
-        .build();
-  }
+  //
+  //  @VisibleForTesting
+  //  public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
+  //    return StackdriverStatsConfiguration.builder()
+  //        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
+  //        .setProjectId(getProjectId())
+  //        .setMonitoredResource(getMonitoringMonitoredResource())
+  //        .build();
+  //  }
 
   private MonitoredResource getMonitoringMonitoredResource() {
     return MonitoredResource.newBuilder()

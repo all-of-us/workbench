@@ -14,7 +14,7 @@ buildscript {
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
-        OPENCENSUS_VERSION = '0.31.1'
+        OPENTELEMETRY_VERSION = '1.35.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.32'
@@ -407,14 +407,11 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
 
-    implementation "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-
-    implementation "io.opentelemetry:opentelemetry-api:1.35.0"
-    implementation "io.opentelemetry:opentelemetry-context:1.35.0"
-
+    implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_VERSION"
+    implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_VERSION"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_VERSION"
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
@@ -517,17 +514,11 @@ dependencies {
     generatedCompile "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
+
+    // OpenTelemetry is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
-    generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-
-    generatedCompile "io.opentelemetry:opentelemetry-api:1.35.0"
-    generatedCompile "io.opentelemetry:opentelemetry-context:1.35.0"
-
-
-
+    generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_VERSION"
+    generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_VERSION"
 
     generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 
