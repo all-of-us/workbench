@@ -364,6 +364,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
         currentCohortCriteriaStore.next(
           JSON.parse(JSON.stringify(searchParameters))
         );
+        const searchRequest = searchRequestStore.getValue();
+        const group = searchRequest[role].find((grp) => grp.id === groupId);
         AnalyticsTracker.CohortBuilder.LaunchSearch(label);
         const context = {
           item: _item,
@@ -372,6 +374,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           role,
           groupId,
           standard,
+          temporal: group.temporal,
           count: item.count,
         };
         setSearchContext(context);

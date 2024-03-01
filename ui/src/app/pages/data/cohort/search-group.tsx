@@ -5,6 +5,7 @@ import { Menu } from 'primereact/menu';
 import {
   CohortDefinition,
   Domain,
+  ModifierType,
   ResourceType,
   TemporalMention,
   TemporalTime,
@@ -373,18 +374,22 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     get disableTemporal() {
-      return this.items.some((it) =>
-        [
-          Domain.PHYSICAL_MEASUREMENT,
-          Domain.PERSON,
-          Domain.SURVEY,
-          Domain.FITBIT,
-          Domain.WHOLE_GENOME_VARIANT,
-          Domain.LR_WHOLE_GENOME_VARIANT,
-          Domain.ARRAY_DATA,
-          Domain.STRUCTURAL_VARIANT_DATA,
-          Domain.SNP_INDEL_VARIANT,
-        ].includes(it.type)
+      return this.items.some(
+        (it) =>
+          [
+            Domain.PHYSICAL_MEASUREMENT,
+            Domain.PERSON,
+            Domain.SURVEY,
+            Domain.FITBIT,
+            Domain.WHOLE_GENOME_VARIANT,
+            Domain.LR_WHOLE_GENOME_VARIANT,
+            Domain.ARRAY_DATA,
+            Domain.STRUCTURAL_VARIANT_DATA,
+            Domain.SNP_INDEL_VARIANT,
+          ].includes(it.type) ||
+          it.modifiers.some(
+            (mod) => mod.name === ModifierType.NUM_OF_OCCURRENCES
+          )
       );
     }
 
@@ -497,6 +502,7 @@ export const SearchGroup = withCurrentWorkspace()(
         role,
         groupId,
         temporalGroup,
+        temporal: group.temporal,
         selectedSurvey,
         name,
       };
