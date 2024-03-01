@@ -391,7 +391,9 @@ public final class SearchGroupItemQueryBuilder {
     }
     // if modifiers exists we need to add them again to the inner temporal sql
     List<String> temporalModifiedParts =
-        conditionsSql.stream().map(s -> s + getAgeDateAndEncounterSql(queryParams, modifiers)).toList();
+        conditionsSql.stream()
+            .map(s -> s + getAgeDateAndEncounterSql(queryParams, modifiers))
+            .toList();
     if (TemporalMention.ANY_MENTION.equals(mention)) {
       List<String> temporalSqlParts =
           temporalModifiedParts.stream().map(s -> String.format(TEMPORAL_SQL, "", s)).toList();
