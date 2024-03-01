@@ -1,27 +1,46 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from 'app/components/buttons';
 import { TextInput } from 'app/components/inputs';
+import { WarningMessage } from 'app/components/messages';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 
 export interface ConfirmWorkspaceDeleteModalProps {
   closeFunction: Function;
   receiveDelete: Function;
   workspaceName: string;
+  workspaceNamespace: string;
 }
 export const ConfirmWorkspaceDeleteModal = ({
   closeFunction,
   receiveDelete,
   workspaceName,
+  workspaceNamespace,
 }: ConfirmWorkspaceDeleteModalProps) => {
   const [loading, setLoading] = useState(false);
   const [deleteDisabled, setDeleteDisabled] = useState(true);
+  const [checkingForUserApps, setCheckingForUserApps] = useState(true);
+  const [appsExist, setAppsExist] = useState(false);
+
+  useEffect(() => {
+    setCheckingForUserApps(true);
+    appsApi()
+      .listAppsInWorkspace(workspaceNamespace)
+      .then((userApps) => {
+        setAppsExist(userApps?.length > 0);
+        setCheckingForUserApps(false);
+      })
+      .finally(() => {
+        setCheckingForUserApps(false);
+      });
+  }, []);
 
   const emitDelete = () => {
     setLoading(true);
@@ -31,6 +50,8 @@ export const ConfirmWorkspaceDeleteModal = ({
   const validateDeleteText = (event) => {
     setDeleteDisabled(!event.toLowerCase().match('delete'));
   };
+
+  const displayUserInput = !checkingForUserApps && !appsExist;
 
   return (
     <Modal loading={loading}>
@@ -50,13 +71,26 @@ export const ConfirmWorkspaceDeleteModal = ({
             access to the workspace. If you still wish to delete this workspace
             and all items within it, type DELETE below to confirm.
           </div>
-
-          <TextInput
-            placeholder='type DELETE to confirm'
-            style={{ marginTop: '0.75rem' }}
-            onChange={validateDeleteText}
-            onBlur=''
-          />
+          {displayUserInput && (
+            <TextInput
+              placeholder='type DELETE to confirm'
+              style={{ marginTop: '0.75rem' }}
+              onChange={validateDeleteText}
+              onBlur=''
+            />
+          )}
+          {checkingForUserApps && (
+            <div style={{ paddingTop: '1rem' }}>
+              {' '}
+              Checking for any existing User Apps....
+            </div>
+          )}
+          {appsExist && (
+            <WarningMessage>
+              You cannot delete the workspace as there are Apps you must delete
+              first
+            </WarningMessage>
+          )}
         </div>
       </ModalBody>
       <ModalFooter style={{ paddingTop: '1.5rem' }}>
@@ -69,7 +103,9 @@ export const ConfirmWorkspaceDeleteModal = ({
         </Button>
         <Button
           aria-label='Confirm Delete'
-          disabled={loading || deleteDisabled}
+          disabled={
+            loading || deleteDisabled || checkingForUserApps || appsExist
+          }
           style={{ marginLeft: '0.75rem' }}
           data-test-id='confirm-delete'
           onClick={() => emitDelete()}

@@ -922,6 +922,7 @@ export const HelpSidebar = fp.flow(
                     this.setState({ currentModal: CurrentModal.None })
                   }
                   receiveDelete={() => this.deleteWorkspace()}
+                  workspaceNamespace={this.props.workspace.namespace}
                   workspaceName={this.props.workspace.name}
                 />
               ),
