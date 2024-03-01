@@ -2,7 +2,6 @@ package org.pmiops.workbench.genomics;
 
 import com.google.cloud.storage.Blob;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +37,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -200,23 +200,18 @@ public class GenomicExtractionService {
                 firecloudSubmission.getSubmissionId(),
                 firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
-    final Optional<FirecloudWorkflowOutputs> workflowOutputs =
-        Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME));
+    // if it exists (and is a double) return the rounded result of:
+    // tasks[EXTRACT_WORKFLOW_NAME].outputs[EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"]
 
-    if (workflowOutputs.isPresent()) {
-      final Optional<Object> vcfSizeMbOutput =
-          Optional.ofNullable(
-              workflowOutputs
-                  .get()
-                  .getOutputs()
-                  .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
-
-      if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
-        return Math.round((Double) vcfSizeMbOutput.get());
-      }
-    }
-
-    return null;
+    return Optional.ofNullable(outputsResponse)
+        .map(FirecloudWorkflowOutputsResponse::getTasks)
+        .flatMap(tasks -> Optional.ofNullable(tasks.get(EXTRACT_WORKFLOW_NAME)))
+        .map(FirecloudWorkflowOutputs::getOutputs)
+        .flatMap(
+            outputs ->
+                Optional.ofNullable(outputs.get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb")))
+        .map(vcfSizeMb -> vcfSizeMb instanceof Double ? Math.round((double) vcfSizeMb) : null)
+        .orElse(null);
   }
 
   private void maybeNotifyOnJobFailure(
@@ -308,9 +303,9 @@ public class GenomicExtractionService {
   private List<String> getFailureCauses(FirecloudSubmission firecloudSubmission) {
     return Optional.ofNullable(firecloudSubmission.getWorkflows())
         .filter(wfs -> !wfs.isEmpty())
-        .map(wfs -> wfs.get(0))
-        .map(wf -> wf.getMessages())
-        .orElse(ImmutableList.of("unknown cause"));
+        .flatMap(wfs -> Optional.ofNullable(wfs.get(0)))
+        .map(FirecloudWorkflow::getMessages)
+        .orElse(List.of("unknown cause"));
   }
 
   public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
@@ -319,7 +314,10 @@ public class GenomicExtractionService {
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     RawlsWorkspaceDetails fcUserWorkspace =
-        fireCloudService.getWorkspace(workspace).get().getWorkspace();
+        fireCloudService
+            .getWorkspace(workspace)
+            .orElseThrow(() -> new NotFoundException("Workspace not found"))
+            .getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "genomic-extractions/" + extractionUuid;
