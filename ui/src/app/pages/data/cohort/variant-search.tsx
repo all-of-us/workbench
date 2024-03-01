@@ -887,7 +887,7 @@ export const VariantSearch = withCurrentWorkspace()(
           </div>
         </div>
         {!loading && variantFilters && (
-          <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', position: 'relative' }}>
             <Clickable
               style={{ color: colors.primary }}
               onClick={() => setFiltersOpen((prevState) => !prevState)}
@@ -912,7 +912,7 @@ export const VariantSearch = withCurrentWorkspace()(
               />
             )}
             {serverConfigStore.get().config.enableVariantSelectAll && (
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex', marginLeft: '1rem' }}>
                 <input
                   style={{ marginRight: '0.25rem' }}
                   type='checkbox'
