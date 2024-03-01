@@ -86,6 +86,8 @@ public final class SearchGroupItemQueryBuilder {
   private static final String OR = " OR ";
   private static final String AND = " AND ";
   private static final String UNION_TEMPLATE = "UNION ALL\n";
+
+  private static final String UNION_DISTINCT_TEMPLATE = "UNION DISTINCT\n";
   private static final String DESC = " DESC";
   private static final String BASE_SQL =
       "SELECT DISTINCT person_id, entry_date, concept_id\n"
@@ -144,7 +146,7 @@ public final class SearchGroupItemQueryBuilder {
 
   // sql parts to help construct Temporal BigQuery sql
   private static final String SAME_ENC =
-      "temp1.person_id = temp2.person_id AND temp1.visit_occurrence_id = temp2.visit_occurrence_id\n";
+      "temp1.person_id = temp2.person_id AND IFNULL(temp1.visit_occurrence_id, 0) = IFNULL(temp2.visit_occurrence_id, 0) AND temp1.entry_date = temp2.entry_date\n";
   private static final String X_DAYS_BEFORE =
       "temp1.person_id = temp2.person_id AND temp1.entry_date <= DATE_SUB(temp2.entry_date, INTERVAL %s DAY)\n";
   private static final String X_DAYS_AFTER =
@@ -168,7 +170,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String TEMPORAL_SQL =
       "SELECT person_id, visit_occurrence_id, entry_date%s\n"
           + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "WHERE %s\n";
+          + "WHERE %s";
   private static final String RANK_1_SQL =
       ", RANK() OVER (PARTITION BY person_id ORDER BY entry_date%s) rn";
   private static final String TEMPORAL_RANK_1_SQL =
@@ -297,7 +299,7 @@ public final class SearchGroupItemQueryBuilder {
     // build the inner temporal sql if this search group item is temporal
     // otherwise return modifiedSql
     return buildInnerTemporalQuery(
-        modifiedSql, queryPartsSql, queryParams, searchGroupItem.getModifiers(), mention);
+        modifiedSql, queryParts, queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   /** Build sql statement for demographics */
@@ -380,7 +382,7 @@ public final class SearchGroupItemQueryBuilder {
    */
   private static String buildInnerTemporalQuery(
       String modifiedSql,
-      String conditionsSql,
+      List<String> conditionsSql,
       Map<String, QueryParameterValue> queryParams,
       List<Modifier> modifiers,
       TemporalMention mention) {
@@ -388,17 +390,27 @@ public final class SearchGroupItemQueryBuilder {
       return modifiedSql;
     }
     // if modifiers exists we need to add them again to the inner temporal sql
-    conditionsSql = conditionsSql + getAgeDateAndEncounterSql(queryParams, modifiers);
+    List<String> temporalModifiedParts =
+        conditionsSql.stream().map(s -> s + getAgeDateAndEncounterSql(queryParams, modifiers)).toList();
     if (TemporalMention.ANY_MENTION.equals(mention)) {
-      return String.format(TEMPORAL_SQL, "", conditionsSql);
+      List<String> temporalSqlParts =
+          temporalModifiedParts.stream().map(s -> String.format(TEMPORAL_SQL, "", s)).toList();
+      return String.join(UNION_DISTINCT_TEMPLATE, temporalSqlParts);
     } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
       String rank1Sql = String.format(RANK_1_SQL, "");
-      String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql);
-      return String.format(TEMPORAL_RANK_1_SQL, temporalSql);
+      List<String> temporalSqlParts =
+          temporalModifiedParts.stream()
+              .map(
+                  s -> String.format(TEMPORAL_RANK_1_SQL, String.format(TEMPORAL_SQL, rank1Sql, s)))
+              .toList();
+      return String.join(UNION_DISTINCT_TEMPLATE, temporalSqlParts);
     }
     String rank1Sql = String.format(RANK_1_SQL, DESC);
-    String temporalSql = String.format(TEMPORAL_SQL, rank1Sql, conditionsSql);
-    return String.format(TEMPORAL_RANK_1_SQL, temporalSql);
+    List<String> temporalSqlParts =
+        temporalModifiedParts.stream()
+            .map(s -> String.format(TEMPORAL_RANK_1_SQL, String.format(TEMPORAL_SQL, rank1Sql, s)))
+            .toList();
+    return String.join(UNION_DISTINCT_TEMPLATE, temporalSqlParts);
   }
 
   /**
@@ -444,8 +456,8 @@ public final class SearchGroupItemQueryBuilder {
     }
     return String.format(
         temporalQueryParts2.size() == 1 ? TEMPORAL_EXIST : TEMPORAL_JOIN,
-        String.join(UNION_TEMPLATE, temporalQueryParts1),
-        String.join(UNION_TEMPLATE, temporalQueryParts2),
+        String.join(UNION_DISTINCT_TEMPLATE, temporalQueryParts1),
+        String.join(UNION_DISTINCT_TEMPLATE, temporalQueryParts2),
         conditions);
   }
 
