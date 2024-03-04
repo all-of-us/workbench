@@ -166,6 +166,18 @@ export const CreateGkeApp = ({
     </div>
   );
 
+  const showDeleteDiskButton = unattachedDiskExists(app, disk);
+  const showDeleteAppButton = canDeleteApp(app);
+
+  // when there is a delete button, FlexRow aligns the open/create button to the right
+  // for consistency of location when there is no delete button, we shift it to the right with `margin-left: auto`
+
+  const shiftOpenOrCreateButtonRight =
+    !showDeleteDiskButton && !showDeleteAppButton;
+  const openOrCreateButtonStyle = shiftOpenOrCreateButtonRight && {
+    marginLeft: 'auto',
+  };
+
   return (
     <FlexColumn
       id={`${appTypeToString[appType]}-configuration-panel`}
@@ -274,13 +286,13 @@ export const CreateGkeApp = ({
           gap: '2rem',
         }}
       >
-        {unattachedDiskExists(app, disk) && (
+        {showDeleteDiskButton && (
           <DeletePersistentDiskButton
             onClick={onClickDeleteUnattachedPersistentDisk}
             style={{ flexShrink: 0 }}
           />
         )}
-        {canDeleteApp(app) && (
+        {showDeleteAppButton && (
           <LinkButton
             style={{ ...styles.deleteLink, flexShrink: 0 }}
             aria-label='Delete Environment'
@@ -295,6 +307,7 @@ export const CreateGkeApp = ({
           <OpenGkeAppButton
             {...{ billingStatus, workspace, onClose }}
             userApp={app}
+            style={openOrCreateButtonStyle}
           />
         ) : (
           <CreateGkeAppButton
@@ -302,6 +315,7 @@ export const CreateGkeApp = ({
             existingApp={app}
             workspaceNamespace={workspace.namespace}
             username={profile.username}
+            style={openOrCreateButtonStyle}
           />
         )}
       </FlexRow>
