@@ -19,7 +19,7 @@ import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
-import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
@@ -71,7 +71,9 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
             ? String.format(
                 "User App name: %s, App type: %s\n",
                 serviceName,
-                appServiceNameToAppType(serviceName).map(AppType::toString).orElse("[unknown]"))
+                appServiceNameToAppType(serviceName)
+                    .map(LeonardoAppUtils::appDisplayName)
+                    .orElse("[unknown]"))
             : String.format("Jupyter server VM prefix: %s\n", originalEvent.getVmPrefix());
     return Stream.concat(
         Stream.of(
