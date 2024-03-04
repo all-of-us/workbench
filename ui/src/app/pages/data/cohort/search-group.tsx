@@ -195,6 +195,24 @@ function initItem(id: string, type: string, tempGroup: number) {
   };
 }
 
+const disabledTemporalTooltip = (
+  <div style={{ marginLeft: '0.75rem' }}>
+    The temporal option cannot be enabled for groups with the 'Number Of
+    Occurrence Dates' modifier or with the following Program Data:
+    <ul style={{ listStylePosition: 'outside' }}>
+      <li>Demographics</li>
+      <li>Surveys</li>
+      <li>Physical Measurements</li>
+      <li>Fitbit</li>
+      <li>Short Read WGS</li>
+      <li>Long Read WGS</li>
+      <li>Global Diversity Array</li>
+      <li>Structural Variant Data</li>
+      <li>SNP/Indel Variants</li>
+    </ul>
+  </div>
+);
+
 interface Props {
   group: any;
   groupIndex: number;
@@ -381,6 +399,13 @@ export const SearchGroup = withCurrentWorkspace()(
             Domain.PERSON,
             Domain.SURVEY,
             Domain.FITBIT,
+            Domain.FITBIT,
+            Domain.FITBIT_ACTIVITY,
+            Domain.FITBIT_HEART_RATE_LEVEL,
+            Domain.FITBIT_HEART_RATE_SUMMARY,
+            Domain.FITBIT_INTRADAY_STEPS,
+            Domain.FITBIT_SLEEP_DAILY_SUMMARY,
+            Domain.FITBIT_SLEEP_LEVEL,
             Domain.WHOLE_GENOME_VARIANT,
             Domain.LR_WHOLE_GENOME_VARIANT,
             Domain.ARRAY_DATA,
@@ -809,14 +834,20 @@ export const SearchGroup = withCurrentWorkspace()(
                       : styles.row
                   }
                 >
-                  <div style={{ ...styles.col6, display: 'flex' }}>
-                    <InputSwitch
-                      checked={temporal}
-                      disabled={this.disableTemporal}
-                      onChange={(e) => this.handleTemporalChange(e)}
-                    />
-                    <div style={{ paddingLeft: '0.75rem' }}>Temporal</div>
-                  </div>
+                  <TooltipTrigger
+                    side='bottom'
+                    content={disabledTemporalTooltip}
+                    disabled={!this.disableTemporal}
+                  >
+                    <div style={{ ...styles.col6, display: 'flex' }}>
+                      <InputSwitch
+                        checked={temporal}
+                        disabled={this.disableTemporal}
+                        onChange={(e) => this.handleTemporalChange(e)}
+                      />
+                      <div style={{ paddingLeft: '0.75rem' }}>Temporal</div>
+                    </div>
+                  </TooltipTrigger>
                   <div style={{ ...styles.col6, textAlign: 'right' }}>
                     <div>
                       Group Count:&nbsp;
