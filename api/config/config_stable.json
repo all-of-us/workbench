@@ -93,11 +93,9 @@
   "absorb": {
     "externalDepartmentId": "Development",
     "samlIdentityProviderId": "C03q5hexf",
-    "samlServiceProviderId": "133137951028",
-    "redirectMoodleUser": true
+    "samlServiceProviderId": "133137951028"
   },
   "moodle": {
-    "trainingMigrationPauseActive": false,
     "host": "aou.nnlm.gov",
     "credentialsKeyV2": "moodle-prod-key-v2.txt"
   },

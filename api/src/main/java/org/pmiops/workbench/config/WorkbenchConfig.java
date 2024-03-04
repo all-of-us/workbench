@@ -262,11 +262,9 @@ public class WorkbenchConfig {
     public String externalDepartmentId;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
-    public Boolean redirectMoodleUser;
   }
 
   public static class MoodleConfig {
-    public Boolean trainingMigrationPauseActive;
     public String host;
     public String credentialsKeyV2;
   }
