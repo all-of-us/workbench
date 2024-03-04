@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -174,9 +175,11 @@ export const CreateGkeApp = ({
 
   const shiftOpenOrCreateButtonRight =
     !showDeleteDiskButton && !showDeleteAppButton;
-  const openOrCreateButtonStyle = shiftOpenOrCreateButtonRight && {
-    marginLeft: 'auto',
-  };
+  const openOrCreateButtonStyle: CSSProperties = shiftOpenOrCreateButtonRight
+    ? {
+        marginLeft: 'auto',
+      }
+    : {};
 
   return (
     <FlexColumn

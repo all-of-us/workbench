@@ -114,7 +114,7 @@ describe('App Selector', () => {
         screen.queryByText('Select an application')
       ).not.toBeInTheDocument();
       // the Jupyter modal is visible
-      expect(screen.queryByText('New Notebook')).toBeInTheDocument();
+      expect(screen.queryByText('New Jupyter Notebook')).toBeInTheDocument();
     });
   });
 
