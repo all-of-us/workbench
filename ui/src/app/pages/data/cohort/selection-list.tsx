@@ -356,7 +356,8 @@ export const SelectionList = fp.flow(
         criteria &&
         criteria.length > 0 &&
         criteria[0].domainId !== Domain.PHYSICAL_MEASUREMENT.toString() &&
-        criteria[0].domainId !== Domain.PERSON.toString()
+        criteria[0].domainId !== Domain.PERSON.toString() &&
+        criteria[0].domainId !== Domain.SNP_INDEL_VARIANT.toString()
       );
     }
 
