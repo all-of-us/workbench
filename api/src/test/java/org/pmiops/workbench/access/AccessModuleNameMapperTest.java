@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.model.AccessModule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+@Import(AccessModuleNameMapperImpl.class)
 @SpringJUnitConfig
 public class AccessModuleNameMapperTest {
   @Autowired private AccessModuleNameMapper mapper;
