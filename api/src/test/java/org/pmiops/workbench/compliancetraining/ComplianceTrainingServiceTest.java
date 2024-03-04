@@ -4,25 +4,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.absorb.AbsorbService;
+import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;
 import org.pmiops.workbench.absorb.Enrollment;
-import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
-import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.access.AccessModuleServiceImpl;
-import org.pmiops.workbench.access.AccessSyncServiceImpl;
-import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.access.*;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -37,11 +31,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.moodle.MoodleService;
-import org.pmiops.workbench.moodle.MoodleService.BadgeName;
-import org.pmiops.workbench.moodle.MoodleServiceImpl;
-import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -69,7 +58,6 @@ public class ComplianceTrainingServiceTest {
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
 
-  @MockBean private MoodleService mockMoodleService;
   @MockBean private AbsorbService mockAbsorbService;
   @MockBean private UserService userService;
 
@@ -82,6 +70,7 @@ public class ComplianceTrainingServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private ComplianceTrainingService complianceTrainingService;
   @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
+  @Autowired private AccessModuleNameMapperImpl ac;
 
   @Import({
     FakeClockConfiguration.class,
@@ -91,7 +80,6 @@ public class ComplianceTrainingServiceTest {
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
-    MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class
   })
   @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class})
@@ -117,7 +105,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @BeforeEach
-  public void setUp() throws org.pmiops.workbench.absorb.ApiException {
+  public void setUp() throws ApiException {
     user = PresetData.createDbUser();
     user.setUsername(USERNAME);
     when(userService.isServiceAccount(user)).thenReturn(false);
@@ -380,7 +368,7 @@ public class ComplianceTrainingServiceTest {
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     user = complianceTrainingService.syncComplianceTrainingStatus();
-    verifyNoInteractions(mockMoodleService);
+    verifyNoInteractions(mockAbsorbService);
   }
 
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
@@ -398,27 +386,14 @@ public class ComplianceTrainingServiceTest {
         .orElse(null);
   }
 
-  private BadgeDetailsV2 defaultBadgeDetails() {
-    Timestamp start_timestamp = FakeClockConfiguration.NOW;
-    return new BadgeDetailsV2()
-        .valid(true)
-        .lastissued(start_timestamp.toInstant().getEpochSecond() - 100);
-  }
-
-  private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
-      throws ApiException {
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
-  }
-
-  private void stubAbsorbNoCoursesComplete() throws org.pmiops.workbench.absorb.ApiException {
+  private void stubAbsorbNoCoursesComplete() throws ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
             List.of(new Enrollment(ComplianceTrainingServiceImpl.rtTrainingCourseId, null)));
   }
 
-  private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime)
-      throws org.pmiops.workbench.absorb.ApiException {
+  private void stubAbsorbOnlyRTComplete(Instant rtCompletionTime) throws ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
@@ -427,8 +402,7 @@ public class ComplianceTrainingServiceTest {
                 new Enrollment(ComplianceTrainingServiceImpl.ctTrainingCourseId, null)));
   }
 
-  private void stubAbsorbRTExpiredCTComplete(Instant ctCompletionTime)
-      throws org.pmiops.workbench.absorb.ApiException {
+  private void stubAbsorbRTExpiredCTComplete(Instant ctCompletionTime) throws ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
@@ -439,7 +413,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void stubAbsorbAllTrainingsComplete(Instant rtCompletionTime, Instant ctCompletionTime)
-      throws org.pmiops.workbench.absorb.ApiException {
+      throws ApiException {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(true);
     when(mockAbsorbService.getActiveEnrollmentsForUser(FAKE_CREDENTIALS))
         .thenReturn(
@@ -457,10 +431,7 @@ public class ComplianceTrainingServiceTest {
         .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 
-  private BadgeDetailsV2 setRTTrainingCompletedWithMoodle() throws ApiException {
-    var rtBadge = defaultBadgeDetails().lastissued(currentSecond());
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge));
-
+  private void setRTTrainingCompletedWithMoodle() {
     // Manually set the database state because new users default to Absorb.
     var uam =
         accessModuleService.updateCompletionTime(
@@ -470,14 +441,9 @@ public class ComplianceTrainingServiceTest {
             .setUserAccessModule(uam)
             .setComplianceTrainingVerificationSystem(
                 DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
-
-    return rtBadge;
   }
 
-  private BadgeDetailsV2 setCTTrainingCompletedWithMoodle(Timestamp timestamp) throws ApiException {
-    var rtBadge = defaultBadgeDetails().lastissued(currentSecond());
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.CONTROLLED_TIER_TRAINING, rtBadge));
-
+  private void setCTTrainingCompletedWithMoodle(Timestamp timestamp) {
     // Manually set the database state because new users default to Absorb.
     var uam =
         accessModuleService.updateCompletionTime(
@@ -489,8 +455,6 @@ public class ComplianceTrainingServiceTest {
             .setUserAccessModule(uam)
             .setComplianceTrainingVerificationSystem(
                 DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
-
-    return rtBadge;
   }
 
   private Instant currentInstant() {

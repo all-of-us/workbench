@@ -1,20 +1,16 @@
 package org.pmiops.workbench.compliancetraining;
 
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;
-import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
-import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
@@ -22,7 +18,6 @@ import org.pmiops.workbench.db.model.DbComplianceTrainingVerification.DbComplian
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,38 +28,23 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   public static final String ctTrainingCourseId = "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d";
 
   private static final Logger log = Logger.getLogger(ComplianceTrainingServiceImpl.class.getName());
-  private final MoodleService moodleService;
-  private final Provider<WorkbenchConfig> configProvider;
-  private final UserAccessModuleDao userAccessModuleDao;
   private final AccessModuleService accessModuleService;
-  private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessSyncService accessSyncService;
-  private final Clock clock;
   private final Provider<DbUser> userProvider;
   private final UserService userService;
   private final ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
-  private AbsorbService absorbService;
+  private final AbsorbService absorbService;
 
   @Autowired
   public ComplianceTrainingServiceImpl(
-      MoodleService moodleService,
-      Provider<WorkbenchConfig> configProvider,
-      UserAccessModuleDao userAccessModuleDao,
       AccessModuleService accessModuleService,
-      AccessModuleNameMapper accessModuleNameMapper,
       AccessSyncService accessSyncService,
-      Clock clock,
       Provider<DbUser> userProvider,
       UserService userService,
       ComplianceTrainingVerificationDao complianceTrainingVerificationDao,
       AbsorbService absorbService) {
-    this.moodleService = moodleService;
-    this.configProvider = configProvider;
-    this.userAccessModuleDao = userAccessModuleDao;
     this.accessModuleService = accessModuleService;
-    this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessSyncService = accessSyncService;
-    this.clock = clock;
     this.userProvider = userProvider;
     this.userService = userService;
     this.complianceTrainingVerificationDao = complianceTrainingVerificationDao;

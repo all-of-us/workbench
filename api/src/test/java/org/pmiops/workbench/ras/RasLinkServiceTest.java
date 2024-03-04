@@ -56,7 +56,6 @@ import org.pmiops.workbench.identityverification.IdentityVerificationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -163,7 +162,6 @@ public class RasLinkServiceTest {
   })
   @MockBean({
     AccessTierService.class,
-    MoodleService.class,
     DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
