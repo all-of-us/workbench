@@ -57,34 +57,10 @@ then
   insertCriteriaMenu "($((++ID)),0,'Program Data','FITBIT','FITBIT','Fitbit',1,$ID)"
 fi
 
-if [[ $wgvCount > 0 ]];
+if [[ $wgvCount > 0 || $longReadWGSCount > 0 || $arrayCount > 0 || $structuralVariantDataCount > 0 || "$TABLE_LIST" == *"prep_vat"* ]];
 then
-  echo "Insert wgv into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','WHOLE_GENOME_VARIANT','','Short Read WGS',0,$ID)"
-fi
-
-if [[ $longReadWGSCount > 0 ]];
-then
-  echo "Insert long read wgs into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','LR_WHOLE_GENOME_VARIANT','','Long Read WGS',0,$ID)"
-fi
-
-if [[ $arrayCount > 0 ]];
-then
-  echo "Insert array data into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','ARRAY_DATA','','Global Diversity Array',0,$ID)"
-fi
-
-if [[ $structuralVariantDataCount > 0 ]];
-then
-  echo "Insert Structural Variant data into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','STRUCTURAL_VARIANT_DATA','','Structural Variant Data',0,$ID)"
-fi
-
-if [[ "$TABLE_LIST" == *"prep_vat"* ]]
-then
-  echo "Insert SNP/Indel Variants data into cb_criteria_menu."
-  insertCriteriaMenu "($((++ID)),0,'Program Data','SNP_INDEL_VARIANT','','SNP/Indel Variants',0,$ID)"
+  echo "Insert Genomics parent menu item into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),0,'Program Data','GENOMICS','','Genomics',1,$ID)"
 fi
 
 echo "Insert cb_criteria_menu"
@@ -147,4 +123,39 @@ then
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_INTRADAY_STEPS','FITBIT_INTRADAY_STEPS','Fitbit Steps Intraday',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_DAILY_SUMMARY','FITBIT_SLEEP_DAILY_SUMMARY','Fitbit Sleep Daily Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_LEVEL','FITBIT_SLEEP_LEVEL','Fitbit Sleep Level',0,$((++SORT_ORDER)))"
+fi
+
+echo "Getting parent id for GENOMICS"
+query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'GENOMICS'"
+PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+SORT_ORDER=0
+
+if [[ $wgvCount > 0 && $PARENT_ID > 0 ]];
+then
+  echo "Insert wgv into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','WHOLE_GENOME_VARIANT','','has Short Read WGS data',0,$((++SORT_ORDER)))"
+fi
+
+if [[ $longReadWGSCount > 0 && $PARENT_ID > 0 ]];
+then
+  echo "Insert long read wgs into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','LR_WHOLE_GENOME_VARIANT','','has Long Read WGS data',0,$((++SORT_ORDER)))"
+fi
+
+if [[ $arrayCount > 0 && $PARENT_ID > 0 ]];
+then
+  echo "Insert array data into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','ARRAY_DATA','','has Global Diversity Array data',0,$((++SORT_ORDER)))"
+fi
+
+if [[ $structuralVariantDataCount > 0 && $PARENT_ID > 0 ]];
+then
+  echo "Insert Structural Variant data into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','STRUCTURAL_VARIANT_DATA','','has Structural Variant data',0,$((++SORT_ORDER)))"
+fi
+
+if [[ "$TABLE_LIST" == *"prep_vat"* && $PARENT_ID > 0 ]]
+then
+  echo "Insert SNP/Indel Variants data into cb_criteria_menu."
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','SNP_INDEL_VARIANT','','SNP/Indel Variants',0,$((++SORT_ORDER)))"
 fi
