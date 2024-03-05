@@ -121,7 +121,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Absorb() throws Exception {
+  public void testSyncComplianceTrainingStatus() throws Exception {
     // User completes RT training in Absorb
     var rtCompletionTime = currentInstant();
     stubAbsorbOnlyRTComplete(rtCompletionTime);
@@ -174,7 +174,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_renew_Absorb() throws Exception {
+  public void testSyncComplianceTrainingStatus_renew() throws Exception {
     // User has completed RT and CT training in Absorb
     var rtOriginalCompletionTime = currentInstant().minusSeconds(2000);
     var ctOriginalCompletionTime = currentInstant();
@@ -189,7 +189,7 @@ public class ComplianceTrainingServiceTest {
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
-    // Verify Absorb (not Moodle) verification records for RT and CT
+    // Verify Absorb verification records for RT and CT
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertAbsorbVerificationSystem(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
@@ -209,7 +209,7 @@ public class ComplianceTrainingServiceTest {
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
-    // Verify Absorb (not Moodle) verification records still exist
+    // Verify Absorb verification records still exist
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertAbsorbVerificationSystem(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
@@ -226,7 +226,7 @@ public class ComplianceTrainingServiceTest {
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctOriginalCompletionTime));
 
-    // Verify Absorb (not Moodle) verification records still exist
+    // Verify Absorb verification records still exist
     assertAbsorbVerificationSystem(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertAbsorbVerificationSystem(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
   }
@@ -239,10 +239,10 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testSyncComplianceTrainingStatus_Initial_Moodle_ResyncUsingAbsorbCausesNoChanges()
       throws Exception {
-    setRTTrainingCompletedWithMoodle();
+    mockRTTrainingCompletedWithMoodle();
 
     // Set up: The user completes and syncs CT training
-    setCTTrainingCompletedWithMoodle(null);
+    mockCTTrainingCompletedWithMoodle(null);
     var completionTime = currentTimestamp();
     assertThat(
             getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
@@ -273,7 +273,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Absorb_ResyncCausesNoChanges() throws Exception {
+  public void testSyncComplianceTrainingStatus_ResyncCausesNoChanges() throws Exception {
     // Set up: The user completes ands syncs RT training
     var completionTime = currentInstant();
     stubAbsorbOnlyRTComplete(completionTime);
@@ -291,7 +291,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfUserHasntSignedIntoAbsorb()
+  public void testSyncComplianceTrainingStatus_DoesNothingIfUserHasntSignedIntoAbsorb()
       throws Exception {
     when(mockAbsorbService.userHasLoggedIntoAbsorb(FAKE_CREDENTIALS)).thenReturn(false);
 
@@ -302,8 +302,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Absorb_DoesNothingIfNoCoursesComplete()
-      throws Exception {
+  public void testSyncComplianceTrainingStatus_DoesNothingIfNoCoursesComplete() throws Exception {
     stubAbsorbNoCoursesComplete();
 
     user = complianceTrainingService.syncComplianceTrainingStatus();
@@ -316,7 +315,7 @@ public class ComplianceTrainingServiceTest {
   public void testSyncComplianceTrainingStatus_Moodle_RenewsExpiredTrainingUsingAbsorb()
       throws Exception {
     // User completes RT training
-    setRTTrainingCompletedWithMoodle();
+    mockRTTrainingCompletedWithMoodle();
 
     // Time passes
     tick();
@@ -324,7 +323,7 @@ public class ComplianceTrainingServiceTest {
     // Mock moodle with completion date as today - 1 year
     var currentTime = currentInstant().minusSeconds(31556952L);
     // User completes CT training
-    setCTTrainingCompletedWithMoodle(Timestamp.from(currentTime));
+    mockCTTrainingCompletedWithMoodle(Timestamp.from(currentTime));
 
     // Time passes
     tick();
@@ -338,8 +337,11 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(currentTime));
-    currentTime = currentInstant().plusSeconds(300);
-    stubAbsorbAllTrainingsComplete(currentTimestamp().toInstant(), currentTime);
+
+    var absorbCtCompletionTime = currentInstant().plusSeconds(3000);
+
+    // Stub absorb training
+    stubAbsorbAllTrainingsComplete(currentTimestamp().toInstant(), absorbCtCompletionTime);
 
     // Time passes, user syncs training using Absorb
     tick();
@@ -348,7 +350,7 @@ public class ComplianceTrainingServiceTest {
     // Completion and expiry timestamp should be updated.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(currentTime));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(absorbCtCompletionTime));
 
     // Database should now show that source of training is Absorb
     assertThat(
@@ -431,8 +433,8 @@ public class ComplianceTrainingServiceTest {
         .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 
-  private void setRTTrainingCompletedWithMoodle() {
-    // Manually set the database state because new users default to Absorb.
+  private void mockRTTrainingCompletedWithMoodle() {
+    // Manually set the database state because all users default to Absorb.
     var uam =
         accessModuleService.updateCompletionTime(
             user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -443,8 +445,8 @@ public class ComplianceTrainingServiceTest {
                 DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
   }
 
-  private void setCTTrainingCompletedWithMoodle(Timestamp timestamp) {
-    // Manually set the database state because new users default to Absorb.
+  private void mockCTTrainingCompletedWithMoodle(Timestamp timestamp) {
+    // Manually set the database state because all users default to Absorb.
     var uam =
         accessModuleService.updateCompletionTime(
             user,
@@ -459,10 +461,6 @@ public class ComplianceTrainingServiceTest {
 
   private Instant currentInstant() {
     return fakeClock.instant();
-  }
-
-  private long currentSecond() {
-    return currentInstant().getEpochSecond();
   }
 
   private Timestamp currentTimestamp() {

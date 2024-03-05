@@ -95,10 +95,6 @@
     "samlIdentityProviderId": "C02celxus",
     "samlServiceProviderId": "638082479253"
   },
-  "moodle": {
-    "host": "aou.nnlm.gov",
-    "credentialsKeyV2": "moodle-key-v2.txt"
-  },
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,

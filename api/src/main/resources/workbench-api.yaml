@@ -6762,9 +6762,6 @@ components:
           type: boolean
           description: Whether the Compliance Training access module is enabled.
           default: false
-        complianceTrainingHost:
-          type: string
-          description: The hostname for constructing the compliance training URL.
         absorbSamlIdentityProviderId:
           type: string
           description: The SAML identity provider ID for Absorb.
@@ -6855,10 +6852,6 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to pause GKE applications.
-        redirectMoodleToAbsorb:
-          type: boolean
-          description: Start redirecting Moodle User to Absorb
-          default: false
         enableVariantSelectAll:
           type: boolean
           default: false

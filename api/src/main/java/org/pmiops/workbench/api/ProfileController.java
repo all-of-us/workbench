@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -365,7 +366,7 @@ public class ProfileController implements ProfileApiDelegate {
       complianceTrainingService.syncComplianceTrainingStatus();
     } catch (NotFoundException ex) {
       throw ex;
-    } catch (org.pmiops.workbench.absorb.ApiException e) {
+    } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
     return getProfileResponse(userProvider.get());

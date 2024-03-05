@@ -78,7 +78,6 @@ const defaultServerConfig: ConfigResponse = {
   enableSasGKEApp: true,
   tanagraBaseUrl: 'https://test.fake-research-aou.org',
   enableGKEAppPausing: false,
-  redirectMoodleToAbsorb: true,
 };
 
 export default defaultServerConfig;

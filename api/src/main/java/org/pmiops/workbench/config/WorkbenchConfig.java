@@ -24,7 +24,6 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public MandrillConfig mandrill;
   public AbsorbConfig absorb;
-  public MoodleConfig moodle;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -62,7 +61,6 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.absorb = new AbsorbConfig();
-    config.moodle = new MoodleConfig();
     config.offlineBatch = new OfflineBatchConfig();
     config.ras = new RasConfig();
     config.rdrExport = new RdrExportConfig();
@@ -262,11 +260,6 @@ public class WorkbenchConfig {
     public String externalDepartmentId;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
-  }
-
-  public static class MoodleConfig {
-    public String host;
-    public String credentialsKeyV2;
   }
 
   public static class TanagraConfig {
