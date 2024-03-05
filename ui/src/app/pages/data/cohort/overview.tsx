@@ -657,27 +657,25 @@ export const ListOverview = fp.flow(
                     />
                   </TooltipTrigger>
                 )}
-                {environment.showCBFunnelPlot && (
-                  <TooltipTrigger content={<div>View Funnel Plot</div>}>
-                    <Clickable
-                      style={
-                        this.disableFunnelPlot
-                          ? { ...styles.actionIcon, ...styles.disabled }
-                          : styles.actionIcon
-                      }
-                      onClick={(e) => {
-                        AnalyticsTracker.CohortBuilder.ViewFunnelPlot();
-                        this.funnelOverlay.toggle(e);
-                      }}
-                    >
-                      <ClrIcon
-                        shape='filter-grid-circle'
-                        className='is-solid'
-                        size={30}
-                      />
-                    </Clickable>
-                  </TooltipTrigger>
-                )}
+                <TooltipTrigger content={<div>View Funnel Plot</div>}>
+                  <Clickable
+                    style={
+                      this.disableFunnelPlot
+                        ? { ...styles.actionIcon, ...styles.disabled }
+                        : styles.actionIcon
+                    }
+                    onClick={(e) => {
+                      AnalyticsTracker.CohortBuilder.ViewFunnelPlot();
+                      this.funnelOverlay.toggle(e);
+                    }}
+                  >
+                    <ClrIcon
+                      shape='filter-grid-circle'
+                      className='is-solid'
+                      size={30}
+                    />
+                  </Clickable>
+                </TooltipTrigger>
                 <TooltipTrigger content={<div>Delete cohort</div>}>
                   <Clickable
                     style={

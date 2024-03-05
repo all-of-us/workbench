@@ -1,12 +1,8 @@
-import { environment } from 'environments/environment';
-
 export const workspacePath = (namespace: string, id: string): string =>
   `/workspaces/${namespace}/${id}`;
 
 // internal name of the analysis tab, also used to construct URLs
-export const analysisTabName = environment.showNewAnalysisTab
-  ? 'analysis'
-  : 'notebooks';
+export const analysisTabName = 'analysis';
 
 export const analysisTabPath = (namespace: string, id: string): string =>
   `${workspacePath(namespace, id)}/${analysisTabName}`;
