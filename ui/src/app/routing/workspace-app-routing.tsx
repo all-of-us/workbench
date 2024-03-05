@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';

@@ -16,7 +16,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button, Clickable } from 'app/components/buttons';
 import { ComboChart } from 'app/components/combo-chart.component';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
