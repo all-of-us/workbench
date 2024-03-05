@@ -1,7 +1,13 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Attribute, Criteria, Domain, Modifier, VariantFilterRequest } from 'generated/fetch';
+import {
+  Attribute,
+  Criteria,
+  Domain,
+  Modifier,
+  VariantFilterRequest,
+} from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow, FlexRowWrap } from 'app/components/flex';
