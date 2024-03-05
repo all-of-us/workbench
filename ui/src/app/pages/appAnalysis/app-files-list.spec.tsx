@@ -25,7 +25,7 @@ const component = async () =>
       <AppFilesList showSpinner={() => {}} hideSpinner={() => {}} />
     </MemoryRouter>
   );
-describe('AppsList', () => {
+describe(AppFilesList.name, () => {
   let workspacesApiStub: WorkspacesApiStub;
   let notebooksApiStub: NotebooksApiStub;
   let user;
