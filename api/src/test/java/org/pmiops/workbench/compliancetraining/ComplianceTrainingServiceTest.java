@@ -70,13 +70,13 @@ public class ComplianceTrainingServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private ComplianceTrainingService complianceTrainingService;
   @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
-  @Autowired private AccessModuleNameMapperImpl ac;
 
   @Import({
     FakeClockConfiguration.class,
     AccessModuleNameMapperImpl.class,
     AccessSyncServiceImpl.class,
     AccessTierServiceImpl.class,
+    AccessModuleNameMapperImpl.class,
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
