@@ -321,9 +321,9 @@ public class ComplianceTrainingServiceTest {
     tick();
 
     // Mock moodle with completion date as today - 1 year
-    var currentTime = currentInstant().minusSeconds(31556952L);
+    var aYearAgo = currentInstant().minusSeconds(31556952L);
     // User completes CT training
-    mockCTTrainingCompletedWithMoodle(Timestamp.from(currentTime));
+    mockCTTrainingCompletedWithMoodle(Timestamp.from(aYearAgo));
 
     // Time passes
     tick();
@@ -336,19 +336,20 @@ public class ComplianceTrainingServiceTest {
 
     // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(currentTime));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(aYearAgo));
 
     var absorbCtCompletionTime = currentInstant().plusSeconds(3000);
-
+    var absrobRTCompletionTime = currentTimestamp().toInstant();
     // Stub absorb training
-    stubAbsorbAllTrainingsComplete(currentTimestamp().toInstant(), absorbCtCompletionTime);
+    stubAbsorbAllTrainingsComplete(absrobRTCompletionTime, absorbCtCompletionTime);
 
     // Time passes, user syncs training using Absorb
     tick();
     user = complianceTrainingService.syncComplianceTrainingStatus();
 
     // Completion and expiry timestamp should be updated.
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(absrobRTCompletionTime));
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(absorbCtCompletionTime));
 
@@ -374,7 +375,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {
-    assertThat(getModuleCompletionTime(moduleName)).isAtMost(timestamp);
+    assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }
 
   private void assertModuleNotCompleted(DbAccessModuleName moduleName) {
