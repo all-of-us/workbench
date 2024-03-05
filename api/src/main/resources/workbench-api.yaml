@@ -6793,7 +6793,7 @@ components:
           default: true
         enableRStudioGKEApp:
           type: boolean
-          description: Whether users are able to use the RStudio GKE app.
+          description: DEPRECATED - always true.  Whether users are able to use the RStudio GKE app.
           default: false
         enableSasGKEApp:
           type: boolean
