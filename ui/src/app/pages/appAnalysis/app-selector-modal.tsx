@@ -35,7 +35,7 @@ export const AppSelectorModal = (props: AppSelectorModalProps) => {
   // in display order
   const appList = [
     UIAppType.JUPYTER,
-    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    UIAppType.RSTUDIO,
     ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
   ];
 

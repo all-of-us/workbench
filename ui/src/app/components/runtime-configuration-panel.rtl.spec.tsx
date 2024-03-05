@@ -775,7 +775,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({ config: { ...defaultServerConfig } });
+    serverConfigStore.set({ config: defaultServerConfig });
     currentWorkspaceStore.next({
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,

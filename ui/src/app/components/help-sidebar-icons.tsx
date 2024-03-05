@@ -708,10 +708,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('apps', cromwellConfigIconId);
-    if (config.enableRStudioGKEApp) {
-      keys.push(rstudioConfigIconId);
-    }
+    keys.push('apps', cromwellConfigIconId, rstudioConfigIconId);
     if (config.enableSasGKEApp) {
       keys.push(sasConfigIconId);
     }

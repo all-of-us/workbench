@@ -163,18 +163,12 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  test.each([
-    [true, true],
-    [true, false],
-    [false, true],
-    [false, false],
-  ])(
-    'should / should not show apps based on feature flags enableRStudioGKEApp %s, enableSasGKEApp %s',
-    async (enableRStudioGKEApp, enableSasGKEApp) => {
+  test.each([true, false])(
+    'should / should not show apps based on feature flag enableSasGKEApp = %s',
+    async (enableSasGKEApp) => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
-          enableRStudioGKEApp,
           enableSasGKEApp,
         },
       });
@@ -182,14 +176,9 @@ describe(AppsPanel.name, () => {
 
       await component();
 
-      // Cromwell is always available
+      // Cromwell and RStudio are always available
       expectUnexpandedApp('Cromwell');
-
-      if (enableRStudioGKEApp) {
-        expectUnexpandedApp('RStudio');
-      } else {
-        expectAppIsMissing('RStudio');
-      }
+      expectUnexpandedApp('RStudio');
 
       if (enableSasGKEApp) {
         expectUnexpandedApp('SAS');
