@@ -175,7 +175,6 @@ swaggerSources {
     jira swagger3JavaClient("jira.yaml", "jira")
     mandrill swagger3JavaClient("mandrill.yaml", "mandrill")
     absorb swagger3JavaClient("absorb.yaml", "absorb")
-    moodle swagger3JavaClient("moodle.yaml", "moodle")
     rdr swagger3JavaClient("rdr.yaml", "rdr", [
             '--model-name-prefix', 'Rdr'
     ])
