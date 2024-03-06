@@ -147,6 +147,17 @@ const styles = reactStyles({
     right: '0',
     top: '1.125rem',
   },
+  caret: {
+    cursor: 'pointer',
+    float: 'right',
+    marginTop: '3px',
+    transition: 'transform 0.1s ease-out',
+  },
+  filterList: {
+    height: 'auto',
+    overflow: 'hidden',
+    transition: 'max-height 0.4s ease-out',
+  },
 });
 
 function mapCriteria(crit: Selection) {
@@ -176,6 +187,7 @@ interface SelectionInfoProps {
 }
 
 interface SelectionInfoState {
+  filtersExpanded: boolean;
   truncated: boolean;
 }
 
@@ -186,7 +198,7 @@ export class SelectionInfo extends React.Component<
   name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
     super(props);
-    this.state = { truncated: false };
+    this.state = { filtersExpanded: false, truncated: false };
   }
 
   componentDidMount(): void {
@@ -202,8 +214,27 @@ export class SelectionInfo extends React.Component<
     ].includes(this.props.selection.domainId);
   }
 
+  renderVariantFilters() {
+    return (
+      <ul>
+        {Object.entries(this.props.selection.variantFilters)
+          .filter(
+            ([, value]) =>
+              (Array.isArray(value) && value.length !== 0) ||
+              !['', null].includes(value)
+          )
+          .map(([key, value]) => (
+            <li>
+              {key}: {value}
+            </li>
+          ))}
+      </ul>
+    );
+  }
+
   render() {
     const { index, selection, removeSelection } = this.props;
+    const { filtersExpanded, truncated } = this.state;
     const itemName = (
       <React.Fragment>
         {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
@@ -224,17 +255,41 @@ export class SelectionInfo extends React.Component<
           </button>
           <FlexColumn style={{ width: 'calc(100% - 1.5rem)' }}>
             {selection.group && <div>Group</div>}
-            <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
+            <TooltipTrigger disabled={!truncated} content={itemName}>
               <div style={styles.itemName} ref={(e) => (this.name = e)}>
                 {itemName}
               </div>
             </TooltipTrigger>
           </FlexColumn>
+          {!!selection.variantFilters && (
+            <ClrIcon
+              style={{
+                ...styles.caret,
+                ...(filtersExpanded ? { transform: 'rotate(90deg)' } : {}),
+              }}
+              shape={'caret right'}
+              size={18}
+              onClick={() =>
+                this.setState({ filtersExpanded: !filtersExpanded })
+              }
+            />
+          )}
         </FlexRow>
+        {!!selection.variantFilters && (
+          <div
+            style={{
+              ...styles.filterList,
+              maxHeight: filtersExpanded ? '22.5rem' : 0,
+            }}
+          >
+            {this.renderVariantFilters()}
+          </div>
+        )}
       </FlexColumn>
     );
   }
 }
+
 interface Props {
   back: Function;
   close: Function;
