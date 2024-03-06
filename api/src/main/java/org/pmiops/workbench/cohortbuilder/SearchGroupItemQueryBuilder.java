@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -90,47 +91,50 @@ public final class SearchGroupItemQueryBuilder {
   private static final String UNION_DISTINCT_TEMPLATE = "UNION DISTINCT\n";
   private static final String DESC = " DESC";
   private static final String BASE_SQL =
-      "SELECT DISTINCT person_id, entry_date, concept_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "WHERE ";
+      """
+             SELECT DISTINCT person_id, entry_date, concept_id
+             FROM `${projectId}.${dataSetId}.cb_search_all_events`
+             WHERE\s""";
   private static final String STANDARD_SQL = "is_standard = %s";
   private static final String CONCEPT_ID_UNNEST_SQL = "concept_id IN unnest(%s)";
   private static final String CONCEPT_ID_IN_SQL = "concept_id IN";
   private static final String STANDARD_OR_SOURCE_SQL =
       CONCEPT_ID_UNNEST_SQL + AND + STANDARD_SQL + "\n";
   public static final String CHILD_LOOKUP_SQL =
-      " (SELECT DISTINCT c.concept_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "JOIN (select cast(cr.id as string) as id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN unnest(%s)\n"
-          + "AND full_text LIKE '%%_rank1]%%') a\n"
-          + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
-          + "WHERE is_standard = %s\n"
-          + "AND is_selectable = 1)";
+      """
+             (SELECT DISTINCT c.concept_id
+             FROM `${projectId}.${dataSetId}.cb_criteria` c
+             JOIN (SELECT CAST(cr.id as string) AS id
+                   FROM `${projectId}.${dataSetId}.cb_criteria` cr
+                   WHERE concept_id IN unnest(%s)
+                   AND full_text LIKE '%%_rank1]%%'
+                  ) a ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)
+             WHERE is_standard = %s
+             AND is_selectable = 1)""";
   public static final String DRUG_CHILD_LOOKUP_SQL =
-      " (SELECT DISTINCT ca.descendant_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
-          + "JOIN (select distinct c.concept_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "JOIN (select cast(cr.id as string) as id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN unnest(%s)\n"
-          + "AND full_text LIKE '%%_rank1]%%') a\n"
-          + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
-          + "WHERE is_standard = %s\n"
-          + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
+      """
+            (SELECT DISTINCT ca.descendant_id
+            FROM `${projectId}.${dataSetId}.cb_criteria_ancestor` ca
+            JOIN (SELECT DISTINCT c.concept_id
+                  FROM `${projectId}.${dataSetId}.cb_criteria` c
+                  JOIN (SELECT CAST(cr.id as string) AS id
+                        FROM `${projectId}.${dataSetId}.cb_criteria` cr
+                        WHERE concept_id IN unnest(%s)
+                        AND full_text LIKE '%%_rank1]%%'
+                  ) a ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)
+            WHERE is_standard = %s
+            AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))""";
   public static final String QUESTION_LOOKUP_SQL =
-      "question_concept_id IN (SELECT DISTINCT concept_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "JOIN (select cast(cr.id as string) as id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN (@surveyConceptIds)\n"
-          + "AND domain_id = 'SURVEY') a\n"
-          + "ON (c.path like CONCAT('%', a.id, '.%'))\n"
-          + "WHERE domain_id = 'SURVEY'\n"
-          + "AND type = 'PPI'\n"
-          + "AND subtype = 'QUESTION')";
+      """
+            question_concept_id IN (SELECT DISTINCT concept_id
+                                    FROM `${projectId}.${dataSetId}.cb_criteria` c
+                                    JOIN (SELECT CAST(cr.id as string) AS id
+                                          FROM `${projectId}.${dataSetId}.cb_criteria` cr
+                                          WHERE concept_id IN (@surveyConceptIds)
+                                          AND domain_id = 'SURVEY') a ON (c.path like CONCAT('%', a.id, '.%'))
+                                    WHERE domain_id = 'SURVEY'
+                                    AND type = 'PPI'
+                                    AND subtype = 'QUESTION')""";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
       CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL + "\n";
   private static final String DRUG_SQL =
@@ -156,25 +160,34 @@ public final class SearchGroupItemQueryBuilder {
       "temp1.person_id = temp2.person_id AND temp1.entry_date between "
           + "DATE_SUB(temp2.entry_date, INTERVAL %s DAY) and DATE_ADD(temp2.entry_date, INTERVAL %s DAY)\n";
   private static final String TEMPORAL_EXIST =
-      "SELECT temp1.person_id\n"
-          + "FROM (%s) temp1\n"
-          + "WHERE EXISTS (SELECT 1\n"
-          + "FROM (%s) temp2\n"
-          + "WHERE (%s))\n";
+      """
+            SELECT temp1.person_id
+            FROM (%s) temp1
+            WHERE EXISTS (SELECT 1
+                          FROM (%s) temp2
+                          WHERE (%s))
+            """;
   private static final String TEMPORAL_JOIN =
-      "SELECT temp1.person_id\n"
-          + "FROM (%s) temp1\n"
-          + "JOIN (SELECT person_id, visit_occurrence_id, entry_date\n"
-          + "FROM (%s)\n"
-          + ") temp2 on (%s)\n";
+      """
+             SELECT temp1.person_id
+             FROM (%s) temp1
+             JOIN (SELECT person_id, visit_occurrence_id, entry_date
+                   FROM (%s)
+             ) temp2 on (%s)
+             """;
   private static final String TEMPORAL_SQL =
-      "SELECT person_id, visit_occurrence_id, entry_date%s\n"
-          + "FROM `${projectId}.${dataSetId}.cb_search_all_events`\n"
-          + "WHERE %s";
+      """
+             SELECT person_id, visit_occurrence_id, entry_date%s
+             FROM `${projectId}.${dataSetId}.cb_search_all_events`
+             WHERE %s""";
   private static final String RANK_1_SQL =
       ", RANK() OVER (PARTITION BY person_id ORDER BY entry_date%s) rn";
   private static final String TEMPORAL_RANK_1_SQL =
-      "SELECT person_id, visit_occurrence_id, entry_date\n" + "FROM (%s) a\n" + "WHERE rn = 1\n";
+      """
+             SELECT person_id, visit_occurrence_id, entry_date
+             FROM (%s) a
+             WHERE rn = 1
+             """;
 
   // sql parts to help construct Modifiers BigQuery sql
   private static final String MODIFIER_SQL_TEMPLATE =
@@ -189,26 +202,42 @@ public final class SearchGroupItemQueryBuilder {
 
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
-      "EXISTS (\n"
-          + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
-          + "WHERE d.person_id = p.person_id)\n";
+      """
+             EXISTS (
+                  SELECT 'x'
+                  FROM `${projectId}.${dataSetId}.death` d
+                  WHERE d.person_id = p.person_id
+             )
+             """;
   private static final String DEMO_BASE =
-      "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.person` p\nWHERE\n";
+      """
+             SELECT person_id
+             FROM `${projectId}.${dataSetId}.person` p
+             WHERE
+             """;
   private static final String AGE_SQL =
-      "SELECT person_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s %s %s\n";
+      """
+             SELECT person_id
+             FROM `${projectId}.${dataSetId}.cb_search_person` p
+             WHERE %s %s %s
+             """;
   private static final String AGE_DEC_SQL = "AND NOT " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s IN unnest(%s)\n";
   private static final String HAS_DATA_SQL =
-      "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s = 1\n";
+      """
+              SELECT person_id
+              FROM `${projectId}.${dataSetId}.cb_search_person` p
+              WHERE %s = 1
+              """;
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
   private static final String VARIANT_SQL =
-      "SELECT person_id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_variant_to_person`\n"
-          + "CROSS JOIN UNNEST(person_ids) AS person_id\n"
-          + "WHERE vid IN unnest(%s)";
+      """
+             SELECT person_id
+             FROM `${projectId}.${dataSetId}.cb_variant_to_person`
+             CROSS JOIN UNNEST(person_ids) AS person_id
+             WHERE vid IN unnest(%s)""";
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -514,25 +543,25 @@ public final class SearchGroupItemQueryBuilder {
     String versionParam;
     List<Long> conceptIds =
         parameter.getAttributes().stream()
-            .filter(attr -> attr.getConceptId() != null)
             .map(Attribute::getConceptId)
-            .collect(Collectors.toList());
+            .filter(Objects::nonNull)
+            .toList();
     List<Attribute> cats =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.CAT))
-            .collect(Collectors.toList());
+            .toList();
     List<Attribute> nums =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.NUM))
-            .collect(Collectors.toList());
+            .toList();
     List<Attribute> any =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.ANY))
-            .collect(Collectors.toList());
+            .toList();
     List<Attribute> versions =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.SURVEY_VERSION_CONCEPT_ID))
-            .collect(Collectors.toList());
+            .toList();
     String standardParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.int64(parameter.isStandard() ? 1 : 0));
@@ -722,15 +751,12 @@ public final class SearchGroupItemQueryBuilder {
       String standardOrSourceParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
-      List<Long> conceptIds =
-          searchParameters.stream().map(SearchParameter::getConceptId).collect(Collectors.toList());
+      List<Long> conceptIds = searchParameters.stream().map(SearchParameter::getConceptId).toList();
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
           searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::isGroup));
       List<Long> parents =
-          parentsAndChildren.get(true).stream()
-              .map(SearchParameter::getConceptId)
-              .collect(Collectors.toList());
+          parentsAndChildren.get(true).stream().map(SearchParameter::getConceptId).toList();
 
       String conceptIdsParam =
           QueryParameterUtil.addQueryParameterValue(
@@ -754,9 +780,7 @@ public final class SearchGroupItemQueryBuilder {
   /** Helper method to return a modifier. */
   private static Modifier getModifier(List<Modifier> modifiers, ModifierType modifierType) {
     List<Modifier> modifierList =
-        modifiers.stream()
-            .filter(modifier -> modifier.getName().equals(modifierType))
-            .collect(Collectors.toList());
+        modifiers.stream().filter(modifier -> modifier.getName().equals(modifierType)).toList();
     if (modifierList.isEmpty()) {
       return null;
     }
