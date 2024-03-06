@@ -10953,6 +10953,8 @@ components:
         variantId:
           type: string
           description: The variant id of SNP Indel Variants.
+        variantFilter:
+          $ref: '#/components/schemas/VariantFilter'
         attributes:
           type: array
           description: |
@@ -11237,105 +11239,94 @@ components:
           format: int64
         conceptName:
           type: string
+    BaseVariantFilter:
+      type: object
+      properties:
+        geneList:
+          type: array
+          description: List of string gene names
+          items:
+            type: string
+        consequenceList:
+          type: array
+          description: List of string consequence names
+          items:
+            type: string
+        clinicalSignificanceList:
+          type: array
+          description: List of string clinical significance names
+          items:
+            type: string
+        countMin:
+          type: integer
+          format: int64
+          description: Allele count min
+        countMax:
+          type: integer
+          format: int64
+          description: Allele count max
+        numberMin:
+          type: integer
+          format: int64
+          description: Allele number min
+        numberMax:
+          type: integer
+          format: int64
+          description: Allele number max
+        frequencyMin:
+          type: number
+          description: Allele frequency min(floating point)
+        frequencyMax:
+          type: number
+          description: Allele number max(floating point)
+        participantCountRange:
+          $ref: '#/components/schemas/ParticipantCountFilter'
+    VariantFilter:
+      allOf:
+        - $ref: '#/components/schemas/BaseVariantFilter'
+        - type: object
+          required: 
+            - searchTerm
+          properties:
+            searchTerm:
+              type: string
+              description: The term used to search variants.
     VariantFilterRequest:
-      type: object
+      allOf:
+        - $ref: '#/components/schemas/VariantFilter'
+        - type: object
+          properties:
+            pageToken:
+              type: string
+              description: Used for retrieving additional pages of results.
+            pageSize:
+              type: integer
+              description: page size of results (default is 25)
+            sortBy:
+              type: string
+              description: sort column by
+    ParticipantCountFilter:
       required:
-      - searchTerm
-      properties:
-        searchTerm:
-          type: string
-          description: The term used to search variants.
-        pageToken:
-          type: string
-          description: Used for retrieving additional pages of results.
-        pageSize:
-          type: integer
-          description: page size of results (default is 25)
-        geneList:
-          type: array
-          description: List of string gene names
-          items:
-            type: string
-        consequenceList:
-          type: array
-          description: List of string consequence names
-          items:
-            type: string
-        clinicalSignificanceList:
-          type: array
-          description: List of string clinical significance names
-          items:
-            type: string
-        countMin:
-          type: integer
-          format: int64
-          description: Allele count min
-        countMax:
-          type: integer
-          format: int64
-          description: Allele count max
-        numberMin:
-          type: integer
-          format: int64
-          description: Allele number min
-        numberMax:
-          type: integer
-          format: int64
-          description: Allele number max
-        frequencyMin:
-          type: number
-          description: Allele frequency min(floating point)
-        frequencyMax:
-          type: number
-          description: Allele number max(floating point)
-        sortBy:
-          type: string
-          description: sort column by
-    VariantFilterResponse:
+        - operator
+        - operands
       type: object
       properties:
-        geneList:
+        operator:
+          $ref: '#/components/schemas/Operator'
+        operands:
           type: array
-          description: List of string gene names
           items:
             type: string
-        consequenceList:
-          type: array
-          description: List of string consequence names
-          items:
-            type: string
-        clinicalSignificanceList:
-          type: array
-          description: List of string clinical significance names
-          items:
-            type: string
-        countMin:
-          type: integer
-          format: int64
-          description: Allele count min
-        countMax:
-          type: integer
-          format: int64
-          description: Allele count max
-        numberMin:
-          type: integer
-          format: int64
-          description: Allele number min
-        numberMax:
-          type: integer
-          format: int64
-          description: Allele number max
-        frequencyMin:
-          type: number
-          description: Allele frequency min(floating point)
-        frequencyMax:
-          type: number
-          description: Allele number max(floating point)
-        sortByList:
-          type: array
-          description: List of string column names
-          items:
-            type: string
+    VariantFilterResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseVariantFilter'
+        - type: object
+          properties:
+            sortByList:
+              type: array
+              description: List of string column names
+              items:
+                type: string
     VariantListResponse:
       required:
       - items
