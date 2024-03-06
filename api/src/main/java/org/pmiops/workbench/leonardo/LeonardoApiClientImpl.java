@@ -176,6 +176,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .defaultClientId(config.server.oauthClientId)
             // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
             .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+            //.jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime_clean_package.sh")
+            //.jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime_clean_cache.sh")
             .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
             .userJupyterExtensionConfig(
                 new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
