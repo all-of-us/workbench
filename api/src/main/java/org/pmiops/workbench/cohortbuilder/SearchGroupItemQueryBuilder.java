@@ -176,14 +176,14 @@ public final class SearchGroupItemQueryBuilder {
              ) temp2 on (%s)
              """;
   private static final String TEMPORAL_SQL =
-          """
+      """
              SELECT person_id, visit_occurrence_id, entry_date%s
              FROM `${projectId}.${dataSetId}.cb_search_all_events`
              WHERE %s""";
   private static final String RANK_1_SQL =
       ", RANK() OVER (PARTITION BY person_id ORDER BY entry_date%s) rn";
   private static final String TEMPORAL_RANK_1_SQL =
-          """
+      """
              SELECT person_id, visit_occurrence_id, entry_date
              FROM (%s) a
              WHERE rn = 1
@@ -202,7 +202,7 @@ public final class SearchGroupItemQueryBuilder {
 
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
-          """
+      """
              EXISTS (
                   SELECT 'x'
                   FROM `${projectId}.${dataSetId}.death` d
@@ -210,13 +210,13 @@ public final class SearchGroupItemQueryBuilder {
              )
              """;
   private static final String DEMO_BASE =
-          """
+      """
              SELECT person_id
              FROM `${projectId}.${dataSetId}.person` p
              WHERE
              """;
   private static final String AGE_SQL =
-          """
+      """
              SELECT person_id
              FROM `${projectId}.${dataSetId}.cb_search_person` p
              WHERE %s %s %s
@@ -224,7 +224,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String AGE_DEC_SQL = "AND NOT " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s IN unnest(%s)\n";
   private static final String HAS_DATA_SQL =
-          """
+      """
               SELECT person_id
               FROM `${projectId}.${dataSetId}.cb_search_person` p
               WHERE %s = 1
@@ -233,7 +233,7 @@ public final class SearchGroupItemQueryBuilder {
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
   private static final String VARIANT_SQL =
-          """
+      """
              SELECT person_id
              FROM `${projectId}.${dataSetId}.cb_variant_to_person`
              CROSS JOIN UNNEST(person_ids) AS person_id
@@ -542,21 +542,26 @@ public final class SearchGroupItemQueryBuilder {
     String catsParam;
     String versionParam;
     List<Long> conceptIds =
-            parameter.getAttributes().stream()
-                    .map(Attribute::getConceptId)
-                    .filter(Objects::nonNull).toList();
+        parameter.getAttributes().stream()
+            .map(Attribute::getConceptId)
+            .filter(Objects::nonNull)
+            .toList();
     List<Attribute> cats =
-            parameter.getAttributes().stream()
-                    .filter(attr -> attr.getName().equals(AttrName.CAT)).toList();
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.CAT))
+            .toList();
     List<Attribute> nums =
-            parameter.getAttributes().stream()
-                    .filter(attr -> attr.getName().equals(AttrName.NUM)).toList();
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.NUM))
+            .toList();
     List<Attribute> any =
-            parameter.getAttributes().stream()
-                    .filter(attr -> attr.getName().equals(AttrName.ANY)).toList();
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.ANY))
+            .toList();
     List<Attribute> versions =
-            parameter.getAttributes().stream()
-                    .filter(attr -> attr.getName().equals(AttrName.SURVEY_VERSION_CONCEPT_ID)).toList();
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.SURVEY_VERSION_CONCEPT_ID))
+            .toList();
     String standardParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams, QueryParameterValue.int64(parameter.isStandard() ? 1 : 0));
@@ -746,14 +751,12 @@ public final class SearchGroupItemQueryBuilder {
       String standardOrSourceParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
-      List<Long> conceptIds =
-              searchParameters.stream().map(SearchParameter::getConceptId).toList();
+      List<Long> conceptIds = searchParameters.stream().map(SearchParameter::getConceptId).toList();
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
           searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::isGroup));
       List<Long> parents =
-              parentsAndChildren.get(true).stream()
-                      .map(SearchParameter::getConceptId).toList();
+          parentsAndChildren.get(true).stream().map(SearchParameter::getConceptId).toList();
 
       String conceptIdsParam =
           QueryParameterUtil.addQueryParameterValue(
@@ -777,8 +780,7 @@ public final class SearchGroupItemQueryBuilder {
   /** Helper method to return a modifier. */
   private static Modifier getModifier(List<Modifier> modifiers, ModifierType modifierType) {
     List<Modifier> modifierList =
-            modifiers.stream()
-                    .filter(modifier -> modifier.getName().equals(modifierType)).toList();
+        modifiers.stream().filter(modifier -> modifier.getName().equals(modifierType)).toList();
     if (modifierList.isEmpty()) {
       return null;
     }
