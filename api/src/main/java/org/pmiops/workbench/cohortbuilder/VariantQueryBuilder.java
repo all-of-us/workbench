@@ -121,26 +121,32 @@ public final class VariantQueryBuilder {
   private static final String NA = "n/a";
 
   private static final String CONTIG_POSITION_SQL =
-      "WHERE vid IN (\n"
-          + "SELECT vid\n"
-          + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_contig_position`\n"
-          + "WHERE contig = @contig\n"
-          + "AND position BETWEEN @start AND @end\n"
-          + ")\n";
+      """
+         WHERE vid IN (
+          SELECT vid
+          FROM `${projectId}.${dataSetId}.cb_variant_attribute_contig_position`
+          WHERE contig = @contig
+          AND position BETWEEN @start AND @end
+         )
+         """;
 
   private static final String GENE_SQL =
-      "WHERE vid IN (\n"
-          + "SELECT vid\n"
-          + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_genes`\n"
-          + "WHERE gene_symbol = @gene\n"
-          + ")\n";
+      """
+        WHERE vid IN (
+          SELECT vid
+          FROM `${projectId}.${dataSetId}.cb_variant_attribute_genes`
+          WHERE gene_symbol = @gene
+        )
+        """;
 
   private static final String RS_NUMBER_SQL =
-      "WHERE vid IN (\n"
-          + "SELECT vid\n"
-          + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_rs_number`\n"
-          + "WHERE rs_number = @rs_number\n"
-          + ")\n";
+      """
+        WHERE vid IN (
+          SELECT vid
+          FROM `${projectId}.${dataSetId}.cb_variant_attribute_rs_number`
+          WHERE rs_number = @rs_number
+        )
+        """;
 
   private static final String FILTERS_SQL =
       "WITH genes AS (\n"
@@ -345,11 +351,12 @@ public final class VariantQueryBuilder {
     String searchTerm = filters.getSearchTerm();
     Map<String, QueryParameterValue> params = new HashMap<>();
     switch (SearchTermType.fromValue(searchTerm)) {
-      case VID:
+      case VID -> {
         // vid SQL only returns 1 variant so no need to add filter params
         params.put("vid", QueryParameterValue.string(searchTerm.toUpperCase()));
         return params;
-      case CONTIG:
+      }
+      case CONTIG -> {
         // example search term for contig -> chr13:32355000-32375000
         String[] chr = searchTerm.split(":");
         String[] position = chr[1].split("-");
@@ -364,7 +371,8 @@ public final class VariantQueryBuilder {
         }
         generateFilterParams(filters, params);
         return params;
-      case GENE:
+      }
+      case GENE -> {
         params.put("gene", QueryParameterValue.string(searchTerm.toUpperCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
@@ -374,7 +382,8 @@ public final class VariantQueryBuilder {
         }
         generateFilterParams(filters, params);
         return params;
-      case RS_NUMBER:
+      }
+      case RS_NUMBER -> {
         params.put("rs_number", QueryParameterValue.string(searchTerm.toLowerCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
@@ -384,8 +393,8 @@ public final class VariantQueryBuilder {
         }
         generateFilterParams(filters, params);
         return params;
-      default:
-        throw new BadRequestException("Search term not supported");
+      }
+      default -> throw new BadRequestException("Search term not supported");
     }
   }
 
@@ -396,8 +405,7 @@ public final class VariantQueryBuilder {
     if (isNotEmpty(consequences)) {
       // Don't change the source consequence list as it's used for multiple queries.
       // Generate a new list without n/a to exclude from the IN clause.
-      List<String> cons =
-          consequences.stream().filter(s -> !s.equals(NA)).collect(Collectors.toList());
+      List<String> cons = consequences.stream().filter(s -> !s.equals(NA)).toList();
       for (int i = 0; i < cons.size(); i++) {
         params.put("consStr" + i, QueryParameterValue.string("%" + cons.get(i) + "%"));
       }
@@ -405,8 +413,7 @@ public final class VariantQueryBuilder {
     if (isNotEmpty(clinicalSigns)) {
       // Don't change the source consequence list as it's used for multiple queries.
       // Generate a new list without n/a to exclude from the IN clause.
-      List<String> clinSigns =
-          clinicalSigns.stream().filter(s -> !s.equals(NA)).collect(Collectors.toList());
+      List<String> clinSigns = clinicalSigns.stream().filter(s -> !s.equals(NA)).toList();
       for (int i = 0; i < clinSigns.size(); i++) {
         params.put("clinStr" + i, QueryParameterValue.string("%" + clinSigns.get(i) + "%"));
       }
