@@ -353,7 +353,7 @@ public class DataSetServiceTest {
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-                """
+            """
                             ( condition_source_concept_id IN (SELECT DISTINCT c.concept_id
                             FROM `${projectId}.${dataSetId}.cb_criteria` c
                             JOIN (SELECT CAST(cr.id as string) AS id
@@ -376,7 +376,7 @@ public class DataSetServiceTest {
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-                """
+            """
                             ( condition_source_concept_id IN (SELECT DISTINCT c.concept_id
                             FROM `${projectId}.${dataSetId}.cb_criteria` c
                             JOIN (SELECT CAST(cr.id as string) AS id
