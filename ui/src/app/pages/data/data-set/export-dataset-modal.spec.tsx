@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import {
+  AnalysisLanguage,
   DataSetApi,
   DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
@@ -146,6 +147,7 @@ describe('ExportDatasetModal', () => {
         newNotebook: true,
         notebookName: expectedNotebookName,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -175,6 +177,7 @@ describe('ExportDatasetModal', () => {
         newNotebook: true,
         notebookName: expectedNotebookName,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -279,6 +282,7 @@ describe('ExportDatasetModal', () => {
         newNotebook: false,
         notebookName: expectedNotebookName,
         kernelType: KernelTypeEnum.R,
+        analysisLanguage: AnalysisLanguage.R,
       })
     );
   });
@@ -316,6 +320,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
       })
     );
 
@@ -331,6 +336,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.R,
+        analysisLanguage: AnalysisLanguage.R,
       })
     );
 
@@ -431,14 +437,19 @@ describe('ExportDatasetModal', () => {
     await changeNotebookName(notebookName);
     await clickExportButton();
 
-    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
-      dataSetRequest: expectedDatasetRequest,
-      newNotebook: true,
-      notebookName: expectedNotebookName,
-      kernelType: KernelTypeEnum.PYTHON,
-      generateGenomicsAnalysisCode: true,
-      genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
-    });
+    expect(exportSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        newNotebook: true,
+        notebookName: expectedNotebookName,
+        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
+        generateGenomicsAnalysisCode: true,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
+      })
+    );
   });
 
   it('Auto reload code preview if genomics analysis tool is changed', async () => {
@@ -467,6 +478,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
       })
     );
@@ -482,6 +494,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool:
           DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
       })
@@ -499,6 +512,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );
