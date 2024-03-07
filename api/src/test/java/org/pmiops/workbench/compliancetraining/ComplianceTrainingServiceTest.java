@@ -16,7 +16,12 @@ import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;
 import org.pmiops.workbench.absorb.Enrollment;
-import org.pmiops.workbench.access.*;
+import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
+import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessSyncServiceImpl;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -76,7 +81,6 @@ public class ComplianceTrainingServiceTest {
     AccessModuleNameMapperImpl.class,
     AccessSyncServiceImpl.class,
     AccessTierServiceImpl.class,
-    AccessModuleNameMapperImpl.class,
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
@@ -339,9 +343,9 @@ public class ComplianceTrainingServiceTest {
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(aYearAgo));
 
     var absorbCtCompletionTime = currentInstant().plusSeconds(3000);
-    var absrobRTCompletionTime = currentTimestamp().toInstant();
+    var absorbRTCompletionTime = currentTimestamp().toInstant();
     // Stub absorb training
-    stubAbsorbAllTrainingsComplete(absrobRTCompletionTime, absorbCtCompletionTime);
+    stubAbsorbAllTrainingsComplete(absorbRTCompletionTime, absorbCtCompletionTime);
 
     // Time passes, user syncs training using Absorb
     tick();
@@ -349,7 +353,7 @@ public class ComplianceTrainingServiceTest {
 
     // Completion and expiry timestamp should be updated.
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(absrobRTCompletionTime));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(absorbRTCompletionTime));
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(absorbCtCompletionTime));
 
@@ -435,7 +439,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void mockRTTrainingCompletedWithMoodle() {
-    // Manually set the database state because all users default to Absorb.
+    // Update database to mark user's training source as MOODLE.
     var uam =
         accessModuleService.updateCompletionTime(
             user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
@@ -447,7 +451,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void mockCTTrainingCompletedWithMoodle(Timestamp timestamp) {
-    // Manually set the database state because all users default to Absorb.
+    // Update database to mark user's training source as MOODLE.
     var uam =
         accessModuleService.updateCompletionTime(
             user,
