@@ -110,10 +110,12 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const createExportDatasetRequest = (): DataSetExportRequest => {
+  const createExportDatasetRequest = (
+    language: AnalysisLanguage
+  ): DataSetExportRequest => {
     return {
       dataSetRequest: createDataSetRequest(),
-      analysisLanguage,
+      analysisLanguage: language,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
       notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
@@ -121,7 +123,7 @@ export const ExportDatasetModal = ({
     };
   };
 
-  const exportDataset = async () => {
+  const exportDataset = async (language: AnalysisLanguage) => {
     AnalyticsTracker.DatasetBuilder.Export(analysisLanguage);
 
     setErrorMsg(null);
@@ -130,7 +132,7 @@ export const ExportDatasetModal = ({
       await dataSetApi().exportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       );
       const notebookUrl =
         `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
@@ -217,14 +219,14 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const getCode = () => {
+  const getCode = (language: AnalysisLanguage) => {
     setLoadingCode(true);
     setErrorMsg(null);
     dataSetApi()
       .previewExportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       )
       .then((resp) => {
         setCodePreview(loadHtmlStringIntoIFrame(resp.html));
@@ -246,14 +248,14 @@ export const ExportDatasetModal = ({
   };
   const onCopyCodeClick = () => {
     if (!codeText) {
-      getCode();
+      getCode(analysisLanguage);
     }
     setLoadingClipboard(true);
   };
 
-  const onChangeAnalysisLanguage = (analysisLanguage: AnalysisLanguage) => {
+  const onChangeAnalysisLanguage = (language: AnalysisLanguage) => {
     resetCode();
-    setAnalysisLanguage(analysisLanguage);
+    setAnalysisLanguage(language);
   };
 
   const onNotebookSelect = (nameWithoutSuffix: string) => {
@@ -272,7 +274,14 @@ export const ExportDatasetModal = ({
           workspace.id,
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
-        .then((resp) => setAnalysisLanguage(resp.kernelType)) // this works for now, because they exactly match
+        .then((resp) => {
+          // can compare directly for now, because they exactly match
+          if (resp.kernelType !== analysisLanguage) {
+            setAnalysisLanguage(resp.kernelType);
+            // code preview will be stale if the language changed
+            getCode(resp.kernelType);
+          }
+        })
         .catch(() =>
           setErrorMsg(
             'Could not fetch notebook metadata. Please try again or create a new notebook.'
@@ -292,7 +301,7 @@ export const ExportDatasetModal = ({
   // have a value, update code.
   useEffect(() => {
     if (showCodePreview && !codePreview) {
-      getCode();
+      getCode(analysisLanguage);
     }
   }, [codePreview, showCodePreview]);
 
@@ -463,7 +472,7 @@ export const ExportDatasetModal = ({
                 type='primary'
                 data-test-id='export-data-set'
                 disabled={!isEmpty(errors) || shouldDisable}
-                onClick={() => exportDataset()}
+                onClick={() => exportDataset(analysisLanguage)}
               >
                 Export
               </Button>

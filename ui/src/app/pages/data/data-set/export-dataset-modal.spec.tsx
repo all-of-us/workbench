@@ -26,7 +26,7 @@ import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-describe('ExportDatasetModal', () => {
+describe(ExportDatasetModal.name, () => {
   let dataset;
   let workspace;
   let testProps;
