@@ -114,6 +114,7 @@ export const ExportDatasetModal = ({
     return {
       dataSetRequest: createDataSetRequest(),
       kernelType,
+      analysisLanguage: kernelType, // this works for now, because they exactly match
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
       notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),

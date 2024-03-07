@@ -57,6 +57,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ResourceTypeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -74,23 +75,16 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final Provider<DbUser> userProvider;
 
+  private final AnalysisLanguageMapper analysisLanguageMapper;
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
 
-  public JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
-    JSONObject newJson = new JSONObject(originalJson.toString());
-
-    codeCells.forEach(
-        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
-
-    return newJson;
-  }
-
   @Autowired
   DataSetController(
+      AnalysisLanguageMapper analysisLanguageMapper,
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -98,6 +92,7 @@ public class DataSetController implements DataSetApiDelegate {
       Provider<DbUser> userProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService) {
+    this.analysisLanguageMapper = analysisLanguageMapper;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -230,8 +225,11 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
+    KernelTypeEnum kernelType =
+        analysisLanguageMapper.analysisLanguageToKernelType(
+            dataSetExportRequest.getAnalysisLanguage());
     byte[] notebookHtml =
-        addCells(createNotebookObject(dataSetExportRequest.getKernelType()), codeCells)
+        addCells(createNotebookObject(kernelType), codeCells)
             .toString()
             .getBytes(StandardCharsets.UTF_8);
 
@@ -260,9 +258,12 @@ public class DataSetController implements DataSetApiDelegate {
     if (!dataSetExportRequest.isNewNotebook()) {
       notebookFile =
           notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
-      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
+      //      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
     } else {
-      notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
+      KernelTypeEnum kernelType =
+          analysisLanguageMapper.analysisLanguageToKernelType(
+              dataSetExportRequest.getAnalysisLanguage());
+      notebookFile = createNotebookObject(kernelType);
     }
 
     notebookFile =
@@ -305,6 +306,15 @@ public class DataSetController implements DataSetApiDelegate {
         // See https://nbformat.readthedocs.io/en/latest/api.html
         .put("nbformat", 4)
         .put("nbformat_minor", 2);
+  }
+
+  private JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
+    JSONObject newJson = new JSONObject(originalJson.toString());
+
+    codeCells.forEach(
+        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+
+    return newJson;
   }
 
   @Override

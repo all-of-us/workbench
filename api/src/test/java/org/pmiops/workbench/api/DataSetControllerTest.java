@@ -102,6 +102,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -137,6 +138,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -254,6 +256,7 @@ public class DataSetControllerTest {
     AccessTierServiceImpl.class,
     ObjectNameLengthServiceImpl.class,
     BucketAuditQueryService.class,
+    AnalysisLanguageMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -573,7 +576,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -593,7 +596,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -612,7 +615,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(dataSet)));
   }
 
@@ -778,7 +781,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
-                        .kernelType(KernelTypeEnum.PYTHON)
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -793,7 +796,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -806,7 +809,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -822,7 +825,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
@@ -946,7 +949,7 @@ public class DataSetControllerTest {
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .generateGenomicsAnalysisCode(true)
-            .kernelType(KernelTypeEnum.R);
+            .analysisLanguage(AnalysisLanguage.R);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
     verify(mockNotebooksService)
@@ -1339,7 +1342,7 @@ public class DataSetControllerTest {
         .dataSetRequest(dataSet)
         .newNotebook(true)
         .notebookName(notebookName)
-        .kernelType(KernelTypeEnum.PYTHON);
+        .analysisLanguage(AnalysisLanguage.PYTHON);
   }
 
   private DbCdrVersion findCdrVersionOrThrow(Workspace workspace) {
