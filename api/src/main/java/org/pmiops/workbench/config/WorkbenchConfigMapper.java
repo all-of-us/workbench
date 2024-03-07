@@ -40,8 +40,6 @@ public interface WorkbenchConfigMapper {
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
-  // deprecated, for removal
-  @Mapping(target = "redirectMoodleToAbsorb", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
@@ -54,7 +52,6 @@ public interface WorkbenchConfigMapper {
       target = "defaultFreeCreditsDollarLimit",
       source = "config.billing.defaultFreeCreditsDollarLimit")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
-  @Mapping(target = "complianceTrainingHost", source = "config.moodle.host")
   @Mapping(target = "absorbSamlIdentityProviderId", source = "config.absorb.samlIdentityProviderId")
   @Mapping(target = "absorbSamlServiceProviderId", source = "config.absorb.samlServiceProviderId")
   @Mapping(

@@ -102,7 +102,6 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.moodle.MoodleServiceImpl;
 import org.pmiops.workbench.profile.AddressMapperImpl;
 import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
@@ -195,7 +194,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     CaptchaVerificationService.class,
     CommonConfig.class,
     CommonMappers.class,
-    MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class,
     DemographicSurveyMapperImpl.class,
     FreeTierBillingService.class,

@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -46,7 +47,6 @@ import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.AddressMapper;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
@@ -356,7 +356,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   /**
-   * This methods updates logged in user's training status from Moodle.
+   * This methods updates logged in user's training status from Absorb.
    *
    * @return Profile updated with training completion time
    */
@@ -366,20 +366,10 @@ public class ProfileController implements ProfileApiDelegate {
       complianceTrainingService.syncComplianceTrainingStatus();
     } catch (NotFoundException ex) {
       throw ex;
-    } catch (ApiException | org.pmiops.workbench.absorb.ApiException e) {
+    } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
     return getProfileResponse(userProvider.get());
-  }
-
-  @Override
-  public ResponseEntity<Boolean> useAbsorb() {
-    return ResponseEntity.ok(complianceTrainingService.useAbsorb());
-  }
-
-  @Override
-  public ResponseEntity<Boolean> trainingsEnabled() {
-    return ResponseEntity.ok(complianceTrainingService.trainingsEnabled());
   }
 
   @Override
