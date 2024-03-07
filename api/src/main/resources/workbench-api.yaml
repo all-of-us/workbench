@@ -485,6 +485,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/account/use-absorb:
+    get:
+      tags:
+      - profile
+      summary: Whether the user should use Absorb for compliance training
+      operationId: useAbsorb
+      responses:
+        200:
+          description: Whether the user should use Absorb for compliance training
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /v1/account/trainings-enabled:
+    get:
+      tags:
+        - profile
+      summary: |
+        Whether trainings are enabled for this user.
+        This endpoint is used to assist in the LMS migration.
+        It is temporary and will be removed after the migration.
+      operationId: trainingsEnabled
+      responses:
+        200:
+          description: Whether trainings are enabled for this user.
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/account/sync-era-commons-status:
     post:
       tags:
@@ -6762,6 +6791,9 @@ components:
           type: boolean
           description: Whether the Compliance Training access module is enabled.
           default: false
+        complianceTrainingHost:
+          type: string
+          description: The hostname for constructing the compliance training URL.
         absorbSamlIdentityProviderId:
           type: string
           description: The SAML identity provider ID for Absorb.
@@ -6852,6 +6884,10 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to pause GKE applications.
+        redirectMoodleToAbsorb:
+          type: boolean
+          description: Start redirecting Moodle User to Absorb
+          default: false
         enableVariantSelectAll:
           type: boolean
           default: false
@@ -7746,7 +7782,11 @@ components:
         newNotebook:
           type: boolean
           default: false
+        analysisLanguage:
+          $ref: '#/components/schemas/AnalysisLanguage'
         kernelType:
+          deprecated: true
+          description: DEPRECATED in favor of analysisLanguage to support more use cases
           $ref: '#/components/schemas/KernelTypeEnum'
         generateGenomicsAnalysisCode:
           type: boolean
@@ -7787,6 +7827,16 @@ components:
       enum:
       - Python
       - R
+      description: The kernel specified in the metadata of a Jupyter notebook file.
+    AnalysisLanguage:
+      type: string
+      enum:
+        - Python
+        - R
+        - SAS
+      description: |
+        The language used for code generation in the Dataset Builder.
+        In the context of Jupyter notebook files, this value is equal to the kernel in KernelTypeEnum.
     DomainValuePair:
       type: object
       properties:
