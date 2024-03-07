@@ -33,6 +33,8 @@ import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -57,31 +59,32 @@ public class DataDictionaryTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
+    CdrVersionService.class,
     CommonMappers.class,
     DataSetController.class,
-    DataSetServiceImpl.class,
     DataSetMapperImpl.class,
-    CdrVersionService.class,
+    DataSetServiceImpl.class,
+    FakeClockConfiguration.class,
   })
   @MockBean({
+    AccessTierService.class,
+    AnalysisLanguageMapper.class,
     BigQueryService.class,
     CdrBigQuerySchemaConfigService.class,
-    CohortBuilderServiceImpl.class,
-    CohortBuilderMapperImpl.class,
-    CohortService.class,
-    CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
-    ConceptSetService.class,
-    ConceptSetMapper.class,
-    FireCloudService.class,
-    NotebooksService.class,
-    WorkspaceService.class,
-    WorkspaceAuthService.class,
-    AccessTierService.class,
     CdrVersionMapper.class,
+    CohortBuilderMapperImpl.class,
+    CohortBuilderServiceImpl.class,
+    CohortQueryBuilder.class,
+    CohortService.class,
+    ConceptBigQueryService.class,
+    ConceptSetMapper.class,
+    ConceptSetService.class,
+    FireCloudService.class,
     GenomicExtractionService.class,
-    UserRecentResourceService.class
+    NotebooksService.class,
+    UserRecentResourceService.class,
+    WorkspaceAuthService.class,
+    WorkspaceService.class,
   })
   static class Configuration {}
 
