@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -258,7 +259,11 @@ public class DataSetController implements DataSetApiDelegate {
     if (!dataSetExportRequest.isNewNotebook()) {
       notebookFile =
           notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
-      //      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
+      // TODO when is it necessary to set this? when isn't it already set?
+      AnalysisLanguage analysisLanguage =
+          analysisLanguageMapper.kernelTypeToAnalysisLanguage(
+              notebooksService.getNotebookKernel(notebookFile));
+      dataSetExportRequest.setAnalysisLanguage(analysisLanguage);
     } else {
       KernelTypeEnum kernelType =
           analysisLanguageMapper.analysisLanguageToKernelType(

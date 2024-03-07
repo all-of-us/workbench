@@ -6,5 +6,7 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 
 @Mapper(config = MapStructConfig.class)
 public interface AnalysisLanguageMapper {
+  AnalysisLanguage kernelTypeToAnalysisLanguage(KernelTypeEnum kernelType);
+
   KernelTypeEnum analysisLanguageToKernelType(AnalysisLanguage analysisLanguage);
 }
