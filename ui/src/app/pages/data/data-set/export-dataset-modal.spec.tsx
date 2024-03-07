@@ -146,7 +146,6 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
@@ -176,7 +175,6 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
@@ -281,7 +279,6 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: false,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.R,
         analysisLanguage: AnalysisLanguage.R,
       })
     );
@@ -319,7 +316,6 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
       })
     );
@@ -335,7 +331,6 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.R,
         analysisLanguage: AnalysisLanguage.R,
       })
     );
@@ -444,7 +439,6 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: true,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
@@ -477,7 +471,6 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
       })
@@ -493,7 +486,6 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool:
           DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
@@ -511,7 +503,6 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
         analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
