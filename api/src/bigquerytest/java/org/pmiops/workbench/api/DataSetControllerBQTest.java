@@ -67,6 +67,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -79,7 +80,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
-import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -510,7 +510,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet),
@@ -536,7 +536,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.R)
+                    .analysisLanguage(AnalysisLanguage.R)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet),
@@ -573,7 +573,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
@@ -592,7 +592,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet),
@@ -611,7 +611,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet),
@@ -630,7 +630,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -649,7 +649,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -669,7 +669,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -690,7 +690,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -724,7 +724,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -743,7 +743,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(),
@@ -762,7 +762,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
@@ -783,7 +783,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         joinCodeCells(
             dataSetService.generateCodeCells(
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
                             ImmutableList.of(dbPFHHConceptSet),
