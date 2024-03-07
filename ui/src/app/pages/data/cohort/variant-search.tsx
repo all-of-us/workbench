@@ -284,8 +284,8 @@ export const VariantSearch = fp.flow(
 
   // Generate a param id based on current filter selections
   const getFilterParamId = () =>
-    Object.values(selectedFilters).reduce((acc, value) => {
-      if (value === null) {
+    Object.entries(selectedFilters).reduce((acc, [key, value]) => {
+      if (value === null || key === 'sortBy') {
         return acc;
       }
       switch (typeof value) {
@@ -383,7 +383,7 @@ export const VariantSearch = fp.flow(
         hasAttributes: false,
         selectable: true,
         attributes: [],
-        variantFilters: selectedFilters,
+        variantFilter: selectedFilters,
       };
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         `Select Variant Filter Group - '${selectedFilters.searchTerm}'`

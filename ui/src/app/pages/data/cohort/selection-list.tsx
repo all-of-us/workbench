@@ -6,7 +6,7 @@ import {
   Criteria,
   Domain,
   Modifier,
-  VariantFilterRequest,
+  VariantFilter,
 } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
@@ -177,7 +177,8 @@ function mapCriteria(crit: Selection) {
 export interface Selection extends Criteria {
   attributes?: Array<Attribute>;
   parameterId: string;
-  variantFilters?: VariantFilterRequest;
+  variantFilter?: VariantFilter;
+  variantId?: string;
 }
 
 interface SelectionInfoProps {
@@ -217,11 +218,13 @@ export class SelectionInfo extends React.Component<
   renderVariantFilters() {
     return (
       <ul>
-        {Object.entries(this.props.selection.variantFilters)
+        {Object.entries(this.props.selection.variantFilter)
           .filter(
             ([, value]) =>
-              (Array.isArray(value) && value.length !== 0) ||
-              !['', null].includes(value)
+              !(
+                (Array.isArray(value) && value.length === 0) ||
+                ['', null].includes(value)
+              )
           )
           .map(([key, value]) => (
             <li>
@@ -261,7 +264,7 @@ export class SelectionInfo extends React.Component<
               </div>
             </TooltipTrigger>
           </FlexColumn>
-          {!!selection.variantFilters && (
+          {!!selection.variantFilter && (
             <ClrIcon
               style={{
                 ...styles.caret,
@@ -275,7 +278,7 @@ export class SelectionInfo extends React.Component<
             />
           )}
         </FlexRow>
-        {!!selection.variantFilters && (
+        {!!selection.variantFilter && (
           <div
             style={{
               ...styles.filterList,
