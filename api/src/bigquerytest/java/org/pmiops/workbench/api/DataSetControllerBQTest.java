@@ -266,8 +266,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 notebooksService,
                 userProvider,
                 genomicExtractionService,
-                workspaceAuthService,
-                workbenchConfigProvider));
+                workspaceAuthService));
 
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);

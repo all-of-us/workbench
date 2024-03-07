@@ -109,7 +109,6 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -829,40 +828,6 @@ public class DataSetControllerTest {
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
-  }
-
-  @Test
-  public void generateCode_pyhton() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.PYTHON.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("import pandas[\\S|\\s]*pandas\\.read_gbq");
-  }
-
-  @Test
-  public void generateCode_R() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.R.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("library[\\S|\\s]*read_bq_export_from_workspace_bucket");
   }
 
   @Test
