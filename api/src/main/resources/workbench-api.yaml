@@ -3513,44 +3513,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: copyConceptSetRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
-    post:
-      tags:
-      - dataSet
-      description: Given a Data Set, return the SQL query built from it.
-      operationId: generateCode
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: workspaceId
-        in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
-        required: true
-        schema:
-          type: string
-      - name: kernelType
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/DataSetRequest'
-        required: true
-      responses:
-        200:
-          description: A SQL query for each domain in the Data Set
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DataSetCodeResponse'
-      x-codegen-request-body-name: dataSet
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
     post:
       tags:
@@ -7746,8 +7708,12 @@ components:
         newNotebook:
           type: boolean
           default: false
+        analysisLanguage:
+          $ref: '#/components/schemas/AnalysisLanguage'
         kernelType:
           $ref: '#/components/schemas/KernelTypeEnum'
+          deprecated: true
+          description: DEPRECATED in favor of analysisLanguage to support more use cases
         generateGenomicsAnalysisCode:
           type: boolean
           default: false
@@ -7787,6 +7753,16 @@ components:
       enum:
       - Python
       - R
+      description: The kernel specified in the metadata of a Jupyter notebook file.
+    AnalysisLanguage:
+      type: string
+      enum:
+        - Python
+        - R
+        #TODO: add SAS
+      description: |
+        The language used for code generation in the Dataset Builder.
+        In the context of Jupyter notebook files, this value is equal to the kernel in KernelTypeEnum.
     DomainValuePair:
       type: object
       properties:
@@ -7854,14 +7830,6 @@ components:
       properties:
         kernelType:
           $ref: '#/components/schemas/KernelTypeEnum'
-    DataSetCodeResponse:
-      type: object
-      properties:
-        kernelType:
-          $ref: '#/components/schemas/KernelTypeEnum'
-        code:
-          type: string
-          description: The code required to generate the query for the data set.
     DataSetQuery:
       required:
       - domain
@@ -11249,7 +11217,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseVariantFilter'
         - type: object
-          required: 
+          required:
             - searchTerm
           properties:
             searchTerm:

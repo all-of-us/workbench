@@ -4,12 +4,12 @@ import fp from 'lodash/fp';
 import { Toast } from 'primereact/toast';
 
 import {
+  AnalysisLanguage,
   BillingStatus,
   DataSet,
   DataSetExportRequest,
   DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
-  KernelTypeEnum,
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
@@ -65,8 +65,8 @@ export const ExportDatasetModal = ({
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
-  const [kernelType, setKernelType] = useState<KernelTypeEnum>(
-    KernelTypeEnum.PYTHON
+  const [analysisLanguage, setAnalysisLanguage] = useState<AnalysisLanguage>(
+    AnalysisLanguage.PYTHON
   );
   const [genomicsAnalysisTool, setGenomicsAnalysisTool] =
     useState<DataSetExportRequestGenomicsAnalysisToolEnum>(
@@ -81,7 +81,7 @@ export const ExportDatasetModal = ({
   const [codeText, setCodeText] = useState(null);
   const [loadingCode, setLoadingCode] = useState(false);
   const [loadingClipboard, setLoadingClipboard] = useState(false);
-  const [loadingNotebook, setIsLoadingNotebook] = useState(false);
+  const [loadingNotebookKernel, setLoadingNotebookKernel] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [, navigateByUrl] = useNavigation();
   const toast = React.useRef(null);
@@ -110,10 +110,12 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const createExportDatasetRequest = (): DataSetExportRequest => {
+  const createExportDatasetRequest = (
+    language: AnalysisLanguage
+  ): DataSetExportRequest => {
     return {
       dataSetRequest: createDataSetRequest(),
-      kernelType,
+      analysisLanguage: language,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
       notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
@@ -121,8 +123,8 @@ export const ExportDatasetModal = ({
     };
   };
 
-  const exportDataset = async () => {
-    AnalyticsTracker.DatasetBuilder.Export(kernelType);
+  const exportDataset = async (language: AnalysisLanguage) => {
+    AnalyticsTracker.DatasetBuilder.Export(analysisLanguage);
 
     setErrorMsg(null);
     setIsExporting(true);
@@ -130,7 +132,7 @@ export const ExportDatasetModal = ({
       await dataSetApi().exportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       );
       const notebookUrl =
         `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
@@ -153,7 +155,7 @@ export const ExportDatasetModal = ({
   // Any state that necessitates disabling all modal controls.
   const shouldDisable =
     isNotebooksLoading ||
-    loadingNotebook ||
+    loadingNotebookKernel ||
     loadingClipboard ||
     loadingCode ||
     isExporting;
@@ -217,14 +219,14 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const getCode = () => {
+  const getCode = (language: AnalysisLanguage) => {
     setLoadingCode(true);
     setErrorMsg(null);
     dataSetApi()
       .previewExportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       )
       .then((resp) => {
         setCodePreview(loadHtmlStringIntoIFrame(resp.html));
@@ -246,17 +248,17 @@ export const ExportDatasetModal = ({
   };
   const onCopyCodeClick = () => {
     if (!codeText) {
-      getCode();
+      getCode(analysisLanguage);
     }
     setLoadingClipboard(true);
   };
 
-  const onChangeKernelType = (kernelTypeEnum: KernelTypeEnum) => {
+  const onChangeAnalysisLanguage = (language: AnalysisLanguage) => {
     resetCode();
-    setKernelType(kernelTypeEnum);
+    setAnalysisLanguage(language);
   };
 
-  const onNotebookSelect = (nameWithoutSuffix) => {
+  const onNotebookSelect = (nameWithoutSuffix: string) => {
     setCreatingNewNotebook(nameWithoutSuffix === '');
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
@@ -265,20 +267,27 @@ export const ExportDatasetModal = ({
       setCreatingNewNotebook(true);
     } else {
       setCreatingNewNotebook(false);
-      setIsLoadingNotebook(true);
+      setLoadingNotebookKernel(true);
       notebooksApi()
         .getNotebookKernel(
           workspace.namespace,
           workspace.id,
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
-        .then((resp) => setKernelType(resp.kernelType))
+        .then((resp) => {
+          // can compare directly for now, because they exactly match
+          if (resp.kernelType !== analysisLanguage) {
+            setAnalysisLanguage(resp.kernelType);
+            // code preview will be stale if the language changed
+            getCode(resp.kernelType);
+          }
+        })
         .catch(() =>
           setErrorMsg(
             'Could not fetch notebook metadata. Please try again or create a new notebook.'
           )
         )
-        .finally(() => setIsLoadingNotebook(false));
+        .finally(() => setLoadingNotebookKernel(false));
     }
   };
 
@@ -292,7 +301,7 @@ export const ExportDatasetModal = ({
   // have a value, update code.
   useEffect(() => {
     if (showCodePreview && !codePreview) {
-      getCode();
+      getCode(analysisLanguage);
     }
   }, [codePreview, showCodePreview]);
 
@@ -341,7 +350,7 @@ export const ExportDatasetModal = ({
 
   return (
     <AnimatedModal
-      loading={isExporting || isNotebooksLoading || loadingNotebook}
+      loading={isExporting || isNotebooksLoading || loadingNotebookKernel}
       width={showCodePreview && codePreview ? 1200 : 450}
     >
       <FlexRow>
@@ -375,23 +384,29 @@ export const ExportDatasetModal = ({
             <div style={headerStyles.formLabel}>
               Select programming language
             </div>
-            {Object.keys(KernelTypeEnum)
-              .map((kernelTypeEnumKey) => KernelTypeEnum[kernelTypeEnumKey])
-              .map((kernelTypeEnum, i) => (
-                <label key={i} style={styles.radioButtonLabel}>
+            {Object.keys(AnalysisLanguage)
+              .map(
+                (analysisLanguageKey) => AnalysisLanguage[analysisLanguageKey]
+              )
+              .map((analysisLanguageValue) => (
+                <label
+                  key={analysisLanguageValue}
+                  style={styles.radioButtonLabel}
+                >
                   <RadioButton
                     style={{ marginRight: '0.375rem' }}
-                    name='kernel-type'
-                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                    name='Analysis Language'
                     disabled={shouldDisable || !creatingNewNotebook}
-                    checked={kernelType === kernelTypeEnum}
-                    onChange={() => onChangeKernelType(kernelTypeEnum)}
+                    checked={analysisLanguage === analysisLanguageValue}
+                    onChange={() =>
+                      onChangeAnalysisLanguage(analysisLanguageValue)
+                    }
                   />
-                  {kernelTypeEnum}
+                  {analysisLanguageValue}
                 </label>
               ))}
 
-            {hasWgs() && kernelType === KernelTypeEnum.PYTHON && (
+            {hasWgs() && analysisLanguage === AnalysisLanguage.PYTHON && (
               <React.Fragment>
                 <div style={headerStyles.formLabel}>
                   Select analysis tool for genetic variant data
@@ -457,7 +472,7 @@ export const ExportDatasetModal = ({
                 type='primary'
                 data-test-id='export-data-set'
                 disabled={!isEmpty(errors) || shouldDisable}
-                onClick={() => exportDataset()}
+                onClick={() => exportDataset(analysisLanguage)}
               >
                 Export
               </Button>
