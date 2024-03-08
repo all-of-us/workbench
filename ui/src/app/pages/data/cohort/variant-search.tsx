@@ -29,7 +29,6 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { currentCohortCriteriaStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
@@ -378,10 +377,8 @@ export const VariantSearch = fp.flow(
     AnalyticsTracker.CohortBuilder.SelectCriteria(
       `Select Variant Filter Group - '${selectAllFilters.searchTerm}'`
     );
-    currentCohortCriteriaStore.next([
-      ...criteria.filter((crit) => crit.parameterId !== param.parameterId),
-      param,
-    ]);
+    select(param);
+    clearSearch();
   };
 
   const disableSelectAll =
