@@ -194,7 +194,7 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const loadHtmlStringIntoIFrame = (html) => {
+  const loadHtmlStringIntoIFrame = (html: string) => {
     const placeholder = document.createElement('html');
     placeholder.innerHTML = html;
 
@@ -264,10 +264,7 @@ export const ExportDatasetModal = ({
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (nameWithoutSuffix === '') {
-      setCreatingNewNotebook(true);
-    } else {
-      setCreatingNewNotebook(false);
+    if (nameWithoutSuffix !== '') {
       setLoadingNotebookKernel(true);
       notebooksApi()
         .getNotebookKernel(
@@ -393,7 +390,9 @@ export const ExportDatasetModal = ({
 
             <div style={{ marginTop: '1.5rem' }}>
               <Select
-                isDisabled={shouldDisable}
+                isDisabled={
+                  shouldDisable || analysisLanguage === AnalysisLanguage.SAS
+                }
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
@@ -401,20 +400,21 @@ export const ExportDatasetModal = ({
               />
             </div>
 
-            {creatingNewNotebook && (
-              <label>
-                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
-                  Jupyter Notebook Name
-                </SmallHeader>
-                <TextInput
-                  onChange={setNotebookNameWithoutSuffix}
-                  onBlur={setNotebookNameWithoutSuffix}
-                  value={notebookNameWithoutSuffix}
-                  data-test-id='notebook-name-input'
-                  disabled={shouldDisable}
-                />
-              </label>
-            )}
+            {creatingNewNotebook &&
+              analysisLanguage !== AnalysisLanguage.SAS && (
+                <label>
+                  <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
+                    Jupyter Notebook Name
+                  </SmallHeader>
+                  <TextInput
+                    onChange={setNotebookNameWithoutSuffix}
+                    onBlur={setNotebookNameWithoutSuffix}
+                    value={notebookNameWithoutSuffix}
+                    data-test-id='notebook-name-input'
+                    disabled={shouldDisable}
+                  />
+                </label>
+              )}
 
             {hasWgs() && analysisLanguage === AnalysisLanguage.PYTHON && (
               <React.Fragment>
@@ -441,7 +441,7 @@ export const ExportDatasetModal = ({
                 type='link'
                 disabled={isCodePreviewLoading || shouldDisable}
                 data-test-id='code-preview-button'
-                onClick={() => onCodePreviewClick()}
+                onClick={onCodePreviewClick}
                 style={{ padding: 0, margin: 0 }}
               >
                 {showCodePreview ? 'Hide Code Preview' : 'See Code Preview'}
