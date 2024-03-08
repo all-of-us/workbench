@@ -66,7 +66,7 @@ public class NotebookUtils {
     return isRmdNotebook(nameWithFileExtension) || isRScriptFile(nameWithFileExtension);
   }
 
-  public static boolean isSasFile(String nameWithFileExtension) {
+  public static boolean isSASFile(String nameWithFileExtension) {
     return nameWithFileExtension.endsWith(SAS_EXTENSION);
   }
 
@@ -77,7 +77,7 @@ public class NotebookUtils {
       return NotebookUtils.withRMarkdownExtension(newName);
     } else if (isJupyterNotebook(fromNotebookNameWithExtension)) {
       return NotebookUtils.withJupyterNotebookExtension(newName);
-    } else if (isSasFile(fromNotebookNameWithExtension)) {
+    } else if (isSASFile(fromNotebookNameWithExtension)) {
       return NotebookUtils.withSasExtension(newName);
     } else if (isRScriptFile(fromNotebookNameWithExtension)) {
       return NotebookUtils.withRFileExtension(newName);

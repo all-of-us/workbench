@@ -7711,9 +7711,9 @@ components:
         analysisLanguage:
           $ref: '#/components/schemas/AnalysisLanguage'
         kernelType:
-          $ref: '#/components/schemas/KernelTypeEnum'
           deprecated: true
           description: DEPRECATED in favor of analysisLanguage to support more use cases
+          $ref: '#/components/schemas/KernelTypeEnum'
         generateGenomicsAnalysisCode:
           type: boolean
           default: false
@@ -7759,7 +7759,7 @@ components:
       enum:
         - Python
         - R
-        #TODO: add SAS
+        - SAS
       description: |
         The language used for code generation in the Dataset Builder.
         In the context of Jupyter notebook files, this value is equal to the kernel in KernelTypeEnum.

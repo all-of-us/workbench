@@ -55,7 +55,11 @@ public interface NotebooksService {
   void saveNotebook(
       String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
-  public String convertJupyterNotebookToHtml(byte[] notebook);
+  String convertJupyterNotebookToHtml(byte[] notebook);
+
+  String convertRStudioNotebookToHtml(byte[] notebook);
+
+  String convertSASNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 

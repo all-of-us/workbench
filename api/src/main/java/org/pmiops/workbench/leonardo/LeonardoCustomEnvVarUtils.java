@@ -27,7 +27,6 @@ public class LeonardoCustomEnvVarUtils {
   private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
   @VisibleForTesting public static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
 
-  @VisibleForTesting
   public static String BIGQUERY_STORAGE_API_ENABLED_ENV_KEY = "BIGQUERY_STORAGE_API_ENABLED";
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";

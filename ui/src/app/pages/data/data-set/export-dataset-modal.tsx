@@ -193,7 +193,7 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const loadHtmlStringIntoIFrame = (html) => {
+  const loadHtmlStringIntoIFrame = (html: string) => {
     const placeholder = document.createElement('html');
     placeholder.innerHTML = html;
 

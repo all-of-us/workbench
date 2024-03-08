@@ -62,6 +62,7 @@ import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -109,9 +110,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
+  private static final String SAS_CDR_ENV_VARIABLE = "joel-temp-cdr-env-variable";
   private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
       Map.of(
-          AnalysisLanguage.R, R_CDR_ENV_VARIABLE, AnalysisLanguage.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+          AnalysisLanguage.R,
+          R_CDR_ENV_VARIABLE,
+          AnalysisLanguage.PYTHON,
+          PYTHON_CDR_ENV_VARIABLE,
+          AnalysisLanguage.SAS,
+          SAS_CDR_ENV_VARIABLE);
 
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
@@ -487,9 +494,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         ImmutableList.copyOf(cohortService.findAllByCohortIdIn(dbDataset.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
         ImmutableList.copyOf(
-            dbDataset.getValues().stream()
-                .map(dataSetMapper::createDomainValuePair)
-                .collect(Collectors.toList()));
+            dbDataset.getValues().stream().map(dataSetMapper::createDomainValuePair).toList());
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
@@ -648,9 +653,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
     final List<DomainValuePair> domainValuePairsForCurrentDomain =
-        domainValuePairs.stream()
-            .filter(dvp -> dvp.getDomain() == domain)
-            .collect(Collectors.toList());
+        domainValuePairs.stream().filter(dvp -> dvp.getDomain() == domain).toList();
 
     final ValuesLinkingPair valuesLinkingPair =
         getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
@@ -878,13 +881,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DbDataset mustGetDbDataset(long workspaceId, long dataSetId) {
     return getDbDataSet(workspaceId, dataSetId)
-        .<NotFoundException>orElseThrow(
-            () -> {
-              throw new NotFoundException(
-                  String.format(
-                      "No DataSet found for workspaceId: %s, dataSetId: %s",
-                      workspaceId, dataSetId));
-            });
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format(
+                        "No DataSet found for workspaceId: %s, dataSetId: %s",
+                        workspaceId, dataSetId)));
   }
 
   private String generateRandomEightCharacterQualifier() {
@@ -921,7 +923,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                                 Domain.fromValue(entry.getKey())))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<String> generateWgsCode(
@@ -935,8 +937,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "The workspace CDR version does not have whole genome data");
     }
 
-    if (dataSetExportRequest.getAnalysisLanguage().equals(AnalysisLanguage.R)) {
-      return generateGenomicsAnalysisCommentForR();
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    if (!analysisLanguage.equals(AnalysisLanguage.PYTHON)) {
+      return List.of(
+          String.format(
+              "# Code generation for genomic analysis tools is not supported for %s\n"
+                  + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel",
+              analysisLanguage));
     }
 
     switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
@@ -960,7 +967,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return dataSetDao
         .findById(datasetId)
         .flatMap(submissionDao::findMostRecentValidExtractionByDataset)
-        .map(submission -> submission.getOutputDir())
+        .map(DbWgsExtractCromwellSubmission::getOutputDir)
         .map(dir -> dir.replaceFirst("/$", ""))
         .filter(dir -> !dir.isEmpty());
   }
@@ -1099,12 +1106,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "}/* "
             + localVcfDir
             + "/");
-  }
-
-  private List<String> generateGenomicsAnalysisCommentForR() {
-    return ImmutableList.of(
-        "# Code generation for genomic analysis tools is not supported in R\n"
-            + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
   }
 
   @Override
@@ -1482,7 +1483,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     switch (analysisLanguage) {
       case PYTHON:
-        return ImmutableList.of(
+        return List.of(
             "import pandas\n"
                 + "import os\n\n"
                 + sqlComment
@@ -1521,14 +1522,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             && StringUtils.containsIgnoreCase(
                                 queryJobConfiguration.getQuery(), field.getName()))
                 .map(field -> field.getName().toLowerCase() + " = col_character()")
-                .collect(Collectors.toList());
-        String colTypes =
-            columns.isEmpty()
-                ? "NULL"
-                : "cols(" + columns.stream().collect(Collectors.joining(", ")) + ")";
+                .toList();
+        String colTypes = columns.isEmpty() ? "NULL" : "cols(" + String.join(", ", columns) + ")";
         String exportName = domainAsString + "_" + qualifier;
         String exportPathVariable = exportName + "_path";
-        return ImmutableList.of(
+        return List.of(
             "library(tidyverse)\nlibrary(bigrquery)\n\n"
                 + sqlComment
                 + "\n"
@@ -1600,6 +1598,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "head("
                 + namespace
                 + "df, 5)");
+      case SAS:
+        return List.of("joel temp");
       default:
         throw new BadRequestException("Language " + analysisLanguage + " not supported.");
     }

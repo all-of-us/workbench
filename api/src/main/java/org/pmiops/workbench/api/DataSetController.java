@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -224,29 +225,40 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    KernelTypeEnum kernelType =
-        analysisLanguageMapper.analysisLanguageToKernelType(
-            dataSetExportRequest.getAnalysisLanguage());
-    byte[] notebookHtml =
-        addCells(createNotebookObject(kernelType), codeCells)
-            .toString()
-            .getBytes(StandardCharsets.UTF_8);
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    String notebookHtml =
+        (analysisLanguage == AnalysisLanguage.SAS)
+            ? String.join("<br/>", codeCells)
+            : notebooksService.convertJupyterNotebookToHtml(
+                createNotebookObject(
+                        analysisLanguageMapper.analysisLanguageToKernelType(analysisLanguage),
+                        codeCells)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
 
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
-            .html(notebooksService.convertJupyterNotebookToHtml(notebookHtml))
+            .html(notebookHtml)
             .text(String.join(System.lineSeparator(), codeCells)));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    KernelTypeEnum kernelType =
+        analysisLanguageMapper.analysisLanguageToKernelType(analysisLanguage);
+    if (kernelType == null) {
+      throw new BadRequestException("Cannot export to notebook for " + analysisLanguage.toString());
+    }
+
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
@@ -258,32 +270,28 @@ public class DataSetController implements DataSetApiDelegate {
             .getWorkspace()
             .getBucketName();
 
-    JSONObject notebookFile;
+    List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    if (!dataSetExportRequest.isNewNotebook()) {
-      notebookFile =
-          notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
-      // TODO when is it necessary to set this? when isn't it already set?
-      AnalysisLanguage analysisLanguage =
-          analysisLanguageMapper.kernelTypeToAnalysisLanguage(
-              notebooksService.getNotebookKernel(notebookFile));
-      dataSetExportRequest.setAnalysisLanguage(analysisLanguage);
-    } else {
-      KernelTypeEnum kernelType =
-          analysisLanguageMapper.analysisLanguageToKernelType(
-              dataSetExportRequest.getAnalysisLanguage());
-      notebookFile = createNotebookObject(kernelType);
-    }
+    JSONObject notebookFile =
+        (!dataSetExportRequest.isNewNotebook())
+            ? addCells(
+                notebooksService.getNotebookContents(
+                    bucketName, dataSetExportRequest.getNotebookName()),
+                codeCells)
+            : createNotebookObject(kernelType, codeCells);
 
-    notebookFile =
-        addCells(notebookFile, dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace));
+    // TODO when is it necessary to set this? when isn't it already set?
+    dataSetExportRequest.setAnalysisLanguage(
+        analysisLanguageMapper.kernelTypeToAnalysisLanguage(
+            notebooksService.getNotebookKernel(notebookFile)));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private JSONObject createNotebookObject(KernelTypeEnum kernelTypeEnum) {
+  private JSONObject createNotebookObject(
+      @NotNull KernelTypeEnum kernelTypeEnum, List<String> codeCells) {
     JSONObject metaData = new JSONObject();
     switch (kernelTypeEnum) {
       case PYTHON:
@@ -308,7 +316,10 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     return new JSONObject()
-        .put("cells", new JSONArray())
+        .put(
+            "cells",
+            new JSONArray()
+                .put(codeCells.stream().map(this::createNotebookCodeCellWithString).toList()))
         .put("metadata", metaData)
         // nbformat and nbformat_minor are the notebook major and minor version we are creating.
         // Specifically, here we create notebook version 4.2 (I believe)
