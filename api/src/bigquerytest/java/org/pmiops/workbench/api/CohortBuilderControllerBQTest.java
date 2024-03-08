@@ -77,6 +77,7 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
@@ -624,6 +625,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .variantId("1-101504524-G-A");
   }
 
+  private static SearchParameter variantFilter() {
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene1");
+    return new SearchParameter()
+            .domain(Domain.SNP_INDEL_VARIANT.toString())
+            .ancestorData(false)
+            .group(false)
+            .variantFilter(variantFilter);
+  }
+
   /**
    * This SearchParameter specifically represents the case that uses the
    * has_physical_measurement_data flag.
@@ -1098,6 +1108,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variant()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVariantFilter() {
+    CohortDefinition cohortDefinition =
+            createCohortDefinition(
+                    Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variantFilter()), new ArrayList<>());
+    assertParticipants(
+            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test

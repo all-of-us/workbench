@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.utils.OperatorUtils;
 
 /** SearchGroupItemQueryBuilder builds BigQuery queries for search group items. */
@@ -394,14 +396,32 @@ public final class SearchGroupItemQueryBuilder {
   /** Build sql statement for SNP Indel Variants */
   private static String buildVariantSql(
       Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
+    List<String> queryParts = new ArrayList<>();
+
+    // build variant id SQL
     String[] variantIds =
         searchGroupItem.getSearchParameters().stream()
             .map(SearchParameter::getVariantId)
+                .filter(Objects::nonNull)
             .toArray(String[]::new);
-    String namedParameter =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.array(variantIds, String.class));
-    return String.format(VARIANT_SQL, namedParameter);
+    if (ArrayUtils.isNotEmpty(variantIds)) {
+      String namedParameter =
+              QueryParameterUtil.addQueryParameterValue(
+                      queryParams, QueryParameterValue.array(variantIds, String.class));
+      queryParts.add(String.format(VARIANT_SQL, namedParameter));
+    }
+
+    // build variant filter SQL
+    List<VariantFilter> variantFilters =
+        searchGroupItem.getSearchParameters().stream()
+            .map(SearchParameter::getVariantFilter)
+            .filter(Objects::nonNull)
+            .toList();
+    variantFilters.forEach(
+        variantFilter ->
+            queryParts.add(
+                VariantQueryBuilder.generateSQL("SELECT DISTINCT vid\n", variantFilter)));
+    return String.join(UNION_TEMPLATE, queryParts);
   }
 
   /**

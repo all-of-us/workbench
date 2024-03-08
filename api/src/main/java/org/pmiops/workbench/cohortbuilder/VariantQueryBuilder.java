@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.model.VariantFilterRequest;
 
 public final class VariantQueryBuilder {
@@ -105,7 +106,7 @@ public final class VariantQueryBuilder {
 
   private static final String CLINICAL_SIGNIFICANCE_EMPTY = "clinical_significance_string = ''";
 
-  private static final String GENES_IN = "genes IN UNNEST(@genes)";
+  private static final String GENES_IN = "genes IN unnest(@genes)";
   private static final String GENES_IS_NULL = "genes IS NULL";
 
   private static final String ALLELE_COUNT = "AND allele_count BETWEEN @countMin AND @countMax\n";
@@ -223,53 +224,45 @@ public final class VariantQueryBuilder {
 
   public static QueryJobConfiguration buildQuery(
       VariantFilterRequest filters, Integer limit, Integer offset) {
-    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.FALSE, filters))
+    return QueryJobConfiguration.newBuilder(generateSQL(SELECT_ALL_COLUMNS, filters))
         .setNamedParameters(generateParams(filters, limit, offset))
         .setUseLegacySql(false)
         .build();
   }
 
-  public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filters) {
-    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.TRUE, filters))
-        .setNamedParameters(generateParams(filters, null, null))
+  public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filter) {
+    return QueryJobConfiguration.newBuilder(generateSQL(SELECT_COUNT, filter))
+        .setNamedParameters(generateParams(filter, null, null))
         .setUseLegacySql(false)
         .build();
   }
 
-  public static QueryJobConfiguration buildFiltersQuery(VariantFilterRequest filters) {
-    String innerSQL = generateSQL(Boolean.TRUE, filters).replace(SELECT_COUNT, SELECT_VID);
+  public static QueryJobConfiguration buildFiltersQuery(VariantFilterRequest filter) {
+    String innerSQL = generateSQL(SELECT_VID, filter);
     return QueryJobConfiguration.newBuilder(FILTERS_SQL.replace("@innerSQL", innerSQL))
-        .setNamedParameters(generateParams(filters, null, null))
+        .setNamedParameters(generateParams(filter, null, null))
         .setUseLegacySql(false)
         .build();
   }
 
   @NotNull
-  private static String generateSQL(boolean isCount, VariantFilterRequest filters) {
-    switch (SearchTermType.fromValue(filters.getSearchTerm())) {
-      case VID:
-        // vid SQL only returns 1 variant so no need to add filters or pagination
-        String sqlBody = FROM_VAT + VID_SQL + PARTICIPANT_COUNT;
-        return isCount ? SELECT_COUNT + sqlBody : SELECT_ALL_COLUMNS + sqlBody;
-      case CONTIG:
-        return generateFilterSQL(
-            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, CONTIG_POSITION_SQL, filters);
-      case GENE:
-        return generateFilterSQL(isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, GENE_SQL, filters);
-      case RS_NUMBER:
-        return generateFilterSQL(
-            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, RS_NUMBER_SQL, filters);
-      default:
-        throw new BadRequestException("Search term not supported");
-    }
+  public static String generateSQL(String selectSQL, VariantFilter filter) {
+    return switch (SearchTermType.fromValue(filter.getSearchTerm())) {
+      case VID ->
+      // vid SQL only returns 1 variant so no need to add filters or pagination
+      selectSQL + FROM_VAT + VID_SQL + PARTICIPANT_COUNT;
+      case CONTIG -> generateFilterSQL(selectSQL, CONTIG_POSITION_SQL, filter);
+      case GENE -> generateFilterSQL(selectSQL, GENE_SQL, filter);
+      case RS_NUMBER -> generateFilterSQL(selectSQL, RS_NUMBER_SQL, filter);
+    };
   }
 
   @NotNull
   private static String generateFilterSQL(
-      String selectSQL, String whereVidInSQL, VariantFilterRequest filters) {
-    List<String> consequences = filters.getConsequenceList();
-    List<String> clinicalSigns = filters.getClinicalSignificanceList();
-    List<String> genes = filters.getGeneList();
+      String selectSQL, String whereVidInSQL, VariantFilter filter) {
+    List<String> consequences = filter.getConsequenceList();
+    List<String> clinicalSigns = filter.getClinicalSignificanceList();
+    List<String> genes = filter.getGeneList();
     StringBuilder sqlBuilder = new StringBuilder(selectSQL).append(FROM_VAT);
     sqlBuilder.append(whereVidInSQL);
     appendEmptyOrLikeCondition(consequences, sqlBuilder, CONSEQUENCE_EMPTY, CONSEQUENCE_LIKE);
@@ -288,24 +281,22 @@ public final class VariantQueryBuilder {
       sqlBuilder.append(")\n");
     }
     appendMinMaxCondition(
-        sqlBuilder, filters.getCountMin() != null && filters.getCountMax() != null, ALLELE_COUNT);
+        sqlBuilder, filter.getCountMin() != null && filter.getCountMax() != null, ALLELE_COUNT);
+    appendMinMaxCondition(
+        sqlBuilder, filter.getNumberMin() != null && filter.getNumberMax() != null, ALLELE_NUMBER);
     appendMinMaxCondition(
         sqlBuilder,
-        filters.getNumberMin() != null && filters.getNumberMax() != null,
-        ALLELE_NUMBER);
-    appendMinMaxCondition(
-        sqlBuilder,
-        filters.getFrequencyMin() != null && filters.getFrequencyMax() != null,
+        filter.getFrequencyMin() != null && filter.getFrequencyMax() != null,
         ALLELE_FREQ);
     sqlBuilder.append(PARTICIPANT_COUNT);
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
-      if (StringUtils.isNotEmpty(filters.getSortBy())) {
-        if (filters.getSortBy().equals(VatColumns.PARTICIPANT_COUNT.getDisplayName())) {
+      String sortBy = ((VariantFilterRequest) filter).getSortBy();
+      if (StringUtils.isNotEmpty(sortBy)) {
+        if (sortBy.equals(VatColumns.PARTICIPANT_COUNT.getDisplayName())) {
           sqlBuilder.append(DEFAULT_ORDER_BY);
         } else {
           sqlBuilder.append(
-              ORDER_BY.replace(
-                  "@orderBy", VatColumns.getColumnNameFromDisplayName(filters.getSortBy())));
+              ORDER_BY.replace("@orderBy", VatColumns.getColumnNameFromDisplayName(sortBy)));
         }
         sqlBuilder.append(LIMIT_OFFSET);
       } else {
