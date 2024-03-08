@@ -7759,7 +7759,7 @@ components:
       enum:
         - Python
         - R
-        #TODO: add SAS
+        - SAS
       description: |
         The language used for code generation in the Dataset Builder.
         In the context of Jupyter notebook files, this value is equal to the kernel in KernelTypeEnum.

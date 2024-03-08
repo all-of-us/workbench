@@ -109,9 +109,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
+  private static final String SAS_CDR_ENV_VARIABLE = "TODO";
   private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
       Map.of(
-          AnalysisLanguage.R, R_CDR_ENV_VARIABLE, AnalysisLanguage.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+          AnalysisLanguage.R,
+          R_CDR_ENV_VARIABLE,
+          AnalysisLanguage.PYTHON,
+          PYTHON_CDR_ENV_VARIABLE,
+          AnalysisLanguage.SAS,
+          SAS_CDR_ENV_VARIABLE);
 
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
@@ -935,8 +941,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "The workspace CDR version does not have whole genome data");
     }
 
-    if (dataSetExportRequest.getAnalysisLanguage().equals(AnalysisLanguage.R)) {
-      return generateGenomicsAnalysisCommentForR();
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    if (!analysisLanguage.equals(AnalysisLanguage.PYTHON)) {
+      return List.of(
+          String.format(
+              "# Code generation for genomic analysis tools is not supported for %s\n"
+                  + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel",
+              analysisLanguage));
     }
 
     switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
@@ -1099,12 +1110,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "}/* "
             + localVcfDir
             + "/");
-  }
-
-  private List<String> generateGenomicsAnalysisCommentForR() {
-    return ImmutableList.of(
-        "# Code generation for genomic analysis tools is not supported in R\n"
-            + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
   }
 
   @Override
@@ -1600,6 +1605,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "head("
                 + namespace
                 + "df, 5)");
+      case SAS:
+        return List.of("TODO: SAS code generation is not yet supported");
       default:
         throw new BadRequestException("Language " + analysisLanguage + " not supported.");
     }
