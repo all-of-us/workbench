@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -82,6 +83,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final NotebooksService notebooksService;
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   DataSetController(
@@ -92,7 +94,8 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       GenomicExtractionService genomicExtractionService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.analysisLanguageMapper = analysisLanguageMapper;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
@@ -101,6 +104,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.userProvider = userProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
