@@ -63,7 +63,7 @@ export const ExportDatasetModal = ({
   dataset,
   closeFunction,
 }: Props) => {
-  const [existingNotebooks, setExistingNotebooks] =
+  const [existingJupyterNotebooks, setExistingJupyterNotebooks] =
     useState<string[]>(undefined);
   const [analysisLanguage, setAnalysisLanguage] = useState<AnalysisLanguage>(
     AnalysisLanguage.PYTHON
@@ -149,7 +149,7 @@ export const ExportDatasetModal = ({
     }
   };
 
-  const isNotebooksLoading = existingNotebooks === undefined;
+  const isNotebooksLoading = existingJupyterNotebooks === undefined;
   const isCodePreviewLoading = showCodePreview && !codePreview;
 
   // Any state that necessitates disabling all modal controls.
@@ -258,15 +258,12 @@ export const ExportDatasetModal = ({
     setAnalysisLanguage(language);
   };
 
-  const onNotebookSelect = (nameWithoutSuffix: string) => {
+  const onJupyterNotebookSelect = (nameWithoutSuffix: string) => {
     setCreatingNewNotebook(nameWithoutSuffix === '');
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (nameWithoutSuffix === '') {
-      setCreatingNewNotebook(true);
-    } else {
-      setCreatingNewNotebook(false);
+    if (nameWithoutSuffix !== '') {
       setLoadingNotebookKernel(true);
       notebooksApi()
         .getNotebookKernel(
@@ -293,8 +290,8 @@ export const ExportDatasetModal = ({
 
   useEffect(() => {
     getExistingJupyterNotebookNames(workspace)
-      .then(setExistingNotebooks)
-      .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
+      .then(setExistingJupyterNotebooks)
+      .catch(() => setExistingJupyterNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);
 
   // When code preview is showing, but codePreview does not
@@ -323,7 +320,7 @@ export const ExportDatasetModal = ({
   const errors = {
     ...validateNewNotebookName(
       notebookNameWithoutSuffix,
-      creatingNewNotebook ? existingNotebooks : [],
+      creatingNewNotebook ? existingJupyterNotebooks : [],
       'notebookName'
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
@@ -341,7 +338,7 @@ export const ExportDatasetModal = ({
   const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
   if (!isNotebooksLoading) {
     selectOptions.push(
-      ...existingNotebooks.map((notebook) => ({
+      ...existingJupyterNotebooks.map((notebook) => ({
         value: notebook,
         label: notebook,
       }))
@@ -363,7 +360,7 @@ export const ExportDatasetModal = ({
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
-                onChange={(v) => onNotebookSelect(v)}
+                onChange={onJupyterNotebookSelect}
               />
             </div>
 
