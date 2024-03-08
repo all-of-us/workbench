@@ -220,15 +220,16 @@ export class SelectionInfo extends React.Component<
       <ul>
         {Object.entries(this.props.selection.variantFilter)
           .filter(
-            ([, value]) =>
+            ([key, value]) =>
               !(
                 (Array.isArray(value) && value.length === 0) ||
-                ['', null].includes(value)
+                ['', null].includes(value) ||
+                key === 'sortBy'
               )
           )
           .map(([key, value]) => (
             <li>
-              {key}: {value}
+              <b>{key}</b>: {Array.isArray(value) ? value.join(', ') : value}
             </li>
           ))}
       </ul>

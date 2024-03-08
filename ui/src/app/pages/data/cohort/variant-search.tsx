@@ -7,6 +7,7 @@ import {
   CriteriaType,
   Domain,
   Variant,
+  VariantFilter,
   VariantFilterRequest,
 } from 'generated/fetch';
 
@@ -28,6 +29,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { currentCohortCriteriaStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
@@ -98,6 +100,13 @@ const styles = reactStyles({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  selectAll: {
+    alignItems: 'center',
+    color: colors.primary,
+    cursor: 'pointer',
+    display: 'flex',
+    marginLeft: '1rem',
+  },
   selectIcon: {
     margin: '2px 0.25rem 2px 2px',
     color: colorWithWhiteness(colors.success, -0.5),
@@ -113,6 +122,10 @@ const styles = reactStyles({
     marginRight: '0.125rem',
     color: colors.danger,
     cursor: 'pointer',
+  },
+  disabled: {
+    opacity: 0.4,
+    cursor: 'not-allowed',
   },
 });
 
@@ -152,8 +165,7 @@ export const VariantSearch = fp.flow(
   const [searchTerms, setSearchTerms] = useState('');
   const [totalCount, setTotalCount] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectAllResults, setSelectAllResults] = useState(false);
-  const [excludeFromSelectAll, setExcludeFromSelectAll] = useState([]);
+  const [selectAllFilters, setSelectAllFilters] = useState<VariantFilter>();
   const [selectedFilters, setSelectedFilters] = useState<VariantFilterRequest>({
     searchTerm: '',
     geneList: [],
@@ -188,11 +200,11 @@ export const VariantSearch = fp.flow(
         ]);
       if (filterResponse) {
         setVariantFilters(filterResponse);
-        setSelectedFilters((prevState) => ({
-          ...prevState,
-          searchTerm: searchTerms.trim(),
-        }));
       }
+      setSelectAllFilters({
+        ...selectedFilters,
+        searchTerm: searchTerms.trim(),
+      });
       setPageToken(nextPageToken);
       setSearchResults((prevState) =>
         firstPage ? [...prevState, ...items] : items
@@ -284,7 +296,7 @@ export const VariantSearch = fp.flow(
 
   // Generate a param id based on current filter selections
   const getFilterParamId = () =>
-    Object.entries(selectedFilters).reduce((acc, [key, value]) => {
+    Object.entries(selectAllFilters).reduce((acc, [key, value]) => {
       if (value === null || key === 'sortBy') {
         return acc;
       }
@@ -299,49 +311,28 @@ export const VariantSearch = fp.flow(
       }
     }, '');
 
-  useEffect(() => {
-    if (
-      selectAllResults &&
-      !criteria.some(({ parameterId }) => parameterId === getFilterParamId())
-    ) {
-      // The filter group was removed from the selection list, clear the select all state
-      setSelectAllResults(false);
-      setExcludeFromSelectAll([]);
-    }
-  }, [criteria]);
-
   const isSelected = (row: any) => {
     const paramId = getParamId(row);
-    return (
-      selectedIds.includes(paramId) ||
-      (selectAllResults && !excludeFromSelectAll.includes(row.vid))
-    );
+    return selectedIds.includes(paramId);
   };
 
   const selectItem = (row: any) => {
-    if (selectAllResults) {
-      // Remove item from excludes list
-      setExcludeFromSelectAll((prevState) =>
-        prevState.filter((excluded) => excluded !== row.vid)
-      );
-    } else {
-      const param = {
-        parameterId: getParamId(row),
-        parentId: null,
-        type: CriteriaType.NONE,
-        name: `Variant ${row.vid}`,
-        group: false,
-        domainId: Domain.SNP_INDEL_VARIANT,
-        hasAttributes: false,
-        selectable: true,
-        variantId: row.vid,
-        attributes: [],
-      };
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        `Select ${domainToTitle(row.domainId)} - '${row.name}'`
-      );
-      select(param);
-    }
+    const param = {
+      parameterId: getParamId(row),
+      parentId: null,
+      type: CriteriaType.NONE,
+      name: `Variant ${row.vid}`,
+      group: false,
+      domainId: Domain.SNP_INDEL_VARIANT,
+      hasAttributes: false,
+      selectable: true,
+      variantId: row.vid,
+      attributes: [],
+    };
+    AnalyticsTracker.CohortBuilder.SelectCriteria(
+      `Select ${domainToTitle(row.domainId)} - '${row.name}'`
+    );
+    select(param);
   };
 
   const handleCheckboxChange = (
@@ -369,33 +360,33 @@ export const VariantSearch = fp.flow(
       sortBy: value,
     }));
 
-  const handleSelectAllChange = (checked: boolean) => {
-    if (checked) {
-      // Add filter object to criteria selection list
-      const param: Selection = {
-        id: null,
-        parameterId: getFilterParamId(),
-        parentId: null,
-        type: CriteriaType.NONE,
-        name: `Filter group: ${selectedFilters.searchTerm}`,
-        group: false,
-        domainId: Domain.SNP_INDEL_VARIANT,
-        hasAttributes: false,
-        selectable: true,
-        attributes: [],
-        variantFilter: selectedFilters,
-      };
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        `Select Variant Filter Group - '${selectedFilters.searchTerm}'`
-      );
-      select(param);
-    } else {
-      // Clear the excludes list when unchecked
-      setExcludeFromSelectAll([]);
-    }
-    setSelectAllResults(checked);
+  const handleSelectAllResults = () => {
+    // Add filter object to criteria selection list
+    const param: Selection = {
+      id: null,
+      parameterId: getFilterParamId(),
+      parentId: null,
+      type: CriteriaType.NONE,
+      name: `Filter group: ${selectAllFilters.searchTerm}`,
+      group: false,
+      domainId: Domain.SNP_INDEL_VARIANT,
+      hasAttributes: false,
+      selectable: true,
+      attributes: [],
+      variantFilter: selectAllFilters,
+    };
+    AnalyticsTracker.CohortBuilder.SelectCriteria(
+      `Select Variant Filter Group - '${selectAllFilters.searchTerm}'`
+    );
+    currentCohortCriteriaStore.next([
+      ...criteria.filter((crit) => crit.parameterId !== param.parameterId),
+      param,
+    ]);
   };
 
+  const disableSelectAll =
+    searchResults.length < 2 ||
+    criteria.some((crit) => crit.parameterId === getFilterParamId());
   const displayResults = searchResults?.slice(first, first + pageSize);
   return (
     <>
@@ -462,17 +453,25 @@ export const VariantSearch = fp.flow(
             />
           )}
           {serverConfigStore.get().config.enableVariantSelectAll && (
-            <div style={{ display: 'flex', marginLeft: '1rem' }}>
-              <input
-                style={{ marginRight: '0.25rem' }}
-                type='checkbox'
-                name='selectAllResults'
-                checked={selectAllResults}
-                disabled={searchResults.length === 0}
-                onChange={(e) => handleSelectAllChange(e.target.checked)}
+            <Clickable
+              style={
+                disableSelectAll
+                  ? { ...styles.selectAll, ...styles.disabled }
+                  : styles.selectAll
+              }
+              onClick={() => handleSelectAllResults()}
+              disabled={disableSelectAll}
+            >
+              <ClrIcon
+                shape='plus-circle'
+                class='is-solid'
+                size={18}
+                style={{
+                  marginRight: '0.25rem',
+                }}
               />
               Select All Results
-            </div>
+            </Clickable>
           )}
         </div>
       )}
@@ -514,20 +513,6 @@ export const VariantSearch = fp.flow(
                         shape='check-circle'
                         size='20'
                       />
-                      {selectAllResults &&
-                        !excludeFromSelectAll.includes(variant.vid) && (
-                          <ClrIcon
-                            style={styles.excludeIcon}
-                            shape='times-circle'
-                            size='20'
-                            onClick={() =>
-                              setExcludeFromSelectAll((prevState) => [
-                                ...prevState,
-                                variant.vid,
-                              ])
-                            }
-                          />
-                        )}
                     </>
                   ) : (
                     <ClrIcon
