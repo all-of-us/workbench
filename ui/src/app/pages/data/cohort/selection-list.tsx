@@ -1,7 +1,13 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Attribute, Criteria, Domain, Modifier } from 'generated/fetch';
+import {
+  Attribute,
+  Criteria,
+  Domain,
+  Modifier,
+  VariantFilter,
+} from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow, FlexRowWrap } from 'app/components/flex';
@@ -141,6 +147,17 @@ const styles = reactStyles({
     right: '0',
     top: '1.125rem',
   },
+  caret: {
+    cursor: 'pointer',
+    float: 'right',
+    marginTop: '3px',
+    transition: 'transform 0.1s ease-out',
+  },
+  filterList: {
+    height: 'auto',
+    overflow: 'hidden',
+    transition: 'max-height 0.4s ease-out',
+  },
 });
 
 function mapCriteria(crit: Selection) {
@@ -160,6 +177,8 @@ function mapCriteria(crit: Selection) {
 export interface Selection extends Criteria {
   attributes?: Array<Attribute>;
   parameterId: string;
+  variantFilter?: VariantFilter;
+  variantId?: string;
 }
 
 interface SelectionInfoProps {
@@ -169,6 +188,7 @@ interface SelectionInfoProps {
 }
 
 interface SelectionInfoState {
+  filtersExpanded: boolean;
   truncated: boolean;
 }
 
@@ -179,7 +199,7 @@ export class SelectionInfo extends React.Component<
   name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
     super(props);
-    this.state = { truncated: false };
+    this.state = { filtersExpanded: false, truncated: false };
   }
 
   componentDidMount(): void {
@@ -195,8 +215,30 @@ export class SelectionInfo extends React.Component<
     ].includes(this.props.selection.domainId);
   }
 
+  renderVariantFilters() {
+    return (
+      <ul>
+        {Object.entries(this.props.selection.variantFilter)
+          .filter(
+            ([key, value]) =>
+              !(
+                (Array.isArray(value) && value.length === 0) ||
+                ['', null].includes(value) ||
+                key === 'sortBy'
+              )
+          )
+          .map(([key, value]) => (
+            <li>
+              <b>{key}</b>: {Array.isArray(value) ? value.join(', ') : value}
+            </li>
+          ))}
+      </ul>
+    );
+  }
+
   render() {
     const { index, selection, removeSelection } = this.props;
+    const { filtersExpanded, truncated } = this.state;
     const itemName = (
       <React.Fragment>
         {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
@@ -217,17 +259,41 @@ export class SelectionInfo extends React.Component<
           </button>
           <FlexColumn style={{ width: 'calc(100% - 1.5rem)' }}>
             {selection.group && <div>Group</div>}
-            <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
+            <TooltipTrigger disabled={!truncated} content={itemName}>
               <div style={styles.itemName} ref={(e) => (this.name = e)}>
                 {itemName}
               </div>
             </TooltipTrigger>
           </FlexColumn>
+          {!!selection.variantFilter && (
+            <ClrIcon
+              style={{
+                ...styles.caret,
+                ...(filtersExpanded ? { transform: 'rotate(90deg)' } : {}),
+              }}
+              shape={'caret right'}
+              size={18}
+              onClick={() =>
+                this.setState({ filtersExpanded: !filtersExpanded })
+              }
+            />
+          )}
         </FlexRow>
+        {!!selection.variantFilter && (
+          <div
+            style={{
+              ...styles.filterList,
+              maxHeight: filtersExpanded ? '22.5rem' : 0,
+            }}
+          >
+            {this.renderVariantFilters()}
+          </div>
+        )}
       </FlexColumn>
     );
   }
 }
+
 interface Props {
   back: Function;
   close: Function;
