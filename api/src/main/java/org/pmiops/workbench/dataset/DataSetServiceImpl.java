@@ -927,7 +927,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                                 Domain.fromValue(entry.getKey())))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<String> generateWgsCode(
@@ -1487,7 +1487,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     switch (analysisLanguage) {
       case PYTHON:
-        return ImmutableList.of(
+        return List.of(
             "import pandas\n"
                 + "import os\n\n"
                 + sqlComment
@@ -1526,14 +1526,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             && StringUtils.containsIgnoreCase(
                                 queryJobConfiguration.getQuery(), field.getName()))
                 .map(field -> field.getName().toLowerCase() + " = col_character()")
-                .collect(Collectors.toList());
-        String colTypes =
-            columns.isEmpty()
-                ? "NULL"
-                : "cols(" + columns.stream().collect(Collectors.joining(", ")) + ")";
+                .toList();
+        String colTypes = columns.isEmpty() ? "NULL" : "cols(" + String.join(", ", columns) + ")";
         String exportName = domainAsString + "_" + qualifier;
         String exportPathVariable = exportName + "_path";
-        return ImmutableList.of(
+        return List.of(
             "library(tidyverse)\nlibrary(bigrquery)\n\n"
                 + sqlComment
                 + "\n"
@@ -1606,7 +1603,28 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + namespace
                 + "df, 5)");
       case SAS:
-        return List.of("TODO: SAS code generation is not yet supported");
+        return List.of(
+            """
+            %let workspacecdr = %sysget(WORKSPACE_CDR);
+            %put This turns to: &workspacecdr;
+            %let googleproject = %sysget(GOOGLE_PROJECT);
+            %put This turns to: &googleproject;/* Define the BigQuery SQL query */
+            proc sql;
+               connect to bigquery (PROJECT="&googleproject." schema="&workspacecdr." mode='Performance');
+
+               /* Fetch and store the results in a SAS dataset */
+               create table mydata as
+               select * from connection to bigquery
+               (
+                  {~~~Paste SQL code here~~~}
+               );
+
+               disconnect from bigquery;
+            quit;
+
+            /* Close the BigQuery library */
+            libname gbqlib clear;
+            """);
       default:
         throw new BadRequestException("Language " + analysisLanguage + " not supported.");
     }

@@ -236,7 +236,10 @@ public class DataSetController implements DataSetApiDelegate {
 
     AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
     if (analysisLanguage == AnalysisLanguage.SAS) {
-      responseHtml = String.join("<br/>", codeCells);
+      responseHtml =
+          codeCells.stream()
+              .map(line -> line.replace(System.lineSeparator(), "<br/>"))
+              .collect(Collectors.joining("<br/>"));
     } else {
       KernelTypeEnum kernelType =
           analysisLanguageMapper.analysisLanguageToKernelType(
