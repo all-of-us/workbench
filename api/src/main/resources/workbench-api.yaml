@@ -7710,10 +7710,6 @@ components:
           default: false
         analysisLanguage:
           $ref: '#/components/schemas/AnalysisLanguage'
-        kernelType:
-          $ref: '#/components/schemas/KernelTypeEnum'
-          deprecated: true
-          description: DEPRECATED in favor of analysisLanguage to support more use cases
         generateGenomicsAnalysisCode:
           type: boolean
           default: false
