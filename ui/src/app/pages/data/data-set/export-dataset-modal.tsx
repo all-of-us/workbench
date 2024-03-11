@@ -274,6 +274,7 @@ export const ExportDatasetModal = ({
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
         .then((resp) => {
+          // TODO test this
           // can compare directly for now, because they exactly match
           if (resp.kernelType !== analysisLanguage) {
             setAnalysisLanguage(resp.kernelType);
