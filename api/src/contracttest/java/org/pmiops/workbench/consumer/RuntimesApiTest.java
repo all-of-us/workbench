@@ -33,12 +33,13 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            //These string matchers are used to ensure these fields are present and have the
+            // These string matchers are used to ensure these fields are present and have the
             // correct format. The third argument is the value that is stored in the contract.
             // StringType will use a random string each time, but there is no way to ensure that
             // the string is a valid URL.
             body.stringMatcher("jupyterUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
-            body.stringMatcher("jupyterStartUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
+            body.stringMatcher(
+                "jupyterStartUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
             body.booleanType("autopause");
             body.numberType("autopauseThreshold");
             body.stringType("defaultClientId");
@@ -122,26 +123,26 @@ class RuntimesApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("runtimeName");
-                  body.stringType("status");
-                  body.numberType("autopauseThreshold");
-                  body.stringType("proxyUrl");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext",
-                      context -> {
-                        context.stringType("cloudProvider");
-                        context.stringType("cloudResource");
-                      });
-                  body.object(
-                      "auditInfo",
-                      context -> {
-                        context.stringType("creator");
-                        context.stringType("createdDate");
-                        context.stringType("dateAccessed");
-                      });
-                })
+                    body -> {
+                      body.stringType("runtimeName");
+                      body.stringType("status");
+                      body.numberType("autopauseThreshold");
+                      body.stringType("proxyUrl");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext",
+                          context -> {
+                            context.stringType("cloudProvider");
+                            context.stringType("cloudResource");
+                          });
+                      body.object(
+                          "auditInfo",
+                          context -> {
+                            context.stringType("creator");
+                            context.stringType("createdDate");
+                            context.stringType("dateAccessed");
+                          });
+                    })
                 .build())
         .toPact();
   }
@@ -193,11 +194,11 @@ class RuntimesApiTest {
         .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
-                body -> {
-                  body.booleanType("allowStop");
-                  body.booleanType("autopause");
-                  body.numberType("autopauseThreshold");
-                })
+                    body -> {
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold");
+                    })
                 .build())
         .willRespondWith()
         .status(202)
@@ -227,22 +228,22 @@ class RuntimesApiTest {
         .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
-                body -> {
-                  body.booleanType("allowStop");
-                  body.booleanType("autopause");
-                  body.numberType("autopauseThreshold");
-                  body.object(
-                      "runtimeConfig",
-                      runtimeConfig -> {
-                        runtimeConfig.stringType("cloudService");
-                        runtimeConfig.stringType("machineType");
-                        runtimeConfig.numberType("diskSize");
-                      });
-                  body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
-                  body.object(
-                      "labelsToUpsert",
-                      labels -> labels.stringValue("randomKey", "randomValue"));
-                })
+                    body -> {
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold");
+                      body.object(
+                          "runtimeConfig",
+                          runtimeConfig -> {
+                            runtimeConfig.stringType("cloudService");
+                            runtimeConfig.stringType("machineType");
+                            runtimeConfig.numberType("diskSize");
+                          });
+                      body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
+                      body.object(
+                          "labelsToUpsert",
+                          labels -> labels.stringValue("randomKey", "randomValue"));
+                    })
                 .build())
         .willRespondWith()
         .status(404)
