@@ -33,8 +33,6 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            body.stringType("jupyterUserScriptUri");
-            body.stringType("jupyterStartUserScriptUri");
             body.booleanType("autopause");
             body.numberType("autopauseThreshold");
             body.stringType("defaultClientId");
