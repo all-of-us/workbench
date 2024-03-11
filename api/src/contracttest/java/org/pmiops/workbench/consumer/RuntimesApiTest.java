@@ -60,8 +60,6 @@ class RuntimesApiTest {
     RuntimesApi api = new RuntimesApi(client);
 
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
-    request.setJupyterUserScriptUri("http://string.com");
-    request.setJupyterStartUserScriptUri("http://start.com");
     request.setAutopause(true);
     request.setAutopauseThreshold(57);
     request.setDefaultClientId("string");
