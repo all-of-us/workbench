@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 
 import { render, screen } from '@testing-library/react';
@@ -35,6 +37,6 @@ describe('Estimate cost estimator', () => {
     renderComponent(true);
 
     // Assert
-    expect(screen.queryByText('Cost when paused')).toBeNull();
+    expect(screen.queryByText('Cost when paused')).not.toBeInTheDocument();
   });
 });
