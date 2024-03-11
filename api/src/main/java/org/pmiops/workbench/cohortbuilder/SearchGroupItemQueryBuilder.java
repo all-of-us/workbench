@@ -234,12 +234,20 @@ public final class SearchGroupItemQueryBuilder {
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
-  private static final String VARIANT_SQL =
+  private static final String VARIANT_SQL_UNNEST =
       """
              SELECT person_id
              FROM `${projectId}.${dataSetId}.cb_variant_to_person`
              CROSS JOIN UNNEST(person_ids) AS person_id
-             WHERE vid IN unnest(%s)""";
+             WHERE vid IN unnest(%s)
+             """;
+  private static final String VARIANT_SQL =
+      """
+                 SELECT person_id
+                 FROM `${projectId}.${dataSetId}.cb_variant_to_person`
+                 CROSS JOIN UNNEST(person_ids) AS person_id
+                 WHERE vid IN (%s)
+                 """;
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -402,13 +410,13 @@ public final class SearchGroupItemQueryBuilder {
     String[] variantIds =
         searchGroupItem.getSearchParameters().stream()
             .map(SearchParameter::getVariantId)
-                .filter(Objects::nonNull)
+            .filter(Objects::nonNull)
             .toArray(String[]::new);
     if (ArrayUtils.isNotEmpty(variantIds)) {
       String namedParameter =
-              QueryParameterUtil.addQueryParameterValue(
-                      queryParams, QueryParameterValue.array(variantIds, String.class));
-      queryParts.add(String.format(VARIANT_SQL, namedParameter));
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.array(variantIds, String.class));
+      queryParts.add(String.format(VARIANT_SQL_UNNEST, namedParameter));
     }
 
     // build variant filter SQL
@@ -420,8 +428,10 @@ public final class SearchGroupItemQueryBuilder {
     variantFilters.forEach(
         variantFilter ->
             queryParts.add(
-                VariantQueryBuilder.generateSQL("SELECT DISTINCT vid\n", variantFilter)));
-    return String.join(UNION_TEMPLATE, queryParts);
+                String.format(
+                    VARIANT_SQL,
+                    VariantQueryBuilder.buildCohortBuilderQuery(variantFilter, queryParams))));
+    return String.join(UNION_DISTINCT_TEMPLATE, queryParts);
   }
 
   /**

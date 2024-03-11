@@ -626,12 +626,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private static SearchParameter variantFilter() {
-    VariantFilter variantFilter = new VariantFilter().searchTerm("gene1");
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene");
     return new SearchParameter()
-            .domain(Domain.SNP_INDEL_VARIANT.toString())
-            .ancestorData(false)
-            .group(false)
-            .variantFilter(variantFilter);
+        .domain(Domain.SNP_INDEL_VARIANT.toString())
+        .ancestorData(false)
+        .group(false)
+        .variantFilter(variantFilter);
   }
 
   /**
@@ -1113,10 +1113,34 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countParticipantsVariantDataUsingVariantFilter() {
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variantFilter()), new ArrayList<>());
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variantFilter()),
+            new ArrayList<>());
     assertParticipants(
-            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVidsAndVariantFilter() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variant(), variantFilter()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingTwoVariantFilters() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variantFilter(), variantFilter()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
