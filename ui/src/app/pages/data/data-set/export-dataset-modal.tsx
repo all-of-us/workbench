@@ -338,7 +338,9 @@ export const ExportDatasetModal = ({
       : {}),
   };
 
-  const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
+  const selectOptions = [
+    { label: '(Create a new Jupyter notebook)', value: '' },
+  ];
   if (!isNotebooksLoading) {
     selectOptions.push(
       ...existingNotebooks.map((notebook) => ({
@@ -363,17 +365,18 @@ export const ExportDatasetModal = ({
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
-                onChange={(v) => onNotebookSelect(v)}
+                onChange={onNotebookSelect}
               />
             </div>
 
             {creatingNewNotebook && (
               <label>
                 <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
-                  Notebook Name
+                  Jupyter Notebook Name
                 </SmallHeader>
                 <TextInput
-                  onChange={(v) => setNotebookNameWithoutSuffix(v)}
+                  onChange={setNotebookNameWithoutSuffix}
+                  onBlur={setNotebookNameWithoutSuffix}
                   value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                   disabled={shouldDisable}
