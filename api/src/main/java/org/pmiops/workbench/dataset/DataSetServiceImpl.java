@@ -1488,7 +1488,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             dataSetName, domainAsString, cdrVersionName);
 
     // Comments in R and Python have the same syntax
-    String rPythonSqlComment ="# " + sqlComment;
+    String rPythonSqlComment = "# " + sqlComment;
     String sasSqlComment = "/* " + sqlComment + " */";
 
     String sqlQuery =
@@ -1613,7 +1613,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             %put The CDR for this workspace is: &workspacecdr;
             %let googleproject = %sysget(GOOGLE_PROJECT);
             %put The Google Project for this workspace is: &googleproject;
-            
+
             """
                 + sasSqlComment
                 + """
