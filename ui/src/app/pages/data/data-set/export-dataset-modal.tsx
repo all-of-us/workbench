@@ -36,6 +36,7 @@ import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isEmpty, reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { validateNewNotebookName } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
@@ -359,31 +360,12 @@ export const ExportDatasetModal = ({
         <div style={{ width: 'calc(450px - 3rem)' }}>
           <ModalTitle>Export Dataset</ModalTitle>
           <ModalBody>
-            <div style={{ marginTop: '1.5rem' }}>
-              <Select
-                isDisabled={shouldDisable}
-                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
-                data-test-id='select-notebook'
-                options={selectOptions}
-                onChange={onNotebookSelect}
-              />
+            <div>
+              You can export the code to an existing or new{' '}
+              <b>Jupyter Notebook in {JUPYTER_FILE_EXT} format</b>. You can also
+              copy the generated code to the clipboard and paste into any app in
+              the workbench.
             </div>
-
-            {creatingNewNotebook && (
-              <label>
-                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
-                  Jupyter Notebook Name
-                </SmallHeader>
-                <TextInput
-                  onChange={setNotebookNameWithoutSuffix}
-                  onBlur={setNotebookNameWithoutSuffix}
-                  value={notebookNameWithoutSuffix}
-                  data-test-id='notebook-name-input'
-                  disabled={shouldDisable}
-                />
-              </label>
-            )}
-
             <div style={headerStyles.formLabel}>
               Select programming language
             </div>
@@ -408,6 +390,31 @@ export const ExportDatasetModal = ({
                   {analysisLanguageValue}
                 </label>
               ))}
+
+            <div style={{ marginTop: '1.5rem' }}>
+              <Select
+                isDisabled={shouldDisable}
+                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
+                data-test-id='select-notebook'
+                options={selectOptions}
+                onChange={onNotebookSelect}
+              />
+            </div>
+
+            {creatingNewNotebook && (
+              <label>
+                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
+                  Jupyter Notebook Name
+                </SmallHeader>
+                <TextInput
+                  onChange={setNotebookNameWithoutSuffix}
+                  onBlur={setNotebookNameWithoutSuffix}
+                  value={notebookNameWithoutSuffix}
+                  data-test-id='notebook-name-input'
+                  disabled={shouldDisable}
+                />
+              </label>
+            )}
 
             {hasWgs() && analysisLanguage === AnalysisLanguage.PYTHON && (
               <React.Fragment>
