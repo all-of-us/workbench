@@ -30,6 +30,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 class RuntimesApiTest {
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
+  static String gcrRegex = "(^((?:us\\.|eu\\.|asia\\.)?gcr.io)/([\\w.-]+/[\\w.-]+)(?::(\\w[\\w.-]+))?(?:@([\\w+.-]+:[A-Fa-f0-9]{32,}))?$)";
+  static String ghcrRegex = "(^(ghcr.io)/((?:[\\w.-]+/)+[\\w.-]+)(?::(\\w[\\w.-]+))?(?:@([\\w+.-]+:[A-Fa-f0-9]{32,}))?$)";
+
+  static String dockerRegex = gcrRegex + "|" + ghcrRegex;
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
@@ -43,7 +47,7 @@ class RuntimesApiTest {
             body.booleanType("autopause");
             body.numberType("autopauseThreshold");
             body.stringType("defaultClientId");
-            body.stringType("toolDockerImage");
+            body.stringMatcher("toolDockerImage",dockerRegex, "us.gcr.io/example/image-for-contract-test:2.2.7");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
