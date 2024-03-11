@@ -66,13 +66,10 @@ describe(CreateCromwell.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+  it('should display a cost of $0.40 per hour when running', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
       '$0.40 per hour'
-    );
-    expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
-      '$0.20 per hour'
     );
   });
 });

@@ -108,28 +108,32 @@ export const EnvironmentCostEstimator = ({
         </TooltipTrigger>
       </FlexColumn>
       <FlexColumn style={styles.costSection}>
-        <div style={{ fontSize: '10px', fontWeight: 600 }}>
-          Cost when paused
-        </div>
-        <TooltipTrigger
-          content={
-            <div>
-              <div>Cost Breakdown</div>
-              {pausedCostBreakdown.map((lineItem, i) => (
-                <div key={i}>{lineItem}</div>
-              ))}
+        {!isGKEApp && (
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 600 }}>
+              Cost when paused
             </div>
-          }
-        >
-          <div
-            style={costStyle}
-            data-test-id='paused-cost'
-            aria-label='cost while paused'
-          >
-            <div style={styles.costValue}>{formatUsd(pausedCost)}</div>
-            <div style={styles.costPeriod}>{` per hour`}</div>
+            <TooltipTrigger
+              content={
+                <div>
+                  <div>Cost Breakdown</div>
+                  {pausedCostBreakdown.map((lineItem, i) => (
+                    <div key={i}>{lineItem}</div>
+                  ))}
+                </div>
+              }
+            >
+              <div
+                style={costStyle}
+                data-test-id='paused-cost'
+                aria-label='cost while paused'
+              >
+                <div style={styles.costValue}>{formatUsd(pausedCost)}</div>
+                <div style={styles.costPeriod}>{` per hour`}</div>
+              </div>
+            </TooltipTrigger>
           </div>
-        </TooltipTrigger>
+        )}
       </FlexColumn>
       {!!pdCost && (
         <FlexColumn style={styles.costSection}>
