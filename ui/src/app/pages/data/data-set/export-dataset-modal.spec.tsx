@@ -20,7 +20,9 @@ import {
   dataSetApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { renderModal } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -92,6 +94,8 @@ describe(ExportDatasetModal.name, () => {
   };
 
   beforeEach(() => {
+    serverConfigStore.set({ config: defaultServerConfig });
+
     window.open = jest.fn();
     dataset = {
       id: 1,
