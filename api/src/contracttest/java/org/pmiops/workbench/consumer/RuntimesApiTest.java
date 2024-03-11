@@ -237,7 +237,6 @@ class RuntimesApiTest {
                           runtimeConfig -> {
                             runtimeConfig.stringMatcher(
                                 "cloudService", "(DATAPROC|GCE)", CloudServiceEnum.GCE.name());
-                            runtimeConfig.stringType("cloudService");
                             runtimeConfig.stringType("machineType");
                             runtimeConfig.numberType("diskSize");
                           });
