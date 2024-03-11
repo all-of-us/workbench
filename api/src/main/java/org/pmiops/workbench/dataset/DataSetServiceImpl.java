@@ -109,8 +109,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
-  // already handled in the preamble to the SAS code
-  private static final String SAS_CDR_ENV_VARIABLE = "";
+  private static final String SAS_CDR_ENV_VARIABLE = "&workspacecdr..";
   private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
       Map.of(
           AnalysisLanguage.R,
