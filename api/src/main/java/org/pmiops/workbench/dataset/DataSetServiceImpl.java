@@ -1485,6 +1485,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
             dataSetName, domainAsString, cdrVersionName);
 
+    String sqlQuery =
+        fillInQueryParams(
+            generateSqlWithEnvironmentVariables(queryJobConfiguration.getQuery(), analysisLanguage),
+            queryJobConfiguration.getNamedParameters());
+
     switch (analysisLanguage) {
       case PYTHON:
         return List.of(
@@ -1494,10 +1499,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "\n"
                 + namespace
                 + "sql = \"\"\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), analysisLanguage),
-                    queryJobConfiguration.getNamedParameters())
+                + sqlQuery
                 + "\"\"\"\n\n"
                 + namespace
                 + "df = pandas.read_gbq(\n"
@@ -1536,10 +1538,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "\n"
                 + namespace
                 + "sql <- paste(\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), analysisLanguage),
-                    queryJobConfiguration.getNamedParameters())
+                + sqlQuery
                 + "\", sep=\"\")\n\n"
                 + "# Formulate a Cloud Storage destination path for the data exported from BigQuery.\n"
                 + "# NOTE: By default data exported multiple times on the same day will overwrite older copies.\n"
@@ -1616,7 +1615,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                create table mydata as
                select * from connection to bigquery
                (
-                  {~~~Paste SQL code here~~~}
+               """
+                + sqlQuery
+                + """
                );
 
                disconnect from bigquery;
