@@ -33,8 +33,13 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            body.stringType("jupyterUserScriptUri");
-            body.stringType("jupyterStartUserScriptUri");
+            // These string matchers are used to ensure these fields are present and have the
+            // correct format. The third argument is the value that is stored in the contract.
+            // StringType will use a random string each time, but there is no way to ensure that
+            // the string is a valid URL.
+            body.stringMatcher("jupyterUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
+            body.stringMatcher(
+                "jupyterStartUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
             body.booleanType("autopause");
             body.numberType("autopauseThreshold");
             body.stringType("defaultClientId");
@@ -230,7 +235,8 @@ class RuntimesApiTest {
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
-                            runtimeConfig.stringType("cloudService");
+                            runtimeConfig.stringMatcher(
+                                "cloudService", "(DATAPROC|GCE)", CloudServiceEnum.GCE.name());
                             runtimeConfig.stringType("machineType");
                             runtimeConfig.numberType("diskSize");
                           });
