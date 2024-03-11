@@ -913,6 +913,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
+    // TODO ensure that SAS works for multiple domains
     return Stream.concat(
             queriesByDomain.entrySet().stream()
                 .flatMap(
@@ -1606,9 +1607,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         return List.of(
             """
             %let workspacecdr = %sysget(WORKSPACE_CDR);
-            %put This workspace's CDR is: &workspacecdr;
+            %put The CDR for this workspace is: &workspacecdr;
             %let googleproject = %sysget(GOOGLE_PROJECT);
-            %put This workspace's Google Project is: &googleproject;
+            %put The Google Project for this workspace is: &googleproject;
             
             /* Define the BigQuery SQL query */
             proc sql;
