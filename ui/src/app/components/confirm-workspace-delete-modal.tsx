@@ -14,7 +14,6 @@ export interface ConfirmWorkspaceDeleteModalProps {
   closeFunction: Function;
   receiveDelete: Function;
   workspaceName: string;
-  workspaceNamespace: string;
 }
 export const ConfirmWorkspaceDeleteModal = ({
   closeFunction,
