@@ -48,6 +48,7 @@ import {
 } from 'app/utils';
 import {
   conceptSetUpdating,
+  currentCohortSearchContextStore,
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
@@ -245,6 +246,7 @@ export const ConceptSearch = fp.flow(
 
     componentWillUnmount() {
       localStorage.removeItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS);
+      currentCohortSearchContextStore.next(undefined);
       currentConceptStore.next(undefined);
       currentConceptSetStore.next(undefined);
       this.subscription.unsubscribe();
