@@ -1480,11 +1480,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     // or [namespace]_query_parameters), and [namespace]_df variables
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
-    // Comments in R and Python have the same syntax
+    String exportName = domainAsString + "_" + qualifier;
+
     String sqlComment =
         String.format(
-            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
+            "This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
             dataSetName, domainAsString, cdrVersionName);
+
+    // Comments in R and Python have the same syntax
+    String rPythonSqlComment ="# " + sqlComment;
+    String sasSqlComment = "/* " + sqlComment + " */";
 
     String sqlQuery =
         fillInQueryParams(
@@ -1496,7 +1501,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         return List.of(
             "import pandas\n"
                 + "import os\n\n"
-                + sqlComment
+                + rPythonSqlComment
                 + "\n"
                 + namespace
                 + "sql = \"\"\""
@@ -1531,11 +1536,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .map(field -> field.getName().toLowerCase() + " = col_character()")
                 .toList();
         String colTypes = columns.isEmpty() ? "NULL" : "cols(" + String.join(", ", columns) + ")";
-        String exportName = domainAsString + "_" + qualifier;
         String exportPathVariable = exportName + "_path";
         return List.of(
             "library(tidyverse)\nlibrary(bigrquery)\n\n"
-                + sqlComment
+                + rPythonSqlComment
                 + "\n"
                 + namespace
                 + "sql <- paste(\""
@@ -1610,17 +1614,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             %let googleproject = %sysget(GOOGLE_PROJECT);
             %put The Google Project for this workspace is: &googleproject;
             
+            """
+                + sasSqlComment
+                + """
+
             /* Define the BigQuery SQL query */
             proc sql;
                connect to bigquery (PROJECT="&googleproject." schema="&workspacecdr." mode='Performance');
 
                /* Fetch and store the results in a SAS dataset */
-               create table mydata as
-               select * from connection to bigquery
+               create table
+               """
+                + exportName
+                + """
+                as
+                select * from connection to bigquery
                ("""
                 + sqlQuery
-                +
-               """
+                + """
                );
 
                disconnect from bigquery;
