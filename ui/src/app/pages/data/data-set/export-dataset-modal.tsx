@@ -364,7 +364,7 @@ export const ExportDatasetModal = ({
               You can export the code to an existing or new{' '}
               <b>Jupyter Notebook in {JUPYTER_FILE_EXT} format</b>. You can also
               copy the generated code to the clipboard and paste into any app in
-              the workbench.
+              the workbench, such as RStudio.
             </div>
             <div style={headerStyles.formLabel}>
               Select programming language
