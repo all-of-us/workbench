@@ -63,7 +63,7 @@ describe(ExportDatasetModal.name, () => {
   }
 
   function findNotebookNameInput() {
-    return screen.getByLabelText('Notebook Name');
+    return screen.getByLabelText('Jupyter Notebook Name');
   }
 
   const waitUntilDoneLoading = async () =>
@@ -260,14 +260,16 @@ describe(ExportDatasetModal.name, () => {
 
     await waitUntilDoneLoading();
 
-    const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
+    const notebookDropdown = screen.getByText(
+      /\(create a new jupyter notebook\)/i
+    );
     await user.click(notebookDropdown);
 
     const existingNotebookOption = screen.getByText(notebookName);
     await user.click(existingNotebookOption);
 
     await waitFor(() => {
-      expect(screen.queryByLabelText('Notebook Name')).toBeNull();
+      expect(screen.queryByLabelText('Jupyter Notebook Name')).toBeNull();
     });
 
     await clickExportButton();
