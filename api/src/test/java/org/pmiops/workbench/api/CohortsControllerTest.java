@@ -80,7 +80,6 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -150,7 +149,6 @@ public class CohortsControllerTest {
   @Autowired CdrVersionService cdrVersionService;
   @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CloudBillingClient cloudBillingClient;
-  @Autowired MoodleService moodleService;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserService userService;
@@ -208,7 +206,6 @@ public class CohortsControllerTest {
     CohortBuilderService.class,
     CohortService.class,
     CohortQueryBuilder.class,
-    MoodleService.class,
     ConceptBigQueryService.class,
     DataSetService.class,
     DirectoryService.class,

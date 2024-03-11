@@ -126,7 +126,6 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -211,7 +210,6 @@ public class CohortReviewControllerTest {
   @Autowired FireCloudService fireCloudService;
   @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CloudBillingClient cloudBillingClient;
-  @Autowired MoodleService moodleService;
   @Autowired DataSetService dataSetService;
   @Autowired BigQueryService bigQueryService;
   @Autowired UserService userService;
@@ -298,7 +296,6 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
-    MoodleService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,

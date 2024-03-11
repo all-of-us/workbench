@@ -102,6 +102,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -109,7 +110,6 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -126,7 +126,6 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -139,6 +138,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -256,6 +256,7 @@ public class DataSetControllerTest {
     AccessTierServiceImpl.class,
     ObjectNameLengthServiceImpl.class,
     BucketAuditQueryService.class,
+    AnalysisLanguageMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -266,7 +267,6 @@ public class DataSetControllerTest {
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
-    MoodleService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,
@@ -576,7 +576,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -596,7 +596,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -615,7 +615,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(dataSet)));
   }
 
@@ -781,7 +781,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
-                        .kernelType(KernelTypeEnum.PYTHON)
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -796,7 +796,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -809,7 +809,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -825,46 +825,12 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
-  }
-
-  @Test
-  public void generateCode_pyhton() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.PYTHON.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("import pandas[\\S|\\s]*pandas\\.read_gbq");
-  }
-
-  @Test
-  public void generateCode_R() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.R.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("library[\\S|\\s]*read_bq_export_from_workspace_bucket");
   }
 
   @Test
@@ -983,7 +949,7 @@ public class DataSetControllerTest {
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .generateGenomicsAnalysisCode(true)
-            .kernelType(KernelTypeEnum.R);
+            .analysisLanguage(AnalysisLanguage.R);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
     verify(mockNotebooksService)
@@ -1376,7 +1342,7 @@ public class DataSetControllerTest {
         .dataSetRequest(dataSet)
         .newNotebook(true)
         .notebookName(notebookName)
-        .kernelType(KernelTypeEnum.PYTHON);
+        .analysisLanguage(AnalysisLanguage.PYTHON);
   }
 
   private DbCdrVersion findCdrVersionOrThrow(Workspace workspace) {

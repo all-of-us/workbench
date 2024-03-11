@@ -177,7 +177,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
-              .collect(Collectors.toList()));
+              .toList());
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
@@ -185,7 +185,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
-              .collect(Collectors.toList()));
+              .toList());
     }
     return criteriaList;
   }
@@ -419,8 +419,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             .collect(Collectors.toList());
 
     // filter strDomains to remove domains that have a cardCount by domain
-    domainNames.removeAll(
-        cardCounts.stream().map(DbCardCount::getDomainId).collect(Collectors.toList()));
+    domainNames.removeAll(cardCounts.stream().map(DbCardCount::getDomainId).toList());
 
     cardCounts.addAll(cbCriteriaDao.findDomainCounts(searchTerm, standard, domainNames));
 

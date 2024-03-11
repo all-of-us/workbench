@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { CSSProperties, useState } from 'react';
 
 import {
   AppType,
@@ -24,6 +24,7 @@ export interface CreateGKEAppButtonProps {
   onDismiss: () => void;
   username: string;
   billingStatus: BillingStatus;
+  style?: CSSProperties;
 }
 
 export function CreateGkeAppButton({
@@ -33,6 +34,7 @@ export function CreateGkeAppButton({
   onDismiss,
   username,
   billingStatus,
+  style,
 }: CreateGKEAppButtonProps) {
   const [creatingApp, setCreatingApp] = useState(false);
   const createEnabled =
@@ -83,7 +85,7 @@ export function CreateGkeAppButton({
   return (
     <TooltipTrigger disabled={createEnabled} content={tooltip}>
       {/* tooltip trigger needs a div for some reason */}
-      <div>
+      <div {...{ style }}>
         <Button
           id={`${appTypeString}-cloud-environment-create-button`}
           aria-label={`${appTypeString} cloud environment create button`}

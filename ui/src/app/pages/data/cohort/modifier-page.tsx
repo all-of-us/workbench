@@ -275,7 +275,7 @@ export const ModifierPage = fp.flow(
     };
 
     const initModifiersForm = async () => {
-      if (cohortContext.domain !== Domain.SURVEY) {
+      if (cohortContext.domain !== Domain.SURVEY && !cohortContext.temporal) {
         formState.push({
           name: ModifierType.NUM_OF_OCCURRENCES,
           label: 'Number Of Occurrence Dates',
@@ -293,7 +293,8 @@ export const ModifierPage = fp.flow(
             },
           ],
         });
-      } else {
+      }
+      if (cohortContext.domain === Domain.SURVEY) {
         const cdrVersion = findCdrVersion(
           workspace.cdrVersionId,
           cdrVersionTiersResponse

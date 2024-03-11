@@ -14,7 +14,8 @@ import {
   TemporalTime,
 } from 'generated/fetch';
 
-import { idsInUse } from './search-state.service';
+import { idsInUse } from 'app/pages/data/cohort/search-state.service';
+import { Selection } from 'app/pages/data/cohort/selection-list';
 
 export function typeDisplay(parameter): string {
   if (
@@ -305,6 +306,7 @@ export function parseCohortDefinition(json: string) {
             ancestorData,
             standard,
             variantId,
+            variantFilter,
           } = sp;
           return {
             parameterId,
@@ -320,7 +322,8 @@ export function parseCohortDefinition(json: string) {
             hasAncestorData: ancestorData,
             standard,
             variantId,
-          };
+            variantFilter,
+          } as Selection;
         });
         if (!grp.temporal) {
           item.temporalGroup = 0;
@@ -343,7 +346,7 @@ export function hasActiveItems(group: any) {
   return group.items.some((it) => it.status === 'active');
 }
 
-export function mapParameter(sp: any) {
+export function mapParameter(sp: Selection) {
   const {
     parameterId,
     name,
@@ -355,6 +358,7 @@ export function mapParameter(sp: any) {
     conceptId,
     hasAncestorData,
     standard,
+    variantFilter,
     variantId,
   } = sp;
   const param = <SearchParameter>{
@@ -369,6 +373,9 @@ export function mapParameter(sp: any) {
   };
   if (conceptId !== null && conceptId !== undefined) {
     param.conceptId = conceptId;
+  }
+  if (variantFilter !== null && variantFilter !== undefined) {
+    param.variantFilter = variantFilter;
   }
   if (variantId !== null && variantId !== undefined) {
     param.variantId = variantId;

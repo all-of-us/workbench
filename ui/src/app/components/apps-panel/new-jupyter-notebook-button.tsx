@@ -10,7 +10,7 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 import { AppsPanelButton } from './apps-panel-button';
 
-export const NewNotebookButton = (props: { workspace: Workspace }) => {
+export const NewJupyterNotebookButton = (props: { workspace: Workspace }) => {
   const { workspace } = props;
 
   const [showModal, setShowModal] = useState(false);

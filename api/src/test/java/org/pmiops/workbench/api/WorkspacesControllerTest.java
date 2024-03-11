@@ -195,6 +195,7 @@ import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -330,6 +331,7 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
+    BucketAuditQueryServiceImpl.class,
     CdrVersionService.class,
     CohortAnnotationDefinitionController.class,
     CohortAnnotationDefinitionMapperImpl.class,
@@ -353,6 +355,7 @@ public class WorkspacesControllerTest {
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
     LogsBasedMetricServiceFakeImpl.class,
+    ObjectNameLengthServiceImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
@@ -365,24 +368,23 @@ public class WorkspacesControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    ObjectNameLengthServiceImpl.class,
-    BucketAuditQueryServiceImpl.class,
   })
   @MockBean({
     AccessTierService.class,
     ActionAuditQueryService.class,
     AdminAuditor.class,
+    AnalysisLanguageMapperImpl.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
+    ChartQueryBuilder.class,
+    ChartService.class,
     CloudMonitoringService.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortQueryBuilder.class,
-    ChartService.class,
-    ChartQueryBuilder.class,
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,

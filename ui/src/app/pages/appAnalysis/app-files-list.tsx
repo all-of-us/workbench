@@ -146,7 +146,7 @@ export const AppFilesList = withCurrentWorkspace()(
       }
     }, [workspace, isTransferComplete]);
 
-    const displayMenu = (row) => {
+    const displayMenu = (row: FileDetail) => {
       return (
         <NotebookActionMenu
           resource={convertToResources([row], props.workspace)[0]}
@@ -159,14 +159,14 @@ export const AppFilesList = withCurrentWorkspace()(
       );
     };
 
-    const displayAppLogo = (row) => {
+    const displayAppLogo = (row: FileDetail) => {
       // Find App Type on the basis of file name extension
       const { name } = row;
       const appType = getAppInfoFromFileName(name).appType;
       return <AppBanner appType={appType} style={{ marginRight: '1em' }} />;
     };
 
-    const displayName = (row) => {
+    const displayName = (row: FileDetail) => {
       const {
         workspace: { namespace, id },
       } = props;
@@ -189,7 +189,7 @@ export const AppFilesList = withCurrentWorkspace()(
       );
     };
 
-    const displayLastModifiedTime = (row) => {
+    const displayLastModifiedTime = (row: FileDetail) => {
       const time = displayDateWithoutHours(row.lastModifiedTime);
       return <div>{time}</div>;
     };
@@ -242,7 +242,7 @@ export const AppFilesList = withCurrentWorkspace()(
                   style={styles.columns}
                   headerStyle={styles.tableHeader}
                   header='Name'
-                  field={'name'}
+                  field='name'
                   body={displayName}
                   bodyStyle={styles.rows}
                   filter
@@ -255,6 +255,8 @@ export const AppFilesList = withCurrentWorkspace()(
                   style={styles.columns}
                   bodyStyle={styles.rows}
                   header='Last Modified Time'
+                  field='lastModifiedTime'
+                  sortable
                   body={displayLastModifiedTime}
                 />
                 <Column

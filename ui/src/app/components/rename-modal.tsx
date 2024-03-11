@@ -77,18 +77,17 @@ export class RenameModal extends React.Component<Props, States> {
         newName
       );
 
-    const errors = validate(
+    return validate(
       { newName: newNameNoExtension },
       {
         newName: nameValidationFormat(lowerCaseNames, resourceType),
       }
     );
-    return errors;
   }
 
   private getFilteredListOfFileNamesWithoutExtension(
     existingNames: string[],
-    oldName,
+    oldName: string,
     newName: string
   ) {
     const oldNameExtension = this.getFileExtension(oldName);
@@ -100,8 +99,8 @@ export class RenameModal extends React.Component<Props, States> {
     // Filtering only files that have the same extension as the original file and stripping file extensions from the names
     const filteredExistingNamesNoExtension = existingNames
       .filter(
-        (name) =>
-          this.getFileExtension(name).toLowerCase() ===
+        (existingName) =>
+          this.getFileExtension(existingName).toLowerCase() ===
           oldNameExtension.toLowerCase()
       )
       .map(this.getFileNameWithoutExtension);
@@ -110,7 +109,7 @@ export class RenameModal extends React.Component<Props, States> {
     // User could be fixing a typo in the extension
     // Example: newName.r -> newName.R
     const isSameNameNoExtension = newNameNoExtension === oldNameNoExtension;
-    const isDifferentNameCaseSensitive = newName ? newName !== oldName : true;
+    const isDifferentNameCaseSensitive = newName !== oldName;
     const isSameExtensionCaseInsensitive =
       newNameExtension?.toLowerCase() === oldNameExtension.toLowerCase();
 

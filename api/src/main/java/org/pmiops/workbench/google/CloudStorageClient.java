@@ -52,8 +52,6 @@ public interface CloudStorageClient {
 
   JSONObject getAbsorbCredentials();
 
-  String getMoodleApiKey();
-
   String getCaptchaServerKey();
 
   FileDetail blobToFileDetail(Blob blob, String bucketName, Set<String> workspaceUsers);

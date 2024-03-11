@@ -93,13 +93,7 @@
   "absorb": {
     "externalDepartmentId": "Researchers",
     "samlIdentityProviderId": "C02celxus",
-    "samlServiceProviderId": "638082479253",
-    "redirectMoodleUser": true
-  },
-  "moodle": {
-    "trainingMigrationPauseActive": false,
-    "host": "aou.nnlm.gov",
-    "credentialsKeyV2": "moodle-key-v2.txt"
+    "samlServiceProviderId": "638082479253"
   },
   "access": {
     "enableComplianceTraining": true,
@@ -122,7 +116,7 @@
     "enableEventDateModifier": false,
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
-    "enableRStudioGKEApp": false,
+    "enableRStudioGKEApp": true,
     "enableSasGKEApp": false,
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,

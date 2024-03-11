@@ -611,7 +611,7 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       showIcon: () => true,
       style: { width: '36px' },
       tooltip: runtimeTooltip(
-        'Cloud Analysis Environment',
+        'Jupyter Cloud Environment',
         loadingError,
         userSuspended
       ),

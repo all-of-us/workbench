@@ -402,11 +402,11 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(
-            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("RSTUDIO"));
+            any(), eq(EgressRemediationAction.SUSPEND_COMPUTE), eq("RStudio"));
   }
 
   @Test
-  public void testRemediateGKEEgressEvent_skipCromwellApp() throws Exception {
+  public void testRemediateGKEEgressEvent_skipCromwellApp() {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
@@ -12,12 +13,14 @@ export interface OpenGkeAppButtonProps {
   billingStatus: BillingStatus;
   workspace: Workspace;
   onClose: () => void;
+  style?: CSSProperties;
 }
 export function OpenGkeAppButton({
   userApp,
   billingStatus,
   workspace: { namespace, id },
   onClose,
+  style,
 }: OpenGkeAppButtonProps) {
   const [navigate] = useNavigation();
 
@@ -31,7 +34,7 @@ export function OpenGkeAppButton({
   return (
     <TooltipTrigger disabled={openEnabled} content={tooltip}>
       {/* tooltip trigger needs a div for some reason */}
-      <div>
+      <div {...{ style }}>
         <Button
           id={`${appTypeString}-cloud-environment-open-button`}
           aria-label={`${appTypeString} cloud environment open button`}

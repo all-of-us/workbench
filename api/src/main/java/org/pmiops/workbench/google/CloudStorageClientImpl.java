@@ -48,11 +48,6 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
-  public String getMoodleApiKey() {
-    return getCredentialsBucketString(configProvider.get().moodle.credentialsKeyV2);
-  }
-
-  @Override
   public String getImageUrl(String imageName) {
     return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + imageName;
   }

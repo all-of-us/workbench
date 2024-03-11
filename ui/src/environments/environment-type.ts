@@ -60,10 +60,6 @@ export interface EnvironmentBase {
   shouldShowDisplayTag: boolean;
   // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
   allowTestAccessTokenOverride: boolean;
-  // Show the new Analysis Tab in the UI
-  showNewAnalysisTab: boolean;
-  // Show the funnel plot icon in the cohort builder UI
-  showCBFunnelPlot: boolean;
   // Pass auth token in iframe url
   // WARNING: This is insecure and should only be enabled for local environments
   tanagraLocalAuth: boolean;

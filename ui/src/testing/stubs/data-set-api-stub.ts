@@ -2,12 +2,10 @@ import {
   DataDictionaryEntry,
   DataSet,
   DataSetApi,
-  DataSetCodeResponse,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
   DomainValuesResponse,
   EmptyResponse,
-  KernelTypeEnum,
   ReadOnlyNotebookResponse,
 } from 'generated/fetch';
 
@@ -40,16 +38,6 @@ export class DataSetApiStub extends DataSetApi {
 
   getDataSet(): Promise<DataSet> {
     return new Promise<DataSet>((resolve) => resolve(this.getDatasetMock));
-  }
-
-  generateCode(
-    workspaceNamespace: string,
-    workspaceId: string,
-    kernelType: string
-  ): Promise<DataSetCodeResponse> {
-    return new Promise<DataSetCodeResponse>((resolve) => {
-      resolve({ kernelType: KernelTypeEnum[kernelType], code: '' });
-    });
   }
 
   previewExportToNotebook(): Promise<ReadOnlyNotebookResponse> {
