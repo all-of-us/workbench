@@ -109,7 +109,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
-  private static final String SAS_CDR_ENV_VARIABLE = "TODO";
+  // already handled in the preamble to the SAS code
+  private static final String SAS_CDR_ENV_VARIABLE = "";
   private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
       Map.of(
           AnalysisLanguage.R,
@@ -1605,19 +1606,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         return List.of(
             """
             %let workspacecdr = %sysget(WORKSPACE_CDR);
-            %put This turns to: &workspacecdr;
+            %put This workspace's CDR is: &workspacecdr;
             %let googleproject = %sysget(GOOGLE_PROJECT);
-            %put This turns to: &googleproject;/* Define the BigQuery SQL query */
+            %put This workspace's Google Project is: &googleproject;
+            
+            /* Define the BigQuery SQL query */
             proc sql;
                connect to bigquery (PROJECT="&googleproject." schema="&workspacecdr." mode='Performance');
 
                /* Fetch and store the results in a SAS dataset */
                create table mydata as
                select * from connection to bigquery
-               (
-               """
+               ("""
                 + sqlQuery
-                + """
+                +
+               """
                );
 
                disconnect from bigquery;
