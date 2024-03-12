@@ -74,7 +74,6 @@ const defaultServerConfig: ConfigResponse = {
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
-  enableRStudioGKEApp: true,
   enableSasGKEApp: true,
   tanagraBaseUrl: 'https://test.fake-research-aou.org',
   enableGKEAppPausing: false,
