@@ -51,7 +51,7 @@ class AppsApiTest {
                       body.object(
                           "diskConfig",
                           diskConfig -> {
-                            diskConfig.stringType("diskType", "SSD");
+                            diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
                             diskConfig.numberType("size");
                           });
                       body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
@@ -118,8 +118,8 @@ class AppsApiTest {
                       body.object(
                           "diskConfig",
                           diskConfig -> {
-                            diskConfig.stringType("diskType", "SSD");
-                            diskConfig.numberType("size", 100);
+                            diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
+                            diskConfig.numberType("size");
                           });
                       body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
                       body.array("extraArgs", extraArgs -> {});
@@ -287,9 +287,9 @@ class AppsApiTest {
         .uponReceiving("a request to list apps")
         .method("GET")
         .path("/api/google/v1/apps/googleProject")
-        .matchQuery("includeDeleted", "false")
-        .matchQuery("includeLabels", "")
-        .matchQuery("role", "creator")
+        .matchQuery("includeDeleted", "true|false")
+        .query("includeLabels")
+        .query("role")
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
@@ -314,9 +314,9 @@ class AppsApiTest {
         .uponReceiving("a request to list apps")
         .method("GET")
         .path("/api/google/v1/apps/googleProject")
-        .matchQuery("includeDeleted", "false")
-        .matchQuery("includeLabels", "")
-        .matchQuery("role", "creator")
+        .matchQuery("includeDeleted", "true|false")
+        .query("includeLabels")
+        .query("role")
         .willRespondWith()
         .status(404)
         .headers(contentTypeJsonHeader)
