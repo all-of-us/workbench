@@ -39,15 +39,13 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            // These string matchers are used to ensure these fields are present and have the
-            // correct format. The third argument is the value that is stored in the contract.
-            // StringType will use a random string each time, but there is no way to ensure that
-            // the string is a valid URL.
-            body.stringMatcher("jupyterUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
-            body.stringMatcher(
-                "jupyterStartUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
+            // Requires a valid URL, so an example is passed for use in tests
+            body.stringType("jupyterUserScriptUri", "http://example.com");
+            body.stringType("jupyterStartUserScriptUri", "http://example.com");
             body.booleanType("autopause");
-            body.numberType("autopauseThreshold");
+            // Requires a value that within a specified range, so an example is passed for use in
+            // tests.
+            body.numberType("autopauseThreshold", 30);
             body.stringType("defaultClientId");
             body.stringMatcher(
                 "toolDockerImage", dockerRegex, "us.gcr.io/example/image-for-contract-test:2.2.7");
