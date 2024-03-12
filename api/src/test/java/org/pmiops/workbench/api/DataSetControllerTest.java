@@ -613,7 +613,7 @@ public class DataSetControllerTest {
     assertThat(text).contains("proc sql;"); // used by SAS
     assertThat(html).isNotEqualTo(testHtml); // does not use convertJupyterNotebookToHtml()
     assertThat(html).contains("proc sql;");
-    assertThat(html).isNotEqualTo(text);  // html adds </br> to line endings
+    assertThat(html).isNotEqualTo(text); // html adds </br> to line endings
   }
 
   @Test
@@ -830,6 +830,35 @@ public class DataSetControllerTest {
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
+  }
+
+  @Test
+  public void exportToNotebook_missingLanguage() {
+    DataSetExportRequest request = setUpValidDataSetExportRequest().analysisLanguage(null);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Analysis language is required");
+  }
+
+  @Test
+  public void exportToNotebook_SAS() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Cannot export to notebook for SAS");
   }
 
   @Test
