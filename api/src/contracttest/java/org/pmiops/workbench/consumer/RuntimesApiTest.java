@@ -125,7 +125,7 @@ class RuntimesApiTest {
                     body -> {
                       body.stringType("runtimeName");
                       body.stringType("status");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.stringType("proxyUrl");
                       body.array("errors", errors -> {});
                       body.object(
@@ -196,7 +196,7 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 30);
                     })
                 .build())
         .willRespondWith()
@@ -230,7 +230,7 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
