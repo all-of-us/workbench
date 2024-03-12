@@ -946,7 +946,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (!analysisLanguage.equals(AnalysisLanguage.PYTHON)) {
       return List.of(
           String.format(
-              "# Code generation for genomic analysis tools is not supported for %s\n"
+              "# Code generation for genomic analysis tools is not supported in %s\n"
                   + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel",
               analysisLanguage));
     }
