@@ -8147,9 +8147,6 @@ components:
         eraCommonsBypassTime:
           type: integer
           format: int64
-        rasLinkLoginGovBypassTime:
-          type: integer
-          format: int64
         identityBypassTime:
           type: integer
           format: int64

@@ -139,8 +139,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getPublicationConfirmationBypassTime();
 
-    Timestamp getRasLinkLoginGovBypassTime();
-
     Timestamp getIdentityBypassTime();
 
     String getAccessTierShortNames();
@@ -172,7 +170,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "uamprofile.profile_confirmation_bypass_time AS profileConfirmationBypassTime, "
               + "uampublication.publication_confirmation_bypass_time AS publicationConfirmationBypassTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
-              + "uamr.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
               + "uami.identity_bypass_time AS identityBypassTime, "
               + "t.access_tier_short_names AS accessTierShortNames "
               + "FROM user u "
