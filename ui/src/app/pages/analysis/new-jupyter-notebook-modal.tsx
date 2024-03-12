@@ -85,7 +85,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         label: 'New Notebook Modal',
       }}
     >
-      <ModalTitle>New Notebook</ModalTitle>
+      <ModalTitle>New Jupyter Notebook</ModalTitle>
       <ModalBody>
         <div style={headerStyles.formLabel}>Name:</div>
         <TextInput

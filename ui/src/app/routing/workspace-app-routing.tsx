@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
@@ -13,7 +12,6 @@ import {
   LeoApplicationType,
   LeonardoAppLauncher,
 } from 'app/pages/analysis/leonardo-app-launcher';
-import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortPage } from 'app/pages/data/cohort/cohort-page';
@@ -77,10 +75,6 @@ const InteractiveNotebookPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(InteractiveNotebook);
-const NotebookListPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(NotebookList);
 const LeonardoAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -154,25 +148,14 @@ export const WorkspaceRoutes = () => {
         path={`${path}/${analysisTabName}`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        {environment.showNewAnalysisTab ? (
-          <AppsListPage
-            routeData={{
-              title: 'View Analysis Files',
-              pageKey: analysisTabName,
-              workspaceNavBarTab: analysisTabName,
-              breadcrumb: BreadcrumbType.Workspace,
-            }}
-          />
-        ) : (
-          <NotebookListPage
-            routeData={{
-              title: 'View Notebooks',
-              pageKey: analysisTabName,
-              workspaceNavBarTab: analysisTabName,
-              breadcrumb: BreadcrumbType.Workspace,
-            }}
-          />
-        )}
+        <AppsListPage
+          routeData={{
+            title: 'View Analysis Files',
+            pageKey: analysisTabName,
+            workspaceNavBarTab: analysisTabName,
+            breadcrumb: BreadcrumbType.Workspace,
+          }}
+        />
       </AppRoute>
       <AppRoute
         exact

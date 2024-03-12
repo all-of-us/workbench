@@ -16,7 +16,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Button, Clickable } from 'app/components/buttons';
 import { ComboChart } from 'app/components/combo-chart.component';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
@@ -657,27 +656,25 @@ export const ListOverview = fp.flow(
                     />
                   </TooltipTrigger>
                 )}
-                {environment.showCBFunnelPlot && (
-                  <TooltipTrigger content={<div>View Funnel Plot</div>}>
-                    <Clickable
-                      style={
-                        this.disableFunnelPlot
-                          ? { ...styles.actionIcon, ...styles.disabled }
-                          : styles.actionIcon
-                      }
-                      onClick={(e) => {
-                        AnalyticsTracker.CohortBuilder.ViewFunnelPlot();
-                        this.funnelOverlay.toggle(e);
-                      }}
-                    >
-                      <ClrIcon
-                        shape='filter-grid-circle'
-                        className='is-solid'
-                        size={30}
-                      />
-                    </Clickable>
-                  </TooltipTrigger>
-                )}
+                <TooltipTrigger content={<div>View Funnel Plot</div>}>
+                  <Clickable
+                    style={
+                      this.disableFunnelPlot
+                        ? { ...styles.actionIcon, ...styles.disabled }
+                        : styles.actionIcon
+                    }
+                    onClick={(e) => {
+                      AnalyticsTracker.CohortBuilder.ViewFunnelPlot();
+                      this.funnelOverlay.toggle(e);
+                    }}
+                  >
+                    <ClrIcon
+                      shape='filter-grid-circle'
+                      className='is-solid'
+                      size={30}
+                    />
+                  </Clickable>
+                </TooltipTrigger>
                 <TooltipTrigger content={<div>Delete cohort</div>}>
                   <Clickable
                     style={

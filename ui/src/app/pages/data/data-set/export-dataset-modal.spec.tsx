@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import {
+  AnalysisLanguage,
   DataSetApi,
   DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
@@ -25,7 +26,7 @@ import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-describe('ExportDatasetModal', () => {
+describe(ExportDatasetModal.name, () => {
   let dataset;
   let workspace;
   let testProps;
@@ -62,7 +63,7 @@ describe('ExportDatasetModal', () => {
   }
 
   function findNotebookNameInput() {
-    return screen.getByLabelText('Notebook Name');
+    return screen.getByLabelText('Jupyter Notebook Name');
   }
 
   const waitUntilDoneLoading = async () =>
@@ -145,7 +146,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -174,7 +175,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -259,14 +260,16 @@ describe('ExportDatasetModal', () => {
 
     await waitUntilDoneLoading();
 
-    const notebookDropdown = screen.getByText(/\(create a new notebook\)/i);
+    const notebookDropdown = screen.getByText(
+      /\(create a new jupyter notebook\)/i
+    );
     await user.click(notebookDropdown);
 
     const existingNotebookOption = screen.getByText(notebookName);
     await user.click(existingNotebookOption);
 
     await waitFor(() => {
-      expect(screen.queryByLabelText('Notebook Name')).toBeNull();
+      expect(screen.queryByLabelText('Jupyter Notebook Name')).toBeNull();
     });
 
     await clickExportButton();
@@ -278,7 +281,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: false,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.R,
+        analysisLanguage: AnalysisLanguage.R,
       })
     );
   });
@@ -315,7 +318,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
       })
     );
 
@@ -330,7 +333,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.R,
+        analysisLanguage: AnalysisLanguage.R,
       })
     );
 
@@ -431,14 +434,18 @@ describe('ExportDatasetModal', () => {
     await changeNotebookName(notebookName);
     await clickExportButton();
 
-    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
-      dataSetRequest: expectedDatasetRequest,
-      newNotebook: true,
-      notebookName: expectedNotebookName,
-      kernelType: KernelTypeEnum.PYTHON,
-      generateGenomicsAnalysisCode: true,
-      genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
-    });
+    expect(exportSpy).toHaveBeenCalledWith(
+      workspace.namespace,
+      workspace.id,
+      expect.objectContaining({
+        dataSetRequest: expectedDatasetRequest,
+        newNotebook: true,
+        notebookName: expectedNotebookName,
+        analysisLanguage: AnalysisLanguage.PYTHON,
+        generateGenomicsAnalysisCode: true,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
+      })
+    );
   });
 
   it('Auto reload code preview if genomics analysis tool is changed', async () => {
@@ -466,7 +473,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
       })
     );
@@ -481,7 +488,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool:
           DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
       })
@@ -498,7 +505,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.PYTHON,
+        analysisLanguage: AnalysisLanguage.PYTHON,
         genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );

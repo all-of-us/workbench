@@ -68,6 +68,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
@@ -81,7 +82,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
-import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -104,13 +104,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
       "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
+
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
-  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
-      ImmutableMap.of(
-          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+  private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
+      Map.of(
+          AnalysisLanguage.R, R_CDR_ENV_VARIABLE, AnalysisLanguage.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String MULTIPLE_DOMAIN_QUERY =
@@ -914,7 +916,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             dataSetExportRequest.getDataSetRequest().getName(),
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
-                            dataSetExportRequest.getKernelType(),
+                            dataSetExportRequest.getAnalysisLanguage(),
                             bigQueryService.getTableFieldsFromDomain(
                                 Domain.fromValue(entry.getKey())))
                             .stream()),
@@ -933,7 +935,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "The workspace CDR version does not have whole genome data");
     }
 
-    if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
+    if (dataSetExportRequest.getAnalysisLanguage().equals(AnalysisLanguage.R)) {
       return generateGenomicsAnalysisCommentForR();
     }
 
@@ -1409,9 +1411,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private static String generateSqlWithEnvironmentVariables(
-      String query, KernelTypeEnum kernelTypeEnum) {
+      String query, AnalysisLanguage analysisLanguage) {
     return new BasicFormatterImpl()
-        .format(query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum)));
+        .format(
+            query.replaceAll(
+                CDR_STRING, ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP.get(analysisLanguage)));
   }
 
   // This takes the query, and string replaces in the values for each of the named
@@ -1463,7 +1467,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String dataSetName,
       String cdrVersionName,
       String qualifier,
-      KernelTypeEnum kernelTypeEnum,
+      AnalysisLanguage analysisLanguage,
       FieldList fieldList) {
 
     // Define [namespace]_sql, query parameters (as either [namespace]_query_config
@@ -1476,7 +1480,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
             dataSetName, domainAsString, cdrVersionName);
 
-    switch (kernelTypeEnum) {
+    switch (analysisLanguage) {
       case PYTHON:
         return ImmutableList.of(
             "import pandas\n"
@@ -1487,7 +1491,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "sql = \"\"\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                        queryJobConfiguration.getQuery(), analysisLanguage),
                     queryJobConfiguration.getNamedParameters())
                 + "\"\"\"\n\n"
                 + namespace
@@ -1532,7 +1536,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "sql <- paste(\""
                 + fillInQueryParams(
                     generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                        queryJobConfiguration.getQuery(), analysisLanguage),
                     queryJobConfiguration.getNamedParameters())
                 + "\", sep=\"\")\n\n"
                 + "# Formulate a Cloud Storage destination path for the data exported from BigQuery.\n"
@@ -1597,7 +1601,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + namespace
                 + "df, 5)");
       default:
-        throw new BadRequestException("Language " + kernelTypeEnum + " not supported.");
+        throw new BadRequestException("Language " + analysisLanguage + " not supported.");
     }
   }
 

@@ -21,6 +21,7 @@ import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.SumologicEgressEvent;
@@ -78,7 +79,7 @@ public class EgressSumologicRemediationService extends EgressRemediationService 
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     String environmentType =
         appServiceNameToAppType(Strings.nullToEmpty(originalEvent.getSrcGkeServiceName()))
-            .map(AppType::toString)
+            .map(LeonardoAppUtils::appDisplayName)
             .orElse("Jupyter");
     mailService.sendEgressRemediationEmail(user, action, environmentType);
   }

@@ -33,12 +33,16 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            body.stringType("jupyterUserScriptUri");
-            body.stringType("jupyterStartUserScriptUri");
+            // Requires a valid URL, so an example is passed for use in tests
+            body.stringType("jupyterUserScriptUri", "http://example.com");
+            body.stringType("jupyterStartUserScriptUri", "http://example.com");
             body.booleanType("autopause");
-            body.numberType("autopauseThreshold");
+            // Requires a value that within a specified range, so an example is passed for use in
+            // tests.
+            body.numberType("autopauseThreshold", 30);
             body.stringType("defaultClientId");
-            body.stringType("toolDockerImage");
+            // Requires a valid Docker image path, so an example is passed for use in tests
+            body.stringType("toolDockerImage", "us.gcr.io/example/image-for-contract-test:2.2.7");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -121,7 +125,7 @@ class RuntimesApiTest {
                     body -> {
                       body.stringType("runtimeName");
                       body.stringType("status");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.stringType("proxyUrl");
                       body.array("errors", errors -> {});
                       body.object(
@@ -192,7 +196,7 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 30);
                     })
                 .build())
         .willRespondWith()
@@ -226,11 +230,12 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
-                            runtimeConfig.stringType("cloudService");
+                            runtimeConfig.stringMatcher(
+                                "cloudService", "(DATAPROC|GCE)", CloudServiceEnum.GCE.name());
                             runtimeConfig.stringType("machineType");
                             runtimeConfig.numberType("diskSize");
                           });
