@@ -941,25 +941,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "The workspace CDR version does not have whole genome data");
     }
 
-    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
-    if (!analysisLanguage.equals(AnalysisLanguage.PYTHON)) {
-      return List.of(
-          String.format(
-              "# Code generation for genomic analysis tools is not supported in %s\n"
-                  + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel",
-              analysisLanguage));
-    }
-
-    switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
-      case HAIL:
-        return generateHailCode(qualifier, dataSetExportRequest);
-      case PLINK:
-        return generatePlinkCode(qualifier, dataSetExportRequest);
-      case NONE:
-        return generateDownloadVcfCode(qualifier, dataSetExportRequest);
-      default:
-        throw new BadRequestException("Invalid Genomics Analysis Tool");
-    }
+    return switch (dataSetExportRequest.getAnalysisLanguage()) {
+      case R -> List.of(
+          """
+          # Code generation for genomic analysis tools is not supported in R.
+          # The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel.
+          """);
+      case SAS -> List.of(
+          """
+          /* Code generation for genomic analysis tools is not supported in SAS.
+             The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel. */
+          """);
+      case PYTHON -> switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
+        case HAIL -> generateHailCode(qualifier, dataSetExportRequest);
+        case PLINK -> generatePlinkCode(qualifier, dataSetExportRequest);
+        case NONE -> generateDownloadVcfCode(qualifier, dataSetExportRequest);
+        default -> throw new BadRequestException("Invalid Genomics Analysis Tool");
+      };
+    };
   }
 
   // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
