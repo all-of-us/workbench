@@ -262,11 +262,15 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    if (analysisLanguage == null) {
+      throw new BadRequestException("Analysis language is required");
+    }
+
     KernelTypeEnum kernelType =
         analysisLanguageMapper.analysisLanguageToKernelType(
             dataSetExportRequest.getAnalysisLanguage());
     if (kernelType == null) {
-      throw new BadRequestException("Cannot export to notebook for " + analysisLanguage.toString());
+      throw new BadRequestException("Cannot export to notebook for " + analysisLanguage);
     }
 
     DbWorkspace dbWorkspace =

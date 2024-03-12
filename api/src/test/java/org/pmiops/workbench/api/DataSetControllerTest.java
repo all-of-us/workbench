@@ -699,6 +699,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -713,6 +714,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -726,7 +728,8 @@ public class DataSetControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    DataSetExportRequest request = new DataSetExportRequest();
+    DataSetExportRequest request =
+        new DataSetExportRequest().analysisLanguage(AnalysisLanguage.PYTHON);
 
     Throwable exception =
         assertThrows(
@@ -749,6 +752,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -764,6 +768,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
@@ -860,6 +865,7 @@ public class DataSetControllerTest {
 
     DataSetExportRequest request =
         new DataSetExportRequest()
+            .analysisLanguage(AnalysisLanguage.PYTHON)
             .dataSetRequest(dataSet)
             .newNotebook(false)
             .notebookName(notebookName);
