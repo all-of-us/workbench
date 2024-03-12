@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { AppType } from 'generated/fetch';
 
-import { styles } from 'app/components/common-env-conf-panels/styles';
+import { SupportNoteSection } from 'app/components/common-env-conf-panels/support-note-section';
 import { InfoMessage } from 'app/components/messages';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -31,16 +31,7 @@ const SupportNote = () => (
         Access your files in RStudio through the Output pane.
       </p>
     </InfoMessage>
-    <div style={{ ...styles.controlSection }}>
-      <div style={{ fontWeight: 'bold' }}>RStudio support articles</div>
-      {rStudioSupportArticles.map((article, index) => (
-        <div key={index} style={{ display: 'block' }}>
-          <a href={article.link} target='_blank'>
-            {index + 1}. {article.text}
-          </a>
-        </div>
-      ))}
-    </div>
+    <div>{SupportNoteSection('RStudio', rStudioSupportArticles)}</div>
   </>
 );
 

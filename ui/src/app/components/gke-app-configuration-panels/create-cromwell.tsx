@@ -3,6 +3,7 @@ import * as React from 'react';
 import { AppType } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
+import { SupportNoteSection } from 'app/components/common-env-conf-panels/support-note-section';
 import { WarningMessage } from 'app/components/messages';
 import {
   CROMWELL_INTRO_LINK,
@@ -87,6 +88,7 @@ export const CreateCromwell = (props: CommonCreateGkeAppProps) => (
       SupportNote,
       CreateAppText,
     }}
+    SupportNote={() => SupportNoteSection('Cromwell', cromwellSupportArticles)}
     appType={AppType.CROMWELL}
   />
 );
