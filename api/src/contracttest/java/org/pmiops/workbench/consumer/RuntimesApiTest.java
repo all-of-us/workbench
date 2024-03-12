@@ -33,17 +33,16 @@ class RuntimesApiTest {
   static LambdaDslJsonBody createBody =
       newJsonBody(
           (body) -> {
-            // These string matchers are used to ensure these fields are present and have the
-            // correct format. The third argument is the value that is stored in the contract.
-            // StringType will use a random string each time, but there is no way to ensure that
-            // the string is a valid URL.
-            body.stringMatcher("jupyterUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
-            body.stringMatcher(
-                "jupyterStartUserScriptUri", "\\bhttps?://\\S+\\b", "http://example.com");
+            // Requires a valid URL, so an example is passed for use in tests
+            body.stringType("jupyterUserScriptUri", "http://example.com");
+            body.stringType("jupyterStartUserScriptUri", "http://example.com");
             body.booleanType("autopause");
-            body.numberType("autopauseThreshold");
+            // Requires a value that within a specified range, so an example is passed for use in
+            // tests.
+            body.numberType("autopauseThreshold", 30);
             body.stringType("defaultClientId");
-            body.stringType("toolDockerImage");
+            // Requires a valid Docker image path, so an example is passed for use in tests
+            body.stringType("toolDockerImage", "us.gcr.io/example/image-for-contract-test:2.2.7");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -126,7 +125,7 @@ class RuntimesApiTest {
                     body -> {
                       body.stringType("runtimeName");
                       body.stringType("status");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.stringType("proxyUrl");
                       body.array("errors", errors -> {});
                       body.object(
@@ -197,7 +196,7 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 30);
                     })
                 .build())
         .willRespondWith()
@@ -231,7 +230,7 @@ class RuntimesApiTest {
                     body -> {
                       body.booleanType("allowStop");
                       body.booleanType("autopause");
-                      body.numberType("autopauseThreshold");
+                      body.numberType("autopauseThreshold", 50);
                       body.object(
                           "runtimeConfig",
                           runtimeConfig -> {
