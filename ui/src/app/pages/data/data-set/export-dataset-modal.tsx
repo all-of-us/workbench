@@ -39,6 +39,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { validateNewNotebookName } from 'app/utils/resources';
+import { serverConfigStore } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -194,7 +195,7 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const loadHtmlStringIntoIFrame = (html) => {
+  const loadHtmlStringIntoIFrame = (html: string) => {
     const placeholder = document.createElement('html');
     placeholder.innerHTML = html;
 
@@ -264,10 +265,7 @@ export const ExportDatasetModal = ({
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (nameWithoutSuffix === '') {
-      setCreatingNewNotebook(true);
-    } else {
-      setCreatingNewNotebook(false);
+    if (nameWithoutSuffix !== '') {
       setLoadingNotebookKernel(true);
       notebooksApi()
         .getNotebookKernel(
@@ -276,6 +274,7 @@ export const ExportDatasetModal = ({
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
         .then((resp) => {
+          // TODO test this
           // can compare directly for now, because they exactly match
           if (resp.kernelType !== analysisLanguage) {
             setAnalysisLanguage(resp.kernelType);
@@ -351,6 +350,7 @@ export const ExportDatasetModal = ({
     );
   }
 
+  const { enableSasGKEApp } = serverConfigStore.get().config;
   return (
     <AnimatedModal
       loading={isExporting || isNotebooksLoading || loadingNotebookKernel}
@@ -364,7 +364,8 @@ export const ExportDatasetModal = ({
               You can export the code to an existing or new{' '}
               <b>Jupyter Notebook in {JUPYTER_FILE_EXT} format</b>. You can also
               copy the generated code to the clipboard and paste into any
-              application in the workbench, such as RStudio.
+              application in the workbench, such as RStudio
+              {enableSasGKEApp && ' and SAS'}.
             </div>
             <div style={headerStyles.formLabel}>
               Select programming language
@@ -393,7 +394,9 @@ export const ExportDatasetModal = ({
 
             <div style={{ marginTop: '1.5rem' }}>
               <Select
-                isDisabled={shouldDisable}
+                isDisabled={
+                  shouldDisable || analysisLanguage === AnalysisLanguage.SAS
+                }
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
@@ -401,20 +404,21 @@ export const ExportDatasetModal = ({
               />
             </div>
 
-            {creatingNewNotebook && (
-              <label>
-                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
-                  Jupyter Notebook Name
-                </SmallHeader>
-                <TextInput
-                  onChange={setNotebookNameWithoutSuffix}
-                  onBlur={setNotebookNameWithoutSuffix}
-                  value={notebookNameWithoutSuffix}
-                  data-test-id='notebook-name-input'
-                  disabled={shouldDisable}
-                />
-              </label>
-            )}
+            {creatingNewNotebook &&
+              analysisLanguage !== AnalysisLanguage.SAS && (
+                <label>
+                  <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
+                    Jupyter Notebook Name
+                  </SmallHeader>
+                  <TextInput
+                    onChange={setNotebookNameWithoutSuffix}
+                    onBlur={setNotebookNameWithoutSuffix}
+                    value={notebookNameWithoutSuffix}
+                    data-test-id='notebook-name-input'
+                    disabled={shouldDisable}
+                  />
+                </label>
+              )}
 
             {hasWgs() && analysisLanguage === AnalysisLanguage.PYTHON && (
               <React.Fragment>
@@ -441,7 +445,7 @@ export const ExportDatasetModal = ({
                 type='link'
                 disabled={isCodePreviewLoading || shouldDisable}
                 data-test-id='code-preview-button'
-                onClick={() => onCodePreviewClick()}
+                onClick={onCodePreviewClick}
                 style={{ padding: 0, margin: 0 }}
               >
                 {showCodePreview ? 'Hide Code Preview' : 'See Code Preview'}

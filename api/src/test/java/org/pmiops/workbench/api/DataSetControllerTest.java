@@ -132,6 +132,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -210,15 +211,15 @@ public class DataSetControllerTest {
   @Autowired private FirecloudMapper firecloudMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private CloudBillingClient cloudBillingClient;
+  @MockBean private BucketAuditQueryService bucketAuditQueryService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
+  @MockBean private CloudBillingClient cloudBillingClient;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
   @MockBean private NotebooksService mockNotebooksService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -275,6 +276,7 @@ public class DataSetControllerTest {
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,
+    TanagraApi.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
@@ -561,6 +563,60 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void previewExportToNotebook_python() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(), workspace.getName(), setUpValidDataSetExportRequest())
+            .getBody();
+
+    assertThat(response.getText()).contains("import pandas"); // used by python
+    assertThat(response.getHtml()).isEqualTo(testHtml);
+  }
+
+  @Test
+  public void previewExportToNotebook_R() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.R))
+            .getBody();
+
+    assertThat(response.getText()).contains("library(bigrquery)"); // used by R
+    assertThat(response.getHtml()).isEqualTo(testHtml);
+  }
+
+  @Test
+  public void previewExportToNotebook_SAS() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS))
+            .getBody();
+
+    var text = response.getText();
+    var html = response.getHtml();
+
+    assertThat(text).contains("proc sql;"); // used by SAS
+    assertThat(html).isNotEqualTo(testHtml); // does not use convertJupyterNotebookToHtml()
+    assertThat(html).contains("proc sql;");
+    assertThat(html).isNotEqualTo(text); // html adds </br> to line endings
+  }
+
+  @Test
   public void testGetQueryFailsWithNoCohort() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
@@ -699,6 +755,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -713,6 +770,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -726,7 +784,8 @@ public class DataSetControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    DataSetExportRequest request = new DataSetExportRequest();
+    DataSetExportRequest request =
+        new DataSetExportRequest().analysisLanguage(AnalysisLanguage.PYTHON);
 
     Throwable exception =
         assertThrows(
@@ -749,6 +808,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -764,11 +824,41 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
+  }
+
+  @Test
+  public void exportToNotebook_missingLanguage() {
+    DataSetExportRequest request = setUpValidDataSetExportRequest().analysisLanguage(null);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Analysis language is required");
+  }
+
+  @Test
+  public void exportToNotebook_SAS() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Cannot export to notebook for SAS");
   }
 
   @Test
@@ -860,6 +950,7 @@ public class DataSetControllerTest {
 
     DataSetExportRequest request =
         new DataSetExportRequest()
+            .analysisLanguage(AnalysisLanguage.PYTHON)
             .dataSetRequest(dataSet)
             .newNotebook(false)
             .notebookName(notebookName);
