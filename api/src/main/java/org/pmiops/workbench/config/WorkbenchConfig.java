@@ -170,15 +170,8 @@ public class WorkbenchConfig {
     // The workspace GCS bucket location
     public String workspaceBucketLocation;
 
-    public RuntimeImages runtimeImages;
-
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
     public String gceVmZone;
-  }
-
-  public static class RuntimeImages {
-    public List<String> gce;
-    public List<String> dataproc;
   }
 
   public static class AuthConfig {

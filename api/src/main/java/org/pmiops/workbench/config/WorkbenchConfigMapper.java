@@ -19,27 +19,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     config = MapStructConfig.class,
     uses = {AccessModuleNameMapper.class})
 public interface WorkbenchConfigMapper {
-  default RuntimeImage dataprocToModel(String imageName) {
-    return new RuntimeImage().cloudService(CloudServiceEnum.DATAPROC.toString()).name(imageName);
-  }
-
-  default RuntimeImage gceToModel(String imageName) {
-    return new RuntimeImage().cloudService(CloudServiceEnum.GCE.toString()).name(imageName);
-  }
-
-  @BeforeMapping
-  default void mapRuntimeImages(WorkbenchConfig source, @MappingTarget ConfigResponse target) {
-    target.runtimeImages(
-        Stream.concat(
-                source.firecloud.runtimeImages.dataproc.stream().map(this::dataprocToModel),
-                source.firecloud.runtimeImages.gce.stream().map(this::gceToModel))
-            .collect(Collectors.toList()));
-  }
-
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
-  // handled by mapRuntimeImages()
-  @Mapping(target = "runtimeImages", ignore = true)
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
