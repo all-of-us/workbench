@@ -42,8 +42,7 @@ class RuntimesApiTest {
             body.numberType("autopauseThreshold", 30);
             body.stringType("defaultClientId");
             // Requires a valid Docker image path, so an example is passed for use in tests
-            body.stringType(
-                "toolDockerImage", "us.gcr.io/example/image-for-contract-test:2.2.7");
+            body.stringType("toolDockerImage", "us.gcr.io/example/image-for-contract-test:2.2.7");
           });
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
