@@ -317,7 +317,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 AnalyticsTracker.Workspaces.Delete();
                 this.deleteWorkspace();
               }}
-              workspaceNamespace={workspace.namespace}
               workspaceName={workspace.name}
             />
           )}
