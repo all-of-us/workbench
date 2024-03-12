@@ -238,7 +238,9 @@ public class DataSetController implements DataSetApiDelegate {
     if (analysisLanguage == AnalysisLanguage.SAS) {
       responseHtml =
           codeCells.stream()
+              // within a code cell
               .map(line -> line.replace(System.lineSeparator(), "<br/>"))
+              // joining the code cells
               .collect(Collectors.joining("<br/>"));
     } else {
       KernelTypeEnum kernelType =
