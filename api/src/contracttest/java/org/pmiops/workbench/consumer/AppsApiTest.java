@@ -3,6 +3,7 @@ package org.pmiops.workbench.consumer;
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray;
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -96,7 +97,7 @@ class AppsApiTest {
     request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
     request.setWorkspaceId("Workspace123");
 
-    api.createApp("googleProject", "appname", request);
+    assertDoesNotThrow(() -> api.createApp("googleProject", "appname", request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -248,7 +249,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    api.deleteApp("googleProject", "appname", false);
+    assertDoesNotThrow(() -> api.deleteApp("googleProject", "appname", false));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -303,7 +304,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    api.listAppByProject("googleProject", null, false, "", "creator");
+    assertDoesNotThrow(() -> api.listAppByProject("googleProject", null, false, "", "creator"));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
