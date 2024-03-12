@@ -122,26 +122,26 @@ class RuntimesApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("runtimeName");
-                  body.stringType("status");
-                  body.numberType("autopauseThreshold", 50);
-                  body.stringType("proxyUrl");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext",
-                      context -> {
-                        context.stringType("cloudProvider");
-                        context.stringType("cloudResource");
-                      });
-                  body.object(
-                      "auditInfo",
-                      context -> {
-                        context.stringType("creator");
-                        context.stringType("createdDate");
-                        context.stringType("dateAccessed");
-                      });
-                })
+                    body -> {
+                      body.stringType("runtimeName");
+                      body.stringType("status");
+                      body.numberType("autopauseThreshold", 50);
+                      body.stringType("proxyUrl");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext",
+                          context -> {
+                            context.stringType("cloudProvider");
+                            context.stringType("cloudResource");
+                          });
+                      body.object(
+                          "auditInfo",
+                          context -> {
+                            context.stringType("creator");
+                            context.stringType("createdDate");
+                            context.stringType("dateAccessed");
+                          });
+                    })
                 .build())
         .toPact();
   }
@@ -193,11 +193,11 @@ class RuntimesApiTest {
         .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
-                body -> {
-                  body.booleanType("allowStop");
-                  body.booleanType("autopause");
-                  body.numberType("autopauseThreshold", 30);
-                })
+                    body -> {
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold", 30);
+                    })
                 .build())
         .willRespondWith()
         .status(202)
@@ -227,23 +227,23 @@ class RuntimesApiTest {
         .path("/api/google/v1/runtimes/googleProject/exampleruntimename")
         .body(
             newJsonBody(
-                body -> {
-                  body.booleanType("allowStop");
-                  body.booleanType("autopause");
-                  body.numberType("autopauseThreshold", 50);
-                  body.object(
-                      "runtimeConfig",
-                      runtimeConfig -> {
-                        runtimeConfig.stringMatcher(
-                            "cloudService", "(DATAPROC|GCE)", CloudServiceEnum.GCE.name());
-                        runtimeConfig.stringType("machineType");
-                        runtimeConfig.numberType("diskSize");
-                      });
-                  body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
-                  body.object(
-                      "labelsToUpsert",
-                      labels -> labels.stringValue("randomKey", "randomValue"));
-                })
+                    body -> {
+                      body.booleanType("allowStop");
+                      body.booleanType("autopause");
+                      body.numberType("autopauseThreshold", 50);
+                      body.object(
+                          "runtimeConfig",
+                          runtimeConfig -> {
+                            runtimeConfig.stringMatcher(
+                                "cloudService", "(DATAPROC|GCE)", CloudServiceEnum.GCE.name());
+                            runtimeConfig.stringType("machineType");
+                            runtimeConfig.numberType("diskSize");
+                          });
+                      body.array("labelsToDelete", arr -> arr.stringType("deletableLabel"));
+                      body.object(
+                          "labelsToUpsert",
+                          labels -> labels.stringValue("randomKey", "randomValue"));
+                    })
                 .build())
         .willRespondWith()
         .status(404)

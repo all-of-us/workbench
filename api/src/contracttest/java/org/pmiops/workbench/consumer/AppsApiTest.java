@@ -42,37 +42,37 @@ class AppsApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appType", "RSTUDIO");
-                  body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                  body.object("labels", labels -> labels.stringType("key1", "value1"));
-                  body.stringType("descriptorPath");
-                  body.object(
-                      "diskConfig",
-                      diskConfig -> {
-                        diskConfig.stringType("diskType", "SSD");
-                        diskConfig.numberType("size");
-                      });
-                  body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                  body.array("extraArgs", extraArgs -> {});
-                  body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                  body.stringType("workspaceId");
-                })
+                    body -> {
+                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+                      body.object("labels", labels -> labels.stringType("key1", "value1"));
+                      body.stringType("descriptorPath");
+                      body.object(
+                          "diskConfig",
+                          diskConfig -> {
+                            diskConfig.stringType("diskType", "SSD");
+                            diskConfig.numberType("size");
+                          });
+                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+                      body.array("extraArgs", extraArgs -> {});
+                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
+                      body.stringType("workspaceId");
+                    })
                 .build())
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appName");
-                  body.stringType("status", "RUNNING");
-                  body.stringType("diskName");
-                  body.stringType("appType", "RSTUDIO");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext", context -> context.stringType("cloudprovider", null));
-                })
+                    body -> {
+                      body.stringType("appName");
+                      body.stringType("status", "RUNNING");
+                      body.stringType("diskName");
+                      body.stringType("appType", "RSTUDIO");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext", context -> context.stringType("cloudprovider", null));
+                    })
                 .build())
         .toPact();
   }
@@ -109,22 +109,22 @@ class AppsApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appType", "RSTUDIO");
-                  body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                  body.object("labels", labels -> labels.stringType("key1", "value1"));
-                  body.stringType("descriptorPath", "descriptor/path");
-                  body.object(
-                      "diskConfig",
-                      diskConfig -> {
-                        diskConfig.stringType("diskType", "SSD");
-                        diskConfig.numberType("size", 100);
-                      });
-                  body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                  body.array("extraArgs", extraArgs -> {});
-                  body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                  body.stringType("workspaceId", "Workspace123");
-                })
+                    body -> {
+                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+                      body.object("labels", labels -> labels.stringType("key1", "value1"));
+                      body.stringType("descriptorPath", "descriptor/path");
+                      body.object(
+                          "diskConfig",
+                          diskConfig -> {
+                            diskConfig.stringType("diskType", "SSD");
+                            diskConfig.numberType("size", 100);
+                          });
+                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+                      body.array("extraArgs", extraArgs -> {});
+                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
+                      body.stringType("workspaceId", "Workspace123");
+                    })
                 .build())
         .willRespondWith()
         .status(409)
@@ -166,15 +166,15 @@ class AppsApiTest {
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
-                body -> {
-                  body.stringType("appName", "sample-cromwell-study");
-                  body.stringType("status", "RUNNING");
-                  body.stringType("diskName", "disk-123");
-                  body.stringType("appType", "CROMWELL");
-                  body.array("errors", errors -> {});
-                  body.object(
-                      "cloudContext", context -> context.stringType("cloudprovider", null));
-                })
+                    body -> {
+                      body.stringType("appName", "sample-cromwell-study");
+                      body.stringType("status", "RUNNING");
+                      body.stringType("diskName", "disk-123");
+                      body.stringType("appType", "CROMWELL");
+                      body.array("errors", errors -> {});
+                      body.object(
+                          "cloudContext", context -> context.stringType("cloudprovider", null));
+                    })
                 .build())
         .toPact();
   }
@@ -330,7 +330,9 @@ class AppsApiTest {
     AppsApi api = new AppsApi(client);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> api.listAppByProject("googleProject", null, false, "", "creator"));
+        assertThrows(
+            ApiException.class,
+            () -> api.listAppByProject("googleProject", null, false, "", "creator"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
