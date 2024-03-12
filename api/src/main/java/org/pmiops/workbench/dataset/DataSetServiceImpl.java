@@ -1607,15 +1607,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "df, 5)");
       case SAS:
         return List.of(
-            """
+            sasSqlComment
+                + """
+
+
             %let workspacecdr = %sysget(WORKSPACE_CDR);
             %put The CDR for this workspace is: &workspacecdr;
             %let googleproject = %sysget(GOOGLE_PROJECT);
             %put The Google Project for this workspace is: &googleproject;
-
-            """
-                + sasSqlComment
-                + """
 
             /* Define the BigQuery SQL query */
             proc sql;
