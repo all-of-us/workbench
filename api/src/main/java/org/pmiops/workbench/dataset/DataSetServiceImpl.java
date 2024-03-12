@@ -912,7 +912,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    // TODO ensure that SAS works for multiple domains
     return Stream.concat(
             queriesByDomain.entrySet().stream()
                 .flatMap(
