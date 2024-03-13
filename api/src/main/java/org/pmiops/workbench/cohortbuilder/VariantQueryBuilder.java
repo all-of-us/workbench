@@ -13,7 +13,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ParticipantCountFilter;
+import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.utils.OperatorUtils;
 
 public final class VariantQueryBuilder {
 
@@ -92,7 +96,12 @@ public final class VariantQueryBuilder {
 
   private static final String LIMIT_OFFSET = "LIMIT @limit OFFSET @offset";
 
-  private static final String PARTICIPANT_COUNT = "AND participant_count > 0\n";
+  private static final String DEFAULT_PARTICIPANT_COUNT = "AND participant_count > 0\n";
+
+  private static final String PARTICIPANT_COUNT = "AND participant_count %s @participantCount\n";
+
+  private static final String PARTICIPANT_COUNT_BETWEEN =
+      "AND participant_count %s @participantCount1 AND @participantCount2\n";
 
   private static final String FROM_VAT = "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n";
 
@@ -105,7 +114,7 @@ public final class VariantQueryBuilder {
 
   private static final String CLINICAL_SIGNIFICANCE_EMPTY = "clinical_significance_string = ''";
 
-  private static final String GENES_IN = "genes IN UNNEST(@genes)";
+  private static final String GENES_IN = "genes IN unnest(@genes)";
   private static final String GENES_IS_NULL = "genes IS NULL";
 
   private static final String ALLELE_COUNT = "AND allele_count BETWEEN @countMin AND @countMax\n";
@@ -135,7 +144,7 @@ public final class VariantQueryBuilder {
         WHERE vid IN (
           SELECT vid
           FROM `${projectId}.${dataSetId}.cb_variant_attribute_genes`
-          WHERE gene_symbol = @gene
+          WHERE gene_symbol = @singleGene
         )
         """;
 
@@ -223,53 +232,65 @@ public final class VariantQueryBuilder {
 
   public static QueryJobConfiguration buildQuery(
       VariantFilterRequest filters, Integer limit, Integer offset) {
-    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.FALSE, filters))
-        .setNamedParameters(generateParams(filters, limit, offset))
+    String sql = generateSQL(SELECT_ALL_COLUMNS, filters);
+
+    Map<String, QueryParameterValue> queryParams = new HashMap<>();
+    String finalSQL = generateAndAddParams(filters, sql, queryParams, limit, offset);
+
+    return QueryJobConfiguration.newBuilder(finalSQL)
+        .setNamedParameters(queryParams)
         .setUseLegacySql(false)
         .build();
   }
 
-  public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filters) {
-    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.TRUE, filters))
-        .setNamedParameters(generateParams(filters, null, null))
+  public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filter) {
+    String sql = generateSQL(SELECT_COUNT, filter);
+
+    Map<String, QueryParameterValue> queryParams = new HashMap<>();
+    String finalSQL = generateAndAddParams(filter, sql, queryParams, null, null);
+
+    return QueryJobConfiguration.newBuilder(finalSQL)
+        .setNamedParameters(queryParams)
         .setUseLegacySql(false)
         .build();
   }
 
-  public static QueryJobConfiguration buildFiltersQuery(VariantFilterRequest filters) {
-    String innerSQL = generateSQL(Boolean.TRUE, filters).replace(SELECT_COUNT, SELECT_VID);
-    return QueryJobConfiguration.newBuilder(FILTERS_SQL.replace("@innerSQL", innerSQL))
-        .setNamedParameters(generateParams(filters, null, null))
+  public static QueryJobConfiguration buildFiltersQuery(VariantFilterRequest filter) {
+    String innerSQL = generateSQL(SELECT_VID, filter);
+
+    Map<String, QueryParameterValue> queryParams = new HashMap<>();
+    String finalInnerSQL = generateAndAddParams(filter, innerSQL, queryParams, null, null);
+
+    return QueryJobConfiguration.newBuilder(FILTERS_SQL.replace("@innerSQL", finalInnerSQL))
+        .setNamedParameters(queryParams)
         .setUseLegacySql(false)
         .build();
+  }
+
+  public static String buildCohortBuilderQuery(
+      VariantFilter filter, Map<String, QueryParameterValue> params) {
+    String sql = generateSQL(SELECT_VID, filter);
+    return generateAndAddParams(filter, sql, params, null, null);
   }
 
   @NotNull
-  private static String generateSQL(boolean isCount, VariantFilterRequest filters) {
-    switch (SearchTermType.fromValue(filters.getSearchTerm())) {
-      case VID:
-        // vid SQL only returns 1 variant so no need to add filters or pagination
-        String sqlBody = FROM_VAT + VID_SQL + PARTICIPANT_COUNT;
-        return isCount ? SELECT_COUNT + sqlBody : SELECT_ALL_COLUMNS + sqlBody;
-      case CONTIG:
-        return generateFilterSQL(
-            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, CONTIG_POSITION_SQL, filters);
-      case GENE:
-        return generateFilterSQL(isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, GENE_SQL, filters);
-      case RS_NUMBER:
-        return generateFilterSQL(
-            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, RS_NUMBER_SQL, filters);
-      default:
-        throw new BadRequestException("Search term not supported");
-    }
+  private static String generateSQL(String selectSQL, VariantFilter filter) {
+    return switch (SearchTermType.fromValue(filter.getSearchTerm())) {
+      case VID ->
+      // vid SQL only returns 1 variant so no need to add filters or pagination
+      selectSQL + FROM_VAT + VID_SQL + DEFAULT_PARTICIPANT_COUNT;
+      case CONTIG -> generateFilterSQL(selectSQL, CONTIG_POSITION_SQL, filter);
+      case GENE -> generateFilterSQL(selectSQL, GENE_SQL, filter);
+      case RS_NUMBER -> generateFilterSQL(selectSQL, RS_NUMBER_SQL, filter);
+    };
   }
 
   @NotNull
   private static String generateFilterSQL(
-      String selectSQL, String whereVidInSQL, VariantFilterRequest filters) {
-    List<String> consequences = filters.getConsequenceList();
-    List<String> clinicalSigns = filters.getClinicalSignificanceList();
-    List<String> genes = filters.getGeneList();
+      String selectSQL, String whereVidInSQL, VariantFilter filter) {
+    List<String> consequences = filter.getConsequenceList();
+    List<String> clinicalSigns = filter.getClinicalSignificanceList();
+    List<String> genes = filter.getGeneList();
     StringBuilder sqlBuilder = new StringBuilder(selectSQL).append(FROM_VAT);
     sqlBuilder.append(whereVidInSQL);
     appendEmptyOrLikeCondition(consequences, sqlBuilder, CONSEQUENCE_EMPTY, CONSEQUENCE_LIKE);
@@ -288,24 +309,24 @@ public final class VariantQueryBuilder {
       sqlBuilder.append(")\n");
     }
     appendMinMaxCondition(
-        sqlBuilder, filters.getCountMin() != null && filters.getCountMax() != null, ALLELE_COUNT);
+        sqlBuilder, filter.getCountMin() != null && filter.getCountMax() != null, ALLELE_COUNT);
+    appendMinMaxCondition(
+        sqlBuilder, filter.getNumberMin() != null && filter.getNumberMax() != null, ALLELE_NUMBER);
     appendMinMaxCondition(
         sqlBuilder,
-        filters.getNumberMin() != null && filters.getNumberMax() != null,
-        ALLELE_NUMBER);
-    appendMinMaxCondition(
-        sqlBuilder,
-        filters.getFrequencyMin() != null && filters.getFrequencyMax() != null,
+        filter.getFrequencyMin() != null && filter.getFrequencyMax() != null,
         ALLELE_FREQ);
-    sqlBuilder.append(PARTICIPANT_COUNT);
+
+    sqlBuilder.append(appendParticipantCountRange(filter));
+
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
-      if (StringUtils.isNotEmpty(filters.getSortBy())) {
-        if (filters.getSortBy().equals(VatColumns.PARTICIPANT_COUNT.getDisplayName())) {
+      String sortBy = ((VariantFilterRequest) filter).getSortBy();
+      if (StringUtils.isNotEmpty(sortBy)) {
+        if (sortBy.equals(VatColumns.PARTICIPANT_COUNT.getDisplayName())) {
           sqlBuilder.append(DEFAULT_ORDER_BY);
         } else {
           sqlBuilder.append(
-              ORDER_BY.replace(
-                  "@orderBy", VatColumns.getColumnNameFromDisplayName(filters.getSortBy())));
+              ORDER_BY.replace("@orderBy", VatColumns.getColumnNameFromDisplayName(sortBy)));
         }
         sqlBuilder.append(LIMIT_OFFSET);
       } else {
@@ -314,6 +335,22 @@ public final class VariantQueryBuilder {
       }
     }
     return sqlBuilder.toString();
+  }
+
+  private static String appendParticipantCountRange(VariantFilter filter) {
+    if (filter.getParticipantCountRange() == null) {
+      return DEFAULT_PARTICIPANT_COUNT;
+    }
+    return switch (filter.getParticipantCountRange().getOperator()) {
+      case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO -> String.format(
+          PARTICIPANT_COUNT,
+          OperatorUtils.getSqlOperator(filter.getParticipantCountRange().getOperator()));
+      case BETWEEN, LESS_THAN, LESS_THAN_OR_EQUAL_TO -> String.format(
+          PARTICIPANT_COUNT_BETWEEN, OperatorUtils.getSqlOperator(Operator.BETWEEN));
+      default -> throw new BadRequestException(
+          "Participant Count filter does not support the following operator: "
+              + filter.getParticipantCountRange().getOperator());
+    };
   }
 
   private static void appendEmptyOrLikeCondition(
@@ -345,69 +382,84 @@ public final class VariantQueryBuilder {
     return CollectionUtils.isNotEmpty(list);
   }
 
-  @NotNull
-  private static Map<String, QueryParameterValue> generateParams(
-      VariantFilterRequest filters, Integer limit, Integer offset) {
-    String searchTerm = filters.getSearchTerm();
-    Map<String, QueryParameterValue> params = new HashMap<>();
+  private static String generateAndAddParams(
+      VariantFilter filter,
+      String sql,
+      Map<String, QueryParameterValue> params,
+      Integer limit,
+      Integer offset) {
+    Map<String, String> replaceParams = new HashMap<>();
+    String searchTerm = filter.getSearchTerm();
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID -> {
         // vid SQL only returns 1 variant so no need to add filter params
-        params.put("vid", QueryParameterValue.string(searchTerm.toUpperCase()));
-        return params;
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string(searchTerm.toUpperCase()));
+        replaceParams.put("@vid", namedParameter);
       }
       case CONTIG -> {
         // example search term for contig -> chr13:32355000-32375000
         String[] chr = searchTerm.split(":");
         String[] position = chr[1].split("-");
-        params.put("contig", QueryParameterValue.string(chr[0].toLowerCase()));
-        params.put("start", QueryParameterValue.int64(Integer.valueOf(position[0])));
-        params.put("end", QueryParameterValue.int64(Integer.valueOf(position[1])));
-        if (limit != null) {
-          params.put("limit", QueryParameterValue.int64(limit));
-        }
-        if (offset != null) {
-          params.put("offset", QueryParameterValue.int64(offset));
-        }
-        generateFilterParams(filters, params);
-        return params;
+
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string(chr[0].toLowerCase()));
+        replaceParams.put("@contig", namedParameter);
+
+        namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.int64(Integer.valueOf(position[0])));
+        replaceParams.put("@start", namedParameter);
+
+        namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.int64(Integer.valueOf(position[1])));
+        replaceParams.put("@end", namedParameter);
+        generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       case GENE -> {
-        params.put("gene", QueryParameterValue.string(searchTerm.toUpperCase()));
-        if (limit != null) {
-          params.put("limit", QueryParameterValue.int64(limit));
-        }
-        if (offset != null) {
-          params.put("offset", QueryParameterValue.int64(offset));
-        }
-        generateFilterParams(filters, params);
-        return params;
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string(searchTerm.toUpperCase()));
+        replaceParams.put("@singleGene", namedParameter);
+        generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       case RS_NUMBER -> {
-        params.put("rs_number", QueryParameterValue.string(searchTerm.toLowerCase()));
-        if (limit != null) {
-          params.put("limit", QueryParameterValue.int64(limit));
-        }
-        if (offset != null) {
-          params.put("offset", QueryParameterValue.int64(offset));
-        }
-        generateFilterParams(filters, params);
-        return params;
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string(searchTerm.toLowerCase()));
+        replaceParams.put("@rs_number", namedParameter);
+        generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       default -> throw new BadRequestException("Search term not supported");
     }
+    return replaceParams.entrySet().stream()
+        .reduce(
+            sql,
+            (result, entry) -> result.replaceAll(entry.getKey(), entry.getValue()),
+            (s1, s2) -> s1);
   }
 
   private static void generateFilterParams(
-      VariantFilterRequest filters, Map<String, QueryParameterValue> params) {
-    List<String> consequences = filters.getConsequenceList();
-    List<String> clinicalSigns = filters.getClinicalSignificanceList();
+      VariantFilter filter,
+      Map<String, QueryParameterValue> params,
+      Map<String, String> replaceParams) {
+    List<String> consequences = filter.getConsequenceList();
+    List<String> clinicalSigns = filter.getClinicalSignificanceList();
     if (isNotEmpty(consequences)) {
       // Don't change the source consequence list as it's used for multiple queries.
       // Generate a new list without n/a to exclude from the IN clause.
       List<String> cons = consequences.stream().filter(s -> !s.equals(NA)).toList();
       for (int i = 0; i < cons.size(); i++) {
-        params.put("consStr" + i, QueryParameterValue.string("%" + cons.get(i) + "%"));
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string("%" + cons.get(i) + "%"));
+        replaceParams.put("@consStr" + i, namedParameter);
       }
     }
     if (isNotEmpty(clinicalSigns)) {
@@ -415,28 +467,104 @@ public final class VariantQueryBuilder {
       // Generate a new list without n/a to exclude from the IN clause.
       List<String> clinSigns = clinicalSigns.stream().filter(s -> !s.equals(NA)).toList();
       for (int i = 0; i < clinSigns.size(); i++) {
-        params.put("clinStr" + i, QueryParameterValue.string("%" + clinSigns.get(i) + "%"));
+        String namedParameter =
+            QueryParameterUtil.addQueryParameterValue(
+                params, QueryParameterValue.string("%" + clinSigns.get(i) + "%"));
+        replaceParams.put("@clinStr" + i, namedParameter);
       }
     }
-    if (isNotEmpty(filters.getGeneList())) {
+    if (isNotEmpty(filter.getGeneList())) {
       // convert n/a to empty string when searching genes
-      params.put(
-          "genes",
-          QueryParameterValue.array(
-              filters.getGeneList().stream().filter(s -> !s.equals(NA)).toArray(String[]::new),
-              String.class));
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params,
+              QueryParameterValue.array(
+                  filter.getGeneList().stream().filter(s -> !s.equals(NA)).toArray(String[]::new),
+                  String.class));
+      replaceParams.put("@genes", namedParameter);
     }
-    if (filters.getCountMin() != null && filters.getCountMax() != null) {
-      params.put("countMin", QueryParameterValue.int64(filters.getCountMin()));
-      params.put("countMax", QueryParameterValue.int64(filters.getCountMax()));
+    if (filter.getCountMin() != null && filter.getCountMax() != null) {
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(filter.getCountMin()));
+      replaceParams.put("@countMin", namedParameter);
+      namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(filter.getCountMax()));
+      replaceParams.put("@countMax", namedParameter);
     }
-    if (filters.getNumberMin() != null && filters.getNumberMax() != null) {
-      params.put("numberMin", QueryParameterValue.int64(filters.getNumberMin()));
-      params.put("numberMax", QueryParameterValue.int64(filters.getNumberMax()));
+    if (filter.getNumberMin() != null && filter.getNumberMax() != null) {
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(filter.getNumberMin()));
+      replaceParams.put("@numberMin", namedParameter);
+      namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.int64(filter.getNumberMax()));
+      replaceParams.put("@numberMax", namedParameter);
     }
-    if (filters.getFrequencyMin() != null && filters.getFrequencyMax() != null) {
-      params.put("freqMin", QueryParameterValue.bigNumeric(filters.getFrequencyMin()));
-      params.put("freqMax", QueryParameterValue.bigNumeric(filters.getFrequencyMax()));
+    if (filter.getFrequencyMin() != null && filter.getFrequencyMax() != null) {
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.bigNumeric(filter.getFrequencyMin()));
+      replaceParams.put("@freqMin", namedParameter);
+      namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params, QueryParameterValue.bigNumeric(filter.getFrequencyMax()));
+      replaceParams.put("@freqMax", namedParameter);
+    }
+    if (filter.getParticipantCountRange() != null) {
+      String namedParameter1;
+      String namedParameter2;
+      ParticipantCountFilter range = filter.getParticipantCountRange();
+      switch (range.getOperator()) {
+        case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
+          replaceParams.put("@participantCount", namedParameter1);
+        }
+        case BETWEEN -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
+          namedParameter2 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(range.getOperands().get(1)));
+          replaceParams.put("@participantCount1", namedParameter1);
+          replaceParams.put("@participantCount2", namedParameter2);
+        }
+        case LESS_THAN, LESS_THAN_OR_EQUAL_TO -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(1));
+          namedParameter2 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
+          replaceParams.put("@participantCount1", namedParameter1);
+          replaceParams.put("@participantCount2", namedParameter2);
+        }
+        default -> throw new BadRequestException(
+            "Participant Count filter does not support the following operator: "
+                + filter.getParticipantCountRange().getOperator());
+      }
+    }
+  }
+
+  private static void addLimitAndOffset(
+      Map<String, QueryParameterValue> params,
+      Map<String, String> replaceParams,
+      Integer limit,
+      Integer offset) {
+    String namedParameter;
+    if (limit != null) {
+      namedParameter =
+          QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(limit));
+      replaceParams.put("@limit", namedParameter);
+    }
+    if (offset != null) {
+      namedParameter =
+          QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(offset));
+      replaceParams.put("@offset", namedParameter);
     }
   }
 }

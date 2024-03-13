@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.utils.OperatorUtils;
 
 /** SearchGroupItemQueryBuilder builds BigQuery queries for search group items. */
@@ -86,7 +88,6 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
   private static final String AND = " AND ";
-  private static final String UNION_TEMPLATE = "UNION ALL\n";
 
   private static final String UNION_DISTINCT_TEMPLATE = "UNION DISTINCT\n";
   private static final String DESC = " DESC";
@@ -232,12 +233,20 @@ public final class SearchGroupItemQueryBuilder {
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
-  private static final String VARIANT_SQL =
+  private static final String VARIANT_SQL_UNNEST =
       """
              SELECT person_id
              FROM `${projectId}.${dataSetId}.cb_variant_to_person`
              CROSS JOIN UNNEST(person_ids) AS person_id
-             WHERE vid IN unnest(%s)""";
+             WHERE vid IN unnest(%s)
+             """;
+  private static final String VARIANT_SQL =
+      """
+                 SELECT person_id
+                 FROM `${projectId}.${dataSetId}.cb_variant_to_person`
+                 CROSS JOIN UNNEST(person_ids) AS person_id
+                 WHERE vid IN (%s)
+                 """;
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -316,7 +325,7 @@ public final class SearchGroupItemQueryBuilder {
       queryPartsSql =
           PERSON_ID_IN
               + CB_SEARCH_ALL_EVENTS_WHERE
-              + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
+              + String.join(UNION_DISTINCT_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
               + ")";
     } else {
       queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
@@ -364,7 +373,7 @@ public final class SearchGroupItemQueryBuilder {
                       ? ageSql
                       : ageSql + AGE_DEC_SQL);
             });
-        return String.join(UNION_TEMPLATE, queryParts);
+        return String.join(UNION_DISTINCT_TEMPLATE, queryParts);
       case GENDER:
       case SEX:
       case ETHNICITY:
@@ -394,14 +403,34 @@ public final class SearchGroupItemQueryBuilder {
   /** Build sql statement for SNP Indel Variants */
   private static String buildVariantSql(
       Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
+    List<String> queryParts = new ArrayList<>();
+
+    // build variant id SQL
     String[] variantIds =
         searchGroupItem.getSearchParameters().stream()
             .map(SearchParameter::getVariantId)
+            .filter(Objects::nonNull)
             .toArray(String[]::new);
-    String namedParameter =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.array(variantIds, String.class));
-    return String.format(VARIANT_SQL, namedParameter);
+    if (ArrayUtils.isNotEmpty(variantIds)) {
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.array(variantIds, String.class));
+      queryParts.add(String.format(VARIANT_SQL_UNNEST, namedParameter));
+    }
+
+    // build variant filter SQL
+    List<VariantFilter> variantFilters =
+        searchGroupItem.getSearchParameters().stream()
+            .map(SearchParameter::getVariantFilter)
+            .filter(Objects::nonNull)
+            .toList();
+    variantFilters.forEach(
+        variantFilter ->
+            queryParts.add(
+                String.format(
+                    VARIANT_SQL,
+                    VariantQueryBuilder.buildCohortBuilderQuery(variantFilter, queryParams))));
+    return String.join(UNION_DISTINCT_TEMPLATE, queryParts);
   }
 
   /**

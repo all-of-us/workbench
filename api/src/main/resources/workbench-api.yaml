@@ -11230,7 +11230,7 @@ components:
         operands:
           type: array
           items:
-            type: string
+            type: integer
     VariantFilterResponse:
       allOf:
         - $ref: '#/components/schemas/BaseVariantFilter'

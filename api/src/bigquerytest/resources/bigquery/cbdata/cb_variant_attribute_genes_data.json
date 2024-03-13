@@ -18,5 +18,13 @@
   {
     "vid": "1-100550658-T-AA",
     "gene_symbol": "GENE3"
+  },
+  {
+    "vid": "2-100550658-T-CC",
+    "gene_symbol": "GENE4"
+  },
+  {
+    "vid": "2-100550658-T-CD",
+    "gene_symbol": "GENE4"
   }
 ]
