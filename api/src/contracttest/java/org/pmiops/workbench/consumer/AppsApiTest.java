@@ -36,8 +36,11 @@ import org.pmiops.workbench.model.AppType;
 class AppsApiTest {
   private static final String GOOGLE_PROJECT = "googleproject";
   private static final String APP_NAME = "appname";
-  private static final String APP_ENDPOINT = String.format("/api/google/v1/apps/%s/%s",GOOGLE_PROJECT,APP_NAME);
-  private static final String LIST_APPS_ENDPOINT = String.format("/api/google/v1/apps/%s",GOOGLE_PROJECT);
+  private static final String APP_ENDPOINT =
+      String.format("/api/google/v1/apps/%s/%s", GOOGLE_PROJECT, APP_NAME);
+  private static final String LIST_APPS_ENDPOINT =
+      String.format("/api/google/v1/apps/%s", GOOGLE_PROJECT);
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewApp(PactDslWithProvider builder) {
     return builder
