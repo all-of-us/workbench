@@ -15,6 +15,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface WorkbenchConfigMapper {
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
+  @Mapping(target = "enableRStudioGKEApp", constant = "true") // deprecated, to be removed
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
@@ -46,7 +47,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
-  @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")

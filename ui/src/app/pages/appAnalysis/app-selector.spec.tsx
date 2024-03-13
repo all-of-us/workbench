@@ -118,31 +118,6 @@ describe('App Selector', () => {
     });
   });
 
-  it('should not list RStudio as an option when the feature flag is false', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableRStudioGKEApp: false },
-    });
-
-    component();
-    const startButton = getStartButton();
-    startButton.click();
-
-    await waitFor(() => {
-      expect(screen.queryByText('Select an application')).toBeInTheDocument();
-    });
-
-    // the caret next to the dropdown
-    const dropdownTrigger = getDropdownTrigger();
-    expect(dropdownTrigger).toBeInTheDocument();
-    dropdownTrigger.click();
-
-    await waitFor(async () => {
-      // I'd prefer to do this, but it doesn't work
-      // screen.queryByRole('option', { name: 'RStudio' });
-      expect(screen.queryByText('RStudio')).not.toBeInTheDocument();
-    });
-  });
-
   it('should open the RStudio config panel when RStudio is selected and Next is clicked', async () => {
     component();
     const startButton = getStartButton();

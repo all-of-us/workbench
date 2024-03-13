@@ -138,7 +138,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({ config: { ...defaultServerConfig } });
+    serverConfigStore.set({ config: defaultServerConfig });
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
 

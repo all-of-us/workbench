@@ -45,7 +45,7 @@ describe('runtime-utils', () => {
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
-    serverConfigStore.set({ config: { ...defaultServerConfig } });
+    serverConfigStore.set({ config: defaultServerConfig });
 
     // For a component using the runtime store to function properly, there must
     // be an active workspace context provided - in the real application this is
