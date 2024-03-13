@@ -88,7 +88,6 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
   private static final String AND = " AND ";
-  private static final String UNION_TEMPLATE = "UNION ALL\n";
 
   private static final String UNION_DISTINCT_TEMPLATE = "UNION DISTINCT\n";
   private static final String DESC = " DESC";
@@ -326,7 +325,7 @@ public final class SearchGroupItemQueryBuilder {
       queryPartsSql =
           PERSON_ID_IN
               + CB_SEARCH_ALL_EVENTS_WHERE
-              + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
+              + String.join(UNION_DISTINCT_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
               + ")";
     } else {
       queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
@@ -374,7 +373,7 @@ public final class SearchGroupItemQueryBuilder {
                       ? ageSql
                       : ageSql + AGE_DEC_SQL);
             });
-        return String.join(UNION_TEMPLATE, queryParts);
+        return String.join(UNION_DISTINCT_TEMPLATE, queryParts);
       case GENDER:
       case SEX:
       case ETHNICITY:

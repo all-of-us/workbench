@@ -35,7 +35,7 @@ public class CohortQueryBuilder extends QueryBuilder {
   private static final String ID_SQL_TEMPLATE =
       "SELECT distinct person_id\n FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n WHERE\n";
 
-  private static final String UNION_TEMPLATE = "UNION ALL\n";
+  private static final String UNION_TEMPLATE = "UNION DISTINCT\n";
 
   private static final Logger log = Logger.getLogger(CohortQueryBuilder.class.getName());
 

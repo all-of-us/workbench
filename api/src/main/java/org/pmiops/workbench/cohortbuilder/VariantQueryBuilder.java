@@ -13,8 +13,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ParticipantCountFilter;
 import org.pmiops.workbench.model.VariantFilter;
 import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.utils.OperatorUtils;
 
 public final class VariantQueryBuilder {
 
@@ -93,7 +96,12 @@ public final class VariantQueryBuilder {
 
   private static final String LIMIT_OFFSET = "LIMIT @limit OFFSET @offset";
 
-  private static final String PARTICIPANT_COUNT = "AND participant_count > 0\n";
+  private static final String DEFAULT_PARTICIPANT_COUNT = "AND participant_count > 0\n";
+
+  private static final String PARTICIPANT_COUNT = "AND participant_count %s @participantCount\n";
+
+  private static final String PARTICIPANT_COUNT_BETWEEN =
+      "AND participant_count %s @participantCount1 AND @participantCount2\n";
 
   private static final String FROM_VAT = "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n";
 
@@ -270,7 +278,7 @@ public final class VariantQueryBuilder {
     return switch (SearchTermType.fromValue(filter.getSearchTerm())) {
       case VID ->
       // vid SQL only returns 1 variant so no need to add filters or pagination
-      selectSQL + FROM_VAT + VID_SQL + PARTICIPANT_COUNT;
+      selectSQL + FROM_VAT + VID_SQL + DEFAULT_PARTICIPANT_COUNT;
       case CONTIG -> generateFilterSQL(selectSQL, CONTIG_POSITION_SQL, filter);
       case GENE -> generateFilterSQL(selectSQL, GENE_SQL, filter);
       case RS_NUMBER -> generateFilterSQL(selectSQL, RS_NUMBER_SQL, filter);
@@ -308,7 +316,9 @@ public final class VariantQueryBuilder {
         sqlBuilder,
         filter.getFrequencyMin() != null && filter.getFrequencyMax() != null,
         ALLELE_FREQ);
-    sqlBuilder.append(PARTICIPANT_COUNT);
+
+    sqlBuilder.append(appendParticipantCountRange(filter));
+
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
       String sortBy = ((VariantFilterRequest) filter).getSortBy();
       if (StringUtils.isNotEmpty(sortBy)) {
@@ -325,6 +335,22 @@ public final class VariantQueryBuilder {
       }
     }
     return sqlBuilder.toString();
+  }
+
+  private static String appendParticipantCountRange(VariantFilter filter) {
+    if (filter.getParticipantCountRange() == null) {
+      return DEFAULT_PARTICIPANT_COUNT;
+    }
+    return switch (filter.getParticipantCountRange().getOperator()) {
+      case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO -> String.format(
+          PARTICIPANT_COUNT,
+          OperatorUtils.getSqlOperator(filter.getParticipantCountRange().getOperator()));
+      case BETWEEN, LESS_THAN, LESS_THAN_OR_EQUAL_TO -> String.format(
+          PARTICIPANT_COUNT_BETWEEN, OperatorUtils.getSqlOperator(Operator.BETWEEN));
+      default -> throw new BadRequestException(
+          "Participant Count filter does not support the following operator: "
+              + filter.getParticipantCountRange().getOperator());
+    };
   }
 
   private static void appendEmptyOrLikeCondition(
@@ -391,24 +417,24 @@ public final class VariantQueryBuilder {
             QueryParameterUtil.addQueryParameterValue(
                 params, QueryParameterValue.int64(Integer.valueOf(position[1])));
         replaceParams.put("@end", namedParameter);
-        addLimitAndOffset(params, replaceParams, limit, offset);
         generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       case GENE -> {
         String namedParameter =
             QueryParameterUtil.addQueryParameterValue(
                 params, QueryParameterValue.string(searchTerm.toUpperCase()));
         replaceParams.put("@singleGene", namedParameter);
-        addLimitAndOffset(params, replaceParams, limit, offset);
         generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       case RS_NUMBER -> {
         String namedParameter =
             QueryParameterUtil.addQueryParameterValue(
                 params, QueryParameterValue.string(searchTerm.toLowerCase()));
         replaceParams.put("@rs_number", namedParameter);
-        addLimitAndOffset(params, replaceParams, limit, offset);
         generateFilterParams(filter, params, replaceParams);
+        addLimitAndOffset(params, replaceParams, limit, offset);
       }
       default -> throw new BadRequestException("Search term not supported");
     }
@@ -486,6 +512,41 @@ public final class VariantQueryBuilder {
           QueryParameterUtil.addQueryParameterValue(
               params, QueryParameterValue.bigNumeric(filter.getFrequencyMax()));
       replaceParams.put("@freqMax", namedParameter);
+    }
+    if (filter.getParticipantCountRange() != null) {
+      String namedParameter1;
+      String namedParameter2;
+      ParticipantCountFilter range = filter.getParticipantCountRange();
+      switch (range.getOperator()) {
+        case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+          replaceParams.put("@participantCount", namedParameter1);
+        }
+        case BETWEEN -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+          namedParameter2 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(1))));
+          replaceParams.put("@participantCount1", namedParameter1);
+          replaceParams.put("@participantCount2", namedParameter2);
+        }
+        case LESS_THAN, LESS_THAN_OR_EQUAL_TO -> {
+          namedParameter1 =
+              QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(1));
+          namedParameter2 =
+              QueryParameterUtil.addQueryParameterValue(
+                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+          replaceParams.put("@participantCount1", namedParameter1);
+          replaceParams.put("@participantCount2", namedParameter2);
+        }
+        default -> throw new BadRequestException(
+            "Participant Count filter does not support the following operator: "
+                + filter.getParticipantCountRange().getOperator());
+      }
     }
   }
 

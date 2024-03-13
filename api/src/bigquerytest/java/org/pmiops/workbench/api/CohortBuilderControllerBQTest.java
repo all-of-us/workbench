@@ -71,6 +71,7 @@ import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ParticipantCountFilter;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -1122,7 +1123,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countParticipantsVariantDataUsingVidsAndVariantFilter() {
+  public void countParticipantsVariantDataUsingVidAndVariantFilter() {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
             Domain.SNP_INDEL_VARIANT.toString(),
@@ -1130,6 +1131,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVidAndVariantFilters() {
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene");
+    variantFilter.addClinicalSignificanceListItem("pathogenic").addConsequenceListItem("intron_variant").countMax(0L).countMax(5L);
+    SearchParameter sp = new SearchParameter()
+            .domain(Domain.SNP_INDEL_VARIANT.toString())
+            .ancestorData(false)
+            .group(false)
+            .variantFilter(variantFilter);
+    CohortDefinition cohortDefinition =
+            createCohortDefinition(
+                    Domain.SNP_INDEL_VARIANT.toString(),
+                    ImmutableList.of(variant(), sp),
+                    new ArrayList<>());
+    assertParticipants(
+            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -2575,6 +2594,28 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByParticipantCount() {
+    VariantFilterRequest request = new VariantFilterRequest();
+    ParticipantCountFilter pcf =
+        new ParticipantCountFilter()
+            .operator(Operator.LESS_THAN)
+            .operands(ImmutableList.of("2000"));
+    request.searchTerm("gene4").participantCountRange(pcf);
+    Variant expectedVariant =
+        new Variant()
+            .vid("2-100550658-T-CC")
+            .gene("gene4")
+            .consequence("")
+            .clinVarSignificance("")
+            .proteinChange("change")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(100L);
     assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
