@@ -521,16 +521,16 @@ public final class VariantQueryBuilder {
         case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO -> {
           namedParameter1 =
               QueryParameterUtil.addQueryParameterValue(
-                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
           replaceParams.put("@participantCount", namedParameter1);
         }
         case BETWEEN -> {
           namedParameter1 =
               QueryParameterUtil.addQueryParameterValue(
-                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
           namedParameter2 =
               QueryParameterUtil.addQueryParameterValue(
-                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(1))));
+                  params, QueryParameterValue.int64(range.getOperands().get(1)));
           replaceParams.put("@participantCount1", namedParameter1);
           replaceParams.put("@participantCount2", namedParameter2);
         }
@@ -539,7 +539,7 @@ public final class VariantQueryBuilder {
               QueryParameterUtil.addQueryParameterValue(params, QueryParameterValue.int64(1));
           namedParameter2 =
               QueryParameterUtil.addQueryParameterValue(
-                  params, QueryParameterValue.int64(Integer.parseInt(range.getOperands().get(0))));
+                  params, QueryParameterValue.int64(range.getOperands().get(0)));
           replaceParams.put("@participantCount1", namedParameter1);
           replaceParams.put("@participantCount2", namedParameter2);
         }
