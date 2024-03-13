@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
@@ -54,17 +55,24 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public List<Blob> getBlobPage(String bucketName) {
-    return storageProvider.get().get(bucketName).list().streamValues().collect(Collectors.toList());
+    return getBucketOrThrow(bucketName).list().streamValues().toList();
   }
 
   @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
-    return storageProvider
-        .get()
-        .get(bucketName)
+    return getBucketOrThrow(bucketName)
         .list(Storage.BlobListOption.prefix(directory))
         .streamValues()
-        .collect(Collectors.toList());
+        .toList();
+  }
+
+  private Bucket getBucketOrThrow(String bucketName) {
+    Bucket b = storageProvider.get().get(bucketName);
+    if (b == null) {
+      // better than NullPointerException
+      throw new NotFoundException("Bucket " + bucketName);
+    }
+    return b;
   }
 
   private String getCredentialsBucketName() {
