@@ -67,6 +67,25 @@ class AppsApiTest {
             body.stringType("workspaceId");
           });
 
+  static LeonardoCreateAppRequest createAppRequest() {
+    LeonardoCreateAppRequest request = new LeonardoCreateAppRequest();
+    LeonardoKubernetesRuntimeConfig runtimeConfig = new LeonardoKubernetesRuntimeConfig();
+    runtimeConfig.setNumNodes(1);
+    runtimeConfig.setMachineType("n1-standard-4");
+    runtimeConfig.setAutoscalingEnabled(true);
+    request.setAppType(LeonardoAppType.RSTUDIO);
+    request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
+    request.setLabels(Map.ofEntries(entry("key1", "value1")));
+    request.setDescriptorPath("descriptor/path");
+    request.setDiskConfig(
+        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
+    request.setCustomEnvironmentVariables(new ArrayList<>());
+    request.setExtraArgs(new ArrayList<>());
+    request.setKubernetesRuntimeConfig(runtimeConfig);
+    request.setWorkspaceId("Workspace123");
+    return request;
+  }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewApp(PactDslWithProvider builder) {
     return builder
@@ -101,17 +120,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    LeonardoCreateAppRequest request = new LeonardoCreateAppRequest();
-    request.setAppType(LeonardoAppType.RSTUDIO);
-    request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
-    request.setLabels(Map.ofEntries(entry("key1", "value1")));
-    request.setDescriptorPath("descriptor/path");
-    request.setDiskConfig(
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
-    request.setCustomEnvironmentVariables(new ArrayList<>());
-    request.setExtraArgs(new ArrayList<>());
-    request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
-    request.setWorkspaceId("Workspace123");
+    LeonardoCreateAppRequest request = createAppRequest();
 
     assertDoesNotThrow(() -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
   }
@@ -138,17 +147,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    LeonardoCreateAppRequest request = new LeonardoCreateAppRequest();
-    request.setAppType(LeonardoAppType.RSTUDIO);
-    request.setAllowedChartName(LeonardoAllowedChartName.RSTUDIO);
-    request.setLabels(Map.ofEntries(entry("key1", "value1")));
-    request.setDescriptorPath("descriptor/path");
-    request.setDiskConfig(
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
-    request.setCustomEnvironmentVariables(new ArrayList<>());
-    request.setExtraArgs(new ArrayList<>());
-    request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
-    request.setWorkspaceId("Workspace123");
+    LeonardoCreateAppRequest request = createAppRequest();
 
     assertThrows(Exception.class, () -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
   }
