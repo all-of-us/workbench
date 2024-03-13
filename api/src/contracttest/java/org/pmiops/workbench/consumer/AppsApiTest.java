@@ -29,22 +29,27 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
+import org.pmiops.workbench.model.AppStatus;
+import org.pmiops.workbench.model.AppType;
 
 @ExtendWith(PactConsumerTestExt.class)
 class AppsApiTest {
-
+  private static final String GOOGLE_PROJECT = "googleproject";
+  private static final String APP_NAME = "appname";
+  private static final String APP_ENDPOINT = String.format("/api/google/v1/apps/%s/%s",GOOGLE_PROJECT,APP_NAME);
+  private static final String LIST_APPS_ENDPOINT = String.format("/api/google/v1/apps/%s",GOOGLE_PROJECT);
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewApp(PactDslWithProvider builder) {
     return builder
         .given("there is not an app in a Google project")
         .uponReceiving("a request to create an app")
         .method("POST")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
                     body -> {
-                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("appType", AppType.RSTUDIO.name());
                       body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
                       body.object("labels", labels -> labels.stringType("key1", "value1"));
                       body.stringType("descriptorPath");
@@ -67,9 +72,9 @@ class AppsApiTest {
             newJsonBody(
                     body -> {
                       body.stringType("appName");
-                      body.stringType("status", "RUNNING");
+                      body.stringType("status", AppStatus.RUNNING.name());
                       body.stringType("diskName");
-                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("appType", AppType.RSTUDIO.name());
                       body.array("errors", errors -> {});
                       body.object(
                           "cloudContext", context -> context.stringType("cloudprovider", null));
@@ -97,7 +102,7 @@ class AppsApiTest {
     request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
     request.setWorkspaceId("Workspace123");
 
-    assertDoesNotThrow(() -> api.createApp("googleProject", "appname", request));
+    assertDoesNotThrow(() -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -106,12 +111,12 @@ class AppsApiTest {
         .given("there is an app in a Google project")
         .uponReceiving("a request to create an app")
         .method("POST")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
                     body -> {
-                      body.stringType("appType", "RSTUDIO");
+                      body.stringType("appType", AppType.RSTUDIO.name());
                       body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
                       body.object("labels", labels -> labels.stringType("key1", "value1"));
                       body.stringType("descriptorPath", "descriptor/path");
@@ -152,7 +157,7 @@ class AppsApiTest {
     request.setKubernetesRuntimeConfig(new LeonardoKubernetesRuntimeConfig());
     request.setWorkspaceId("Workspace123");
 
-    assertThrows(Exception.class, () -> api.createApp("googleProject", "appname", request));
+    assertThrows(Exception.class, () -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -161,7 +166,7 @@ class AppsApiTest {
         .given("there is an app in a Google project")
         .uponReceiving("a request to get that app")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
@@ -169,7 +174,7 @@ class AppsApiTest {
             newJsonBody(
                     body -> {
                       body.stringType("appName", "sample-cromwell-study");
-                      body.stringType("status", "RUNNING");
+                      body.stringType("status", AppStatus.RUNNING.name());
                       body.stringType("diskName", "disk-123");
                       body.stringType("appType", "CROMWELL");
                       body.array("errors", errors -> {});
@@ -195,7 +200,7 @@ class AppsApiTest {
     expected.setAppType(LeonardoAppType.CROMWELL);
     expected.setCloudContext(new LeonardoCloudContext());
 
-    LeonardoGetAppResponse response = api.getApp("googleProject", "appname");
+    LeonardoGetAppResponse response = api.getApp(GOOGLE_PROJECT, APP_NAME);
 
     assertEquals(expected, response);
   }
@@ -206,7 +211,7 @@ class AppsApiTest {
         .given("there is not an app in a Google project")
         .uponReceiving("a request to get that app")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .willRespondWith()
         .status(404)
         .headers(contentTypeJsonHeader)
@@ -222,7 +227,7 @@ class AppsApiTest {
     AppsApi api = new AppsApi(client);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> api.getApp("googleProject", "appname"));
+        assertThrows(ApiException.class, () -> api.getApp(GOOGLE_PROJECT, APP_NAME));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -233,7 +238,7 @@ class AppsApiTest {
         .given("there is an app in a Google project")
         .uponReceiving("a request to delete an app")
         .method("DELETE")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .matchQuery("deleteDisk", "true|false")
         .willRespondWith()
         .status(200)
@@ -249,7 +254,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    assertDoesNotThrow(() -> api.deleteApp("googleProject", "appname", false));
+    assertDoesNotThrow(() -> api.deleteApp(GOOGLE_PROJECT, APP_NAME, false));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -258,7 +263,7 @@ class AppsApiTest {
         .given("there is not an app in a Google project")
         .uponReceiving("a request to delete an app")
         .method("DELETE")
-        .path("/api/google/v1/apps/googleProject/appname")
+        .path(APP_ENDPOINT)
         .matchQuery("deleteDisk", "true|false")
         .willRespondWith()
         .status(404)
@@ -275,7 +280,7 @@ class AppsApiTest {
     AppsApi api = new AppsApi(client);
 
     ApiException exception =
-        assertThrows(ApiException.class, () -> api.deleteApp("googleProject", "appname", false));
+        assertThrows(ApiException.class, () -> api.deleteApp(GOOGLE_PROJECT, APP_NAME, false));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
@@ -286,7 +291,7 @@ class AppsApiTest {
         .given("there is a Google project")
         .uponReceiving("a request to list apps")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject")
+        .path(LIST_APPS_ENDPOINT)
         .matchQuery("includeDeleted", "true|false")
         .matchQuery("includeLabels", ".*")
         .matchQuery("role", ".*")
@@ -304,7 +309,7 @@ class AppsApiTest {
     client.setBasePath(mockServer.getUrl());
     AppsApi api = new AppsApi(client);
 
-    assertDoesNotThrow(() -> api.listAppByProject("googleProject", null, false, "", "creator"));
+    assertDoesNotThrow(() -> api.listAppByProject(GOOGLE_PROJECT, null, false, "", "creator"));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -313,7 +318,7 @@ class AppsApiTest {
         .given("there is not a Google project")
         .uponReceiving("a request to list apps")
         .method("GET")
-        .path("/api/google/v1/apps/googleProject")
+        .path(LIST_APPS_ENDPOINT)
         .matchQuery("includeDeleted", "true|false")
         .matchQuery("includeLabels", ".*")
         .matchQuery("role", ".*")
@@ -333,7 +338,7 @@ class AppsApiTest {
     ApiException exception =
         assertThrows(
             ApiException.class,
-            () -> api.listAppByProject("googleProject", null, false, "", "creator"));
+            () -> api.listAppByProject(GOOGLE_PROJECT, null, false, "", "creator"));
 
     assertEquals(exception.getMessage(), "Not Found");
   }
