@@ -60,6 +60,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
     },
     {
       conceptSets: ConceptSet[];
+      conceptSetsInDomain: ConceptSet[];
       errorMessage: string;
       errorSaving: boolean;
       addingToExistingSet: boolean;
@@ -78,6 +79,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       super(props);
       this.state = {
         conceptSets: [],
+        conceptSetsInDomain: [],
         errorMessage: null,
         errorSaving: false,
         addingToExistingSet: true,
@@ -115,7 +117,8 @@ export const ConceptAddModal = withCurrentWorkspace()(
           (conceptSet) => conceptSet.domain === domain
         );
         this.setState({
-          conceptSets: conceptSetsInDomain,
+          conceptSets: conceptSets.items,
+          conceptSetsInDomain,
           addingToExistingSet: conceptSetsInDomain.length > 0,
           selectedConceptsInDomain: filterConcepts(selectedConcepts, domain),
           loading: false,
@@ -245,6 +248,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       const { activeDomainTab, onClose } = this.props;
       const {
         conceptSets,
+        conceptSetsInDomain,
         loading,
         loadingSelectedSet,
         nameTouched,
@@ -287,13 +291,13 @@ export const ConceptAddModal = withCurrentWorkspace()(
                         No concept sets in domain '{activeDomainTab.name}'
                       </div>
                     }
-                    disabled={conceptSets.length > 0}
+                    disabled={conceptSetsInDomain.length > 0}
                   >
                     <div>
                       <RadioButton
                         value={addingToExistingSet}
                         checked={addingToExistingSet}
-                        disabled={conceptSets.length === 0}
+                        disabled={conceptSetsInDomain.length === 0}
                         data-test-id='toggle-existing-set'
                         onChange={() => {
                           this.setState({
@@ -330,10 +334,10 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     }}
                     placeholder='Select Concept Set'
                     onChange={(e) =>
-                      this.selectConceptSet(conceptSets[e.target.value])
+                      this.selectConceptSet(conceptSetsInDomain[e.target.value])
                     }
                   >
-                    {conceptSets.map((set: ConceptSet, i) => (
+                    {conceptSetsInDomain.map((set: ConceptSet, i) => (
                       <option data-test-id='existing-set' key={i} value={i}>
                         {set.name}
                       </option>
