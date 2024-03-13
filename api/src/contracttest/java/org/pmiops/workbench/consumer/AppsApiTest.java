@@ -13,6 +13,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
 import java.util.ArrayList;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,31 @@ class AppsApiTest {
   private static final String LIST_APPS_ENDPOINT =
       String.format("/api/google/v1/apps/%s", GOOGLE_PROJECT);
 
+  static LambdaDslJsonBody createAppRequestBody =
+      newJsonBody(
+          body -> {
+            body.stringType("appType", AppType.RSTUDIO.name());
+            body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+            body.object("labels", labels -> labels.stringType("key1", "value1"));
+            body.stringType("descriptorPath");
+            body.object(
+                "diskConfig",
+                diskConfig -> {
+                  diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
+                  diskConfig.numberType("size");
+                });
+            body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+            body.array("extraArgs", extraArgs -> {});
+            body.object(
+                "kubernetesRuntimeConfig",
+                kubernetesRuntimeConfig -> {
+                  kubernetesRuntimeConfig.numberType("numNodes");
+                  kubernetesRuntimeConfig.stringType("machineType");
+                  kubernetesRuntimeConfig.booleanType("autoscalingEnabled");
+                });
+            body.stringType("workspaceId");
+          });
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createNewApp(PactDslWithProvider builder) {
     return builder
@@ -49,27 +75,9 @@ class AppsApiTest {
         .method("POST")
         .path(APP_ENDPOINT)
         .headers(contentTypeJsonHeader)
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("appType", AppType.RSTUDIO.name());
-                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                      body.object("labels", labels -> labels.stringType("key1", "value1"));
-                      body.stringType("descriptorPath");
-                      body.object(
-                          "diskConfig",
-                          diskConfig -> {
-                            diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
-                            diskConfig.numberType("size");
-                          });
-                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                      body.array("extraArgs", extraArgs -> {});
-                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                      body.stringType("workspaceId");
-                    })
-                .build())
+        .body(createAppRequestBody.build())
         .willRespondWith()
-        .status(200)
+        .status(202)
         .headers(contentTypeJsonHeader)
         .body(
             newJsonBody(
@@ -116,25 +124,7 @@ class AppsApiTest {
         .method("POST")
         .path(APP_ENDPOINT)
         .headers(contentTypeJsonHeader)
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("appType", AppType.RSTUDIO.name());
-                      body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
-                      body.object("labels", labels -> labels.stringType("key1", "value1"));
-                      body.stringType("descriptorPath", "descriptor/path");
-                      body.object(
-                          "diskConfig",
-                          diskConfig -> {
-                            diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
-                            diskConfig.numberType("size");
-                          });
-                      body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
-                      body.array("extraArgs", extraArgs -> {});
-                      body.object("kubernetesRuntimeConfig", kubernetesRuntimeConfig -> {});
-                      body.stringType("workspaceId", "Workspace123");
-                    })
-                .build())
+        .body(createAppRequestBody.build())
         .willRespondWith()
         .status(409)
         .headers(contentTypeJsonHeader)
