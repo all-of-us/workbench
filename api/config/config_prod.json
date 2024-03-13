@@ -17,10 +17,6 @@
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-prod",
     "workspaceBucketLocation": "us-central1",
-    "runtimeImages": {
-      "gce": [],
-      "dataproc": []
-    },
     "gceVmZone": "us-central1-a"
   },
   "billing": {

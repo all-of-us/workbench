@@ -6775,10 +6775,6 @@ components:
         rasLogoutUrl:
           type: string
           description: The URL that can sign out RAS login session.
-        runtimeImages:
-          type: array
-          items:
-            $ref: '#/components/schemas/RuntimeImage'
         freeTierBillingAccountId:
           type: string
           description: The free tier billing account id
@@ -6818,13 +6814,6 @@ components:
           type: boolean
           default: false
           description: Enable variant select all
-    RuntimeImage:
-      type: object
-      properties:
-        cloudService:
-          type: string
-        name:
-          type: string
     AccessModuleConfig:
       required:
       - expirable
