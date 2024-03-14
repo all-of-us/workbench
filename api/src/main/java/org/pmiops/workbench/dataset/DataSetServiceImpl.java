@@ -91,6 +91,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -131,6 +132,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           + "\nAND UPPER(domain) = %s";
   private static final String LIMIT_20 = " LIMIT 20";
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+
+  // RStudio has a line length limit of 4096 characters.  Pasting lines longer than this will
+  // FAIL SILENTLY, CAUSING WRONG RESULTS, so it's critical to produce output shorter than this.
+  // https://github.com/rstudio/rstudio/issues/14420
+  private static final int RSTUDIO_LINE_LENGTH_MINUS_BUFFER = 1000;
+
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
       ImmutableList.of(
           Domain.CONDITION,
@@ -1489,10 +1496,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String rPythonSqlComment = "# " + sqlComment;
     String sasSqlComment = "/* " + sqlComment + " */";
 
-    String sqlQuery =
+    String rawSqlQuery =
         fillInQueryParams(
             generateSqlWithEnvironmentVariables(queryJobConfiguration.getQuery(), analysisLanguage),
             queryJobConfiguration.getNamedParameters());
+
+    // Split long lines in the SQL query into multiple, to avoid exceeding RStudio's length limit
+    String sqlQuery =
+        WorkbenchStringUtils.splitTooLongLines(
+            rawSqlQuery, RSTUDIO_LINE_LENGTH_MINUS_BUFFER, ",", System.lineSeparator());
 
     switch (analysisLanguage) {
       case PYTHON:
