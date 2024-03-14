@@ -3,6 +3,7 @@ package org.pmiops.workbench.dataset;
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.QUESTION_LOOKUP_SQL;
+import static org.pmiops.workbench.dataset.DatasetBuilderUtils.splitWithLineBreaks;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -789,10 +790,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           dbConceptSetConceptIds.stream()
               .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
       String standardConceptIds =
-          partitionSourceAndStandard.get(true).stream()
-              .map(c -> c.getConceptId().toString())
-              .sorted()
-              .collect(Collectors.joining(", "));
+          splitWithLineBreaks(
+              partitionSourceAndStandard.get(true).stream()
+                  .map(c -> c.getConceptId().toString())
+                  .sorted()
+                  .collect(Collectors.joining(", ")),
+              100);
       String sourceConceptIds =
           partitionSourceAndStandard.get(false).stream()
               .map(c -> c.getConceptId().toString())
