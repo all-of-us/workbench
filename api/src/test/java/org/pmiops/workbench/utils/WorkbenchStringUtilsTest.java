@@ -82,6 +82,33 @@ public class WorkbenchStringUtilsTest {
   }
 
   @Test
+  public void testSplitByLength_EmptyInput() {
+    String line = "";
+    int limit = 5;
+    String tokenSeparator = ",";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of(line));
+  }
+
+  @Test
+  public void testSplitByLength_ZeroLimit() {
+    String line = "a,b,c";
+    int limit = 0;
+    String tokenSeparator = ",";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of("a,", "b,", "c"));
+  }
+
+  @Test
+  public void testSplitByLength_EmptyTokenSeparator() {
+    String line = "a,b,c";
+    int limit = 5;
+    String tokenSeparator = "";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of(line));
+  }
+
+  @Test
   public void testSplitTooLongLines_ShorterThanLimit() {
     String input =
         """
@@ -148,5 +175,38 @@ public class WorkbenchStringUtilsTest {
     String result =
         WorkbenchStringUtils.splitTooLongLines(input, limit, tokenSeparator, lineSeparator);
     assertThat(result.trim()).isEqualTo(expected.trim());
+  }
+
+  @Test
+  public void testSplitTooLongLines_EmptyLineSeparator() {
+    String input = "a,b,c" + System.lineSeparator() + "d,e,f";
+    int limit = 5;
+    String tokenSeparator = ",";
+    String lineSeparator = "";
+    String result =
+        WorkbenchStringUtils.splitTooLongLines(input, limit, tokenSeparator, lineSeparator);
+    assertThat(result).isEqualTo(input);
+  }
+
+  @Test
+  public void testSplitTooLongLines_InputOnlyTokenSeparator() {
+    String input = ",,,";
+    int limit = 5;
+    String tokenSeparator = ",";
+    String lineSeparator = System.lineSeparator();
+    String result =
+        WorkbenchStringUtils.splitTooLongLines(input, limit, tokenSeparator, lineSeparator);
+    assertThat(result).isEqualTo(input);
+  }
+
+  @Test
+  public void testSplitTooLongLines_InputOnlyLineSeparator() {
+    String input = System.lineSeparator() + System.lineSeparator() + System.lineSeparator();
+    int limit = 5;
+    String tokenSeparator = ",";
+    String lineSeparator = System.lineSeparator();
+    String result =
+        WorkbenchStringUtils.splitTooLongLines(input, limit, tokenSeparator, lineSeparator);
+    assertThat(result.trim()).isEqualTo(input.trim());
   }
 }
