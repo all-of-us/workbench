@@ -20,7 +20,7 @@ public class DatasetBuilderUtils {
 
       // Add line break after every chunk except the last one
       if (i % chunkSize == chunkSize - 1 && i != numbers.length - 1) {
-        result.append("\n,");
+        result.append(System.lineSeparator());
       }
     }
     return result.toString();
