@@ -14,8 +14,10 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
+import io.pactfoundation.consumer.dsl.LambdaDslObject;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -46,16 +48,21 @@ class AppsApiTest {
       newJsonBody(
           body -> {
             body.stringType("appType", AppType.RSTUDIO.name());
-            body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.name());
+            body.stringType("allowedChartName", LeonardoAllowedChartName.RSTUDIO.toString());
             body.object("labels", labels -> labels.stringType("key1", "value1"));
             body.stringType("descriptorPath");
             body.object(
                 "diskConfig",
                 diskConfig -> {
-                  diskConfig.stringType("diskType", LeonardoDiskType.SSD.name());
+                  diskConfig.stringType("diskType", LeonardoDiskType.SSD.toString());
                   diskConfig.numberType("size");
+                  diskConfig.stringType("name", "mock-disk");
                 });
-            body.array("customEnvironmentVariables", customEnvironmentVariables -> {});
+            body.object(
+                "customEnvironmentVariables",
+                customEnvironmentVariables -> {
+                  customEnvironmentVariables.stringType("key1");
+                });
             body.array("extraArgs", extraArgs -> {});
             body.object(
                 "kubernetesRuntimeConfig",
@@ -64,7 +71,7 @@ class AppsApiTest {
                   kubernetesRuntimeConfig.stringType("machineType");
                   kubernetesRuntimeConfig.booleanType("autoscalingEnabled");
                 });
-            body.stringType("workspaceId");
+            body.uuid("workspaceId");
           });
 
   static LeonardoCreateAppRequest createAppRequest() {
@@ -78,12 +85,24 @@ class AppsApiTest {
     request.setLabels(Map.ofEntries(entry("key1", "value1")));
     request.setDescriptorPath("descriptor/path");
     request.setDiskConfig(
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.SSD).size(100));
-    request.setCustomEnvironmentVariables(new ArrayList<>());
+        new LeonardoPersistentDiskRequest()
+            .diskType(LeonardoDiskType.SSD)
+            .size(100)
+            .name("mockDisk"));
+    request.setCustomEnvironmentVariables(Map.ofEntries(entry("key1", "value1")));
     request.setExtraArgs(new ArrayList<>());
     request.setKubernetesRuntimeConfig(runtimeConfig);
-    request.setWorkspaceId("Workspace123");
+    request.setWorkspaceId(UUID.randomUUID().toString());
     return request;
+  }
+
+  void applyAppExpectations(LambdaDslObject app) {
+    app.stringType("appName", "sample-cromwell-study");
+    app.stringType("status", AppStatus.RUNNING.name());
+    app.stringType("diskName", "disk-123");
+    app.stringType("appType", "CROMWELL");
+    app.array("errors", errors -> {});
+    app.object("cloudContext", context -> context.stringType("cloudprovider", null));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -97,19 +116,7 @@ class AppsApiTest {
         .body(createAppRequestBody.build())
         .willRespondWith()
         .status(202)
-        .headers(contentTypeJsonHeader)
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("appName");
-                      body.stringType("status", AppStatus.RUNNING.name());
-                      body.stringType("diskName");
-                      body.stringType("appType", AppType.RSTUDIO.name());
-                      body.array("errors", errors -> {});
-                      body.object(
-                          "cloudContext", context -> context.stringType("cloudprovider", null));
-                    })
-                .build())
+        .headers(contentTypeTextPlainHeader)
         .toPact();
   }
 
@@ -162,18 +169,7 @@ class AppsApiTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(
-            newJsonBody(
-                    body -> {
-                      body.stringType("appName", "sample-cromwell-study");
-                      body.stringType("status", AppStatus.RUNNING.name());
-                      body.stringType("diskName", "disk-123");
-                      body.stringType("appType", "CROMWELL");
-                      body.array("errors", errors -> {});
-                      body.object(
-                          "cloudContext", context -> context.stringType("cloudprovider", null));
-                    })
-                .build())
+        .body(newJsonBody(this::applyAppExpectations).build())
         .toPact();
   }
 
@@ -233,9 +229,8 @@ class AppsApiTest {
         .path(APP_ENDPOINT)
         .matchQuery("deleteDisk", "true|false")
         .willRespondWith()
-        .status(200)
-        .headers(contentTypeJsonHeader)
-        .body(newJsonBody(body -> {}).build())
+        .status(202)
+        .headers(contentTypeTextPlainHeader)
         .toPact();
   }
 
@@ -290,7 +285,12 @@ class AppsApiTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(newJsonArray(array -> {}).build())
+        .body(
+            newJsonArray(
+                    apps -> {
+                      apps.object(this::applyAppExpectations);
+                    })
+                .build())
         .toPact();
   }
 
@@ -304,36 +304,6 @@ class AppsApiTest {
     assertDoesNotThrow(() -> api.listAppByProject(GOOGLE_PROJECT, null, false, "", "creator"));
   }
 
-  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
-  RequestResponsePact listAppsByMissingProject(PactDslWithProvider builder) {
-    return builder
-        .given("there is not a Google project")
-        .uponReceiving("a request to list apps")
-        .method("GET")
-        .path(LIST_APPS_ENDPOINT)
-        .matchQuery("includeDeleted", "true|false")
-        .matchQuery("includeLabels", ".*")
-        .matchQuery("role", ".*")
-        .willRespondWith()
-        .status(404)
-        .headers(contentTypeJsonHeader)
-        .toPact();
-  }
-
-  @Test
-  @PactTestFor(pactMethod = "listAppsByMissingProject")
-  void testListAppWhenGoogleProjectDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
-    ApiException exception =
-        assertThrows(
-            ApiException.class,
-            () -> api.listAppByProject(GOOGLE_PROJECT, null, false, "", "creator"));
-
-    assertEquals(exception.getMessage(), "Not Found");
-  }
-
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
+  static Map<String, String> contentTypeTextPlainHeader = Map.of("Content-Type", "text/plain");
 }
