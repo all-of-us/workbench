@@ -45,6 +45,10 @@ public class WorkbenchStringUtils {
    */
   public static List<String> splitByLength(String line, int limit, String tokenSeparator) {
     String[] tokens = line.split(tokenSeparator);
+    if (tokens.length < 2) {
+      return List.of(line);
+    }
+
     ArrayList<String> outLines = new ArrayList<>();
     StringBuilder currentLine = new StringBuilder();
 

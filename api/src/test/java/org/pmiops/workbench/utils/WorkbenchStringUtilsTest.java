@@ -55,6 +55,33 @@ public class WorkbenchStringUtilsTest {
   }
 
   @Test
+  public void testSplitByLength_NoSeparator() {
+    String line = "abcdefghij";
+    int limit = 5;
+    String tokenSeparator = ",";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of(line));
+  }
+
+  @Test
+  public void testSplitByLength_TrailingSeparator_ShorterThanLimit() {
+    String line = "abcdefghij,";
+    int limit = 50;
+    String tokenSeparator = ",";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of(line));
+  }
+
+  @Test
+  public void testSplitByLength_TrailingSeparator_LongerThanLimit() {
+    String line = "abcdefghij,";
+    int limit = 5;
+    String tokenSeparator = ",";
+    assertThat(WorkbenchStringUtils.splitByLength(line, limit, tokenSeparator))
+        .isEqualTo(List.of(line));
+  }
+
+  @Test
   public void testSplitTooLongLines_ShorterThanLimit() {
     String input =
         """
