@@ -136,7 +136,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // RStudio has a line length limit of 4096 characters.  Pasting lines longer than this will
   // FAIL SILENTLY, CAUSING WRONG RESULTS, so it's critical to produce output shorter than this.
   // https://github.com/rstudio/rstudio/issues/14420
-  private static final int RSTUDIO_LINE_LENGTH_MINUS_BUFFER = 4000;
+  private static final int RSTUDIO_LINE_LENGTH_MINUS_BUFFER = 1000;
 
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
       ImmutableList.of(
