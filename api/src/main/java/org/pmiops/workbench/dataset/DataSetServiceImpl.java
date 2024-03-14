@@ -3,6 +3,8 @@ package org.pmiops.workbench.dataset;
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.QUESTION_LOOKUP_SQL;
+import static org.pmiops.workbench.dataset.DatasetBuilderUtils.splitWithLineBreaks;
+import static org.pmiops.workbench.dataset.DatasetBuilderUtils.transformText;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -788,16 +790,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetConceptIds.stream()
               .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
+      // ConceptIds string can be too long for single line, split it into multiple lines
+      // See https://precisionmedicineinitiative.atlassian.net/browse/DST-1735
       String standardConceptIds =
-          partitionSourceAndStandard.get(true).stream()
-              .map(c -> c.getConceptId().toString())
-              .sorted()
-              .collect(Collectors.joining(", "));
+          splitWithLineBreaks(
+              partitionSourceAndStandard.get(true).stream()
+                  .map(c -> c.getConceptId().toString())
+                  .sorted()
+                  .collect(Collectors.joining(", ")),
+              5);
       String sourceConceptIds =
-          partitionSourceAndStandard.get(false).stream()
+          splitWithLineBreaks(partitionSourceAndStandard.get(false).stream()
               .map(c -> c.getConceptId().toString())
               .sorted()
-              .collect(Collectors.joining(", "));
+              .collect(Collectors.joining(", ")), 5);
       if (!standardConceptIds.isEmpty()) {
         queryBuilder.append(
             BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
@@ -1490,9 +1496,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String sasSqlComment = "/* " + sqlComment + " */";
 
     String sqlQuery =
-        fillInQueryParams(
+        transformText(fillInQueryParams(
             generateSqlWithEnvironmentVariables(queryJobConfiguration.getQuery(), analysisLanguage),
-            queryJobConfiguration.getNamedParameters());
+            queryJobConfiguration.getNamedParameters()), 100);
 
     switch (analysisLanguage) {
       case PYTHON:
