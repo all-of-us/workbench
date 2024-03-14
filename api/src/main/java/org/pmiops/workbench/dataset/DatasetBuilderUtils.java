@@ -1,6 +1,8 @@
 package org.pmiops.workbench.dataset;
 
 public class DatasetBuilderUtils {
+  private DatasetBuilderUtils() {}
+
   /** Split the string into an array of numbers (assuming comma separated) */
   public static String splitWithLineBreaks(String str, int chunkSize) {
     // Split the string into an array of numbers (assuming comma separated)
