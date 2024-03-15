@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
 import io.pactfoundation.consumer.dsl.LambdaDslObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -60,10 +61,13 @@ class AppsApiTest {
                 });
             body.object(
                 "customEnvironmentVariables",
-                customEnvironmentVariables -> {
-                  customEnvironmentVariables.stringType("key1");
+                customEnvironmentVariables -> customEnvironmentVariables.stringType("key1"));
+            body.array(
+                "extraArgs",
+                extraArgs -> {
+                  extraArgs.stringType("arg1");
+                  extraArgs.stringType("arg2");
                 });
-            body.array("extraArgs", extraArgs -> {});
             body.object(
                 "kubernetesRuntimeConfig",
                 kubernetesRuntimeConfig -> {
@@ -90,7 +94,7 @@ class AppsApiTest {
             .size(100)
             .name("mockDisk"));
     request.setCustomEnvironmentVariables(Map.ofEntries(entry("key1", "value1")));
-    request.setExtraArgs(new ArrayList<>());
+    request.setExtraArgs(Arrays.asList("arg1", "arg2"));
     request.setKubernetesRuntimeConfig(runtimeConfig);
     request.setWorkspaceId(UUID.randomUUID().toString());
     return request;
@@ -285,12 +289,7 @@ class AppsApiTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(
-            newJsonArray(
-                    apps -> {
-                      apps.object(this::applyAppExpectations);
-                    })
-                .build())
+        .body(newJsonArray(apps -> apps.object(this::applyAppExpectations)).build())
         .toPact();
   }
 
