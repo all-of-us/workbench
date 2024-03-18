@@ -2,6 +2,8 @@ package org.pmiops.workbench.consumer;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -69,6 +71,34 @@ class DisksApiTest {
     DisksApi api = new DisksApi(client);
 
     assertDoesNotThrow(() -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact getMissingDisk(PactDslWithProvider builder) {
+    return builder
+        .given("there is not a disk in a Google project")
+        .uponReceiving("a request to get a disk")
+        .method("GET")
+        .path(DISK_ENDPOINT)
+        .headers(contentTypeJsonHeader)
+        .willRespondWith()
+        .status(404)
+        .headers(contentTypeJsonHeader)
+        .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "getMissingDisk")
+  void testGetDiskWhenDiskDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    DisksApi api = new DisksApi(client);
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
+    assertEquals("Not Found", exception.getMessage());
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
