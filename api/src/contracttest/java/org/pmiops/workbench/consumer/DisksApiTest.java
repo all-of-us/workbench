@@ -45,21 +45,17 @@ class DisksApiTest {
               });
               body.stringType("zone");
               body.stringType("name", DISK_NAME);
-              body.stringType("googleId");
               body.stringType("samResourceId");
-              body.stringMatcher("status", "READY|DELETING|ERROR", "READY");
+              body.stringMatcher("status", "Ready|Deleting|Error", "Ready");
               body.object("auditInfo", auditInfo -> {
                 auditInfo.stringType("creator");
                 auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
-                auditInfo.stringType("destroyedDate", "2021-01-04T00:00:00Z");
                 auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
-                auditInfo.stringType("kernelFoundBusyDate", "2021-01-01T00:00:00Z");
               });
               body.numberType("size");
-              body.stringMatcher("diskType", "SSD|HDD", "SSD");
+              body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
               body.numberType("blockSize");
               body.object("labels", labels -> {
-                labels.stringType("key1", "value1");
               });
         }).build())
         .toPact();
