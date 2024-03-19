@@ -55,10 +55,13 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.ParticipantCountFilter;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilter;
+import org.pmiops.workbench.model.VariantFilterInfoResponse;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.utils.FieldValues;
@@ -631,6 +634,17 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public VariantFilterInfoResponse findVariantFilterInfo(VariantFilter filter) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildFilterInfoQuery(filter));
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(row -> convertToVariantFilterInfoResponse(row, filter))
+        .findFirst()
+        .get();
+  }
+
+  @Override
   public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
     List<String> searchDomains =
         ImmutableList.of(
@@ -652,6 +666,26 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return dbCriteria.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private VariantFilterInfoResponse convertToVariantFilterInfoResponse(
+      FieldValueList row, VariantFilter filter) {
+    ParticipantCountFilter range = filter.getParticipantCountRange();
+    VariantFilterInfoResponse response =
+        new VariantFilterInfoResponse()
+            .lessThanOrEqualToFiveThousand(0L)
+            .overFiveThousand(0L)
+            .overTenThousand(0L)
+            .overHundredThousand(0L)
+            .overTwoHundredThousand(0L);
+    FieldValues.getLong(row, "count").ifPresent(response::setVidsCount);
+    FieldValues.getLong(row, "participant_count").ifPresent(response::setParticipantCount);
+    FieldValues.getLong(row, "count_1").ifPresent(response::setLessThanOrEqualToFiveThousand);
+    FieldValues.getLong(row, "count_2").ifPresent(response::setOverFiveThousand);
+    FieldValues.getLong(row, "count_3").ifPresent(response::setOverTenThousand);
+    FieldValues.getLong(row, "count_4").ifPresent(response::setOverHundredThousand);
+    FieldValues.getLong(row, "count_5").ifPresent(response::setOverTwoHundredThousand);
+    return response;
   }
 
   private VariantFilterResponse fieldValueListToVariantFilter(FieldValueList row) {

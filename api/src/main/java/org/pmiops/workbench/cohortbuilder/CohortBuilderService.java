@@ -20,6 +20,8 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilter;
+import org.pmiops.workbench.model.VariantFilterInfoResponse;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 
@@ -95,4 +97,7 @@ public interface CohortBuilderService {
    * pageToken, total query count and list of variants(paginated).
    */
   ImmutableTriple<String, Integer, List<Variant>> findVariants(VariantFilterRequest filters);
+
+  /** Find VariantFilter info for specified filter */
+  VariantFilterInfoResponse findVariantFilterInfo(VariantFilter filter);
 }

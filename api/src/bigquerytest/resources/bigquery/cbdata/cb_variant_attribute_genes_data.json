@@ -26,5 +26,13 @@
   {
     "vid": "2-100550658-T-CD",
     "gene_symbol": "GENE4"
+  },
+  {
+    "vid": "22-100550658-T-EE",
+    "gene_symbol": "GENE5"
+  },
+  {
+    "vid": "22-100550658-T-EF",
+    "gene_symbol": "GENE5"
   }
 ]
