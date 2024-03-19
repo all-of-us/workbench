@@ -55,7 +55,6 @@ import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.FilterColumns;
-import org.pmiops.workbench.model.ParticipantCountFilter;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
@@ -639,7 +638,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             VariantQueryBuilder.buildFilterInfoQuery(filter));
     return StreamSupport.stream(result.iterateAll().spliterator(), false)
-        .map(row -> convertToVariantFilterInfoResponse(row, filter))
+        .map(row -> convertToVariantFilterInfoResponse(row))
         .findFirst()
         .get();
   }
@@ -668,9 +667,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
-  private VariantFilterInfoResponse convertToVariantFilterInfoResponse(
-      FieldValueList row, VariantFilter filter) {
-    ParticipantCountFilter range = filter.getParticipantCountRange();
+  private VariantFilterInfoResponse convertToVariantFilterInfoResponse(FieldValueList row) {
     VariantFilterInfoResponse response =
         new VariantFilterInfoResponse()
             .lessThanOrEqualToFiveThousand(0L)

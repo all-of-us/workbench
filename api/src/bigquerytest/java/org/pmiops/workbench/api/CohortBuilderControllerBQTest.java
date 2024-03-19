@@ -2888,6 +2888,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(response).isNotNull();
     assertThat(response.getVidsCount()).isEqualTo(2);
     assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(0);
     assertThat(response.getOverFiveThousand()).isEqualTo(0);
     assertThat(response.getOverTenThousand()).isEqualTo(0);
     assertThat(response.getOverHundredThousand()).isEqualTo(0);
