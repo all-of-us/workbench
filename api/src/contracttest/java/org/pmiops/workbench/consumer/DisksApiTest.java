@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.pactfoundation.consumer.dsl.LambdaDslObject;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -31,6 +32,15 @@ class DisksApiTest {
       String.format("/api/google/v1/disks/%s/%s", GOOGLE_PROJECT, DISK_NAME);
   private static final String LIST_DISKS_ENDPOINT =
       String.format("/api/google/v1/disks/%s", GOOGLE_PROJECT);
+
+  private DisksApi api;
+
+  @BeforeEach
+  void setUp(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    api = new DisksApi(client);
+  }
 
   void applyDiskExpectations(LambdaDslObject disk) {
     disk.numberType("id", 3);
@@ -73,11 +83,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getDisk")
-  void testGetDiskWhenDiskExists(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    DisksApi api = new DisksApi(client);
-
+  void testGetDiskWhenDiskExists() {
     assertDoesNotThrow(() -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
   }
 
@@ -97,11 +103,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getMissingDisk")
-  void testGetDiskWhenDiskDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    DisksApi api = new DisksApi(client);
-
+  void testGetDiskWhenDiskDoesNotExist() {
     ApiException exception =
         assertThrows(ApiException.class, () -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
     assertEquals("Not Found", exception.getMessage());
@@ -130,11 +132,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateDisk")
-  void testUpdateDiskWhenDiskExists(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    DisksApi api = new DisksApi(client);
-
+  void testUpdateDiskWhenDiskExists() {
     LeonardoUpdateDiskRequest updateDiskRequest = new LeonardoUpdateDiskRequest();
     updateDiskRequest.setSize(100);
     updateDiskRequest.setDiskType(LeonardoDiskType.SSD);
@@ -167,11 +165,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateMissingDisk")
-  void testUpdateDiskWhenDiskDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    DisksApi api = new DisksApi(client);
-
+  void testUpdateDiskWhenDiskDoesNotExist() {
     LeonardoUpdateDiskRequest updateDiskRequest = new LeonardoUpdateDiskRequest();
     updateDiskRequest.setSize(100);
     updateDiskRequest.setDiskType(LeonardoDiskType.SSD);
@@ -203,11 +197,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "listDisksByProject")
-  void testListDisksByProjectWhenGoogleProjectExists(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    DisksApi api = new DisksApi(client);
-
+  void testListDisksByProjectWhenGoogleProjectExists() {
     assertDoesNotThrow(() -> api.listDisksByProject(GOOGLE_PROJECT, null, true, "AOU", "creator"));
   }
 
