@@ -73,7 +73,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getDisk")
-  void testGetDiskWhenDiskExists(MockServer mockServer) throws ApiException {
+  void testGetDiskWhenDiskExists(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
@@ -97,7 +97,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getMissingDisk")
-  void testGetDiskWhenDiskDoesNotExist(MockServer mockServer) throws ApiException {
+  void testGetDiskWhenDiskDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
@@ -130,7 +130,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateDisk")
-  void testUpdateDiskWhenDiskExists(MockServer mockServer) throws ApiException {
+  void testUpdateDiskWhenDiskExists(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
@@ -167,7 +167,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateMissingDisk")
-  void testUpdateDiskWhenDiskDoesNotExist(MockServer mockServer) throws ApiException {
+  void testUpdateDiskWhenDiskDoesNotExist(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
@@ -203,7 +203,7 @@ class DisksApiTest {
 
   @Test
   @PactTestFor(pactMethod = "listDisksByProject")
-  void testListDisksByProjectWhenGoogleProjectExists(MockServer mockServer) throws ApiException {
+  void testListDisksByProjectWhenGoogleProjectExists(MockServer mockServer) {
     ApiClient client = new ApiClient();
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
@@ -212,5 +212,4 @@ class DisksApiTest {
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
-  static Map<String, String> contentTypeTextPlainHeader = Map.of("Content-Type", "text/plain");
 }
