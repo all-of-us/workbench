@@ -2411,10 +2411,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-onclickoutside@^6.7.9":
-  version "6.7.9"
-  resolved "https://registry.yarnpkg.com/@types/react-onclickoutside/-/react-onclickoutside-6.7.9.tgz#c29d0796075c636a4040ece86eafadaac258c089"
-  integrity sha512-1Zq0AjKq+w2P1/XzShkbRfpXUEVEP7seOHGdYojYGf6FOCvkUrquZeRRAw3amNoynsanJ5nFTSfoOv41w7oH1w==
+"@types/react-onclickoutside@^6.7.10":
+  version "6.7.10"
+  resolved "https://registry.yarnpkg.com/@types/react-onclickoutside/-/react-onclickoutside-6.7.10.tgz#aeaf56aac4b67185a69038d22c55bd0726f13123"
+  integrity sha512-Do2eOuqlJ9amXAuQO5gbhp5MAPnzZ7cknmYqX4U44tX22eAAnHgQKjp3SaNhSAuUHBTANWEqn1N+nWd3ea8FyQ==
   dependencies:
     "@types/react" "*"
 
@@ -2442,10 +2442,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16", "@types/react@^17", "@types/react@^17.0.75":
-  version "17.0.75"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.75.tgz#cffbc76840a12fcadaf5a3cf14878bb06efcf73d"
-  integrity sha512-MSA+NzEzXnQKrqpO63CYqNstFjsESgvJAdAyyJ1n6ZQq/GLgf6nOfIKwk+Twuz0L1N6xPe+qz5xRCJrbhMaLsw==
+"@types/react@*", "@types/react@^16", "@types/react@^17", "@types/react@^17.0.79":
+  version "17.0.79"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.79.tgz#67693ab9bc476780d968326658619fa7f25b8935"
+  integrity sha512-gavKA8AwJAML9zWHuiQRASjrrPJHbT/zrUDHiUGUf+l5a3pkEd6atvjjq+8y2vfRHBJLQJjFpxSa9I8qe9zHAw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
