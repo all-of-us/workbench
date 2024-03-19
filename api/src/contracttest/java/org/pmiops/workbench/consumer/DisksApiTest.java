@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.DisksApi;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 
 
 @ExtendWith(PactConsumerTestExt.class)
@@ -99,6 +101,81 @@ class DisksApiTest {
             ApiException.class,
             () -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
     assertEquals("Not Found", exception.getMessage());
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact updateDisk(PactDslWithProvider builder) {
+    return builder
+        .given("there is a disk in a Google project")
+        .uponReceiving("a request to update a disk")
+        .method("PATCH")
+        .path(DISK_ENDPOINT)
+        .body(newJsonBody(body -> {
+          body.numberType("size");
+          body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+          body.numberType("blockSize");
+          body.object("labels", labels -> {
+          });
+        }).build())
+        .willRespondWith()
+        .status(202)
+        .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "updateDisk")
+  void testUpdateDiskWhenDiskExists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    DisksApi api = new DisksApi(client);
+
+    LeonardoUpdateDiskRequest updateDiskRequest = new LeonardoUpdateDiskRequest();
+    updateDiskRequest.setSize(100);
+    updateDiskRequest.setDiskType(LeonardoDiskType.SSD);
+    updateDiskRequest.setBlockSize(4096);
+    updateDiskRequest.setLabels(Map.of());
+
+    assertDoesNotThrow(() -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME,updateDiskRequest));
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact updateMissingDisk(PactDslWithProvider builder) {
+    return builder
+        .given("there is a disk in a Google project")
+        .uponReceiving("a request to update a disk")
+        .method("PATCH")
+        .path(DISK_ENDPOINT)
+        .body(newJsonBody(body -> {
+          body.numberType("size");
+          body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+          body.numberType("blockSize");
+          body.object("labels", labels -> {
+          });
+        }).build())
+        .willRespondWith()
+        .status(404)
+        .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "updateMissingDisk")
+  void testUpdateDiskWhenDiskDoesNotExist(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    DisksApi api = new DisksApi(client);
+
+    LeonardoUpdateDiskRequest updateDiskRequest = new LeonardoUpdateDiskRequest();
+    updateDiskRequest.setSize(100);
+    updateDiskRequest.setDiskType(LeonardoDiskType.SSD);
+    updateDiskRequest.setBlockSize(4096);
+    updateDiskRequest.setLabels(Map.of());
+
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME,updateDiskRequest));
+    assertEquals(exception.getMessage(), "Not Found");
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
