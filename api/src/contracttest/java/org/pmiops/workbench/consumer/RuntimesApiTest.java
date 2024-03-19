@@ -16,6 +16,7 @@ import io.pactfoundation.consumer.dsl.LambdaDslJsonBody;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -45,6 +46,16 @@ class RuntimesApiTest {
             body.stringType("toolDockerImage", "us.gcr.io/example/image-for-contract-test:2.2.7");
           });
 
+  private RuntimesApi api;
+
+  @BeforeEach
+  void setUp(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    api = new RuntimesApi(client);
+  }
+
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
     return builder
@@ -60,11 +71,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "createDuplicateRuntime")
-  void testCreateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testCreateRuntimeWhenRuntimeDoesExist() {
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
     request.setJupyterUserScriptUri("http://string.com");
     request.setJupyterStartUserScriptUri("http://start.com");
@@ -93,11 +100,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "createNewRuntime")
-  void testCreateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testCreateRuntimeWhenRuntimeDoesNotExist() {
     LeonardoCreateRuntimeRequest request = new LeonardoCreateRuntimeRequest();
     request.setJupyterUserScriptUri("http://string.com");
     request.setJupyterStartUserScriptUri("http://start.com");
@@ -148,11 +151,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getRuntime")
-  void testGetRuntimeWhenRuntimeExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testGetRuntimeWhenRuntimeExists() {
     assertDoesNotThrow(() -> api.getRuntime("googleProject", "exampleruntimename"));
   }
 
@@ -172,11 +171,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getMissingRuntime")
-  void testGetRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testGetRuntimeWhenRuntimeDoesNotExist() {
     ApiException exception =
         assertThrows(
             ApiException.class, () -> api.getRuntime("googleProject", "exampleruntimename"));
@@ -206,10 +201,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateRuntime")
-  void testUpdateRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
+  void testUpdateRuntimeWhenRuntimeDoesExist() {
     LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
     request.setAllowStop(true);
     request.setAutopause(true);
@@ -252,10 +244,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "updateMissingRuntime")
-  void testUpdateRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
+  void testUpdateRuntimeWhenRuntimeDoesNotExist() {
     LeonardoUpdateRuntimeRequest request = new LeonardoUpdateRuntimeRequest();
     request.setAllowStop(true);
     request.setAutopause(true);
@@ -290,11 +279,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "deleteRuntime")
-  void testDeleteRuntimeWhenRuntimeDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testDeleteRuntimeWhenRuntimeDoesExist() {
     assertDoesNotThrow(() -> api.deleteRuntime("googleProject", "exampleruntimename", true));
   }
 
@@ -313,11 +298,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "deleteMissingRuntime")
-  void testDeleteRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testDeleteRuntimeWhenRuntimeDoesNotExist() {
     ApiException exception =
         assertThrows(
             ApiException.class,
@@ -339,11 +320,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "stopRuntime")
-  void testStopRuntimeWhenRuntimeDoesExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testStopRuntimeWhenRuntimeDoesExist() {
     assertDoesNotThrow(() -> api.stopRuntime("googleProject", "exampleruntimename"));
   }
 
@@ -362,11 +339,7 @@ class RuntimesApiTest {
 
   @Test
   @PactTestFor(pactMethod = "stopMissingRuntime")
-  void testStopRuntimeWhenRuntimeDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    RuntimesApi api = new RuntimesApi(client);
-
+  void testStopRuntimeWhenRuntimeDoesNotExist() {
     ApiException exception =
         assertThrows(
             ApiException.class, () -> api.stopRuntime("googleProject", "exampleruntimename"));
