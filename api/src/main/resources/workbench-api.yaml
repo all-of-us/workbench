@@ -6791,10 +6791,6 @@ components:
           description: Whether a captcha check is part of the new user registration
             process
           default: true
-        enableRStudioGKEApp:
-          type: boolean
-          description: DEPRECATED - always true.  Whether users are able to use the RStudio GKE app.
-          default: false
         enableSasGKEApp:
           type: boolean
           description: Whether users are able to use the SAS GKE app.
