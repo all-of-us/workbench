@@ -55,7 +55,6 @@ class RuntimesApiTest {
     api = new RuntimesApi(client);
   }
 
-
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact createDuplicateRuntime(PactDslWithProvider builder) {
     return builder
