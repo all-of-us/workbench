@@ -11291,6 +11291,7 @@ components:
       required:
         - vidsCount
         - participantCount
+        - lessThanOrEqualToFiveThousand
         - overFiveThousand
         - overTenThousand
         - overHundredThousand
