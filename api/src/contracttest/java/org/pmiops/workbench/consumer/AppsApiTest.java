@@ -279,7 +279,7 @@ class AppsApiTest {
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact listAppsByProject(PactDslWithProvider builder) {
     return builder
-        .given("there is a Google project")
+        .given("there is a Google project with apps")
         .uponReceiving("a request to list apps")
         .method("GET")
         .path(LIST_APPS_ENDPOINT)
