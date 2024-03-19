@@ -1,5 +1,6 @@
 package org.pmiops.workbench.consumer;
 
+import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray;
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -176,6 +177,53 @@ class DisksApiTest {
             ApiException.class,
             () -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME,updateDiskRequest));
     assertEquals(exception.getMessage(), "Not Found");
+  }
+
+  @Pact(consumer = "aou-rwb-api", provider = "leonardo")
+  RequestResponsePact listDisksByProject(PactDslWithProvider builder) {
+    return builder
+        .given("there is a Google project with disks")
+        .uponReceiving("a request to list disks by project")
+        .method("GET")
+        .path(LIST_DISKS_ENDPOINT)
+        .matchQuery("includeDeleted", "true|false")
+        .matchQuery("includeLabels", ".*")
+        .matchQuery("role", ".*")
+        .willRespondWith()
+        .status(200)
+        .headers(contentTypeJsonHeader)
+        .body(newJsonArray(apps -> apps.object((app) ->{
+          app.numberType("id", 3);
+          app.object("cloudContext", cloudContext -> {
+            cloudContext.stringType("cloudProvider");
+            cloudContext.stringType("cloudResource");
+          });
+          app.stringType("zone");
+          app.stringType("name", DISK_NAME);
+          app.stringMatcher("status", "Ready|Deleting|Error", "Ready");
+          app.object("auditInfo", auditInfo -> {
+            auditInfo.stringType("creator");
+            auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
+            auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
+          });
+          app.numberType("size");
+          app.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+          app.numberType("blockSize");
+          app.object("labels", labels -> {
+          });
+
+        })).build())
+        .toPact();
+  }
+
+  @Test
+  @PactTestFor(pactMethod = "listDisksByProject")
+  void testListDisksByProjectWhenGoogleProjectExists(MockServer mockServer) throws ApiException {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    DisksApi api = new DisksApi(client);
+
+    assertDoesNotThrow(() -> api.listDisksByProject(GOOGLE_PROJECT, null, true, "AOU","creator"));
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
