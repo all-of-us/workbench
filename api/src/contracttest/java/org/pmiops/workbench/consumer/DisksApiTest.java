@@ -12,6 +12,7 @@ import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
+import io.pactfoundation.consumer.dsl.LambdaDslObject;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,27 @@ class DisksApiTest {
       String.format("/api/google/v1/disks/%s/%s", GOOGLE_PROJECT, DISK_NAME);
   private static final String LIST_DISKS_ENDPOINT =
       String.format("/api/google/v1/disks/%s", GOOGLE_PROJECT);
+
+  void applyDiskExpectations(LambdaDslObject disk) {
+    disk.numberType("id", 3);
+    disk.object("cloudContext", cloudContext -> {
+      cloudContext.stringType("cloudProvider");
+      cloudContext.stringType("cloudResource");
+    });
+    disk.stringType("zone");
+    disk.stringType("name", DISK_NAME);
+    disk.stringMatcher("status", "Ready|Deleting|Error", "Ready");
+    disk.object("auditInfo", auditInfo -> {
+      auditInfo.stringType("creator");
+      auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
+      auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
+    });
+    disk.numberType("size");
+    disk.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+    disk.numberType("blockSize");
+    disk.object("labels", labels -> {
+    });
+  }
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getDisk(PactDslWithProvider builder) {
     return builder
@@ -42,27 +64,7 @@ class DisksApiTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(newJsonBody(body -> {
-              body.numberType("id", 3);
-              body.object("cloudContext", cloudContext -> {
-                cloudContext.stringType("cloudProvider");
-                cloudContext.stringType("cloudResource");
-              });
-              body.stringType("zone");
-              body.stringType("name", DISK_NAME);
-              body.stringType("samResourceId");
-              body.stringMatcher("status", "Ready|Deleting|Error", "Ready");
-              body.object("auditInfo", auditInfo -> {
-                auditInfo.stringType("creator");
-                auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
-                auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
-              });
-              body.numberType("size");
-              body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
-              body.numberType("blockSize");
-              body.object("labels", labels -> {
-              });
-        }).build())
+        .body(newJsonBody(this::applyDiskExpectations).build())
         .toPact();
   }
 
@@ -192,27 +194,7 @@ class DisksApiTest {
         .willRespondWith()
         .status(200)
         .headers(contentTypeJsonHeader)
-        .body(newJsonArray(apps -> apps.object((app) ->{
-          app.numberType("id", 3);
-          app.object("cloudContext", cloudContext -> {
-            cloudContext.stringType("cloudProvider");
-            cloudContext.stringType("cloudResource");
-          });
-          app.stringType("zone");
-          app.stringType("name", DISK_NAME);
-          app.stringMatcher("status", "Ready|Deleting|Error", "Ready");
-          app.object("auditInfo", auditInfo -> {
-            auditInfo.stringType("creator");
-            auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
-            auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
-          });
-          app.numberType("size");
-          app.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
-          app.numberType("blockSize");
-          app.object("labels", labels -> {
-          });
-
-        })).build())
+        .body(newJsonArray(apps -> apps.object(this::applyDiskExpectations)).build())
         .toPact();
   }
 
