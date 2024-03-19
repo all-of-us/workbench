@@ -22,7 +22,6 @@ import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 
-
 @ExtendWith(PactConsumerTestExt.class)
 class DisksApiTest {
   private static final String GOOGLE_PROJECT = "googleproject";
@@ -35,24 +34,28 @@ class DisksApiTest {
 
   void applyDiskExpectations(LambdaDslObject disk) {
     disk.numberType("id", 3);
-    disk.object("cloudContext", cloudContext -> {
-      cloudContext.stringType("cloudProvider");
-      cloudContext.stringType("cloudResource");
-    });
+    disk.object(
+        "cloudContext",
+        cloudContext -> {
+          cloudContext.stringType("cloudProvider");
+          cloudContext.stringType("cloudResource");
+        });
     disk.stringType("zone");
     disk.stringType("name", DISK_NAME);
     disk.stringMatcher("status", "Ready|Deleting|Error", "Ready");
-    disk.object("auditInfo", auditInfo -> {
-      auditInfo.stringType("creator");
-      auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
-      auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
-    });
+    disk.object(
+        "auditInfo",
+        auditInfo -> {
+          auditInfo.stringType("creator");
+          auditInfo.stringType("createdDate", "2021-01-01T00:00:00Z");
+          auditInfo.stringType("dateAccessed", "2021-01-01T00:00:00Z");
+        });
     disk.numberType("size");
     disk.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
     disk.numberType("blockSize");
-    disk.object("labels", labels -> {
-    });
+    disk.object("labels", labels -> {});
   }
+
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
   RequestResponsePact getDisk(PactDslWithProvider builder) {
     return builder
@@ -100,9 +103,7 @@ class DisksApiTest {
     DisksApi api = new DisksApi(client);
 
     ApiException exception =
-        assertThrows(
-            ApiException.class,
-            () -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
+        assertThrows(ApiException.class, () -> api.getDisk(GOOGLE_PROJECT, DISK_NAME));
     assertEquals("Not Found", exception.getMessage());
   }
 
@@ -113,13 +114,15 @@ class DisksApiTest {
         .uponReceiving("a request to update a disk")
         .method("PATCH")
         .path(DISK_ENDPOINT)
-        .body(newJsonBody(body -> {
-          body.numberType("size");
-          body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
-          body.numberType("blockSize");
-          body.object("labels", labels -> {
-          });
-        }).build())
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.numberType("size");
+                      body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+                      body.numberType("blockSize");
+                      body.object("labels", labels -> {});
+                    })
+                .build())
         .willRespondWith()
         .status(202)
         .toPact();
@@ -138,7 +141,7 @@ class DisksApiTest {
     updateDiskRequest.setBlockSize(4096);
     updateDiskRequest.setLabels(Map.of());
 
-    assertDoesNotThrow(() -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME,updateDiskRequest));
+    assertDoesNotThrow(() -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME, updateDiskRequest));
   }
 
   @Pact(consumer = "aou-rwb-api", provider = "leonardo")
@@ -148,13 +151,15 @@ class DisksApiTest {
         .uponReceiving("a request to update a disk")
         .method("PATCH")
         .path(DISK_ENDPOINT)
-        .body(newJsonBody(body -> {
-          body.numberType("size");
-          body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
-          body.numberType("blockSize");
-          body.object("labels", labels -> {
-          });
-        }).build())
+        .body(
+            newJsonBody(
+                    body -> {
+                      body.numberType("size");
+                      body.stringMatcher("diskType", "pd-standard|pd-ssd|pd-balanced", "pd-ssd");
+                      body.numberType("blockSize");
+                      body.object("labels", labels -> {});
+                    })
+                .build())
         .willRespondWith()
         .status(404)
         .toPact();
@@ -173,11 +178,9 @@ class DisksApiTest {
     updateDiskRequest.setBlockSize(4096);
     updateDiskRequest.setLabels(Map.of());
 
-
     ApiException exception =
         assertThrows(
-            ApiException.class,
-            () -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME,updateDiskRequest));
+            ApiException.class, () -> api.updateDisk(GOOGLE_PROJECT, DISK_NAME, updateDiskRequest));
     assertEquals(exception.getMessage(), "Not Found");
   }
 
@@ -205,7 +208,7 @@ class DisksApiTest {
     client.setBasePath(mockServer.getUrl());
     DisksApi api = new DisksApi(client);
 
-    assertDoesNotThrow(() -> api.listDisksByProject(GOOGLE_PROJECT, null, true, "AOU","creator"));
+    assertDoesNotThrow(() -> api.listDisksByProject(GOOGLE_PROJECT, null, true, "AOU", "creator"));
   }
 
   static Map<String, String> contentTypeJsonHeader = Map.of("Content-Type", "application/json");
