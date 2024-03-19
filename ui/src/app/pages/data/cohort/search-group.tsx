@@ -290,6 +290,16 @@ export const SearchGroup = withCurrentWorkspace()(
       }
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      const {
+        group: { id, status },
+      } = this.props;
+      if (prevProps.group.id !== id && status === 'active') {
+        // Group was deleted, prevent overlay of deleted group from remaining
+        this.setState({ overlayStyle: undefined });
+      }
+    }
+
     componentWillUnmount(): void {
       this.aborter.abort();
       clearTimeout(this.deleteTimeout);
