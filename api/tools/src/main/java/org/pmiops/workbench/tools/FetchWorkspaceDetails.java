@@ -101,13 +101,20 @@ public class FetchWorkspaceDetails extends Tool {
               .getWorkspace()
               .getBucketName();
 
-      sb.append("\nWorkspace Name: " + workspace.getName() + "\n");
-      sb.append("Workspace Namespace: " + workspace.getWorkspaceNamespace() + "\n");
-      sb.append("Creator: " + workspace.getCreator().getUsername() + "\n");
-      sb.append("GCS bucket path: gs://" + bucketName + "\n");
+      sb.append("\nWorkspace Name: ").append(workspace.getName()).append("\n");
+      sb.append("Workspace Namespace: ").append(workspace.getWorkspaceNamespace()).append("\n");
+      sb.append("Google Project: ").append(workspace.getGoogleProject()).append("\n");
+      sb.append("Creation time: ").append(workspace.getCreationTime()).append("\n");
+      sb.append("Last modified time: ").append(workspace.getLastModifiedTime()).append("\n");
+      sb.append("Last modified by: ").append(workspace.getLastModifiedBy()).append("\n");
+      sb.append("Creator: ").append(workspace.getCreator().getUsername()).append("\n");
+      sb.append("Creator institutional email: ").append(workspace.getCreator().getContactEmail())
+          .append("\n");
+      sb.append("GCS bucket path: gs://").append(bucketName).append("\n");
       sb.append("Collaborators:\n");
       for (Map.Entry<String, RawlsWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
-        sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");
+        sb.append("\t").append(aclEntry.getKey()).append(" (")
+            .append(aclEntry.getValue().getAccessLevel()).append(")\n");
       }
 
       sb.append(String.join("\n", Collections.nCopies(3, "***")));
