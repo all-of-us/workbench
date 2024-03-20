@@ -52,9 +52,9 @@ define([
        });
       // If all selected Files are jupyter files return now
       if (!!isJupyterFile) {
-        return
+        return true;
       }
-      
+
       const affirm = prompt('The All of Us Data Use Policies prohibit you from removing participant-level data from ' +
           'the workbench. You are also prohibited from publishing or otherwise distributing any data ' +
           'or aggregate statistics corresponding to fewer than 20 participants unless ' +
