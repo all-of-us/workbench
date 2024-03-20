@@ -711,7 +711,9 @@ task fetchFireCloudUserProfile(type: JavaExec) {
     }
 }
 
-// See project.rb command: fetch-workspace-details
+// example run:
+// ./project.rb fetch-workspace-details \
+// --project all-of-us-workbench-test --workspace-namespace aou-rw-test-d15fd8ee
 task fetchWorkspaceDetails(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
