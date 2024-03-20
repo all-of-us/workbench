@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.leonardo.ApiClient;
@@ -44,6 +45,15 @@ class AppsApiTest {
       String.format("/api/google/v1/apps/%s/%s", GOOGLE_PROJECT, APP_NAME);
   private static final String LIST_APPS_ENDPOINT =
       String.format("/api/google/v1/apps/%s", GOOGLE_PROJECT);
+
+  private AppsApi api;
+
+  @BeforeEach
+  void setUp(MockServer mockServer) {
+    ApiClient client = new ApiClient();
+    client.setBasePath(mockServer.getUrl());
+    api = new AppsApi(client);
+  }
 
   static LambdaDslJsonBody createAppRequestBody =
       newJsonBody(
@@ -126,11 +136,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "createNewApp")
-  void testCreateAppWhenAppDoesNotExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testCreateAppWhenAppDoesNotExist() {
     LeonardoCreateAppRequest request = createAppRequest();
 
     assertDoesNotThrow(() -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
@@ -153,11 +159,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "createDuplicateApp")
-  void testCreateAppWhenAppDoesExist(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testCreateAppWhenAppDoesExist() {
     LeonardoCreateAppRequest request = createAppRequest();
 
     assertThrows(Exception.class, () -> api.createApp(GOOGLE_PROJECT, APP_NAME, request));
@@ -179,11 +181,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getApp")
-  void testGetAppWhenAppExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testGetAppWhenAppExists() throws ApiException {
     LeonardoGetAppResponse expected = new LeonardoGetAppResponse();
     expected.setAppName("sample-cromwell-study");
     expected.setErrors(new ArrayList<>());
@@ -213,11 +211,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "getMissingApp")
-  void testGetAppWhenAppDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testGetAppWhenAppDoesNotExist() {
     ApiException exception =
         assertThrows(ApiException.class, () -> api.getApp(GOOGLE_PROJECT, APP_NAME));
 
@@ -240,11 +234,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "deleteApp")
-  void testDeleteAppWhenAppExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testDeleteAppWhenAppExists() {
     assertDoesNotThrow(() -> api.deleteApp(GOOGLE_PROJECT, APP_NAME, false));
   }
 
@@ -265,11 +255,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "deleteMissingApp")
-  void testDeleteAppWhenAppDoesNotExist(MockServer mockServer) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testDeleteAppWhenAppDoesNotExist() {
     ApiException exception =
         assertThrows(ApiException.class, () -> api.deleteApp(GOOGLE_PROJECT, APP_NAME, false));
 
@@ -295,11 +281,7 @@ class AppsApiTest {
 
   @Test
   @PactTestFor(pactMethod = "listAppsByProject")
-  void testListAppWhenGoogleProjectExists(MockServer mockServer) throws ApiException {
-    ApiClient client = new ApiClient();
-    client.setBasePath(mockServer.getUrl());
-    AppsApi api = new AppsApi(client);
-
+  void testListAppWhenGoogleProjectExists() {
     assertDoesNotThrow(() -> api.listAppByProject(GOOGLE_PROJECT, null, false, "", "creator"));
   }
 
