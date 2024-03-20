@@ -13,8 +13,12 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
+import org.pmiops.workbench.google.GoogleConfig;
+import org.pmiops.workbench.rawls.RawlsApiClientFactory;
+import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.sam.SamRetryHandler;
 import org.pmiops.workbench.tools.factories.ToolsRawlsServiceAccountApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +30,14 @@ import org.springframework.context.annotation.Import;
  * workspaces found.
  */
 @Configuration
-@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
+@Import({
+  FireCloudConfig.class,
+  FireCloudServiceImpl.class,
+  GoogleConfig.class, // injects com.google.cloud.iam.credentials.v1.IamCredentialsClient
+  RawlsApiClientFactory.class,
+  RawlsConfig.class,
+  SamRetryHandler.class,
+})
 public class FetchWorkspaceDetails extends Tool {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
@@ -39,58 +50,70 @@ public class FetchWorkspaceDetails extends Tool {
           .hasArg()
           .build();
 
-  private static Option workspaceProjectIdOpt =
+  private static Option workspaceNamespaceOpt =
       Option.builder()
-          .longOpt("workspace-project-id")
-          .desc("Workspace billing project ID to fetch details for")
+          .longOpt("workspace-namespace")
+          .desc("Workspace namespace to fetch details for")
           .required()
           .hasArg()
           .build();
 
   private static Options options =
-      new Options().addOption(rawlsBaseUrlOpt).addOption(workspaceProjectIdOpt);
+      new Options().addOption(rawlsBaseUrlOpt).addOption(workspaceNamespaceOpt);
 
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao, FireCloudService fireCloudService) {
     return (args) -> {
-      CommandLine opts = new DefaultParser().parse(options, args);
+      // project.rb swallows exceptions, so we need to catch and log them here
+      try {
+        getDetails(workspaceDao, fireCloudService, args);
+      } catch (Exception e) {
+        log.severe("Error fetching workspace details: " + e.getMessage());
+        e.printStackTrace();
+      }
+    };
+  }
 
-      String workspaceNamespace = opts.getOptionValue(workspaceProjectIdOpt.getLongOpt());
+  public void getDetails(
+      WorkspaceDao workspaceDao, FireCloudService fireCloudService, String[] args)
+      throws Exception {
+    CommandLine opts = new DefaultParser().parse(options, args);
 
-      WorkspacesApi workspacesApi =
-          (new ToolsRawlsServiceAccountApiClientFactory(
-                  opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt())))
-              .workspacesApi();
+    String workspaceNamespace = opts.getOptionValue(workspaceNamespaceOpt.getLongOpt());
 
-      StringBuilder sb = new StringBuilder();
-      sb.append(String.join("\n", Collections.nCopies(10, "***")));
+    WorkspacesApi workspacesApi =
+        (new ToolsRawlsServiceAccountApiClientFactory(
+                opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt())))
+            .workspacesApi();
 
-      for (DbWorkspace workspace : workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
-        Map<String, RawlsWorkspaceAccessEntry> acl =
-            FirecloudTransforms.extractAclResponse(
-                workspacesApi.getACL(
-                    workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
+    StringBuilder sb = new StringBuilder();
+    sb.append(String.join("\n", Collections.nCopies(10, "***")));
 
-        String bucketName =
-            fireCloudService
-                .getWorkspaceAsService(workspaceNamespace, workspace.getFirecloudName())
-                .getWorkspace()
-                .getBucketName();
+    for (DbWorkspace workspace : workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
+      Map<String, RawlsWorkspaceAccessEntry> acl =
+          FirecloudTransforms.extractAclResponse(
+              workspacesApi.getACL(
+                  workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
-        sb.append("\nWorkspace Name: " + workspace.getName() + "\n");
-        sb.append("Workspace Namespace: " + workspace.getWorkspaceNamespace() + "\n");
-        sb.append("Creator: " + workspace.getCreator().getUsername() + "\n");
-        sb.append("GCS bucket path: gs://" + bucketName + "\n");
-        sb.append("Collaborators:\n");
-        for (Map.Entry<String, RawlsWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
-          sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");
-        }
+      String bucketName =
+          fireCloudService
+              .getWorkspaceAsService(workspaceNamespace, workspace.getFirecloudName())
+              .getWorkspace()
+              .getBucketName();
 
-        sb.append(String.join("\n", Collections.nCopies(3, "***")));
+      sb.append("\nWorkspace Name: " + workspace.getName() + "\n");
+      sb.append("Workspace Namespace: " + workspace.getWorkspaceNamespace() + "\n");
+      sb.append("Creator: " + workspace.getCreator().getUsername() + "\n");
+      sb.append("GCS bucket path: gs://" + bucketName + "\n");
+      sb.append("Collaborators:\n");
+      for (Map.Entry<String, RawlsWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
+        sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");
       }
 
-      log.info(sb.toString());
-    };
+      sb.append(String.join("\n", Collections.nCopies(3, "***")));
+    }
+
+    log.info(sb.toString());
   }
 
   public static void main(String[] args) {

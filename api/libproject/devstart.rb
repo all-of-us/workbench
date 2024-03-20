@@ -912,7 +912,7 @@ def tanagra_stage_redcap_files(cmd_name, *args)
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.date and opts.dataset }
   op.parse.validate
-  
+
   env = ENVIRONMENTS[op.opts.project]
   cdr_source = env.fetch(:source_cdr_project)
 
@@ -1425,10 +1425,10 @@ def fetch_workspace_details(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--workspace-project-id [workspace-project-id]",
+      "--workspace-namespace [workspace-namespace]",
       String,
-      ->(opts, v) { opts.workspace_project_id = v},
-      "Fetches details for workspace(s) that match the given project ID / namespace (e.g. 'aou-rw-231823128'")
+      ->(opts, v) { opts.workspace_namespace = v},
+      "Fetches details for workspace(s) that match the given namespace (e.g. 'aou-rw-231823128'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1440,7 +1440,7 @@ def fetch_workspace_details(cmd_name, *args)
 
   flags = ([
       ["--rawls-base-url", fc_config["rawlsBaseUrl"]],
-      ["--workspace-project-id", op.opts.workspace_project_id]
+      ["--workspace-namespace", op.opts.workspace_namespace]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
