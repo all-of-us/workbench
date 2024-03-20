@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -7,6 +8,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
@@ -14,6 +16,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.GoogleConfig;
+import org.pmiops.workbench.rawls.ApiException;
 import org.pmiops.workbench.rawls.RawlsApiClientFactory;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
@@ -63,7 +66,7 @@ public class FetchWorkspaceDetails extends Tool {
 
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao, FireCloudService fireCloudService) {
-    return (args) -> {
+    return args -> {
       // project.rb swallows exceptions, so we need to catch and log them here
       try {
         getDetails(workspaceDao, fireCloudService, args);
@@ -76,7 +79,7 @@ public class FetchWorkspaceDetails extends Tool {
 
   public void getDetails(
       WorkspaceDao workspaceDao, FireCloudService fireCloudService, String[] args)
-      throws Exception {
+      throws ParseException, IOException, ApiException {
     CommandLine opts = new DefaultParser().parse(options, args);
 
     String workspaceNamespace = opts.getOptionValue(workspaceNamespaceOpt.getLongOpt());
@@ -108,13 +111,17 @@ public class FetchWorkspaceDetails extends Tool {
       sb.append("Last modified time: ").append(workspace.getLastModifiedTime()).append("\n");
       sb.append("Last modified by: ").append(workspace.getLastModifiedBy()).append("\n");
       sb.append("Creator: ").append(workspace.getCreator().getUsername()).append("\n");
-      sb.append("Creator institutional email: ").append(workspace.getCreator().getContactEmail())
+      sb.append("Creator institutional email: ")
+          .append(workspace.getCreator().getContactEmail())
           .append("\n");
       sb.append("GCS bucket path: gs://").append(bucketName).append("\n");
       sb.append("Collaborators:\n");
       for (Map.Entry<String, RawlsWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
-        sb.append("\t").append(aclEntry.getKey()).append(" (")
-            .append(aclEntry.getValue().getAccessLevel()).append(")\n");
+        sb.append("\t")
+            .append(aclEntry.getKey())
+            .append(" (")
+            .append(aclEntry.getValue().getAccessLevel())
+            .append(")\n");
       }
 
       sb.append(String.join("\n", Collections.nCopies(3, "***")));
