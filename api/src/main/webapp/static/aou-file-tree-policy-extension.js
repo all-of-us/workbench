@@ -62,8 +62,6 @@ define([
           'To continue, affirm that this download will be used in accordance with the All of Us ' +
           'data use policy by typing "affirm" below.');
       return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase();
-
-
     });
   };
 
