@@ -6,9 +6,8 @@ define([
 ], (Jupyter) => {
 
   const load_upload_extension = () => {
-  // This will open a dialog box when the user clicks Upload Button on the Jupyter File List page.
-  // File will be uploaded only if the user clicks OK else it will just close the dialog box and do nothing.
-
+    // This will open a dialog box when the user clicks Upload Button on the Jupyter File List page.
+    // File will be uploaded only if the user clicks OK else it will just close the dialog box and do nothing.
     $('#notebook_list_info input').click(() => confirm(
         'It is All of Us data use policy to not upload data or files containing ' +
         'personally identifiable information (PII). Any external data, files, or software that ' +
@@ -24,17 +23,24 @@ define([
     $('.dynamic-buttons .view-button').empty().append(
         '<span id="aou-view-button-overlay">View</span>');
 
+
+    function downloadPolicyPopUp() {
+      var affirm =  prompt(
+          'The All of Us Data Use Policies prohibit you from removing participant-level data from ' +
+          'the workbench. You are also prohibited from publishing or otherwise distributing any data ' +
+          'or aggregate statistics corresponding to fewer than 20 participants unless ' +
+          'expressly permitted by our data use policies.\n\n' +
+          'To continue, affirm that this download will be used in accordance with the All of Us ' +
+          'data use policy by typing "affirm" below.');
+      return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase()
+    }
+
+
     $('#aou-download-button-overlay').click(() => {
-      const affirm = prompt(
-        'The All of Us Data Use Policies prohibit you from removing participant-level data from ' +
-        'the workbench. You are also prohibited from publishing or otherwise distributing any data ' +
-        'or aggregate statistics corresponding to fewer than 20 participants unless ' +
-        'expressly permitted by our data use policies.\n\n' +
-        'To continue, affirm that this download will be used in accordance with the All of Us ' +
-        'data use policy by typing "affirm" below.');
-      return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase();
+      return downloadPolicyPopUp();
     });
 
+    const viewableFileExtenstions = ['ipynb', 'txt', 'sh'];
     // Clicking the view button will
     // 1) Open All Jupyter files in a new tab.
     // 2) Display a download policy prompt for all other files as they will be downloaded
@@ -45,7 +51,7 @@ define([
         const elem = $(this).siblings().find($('.item_link .item_name'));
         const fileName = elem.text();
         var fileExt = fileName.substring( (fileName.lastIndexOf('.') +1) );
-        if (fileExt !== 'ipynb') {
+        if (viewableFileExtenstions.indexOf(fileExt) === -1) {
           isJupyterFile = false;
           return false;
         }
@@ -55,13 +61,7 @@ define([
         return true;
       }
 
-      const affirm = prompt('The All of Us Data Use Policies prohibit you from removing participant-level data from ' +
-          'the workbench. You are also prohibited from publishing or otherwise distributing any data ' +
-          'or aggregate statistics corresponding to fewer than 20 participants unless ' +
-          'expressly permitted by our data use policies.\n\n' +
-          'To continue, affirm that this download will be used in accordance with the All of Us ' +
-          'data use policy by typing "affirm" below.');
-      return !!affirm && 'affirm' === affirm.replace(/\W/g, '').toLowerCase();
+      return downloadPolicyPopUp();
     });
   };
 
