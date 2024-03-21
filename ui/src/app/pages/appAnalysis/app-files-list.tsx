@@ -75,9 +75,10 @@ const WaitingForFiles = () => (
         size='2x'
       />
     </div>
+    <div>Copying 1 or more notebooks from another workspace.</div>
     <div>
-      Copying 1 or more notebooks from another workspace. This often happens
-      quickly, but in some circumstances it can take <b>minutes to hours</b>.
+      Notebook copy should happen quickly, but in can sometime take <b>hours</b>{' '}
+      to complete.
     </div>
     <div>
       If you continue to see this message after a few minutes have passed,
