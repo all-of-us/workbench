@@ -128,5 +128,43 @@
     "consequence": [],
     "genes": "gene4",
     "participant_count": 2500
+  },
+  {
+    "vid": "22-100550658-T-EE",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 7,
+    "allele_number": 18226,
+    "allele_frequency": 0.000266,
+    "clinical_significance": [],
+    "clinical_significance_string": "",
+    "transcript": "",
+    "contig": "chr20",
+    "position": 3000,
+    "ref_allele": "T",
+    "alt_allele": "C",
+    "cons_str": "",
+    "consequence": [],
+    "genes": "gene5",
+    "participant_count": 5000
+  },
+  {
+    "vid": "22-100550658-T-EE",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 7,
+    "allele_number": 18226,
+    "allele_frequency": 0.000266,
+    "clinical_significance": [],
+    "clinical_significance_string": "",
+    "transcript": "",
+    "contig": "chr20",
+    "position": 3000,
+    "ref_allele": "T",
+    "alt_allele": "C",
+    "cons_str": "",
+    "consequence": [],
+    "genes": "gene5",
+    "participant_count": 5001
   }
 ]

@@ -79,6 +79,7 @@ import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilter;
+import org.pmiops.workbench.model.VariantFilterInfoResponse;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
@@ -2853,6 +2854,45 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         controller.findVariantFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     assertThat(response).isNotNull();
     assertThat(response).isEqualTo(expectedVariantFilter);
+  }
+
+  @Test
+  public void findVariantFilterInfo() {
+    VariantFilter filter = new VariantFilter();
+    filter.searchTerm("gene5");
+
+    VariantFilterInfoResponse response =
+        controller.findVariantFilterInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, filter).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response.getVidsCount()).isEqualTo(1);
+    assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(1);
+    assertThat(response.getOverFiveThousand()).isEqualTo(1);
+    assertThat(response.getOverTenThousand()).isEqualTo(0);
+    assertThat(response.getOverHundredThousand()).isEqualTo(0);
+    assertThat(response.getOverTwoHundredThousand()).isEqualTo(0);
+  }
+
+  @Test
+  public void findVariantFilterInfoParticipantCountLessThan5KNoBuckets() {
+    VariantFilter filter = new VariantFilter();
+    filter
+        .searchTerm("gene4")
+        .participantCountRange(
+            new ParticipantCountFilter()
+                .operator(Operator.LESS_THAN)
+                .operands(ImmutableList.of(5000)));
+
+    VariantFilterInfoResponse response =
+        controller.findVariantFilterInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, filter).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response.getVidsCount()).isEqualTo(2);
+    assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(0);
+    assertThat(response.getOverFiveThousand()).isEqualTo(0);
+    assertThat(response.getOverTenThousand()).isEqualTo(0);
+    assertThat(response.getOverHundredThousand()).isEqualTo(0);
+    assertThat(response.getOverTwoHundredThousand()).isEqualTo(0);
   }
 
   protected String getTablePrefix() {

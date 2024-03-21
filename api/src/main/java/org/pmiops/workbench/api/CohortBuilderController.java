@@ -35,6 +35,8 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilter;
+import org.pmiops.workbench.model.VariantFilterInfoResponse;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
@@ -257,6 +259,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .nextPageToken(searchResults.getLeft())
             .totalSize(searchResults.getMiddle())
             .items(searchResults.getRight()));
+  }
+
+  @Override
+  public ResponseEntity<VariantFilterInfoResponse> findVariantFilterInfo(
+      String workspaceNamespace, String workspaceId, VariantFilter variantFilter) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(variantFilter.getSearchTerm());
+
+    return ResponseEntity.ok(cohortBuilderService.findVariantFilterInfo(variantFilter));
   }
 
   @Override

@@ -6179,6 +6179,40 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/VariantFilterResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filter/info":
+    post:
+      tags:
+        - cohortBuilder
+      description: Returns info about this VariantFilter
+      operationId: findVariantFilterInfo
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceId
+          in: path
+          description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: request body for getting VariantFilterInfoResponse.
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VariantFilter"
+        required: true
+      responses:
+        200:
+          description: VariantFilterInfoResponse contains vid count, participant count
+            and count of vids by participant count in ranges 5k, 10k, 100k and 200k
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VariantFilterInfoResponse"
   /v1/surveys/newUserSatisfactionSurvey:
     post:
       tags:
@@ -11253,6 +11287,45 @@ components:
         totalSize:
           type: integer
           description: Total size of the result set.
+    VariantFilterInfoResponse:
+      required:
+        - vidsCount
+        - participantCount
+        - lessThanOrEqualToFiveThousand
+        - overFiveThousand
+        - overTenThousand
+        - overHundredThousand
+        - overTwoHundredThousand
+      type: object
+      properties:
+        vidsCount:
+          type: integer
+          format: int64
+          description: Total vids count for the VariantFilter.
+        participantCount:
+          type: integer
+          format: int64
+          description: Total participant count for the VariantFilter.
+        lessThanOrEqualToFiveThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in less than or equal to 5k of participants.
+        overFiveThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 5k of participants.
+        overTenThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 10k of participants.
+        overHundredThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 100k of participants.
+        overTwoHundredThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 200k of participants.
     Variant:
       required:
       - participantCount
