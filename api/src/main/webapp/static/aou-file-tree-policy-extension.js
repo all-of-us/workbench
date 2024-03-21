@@ -45,19 +45,19 @@ define([
     // 1) Open All Jupyter, text or shell files in a new tab.
     // 2) Display a download policy prompt for all other files as they will be downloaded
     $('#aou-view-button-overlay').click(() => {
-      var isJupyterFile = true;
+      var openInANewTab = true;
       $('#notebook_list input:checked').each(function() {
         // Find the selected file name
         const elem = $(this).siblings().find($('.item_link .item_name'));
         const fileName = elem.text();
         var fileExt = fileName.substring( (fileName.lastIndexOf('.') +1) );
         if (viewableFileExtenstions.indexOf(fileExt) === -1) {
-          isJupyterFile = false;
+          openInANewTab = false;
           return false;
         }
        });
       // If all selected Files are files that open in a new tab (ipynb, txt or sh), return now
-      if (!!isJupyterFile) {
+      if (!!openInANewTab) {
         return true;
       }
 
