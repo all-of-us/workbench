@@ -42,7 +42,7 @@ define([
 
     const viewableFileExtenstions = ['ipynb', 'txt', 'sh'];
     // Clicking the view button will
-    // 1) Open All Jupyter files in a new tab.
+    // 1) Open All Jupyter, text or shell files in a new tab.
     // 2) Display a download policy prompt for all other files as they will be downloaded
     $('#aou-view-button-overlay').click(() => {
       var isJupyterFile = true;
@@ -56,7 +56,7 @@ define([
           return false;
         }
        });
-      // If all selected Files are jupyter files return now
+      // If all selected Files are files that open in a new tab (ipynb, txt or sh), return now
       if (!!isJupyterFile) {
         return true;
       }
