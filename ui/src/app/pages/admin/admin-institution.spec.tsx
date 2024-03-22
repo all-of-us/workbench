@@ -1,22 +1,22 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { InstitutionApi } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
 
 import { AdminInstitution } from './admin-institution';
 
 describe('AdminInstitutionSpec', () => {
-  const component = () => {
-    return mount(
-      <AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} />
-    );
+  const renderComponent = () => {
+    render(<AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {
@@ -26,14 +26,16 @@ describe('AdminInstitutionSpec', () => {
   });
 
   it('should render', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getByText('Institution admin table')).toBeInTheDocument();
+    });
   });
 
   it('should display all institutions', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('tbody').first().find('tr').length).toBe(4);
+    renderComponent();
+    await waitFor(() => {
+      expect(screen.getAllByRole('row')).toHaveLength(5); // 4 rows + 1 header row
+    });
   });
 });
