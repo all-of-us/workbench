@@ -15,7 +15,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { NotebookSizeWarningModal } from 'app/components/notebook-size-warning-modal';
-import { SupportMailto } from 'app/components/support';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
@@ -75,13 +74,14 @@ const WaitingForFiles = () => (
         size='2x'
       />
     </div>
+    <div>Copying 1 or more notebooks from another workspace.</div>
     <div>
-      Copying 1 or more notebooks from another workspace. This may take{' '}
-      <b>a few minutes</b>.
+      Notebook copy should happen quickly, but it can sometimes take{' '}
+      <b>minutes to hours</b> to complete.
     </div>
     <div>
-      If you continue to see this message after a few minutes have passed,
-      please contact support at <SupportMailto />.
+      If it takes longer than a few minutes, try duplicating the original
+      workspace again.
     </div>
   </FlexColumn>
 );

@@ -18,6 +18,9 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => (
       <WorkspaceInfoField labelText='Active Status'>
         {activeStatus}
       </WorkspaceInfoField>
+      <WorkspaceInfoField labelText='Billing Status'>
+        {workspace.billingStatus}
+      </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Workspace Name'>
         {workspace.name}
       </WorkspaceInfoField>
@@ -29,9 +32,6 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => (
       </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Google Project Id'>
         {workspace.googleProject}
-      </WorkspaceInfoField>
-      <WorkspaceInfoField labelText='Billing Status'>
-        {workspace.billingStatus}
       </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Billing Account Type'>
         {isUsingFreeTierBillingAccount(workspace)
