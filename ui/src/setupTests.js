@@ -5,6 +5,7 @@
  * @copyright 2017 Airbnb, Inc.
  */
 const enzyme = require('enzyme');
+const rtl = require('@testing-library/react');
 const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 
 const { setupCustomValidators } = require('app/services/setup');
@@ -61,6 +62,7 @@ global.afterEach(() => {
 });
 
 enzyme.configure({ adapter: new ReactAdapterWithMountTracking() });
+rtl.configure({ testIdAttribute: 'data-test-id' });
 
 module.exports = {
   mockNavigate: mockNavigate,
