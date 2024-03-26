@@ -462,7 +462,7 @@ jobs:
         name: Pact Broker, can I deploy?
         working_directory: ~
         command: |
-          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 3 --retry-interval 30
+          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 10 --retry-interval 30
 
   #Updates the pacticipant version in the pact broker for our test environment which is referred to as dev in Pact Broker
   api-contract-update-test:
