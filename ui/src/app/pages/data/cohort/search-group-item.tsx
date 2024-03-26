@@ -11,13 +11,14 @@ import {
   ModifierType,
   ResourceType,
   SearchGroupItem as Item,
+  VariantFilter,
 } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
 import { RenameModal } from 'app/components/rename-modal';
-import { MODIFIERS_MAP } from 'app/pages/data/cohort/constant';
+import { MODIFIERS_MAP, VARIANT_DISPLAY } from 'app/pages/data/cohort/constant';
 import {
   encountersStore,
   searchRequestStore,
@@ -97,6 +98,12 @@ const styles = reactStyles({
     opacity: 0.6,
     fontSize: '12px',
   },
+  variantList: {
+    lineHeight: '1.25rem',
+    listStyle: 'none',
+    margin: 0,
+    paddingLeft: '1rem',
+  },
 });
 
 const itemStyles = `
@@ -151,6 +158,32 @@ class SearchGroupItemParameter extends React.Component<
           onMouseLeave={() => tooltip && this.overlay.hide()}
         >
           {showCode && <b>{parameter.code}</b>} {parameter.name}
+          {!!parameter.variantFilter && (
+            <ul style={styles.variantList}>
+              {Object.entries(parameter.variantFilter as VariantFilter)
+                .filter(
+                  ([key, value]) =>
+                    !(
+                      (Array.isArray(value) && value.length === 0) ||
+                      ['', null].includes(value) ||
+                      key === 'sortBy'
+                    )
+                )
+                .map(([key, value]) => (
+                  <li style={{ whiteSpace: 'normal' }}>
+                    <b>{VARIANT_DISPLAY[key]}</b>:{' '}
+                    {Array.isArray(value) ? (
+                      <>
+                        <br />
+                        {value.join(', ')}
+                      </>
+                    ) : (
+                      value.toLocaleString()
+                    )}
+                  </li>
+                ))}
+            </ul>
+          )}
         </span>
         {tooltip && (
           <OverlayPanel

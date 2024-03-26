@@ -158,10 +158,16 @@ const styles = reactStyles({
     marginTop: '3px',
     transition: 'transform 0.1s ease-out',
   },
-  filterList: {
+  filterContainer: {
     height: 'auto',
     overflow: 'hidden',
     transition: 'max-height 0.4s ease-out',
+  },
+  filterList: {
+    lineHeight: '1.25rem',
+    listStyle: 'none',
+    margin: 0,
+    paddingLeft: '1rem',
   },
 });
 
@@ -247,7 +253,7 @@ export class SelectionInfo extends React.Component<
 
   renderVariantFilters() {
     return (
-      <ul>
+      <ul style={styles.filterList}>
         {Object.entries(this.props.selection.variantFilter)
           .filter(
             ([key, value]) =>
@@ -260,15 +266,24 @@ export class SelectionInfo extends React.Component<
           .map(([key, value]) => (
             <li>
               <b>{VARIANT_DISPLAY[key]}</b>:{' '}
-              {Array.isArray(value) ? value.join(', ') : value.toLocaleString()}
+              {Array.isArray(value) ? (
+                <>
+                  <br />
+                  {value.join(', ')}
+                </>
+              ) : (
+                value.toLocaleString()
+              )}
             </li>
           ))}
         <li>
           <b>Participant Count Overview:</b>
           {this.state.loadingVariantBuckets ? (
-            <Spinner size={24} style={{ margin: '1rem 5rem' }} />
+            <div>
+              <Spinner size={24} style={{ margin: '1rem 5rem' }} />
+            </div>
           ) : (
-            <ul>
+            <ul style={styles.filterList}>
               {Object.entries(this.state.variantFilterInfoResponse)
                 .filter(([, value]) => value !== 0)
                 .map(([key, value]) => (
@@ -329,7 +344,7 @@ export class SelectionInfo extends React.Component<
         {!!selection.variantFilter && (
           <div
             style={{
-              ...styles.filterList,
+              ...styles.filterContainer,
               maxHeight: filtersExpanded ? '22.5rem' : 0,
             }}
           >

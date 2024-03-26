@@ -142,5 +142,4 @@ export const VARIANT_DISPLAY = {
   overTenThousand: '> 10,000 Participants',
   overHundredThousand: '> 100,000 Participants',
   overTwoHundredThousand: '> 200,000 Participants',
-
-}
+};
