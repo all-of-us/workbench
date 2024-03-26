@@ -382,7 +382,8 @@ export const VariantSearch = fp.flow(
   };
 
   const disableSelectAll =
-    searchResults.length < 2 ||
+    totalCount < 100 ||
+    totalCount > 10000 ||
     criteria.some((crit) => crit.parameterId === getFilterParamId());
   const displayResults = searchResults?.slice(first, first + pageSize);
   return (
