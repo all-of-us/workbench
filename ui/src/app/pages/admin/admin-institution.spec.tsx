@@ -5,7 +5,6 @@ import * as React from 'react';
 import { InstitutionApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
