@@ -938,7 +938,7 @@ workflows:
           - api-contract-test
       - api-contract-can-i-deploy:
           requires:
-          - api-contract-update-test
+          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
@@ -978,7 +978,7 @@ workflows:
       - api-contract-update-test:
           <<: *filter-main-branch
           requires:
-            - api-contract-upload
+            - api-deploy-to-test
 
   playground:
     jobs:
