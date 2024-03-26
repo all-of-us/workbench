@@ -464,6 +464,31 @@ jobs:
         command: |
           pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 3 --retry-interval 30
 
+  #Updates the pacticipant version in the pact broker for our test environment which is referred to as dev in Pact Broker
+  api-contract-update-test:
+    executor: pact-executor
+    steps:
+    - run:
+        name: Pact Broker, update test.
+        working_directory: ~
+        command: |
+          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment dev
+
+  #Updates the pacticipant version in the pact broker for our staging and production environment.
+  api-contract-update-staging:
+    executor: pact-executor
+    steps:
+    - run:
+        name: Pact Broker, update staging.
+        working_directory: ~
+        command: |
+          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment staging
+    - run:
+        name: Pact Broker, update production.
+        working_directory: ~
+        command: |
+          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment production
+
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
@@ -911,9 +936,9 @@ workflows:
       - api-contract-upload:
           requires:
           - api-contract-test
-#      - api-contract-can-i-deploy:
-#          requires:
-#          - api-contract-upload
+      - api-contract-can-i-deploy:
+          requires:
+          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
@@ -948,6 +973,12 @@ workflows:
             - ui-deploy-to-test
           post-steps:
             - gcs-load-test-results
+    # On main branch merges, update Pact Broker with the version of the Workbench repo
+      - api-contract-update-test:
+          <<: *filter-main-branch
+          requires:
+            - api-contract-upload
+            - api-deploy-to-test
 
   playground:
     jobs:
@@ -997,6 +1028,10 @@ workflows:
             - deploy-to-staging
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
+      - api-contract-update-staging:
+          <<: *filter-release-tags
+          requires:
+            - deploy-to-staging
 
   nightly-tests:
     triggers:
