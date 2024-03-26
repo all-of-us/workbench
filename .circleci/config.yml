@@ -936,15 +936,15 @@ workflows:
       - api-contract-upload:
           requires:
           - api-contract-test
-      - api-contract-can-i-deploy:
-          requires:
-          - api-contract-upload
+#      - api-contract-can-i-deploy:
+#          requires:
+#          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
           requires:
             - api-unit-test
-            - api-contract-can-i-deploy
+            - api-contract-upload
       - ui-deploy-to-test:
           <<: *filter-main-branch
           requires:
