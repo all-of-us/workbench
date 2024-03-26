@@ -1169,6 +1169,25 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countParticipantsVariantDataUsingVariantFilterWithExcludeList() {
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene5");
+    variantFilter.addExclusionListItem("22-100550658-T-EF");
+    SearchParameter sp =
+            new SearchParameter()
+                    .domain(Domain.SNP_INDEL_VARIANT.toString())
+                    .ancestorData(false)
+                    .group(false)
+                    .variantFilter(variantFilter);
+    CohortDefinition cohortDefinition =
+            createCohortDefinition(
+                    Domain.SNP_INDEL_VARIANT.toString(),
+                    ImmutableList.of(sp),
+                    new ArrayList<>());
+    assertParticipants(
+            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceChild() {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
