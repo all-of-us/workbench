@@ -1,8 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
