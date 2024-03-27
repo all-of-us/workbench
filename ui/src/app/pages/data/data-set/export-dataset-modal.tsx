@@ -208,7 +208,7 @@ export const ExportDatasetModal = ({
     return (
       <iframe
         id='export-preview-frame'
-        data-testid='export-preview-frame'
+        data-test-id='export-preview-frame'
         scrolling='yes'
         style={{
           width: '100%',

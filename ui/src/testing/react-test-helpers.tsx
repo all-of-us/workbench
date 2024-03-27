@@ -190,5 +190,9 @@ export const expectDropdownDisabled = (
   ).not.toBeInTheDocument();
 };
 
+export const getHTMLInputElementValue = (element: HTMLElement): string => {
+  return (element as HTMLInputElement).value;
+};
+
 // by default, screen.debug() cuts off after 7000 chars.  let's output more than that
 export const debugAll = () => screen.debug(undefined, 1_000_000);

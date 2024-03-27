@@ -1,11 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { Redirect, Switch } from 'react-router-dom';
-import { mount } from 'enzyme';
 
+import { render, screen } from '@testing-library/react';
 import { AppRoute, AppRouter, Guard } from 'app/components/app-router';
-
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -100,7 +100,7 @@ const makeAppRouter = () => {
 
 describe('AppRouter', () => {
   const component = (initialEntries: string[], initialIndex: number) => {
-    return mount(
+    return render(
       <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
         {makeAppRouter()}
       </MemoryRouter>
@@ -108,51 +108,42 @@ describe('AppRouter', () => {
   };
 
   it('allows anyone into unprotected route', () => {
-    const wrapper = component(['/unprotected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual('Unprotected Route');
+    component(['/unprotected-route'], 0);
+    expect(screen.getByText('Unprotected Route')).toBeInTheDocument();
   });
 
   it('punts when user fails guard', () => {
-    const wrapper = component(['/unreachable-path'], 0);
-    // don't want to pull all of angular into a test of react routerto test that a redirect is
-    // happening, so we'll check that the router is telling it to redirect to the right place
-    expect(wrapper.find('span').first().text()).toEqual('Punting');
+    component(['/unreachable-path'], 0);
+    expect(screen.getByText('Punting')).toBeInTheDocument();
   });
 
   it('renders when user passes guard', () => {
-    const wrapper = component(['/protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual('Protected Route');
+    component(['/protected-route'], 0);
+    expect(screen.getByText('Protected Route')).toBeInTheDocument();
   });
 
   it('renders for sibling routes under a guard', () => {
-    const wrapper = component(['/other-protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual(
-      'Other Protected Route'
-    );
+    component(['/other-protected-route'], 0);
+    expect(screen.getByText('Other Protected Route')).toBeInTheDocument();
   });
 
   it('renders for nested protectedRoutes', () => {
-    const wrapper = component(['/nested-protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual(
-      'Nested Protected Route'
-    );
+    component(['/nested-protected-route'], 0);
+    expect(screen.getByText('Nested Protected Route')).toBeInTheDocument();
   });
 
   it('punts on failed nested protected route', () => {
-    const wrapper = component(['/nested-unreachable-path'], 0);
-    // don't want to pull all of angular into a test of react router to test that a redirect is
-    // happening, so we'll check that the router is telling it to redirect to the right place
-    expect(wrapper.find('span').first().text()).toEqual('Punting');
+    component(['/nested-unreachable-path'], 0);
+    expect(screen.getByText('Punting')).toBeInTheDocument();
   });
 
   it('redirects to not found page when no route is matched', async () => {
-    const wrapper = component(['/wharrgarbl'], 0);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('span').first().text()).toEqual('Not Found');
+    component(['/wharrgarbl'], 0);
+    expect(await screen.findByText('Not Found')).toBeInTheDocument();
   });
 
   it('renders content when guard fails', () => {
-    const wrapper = component(['/block-render-route'], 0);
-    expect(wrapper.text()).toEqual('guard component');
+    component(['/block-render-route'], 0);
+    expect(screen.getByText('guard component')).toBeInTheDocument();
   });
 });
