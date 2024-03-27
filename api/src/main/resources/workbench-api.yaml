@@ -11225,6 +11225,11 @@ components:
           description: Allele number max(floating point)
         participantCountRange:
           $ref: '#/components/schemas/ParticipantCountFilter'
+        exclusionList:
+          type: array
+          description: List of vids to exclude from filter
+          items:
+            type: string
     VariantFilter:
       allOf:
         - $ref: '#/components/schemas/BaseVariantFilter'

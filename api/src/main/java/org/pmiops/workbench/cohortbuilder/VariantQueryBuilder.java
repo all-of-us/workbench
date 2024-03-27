@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ParticipantCountFilter;
@@ -60,6 +60,8 @@ public final class VariantQueryBuilder {
       "AND allele_number BETWEEN @numberMin AND @numberMax\n";
 
   private static final String ALLELE_FREQ = "AND allele_frequency BETWEEN @freqMin AND @freqMax\n";
+
+  private static final String AND_EXCLUSION_LIST_SQL = "AND vid NOT IN unnest(@exclusionList)\n";
 
   private static final String ORDER_BY = "ORDER BY @orderBy\n";
 
@@ -380,7 +382,6 @@ public final class VariantQueryBuilder {
     return generateAndAddParams(filter, sql, params, null, null);
   }
 
-  @NotNull
   private static String generateSQL(String selectSQL, VariantFilter filter) {
     return switch (SearchTermType.fromValue(filter.getSearchTerm())) {
       case VID ->
@@ -392,7 +393,6 @@ public final class VariantQueryBuilder {
     };
   }
 
-  @NotNull
   private static String generateFilterSQL(
       String selectSQL, String whereVidInSQL, VariantFilter filter) {
     List<String> consequences = filter.getConsequenceList();
@@ -424,7 +424,13 @@ public final class VariantQueryBuilder {
         filter.getFrequencyMin() != null && filter.getFrequencyMax() != null,
         ALLELE_FREQ);
 
+    // add participant count range if exists
     sqlBuilder.append(appendParticipantCountRange(filter));
+
+    // add exclusion list if exists
+    if (filter.getExclusionList() != null) {
+      sqlBuilder.append(AND_EXCLUSION_LIST_SQL);
+    }
 
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
       String sortBy = ((VariantFilterRequest) filter).getSortBy();
@@ -485,7 +491,7 @@ public final class VariantQueryBuilder {
     }
   }
 
-  private static boolean isNotEmpty(List<String> list) {
+  private static boolean isNotEmpty(Collection<?> list) {
     return CollectionUtils.isNotEmpty(list);
   }
 
@@ -657,6 +663,14 @@ public final class VariantQueryBuilder {
             "Participant Count filter does not support the following operator: "
                 + filter.getParticipantCountRange().getOperator());
       }
+    }
+    if (isNotEmpty(filter.getExclusionList())) {
+      String namedParameter =
+          QueryParameterUtil.addQueryParameterValue(
+              params,
+              QueryParameterValue.array(
+                  filter.getExclusionList().toArray(new String[0]), String.class));
+      replaceParams.put("@exclusionList", namedParameter);
     }
   }
 
