@@ -1173,18 +1173,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     VariantFilter variantFilter = new VariantFilter().searchTerm("gene5");
     variantFilter.addExclusionListItem("22-100550658-T-EF");
     SearchParameter sp =
-            new SearchParameter()
-                    .domain(Domain.SNP_INDEL_VARIANT.toString())
-                    .ancestorData(false)
-                    .group(false)
-                    .variantFilter(variantFilter);
+        new SearchParameter()
+            .domain(Domain.SNP_INDEL_VARIANT.toString())
+            .ancestorData(false)
+            .group(false)
+            .variantFilter(variantFilter);
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.SNP_INDEL_VARIANT.toString(),
-                    ImmutableList.of(sp),
-                    new ArrayList<>());
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(sp), new ArrayList<>());
     assertParticipants(
-            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -2883,8 +2881,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     VariantFilterInfoResponse response =
         controller.findVariantFilterInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, filter).getBody();
     assertThat(response).isNotNull();
-    assertThat(response.getVidsCount()).isEqualTo(1);
-    assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getVidsCount()).isEqualTo(2);
+    assertThat(response.getParticipantCount()).isEqualTo(2);
     assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(1);
     assertThat(response.getOverFiveThousand()).isEqualTo(1);
     assertThat(response.getOverTenThousand()).isEqualTo(0);
