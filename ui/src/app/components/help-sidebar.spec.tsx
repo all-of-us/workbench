@@ -362,10 +362,7 @@ describe('HelpSidebar', () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
     serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableRStudioGKEApp: false,
-      },
+      config: defaultServerConfig,
     });
 
     const wrapper = await component();
@@ -631,20 +628,8 @@ describe('HelpSidebar', () => {
     expect(wrapper.text()).toContain('Cromwell Cloud Environment');
   });
 
-  it('should not show the RStudio icon if RStudio is disabled', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableRStudioGKEApp: false },
-    });
-    await component();
-
-    const rstudioIcon = screen.queryByLabelText('RStudio Icon');
-    expect(rstudioIcon).not.toBeInTheDocument();
-  });
-
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableRStudioGKEApp: true },
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
     await component();
 
     const rstudioIcon = screen.queryByLabelText('RStudio Icon');

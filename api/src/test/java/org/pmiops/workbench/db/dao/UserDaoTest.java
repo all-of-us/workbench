@@ -196,8 +196,8 @@ public class UserDaoTest {
         accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
     final DbAccessModule duccModule =
         accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
-    final DbAccessModule rasConfirmModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
+    final DbAccessModule identityModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get();
     final DbAccessModule profileConfirmationModule =
         accessModuleDao.findOneByName(DbAccessModuleName.PROFILE_CONFIRMATION).get();
     final DbAccessModule publicationConfirmationModule =
@@ -211,28 +211,22 @@ public class UserDaoTest {
     Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
     Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
-    Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
-    Timestamp identityBypassTime = Timestamp.from(now.minusSeconds(95));
+    Timestamp identityBypassTime = Timestamp.from(now.minusSeconds(90));
+    Timestamp identityCompleteTime = Timestamp.from(now.minusSeconds(95));
     Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(100));
     Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(110));
     Timestamp profileConfirmationBypassTime = Timestamp.from(now.minusSeconds(120));
     Timestamp publicationConfirmationBypassTime = Timestamp.from(now.minusSeconds(130));
-    Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
     addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
     addUserAccessModule(user, ctTrainingModule, ctTrainingBypassTime, ctTrainingCompleteTime);
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
     addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
-    addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
+    addUserAccessModule(user, identityModule, identityBypassTime, identityCompleteTime);
     addUserAccessModule(user, profileConfirmationModule, profileConfirmationBypassTime, null);
     addUserAccessModule(
         user, publicationConfirmationModule, publicationConfirmationBypassTime, null);
-    addUserAccessModule(
-        user,
-        accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get(),
-        identityBypassTime,
-        null);
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     assertThat(rows.get(0).getEraCommonsBypassTime()).isEqualTo(eRABypassTime);
@@ -240,7 +234,6 @@ public class UserDaoTest {
     assertThat(rows.get(0).getCtComplianceTrainingBypassTime()).isEqualTo(ctTrainingBypassTime);
     assertThat(rows.get(0).getDuccBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
-    assertThat(rows.get(0).getRasLinkLoginGovBypassTime()).isEqualTo(rasBypassTime);
     assertThat(rows.get(0).getIdentityBypassTime()).isEqualTo(identityBypassTime);
     assertThat(rows.get(0).getProfileConfirmationBypassTime())
         .isEqualTo(profileConfirmationBypassTime);

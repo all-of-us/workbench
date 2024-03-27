@@ -103,7 +103,6 @@ import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -214,7 +213,6 @@ public class RuntimeControllerTest {
   @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean MoodleService mockMoodleService;
   @MockBean DirectoryService mockDirectoryService;
   @MockBean FireCloudService mockFireCloudService;
   @MockBean UserRecentResourceService mockUserRecentResourceService;

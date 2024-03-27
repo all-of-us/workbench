@@ -41,7 +41,6 @@ import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -80,7 +79,6 @@ public class UserControllerTest {
     CommonMappers.class,
   })
   @MockBean({
-    MoodleService.class,
     DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,

@@ -15,7 +15,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { NotebookSizeWarningModal } from 'app/components/notebook-size-warning-modal';
-import { SupportMailto } from 'app/components/support';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import { analysisTabPath } from 'app/routing/utils';
@@ -75,13 +74,14 @@ const WaitingForFiles = () => (
         size='2x'
       />
     </div>
+    <div>Copying 1 or more notebooks from another workspace.</div>
     <div>
-      Copying 1 or more notebooks from another workspace. This may take{' '}
-      <b>a few minutes</b>.
+      Notebook copy should happen quickly, but it can sometimes take{' '}
+      <b>minutes to hours</b> to complete.
     </div>
     <div>
-      If you continue to see this message after a few minutes have passed,
-      please contact support at <SupportMailto />.
+      If it takes longer than a few minutes, try duplicating the original
+      workspace again.
     </div>
   </FlexColumn>
 );
@@ -146,7 +146,7 @@ export const AppFilesList = withCurrentWorkspace()(
       }
     }, [workspace, isTransferComplete]);
 
-    const displayMenu = (row) => {
+    const displayMenu = (row: FileDetail) => {
       return (
         <NotebookActionMenu
           resource={convertToResources([row], props.workspace)[0]}
@@ -159,14 +159,14 @@ export const AppFilesList = withCurrentWorkspace()(
       );
     };
 
-    const displayAppLogo = (row) => {
+    const displayAppLogo = (row: FileDetail) => {
       // Find App Type on the basis of file name extension
       const { name } = row;
       const appType = getAppInfoFromFileName(name).appType;
       return <AppBanner appType={appType} style={{ marginRight: '1em' }} />;
     };
 
-    const displayName = (row) => {
+    const displayName = (row: FileDetail) => {
       const {
         workspace: { namespace, id },
       } = props;
@@ -189,7 +189,7 @@ export const AppFilesList = withCurrentWorkspace()(
       );
     };
 
-    const displayLastModifiedTime = (row) => {
+    const displayLastModifiedTime = (row: FileDetail) => {
       const time = displayDateWithoutHours(row.lastModifiedTime);
       return <div>{time}</div>;
     };
@@ -242,7 +242,7 @@ export const AppFilesList = withCurrentWorkspace()(
                   style={styles.columns}
                   headerStyle={styles.tableHeader}
                   header='Name'
-                  field={'name'}
+                  field='name'
                   body={displayName}
                   bodyStyle={styles.rows}
                   filter
@@ -255,6 +255,8 @@ export const AppFilesList = withCurrentWorkspace()(
                   style={styles.columns}
                   bodyStyle={styles.rows}
                   header='Last Modified Time'
+                  field='lastModifiedTime'
+                  sortable
                   body={displayLastModifiedTime}
                 />
                 <Column

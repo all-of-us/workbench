@@ -54,10 +54,6 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
-    if (createAppRequest.getAppType() == AppType.RSTUDIO
-        && !configProvider.get().featureFlags.enableRStudioGKEApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
     if (createAppRequest.getAppType() == AppType.SAS
         && !configProvider.get().featureFlags.enableSasGKEApp) {
       throw new UnsupportedOperationException("API not supported.");

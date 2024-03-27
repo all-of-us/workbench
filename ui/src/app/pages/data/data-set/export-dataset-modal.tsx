@@ -4,12 +4,12 @@ import fp from 'lodash/fp';
 import { Toast } from 'primereact/toast';
 
 import {
+  AnalysisLanguage,
   BillingStatus,
   DataSet,
   DataSetExportRequest,
   DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
-  KernelTypeEnum,
   PrePackagedConceptSetEnum,
 } from 'generated/fetch';
 
@@ -36,8 +36,10 @@ import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isEmpty, reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { validateNewNotebookName } from 'app/utils/resources';
+import { serverConfigStore } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -65,8 +67,8 @@ export const ExportDatasetModal = ({
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
-  const [kernelType, setKernelType] = useState<KernelTypeEnum>(
-    KernelTypeEnum.PYTHON
+  const [analysisLanguage, setAnalysisLanguage] = useState<AnalysisLanguage>(
+    AnalysisLanguage.PYTHON
   );
   const [genomicsAnalysisTool, setGenomicsAnalysisTool] =
     useState<DataSetExportRequestGenomicsAnalysisToolEnum>(
@@ -81,7 +83,7 @@ export const ExportDatasetModal = ({
   const [codeText, setCodeText] = useState(null);
   const [loadingCode, setLoadingCode] = useState(false);
   const [loadingClipboard, setLoadingClipboard] = useState(false);
-  const [loadingNotebook, setIsLoadingNotebook] = useState(false);
+  const [loadingNotebookKernel, setLoadingNotebookKernel] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [, navigateByUrl] = useNavigation();
   const toast = React.useRef(null);
@@ -110,10 +112,12 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const createExportDatasetRequest = (): DataSetExportRequest => {
+  const createExportDatasetRequest = (
+    language: AnalysisLanguage
+  ): DataSetExportRequest => {
     return {
       dataSetRequest: createDataSetRequest(),
-      kernelType,
+      analysisLanguage: language,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
       notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
@@ -121,8 +125,8 @@ export const ExportDatasetModal = ({
     };
   };
 
-  const exportDataset = async () => {
-    AnalyticsTracker.DatasetBuilder.Export(kernelType);
+  const exportDataset = async (language: AnalysisLanguage) => {
+    AnalyticsTracker.DatasetBuilder.Export(analysisLanguage);
 
     setErrorMsg(null);
     setIsExporting(true);
@@ -130,7 +134,7 @@ export const ExportDatasetModal = ({
       await dataSetApi().exportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       );
       const notebookUrl =
         `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
@@ -153,7 +157,7 @@ export const ExportDatasetModal = ({
   // Any state that necessitates disabling all modal controls.
   const shouldDisable =
     isNotebooksLoading ||
-    loadingNotebook ||
+    loadingNotebookKernel ||
     loadingClipboard ||
     loadingCode ||
     isExporting;
@@ -191,7 +195,7 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const loadHtmlStringIntoIFrame = (html) => {
+  const loadHtmlStringIntoIFrame = (html: string) => {
     const placeholder = document.createElement('html');
     placeholder.innerHTML = html;
 
@@ -217,14 +221,14 @@ export const ExportDatasetModal = ({
     );
   };
 
-  const getCode = () => {
+  const getCode = (language: AnalysisLanguage) => {
     setLoadingCode(true);
     setErrorMsg(null);
     dataSetApi()
       .previewExportToNotebook(
         workspace.namespace,
         workspace.id,
-        createExportDatasetRequest()
+        createExportDatasetRequest(language)
       )
       .then((resp) => {
         setCodePreview(loadHtmlStringIntoIFrame(resp.html));
@@ -246,39 +250,44 @@ export const ExportDatasetModal = ({
   };
   const onCopyCodeClick = () => {
     if (!codeText) {
-      getCode();
+      getCode(analysisLanguage);
     }
     setLoadingClipboard(true);
   };
 
-  const onChangeKernelType = (kernelTypeEnum: KernelTypeEnum) => {
+  const onChangeAnalysisLanguage = (language: AnalysisLanguage) => {
     resetCode();
-    setKernelType(kernelTypeEnum);
+    setAnalysisLanguage(language);
   };
 
-  const onNotebookSelect = (nameWithoutSuffix) => {
+  const onNotebookSelect = (nameWithoutSuffix: string) => {
     setCreatingNewNotebook(nameWithoutSuffix === '');
     setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (nameWithoutSuffix === '') {
-      setCreatingNewNotebook(true);
-    } else {
-      setCreatingNewNotebook(false);
-      setIsLoadingNotebook(true);
+    if (nameWithoutSuffix !== '') {
+      setLoadingNotebookKernel(true);
       notebooksApi()
         .getNotebookKernel(
           workspace.namespace,
           workspace.id,
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
-        .then((resp) => setKernelType(resp.kernelType))
+        .then((resp) => {
+          // TODO test this
+          // can compare directly for now, because they exactly match
+          if (resp.kernelType !== analysisLanguage) {
+            setAnalysisLanguage(resp.kernelType);
+            // code preview will be stale if the language changed
+            getCode(resp.kernelType);
+          }
+        })
         .catch(() =>
           setErrorMsg(
             'Could not fetch notebook metadata. Please try again or create a new notebook.'
           )
         )
-        .finally(() => setIsLoadingNotebook(false));
+        .finally(() => setLoadingNotebookKernel(false));
     }
   };
 
@@ -292,7 +301,7 @@ export const ExportDatasetModal = ({
   // have a value, update code.
   useEffect(() => {
     if (showCodePreview && !codePreview) {
-      getCode();
+      getCode(analysisLanguage);
     }
   }, [codePreview, showCodePreview]);
 
@@ -329,7 +338,9 @@ export const ExportDatasetModal = ({
       : {}),
   };
 
-  const selectOptions = [{ label: '(Create a new notebook)', value: '' }];
+  const selectOptions = [
+    { label: '(Create a new Jupyter notebook)', value: '' },
+  ];
   if (!isNotebooksLoading) {
     selectOptions.push(
       ...existingNotebooks.map((notebook) => ({
@@ -339,59 +350,77 @@ export const ExportDatasetModal = ({
     );
   }
 
+  const { enableSasGKEApp } = serverConfigStore.get().config;
   return (
     <AnimatedModal
-      loading={isExporting || isNotebooksLoading || loadingNotebook}
+      loading={isExporting || isNotebooksLoading || loadingNotebookKernel}
       width={showCodePreview && codePreview ? 1200 : 450}
     >
       <FlexRow>
         <div style={{ width: 'calc(450px - 3rem)' }}>
           <ModalTitle>Export Dataset</ModalTitle>
           <ModalBody>
-            <div style={{ marginTop: '1.5rem' }}>
-              <Select
-                isDisabled={shouldDisable}
-                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
-                data-test-id='select-notebook'
-                options={selectOptions}
-                onChange={(v) => onNotebookSelect(v)}
-              />
+            <div>
+              You can export the code to an existing or new{' '}
+              <b>Jupyter Notebook in {JUPYTER_FILE_EXT} format</b>. You can also
+              copy the generated code to the clipboard and paste into any
+              application in the workbench, such as RStudio
+              {enableSasGKEApp && ' and SAS'}.
             </div>
-
-            {creatingNewNotebook && (
-              <label>
-                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
-                  Notebook Name
-                </SmallHeader>
-                <TextInput
-                  onChange={(v) => setNotebookNameWithoutSuffix(v)}
-                  value={notebookNameWithoutSuffix}
-                  data-test-id='notebook-name-input'
-                  disabled={shouldDisable}
-                />
-              </label>
-            )}
-
             <div style={headerStyles.formLabel}>
               Select programming language
             </div>
-            {Object.keys(KernelTypeEnum)
-              .map((kernelTypeEnumKey) => KernelTypeEnum[kernelTypeEnumKey])
-              .map((kernelTypeEnum, i) => (
-                <label key={i} style={styles.radioButtonLabel}>
+            {Object.keys(AnalysisLanguage)
+              .map(
+                (analysisLanguageKey) => AnalysisLanguage[analysisLanguageKey]
+              )
+              .map((analysisLanguageValue) => (
+                <label
+                  key={analysisLanguageValue}
+                  style={styles.radioButtonLabel}
+                >
                   <RadioButton
                     style={{ marginRight: '0.375rem' }}
-                    name='kernel-type'
-                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                    name='Analysis Language'
                     disabled={shouldDisable || !creatingNewNotebook}
-                    checked={kernelType === kernelTypeEnum}
-                    onChange={() => onChangeKernelType(kernelTypeEnum)}
+                    checked={analysisLanguage === analysisLanguageValue}
+                    onChange={() =>
+                      onChangeAnalysisLanguage(analysisLanguageValue)
+                    }
                   />
-                  {kernelTypeEnum}
+                  {analysisLanguageValue}
                 </label>
               ))}
 
-            {hasWgs() && kernelType === KernelTypeEnum.PYTHON && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <Select
+                isDisabled={
+                  shouldDisable || analysisLanguage === AnalysisLanguage.SAS
+                }
+                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
+                data-test-id='select-notebook'
+                options={selectOptions}
+                onChange={onNotebookSelect}
+              />
+            </div>
+
+            {creatingNewNotebook &&
+              analysisLanguage !== AnalysisLanguage.SAS && (
+                <label>
+                  <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
+                    Jupyter Notebook Name
+                  </SmallHeader>
+                  <TextInput
+                    onChange={setNotebookNameWithoutSuffix}
+                    onBlur={setNotebookNameWithoutSuffix}
+                    value={notebookNameWithoutSuffix}
+                    data-test-id='notebook-name-input'
+                    disabled={shouldDisable}
+                  />
+                </label>
+              )}
+
+            {hasWgs() && analysisLanguage === AnalysisLanguage.PYTHON && (
               <React.Fragment>
                 <div style={headerStyles.formLabel}>
                   Select analysis tool for genetic variant data
@@ -416,7 +445,7 @@ export const ExportDatasetModal = ({
                 type='link'
                 disabled={isCodePreviewLoading || shouldDisable}
                 data-test-id='code-preview-button'
-                onClick={() => onCodePreviewClick()}
+                onClick={onCodePreviewClick}
                 style={{ padding: 0, margin: 0 }}
               >
                 {showCodePreview ? 'Hide Code Preview' : 'See Code Preview'}
@@ -457,7 +486,7 @@ export const ExportDatasetModal = ({
                 type='primary'
                 data-test-id='export-data-set'
                 disabled={!isEmpty(errors) || shouldDisable}
-                onClick={() => exportDataset()}
+                onClick={() => exportDataset(analysisLanguage)}
               >
                 Export
               </Button>

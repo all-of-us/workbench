@@ -24,7 +24,6 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public MandrillConfig mandrill;
   public AbsorbConfig absorb;
-  public MoodleConfig moodle;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -62,7 +61,6 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
     config.absorb = new AbsorbConfig();
-    config.moodle = new MoodleConfig();
     config.offlineBatch = new OfflineBatchConfig();
     config.ras = new RasConfig();
     config.rdrExport = new RdrExportConfig();
@@ -172,15 +170,8 @@ public class WorkbenchConfig {
     // The workspace GCS bucket location
     public String workspaceBucketLocation;
 
-    public RuntimeImages runtimeImages;
-
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
     public String gceVmZone;
-  }
-
-  public static class RuntimeImages {
-    public List<String> gce;
-    public List<String> dataproc;
   }
 
   public static class AuthConfig {
@@ -262,13 +253,6 @@ public class WorkbenchConfig {
     public String externalDepartmentId;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
-    public Boolean redirectMoodleUser;
-  }
-
-  public static class MoodleConfig {
-    public Boolean trainingMigrationPauseActive;
-    public String host;
-    public String credentialsKeyV2;
   }
 
   public static class TanagraConfig {
@@ -329,8 +313,6 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable user creation of RStudio GKE apps
-    public boolean enableRStudioGKEApp;
     // If true, enable user creation of SAS GKE apps
     public boolean enableSasGKEApp;
     // If true, enable visual data explorer

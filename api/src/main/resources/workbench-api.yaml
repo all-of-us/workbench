@@ -485,35 +485,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/account/use-absorb:
-    get:
-      tags:
-      - profile
-      summary: Whether the user should use Absorb for compliance training
-      operationId: useAbsorb
-      responses:
-        200:
-          description: Whether the user should use Absorb for compliance training
-          content:
-            application/json:
-              schema:
-                type: boolean
-  /v1/account/trainings-enabled:
-    get:
-      tags:
-        - profile
-      summary: |
-        Whether trainings are enabled for this user.
-        This endpoint is used to assist in the LMS migration.
-        It is temporary and will be removed after the migration.
-      operationId: trainingsEnabled
-      responses:
-        200:
-          description: Whether trainings are enabled for this user.
-          content:
-            application/json:
-              schema:
-                type: boolean
   /v1/account/sync-era-commons-status:
     post:
       tags:
@@ -3542,44 +3513,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: copyConceptSetRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
-    post:
-      tags:
-      - dataSet
-      description: Given a Data Set, return the SQL query built from it.
-      operationId: generateCode
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: workspaceId
-        in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
-        required: true
-        schema:
-          type: string
-      - name: kernelType
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/DataSetRequest'
-        required: true
-      responses:
-        200:
-          description: A SQL query for each domain in the Data Set
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DataSetCodeResponse'
-      x-codegen-request-body-name: dataSet
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
     post:
       tags:
@@ -6246,6 +6179,40 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/VariantFilterResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filter/info":
+    post:
+      tags:
+        - cohortBuilder
+      description: Returns info about this VariantFilter
+      operationId: findVariantFilterInfo
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceId
+          in: path
+          description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: request body for getting VariantFilterInfoResponse.
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/VariantFilter"
+        required: true
+      responses:
+        200:
+          description: VariantFilterInfoResponse contains vid count, participant count
+            and count of vids by participant count in ranges 5k, 10k, 100k and 200k
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VariantFilterInfoResponse"
   /v1/surveys/newUserSatisfactionSurvey:
     post:
       tags:
@@ -6791,9 +6758,6 @@ components:
           type: boolean
           description: Whether the Compliance Training access module is enabled.
           default: false
-        complianceTrainingHost:
-          type: string
-          description: The hostname for constructing the compliance training URL.
         absorbSamlIdentityProviderId:
           type: string
           description: The SAML identity provider ID for Absorb.
@@ -6845,10 +6809,6 @@ components:
         rasLogoutUrl:
           type: string
           description: The URL that can sign out RAS login session.
-        runtimeImages:
-          type: array
-          items:
-            $ref: '#/components/schemas/RuntimeImage'
         freeTierBillingAccountId:
           type: string
           description: The free tier billing account id
@@ -6865,10 +6825,6 @@ components:
           description: Whether a captcha check is part of the new user registration
             process
           default: true
-        enableRStudioGKEApp:
-          type: boolean
-          description: Whether users are able to use the RStudio GKE app.
-          default: false
         enableSasGKEApp:
           type: boolean
           description: Whether users are able to use the SAS GKE app.
@@ -6884,21 +6840,10 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to pause GKE applications.
-        redirectMoodleToAbsorb:
-          type: boolean
-          description: Start redirecting Moodle User to Absorb
-          default: false
         enableVariantSelectAll:
           type: boolean
           default: false
           description: Enable variant select all
-    RuntimeImage:
-      type: object
-      properties:
-        cloudService:
-          type: string
-        name:
-          type: string
     AccessModuleConfig:
       required:
       - expirable
@@ -7782,8 +7727,8 @@ components:
         newNotebook:
           type: boolean
           default: false
-        kernelType:
-          $ref: '#/components/schemas/KernelTypeEnum'
+        analysisLanguage:
+          $ref: '#/components/schemas/AnalysisLanguage'
         generateGenomicsAnalysisCode:
           type: boolean
           default: false
@@ -7823,6 +7768,16 @@ components:
       enum:
       - Python
       - R
+      description: The kernel specified in the metadata of a Jupyter notebook file.
+    AnalysisLanguage:
+      type: string
+      enum:
+        - Python
+        - R
+        - SAS
+      description: |
+        The language used for code generation in the Dataset Builder.
+        In the context of Jupyter notebook files, this value is equal to the kernel in KernelTypeEnum.
     DomainValuePair:
       type: object
       properties:
@@ -7890,14 +7845,6 @@ components:
       properties:
         kernelType:
           $ref: '#/components/schemas/KernelTypeEnum'
-    DataSetCodeResponse:
-      type: object
-      properties:
-        kernelType:
-          $ref: '#/components/schemas/KernelTypeEnum'
-        code:
-          type: string
-          description: The code required to generate the query for the data set.
     DataSetQuery:
       required:
       - domain
@@ -8217,9 +8164,6 @@ components:
           type: integer
           format: int64
         eraCommonsBypassTime:
-          type: integer
-          format: int64
-        rasLinkLoginGovBypassTime:
           type: integer
           format: int64
         identityBypassTime:
@@ -10953,6 +10897,8 @@ components:
         variantId:
           type: string
           description: The variant id of SNP Indel Variants.
+        variantFilter:
+          $ref: '#/components/schemas/VariantFilter'
         attributes:
           type: array
           description: |
@@ -11237,105 +11183,94 @@ components:
           format: int64
         conceptName:
           type: string
+    BaseVariantFilter:
+      type: object
+      properties:
+        geneList:
+          type: array
+          description: List of string gene names
+          items:
+            type: string
+        consequenceList:
+          type: array
+          description: List of string consequence names
+          items:
+            type: string
+        clinicalSignificanceList:
+          type: array
+          description: List of string clinical significance names
+          items:
+            type: string
+        countMin:
+          type: integer
+          format: int64
+          description: Allele count min
+        countMax:
+          type: integer
+          format: int64
+          description: Allele count max
+        numberMin:
+          type: integer
+          format: int64
+          description: Allele number min
+        numberMax:
+          type: integer
+          format: int64
+          description: Allele number max
+        frequencyMin:
+          type: number
+          description: Allele frequency min(floating point)
+        frequencyMax:
+          type: number
+          description: Allele number max(floating point)
+        participantCountRange:
+          $ref: '#/components/schemas/ParticipantCountFilter'
+    VariantFilter:
+      allOf:
+        - $ref: '#/components/schemas/BaseVariantFilter'
+        - type: object
+          required:
+            - searchTerm
+          properties:
+            searchTerm:
+              type: string
+              description: The term used to search variants.
     VariantFilterRequest:
-      type: object
+      allOf:
+        - $ref: '#/components/schemas/VariantFilter'
+        - type: object
+          properties:
+            pageToken:
+              type: string
+              description: Used for retrieving additional pages of results.
+            pageSize:
+              type: integer
+              description: page size of results (default is 25)
+            sortBy:
+              type: string
+              description: sort column by
+    ParticipantCountFilter:
       required:
-      - searchTerm
-      properties:
-        searchTerm:
-          type: string
-          description: The term used to search variants.
-        pageToken:
-          type: string
-          description: Used for retrieving additional pages of results.
-        pageSize:
-          type: integer
-          description: page size of results (default is 25)
-        geneList:
-          type: array
-          description: List of string gene names
-          items:
-            type: string
-        consequenceList:
-          type: array
-          description: List of string consequence names
-          items:
-            type: string
-        clinicalSignificanceList:
-          type: array
-          description: List of string clinical significance names
-          items:
-            type: string
-        countMin:
-          type: integer
-          format: int64
-          description: Allele count min
-        countMax:
-          type: integer
-          format: int64
-          description: Allele count max
-        numberMin:
-          type: integer
-          format: int64
-          description: Allele number min
-        numberMax:
-          type: integer
-          format: int64
-          description: Allele number max
-        frequencyMin:
-          type: number
-          description: Allele frequency min(floating point)
-        frequencyMax:
-          type: number
-          description: Allele number max(floating point)
-        sortBy:
-          type: string
-          description: sort column by
-    VariantFilterResponse:
+        - operator
+        - operands
       type: object
       properties:
-        geneList:
+        operator:
+          $ref: '#/components/schemas/Operator'
+        operands:
           type: array
-          description: List of string gene names
           items:
-            type: string
-        consequenceList:
-          type: array
-          description: List of string consequence names
-          items:
-            type: string
-        clinicalSignificanceList:
-          type: array
-          description: List of string clinical significance names
-          items:
-            type: string
-        countMin:
-          type: integer
-          format: int64
-          description: Allele count min
-        countMax:
-          type: integer
-          format: int64
-          description: Allele count max
-        numberMin:
-          type: integer
-          format: int64
-          description: Allele number min
-        numberMax:
-          type: integer
-          format: int64
-          description: Allele number max
-        frequencyMin:
-          type: number
-          description: Allele frequency min(floating point)
-        frequencyMax:
-          type: number
-          description: Allele number max(floating point)
-        sortByList:
-          type: array
-          description: List of string column names
-          items:
-            type: string
+            type: integer
+    VariantFilterResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseVariantFilter'
+        - type: object
+          properties:
+            sortByList:
+              type: array
+              description: List of string column names
+              items:
+                type: string
     VariantListResponse:
       required:
       - items
@@ -11352,6 +11287,45 @@ components:
         totalSize:
           type: integer
           description: Total size of the result set.
+    VariantFilterInfoResponse:
+      required:
+        - vidsCount
+        - participantCount
+        - lessThanOrEqualToFiveThousand
+        - overFiveThousand
+        - overTenThousand
+        - overHundredThousand
+        - overTwoHundredThousand
+      type: object
+      properties:
+        vidsCount:
+          type: integer
+          format: int64
+          description: Total vids count for the VariantFilter.
+        participantCount:
+          type: integer
+          format: int64
+          description: Total participant count for the VariantFilter.
+        lessThanOrEqualToFiveThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in less than or equal to 5k of participants.
+        overFiveThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 5k of participants.
+        overTenThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 10k of participants.
+        overHundredThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 100k of participants.
+        overTwoHundredThousand:
+          type: integer
+          format: int64
+          description: Total vids count of variants found in over 200k of participants.
     Variant:
       required:
       - participantCount

@@ -52,7 +52,7 @@ public class ConceptBigQueryService {
           innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
       innerSql.append("\n");
       if (!sourceList.isEmpty()) {
-        innerSql.append(" UNION ALL\n");
+        innerSql.append(" UNION DISTINCT\n");
       }
     }
     if (!sourceList.isEmpty()) {

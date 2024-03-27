@@ -22,7 +22,7 @@ public class QueryBuilder {
       "${mainTable}.person_id NOT IN unnest(@" + PERSON_ID_BLACKLIST_PARAM + ")\n";
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id NOT IN\n" + "(${excludeSql})\n";
-  private static final String UNION_TEMPLATE = "UNION ALL\n";
+  private static final String UNION_TEMPLATE = "UNION DISTINCT\n";
   private static final Logger log = Logger.getLogger(QueryBuilder.class.getName());
 
   public void addWhereClause(

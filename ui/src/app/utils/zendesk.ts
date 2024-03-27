@@ -19,6 +19,8 @@ interface ZendeskUrls {
   rStudioHowToRun: string;
   rStudioHowToDataset: string;
   cromwellInformation: string;
+  sasHowToRun: string;
+  sasExplore: string;
 }
 
 const zendeskConfigs = {
@@ -59,6 +61,8 @@ export const supportUrls: ZendeskUrls = ((env) => {
     rStudioHowToRun: article('22078658566804'),
     rStudioHowToDataset: article('360039585831'),
     cromwellInformation: article('14428263737620'),
+    sasHowToRun: article('24413203234068'),
+    sasExplore: article('24413326641684'),
   };
   const urls: { [key: string]: ZendeskUrls } = {
     [ZendeskEnv.Prod]: {

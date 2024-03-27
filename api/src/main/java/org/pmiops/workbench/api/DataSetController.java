@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -35,9 +36,9 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
@@ -59,6 +60,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.ResourceTypeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +78,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final Provider<DbUser> userProvider;
 
+  private final AnalysisLanguageMapper analysisLanguageMapper;
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
@@ -83,17 +86,9 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceAuthService workspaceAuthService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  public JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
-    JSONObject newJson = new JSONObject(originalJson.toString());
-
-    codeCells.forEach(
-        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
-
-    return newJson;
-  }
-
   @Autowired
   DataSetController(
+      AnalysisLanguageMapper analysisLanguageMapper,
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -102,6 +97,7 @@ public class DataSetController implements DataSetApiDelegate {
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.analysisLanguageMapper = analysisLanguageMapper;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -227,30 +223,6 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataSetCodeResponse> generateCode(
-      String workspaceNamespace,
-      String workspaceId,
-      String kernelTypeEnumString,
-      DataSetRequest dataSetRequest) {
-    DbWorkspace dbWorkspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
-    final String generatedCode =
-        String.join(
-            "\n\n",
-            dataSetService.generateCodeCells(
-                new DataSetExportRequest()
-                    .kernelType(kernelTypeEnum)
-                    .dataSetRequest(dataSetRequest),
-                dbWorkspace));
-
-    return ResponseEntity.ok(
-        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
-  }
-
-  @Override
   public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     DbWorkspace dbWorkspace =
@@ -259,20 +231,50 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
-    byte[] notebookHtml =
-        addCells(createNotebookObject(dataSetExportRequest.getKernelType()), codeCells)
-            .toString()
-            .getBytes(StandardCharsets.UTF_8);
+    String responseText = String.join(System.lineSeparator(), codeCells);
+    String responseHtml = responseText; // default if we can't improve on it
 
-    return ResponseEntity.ok(
-        new ReadOnlyNotebookResponse()
-            .html(notebooksService.convertJupyterNotebookToHtml(notebookHtml))
-            .text(String.join(System.lineSeparator(), codeCells)));
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    if (analysisLanguage == AnalysisLanguage.SAS) {
+      responseHtml =
+          codeCells.stream()
+              // within a code cell
+              .map(line -> line.replace(System.lineSeparator(), "<br/>"))
+              // joining the code cells
+              .collect(Collectors.joining("<br/>"));
+    } else {
+      KernelTypeEnum kernelType =
+          analysisLanguageMapper.analysisLanguageToKernelType(
+              dataSetExportRequest.getAnalysisLanguage());
+
+      // not all languages are available as Jupyter kernels
+      if (kernelType != null) {
+        responseHtml =
+            notebooksService.convertJupyterNotebookToHtml(
+                addCells(createNotebookObject(kernelType), codeCells)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+      }
+    }
+
+    return ResponseEntity.ok(new ReadOnlyNotebookResponse().html(responseHtml).text(responseText));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
+    if (analysisLanguage == null) {
+      throw new BadRequestException("Analysis language is required");
+    }
+
+    KernelTypeEnum kernelType =
+        analysisLanguageMapper.analysisLanguageToKernelType(
+            dataSetExportRequest.getAnalysisLanguage());
+    if (kernelType == null) {
+      throw new BadRequestException("Cannot export to notebook for " + analysisLanguage);
+    }
+
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
@@ -289,9 +291,12 @@ public class DataSetController implements DataSetApiDelegate {
     if (!dataSetExportRequest.isNewNotebook()) {
       notebookFile =
           notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
-      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
+      // TODO when is it necessary to set this? when isn't it already set?
+      dataSetExportRequest.setAnalysisLanguage(
+          analysisLanguageMapper.kernelTypeToAnalysisLanguage(
+              notebooksService.getNotebookKernel(notebookFile)));
     } else {
-      notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
+      notebookFile = createNotebookObject(kernelType);
     }
 
     notebookFile =
@@ -302,7 +307,7 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private JSONObject createNotebookObject(KernelTypeEnum kernelTypeEnum) {
+  private JSONObject createNotebookObject(@NotNull KernelTypeEnum kernelTypeEnum) {
     JSONObject metaData = new JSONObject();
     switch (kernelTypeEnum) {
       case PYTHON:
@@ -334,6 +339,15 @@ public class DataSetController implements DataSetApiDelegate {
         // See https://nbformat.readthedocs.io/en/latest/api.html
         .put("nbformat", 4)
         .put("nbformat_minor", 2);
+  }
+
+  private JSONObject addCells(JSONObject originalJson, List<String> codeCells) {
+    JSONObject newJson = new JSONObject(originalJson.toString());
+
+    codeCells.forEach(
+        cell -> newJson.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+
+    return newJson;
   }
 
   @Override

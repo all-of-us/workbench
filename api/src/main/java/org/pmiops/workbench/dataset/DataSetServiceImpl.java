@@ -68,6 +68,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
@@ -81,7 +82,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
-import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -91,6 +91,7 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -104,13 +105,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
       "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
+
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
   private static final String R_CDR_ENV_VARIABLE = "";
-  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
-      ImmutableMap.of(
-          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
+  private static final String SAS_CDR_ENV_VARIABLE = "&workspacecdr..";
+  private static final Map<AnalysisLanguage, String> ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP =
+      Map.of(
+          AnalysisLanguage.R,
+          R_CDR_ENV_VARIABLE,
+          AnalysisLanguage.PYTHON,
+          PYTHON_CDR_ENV_VARIABLE,
+          AnalysisLanguage.SAS,
+          SAS_CDR_ENV_VARIABLE);
+
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String MULTIPLE_DOMAIN_QUERY =
@@ -123,6 +132,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           + "\nAND UPPER(domain) = %s";
   private static final String LIMIT_20 = " LIMIT 20";
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+
+  // RStudio has a line length limit of 4096 characters.  Pasting lines longer than this will
+  // FAIL SILENTLY, CAUSING WRONG RESULTS, so it's critical to produce output shorter than this.
+  // https://github.com/rstudio/rstudio/issues/14420
+  private static final int RSTUDIO_LINE_LENGTH_MINUS_BUFFER = 1000;
+
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
       ImmutableList.of(
           Domain.CONDITION,
@@ -914,12 +929,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             dataSetExportRequest.getDataSetRequest().getName(),
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
-                            dataSetExportRequest.getKernelType(),
+                            dataSetExportRequest.getAnalysisLanguage(),
                             bigQueryService.getTableFieldsFromDomain(
                                 Domain.fromValue(entry.getKey())))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<String> generateWgsCode(
@@ -933,20 +948,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           "The workspace CDR version does not have whole genome data");
     }
 
-    if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
-      return generateGenomicsAnalysisCommentForR();
-    }
-
-    switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
-      case HAIL:
-        return generateHailCode(qualifier, dataSetExportRequest);
-      case PLINK:
-        return generatePlinkCode(qualifier, dataSetExportRequest);
-      case NONE:
-        return generateDownloadVcfCode(qualifier, dataSetExportRequest);
-      default:
-        throw new BadRequestException("Invalid Genomics Analysis Tool");
-    }
+    return switch (dataSetExportRequest.getAnalysisLanguage()) {
+      case R -> List.of(
+          """
+          # Code generation for genomic analysis tools is not supported in R.
+          # The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel.
+          """);
+      case SAS -> List.of(
+          """
+          /* Code generation for genomic analysis tools is not supported in SAS.
+             The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel. */
+          """);
+      case PYTHON -> switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
+        case HAIL -> generateHailCode(qualifier, dataSetExportRequest);
+        case PLINK -> generatePlinkCode(qualifier, dataSetExportRequest);
+        case NONE -> generateDownloadVcfCode(qualifier, dataSetExportRequest);
+        default -> throw new BadRequestException("Invalid Genomics Analysis Tool");
+      };
+    };
   }
 
   // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
@@ -1097,12 +1116,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "}/* "
             + localVcfDir
             + "/");
-  }
-
-  private List<String> generateGenomicsAnalysisCommentForR() {
-    return ImmutableList.of(
-        "# Code generation for genomic analysis tools is not supported in R\n"
-            + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
   }
 
   @Override
@@ -1409,9 +1422,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private static String generateSqlWithEnvironmentVariables(
-      String query, KernelTypeEnum kernelTypeEnum) {
+      String query, AnalysisLanguage analysisLanguage) {
     return new BasicFormatterImpl()
-        .format(query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum)));
+        .format(
+            query.replaceAll(
+                CDR_STRING, ANALYSIS_LANGUAGE_TO_ENV_VARIABLE_MAP.get(analysisLanguage)));
   }
 
   // This takes the query, and string replaces in the values for each of the named
@@ -1463,32 +1478,44 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String dataSetName,
       String cdrVersionName,
       String qualifier,
-      KernelTypeEnum kernelTypeEnum,
+      AnalysisLanguage analysisLanguage,
       FieldList fieldList) {
 
     // Define [namespace]_sql, query parameters (as either [namespace]_query_config
     // or [namespace]_query_parameters), and [namespace]_df variables
     String domainAsString = domain.toString().toLowerCase();
     String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
-    // Comments in R and Python have the same syntax
+    String exportName = domainAsString + "_" + qualifier;
+
     String sqlComment =
         String.format(
-            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
+            "This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
             dataSetName, domainAsString, cdrVersionName);
 
-    switch (kernelTypeEnum) {
+    // Comments in R and Python have the same syntax
+    String rPythonSqlComment = "# " + sqlComment;
+    String sasSqlComment = "/* " + sqlComment + " */";
+
+    String rawSqlQuery =
+        fillInQueryParams(
+            generateSqlWithEnvironmentVariables(queryJobConfiguration.getQuery(), analysisLanguage),
+            queryJobConfiguration.getNamedParameters());
+
+    // Split long lines in the SQL query into multiple, to avoid exceeding RStudio's length limit
+    String sqlQuery =
+        WorkbenchStringUtils.splitTooLongLines(
+            rawSqlQuery, RSTUDIO_LINE_LENGTH_MINUS_BUFFER, ",", System.lineSeparator());
+
+    switch (analysisLanguage) {
       case PYTHON:
-        return ImmutableList.of(
+        return List.of(
             "import pandas\n"
                 + "import os\n\n"
-                + sqlComment
+                + rPythonSqlComment
                 + "\n"
                 + namespace
                 + "sql = \"\"\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
+                + sqlQuery
                 + "\"\"\"\n\n"
                 + namespace
                 + "df = pandas.read_gbq(\n"
@@ -1517,23 +1544,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             && StringUtils.containsIgnoreCase(
                                 queryJobConfiguration.getQuery(), field.getName()))
                 .map(field -> field.getName().toLowerCase() + " = col_character()")
-                .collect(Collectors.toList());
-        String colTypes =
-            columns.isEmpty()
-                ? "NULL"
-                : "cols(" + columns.stream().collect(Collectors.joining(", ")) + ")";
-        String exportName = domainAsString + "_" + qualifier;
+                .toList();
+        String colTypes = columns.isEmpty() ? "NULL" : "cols(" + String.join(", ", columns) + ")";
         String exportPathVariable = exportName + "_path";
-        return ImmutableList.of(
+        return List.of(
             "library(tidyverse)\nlibrary(bigrquery)\n\n"
-                + sqlComment
+                + rPythonSqlComment
                 + "\n"
                 + namespace
                 + "sql <- paste(\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
+                + sqlQuery
                 + "\", sep=\"\")\n\n"
                 + "# Formulate a Cloud Storage destination path for the data exported from BigQuery.\n"
                 + "# NOTE: By default data exported multiple times on the same day will overwrite older copies.\n"
@@ -1596,8 +1616,41 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "head("
                 + namespace
                 + "df, 5)");
+      case SAS:
+        return List.of(
+            sasSqlComment
+                + """
+
+
+            %let workspacecdr = %sysget(WORKSPACE_CDR);
+            %put The CDR for this workspace is: &workspacecdr;
+            %let googleproject = %sysget(GOOGLE_PROJECT);
+            %put The Google Project for this workspace is: &googleproject;
+
+            /* Define the BigQuery SQL query */
+            proc sql;
+               connect to bigquery (PROJECT="&googleproject." schema="&workspacecdr." mode='Performance');
+
+               /* Fetch and store the results in a SAS dataset */
+               create table
+               """
+                + exportName
+                + """
+                as
+                select * from connection to bigquery
+               ("""
+                + sqlQuery
+                + """
+               );
+
+               disconnect from bigquery;
+            quit;
+
+            /* Close the BigQuery library */
+            libname gbqlib clear;
+            """);
       default:
-        throw new BadRequestException("Language " + kernelTypeEnum + " not supported.");
+        throw new BadRequestException("Language " + analysisLanguage + " not supported.");
     }
   }
 

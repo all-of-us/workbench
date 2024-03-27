@@ -17,10 +17,6 @@
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "workspaceLogsProject": "fc-aou-logs-test",
     "workspaceBucketLocation": "us-central1",
-    "runtimeImages": {
-      "gce": ["test-gce-docker-image"],
-      "dataproc": ["test-dataproc-docker-image"]
-    },
     "gceVmZone": "us-central1-c"
   },
   "billing": {
@@ -93,13 +89,7 @@
   "absorb": {
     "externalDepartmentId": "Development",
     "samlIdentityProviderId": "C03q5hexf",
-    "samlServiceProviderId": "133137951028",
-    "redirectMoodleUser": true
-  },
-  "moodle": {
-    "trainingMigrationPauseActive": false,
-    "host": "aoudev.nnlm.gov",
-    "credentialsKeyV2": "moodle-key-v2.txt"
+    "samlServiceProviderId": "133137951028"
   },
   "access": {
     "enableComplianceTraining": true,
@@ -122,7 +112,6 @@
     "enableEventDateModifier": false,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableRStudioGKEApp": true,
     "enableSasGKEApp": true,
     "enableDataExplorer": true,
     "enableGKEAppPausing": true,

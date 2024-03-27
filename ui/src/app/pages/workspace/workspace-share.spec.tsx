@@ -104,7 +104,7 @@ describe('WorkspaceShare', () => {
       WorkspacesApi,
       new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles)
     );
-    serverConfigStore.set({ config: { ...defaultServerConfig } });
+    serverConfigStore.set({ config: defaultServerConfig });
 
     props = {
       workspace: tomRiddleDiary,

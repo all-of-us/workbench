@@ -102,6 +102,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -109,7 +110,6 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -126,19 +126,20 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -210,15 +211,15 @@ public class DataSetControllerTest {
   @Autowired private FirecloudMapper firecloudMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private CloudBillingClient cloudBillingClient;
+  @MockBean private BucketAuditQueryService bucketAuditQueryService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
+  @MockBean private CloudBillingClient cloudBillingClient;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
   @MockBean private NotebooksService mockNotebooksService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -256,6 +257,7 @@ public class DataSetControllerTest {
     AccessTierServiceImpl.class,
     ObjectNameLengthServiceImpl.class,
     BucketAuditQueryService.class,
+    AnalysisLanguageMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
@@ -266,7 +268,6 @@ public class DataSetControllerTest {
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
-    MoodleService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,
@@ -275,6 +276,7 @@ public class DataSetControllerTest {
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,
+    TanagraApi.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
@@ -561,6 +563,60 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void previewExportToNotebook_python() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(), workspace.getName(), setUpValidDataSetExportRequest())
+            .getBody();
+
+    assertThat(response.getText()).contains("import pandas"); // used by python
+    assertThat(response.getHtml()).isEqualTo(testHtml);
+  }
+
+  @Test
+  public void previewExportToNotebook_R() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.R))
+            .getBody();
+
+    assertThat(response.getText()).contains("library(bigrquery)"); // used by R
+    assertThat(response.getHtml()).isEqualTo(testHtml);
+  }
+
+  @Test
+  public void previewExportToNotebook_SAS() {
+    String testHtml = "<body><div>test</div></body>";
+    when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
+
+    var response =
+        dataSetController
+            .previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS))
+            .getBody();
+
+    var text = response.getText();
+    var html = response.getHtml();
+
+    assertThat(text).contains("proc sql;"); // used by SAS
+    assertThat(html).isNotEqualTo(testHtml); // does not use convertJupyterNotebookToHtml()
+    assertThat(html).contains("proc sql;");
+    assertThat(html).isNotEqualTo(text); // html adds </br> to line endings
+  }
+
+  @Test
   public void testGetQueryFailsWithNoCohort() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
@@ -576,7 +632,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -596,7 +652,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
   }
 
@@ -615,7 +671,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(dataSet)));
   }
 
@@ -699,6 +755,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -713,6 +770,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -726,7 +784,8 @@ public class DataSetControllerTest {
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
-    DataSetExportRequest request = new DataSetExportRequest();
+    DataSetExportRequest request =
+        new DataSetExportRequest().analysisLanguage(AnalysisLanguage.PYTHON);
 
     Throwable exception =
         assertThrows(
@@ -749,6 +808,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -764,11 +824,41 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
+  }
+
+  @Test
+  public void exportToNotebook_missingLanguage() {
+    DataSetExportRequest request = setUpValidDataSetExportRequest().analysisLanguage(null);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Analysis language is required");
+  }
+
+  @Test
+  public void exportToNotebook_SAS() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS);
+
+    var exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                dataSetController.exportToNotebook(
+                    workspace.getNamespace(), workspace.getName(), request));
+
+    assertThat(exception).hasMessageThat().isEqualTo("Cannot export to notebook for SAS");
   }
 
   @Test
@@ -781,7 +871,7 @@ public class DataSetControllerTest {
                     noAccessWorkspace.getNamespace(),
                     noAccessWorkspace.getName(),
                     new DataSetExportRequest()
-                        .kernelType(KernelTypeEnum.PYTHON)
+                        .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
 
     assertForbiddenException(exception);
@@ -796,7 +886,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
@@ -809,7 +899,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
@@ -825,46 +915,12 @@ public class DataSetControllerTest {
                 workspace.getNamespace(),
                 workspace.getName(),
                 new DataSetExportRequest()
-                    .kernelType(KernelTypeEnum.PYTHON)
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         new DataSetRequest()
                             .conceptSetIds(
                                 ImmutableList.of(
                                     conceptSet1.getId(), noAccessConceptSet.getId())))));
-  }
-
-  @Test
-  public void generateCode_pyhton() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.PYTHON.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("import pandas[\\S|\\s]*pandas\\.read_gbq");
-  }
-
-  @Test
-  public void generateCode_R() {
-    mockLinkingTableQuery();
-    DataSetRequest dataSetRequest = buildValidDataSetRequest();
-    DataSetCodeResponse dataSetCodeResponse =
-        dataSetController
-            .generateCode(
-                workspace.getNamespace(),
-                workspace.getId(),
-                KernelTypeEnum.R.toString(),
-                dataSetRequest)
-            .getBody();
-
-    assertThat(dataSetCodeResponse.getCode())
-        .containsMatch("library[\\S|\\s]*read_bq_export_from_workspace_bucket");
   }
 
   @Test
@@ -894,6 +950,7 @@ public class DataSetControllerTest {
 
     DataSetExportRequest request =
         new DataSetExportRequest()
+            .analysisLanguage(AnalysisLanguage.PYTHON)
             .dataSetRequest(dataSet)
             .newNotebook(false)
             .notebookName(notebookName);
@@ -983,7 +1040,7 @@ public class DataSetControllerTest {
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .generateGenomicsAnalysisCode(true)
-            .kernelType(KernelTypeEnum.R);
+            .analysisLanguage(AnalysisLanguage.R);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
     verify(mockNotebooksService)
@@ -1376,7 +1433,7 @@ public class DataSetControllerTest {
         .dataSetRequest(dataSet)
         .newNotebook(true)
         .notebookName(notebookName)
-        .kernelType(KernelTypeEnum.PYTHON);
+        .analysisLanguage(AnalysisLanguage.PYTHON);
   }
 
   private DbCdrVersion findCdrVersionOrThrow(Workspace workspace) {

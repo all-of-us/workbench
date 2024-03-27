@@ -71,12 +71,15 @@ import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ParticipantCountFilter;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilter;
+import org.pmiops.workbench.model.VariantFilterInfoResponse;
 import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
@@ -624,6 +627,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .variantId("1-101504524-G-A");
   }
 
+  private static SearchParameter variantFilter() {
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene");
+    return new SearchParameter()
+        .domain(Domain.SNP_INDEL_VARIANT.toString())
+        .ancestorData(false)
+        .group(false)
+        .variantFilter(variantFilter);
+  }
+
   /**
    * This SearchParameter specifically represents the case that uses the
    * has_physical_measurement_data flag.
@@ -1096,6 +1108,62 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
             Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variant()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVariantFilter() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variantFilter()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVidAndVariantFilter() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variant(), variantFilter()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingVidAndVariantFilters() {
+    VariantFilter variantFilter = new VariantFilter().searchTerm("gene");
+    variantFilter
+        .addClinicalSignificanceListItem("pathogenic")
+        .addConsequenceListItem("intron_variant")
+        .countMax(0L)
+        .countMax(5L);
+    SearchParameter sp =
+        new SearchParameter()
+            .domain(Domain.SNP_INDEL_VARIANT.toString())
+            .ancestorData(false)
+            .group(false)
+            .variantFilter(variantFilter);
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variant(), sp),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsVariantDataUsingTwoVariantFilters() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(),
+            ImmutableList.of(variantFilter(), variantFilter()),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
@@ -2498,7 +2566,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @ParameterizedTest
   @ValueSource(strings = {"1-101504524-G-A", "gene", "chr20:955-1000", "rs23346"})
   public void findVariants(String searchTerm) {
-    VariantFilterRequest request = new VariantFilterRequest().searchTerm(searchTerm);
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm(searchTerm);
     Variant expectedVariant =
         new Variant()
             .vid("1-101504524-G-A")
@@ -2515,11 +2584,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByConsequence() {
-    VariantFilterRequest request =
-        new VariantFilterRequest()
-            .searchTerm("gene")
-            .addConsequenceListItem("intron_variant")
-            .addConsequenceListItem("non_coding_transcript_variant");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request
+        .searchTerm("gene")
+        .addConsequenceListItem("intron_variant")
+        .addConsequenceListItem("non_coding_transcript_variant");
     Variant expectedVariant =
         new Variant()
             .vid("1-101504524-G-A")
@@ -2535,12 +2604,32 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void findVariantsFilterByParticipantCount() {
+    VariantFilterRequest request = new VariantFilterRequest();
+    ParticipantCountFilter pcf =
+        new ParticipantCountFilter().operator(Operator.LESS_THAN).operands(ImmutableList.of(2000));
+    request.searchTerm("gene4").participantCountRange(pcf);
+    Variant expectedVariant =
+        new Variant()
+            .vid("2-100550658-T-CC")
+            .gene("gene4")
+            .consequence("")
+            .clinVarSignificance("")
+            .proteinChange("change")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(100L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
   public void findVariantsFilterByConsequenceNA() {
-    VariantFilterRequest request =
-        new VariantFilterRequest()
-            .searchTerm("gene3")
-            .addConsequenceListItem("n/a")
-            .addConsequenceListItem("intron_variant");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request
+        .searchTerm("gene3")
+        .addConsequenceListItem("n/a")
+        .addConsequenceListItem("intron_variant");
     Variant expectedVariant =
         new Variant()
             .vid("1-100550658-T-AA")
@@ -2557,11 +2646,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByClinicalSignificance() {
-    VariantFilterRequest request =
-        new VariantFilterRequest()
-            .searchTerm("gene")
-            .addClinicalSignificanceListItem("likely pathogenic")
-            .addClinicalSignificanceListItem("pathogenic");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request
+        .searchTerm("gene")
+        .addClinicalSignificanceListItem("likely pathogenic")
+        .addClinicalSignificanceListItem("pathogenic");
     Variant expectedVariant =
         new Variant()
             .vid("1-101504524-G-A")
@@ -2578,11 +2667,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByClinicalSignificanceNA() {
-    VariantFilterRequest request =
-        new VariantFilterRequest()
-            .searchTerm("gene3")
-            .addClinicalSignificanceListItem("n/a")
-            .addClinicalSignificanceListItem("pathogenic");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request
+        .searchTerm("gene3")
+        .addClinicalSignificanceListItem("n/a")
+        .addClinicalSignificanceListItem("pathogenic");
     Variant expectedVariant =
         new Variant()
             .vid("1-100550658-T-AA")
@@ -2599,8 +2688,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByGeneList() {
-    VariantFilterRequest request =
-        new VariantFilterRequest().searchTerm("gene").addGeneListItem("gene, gene2");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm("gene").addGeneListItem("gene, gene2");
     Variant expectedVariant =
         new Variant()
             .vid("1-101504524-G-A")
@@ -2617,8 +2706,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByGenesListNA() {
-    VariantFilterRequest request =
-        new VariantFilterRequest().searchTerm("rs23347").addGeneListItem("n/a");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm("rs23347").addGeneListItem("n/a");
     Variant expectedVariant =
         new Variant()
             .vid("1-100550658-T-AH")
@@ -2634,15 +2723,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsFilterByMinAndMax() {
-    VariantFilterRequest request =
-        new VariantFilterRequest()
-            .searchTerm("gene")
-            .countMin(4L)
-            .countMax(5L)
-            .numberMin(18242L)
-            .numberMax(18245L)
-            .frequencyMin(new BigDecimal("0.000277").setScale(6, RoundingMode.HALF_UP))
-            .frequencyMax(new BigDecimal(1).setScale(6, RoundingMode.HALF_UP));
+    VariantFilterRequest request = new VariantFilterRequest();
+    request
+        .searchTerm("gene")
+        .countMin(4L)
+        .countMax(5L)
+        .numberMin(18242L)
+        .numberMax(18245L)
+        .frequencyMin(new BigDecimal("0.000277").setScale(6, RoundingMode.HALF_UP))
+        .frequencyMax(new BigDecimal(1).setScale(6, RoundingMode.HALF_UP));
     Variant expectedVariant =
         new Variant()
             .vid("1-101504524-G-A")
@@ -2659,8 +2748,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantsSortByAlleleCount() {
-    VariantFilterRequest request =
-        new VariantFilterRequest().searchTerm("gene1").pageSize(1).sortBy("Allele Count");
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm("gene1");
+    request.pageSize(1).sortBy("Allele Count");
     Variant expectedVariant =
         new Variant()
             .vid("1-100550658-T-H")
@@ -2692,7 +2782,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariants_Pagination() {
-    VariantFilterRequest request = new VariantFilterRequest().searchTerm("gene1").pageSize(1);
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm("gene1");
+    request.pageSize(1);
     VariantListResponse response =
         controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     List<Variant> items = Objects.requireNonNull(response).getItems();
@@ -2739,20 +2831,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findVariantFilters() {
-    VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
-    VariantFilterResponse expectedVariantFilter =
-        new VariantFilterResponse()
-            .geneList(Arrays.asList("gene, gene2", "gene3"))
-            .consequenceList(
-                Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
-            .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
-            .countMin(5L)
-            .countMax(7L)
-            .numberMin(18226L)
-            .numberMax(18242L)
-            .frequencyMin(new BigDecimal(0))
-            .frequencyMax(new BigDecimal(1))
-            .sortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
+    VariantFilterRequest request = new VariantFilterRequest();
+    request.searchTerm("chr20:1000-5000");
+    VariantFilterResponse expectedVariantFilter = new VariantFilterResponse();
+    expectedVariantFilter
+        .geneList(Arrays.asList("gene, gene2", "gene3"))
+        .consequenceList(Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
+        .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
+        .countMin(5L)
+        .countMax(7L)
+        .numberMin(18226L)
+        .numberMax(18242L)
+        .frequencyMin(new BigDecimal(0))
+        .frequencyMax(new BigDecimal(1));
+    expectedVariantFilter.sortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
     assertFindVariantFiltersResponse(request, expectedVariantFilter);
   }
 
@@ -2762,6 +2854,45 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         controller.findVariantFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     assertThat(response).isNotNull();
     assertThat(response).isEqualTo(expectedVariantFilter);
+  }
+
+  @Test
+  public void findVariantFilterInfo() {
+    VariantFilter filter = new VariantFilter();
+    filter.searchTerm("gene5");
+
+    VariantFilterInfoResponse response =
+        controller.findVariantFilterInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, filter).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response.getVidsCount()).isEqualTo(1);
+    assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(1);
+    assertThat(response.getOverFiveThousand()).isEqualTo(1);
+    assertThat(response.getOverTenThousand()).isEqualTo(0);
+    assertThat(response.getOverHundredThousand()).isEqualTo(0);
+    assertThat(response.getOverTwoHundredThousand()).isEqualTo(0);
+  }
+
+  @Test
+  public void findVariantFilterInfoParticipantCountLessThan5KNoBuckets() {
+    VariantFilter filter = new VariantFilter();
+    filter
+        .searchTerm("gene4")
+        .participantCountRange(
+            new ParticipantCountFilter()
+                .operator(Operator.LESS_THAN)
+                .operands(ImmutableList.of(5000)));
+
+    VariantFilterInfoResponse response =
+        controller.findVariantFilterInfo(WORKSPACE_NAMESPACE, WORKSPACE_ID, filter).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response.getVidsCount()).isEqualTo(2);
+    assertThat(response.getParticipantCount()).isEqualTo(1);
+    assertThat(response.getLessThanOrEqualToFiveThousand()).isEqualTo(0);
+    assertThat(response.getOverFiveThousand()).isEqualTo(0);
+    assertThat(response.getOverTenThousand()).isEqualTo(0);
+    assertThat(response.getOverHundredThousand()).isEqualTo(0);
+    assertThat(response.getOverTwoHundredThousand()).isEqualTo(0);
   }
 
   protected String getTablePrefix() {

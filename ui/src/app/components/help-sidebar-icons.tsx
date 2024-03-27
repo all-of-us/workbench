@@ -611,7 +611,7 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       showIcon: () => true,
       style: { width: '36px' },
       tooltip: runtimeTooltip(
-        'Cloud Analysis Environment',
+        'Jupyter Cloud Environment',
         loadingError,
         userSuspended
       ),
@@ -708,10 +708,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('apps', cromwellConfigIconId);
-    if (config.enableRStudioGKEApp) {
-      keys.push(rstudioConfigIconId);
-    }
+    keys.push('apps', cromwellConfigIconId, rstudioConfigIconId);
     if (config.enableSasGKEApp) {
       keys.push(sasConfigIconId);
     }

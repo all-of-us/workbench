@@ -55,7 +55,6 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -126,7 +125,6 @@ public class UserServiceAccessTest {
     UserAccessModuleMapperImpl.class,
   })
   @MockBean({
-    MoodleService.class,
     DirectoryService.class,
     FireCloudService.class,
     MailService.class,

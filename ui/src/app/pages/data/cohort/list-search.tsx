@@ -378,7 +378,7 @@ export const ListSearch = fp.flow(
       });
       if (source === 'conceptSetDetails') {
         this.setState({ data: this.props.concept });
-      } else {
+      } else if (!!source) {
         if (this.criteriaLookupNeeded) {
           this.setState({ loading: true });
           await cohortBuilderApi()
@@ -467,14 +467,12 @@ export const ListSearch = fp.flow(
           searchContext: { domain, source, selectedSurvey },
           workspace: { id, namespace },
         } = this.props;
-        const { searchSource } = this.state;
-        const { removeDrugBrand } = this.state;
-        const surveyName = selectedSurvey || 'All';
+        const { removeDrugBrand, searchSource } = this.state;
         const request: CriteriaSearchRequest = {
           domain,
           standard: !searchSource,
           term: value.trim(),
-          surveyName,
+          surveyName: selectedSurvey || 'All',
           removeDrugBrand,
         };
         const resp = await cohortBuilderApi().findCriteriaByDomain(
@@ -482,7 +480,7 @@ export const ListSearch = fp.flow(
           id,
           request
         );
-        let data;
+        let data: Criteria[];
         if (this.isSurvey) {
           if (source === 'cohort') {
             const questions = ppiQuestions.getValue();

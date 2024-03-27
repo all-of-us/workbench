@@ -16,7 +16,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
-import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppType;
@@ -98,16 +97,12 @@ public class AppsControllerTest {
 
   @Test
   public void testCreateAppSuccess() {
-    config.featureFlags.enableRStudioGKEApp = true;
-
     controller.createApp(WORKSPACE_NS, createAppRequest);
     verify(mockLeonardoApiClient).createApp(createAppRequest, testWorkspace);
   }
 
   @Test
   public void testCreateAppFail_validateActiveBilling() {
-    config.featureFlags.enableRStudioGKEApp = true;
-
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
@@ -124,32 +119,37 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateRStudioAppSuccess_featureEnabled() {
-    config.featureFlags.enableRStudioGKEApp = true;
+  public void testCreateRStudioAppSuccess() {
     CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
-
     controller.createApp(WORKSPACE_NS, createRStudioAppRequest);
-
     verify(mockLeonardoApiClient).createApp(createRStudioAppRequest, testWorkspace);
   }
 
   @Test
-  public void testCreateRStudioAppFail_featureNotEnabled() {
-    config.featureFlags.enableRStudioGKEApp = false;
-    CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.createApp(WORKSPACE_NS, createRStudioAppRequest));
+  public void testCreateSASAppSuccess_featureEnabled() {
+    config.featureFlags.enableSasGKEApp = true;
+    CreateAppRequest createSASAppRequest = new CreateAppRequest().appType(AppType.SAS);
+    controller.createApp(WORKSPACE_NS, createSASAppRequest);
+    verify(mockLeonardoApiClient).createApp(createSASAppRequest, testWorkspace);
   }
 
   @Test
-  public void testGetAppSuccess() throws Exception {
+  public void testCreateSASAppFail_featureNotEnabled() {
+    config.featureFlags.enableSasGKEApp = false;
+    CreateAppRequest createSASAppRequest = new CreateAppRequest().appType(AppType.SAS);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> controller.createApp(WORKSPACE_NS, createSASAppRequest));
+  }
+
+  @Test
+  public void testGetAppSuccess() {
     controller.getApp(WORKSPACE_NS, APP_NAME);
     verify(mockLeonardoApiClient).getAppByNameByProjectId(GOOGLE_PROJECT_ID, APP_NAME);
   }
 
   @Test
-  public void testListAppSuccess() throws Exception {
+  public void testListAppSuccess() {
     controller.listAppsInWorkspace(WORKSPACE_NS);
     verify(mockLeonardoApiClient).listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
   }
@@ -162,7 +162,7 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateApp_securitySuspended() throws ApiException {
+  public void testCreateApp_securitySuspended() {
     user.setComputeSecuritySuspendedUntil(
         Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
     assertThrows(

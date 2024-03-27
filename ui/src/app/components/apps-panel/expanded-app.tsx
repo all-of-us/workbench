@@ -49,7 +49,7 @@ import {
 
 import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
-import { NewNotebookButton } from './new-notebook-button';
+import { NewJupyterNotebookButton } from './new-jupyter-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
 import { RuntimeCost } from './runtime-cost';
 import {
@@ -122,7 +122,7 @@ const JupyterButtonRow = (props: {
     <FlexRow>
       <SettingsButton onClick={onClickRuntimeConf} />
       <PauseRuntimeButton {...{ workspace }} />
-      <NewNotebookButton {...{ workspace }} />
+      <NewJupyterNotebookButton {...{ workspace }} />
     </FlexRow>
   );
 };
