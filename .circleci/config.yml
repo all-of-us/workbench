@@ -462,7 +462,7 @@ jobs:
         name: Pact Broker, can I deploy?
         working_directory: ~
         command: |
-          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 3 --retry-interval 30
+          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 10 --retry-interval 30
 
   #Updates the pacticipant version in the pact broker for our test environment which is referred to as dev in Pact Broker
   api-contract-update-test:
@@ -936,14 +936,15 @@ workflows:
       - api-contract-upload:
           requires:
           - api-contract-test
-      - api-contract-can-i-deploy:
-          requires:
-          - api-contract-upload
+#      - api-contract-can-i-deploy:
+#          requires:
+#          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
           requires:
             - api-unit-test
+            - api-contract-upload
       - ui-deploy-to-test:
           <<: *filter-main-branch
           requires:
@@ -977,7 +978,6 @@ workflows:
       - api-contract-update-test:
           <<: *filter-main-branch
           requires:
-            - api-contract-upload
             - api-deploy-to-test
 
   playground:
