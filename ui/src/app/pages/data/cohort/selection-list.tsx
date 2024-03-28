@@ -7,19 +7,23 @@ import {
   Domain,
   Modifier,
   VariantFilter,
+  VariantFilterInfoResponse,
 } from 'generated/fetch';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow, FlexRowWrap } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
+import { Spinner } from 'app/components/spinners';
 import { AttributesPage } from 'app/pages/data/cohort/attributes-page';
 import {
   getItemFromSearchRequest,
   saveCriteria,
 } from 'app/pages/data/cohort/cohort-search';
+import { VARIANT_DISPLAY } from 'app/pages/data/cohort/constant';
 import { ModifierPage } from 'app/pages/data/cohort/modifier-page';
 import { nameDisplay, typeDisplay } from 'app/pages/data/cohort/utils';
+import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
@@ -29,6 +33,7 @@ import {
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
+  currentWorkspaceStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
@@ -153,10 +158,16 @@ const styles = reactStyles({
     marginTop: '3px',
     transition: 'transform 0.1s ease-out',
   },
-  filterList: {
+  filterContainer: {
     height: 'auto',
     overflow: 'hidden',
     transition: 'max-height 0.4s ease-out',
+  },
+  filterList: {
+    lineHeight: '1.25rem',
+    listStyle: 'none',
+    margin: 0,
+    paddingLeft: '1rem',
   },
 });
 
@@ -189,7 +200,9 @@ interface SelectionInfoProps {
 
 interface SelectionInfoState {
   filtersExpanded: boolean;
+  loadingVariantBuckets: boolean;
   truncated: boolean;
+  variantFilterInfoResponse: VariantFilterInfoResponse;
 }
 
 export class SelectionInfo extends React.Component<
@@ -199,10 +212,16 @@ export class SelectionInfo extends React.Component<
   name: HTMLDivElement;
   constructor(props: SelectionInfoProps) {
     super(props);
-    this.state = { filtersExpanded: false, truncated: false };
+    this.state = {
+      filtersExpanded: false,
+      loadingVariantBuckets: !!props.selection.variantFilter,
+      truncated: false,
+      variantFilterInfoResponse: null,
+    };
   }
 
   componentDidMount(): void {
+    this.getVariantFilterBuckets();
     const { offsetWidth, scrollWidth } = this.name;
     this.setState({ truncated: scrollWidth > offsetWidth });
   }
@@ -215,9 +234,26 @@ export class SelectionInfo extends React.Component<
     ].includes(this.props.selection.domainId);
   }
 
+  async getVariantFilterBuckets() {
+    const { namespace, id } = currentWorkspaceStore.getValue();
+    try {
+      const filterBucketResponse =
+        await cohortBuilderApi().findVariantFilterInfo(
+          namespace,
+          id,
+          this.props.selection.variantFilter
+        );
+      this.setState({ variantFilterInfoResponse: filterBucketResponse });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.setState({ loadingVariantBuckets: false });
+    }
+  }
+
   renderVariantFilters() {
     return (
-      <ul>
+      <ul style={styles.filterList}>
         {Object.entries(this.props.selection.variantFilter)
           .filter(
             ([key, value]) =>
@@ -229,9 +265,35 @@ export class SelectionInfo extends React.Component<
           )
           .map(([key, value]) => (
             <li>
-              <b>{key}</b>: {Array.isArray(value) ? value.join(', ') : value}
+              <b>{VARIANT_DISPLAY[key]}</b>:{' '}
+              {Array.isArray(value) ? (
+                <>
+                  <br />
+                  {value.join(', ')}
+                </>
+              ) : (
+                value.toLocaleString()
+              )}
             </li>
           ))}
+        <li>
+          <b>Participant Count Overview:</b>
+          {this.state.loadingVariantBuckets ? (
+            <div>
+              <Spinner size={24} style={{ margin: '1rem 5rem' }} />
+            </div>
+          ) : (
+            <ul style={styles.filterList}>
+              {Object.entries(this.state.variantFilterInfoResponse)
+                .filter(([, value]) => value !== 0)
+                .map(([key, value]) => (
+                  <li>
+                    <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </li>
       </ul>
     );
   }
@@ -282,7 +344,7 @@ export class SelectionInfo extends React.Component<
         {!!selection.variantFilter && (
           <div
             style={{
-              ...styles.filterList,
+              ...styles.filterContainer,
               maxHeight: filtersExpanded ? '22.5rem' : 0,
             }}
           >

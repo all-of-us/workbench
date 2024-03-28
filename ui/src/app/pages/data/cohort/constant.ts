@@ -123,3 +123,23 @@ export const MODIFIERS_MAP = {
     },
   },
 };
+
+export const VARIANT_DISPLAY = {
+  searchTerm: 'Search Terms',
+  geneList: 'Gene',
+  consequenceList: 'Consequence',
+  clinicalSignificanceList: 'ClinVar Significance',
+  countMin: 'Allele Count Min',
+  countMax: 'Allele Count Max',
+  numberMin: 'Allele Number Min',
+  numberMax: 'Allele Number Max',
+  frequencyMin: 'Allele Frequency Min',
+  frequencyMax: 'Allele Frequency Max',
+  vidsCount: 'Total Variant Count',
+  participantCount: 'Total Participant Count',
+  lessThanOrEqualToFiveThousand: '<= 5,000 Participants',
+  overFiveThousand: '> 5,000 Participants',
+  overTenThousand: '> 10,000 Participants',
+  overHundredThousand: '> 100,000 Participants',
+  overTwoHundredThousand: '> 200,000 Participants',
+};

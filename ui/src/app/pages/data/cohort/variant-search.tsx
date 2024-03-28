@@ -366,7 +366,7 @@ export const VariantSearch = fp.flow(
       parameterId: getFilterParamId(),
       parentId: null,
       type: CriteriaType.NONE,
-      name: `Filter group: ${selectAllFilters.searchTerm}`,
+      name: `Select All Group: ${selectAllFilters.searchTerm}`,
       group: false,
       domainId: Domain.SNP_INDEL_VARIANT,
       hasAttributes: false,
@@ -375,14 +375,15 @@ export const VariantSearch = fp.flow(
       variantFilter: selectAllFilters,
     };
     AnalyticsTracker.CohortBuilder.SelectCriteria(
-      `Select Variant Filter Group - '${selectAllFilters.searchTerm}'`
+      `Select All Variant Filter Group - '${selectAllFilters.searchTerm}'`
     );
     select(param);
     clearSearch();
   };
 
   const disableSelectAll =
-    searchResults.length < 2 ||
+    totalCount < 100 ||
+    totalCount > 10000 ||
     criteria.some((crit) => crit.parameterId === getFilterParamId());
   const displayResults = searchResults?.slice(first, first + pageSize);
   return (
