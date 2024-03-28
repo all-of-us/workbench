@@ -6,7 +6,6 @@ import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForContr
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierRenewal;
 
 import com.google.api.services.oauth2.model.Userinfo;
-import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -52,10 +51,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.GeneralDiscoverySource;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.profile.DiscoverySourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,7 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateUserAccessTiers method whenever a User entry is saved.
  */
 @Service
-public class UserServiceImpl implements UserService, GaugeDataCollector {
+public class UserServiceImpl implements UserService {
   private static final int MAX_RETRIES = 3;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -637,19 +632,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     return accessSyncService.updateUserAccessTiers(targetUser, agent);
-  }
-
-  @Override
-  public Collection<MeasurementBundle> getGaugeData() {
-    return userDao.getUserCountGaugeData().stream()
-        .map(
-            row ->
-                MeasurementBundle.builder()
-                    .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
-                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getAccessTierShortNames())
-                    .build())
-        .collect(ImmutableList.toImmutableList());
   }
 
   @Override

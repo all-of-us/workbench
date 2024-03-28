@@ -1,12 +1,10 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +45,6 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -72,7 +66,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>This needs to implement an interface to support Transactional
  */
 @Service
-public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollector {
+public class WorkspaceServiceImpl implements WorkspaceService {
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
@@ -449,20 +443,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
     }
-  }
-
-  @Override
-  public Collection<MeasurementBundle> getGaugeData() {
-    return workspaceDao.getWorkspaceCountGaugeData().stream()
-        .map(
-            row ->
-                MeasurementBundle.builder()
-                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
-                    .addTag(
-                        MetricLabel.WORKSPACE_ACTIVE_STATUS, row.getActiveStatusEnum().toString())
-                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, row.getTier().getShortName())
-                    .build())
-        .collect(ImmutableList.toImmutableList());
   }
 
   @Override

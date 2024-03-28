@@ -4,16 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 import static org.springframework.test.util.AssertionErrors.fail;
 
-import java.lang.reflect.Method;
 import java.time.Clock;
-import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -77,37 +73,6 @@ public class WorkspaceDaoTest {
         .isEqualTo(dbWorkspace.getName());
     assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getGoogleProject())
         .isEqualTo(dbWorkspace.getGoogleProject());
-  }
-
-  @Test
-  public void testGetWorkspaceCountGaugeData_empty() {
-    workspaceDao.deleteAll();
-    assertThat(workspaceDao.getWorkspaceCountGaugeData()).isEmpty();
-  }
-
-  @Test
-  public void testGetWorkspaceCountGaugeData_one() throws Exception {
-    workspaceDao.deleteAll();
-    createWorkspace();
-
-    final List<WorkspaceCountByActiveStatusAndTier> gaugeData =
-        workspaceDao.getWorkspaceCountGaugeData();
-    assertThat(gaugeData).hasSize(1);
-
-    WorkspaceCountByActiveStatusAndTier count = gaugeData.get(0);
-    assertThat(count.getWorkspaceCount()).isEqualTo(1);
-    assertThat(count.getTier().getShortName())
-        .isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
-    assertThat(count.getActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
-
-    // Iterate all getter methods and make sure all return value is non-null.
-    Class<WorkspaceCountByActiveStatusAndTier> projectionClass =
-        WorkspaceCountByActiveStatusAndTier.class;
-    for (Method method : projectionClass.getMethods()) {
-      if (method.getName().startsWith("get")) {
-        assertThat(method.invoke(count)).isNotNull();
-      }
-    }
   }
 
   @Test

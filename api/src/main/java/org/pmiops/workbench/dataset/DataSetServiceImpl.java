@@ -20,7 +20,6 @@ import com.google.common.collect.Streams;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,10 +86,6 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +95,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+public class DataSetServiceImpl implements DataSetService {
 
   private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
       "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
@@ -176,20 +171,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
           .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
           .build();
-
-  @Override
-  public Collection<MeasurementBundle> getGaugeData() {
-    Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
-    return ImmutableSet.of(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
-            .addTag(MetricLabel.DATASET_INVALID, Boolean.valueOf(false).toString())
-            .build(),
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(true, 0L))
-            .addTag(MetricLabel.DATASET_INVALID, Boolean.valueOf(true).toString())
-            .build());
-  }
 
   /*
    * Stores the associated set of selects and joins for values for the data set builder,

@@ -31,8 +31,6 @@ import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
-import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +80,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceAuthService workspaceAuthService;
-  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public NotebooksServiceImpl(
@@ -92,8 +89,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceDao workspaceDao,
-      WorkspaceAuthService workspaceAuthService,
-      LogsBasedMetricService logsBasedMetricService) {
+      WorkspaceAuthService workspaceAuthService) {
     this.clock = clock;
     this.cloudStorageClient = cloudStorageClient;
     this.fireCloudService = fireCloudService;
@@ -101,7 +97,6 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceDao = workspaceDao;
     this.workspaceAuthService = workspaceAuthService;
-    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
@@ -203,7 +198,6 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newNameWithExtension);
-    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
 
@@ -219,7 +213,6 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceDao.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -303,7 +296,6 @@ public class NotebooksServiceImpl implements NotebooksService {
         NotebookUtils.withNotebookPath(
             NotebookUtils.withJupyterNotebookExtension(notebookNameWithFileExtension)),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Override
