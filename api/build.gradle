@@ -14,7 +14,8 @@ buildscript {
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
-        OPENTELEMETRY_VERSION = '1.35.0'
+        OPENTELEMETRY_SDK_VERSION = '1.36.0'
+        OPENTELEMETRY_JAVA_VERSION = '2.2.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.32'
@@ -406,11 +407,13 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
 
-    implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_VERSION"
-    implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_VERSION"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_VERSION"
-    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_VERSION"
-    implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_VERSION"
+    implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
@@ -516,8 +519,8 @@ dependencies {
 
     // OpenTelemetry is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
-    generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_VERSION"
-    generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_VERSION"
+    generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
 
     generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 

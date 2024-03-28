@@ -72,16 +72,6 @@ public class StackdriverStatsExporterService {
     }
   }
 
-  //
-  //  @VisibleForTesting
-  //  public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
-  //    return StackdriverStatsConfiguration.builder()
-  //        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
-  //        .setProjectId(getProjectId())
-  //        .setMonitoredResource(getMonitoringMonitoredResource())
-  //        .build();
-  //  }
-
   private MonitoredResource getMonitoringMonitoredResource() {
     return MonitoredResource.newBuilder()
         .setType(MONITORED_RESOURCE_TYPE)
