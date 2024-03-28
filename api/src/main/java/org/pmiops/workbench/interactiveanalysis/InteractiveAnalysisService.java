@@ -116,6 +116,7 @@ public class InteractiveAnalysisService {
     String googleProjectId = dbWorkspace.getGoogleProject();
     // Use current dir if not Jupyter
     String editDir = isGceRuntime ? "workspaces/" + workspacePath : "";
+    // note: Playground Mode only applies to Jupyter
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = isPlayground ? playgroundDir : editDir;
 
