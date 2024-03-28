@@ -181,8 +181,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
@@ -354,7 +352,6 @@ public class WorkspacesControllerTest {
     FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
     LeonardoMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class,
     ObjectNameLengthServiceImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
@@ -391,7 +388,6 @@ public class WorkspacesControllerTest {
     LeonardoApiClient.class,
     LeonardoRuntimeAuditor.class,
     MailService.class,
-    MonitoringService.class,
     NotebooksService.class,
     TanagraApi.class,
     TaskQueueService.class,

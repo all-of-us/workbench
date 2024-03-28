@@ -18,13 +18,11 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,10 +36,6 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollector {
+public class DirectoryServiceImpl implements DirectoryService {
 
   private static final Logger log = LoggerFactory.getLogger(DirectoryService.class.getName());
   private static final String ALLOWED =
@@ -316,32 +310,6 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   @Override
   public void signOut(String username) {
     retryHandler.run((context) -> getGoogleDirectoryService().users().signOut(username).execute());
-  }
-
-  @Override
-  public Collection<MeasurementBundle> getGaugeData() {
-    ImmutableSet.Builder<MeasurementBundle> resultBuilder = ImmutableSet.builder();
-
-    final String localDomain = gSuiteDomain();
-    addDomainCountMeasurement(resultBuilder, localDomain, countUsersInDomain(localDomain));
-
-    final String topLevelDomain = getTopLevelGSuiteDomain();
-    // Avoid creating duplicate data point if the local domain is the top domain
-    if (!localDomain.equals(topLevelDomain)) {
-      addDomainCountMeasurement(resultBuilder, topLevelDomain, countUsersInDomain(topLevelDomain));
-    }
-    return resultBuilder.build();
-  }
-
-  private void addDomainCountMeasurement(
-      ImmutableSet.Builder<MeasurementBundle> resultBuilder,
-      String gSuiteDomain,
-      long domainUserCount) {
-    resultBuilder.add(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, domainUserCount)
-            .addTag(MetricLabel.GSUITE_DOMAIN, gSuiteDomain)
-            .build());
   }
 
   private long countUsersInDomain(String gSuiteDomain) {

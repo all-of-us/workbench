@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortreview;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
 import com.google.gson.Gson;
 import java.sql.Date;
@@ -12,7 +11,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,15 +56,12 @@ import org.pmiops.workbench.model.ParticipantData;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCollector {
+public class CohortReviewServiceImpl implements CohortReviewService {
 
   private BigQueryService bigQueryService;
   private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
@@ -563,16 +558,5 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         .reviewedCount(0L)
         .reviewSize(0L)
         .reviewStatus(ReviewStatus.NONE);
-  }
-
-  @Override
-  public Collection<MeasurementBundle> getGaugeData() {
-    return ImmutableSet.of(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.COHORT_COUNT, cohortDao.count())
-            .build(),
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.COHORT_REVIEW_COUNT, cohortReviewDao.count())
-            .build());
   }
 }

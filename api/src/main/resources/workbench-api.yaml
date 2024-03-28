@@ -2466,24 +2466,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/cron/monitoring/updateGaugeMetrics:
-    get:
-      tags:
-      - offlineMonitoring
-      - cron
-      description: Trigger recording of all gauge metrics
-      operationId: updateGaugeMetrics
-      security: []
-      responses:
-        204:
-          description: No content
-          content: {}
-        500:
-          description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
   /v1/cron/uploadReportingSnapshot:
     get:
       tags:

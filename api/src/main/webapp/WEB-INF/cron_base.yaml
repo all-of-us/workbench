@@ -22,14 +22,6 @@ cron:
   timezone: UTC
   target: api
 - description: >
-    Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
-    the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
-    cron job.
-  url: /v1/cron/monitoring/updateGaugeMetrics
-  schedule: every 1 minutes
-  timezone: UTC
-  target: api
-- description: >
     Export user and workspace data to RDR.
     RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
     that is (1) after the close of normal business working hours, and (2) early enough in the evening that the

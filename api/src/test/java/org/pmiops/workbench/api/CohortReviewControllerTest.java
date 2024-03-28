@@ -125,7 +125,6 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -279,7 +278,6 @@ public class CohortReviewControllerTest {
     ParticipantCohortAnnotationMapperImpl.class,
     ParticipantCohortStatusMapperImpl.class,
     FirecloudMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,

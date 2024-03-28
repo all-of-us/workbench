@@ -78,8 +78,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -180,7 +178,6 @@ public class CohortsControllerTest {
     ConceptSetsController.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class,
     NotebooksServiceImpl.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
@@ -214,7 +211,6 @@ public class CohortsControllerTest {
     LeonardoApiClient.class,
     IamService.class,
     MailService.class,
-    MonitoringService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,

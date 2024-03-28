@@ -37,7 +37,6 @@ import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -75,7 +74,6 @@ public class NotebooksControllerTest {
     AccessTierServiceImpl.class,
     FirecloudMapperImpl.class,
     FakeClockConfiguration.class,
-    LogsBasedMetricServiceFakeImpl.class,
     NotebooksController.class,
   })
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
