@@ -54,8 +54,6 @@ public class InteractiveAnalysisService {
   // The billing project to use for the analysis.
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
-  // note: only applicable to GCE runtimes
-  private static final String PLAYGROUND_DIR = "workspaces_playground/";
 
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "(?i)\\.(Rmd|R)$";
@@ -118,13 +116,14 @@ public class InteractiveAnalysisService {
     String googleProjectId = dbWorkspace.getGoogleProject();
     // Use current dir if not Jupyter
     String editDir = isGceRuntime ? "workspaces/" + workspacePath : "";
-    String targetDir = isPlayground ? PLAYGROUND_DIR : editDir;
+    String playgroundDir = "workspaces_playground/" + workspacePath;
+    String targetDir = isPlayground ? playgroundDir : editDir;
 
     var storageLink =
         new StorageLink().cloudStorageDirectory(gcsNotebooksDir).localBaseDirectory(editDir);
 
     if (isGceRuntime) {
-      storageLink.localSafeModeBaseDirectory(PLAYGROUND_DIR);
+      storageLink.localSafeModeBaseDirectory(playgroundDir);
       storageLink.setPattern(JUPYTER_DELOC_PATTERN);
       leonardoNotebooksClient.createStorageLinkForRuntime(googleProjectId, appName, storageLink);
     } else {
@@ -169,7 +168,7 @@ public class InteractiveAnalysisService {
                     name -> localizeTargetDir + name, name -> gcsNotebooksDir + "/" + name)));
 
     if (isGceRuntime) {
-      localizeMap.put(PLAYGROUND_DIR + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
+      localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
       leonardoNotebooksClient.localizeForRuntime(googleProjectId, appName, localizeMap);
     } else {
       leonardoNotebooksClient.localizeForApp(googleProjectId, appName, localizeMap);
