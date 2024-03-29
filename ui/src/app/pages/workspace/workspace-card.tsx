@@ -105,7 +105,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
     deleteWorkspace = withErrorModal(
       {
         title: 'Error Deleting Workspace',
-        message: `Could not delete workspace '${this.props.workspace.id}'.`,
+        message: `Could not delete workspace '${this.props.workspace.name}'.`,
         showBugReportLink: true,
         onDismiss: () => {
           this.setState({ confirmDeleting: false });
