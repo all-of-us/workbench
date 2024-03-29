@@ -156,17 +156,14 @@ public class InteractiveAnalysisServiceTest {
   @Test
   public void testLocalize_RStudio_editMode() {
     String editDir = "";
-    String playgroundDir = "workspaces_playground";
     List<String> notebookLists = List.of("foo.Rmd");
     StorageLink expectedStorageLink =
         new StorageLink()
             .cloudStorageDirectory(NOTEBOOK_DIR)
             .localBaseDirectory(editDir)
-            .localSafeModeBaseDirectory(playgroundDir)
             .pattern(RSTUDIO_DELOC_PATTERN);
     Map<String, String> expectedLocalizeMap = new HashMap<>();
     expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put("foo.Rmd", NOTEBOOK_DIR + "/foo.Rmd");
 
     interactiveAnalysisService.localize(
@@ -177,69 +174,20 @@ public class InteractiveAnalysisServiceTest {
   }
 
   @Test
-  public void testLocalize_RStudio_playground() {
-    String editDir = "";
-    String playgroundDir = "workspaces_playground";
-    List<String> notebookLists = List.of("foo.Rmd");
-    StorageLink expectedStorageLink =
-        new StorageLink()
-            .cloudStorageDirectory(NOTEBOOK_DIR)
-            .localBaseDirectory(editDir)
-            .localSafeModeBaseDirectory(playgroundDir)
-            .pattern(RSTUDIO_DELOC_PATTERN);
-    Map<String, String> expectedLocalizeMap = new HashMap<>();
-    expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/foo.Rmd", NOTEBOOK_DIR + "/foo.Rmd");
-
-    interactiveAnalysisService.localize(
-        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, notebookLists, true, false);
-    verify(mockLeonardoApiClient)
-        .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
-    verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
-  }
-
-  @Test
   public void testLocalize_SAS_editMode() {
     String editDir = "";
-    String playgroundDir = "workspaces_playground";
     List<String> notebookLists = List.of("foo.sas");
     StorageLink expectedStorageLink =
         new StorageLink()
             .cloudStorageDirectory(NOTEBOOK_DIR)
             .localBaseDirectory(editDir)
-            .localSafeModeBaseDirectory(playgroundDir)
             .pattern(SAS_DELOC_PATTERN);
     Map<String, String> expectedLocalizeMap = new HashMap<>();
     expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put("foo.sas", NOTEBOOK_DIR + "/foo.sas");
 
     interactiveAnalysisService.localize(
         WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, false, false);
-    verify(mockLeonardoApiClient)
-        .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
-    verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
-  }
-
-  @Test
-  public void testLocalize_SAS_playground() {
-    String editDir = "";
-    String playgroundDir = "workspaces_playground";
-    List<String> notebookLists = List.of("foo.sas");
-    StorageLink expectedStorageLink =
-        new StorageLink()
-            .cloudStorageDirectory(NOTEBOOK_DIR)
-            .localBaseDirectory(editDir)
-            .localSafeModeBaseDirectory(playgroundDir)
-            .pattern(SAS_DELOC_PATTERN);
-    Map<String, String> expectedLocalizeMap = new HashMap<>();
-    expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
-    expectedLocalizeMap.put(playgroundDir + "/foo.sas", NOTEBOOK_DIR + "/foo.sas");
-
-    interactiveAnalysisService.localize(
-        WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, true, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
