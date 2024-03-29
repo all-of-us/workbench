@@ -8,14 +8,14 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import {
+  sidebarConfigIcon,
+  UIAppType,
+} from '../../components/apps-panel/utils';
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import {
-  helpSidebarConfigIdForUIApp,
-  UIAppType,
-} from 'app/components/apps-panel/utils';
 import {
   rstudioConfigIconId,
   sasConfigIconId,
@@ -52,8 +52,10 @@ beforeEach(async () => {
   jest.mock('app/services/swagger-fetch-clients');
   mockAppsApi = jest.spyOn(swaggerClients, 'appsApi');
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
-  helpSidebarConfigIdForUIApp[UIAppType.RSTUDIO] = rstudioConfigIconId;
-  helpSidebarConfigIdForUIApp[UIAppType.SAS] = sasConfigIconId;
+
+  // not sure why this is necessary, but it is
+  sidebarConfigIcon[UIAppType.RSTUDIO] = rstudioConfigIconId;
+  sidebarConfigIcon[UIAppType.SAS] = sasConfigIconId;
 });
 
 const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
@@ -151,7 +153,9 @@ test.each([
     const pathParameters = { params: matchParams };
     const spyWindowOpen = jest.spyOn(window, 'open');
     spyWindowOpen.mockImplementation(jest.fn(() => window));
+
     renderInteractiveNotebook(pathParameters);
+
     const editButton = screen.getByTitle('Edit');
     await user.click(editButton);
     expect(spyWindowOpen).toHaveBeenCalledTimes(0);
