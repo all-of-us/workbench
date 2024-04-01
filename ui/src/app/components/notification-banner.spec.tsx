@@ -1,12 +1,15 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
+
+import { render, screen } from '@testing-library/react';
 
 import { NotificationBanner } from './notification-banner';
 
 describe('NotificationBanner', () => {
   const component = () => {
-    return mount(
+    return render(
       <MemoryRouter>
         <NotificationBanner
           dataTestId='banner'
@@ -21,7 +24,7 @@ describe('NotificationBanner', () => {
   };
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+    const { container } = component();
+    expect(container).toBeInTheDocument();
   });
 });
