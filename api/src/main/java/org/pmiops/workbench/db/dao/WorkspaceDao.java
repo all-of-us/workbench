@@ -135,15 +135,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("billingAccountNames") List<String> billingAccountNames,
       @Param("creators") Set<DbUser> creators);
 
-  @Query(
-      "SELECT COUNT(workspace.workspaceId) AS workspaceCount, workspace.activeStatus AS activeStatus, tier AS tier "
-          + "FROM DbWorkspace workspace "
-          + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
-          + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "
-          + "GROUP BY workspace.activeStatus, tier "
-          + "ORDER BY workspace.activeStatus, tier")
-  List<WorkspaceCountByActiveStatusAndTier> getWorkspaceCountGaugeData();
-
   interface WorkspaceCountByActiveStatusAndTier {
     Long getWorkspaceCount();
 

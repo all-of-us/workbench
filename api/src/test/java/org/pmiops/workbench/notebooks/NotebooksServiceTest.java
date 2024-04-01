@@ -45,8 +45,6 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.monitoring.LogsBasedMetricService;
-import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
@@ -78,8 +76,6 @@ public class NotebooksServiceTest {
   private DbCdrVersion toCDRVersion;
   private DbAccessTier fromAccessTier;
   private DbAccessTier toAccessTier;
-
-  @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
@@ -220,7 +216,6 @@ public class NotebooksServiceTest {
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
     verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
-    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
   @Test
@@ -369,7 +364,6 @@ public class NotebooksServiceTest {
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -751,13 +745,6 @@ public class NotebooksServiceTest {
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
         .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
-  }
-
-  @Test
-  public void testSaveNotebook_firesMetric() {
-    notebooksService.saveNotebook(
-        BUCKET_NAME, NOTEBOOK_NAME, new JSONObject().put("who", "I'm a notebook!"));
-    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Test

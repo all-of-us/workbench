@@ -76,25 +76,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     String getAccessTierShortNames();
   }
 
-  @Query(
-      // JPQL doesn't allow join on subquery
-      nativeQuery = true,
-      value =
-          "SELECT COUNT(u.user_id) AS userCount, u.disabled AS disabled, "
-              + "COALESCE(t.accessTierShortNames, '[unregistered]') AS accessTierShortNames "
-              + "FROM user u "
-              + "LEFT JOIN ("
-              + "  SELECT u.user_id, "
-              + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS accessTierShortNames "
-              + "  FROM user u "
-              + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
-              + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
-              + "  WHERE uat.access_status = 1 " // ENABLED
-              + "  GROUP BY u.user_id"
-              + ") as t ON t.user_id = u.user_id "
-              + "GROUP BY u.disabled, accessTierShortNames ")
-  List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
-
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
     Long getUserId();
