@@ -164,6 +164,8 @@ export const VariantSearch = fp.flow(
   const [searchTerms, setSearchTerms] = useState('');
   const [totalCount, setTotalCount] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectAllResults, setSelectAllResults] = useState(false);
+  const [excludeFromSelectAll, setExcludeFromSelectAll] = useState([]);
   const [selectAllFilters, setSelectAllFilters] = useState<VariantFilter>();
   const [selectedFilters, setSelectedFilters] = useState<VariantFilterRequest>({
     searchTerm: '',
@@ -310,28 +312,49 @@ export const VariantSearch = fp.flow(
       }
     }, '');
 
+  useEffect(() => {
+    if (
+      selectAllResults &&
+      !criteria.some(({ parameterId }) => parameterId === getFilterParamId())
+    ) {
+      // The filter group was removed from the selection list, clear the select all state
+      setSelectAllResults(false);
+      setExcludeFromSelectAll([]);
+    }
+  }, [criteria]);
+
   const isSelected = (row: any) => {
     const paramId = getParamId(row);
-    return selectedIds.includes(paramId);
+    return (
+      selectedIds.includes(paramId) ||
+      (selectAllResults && !excludeFromSelectAll.includes(row.vid))
+    );
   };
 
   const selectItem = (row: any) => {
-    const param = {
-      parameterId: getParamId(row),
-      parentId: null,
-      type: CriteriaType.NONE,
-      name: `Variant ${row.vid}`,
-      group: false,
-      domainId: Domain.SNP_INDEL_VARIANT,
-      hasAttributes: false,
-      selectable: true,
-      variantId: row.vid,
-      attributes: [],
-    };
-    AnalyticsTracker.CohortBuilder.SelectCriteria(
-      `Select ${domainToTitle(row.domainId)} - '${row.name}'`
-    );
-    select(param);
+    if (selectAllResults) {
+      // Remove item from excludes list
+      setExcludeFromSelectAll((prevState) =>
+        prevState.filter((excluded) => excluded !== row.vid)
+      );
+    } else {
+      const param = {
+        parameterId: getParamId(row),
+        parentId: null,
+        type: CriteriaType.NONE,
+        name: `Variant ${row.vid}`,
+        group: false,
+        domainId: Domain.SNP_INDEL_VARIANT,
+        hasAttributes: false,
+        selectable: true,
+        variantId: row.vid,
+        attributes: [],
+      };
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        `Select ${domainToTitle(row.domainId)} - '${row.name}'`
+      );
+      select(param);
+    }
   };
 
   const handleCheckboxChange = (
@@ -511,6 +534,20 @@ export const VariantSearch = fp.flow(
                         shape='check-circle'
                         size='20'
                       />
+                      {selectAllResults &&
+                        !excludeFromSelectAll.includes(variant.vid) && (
+                          <ClrIcon
+                            style={styles.excludeIcon}
+                            shape='times-circle'
+                            size='20'
+                            onClick={() =>
+                              setExcludeFromSelectAll((prevState) => [
+                                ...prevState,
+                                variant.vid,
+                              ])
+                            }
+                          />
+                        )}
                     </>
                   ) : (
                     <ClrIcon
