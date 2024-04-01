@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFreeTierUsage, Long> {
 
+  @Nullable
   DbWorkspaceFreeTierUsage findOneByWorkspace(DbWorkspace workspace);
 
   Iterable<DbWorkspaceFreeTierUsage> findAllByWorkspaceIn(Iterable<DbWorkspace> workspaceList);
