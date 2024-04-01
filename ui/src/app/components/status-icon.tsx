@@ -28,6 +28,7 @@ export const ErrorIcon = () => (
       ...styles.runtimeStatusIconOutline,
       color: colors.asyncOperationStatus.error,
     }}
+    title='Icon indicating item has encountered an error'
   />
 );
 
@@ -38,6 +39,7 @@ export const SuspendedIcon = () => (
       ...styles.asyncOperationStatusIcon,
       color: colors.asyncOperationStatus.stopped,
     }}
+    title='Icon indicating item is suspended'
   />
 );
 
@@ -49,6 +51,7 @@ export const UpdatingIcon = () => (
       ...styles.rotate,
       color: colors.asyncOperationStatus.starting,
     }}
+    title='Icon indicating item is updating'
   />
 );
 
@@ -60,6 +63,7 @@ export const StoppedIcon = () => (
       ...styles.runtimeStatusIconOutline,
       color: colors.asyncOperationStatus.stopped,
     }}
+    title='Icon indicating item has stopped'
   />
 );
 
@@ -71,6 +75,7 @@ export const RunningIcon = () => (
       ...styles.runtimeStatusIconOutline,
       color: colors.asyncOperationStatus.running,
     }}
+    title='Icon indicating item is running'
   />
 );
 
@@ -82,5 +87,6 @@ export const StoppingIcon = () => (
       ...styles.rotate,
       color: colors.asyncOperationStatus.stopping,
     }}
+    title='Icon indicating item is stopping'
   />
 );
