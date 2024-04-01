@@ -1,6 +1,9 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
+
+import { render, screen } from '@testing-library/react';
 
 import LoginReactComponent from './login';
 
@@ -8,7 +11,7 @@ describe('LoginComponent', () => {
   let loginProps: { signIn: Function; onCreateAccount: Function };
 
   const component = (props) =>
-    mount(
+    render(
       <MemoryRouter>
         <LoginReactComponent {...props} />
       </MemoryRouter>
@@ -22,7 +25,7 @@ describe('LoginComponent', () => {
   });
 
   it('should render', () => {
-    const wrapper = component(loginProps);
-    expect(wrapper).toBeTruthy();
+    const { container } = component(loginProps);
+    expect(container).toBeInTheDocument();
   });
 });
