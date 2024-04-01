@@ -94,7 +94,7 @@ public class UserServiceAccessTest {
   private static DbAccessTier controlledTier;
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
-      t -> dbu -> registerUser(t, dbu);
+      t -> dbu -> registerUser(dbu);
   private Function<DbUser, DbUser> registerUserNow;
 
   private static List<DbAccessModule> accessModules;
@@ -1223,7 +1223,7 @@ public class UserServiceAccessTest {
     // CT does not exist anywhere
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = registerUser(new Timestamp(PROVIDED_CLOCK.millis()), dbUser);
+    dbUser = registerUser(dbUser);
     TestMockFactory.removeControlledTierForTests(accessTierDao);
     removeCTConfigFromInstitution();
 
@@ -1346,7 +1346,7 @@ public class UserServiceAccessTest {
     assertTierMembershipWithStatus(controlledTier, dbUser, status);
   }
 
-  private DbUser registerUser(Timestamp timestamp, DbUser user) {
+  private DbUser registerUser(DbUser user) {
     // shouldUserBeRegistered logic:
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
@@ -1401,7 +1401,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUser completeRTAndCTRequirements(DbUser user) {
-    return completeCTRequirements(registerUser(new Timestamp(PROVIDED_CLOCK.millis()), user));
+    return completeCTRequirements(registerUser(user));
   }
 
   private void createAffiliation(final DbUser user) {

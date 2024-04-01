@@ -11,10 +11,6 @@ public class WorkbenchLocationConfigService {
     this.workbenchConfig = workbenchConfig;
   }
 
-  public String getWorkbenchAppEngineLocationId() {
-    return workbenchConfig.get().server.appEngineLocationId;
-  }
-
   /**
    * In case of location Id for cloud task queue, replace us-central and europe-west to us-central1
    * and europe-west1 Refer to https://cloud.google.com/tasks/docs/dual-overview

@@ -425,31 +425,6 @@ public class UserDaoTest {
     assertThat(user.getAddress().getId()).isEqualTo(address.getId());
   }
 
-  private List<DbUser> insertTestUsers(
-      boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
-
-    ImmutableList.Builder<DbUser> resultList = ImmutableList.builder();
-
-    for (int i = 0; i < numUsers; ++i) {
-      DbUser user = new DbUser();
-      user.setGivenName("Bar");
-      user.setFamilyName("Foo");
-      user.setUsername("jaycarlton@aou.biz");
-      final DbAddress address = createAddress();
-      user.setAddress(address);
-      user.setDisabled(isDisabled);
-      user = userDao.save(user);
-
-      createAffiliation(user, institution);
-      for (DbAccessTier tier : tiers) {
-        addUserToTier(user, tier);
-      }
-
-      resultList.add(userDao.save(user));
-    }
-    return resultList.build();
-  }
-
   private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier, TierAccessStatus status) {
     final DbUserAccessTier entryToInsert =
         new DbUserAccessTier()
