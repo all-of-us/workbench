@@ -36,6 +36,8 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
+  private static final Logger log = LoggerFactory.getLogger(DirectoryService.class.getName());
   private static final String ALLOWED =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
@@ -59,6 +62,9 @@ public class DirectoryServiceImpl implements DirectoryService {
   // Details: https://docs.google.com/document/d/1xgcvow0xPL6K4vxyM3PVlW-1E5Ye3X1Y5wZSD5rrPlc
   private static final String GSUITE_FIELD_ABSORB_EXTERNAL_DEPARTMENT_ID =
       "Absorb_external_department_ID";
+  private static final int MAX_USERS_LIST_PAGE_SIZE = 500;
+  private static final String EMAIL_USER_FIELD = "email";
+  private static final String USER_VIEW_TYPE = "domain_public";
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "gsuite-admin";
 
@@ -295,6 +301,35 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public void signOut(String username) {
     retryHandler.run((context) -> getGoogleDirectoryService().users().signOut(username).execute());
+  }
+
+  private long countUsersInDomain(String gSuiteDomain) {
+    long result = 0;
+    try {
+      final Directory directoryService = getGoogleDirectoryService();
+      Optional<String> nextPageToken = Optional.empty();
+      do {
+        final Directory.Users.List listQuery =
+            directoryService
+                .users()
+                .list()
+                .setDomain(gSuiteDomain)
+                .setViewType(USER_VIEW_TYPE)
+                .setCustomFieldMask("email")
+                .setMaxResults(MAX_USERS_LIST_PAGE_SIZE)
+                .setOrderBy(EMAIL_USER_FIELD);
+        nextPageToken.ifPresent(listQuery::setPageToken);
+
+        final Users usersQueryResult = listQuery.execute();
+
+        result += usersQueryResult.getUsers().size();
+        nextPageToken = Optional.ofNullable(usersQueryResult.getNextPageToken());
+      } while (nextPageToken.isPresent());
+      return result;
+    } catch (IOException e) {
+      log.warn("Failed to retrieve GSuite User List.", e);
+      return 0;
+    }
   }
 
   private String randomString() {

@@ -93,10 +93,6 @@ public class UserServiceAccessTest {
   private static DbAccessTier registeredTier;
   private static DbAccessTier controlledTier;
 
-  private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
-      t -> dbu -> registerUser(dbu);
-  private Function<DbUser, DbUser> registerUserNow;
-
   private static List<DbAccessModule> accessModules;
 
   private InstitutionTierConfig rtTierConfig;
@@ -200,7 +196,6 @@ public class UserServiceAccessTest {
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
-    registerUserNow = registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
   }
 
   @Test
@@ -221,7 +216,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_register() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
   }
@@ -230,7 +225,7 @@ public class UserServiceAccessTest {
   public void testSimulateUserFlowThroughRenewal() {
     // initialize user as registered with generic values including bypassed DUCC
 
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
 
     // add a proper DUCC completion which will expire soon, but remove DUCC bypass
@@ -898,7 +893,7 @@ public class UserServiceAccessTest {
                     .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
                     .addEmailAddressesItem(dbUser.getContactEmail())
                     .emailDomains(null))));
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -949,7 +944,7 @@ public class UserServiceAccessTest {
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
 
     // Now make user eRA not complete, expect user removed from Registered tier;
@@ -972,7 +967,7 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    updateUserWithRetries(registerUserNow);
+    updateUserWithRetries(this::registerUser);
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
@@ -991,7 +986,7 @@ public class UserServiceAccessTest {
   public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    updateUserWithRetries(registerUserNow);
+    updateUserWithRetries(this::registerUser);
     providedWorkbenchConfig.access.enableEraCommons = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
     institutionService.updateInstitution(
@@ -1007,7 +1002,7 @@ public class UserServiceAccessTest {
   public void testRasLinkNotComplete() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
 
     // Incomplete RAS module, expect user removed from Registered tier;
@@ -1032,7 +1027,7 @@ public class UserServiceAccessTest {
     // enableRasLoginGovLinking is disabled.
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
@@ -1274,7 +1269,7 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     // we register the user
-    dbUser = updateUserWithRetries(registerUserNow);
+    dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
 
     // we unregister the user by applying the function under test
