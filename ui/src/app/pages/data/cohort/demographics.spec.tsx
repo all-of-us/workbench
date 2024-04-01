@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { CohortBuilderApi, CriteriaType } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -18,7 +20,7 @@ describe('Demographics', () => {
   });
 
   it('should create', () => {
-    const wrapper = shallow(
+    render(
       <Demographics
         criteriaType={CriteriaType.GENDER}
         select={() => {}}
@@ -26,6 +28,7 @@ describe('Demographics', () => {
         selections={[]}
       />
     );
-    expect(wrapper).toBeTruthy();
+    // spinner label
+    expect(screen.getByLabelText('Please Wait')).toBeInTheDocument();
   });
 });
