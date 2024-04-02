@@ -24,7 +24,7 @@ RUN npm install --global yarn n
 RUN n 18
 
 # keep in sync with api/gradle.build and ci/Dockerfile.circle_build
-ENV CLOUD_SDK_VERSION 470.0.0
+ENV CLOUD_SDK_VERSION 471.0.0
 
 WORKDIR /root
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
