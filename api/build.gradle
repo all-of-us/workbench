@@ -413,7 +413,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp"
     implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure"
     implementation "io.opentelemetry:opentelemetry-sdk"
-    implementation "com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION" {
+    implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION"){
         exclude group: 'com.google.cloud', module: 'google-cloud-iamcredentials'
         exclude group: 'com.google.cloud', module: 'google-cloud-logging'
         exclude group: 'com.google.api.grpc', module: 'proto-google-cloud-iamcredentials'
