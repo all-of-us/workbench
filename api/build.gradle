@@ -35,7 +35,7 @@ plugins {
 
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '6.23.3'
-    id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
+    id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.8.0'
 
     // required even though we have removed our own Kotlin code - transitive dependency?
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
@@ -621,8 +621,8 @@ tasks.withType(Test) {
 
 appengine {  // App Engine tasks configuration
     tools {
-        // Keep in sync with ci/Dockerfile.circle_build
-        cloudSdkVersion = '392.0.0'
+        // Keep in sync with ci/Dockerfile.circle_build and deploy/Dockerfile
+        cloudSdkVersion = '471.0.0'
     }
     run {      // local (dev_appserver) configuration (standard environments only)
         port = 8081                 // default
