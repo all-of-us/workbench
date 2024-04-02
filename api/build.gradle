@@ -414,6 +414,7 @@ dependencies {
     implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
         exclude group: 'com.google.cloud', module: 'libraries-bom'
         exclude group: 'com.google.cloud', module: 'google-cloud-core'
+        exclude group: 'com.google.cloud', module: 'google-cloud-trace'
     }
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
@@ -446,6 +447,7 @@ dependencies {
     implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
     implementation 'com.google.cloud:google-cloud-monitoring:3.4.6'
+    implementation 'com.google.cloud:google-cloud-trace:2.39.0'
     implementation 'com.google.cloud:google-cloud-storage:2.13.0'
     implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
