@@ -412,9 +412,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
-        exclude group: 'com.google.cloud', module: 'google-cloud-iamcredentials'
-        exclude group: 'com.google.cloud', module: 'google-cloud-logging'
-        exclude group: 'com.google.api.grpc', module: 'proto-google-cloud-iamcredentials'
+        exclude group: 'com.google.cloud', module: 'libraries-bom'
     }
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
