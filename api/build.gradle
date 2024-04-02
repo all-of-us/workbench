@@ -621,7 +621,7 @@ tasks.withType(Test) {
 
 appengine {  // App Engine tasks configuration
     tools {
-        // Keep in sync with ci/Dockerfile.circle_build
+        // Keep in sync with ci/Dockerfile.circle_build and deploy/Dockerfile
         cloudSdkVersion = '470.0.0'
     }
     run {      // local (dev_appserver) configuration (standard environments only)
