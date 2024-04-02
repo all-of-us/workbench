@@ -413,8 +413,6 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
     implementation "com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION"
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
@@ -522,7 +520,6 @@ dependencies {
     // template file api.mustache for more details.
     generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
     generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    generatedCompile "com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION"
 
     generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 
