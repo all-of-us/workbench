@@ -446,7 +446,7 @@ dependencies {
     implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
     implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
-    implementation 'com.google.cloud:google-cloud-monitoring:3.4.6'
+    implementation 'com.google.cloud:google-cloud-monitoring:3.40.0'
     implementation 'com.google.cloud:google-cloud-trace:2.39.0'
     implementation 'com.google.cloud:google-cloud-storage:2.13.0'
     implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
