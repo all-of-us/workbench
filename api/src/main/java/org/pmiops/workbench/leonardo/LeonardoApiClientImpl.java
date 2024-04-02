@@ -669,18 +669,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public void deleteAppAsService(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
-      throws WorkbenchException {
-    AppsApi appsApi = serviceAppsApiProvider.get();
-
-    leonardoRetryHandler.run(
-        (context) -> {
-          appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
-          return null;
-        });
-  }
-
-  @Override
   public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
