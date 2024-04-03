@@ -7,7 +7,6 @@ import { render, screen } from '@testing-library/react';
 import {
   ConfirmDeleteModal,
   ConfirmDeleteModalProps,
-  ConfirmDeleteModalState,
 } from './confirm-delete-modal';
 
 describe('ConfirmDeleteModalComponent', () => {
@@ -27,7 +26,7 @@ describe('ConfirmDeleteModalComponent', () => {
   });
 
   it('should render', () => {
-    const { container } = component();
+    component();
     expect(screen.getByText(/are you sure you want to delete /i)).toBeTruthy();
   });
 });

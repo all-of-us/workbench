@@ -7,8 +7,6 @@ import { ResourceType } from 'generated/fetch';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-
 import { RenameModal } from './rename-modal';
 
 describe(RenameModal.name, () => {

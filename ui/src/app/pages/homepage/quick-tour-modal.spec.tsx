@@ -8,7 +8,6 @@ import {
   panels,
   QuickTourReact,
   QuickTourReactProps,
-  QuickTourReactState,
 } from './quick-tour-modal';
 
 describe('QuickTourModalComponent', () => {
@@ -26,13 +25,13 @@ describe('QuickTourModalComponent', () => {
   });
 
   it('should render, should have a next and close button', () => {
-    const { getByTestId } = component();
+    component();
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
   });
 
   it('should not show the previous button when we are on the first slide', () => {
-    const { queryByTestId } = component();
+    component();
 
     expect(
       screen.queryByRole('button', { name: /previous/i })

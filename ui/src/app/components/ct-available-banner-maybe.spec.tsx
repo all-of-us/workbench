@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { CdrVersionTier, Profile, UserTierEligibility } from 'generated/fetch';
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { cdrVersionStore, profileStore } from 'app/utils/stores';
@@ -105,8 +105,7 @@ describe('CTAvailableBannerMaybe', () => {
   it('should render if all of the requirements are met', async () => {
     fulfillAllBannerRequirements();
 
-    const { container, getByTestId } = component();
-    // console.log('outer container:', exists);
+    component();
     expect(await ctBannerExists()).toBeInTheDocument();
   });
 

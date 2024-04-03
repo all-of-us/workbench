@@ -7,14 +7,6 @@ import { AppStatus } from 'generated/fetch';
 import { render, within } from '@testing-library/react';
 
 import { AppStatusIndicator } from './app-status-indicator';
-import {
-  ErrorIcon,
-  RunningIcon,
-  StoppedIcon,
-  StoppingIcon,
-  SuspendedIcon,
-  UpdatingIcon,
-} from './status-icon';
 
 describe('App Status Indicator', () => {
   test.each([

@@ -24,7 +24,7 @@ describe('NotificationBanner', () => {
   };
 
   it('should render', () => {
-    const { container } = component();
-    expect(container).toBeInTheDocument();
+    component();
+    expect(screen.getByText('blah')).toBeInTheDocument();
   });
 });

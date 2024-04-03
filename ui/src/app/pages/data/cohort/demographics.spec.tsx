@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { CohortBuilderApi, CriteriaType } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 

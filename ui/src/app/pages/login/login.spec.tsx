@@ -25,7 +25,9 @@ describe('LoginComponent', () => {
   });
 
   it('should render', () => {
-    const { container } = component(loginProps);
-    expect(container).toBeInTheDocument();
+    component(loginProps);
+    expect(
+      screen.getByText('Already have a Researcher Workbench account?')
+    ).toBeInTheDocument();
   });
 });
