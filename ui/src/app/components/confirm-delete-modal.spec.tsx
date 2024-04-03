@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { ResourceType } from 'generated/fetch';
+
+import { render, screen } from '@testing-library/react';
 
 import {
   ConfirmDeleteModal,
@@ -13,11 +14,7 @@ describe('ConfirmDeleteModalComponent', () => {
   let props: ConfirmDeleteModalProps;
 
   const component = () => {
-    return shallow<
-      ConfirmDeleteModal,
-      ConfirmDeleteModalProps,
-      ConfirmDeleteModalState
-    >(<ConfirmDeleteModal {...props} />);
+    return render(<ConfirmDeleteModal {...props} />);
   };
 
   beforeEach(() => {
@@ -30,7 +27,7 @@ describe('ConfirmDeleteModalComponent', () => {
   });
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    const { container } = component();
+    expect(screen.getByText(/are you sure you want to delete /i)).toBeTruthy();
   });
 });
