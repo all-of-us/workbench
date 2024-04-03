@@ -3,35 +3,30 @@ package org.pmiops.workbench.opentelemetry;
 import com.google.cloud.opentelemetry.trace.TraceExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.logging.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class OpenTelemetryConfig {
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private static final Logger LOGGER = Logger.getLogger(OpenTelemetryConfig.class.getName());
 
-  @Autowired
-  public OpenTelemetryConfig(Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
-  }
+  public static boolean IS_GAE = System.getProperty("com.google.appengine.runtime.version") != null;
 
   /** Creates an OpenTelemetry {@link SdkTracerProvider} */
   @Bean
   @Primary
   public SdkTracerProvider traceProvider() {
-    SpanExporter traceExporter;
-    if (workbenchConfigProvider.get().server.openTelemetryGcpExporterEnabled) {
-      traceExporter = TraceExporter.createWithDefaultConfiguration();
+    if (IS_GAE) {
+      LOGGER.info("Running on GAE, enable GCP TraceExporter");
+      return SdkTracerProvider.builder()
+          .addSpanProcessor(BatchSpanProcessor.builder(TraceExporter.createWithDefaultConfiguration()).build())
+          .build();
     } else {
-      traceExporter = TraceExporter.createWithDefaultConfiguration();
+      return SdkTracerProvider.builder()
+          .build();
     }
-    return SdkTracerProvider.builder()
-        .addSpanProcessor(BatchSpanProcessor.builder(traceExporter).build())
-        .build();
   }
+
 }
