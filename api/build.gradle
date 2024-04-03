@@ -15,6 +15,7 @@ buildscript {
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
         OPENTELEMETRY_SDK_VERSION = '1.36.0'
+        OPENTELEMETRY_JAVA_VERSION = '2.2.0'
         OPENTELEMETRY_GOOGLE_VERSION = '0.27.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
@@ -411,11 +412,17 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
     implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
         exclude group: 'com.google.cloud', module: 'libraries-bom'
         exclude group: 'com.google.cloud', module: 'google-cloud-core'
         exclude group: 'com.google.cloud', module: 'google-cloud-trace'
     }
+    implementation group: 'io.opentelemetry.instrumentation', name: 'opentelemetry-instrumentation-annotations', version: '2.2.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot'
+
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
