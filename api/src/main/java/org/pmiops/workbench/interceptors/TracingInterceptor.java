@@ -67,7 +67,7 @@ public class TracingInterceptor implements AsyncHandlerInterceptor {
   public void afterCompletion(
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
     if (request.getAttribute(RequestAttribute.TRACE.toString()) != null) {
-      ((Scope) request.getAttribute(RequestAttribute.TRACE.toString())).close();
+      ((Context) request.getAttribute(RequestAttribute.TRACE.toString())).makeCurrent().close();
     }
   }
 }
