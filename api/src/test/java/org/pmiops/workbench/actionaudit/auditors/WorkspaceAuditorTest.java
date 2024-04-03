@@ -225,7 +225,7 @@ public class WorkspaceAuditorTest {
         eventsSent.stream()
             .filter(e -> e.targetType() == TargetType.USER)
             .findFirst()
-            .flatMap(e -> Optional.ofNullable(e.targetPropertyMaybe()));
+            .map(ActionAuditEvent::targetPropertyMaybe);
 
     assertThat(targetPropertyMaybe.isPresent()).isTrue();
     assertThat(targetPropertyMaybe.get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
