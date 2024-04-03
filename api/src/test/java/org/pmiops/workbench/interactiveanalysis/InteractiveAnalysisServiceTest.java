@@ -8,6 +8,7 @@ import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisServic
 import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.SAS_DELOC_PATTERN;
 import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.aouConfigDataUri;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -74,6 +76,7 @@ public class InteractiveAnalysisServiceTest {
   @MockBean WorkspaceService mockWorkspaceService;
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean FireCloudService mockFireCloudService;
+  @MockBean NotebooksService mockNotebooksService;
 
   @Autowired InteractiveAnalysisService interactiveAnalysisService;
 
@@ -96,7 +99,7 @@ public class InteractiveAnalysisServiceTest {
             .setFirecloudName(FIRECLOUD_WS_NAME);
     when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS)).thenReturn(dbWorkspace);
     RawlsWorkspaceDetails rawlsWorkspaceDetails =
-        new RawlsWorkspaceDetails().bucketName(BUCKET_NAME);
+        new RawlsWorkspaceDetails().bucketName(BUCKET_NAME).name(FIRECLOUD_WS_NAME);
     when(mockFireCloudService.getWorkspace(WORKSPACE_NS, FIRECLOUD_WS_NAME))
         .thenReturn(new RawlsWorkspaceResponse().workspace(rawlsWorkspaceDetails));
 
@@ -122,7 +125,7 @@ public class InteractiveAnalysisServiceTest {
 
     AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
     interactiveAnalysisService.localize(
-        WORKSPACE_NS, APP_NAME, appType, notebookLists, false, true);
+        WORKSPACE_NS, APP_NAME, appType, notebookLists, false, true, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -146,7 +149,8 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/foo.ipynb", NOTEBOOK_DIR + "/foo.ipynb");
 
     AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, appType, notebookLists, true, true);
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, appType, notebookLists, true, true, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -167,10 +171,34 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put("foo.Rmd", NOTEBOOK_DIR + "/foo.Rmd");
 
     interactiveAnalysisService.localize(
-        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, notebookLists, false, false);
+        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, notebookLists, false, false, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
+  }
+
+  @Test
+  public void testLocalize_allFiles_rstudio() {
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, new ArrayList<>(), false, false, true);
+    verify(mockNotebooksService)
+        .getAllNotebooksByAppType(BUCKET_NAME, WORKSPACE_NS, FIRECLOUD_WS_NAME, AppType.RSTUDIO);
+  }
+
+  @Test
+  public void testLocalize_allFiles_sas() {
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.SAS, new ArrayList<>(), false, false, true);
+    verify(mockNotebooksService)
+        .getAllNotebooksByAppType(BUCKET_NAME, WORKSPACE_NS, FIRECLOUD_WS_NAME, AppType.SAS);
+  }
+
+  @Test
+  public void testLocalize_allFiles_jupyter() {
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, null, new ArrayList<>(), false, true, true);
+    verify(mockNotebooksService)
+        .getAllJupyterNotebooks(BUCKET_NAME, WORKSPACE_NS, FIRECLOUD_WS_NAME);
   }
 
   @Test
@@ -187,7 +215,7 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put("foo.sas", NOTEBOOK_DIR + "/foo.sas");
 
     interactiveAnalysisService.localize(
-        WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, false, false);
+        WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, false, false, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
@@ -200,6 +228,12 @@ public class InteractiveAnalysisServiceTest {
         NotImplementedException.class,
         () ->
             interactiveAnalysisService.localize(
-                WORKSPACE_NS, APP_NAME, unsupportedAppType, Collections.emptyList(), false, false));
+                WORKSPACE_NS,
+                APP_NAME,
+                unsupportedAppType,
+                Collections.emptyList(),
+                false,
+                false,
+                false));
   }
 }

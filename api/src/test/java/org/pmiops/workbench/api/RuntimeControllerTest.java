@@ -1321,7 +1321,7 @@ public class RuntimeControllerTest {
 
     assertThrows(
         FailedPreconditionException.class,
-        () -> runtimeController.localize(WORKSPACE_NS, new RuntimeLocalizeRequest()));
+        () -> runtimeController.localize(WORKSPACE_NS, false, new RuntimeLocalizeRequest()));
   }
 
   @Test
@@ -1331,7 +1331,8 @@ public class RuntimeControllerTest {
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
-    assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
+    assertThrows(
+        ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, false, req));
   }
 
   @Test
@@ -1342,7 +1343,8 @@ public class RuntimeControllerTest {
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
 
-    assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
+    assertThrows(
+        ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, false, req));
     verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 

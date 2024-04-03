@@ -97,8 +97,12 @@ public class AppsController implements AppsApiDelegate {
     return ResponseEntity.ok(response);
   }
 
+  @Override
   public ResponseEntity<AppLocalizeResponse> localizeApp(
-      String workspaceNamespace, String appName, AppLocalizeRequest body) {
+      String workspaceNamespace,
+      String appName,
+      Boolean localizeAllFiles,
+      AppLocalizeRequest body) {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
@@ -111,6 +115,7 @@ public class AppsController implements AppsApiDelegate {
                     body.getAppType(),
                     body.getFileNames(),
                     body.isPlaygroundMode(),
-                    false)));
+                    false,
+                    localizeAllFiles)));
   }
 }

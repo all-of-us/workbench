@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobId;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.GoogleCloudLocators;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -121,6 +123,32 @@ public class NotebooksServiceImpl implements NotebooksService {
         .stream()
         .filter(this::isManagedNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<FileDetail> getAllNotebooksByAppType(
+      String bucketName, String workspaceNamespace, String workspaceName, AppType appType) {
+    List<FileDetail> allNotebooks =
+        getNotebooksAsService(bucketName, workspaceNamespace, workspaceName);
+    if (appType.equals(AppType.RSTUDIO)) {
+      return allNotebooks.stream()
+          .filter(fileDetail -> NotebookUtils.isRStudioFile(fileDetail.getName()))
+          .collect(Collectors.toList());
+    } else if (appType.equals(AppType.SAS)) {
+      return allNotebooks.stream()
+          .filter(fileDetail -> NotebookUtils.isSasFile(fileDetail.getName()))
+          .collect(Collectors.toList());
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+  @Override
+  public List<FileDetail> getAllJupyterNotebooks(
+      String bucketName, String workspaceNamespace, String workspaceName) {
+    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceName).stream()
+        .filter(fileDetail -> NotebookUtils.isJupyterNotebook(fileDetail.getName()))
         .collect(Collectors.toList());
   }
 

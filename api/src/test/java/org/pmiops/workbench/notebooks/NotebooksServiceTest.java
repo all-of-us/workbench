@@ -42,6 +42,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -518,6 +519,74 @@ public class NotebooksServiceTest {
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
 
     assertThat(gotNames).isEqualTo(ImmutableList.of("f1.ipynb", "f2.Rmd"));
+  }
+
+  @Test
+  public void testGetNotebooks_getAllFilesByAppType() {
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    Blob mockBlob3 = mock(Blob.class);
+    Blob mockBlob4 = mock(Blob.class);
+    FileDetail fileDetail1 = mock(FileDetail.class);
+    FileDetail fileDetail2 = mock(FileDetail.class);
+    FileDetail fileDetail3 = mock(FileDetail.class);
+    FileDetail fileDetail4 = mock(FileDetail.class);
+    Set<String> workspaceUsersSet = new HashSet<String>();
+
+    stubGetWorkspace(
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        BUCKET_NAME,
+        WorkspaceAccessLevel.OWNER);
+    when(mockBlob1.getName()).thenReturn(NotebookUtils.withNotebookPath("f1.ipynb"));
+    when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.Rmd"));
+    when(mockBlob3.getName()).thenReturn(NotebookUtils.withNotebookPath("f3.sas"));
+    when(mockBlob4.getName()).thenReturn(NotebookUtils.withNotebookPath("f4.random"));
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+            BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
+        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail1);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob2, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail2);
+    when(mockCloudStorageClient.blobToFileDetail(mockBlob3, BUCKET_NAME, workspaceUsersSet))
+        .thenReturn(fileDetail3);
+    when(fileDetail1.getName()).thenReturn("f1.ipynb");
+    when(fileDetail2.getName()).thenReturn("f2.Rmd");
+    when(fileDetail3.getName()).thenReturn("f3.sas");
+    when(fileDetail4.getName()).thenReturn("f4.random");
+
+    List<String> jupyterNotebooks =
+        notebooksService
+            .getAllJupyterNotebooks(
+                BUCKET_NAME, dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .stream()
+            .map(FileDetail::getName)
+            .collect(Collectors.toList());
+    List<String> rstudioNotebooks =
+        notebooksService
+            .getAllNotebooksByAppType(
+                BUCKET_NAME,
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getFirecloudName(),
+                AppType.RSTUDIO)
+            .stream()
+            .map(FileDetail::getName)
+            .collect(Collectors.toList());
+    List<String> sasNotebooks =
+        notebooksService
+            .getAllNotebooksByAppType(
+                BUCKET_NAME,
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getFirecloudName(),
+                AppType.SAS)
+            .stream()
+            .map(FileDetail::getName)
+            .collect(Collectors.toList());
+
+    assertThat(jupyterNotebooks).containsExactly("f1.ipynb");
+    assertThat(rstudioNotebooks).containsExactly("f2.Rmd");
+    assertThat(sasNotebooks).containsExactly("f3.sas");
   }
 
   @Test
