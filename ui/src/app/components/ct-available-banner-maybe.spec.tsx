@@ -145,7 +145,7 @@ describe('CTAvailableBannerMaybe', () => {
 
       preMountModifier();
 
-      const { container } = initWrapper();
+      initWrapper();
       await expect(ctBannerExists()).rejects.toThrow();
     }
   );
