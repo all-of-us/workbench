@@ -26,6 +26,9 @@ sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-file-tree-polic
 
 sudo -E -u jupyter /opt/conda/bin/nbstripout --install --global
 
+# Enable limit output extension to limit the number of lines displayed in a cell output.
+sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable limit_output/main
+
 # Setup gitignore to avoid accidental checkin of data on AoU. Ideally this would be
 # configured on the image, per https://github.com/DataBiosphere/terra-docker/pull/234
 # but that's no longer possible as the home directory is mounted at runtime.

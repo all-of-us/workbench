@@ -656,7 +656,7 @@ export const LeonardoAppLauncher = fp.flow(
       const { workspace } = this.props;
       const resp = await this.runtimeRetry(() =>
         runtimeApi().localize(
-          workspace.namespace,
+          workspace.namespace, false,
           {
             notebookNames,
             playgroundMode: this.isPlaygroundMode(),
