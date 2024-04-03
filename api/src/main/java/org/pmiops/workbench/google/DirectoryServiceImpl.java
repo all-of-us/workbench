@@ -129,15 +129,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     return configProvider.get().googleDirectoryService.gSuiteDomain;
   }
 
-  private String getTopLevelGSuiteDomain() {
-    final String domain = gSuiteDomain();
-    final String[] parts = domain.split("\\.");
-    // return the last two parts
-    final int numParts = parts.length;
-    final int firstIndex = numParts - 2;
-    return String.format("%s.%s", parts[firstIndex], parts[firstIndex + 1]);
-  }
-
   /**
    * Fetches a user by their GSuite email address.
    *

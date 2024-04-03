@@ -3,8 +3,6 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @Import(FakeClockConfiguration.class)
 public class DataSetDaoTest {
 
-  private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private DbWorkspace workspace;
 
   @Autowired private CohortDao cohortDao;
