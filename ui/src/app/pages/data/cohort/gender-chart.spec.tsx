@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
+import { render, screen } from '@testing-library/react';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -13,7 +13,7 @@ describe('GenderChart', () => {
   });
 
   it('should render', () => {
-    const wrapper = shallow(<GenderChart data={[]} />);
-    expect(wrapper.exists()).toBeTruthy();
+    render(<GenderChart data={[]} />);
+    expect(screen.getByText('# Participants')).toBeTruthy();
   });
 });
