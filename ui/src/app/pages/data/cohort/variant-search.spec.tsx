@@ -6,7 +6,10 @@ import { CohortBuilderApi } from 'generated/fetch';
 
 import { VariantSearch } from 'app/pages/data/cohort/variant-search';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentCohortSearchContextStore, currentWorkspaceStore } from 'app/utils/navigation';
+import {
+  currentCohortSearchContextStore,
+  currentWorkspaceStore,
+} from 'app/utils/navigation';
 
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
