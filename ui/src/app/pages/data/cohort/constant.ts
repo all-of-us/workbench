@@ -135,6 +135,7 @@ export const VARIANT_DISPLAY = {
   numberMax: 'Allele Number Max',
   frequencyMin: 'Allele Frequency Min',
   frequencyMax: 'Allele Frequency Max',
+  exclusionList: 'Exclusions',
   vidsCount: 'Total Variant Count',
   participantCount: 'Total Participant Count',
   lessThanOrEqualToFiveThousand: '<= 5,000 Participants',
