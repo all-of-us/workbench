@@ -587,6 +587,13 @@ public class NotebooksServiceTest {
     assertThat(jupyterNotebooks).containsExactly("f1.ipynb");
     assertThat(rstudioNotebooks).containsExactly("f2.Rmd");
     assertThat(sasNotebooks).containsExactly("f3.sas");
+    assertThat(
+            notebooksService.getAllNotebooksByAppType(
+                BUCKET_NAME,
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getFirecloudName(),
+                AppType.CROMWELL))
+        .isEmpty();
   }
 
   @Test
