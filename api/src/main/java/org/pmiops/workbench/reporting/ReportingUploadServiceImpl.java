@@ -222,7 +222,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder,
       StringBuilder performanceStringBuilder,
       InsertAllRequest request) {
-    stopwatch.start();
+    stopwatch.reset().start();
     final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
     stopwatch.stop();
     responseMapBuilder.put(request.getTable(), currentResponse);

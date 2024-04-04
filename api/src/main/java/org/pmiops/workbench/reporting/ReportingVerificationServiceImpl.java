@@ -130,7 +130,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
   private ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {
     final Stopwatch verifyStopwatch = stopwatchProvider.get();
-    verifyStopwatch.start();
+    verifyStopwatch.reset().start();
     final ReportingUploadDetails result =
         new ReportingUploadDetails()
             .snapshotTimestamp(snapshot.getCaptureTimestamp())
