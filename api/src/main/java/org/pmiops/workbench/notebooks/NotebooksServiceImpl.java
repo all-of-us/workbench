@@ -245,7 +245,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     try {
       String language =
           Optional.of(notebookFile.getJSONObject("metadata"))
-              .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+              .map(metaDataObj -> metaDataObj.getJSONObject("kernelspec"))
               .map(kernelSpec -> kernelSpec.getString("language"))
               .orElse("Python");
 

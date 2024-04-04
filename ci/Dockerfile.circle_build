@@ -1,10 +1,12 @@
 # To build and deploy, from this directory:
 # $ docker build . -f Dockerfile.circle_build -t us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z .
 # Note: M1 Macs may need to add `--platform linux/x86_64` after `docker build`
+
 # Test out the new image with:
 # $ docker run -it us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z /bin/bash
+
 # Update all mentions of us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z in
-# .circleci/config.yml by incrementing the numbers. Using the new values, run:
+# .circleci/config.yml by incrementing the numbers. Using the new values, run (while logged in to a @broadinstitute.org account):
 # $ gcloud auth configure-docker  # interactive prompts
 # $ docker push us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z
 # Include your changes to config.yml in the PR that uses the build image.
@@ -21,7 +23,7 @@ FROM cimg/openjdk:17.0-browsers
 USER circleci
 
 # keep in sync with deploy/Dockerfile and api/gradle.build
-ENV CLOUD_SDK_VERSION 392.0.0
+ENV CLOUD_SDK_VERSION 471.0.0
 
 RUN cd && \
   wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \

@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -68,9 +67,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
-
-  @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
-  Set<String> findAllWorkspaceNamespaces();
 
   @Query(
       "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
@@ -134,18 +130,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("status") BillingStatus status,
       @Param("billingAccountNames") List<String> billingAccountNames,
       @Param("creators") Set<DbUser> creators);
-
-  interface WorkspaceCountByActiveStatusAndTier {
-    Long getWorkspaceCount();
-
-    Short getActiveStatus();
-
-    DbAccessTier getTier();
-
-    default WorkspaceActiveStatus getActiveStatusEnum() {
-      return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
-    }
-  }
 
   interface WorkspaceCostView {
     Long getWorkspaceId();

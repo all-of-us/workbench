@@ -39,7 +39,7 @@ public class LeonardoLabelHelper {
   @SuppressWarnings("unchecked")
   public static Optional<AppType> maybeMapLeonardoLabelsToGkeApp(@Nullable Object diskLabels) {
     return Optional.ofNullable((Map<String, String>) diskLabels)
-        .flatMap(m -> Optional.ofNullable(m.get(LEONARDO_LABEL_APP_TYPE)))
+        .map(m -> m.get(LEONARDO_LABEL_APP_TYPE))
         .map(LeonardoLabelHelper::labelValueToAppType);
   }
 

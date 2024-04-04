@@ -26,9 +26,14 @@ import {
   reactStyles,
   validateInputForMySQL,
   withCurrentCohortCriteria,
+  withCurrentCohortSearchContext,
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import {
+  currentCohortCriteriaStore,
+  currentCohortSearchContextStore,
+} from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
@@ -152,454 +157,599 @@ const searchTooltip = (
 
 export const VariantSearch = fp.flow(
   withCurrentWorkspace(),
-  withCurrentCohortCriteria()
-)(({ criteria, select, selectedIds, workspace: { id, namespace } }) => {
-  const [first, setFirst] = useState(0);
-  const [inputErrors, setInputErrors] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [pageToken, setPageToken] = useState(null);
-  const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<Variant[]>([]);
-  const [searchTerms, setSearchTerms] = useState('');
-  const [totalCount, setTotalCount] = useState(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectAllFilters, setSelectAllFilters] = useState<VariantFilter>();
-  const [selectedFilters, setSelectedFilters] = useState<VariantFilterRequest>({
-    searchTerm: '',
-    geneList: [],
-    consequenceList: [],
-    clinicalSignificanceList: [],
-    countMin: null,
-    countMax: null,
-    numberMin: null,
-    numberMax: null,
-    frequencyMin: null,
-    frequencyMax: null,
-    sortBy: 'Participant Count',
-  });
-  const [variantFilters, setVariantFilters] = useState(null);
-  const [resetResults, setResetResults] = useState(0);
-
-  const searchVariants = async (newSearch: boolean, firstPage?: number) => {
-    try {
-      const [{ items, nextPageToken, totalSize }, filterResponse] =
-        await Promise.all([
-          cohortBuilderApi().findVariants(namespace, id, {
-            ...selectedFilters,
-            searchTerm: searchTerms.trim(),
-            pageSize,
-            pageToken: !!firstPage ? pageToken : null,
-          }),
-          newSearch
-            ? cohortBuilderApi().findVariantFilters(namespace, id, {
-                searchTerm: searchTerms.trim(),
-              })
-            : null,
-        ]);
-      if (filterResponse) {
-        setVariantFilters(filterResponse);
-      }
-      setSelectAllFilters({
-        ...selectedFilters,
-        searchTerm: searchTerms.trim(),
+  withCurrentCohortCriteria(),
+  withCurrentCohortSearchContext()
+)(
+  ({
+    cohortContext,
+    criteria,
+    select,
+    selectedIds,
+    workspace: { id, namespace },
+  }) => {
+    const [first, setFirst] = useState(0);
+    const [inputErrors, setInputErrors] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [pageToken, setPageToken] = useState(null);
+    const [searching, setSearching] = useState(false);
+    const [searchResults, setSearchResults] = useState<Variant[]>([]);
+    const [searchTerms, setSearchTerms] = useState('');
+    const [totalCount, setTotalCount] = useState(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [editSelectAllResults, setEditSelectAllResults] = useState(false);
+    const [excludeFromSelectAll, setExcludeFromSelectAll] = useState([]);
+    const [selectAllFilters, setSelectAllFilters] = useState<VariantFilter>();
+    const [selectedFilters, setSelectedFilters] =
+      useState<VariantFilterRequest>({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
       });
-      setPageToken(nextPageToken);
-      setSearchResults((prevState) =>
-        firstPage ? [...prevState, ...items] : items
-      );
-      setTotalCount(totalSize);
-      setFirst(firstPage || 0);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+    const [variantFilters, setVariantFilters] = useState(null);
+    const [resetResults, setResetResults] = useState(0);
 
-  useEffect(() => {
-    if (resetResults > 0) {
-      setLoading(true);
-      searchVariants(false);
-    }
-  }, [resetResults]);
+    const searchVariants = async (newSearch: boolean, firstPage?: number) => {
+      try {
+        const [{ items, nextPageToken, totalSize }, filterResponse] =
+          await Promise.all([
+            cohortBuilderApi().findVariants(namespace, id, {
+              ...selectedFilters,
+              searchTerm: searchTerms.trim(),
+              pageSize,
+              pageToken: !!firstPage ? pageToken : null,
+            }),
+            newSearch
+              ? cohortBuilderApi().findVariantFilters(namespace, id, {
+                  searchTerm: searchTerms.trim(),
+                })
+              : null,
+          ]);
+        if (filterResponse) {
+          setVariantFilters(filterResponse);
+        }
+        setSelectAllFilters({
+          ...selectedFilters,
+          searchTerm: searchTerms.trim(),
+        });
+        setPageToken(nextPageToken);
+        setSearchResults((prevState) =>
+          firstPage ? [...prevState, ...items] : items
+        );
+        setTotalCount(totalSize);
+        setFirst(firstPage || 0);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    };
 
-  const clearFilters = (callApi: boolean) => {
-    setSelectedFilters({
-      searchTerm: '',
-      geneList: [],
-      consequenceList: [],
-      clinicalSignificanceList: [],
-      countMin: null,
-      countMax: null,
-      numberMin: null,
-      numberMax: null,
-      frequencyMin: null,
-      frequencyMax: null,
-      sortBy: 'Participant Count',
-    });
-    setFiltersOpen(false);
-    if (callApi) {
-      setResetResults((prevState) => prevState + 1);
-    }
-  };
+    useEffect(() => {
+      if (resetResults > 0) {
+        setLoading(true);
+        searchVariants(false);
+      }
+    }, [resetResults]);
 
-  const handleInput = (event: any) => {
-    const {
-      key,
-      target: { value },
-    } = event;
-    if (key === 'Enter') {
-      if (value.trim().length < searchTrigger) {
-        setInputErrors([
-          `Minimum criteria search length is ${searchTrigger} characters`,
-        ]);
-      } else {
-        const newInputErrors = validateInputForMySQL(value, searchTrigger);
-        if (newInputErrors.length > 0) {
-          setInputErrors(newInputErrors);
+    useEffect(() => {
+      if (cohortContext.editSelectAll) {
+        const { variantFilter } = cohortContext.editSelectAll;
+        setSearchTerms(variantFilter.searchTerm);
+        setSelectedFilters(variantFilter);
+        setVariantFilters(variantFilter);
+        setExcludeFromSelectAll(variantFilter.exclusionList ?? []);
+        setEditSelectAllResults(true);
+        setSearching(true);
+      }
+    }, [cohortContext]);
+
+    useEffect(() => {
+      if (editSelectAllResults) {
+        setLoading(true);
+        searchVariants(false);
+      }
+    }, [editSelectAllResults]);
+
+    const clearFilters = (callApi: boolean) => {
+      setSelectedFilters({
+        searchTerm: '',
+        geneList: [],
+        consequenceList: [],
+        clinicalSignificanceList: [],
+        countMin: null,
+        countMax: null,
+        numberMin: null,
+        numberMax: null,
+        frequencyMin: null,
+        frequencyMax: null,
+        sortBy: 'Participant Count',
+      });
+      setFiltersOpen(false);
+      if (callApi) {
+        setResetResults((prevState) => prevState + 1);
+      }
+    };
+
+    const handleInput = (event: any) => {
+      const {
+        key,
+        target: { value },
+      } = event;
+      if (key === 'Enter') {
+        if (value.trim().length < searchTrigger) {
+          setInputErrors([
+            `Minimum criteria search length is ${searchTrigger} characters`,
+          ]);
         } else {
-          setLoading(true);
-          setSearching(true);
-          clearFilters(false);
-          searchVariants(true);
+          const newInputErrors = validateInputForMySQL(value, searchTrigger);
+          if (newInputErrors.length > 0) {
+            setInputErrors(newInputErrors);
+          } else {
+            setLoading(true);
+            setSearching(true);
+            clearFilters(false);
+            searchVariants(true);
+          }
         }
       }
-    }
-  };
-
-  const handlePage = (firstPage: number, rows: number) => {
-    if (searchResults.length >= rows + firstPage - 1) {
-      setFirst(firstPage);
-      return;
-    }
-    if (searchResults && !pageToken) {
-      // We've loaded at least one page, and there's no more data to load.
-      setFirst(firstPage);
-      return;
-    }
-    setLoadingMore(true);
-    searchVariants(false, firstPage);
-  };
-
-  const clearSearch = () => {
-    setSearching(false);
-    setSearchTerms('');
-    setSearchResults([]);
-    setVariantFilters(null);
-    clearFilters(false);
-  };
-
-  const getParamId = (row: Variant) => `param${row.vid}`;
-
-  // Generate a param id based on current filter selections
-  const getFilterParamId = () =>
-    Object.entries(selectAllFilters).reduce((acc, [key, value]) => {
-      if (value === null || key === 'sortBy') {
-        return acc;
-      }
-      switch (typeof value) {
-        case 'string':
-          return acc + value.replace(/\s/g, '');
-        case 'number':
-          return acc + value.toString();
-        default:
-          // Can only be an array
-          return acc + value.join('').replace(/\s/g, '');
-      }
-    }, '');
-
-  const isSelected = (row: any) => {
-    const paramId = getParamId(row);
-    return selectedIds.includes(paramId);
-  };
-
-  const selectItem = (row: any) => {
-    const param = {
-      parameterId: getParamId(row),
-      parentId: null,
-      type: CriteriaType.NONE,
-      name: `Variant ${row.vid}`,
-      group: false,
-      domainId: Domain.SNP_INDEL_VARIANT,
-      hasAttributes: false,
-      selectable: true,
-      variantId: row.vid,
-      attributes: [],
     };
-    AnalyticsTracker.CohortBuilder.SelectCriteria(
-      `Select ${domainToTitle(row.domainId)} - '${row.name}'`
-    );
-    select(param);
-  };
 
-  const handleCheckboxChange = (
-    filter: string,
-    name: string,
-    checked: boolean
-  ) =>
-    setSelectedFilters((prevState) => ({
-      ...prevState,
-      [filter]: checked
-        ? [...prevState[filter], name]
-        : prevState[filter].filter((val) => val !== name),
-    }));
-
-  const handleSliderChange = (filterName: string, range: number[]) =>
-    setSelectedFilters((prevState) => ({
-      ...prevState,
-      [`${filterName}Min`]: range[0],
-      [`${filterName}Max`]: range[1],
-    }));
-
-  const handleSortByChange = (value: string) =>
-    setSelectedFilters((prevState) => ({
-      ...prevState,
-      sortBy: value,
-    }));
-
-  const handleSelectAllResults = () => {
-    // Add filter object to criteria selection list
-    const param: Selection = {
-      id: null,
-      parameterId: getFilterParamId(),
-      parentId: null,
-      type: CriteriaType.NONE,
-      name: `Select All Group: ${selectAllFilters.searchTerm}`,
-      group: false,
-      domainId: Domain.SNP_INDEL_VARIANT,
-      hasAttributes: false,
-      selectable: true,
-      attributes: [],
-      variantFilter: selectAllFilters,
+    const handlePage = (firstPage: number, rows: number) => {
+      if (searchResults.length >= rows + firstPage - 1) {
+        setFirst(firstPage);
+        return;
+      }
+      if (searchResults && !pageToken) {
+        // We've loaded at least one page, and there's no more data to load.
+        setFirst(firstPage);
+        return;
+      }
+      setLoadingMore(true);
+      searchVariants(false, firstPage);
     };
-    AnalyticsTracker.CohortBuilder.SelectCriteria(
-      `Select All Variant Filter Group - '${selectAllFilters.searchTerm}'`
-    );
-    select(param);
-    clearSearch();
-  };
 
-  const disableSelectAll =
-    totalCount < 100 ||
-    totalCount > 10000 ||
-    criteria.some((crit) => crit.parameterId === getFilterParamId());
-  const displayResults = searchResults?.slice(first, first + pageSize);
-  return (
-    <>
-      <div style={{ display: 'flex' }}>
-        <div style={styles.searchContainer}>
-          <div style={styles.searchBar}>
-            <ClrIcon shape='search' size='18' />
-            <TextInput
-              data-test-id='list-search-input'
-              style={styles.searchInput}
-              value={searchTerms}
-              placeholder='Search Variants'
-              onChange={(e) => setSearchTerms(e)}
-              onKeyPress={handleInput}
-            />
-            {searching && (
-              <Clickable
-                style={styles.clearSearchIcon}
-                onClick={() => clearSearch()}
-              >
-                <ClrIcon size={24} shape='times-circle' />
-              </Clickable>
-            )}
+    const clearSearch = () => {
+      setSearching(false);
+      setSearchTerms('');
+      setSearchResults([]);
+      setVariantFilters(null);
+      clearFilters(false);
+      if (editSelectAllResults) {
+        setEditSelectAllResults(false);
+        currentCohortSearchContextStore.next({
+          ...cohortContext,
+          editSelectAll: null,
+        });
+      }
+    };
+
+    const getParamId = (row: Variant) => `param${row.vid}`;
+
+    // Generate a param id based on current filter selections
+    const getFilterParamId = () =>
+      Object.entries(selectAllFilters).reduce((acc, [key, value]) => {
+        if (value === null || key === 'sortBy') {
+          return acc;
+        }
+        switch (typeof value) {
+          case 'string':
+            return acc + value.replace(/\s/g, '');
+          case 'number':
+            return acc + value.toString();
+          default:
+            // Can only be an array
+            return acc + value.join('').replace(/\s/g, '');
+        }
+      }, '');
+
+    useEffect(() => {
+      if (
+        editSelectAllResults &&
+        !criteria.some(({ parameterId }) => parameterId === getFilterParamId())
+      ) {
+        // The filter group was removed from the selection list, clear the select all state
+        setEditSelectAllResults(false);
+        setExcludeFromSelectAll([]);
+      }
+    }, [criteria]);
+
+    const isSelected = (row: any) => {
+      const paramId = getParamId(row);
+      return (
+        selectedIds.includes(paramId) ||
+        (editSelectAllResults && !excludeFromSelectAll.includes(row.vid))
+      );
+    };
+
+    const selectItem = (row: any) => {
+      if (editSelectAllResults) {
+        // Remove item from excludes list
+        setExcludeFromSelectAll((prevState) =>
+          prevState.filter((excluded) => excluded !== row.vid)
+        );
+      } else {
+        const param = {
+          parameterId: getParamId(row),
+          parentId: null,
+          type: CriteriaType.NONE,
+          name: `Variant ${row.vid}`,
+          group: false,
+          domainId: Domain.SNP_INDEL_VARIANT,
+          hasAttributes: false,
+          selectable: true,
+          variantId: row.vid,
+          attributes: [],
+        };
+        AnalyticsTracker.CohortBuilder.SelectCriteria(
+          `Select ${domainToTitle(row.domainId)} - '${row.name}'`
+        );
+        select(param);
+      }
+    };
+
+    const handleCheckboxChange = (
+      filter: string,
+      name: string,
+      checked: boolean
+    ) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        [filter]: checked
+          ? [...prevState[filter], name]
+          : prevState[filter].filter((val) => val !== name),
+      }));
+
+    const handleSliderChange = (filterName: string, range: number[]) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        [`${filterName}Min`]: range[0],
+        [`${filterName}Max`]: range[1],
+      }));
+
+    const handleSortByChange = (value: string) =>
+      setSelectedFilters((prevState) => ({
+        ...prevState,
+        sortBy: value,
+      }));
+
+    const handleSelectAllResults = () => {
+      // Add filter object to criteria selection list
+      const param: Selection = {
+        id: null,
+        parameterId: getFilterParamId(),
+        parentId: null,
+        type: CriteriaType.NONE,
+        name: `Select All Group: ${selectAllFilters.searchTerm}`,
+        group: false,
+        domainId: Domain.SNP_INDEL_VARIANT,
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+        variantFilter: selectAllFilters,
+      };
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        `Select All Variant Filter Group - '${selectAllFilters.searchTerm}'`
+      );
+      select(param);
+      clearSearch();
+    };
+
+    const handleSelectAllEdit = () => {
+      // Remove filter object from criteria selection list before adding updated selection
+      const updatedCriteria = criteria.filter(
+        ({ parameterId }) =>
+          parameterId !== cohortContext.editSelectAll.parameterId
+      );
+      // Add filter object to criteria selection list with updated exclusion list
+      updatedCriteria.push({
+        ...cohortContext.editSelectAll,
+        variantFilter: {
+          ...selectAllFilters,
+          exclusionList: excludeFromSelectAll,
+        },
+      });
+      currentCohortCriteriaStore.next(updatedCriteria);
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        `Edit Select All Variant Filter Group - '${selectAllFilters.searchTerm}'`
+      );
+      clearSearch();
+    };
+
+    const disableSelectAll =
+      totalCount < 100 ||
+      totalCount > 10000 ||
+      criteria.some((crit) => crit.parameterId === getFilterParamId());
+    const disableSelectAllSave =
+      excludeFromSelectAll.length ===
+      cohortContext.editSelectAll?.variantFilter.exclusionList.length;
+    const displayResults = searchResults?.slice(first, first + pageSize);
+    return (
+      <>
+        <div style={{ display: 'flex' }}>
+          <div style={styles.searchContainer}>
+            <div style={styles.searchBar}>
+              <ClrIcon shape='search' size='18' />
+              <TextInput
+                data-test-id='list-search-input'
+                style={styles.searchInput}
+                value={searchTerms}
+                placeholder='Search Variants'
+                onChange={(e) => setSearchTerms(e)}
+                onKeyPress={handleInput}
+              />
+              {searching && (
+                <Clickable
+                  style={styles.clearSearchIcon}
+                  onClick={() => clearSearch()}
+                >
+                  <ClrIcon size={24} shape='times-circle' />
+                </Clickable>
+              )}
+            </div>
+            {inputErrors.map((error, e) => (
+              <AlertDanger key={e} style={styles.inputAlert}>
+                <span data-test-id='input-error-alert'>{error}</span>
+              </AlertDanger>
+            ))}
           </div>
-          {inputErrors.map((error, e) => (
-            <AlertDanger key={e} style={styles.inputAlert}>
-              <span data-test-id='input-error-alert'>{error}</span>
-            </AlertDanger>
-          ))}
-        </div>
-        <div style={{ float: 'right', width: '20%' }}>
-          <TooltipTrigger side='top' content={searchTooltip}>
-            <ClrIcon
-              style={styles.infoIcon}
-              className='is-solid'
-              shape='info-standard'
-            />
-          </TooltipTrigger>
-        </div>
-      </div>
-      {!loading && variantFilters && (
-        <div style={{ display: 'flex', position: 'relative' }}>
-          <Clickable
-            style={{ color: colors.primary }}
-            onClick={() => setFiltersOpen((prevState) => !prevState)}
-            disabled={loadingMore}
-          >
-            <ClrIcon shape='filter-2' className='is-solid' size={30} />
-            Filter & Sort
-          </Clickable>
-          {filtersOpen && (
-            <VariantSearchFilters
-              filters={variantFilters}
-              formState={selectedFilters}
-              checkboxFn={handleCheckboxChange}
-              sliderFn={handleSliderChange}
-              sortFn={handleSortByChange}
-              clearFn={() => clearFilters(true)}
-              submitFn={() => {
-                setFiltersOpen(false);
-                setLoading(true);
-                searchVariants(false);
-              }}
-            />
-          )}
-          {serverConfigStore.get().config.enableVariantSelectAll && (
-            <Clickable
-              style={
-                disableSelectAll
-                  ? { ...styles.selectAll, ...styles.disabled }
-                  : styles.selectAll
-              }
-              onClick={() => handleSelectAllResults()}
-              disabled={disableSelectAll}
-            >
+          <div style={{ float: 'right', width: '20%' }}>
+            <TooltipTrigger side='top' content={searchTooltip}>
               <ClrIcon
-                shape='plus-circle'
-                class='is-solid'
-                size={18}
-                style={{
-                  marginRight: '0.25rem',
+                style={styles.infoIcon}
+                className='is-solid'
+                shape='info-standard'
+              />
+            </TooltipTrigger>
+          </div>
+        </div>
+        {!loading && variantFilters && (
+          <div style={{ display: 'flex', position: 'relative' }}>
+            <Clickable
+              style={{ color: colors.primary }}
+              onClick={() => setFiltersOpen((prevState) => !prevState)}
+              disabled={loadingMore || !!cohortContext.editSelectAll}
+            >
+              <ClrIcon shape='filter-2' className='is-solid' size={30} />
+              Filter & Sort
+            </Clickable>
+            {filtersOpen && (
+              <VariantSearchFilters
+                filters={variantFilters}
+                formState={selectedFilters}
+                checkboxFn={handleCheckboxChange}
+                sliderFn={handleSliderChange}
+                sortFn={handleSortByChange}
+                clearFn={() => clearFilters(true)}
+                submitFn={() => {
+                  setFiltersOpen(false);
+                  setLoading(true);
+                  searchVariants(false);
                 }}
               />
-              Select All Results
-            </Clickable>
-          )}
-        </div>
-      )}
-      {loading ? (
-        <SpinnerOverlay />
-      ) : (
-        searching && (
-          <DataTable
-            currentPageReportTemplate={
-              displayResults.length > 0
-                ? `${first + 1} - ${
-                    first + displayResults.length
-                  } of ${totalCount.toLocaleString()}`
-                : ''
-            }
-            first={first}
-            lazy
-            loading={loadingMore}
-            onPage={(e) => handlePage(e.first, e.rows)}
-            paginator
-            paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
-            rows={pageSize}
-            scrollable
-            scrollHeight='26rem'
-            style={{ fontSize: '12px', minHeight: '22rem' }}
-            totalRecords={totalCount}
-            value={displayResults}
-          >
-            <Column
-              field='vid'
-              header='Variant Id'
-              headerStyle={{ ...styles.columnHeader, width: '20%' }}
-              body={(variant) => (
-                <div title={variant.vid}>
-                  {isSelected(variant) ? (
-                    <>
-                      <ClrIcon
-                        style={styles.selectedIcon}
-                        shape='check-circle'
-                        size='20'
-                      />
-                    </>
-                  ) : (
+            )}
+            {serverConfigStore.get().config.enableVariantSelectAll &&
+              (!!cohortContext.editSelectAll ? (
+                <>
+                  <Clickable
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      marginLeft: '1rem',
+                    }}
+                    onClick={() => handleSelectAllEdit()}
+                    disabled={disableSelectAllSave}
+                  >
                     <ClrIcon
-                      style={styles.selectIcon}
-                      shape='plus-circle'
-                      size='16'
-                      onClick={() => selectItem(variant)}
+                      shape='check'
+                      class='is-solid'
+                      size={18}
+                      style={{
+                        marginRight: '0.25rem',
+                        color: colors.select,
+                      }}
                     />
-                  )}
-                  {variant.vid}
-                </div>
-              )}
-              bodyStyle={{ ...styles.columnBody, borderLeft: borderStyle }}
-            />
-            <Column
-              field='gene'
-              header='Gene'
-              headerStyle={styles.columnHeader}
-              body={({ gene }) => <div title={gene}>{gene}</div>}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='consequence'
-              header='Consequence'
-              headerStyle={{ ...styles.columnHeader, width: '15%' }}
-              body={({ consequence }) => (
-                <div title={consequence}>{consequence}</div>
-              )}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='proteinChange'
-              header='Protein Change'
-              headerStyle={styles.columnHeader}
-              body={({ proteinChange }) => (
-                <div title={proteinChange}>{proteinChange || '-'}</div>
-              )}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='clinVarSignificance'
-              header='ClinVar Significance'
-              headerStyle={styles.columnHeader}
-              body={({ clinVarSignificance }) => (
-                <div title={clinVarSignificance}>
-                  {clinVarSignificance || '-'}
-                </div>
-              )}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='alleleCount'
-              header='Allele Count'
-              headerStyle={styles.columnHeader}
-              body={({ alleleCount }) => (
-                <div title={alleleCount}>{alleleCount}</div>
-              )}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='alleleNumber'
-              header='Allele Number'
-              headerStyle={styles.columnHeader}
-              body={({ alleleNumber }) => (
-                <div title={alleleNumber}>{alleleNumber}</div>
-              )}
-              bodyStyle={styles.columnBody}
-            />
-            <Column
-              field='alleleFrequency'
-              header='Allele Frequency'
-              headerStyle={styles.columnHeader}
-              body={({ alleleFrequency }) => (
-                <div title={alleleFrequency}>{alleleFrequency}</div>
-              )}
-              bodyStyle={{ ...styles.columnBody }}
-            />
-            <Column
-              field='participantCount'
-              header='Participant Count'
-              headerStyle={styles.columnHeader}
-              body={({ participantCount }) => (
-                <div title={participantCount}>{participantCount}</div>
-              )}
-              bodyStyle={{ ...styles.columnBody, borderRight: borderStyle }}
-            />
-          </DataTable>
-        )
-      )}
-    </>
-  );
-});
+                    Save Select All Exclusions (
+                    {excludeFromSelectAll.length -
+                      cohortContext.editSelectAll.variantFilter.exclusionList
+                        .length}
+                    )
+                  </Clickable>
+                  <Clickable
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      marginLeft: '1rem',
+                    }}
+                    onClick={() => clearSearch()}
+                  >
+                    <ClrIcon
+                      shape='times'
+                      class='is-solid'
+                      size={18}
+                      style={{
+                        marginRight: '0.25rem',
+                        color: colors.danger,
+                      }}
+                    />
+                    Cancel Edit
+                  </Clickable>
+                </>
+              ) : (
+                <Clickable
+                  style={
+                    disableSelectAll
+                      ? { ...styles.selectAll, ...styles.disabled }
+                      : styles.selectAll
+                  }
+                  onClick={() => handleSelectAllResults()}
+                  disabled={disableSelectAll}
+                >
+                  <ClrIcon
+                    shape='plus-circle'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                    }}
+                  />
+                  Select All Results
+                </Clickable>
+              ))}
+          </div>
+        )}
+        {loading ? (
+          <SpinnerOverlay />
+        ) : (
+          searching && (
+            <DataTable
+              currentPageReportTemplate={
+                displayResults.length > 0
+                  ? `${first + 1} - ${
+                      first + displayResults.length
+                    } of ${totalCount.toLocaleString()}`
+                  : ''
+              }
+              first={first}
+              lazy
+              loading={loadingMore}
+              onPage={(e) => handlePage(e.first, e.rows)}
+              paginator
+              paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
+              rows={pageSize}
+              scrollable
+              scrollHeight='26rem'
+              style={{ fontSize: '12px', minHeight: '22rem' }}
+              totalRecords={totalCount}
+              value={displayResults}
+            >
+              <Column
+                field='vid'
+                header='Variant Id'
+                headerStyle={{ ...styles.columnHeader, width: '20%' }}
+                body={(variant) => (
+                  <div title={variant.vid}>
+                    {isSelected(variant) ? (
+                      <>
+                        <ClrIcon
+                          style={styles.selectedIcon}
+                          shape='check-circle'
+                          size='20'
+                        />
+                        {editSelectAllResults &&
+                          !excludeFromSelectAll.includes(variant.vid) && (
+                            <ClrIcon
+                              style={styles.excludeIcon}
+                              shape='times-circle'
+                              size='20'
+                              onClick={() =>
+                                setExcludeFromSelectAll((prevState) => [
+                                  ...prevState,
+                                  variant.vid,
+                                ])
+                              }
+                              title='Exclude From Select All Group'
+                            />
+                          )}
+                      </>
+                    ) : (
+                      <ClrIcon
+                        style={styles.selectIcon}
+                        shape='plus-circle'
+                        size='16'
+                        onClick={() => selectItem(variant)}
+                      />
+                    )}
+                    {variant.vid}
+                  </div>
+                )}
+                bodyStyle={{ ...styles.columnBody, borderLeft: borderStyle }}
+              />
+              <Column
+                field='gene'
+                header='Gene'
+                headerStyle={styles.columnHeader}
+                body={({ gene }) => <div title={gene}>{gene}</div>}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='consequence'
+                header='Consequence'
+                headerStyle={{ ...styles.columnHeader, width: '15%' }}
+                body={({ consequence }) => (
+                  <div title={consequence}>{consequence}</div>
+                )}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='proteinChange'
+                header='Protein Change'
+                headerStyle={styles.columnHeader}
+                body={({ proteinChange }) => (
+                  <div title={proteinChange}>{proteinChange || '-'}</div>
+                )}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='clinVarSignificance'
+                header='ClinVar Significance'
+                headerStyle={styles.columnHeader}
+                body={({ clinVarSignificance }) => (
+                  <div title={clinVarSignificance}>
+                    {clinVarSignificance || '-'}
+                  </div>
+                )}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='alleleCount'
+                header='Allele Count'
+                headerStyle={styles.columnHeader}
+                body={({ alleleCount }) => (
+                  <div title={alleleCount}>{alleleCount}</div>
+                )}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='alleleNumber'
+                header='Allele Number'
+                headerStyle={styles.columnHeader}
+                body={({ alleleNumber }) => (
+                  <div title={alleleNumber}>{alleleNumber}</div>
+                )}
+                bodyStyle={styles.columnBody}
+              />
+              <Column
+                field='alleleFrequency'
+                header='Allele Frequency'
+                headerStyle={styles.columnHeader}
+                body={({ alleleFrequency }) => (
+                  <div title={alleleFrequency}>{alleleFrequency}</div>
+                )}
+                bodyStyle={{ ...styles.columnBody }}
+              />
+              <Column
+                field='participantCount'
+                header='Participant Count'
+                headerStyle={styles.columnHeader}
+                body={({ participantCount }) => (
+                  <div title={participantCount}>{participantCount}</div>
+                )}
+                bodyStyle={{ ...styles.columnBody, borderRight: borderStyle }}
+              />
+            </DataTable>
+          )
+        )}
+      </>
+    );
+  }
+);

@@ -68,14 +68,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("minCreationTime") Timestamp minCreationTime,
       @Param("maxCreationTime") Timestamp maxCreationTime);
 
-  interface UserCountByDisabledAndAccessTiers {
-    Long getUserCount();
-
-    Boolean getDisabled();
-
-    String getAccessTierShortNames();
-  }
-
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
     Long getUserId();

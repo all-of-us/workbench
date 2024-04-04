@@ -218,8 +218,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   public boolean isValidResource(DbUserRecentlyModifiedResource resource) {
     // handle null and unparseable resourceIds
     final Optional<Long> resourceId =
-        Optional.ofNullable(resource.getResourceId())
-            .flatMap(str -> Optional.ofNullable(Longs.tryParse(str)));
+        Optional.ofNullable(resource.getResourceId()).map(Longs::tryParse);
     switch (resource.getResourceType()) {
       case COHORT:
         return resourceId.flatMap(cohortService::findByCohortId).isPresent();
