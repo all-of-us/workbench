@@ -10,14 +10,14 @@ import {
 
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
-import { RuntimeStatusIndicator } from './runtime-status-indicator';
 import {
   ErrorIcon,
   RunningIcon,
   StoppedIcon,
   StoppingIcon,
   UpdatingIcon,
-} from './status-icon';
+} from './environment-status-icon';
+import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
 describe('Runtime Status Indicator', () => {
   test.each([

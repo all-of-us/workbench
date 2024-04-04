@@ -3,7 +3,6 @@ import { CSSProperties } from 'react';
 
 import { AppStatus } from 'generated/fetch';
 
-import { FlexRow } from './flex';
 import {
   ErrorIcon,
   RunningIcon,
@@ -11,7 +10,8 @@ import {
   StoppingIcon,
   SuspendedIcon,
   UpdatingIcon,
-} from './status-icon';
+} from './environment-status-icon';
+import { FlexRow } from './flex';
 
 export const AppStatusIndicator = (props: {
   style?: CSSProperties;

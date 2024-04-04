@@ -13,7 +13,6 @@ import {
   withStore,
 } from 'app/utils/stores';
 
-import { FlexRow } from './flex';
 import {
   ErrorIcon,
   RunningIcon,
@@ -21,7 +20,8 @@ import {
   StoppingIcon,
   SuspendedIcon,
   UpdatingIcon,
-} from './status-icon';
+} from './environment-status-icon';
+import { FlexRow } from './flex';
 
 export const RuntimeStatusIndicator = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps')
