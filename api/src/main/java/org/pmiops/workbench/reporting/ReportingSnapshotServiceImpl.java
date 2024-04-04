@@ -32,8 +32,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Transactional(readOnly = true)
   @Override
   public ReportingSnapshot takeSnapshot() {
-    final Stopwatch stopwatch = stopwatchProvider.get();
-    stopwatch.reset().start();
+    final Stopwatch stopwatch = stopwatchProvider.get().reset().start();
     final ReportingSnapshot result =
         new ReportingSnapshot()
             .captureTimestamp(clock.millis())
