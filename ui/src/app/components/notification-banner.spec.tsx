@@ -8,12 +8,13 @@ import { render, screen } from '@testing-library/react';
 import { NotificationBanner } from './notification-banner';
 
 describe('NotificationBanner', () => {
+  const bannerText = 'blah';
   const component = () => {
     return render(
       <MemoryRouter>
         <NotificationBanner
           dataTestId='banner'
-          text='blah'
+          text={bannerText}
           buttonText='BLAH'
           buttonPath='yahoo.com'
           buttonDisabled={true}
@@ -25,6 +26,6 @@ describe('NotificationBanner', () => {
 
   it('should render', () => {
     component();
-    expect(screen.getByText('blah')).toBeInTheDocument();
+    expect(screen.getByText(bannerText)).toBeInTheDocument();
   });
 });
