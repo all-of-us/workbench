@@ -72,59 +72,63 @@ const localizeUserApp = (
     appType,
   });
 
+const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
+  // Note: We do not call localize for CROMWELL
+  // We want app that are transitioning from PROVISIONING to RUNNING
+  const appsJustStartedRunning = userAppsStore
+    .get()
+    .userApps.filter((userApp) => {
+      if (
+        userApp.status === AppStatus.PROVISIONING &&
+        userApp.appType !== AppType.CROMWELL
+      ) {
+        const runningAppFromApi = listAppsResponse.filter(
+          (app) =>
+            app.appType === userApp.appType && app.status === AppStatus.RUNNING
+        );
+        return !!runningAppFromApi && runningAppFromApi.length > 0;
+      }
+      return false;
+    });
+  return appsJustStartedRunning;
+};
+
+const callLocalizeIfApplicable = (listAppsResponse) => {
+  // If userAppsStore is not updated lets wait for it to be updated before checking
+  if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
+    return null;
+  }
+
+  // Get the list of Apps that are in PROVISIONING state in store but RUNNING in list of Apps from api response
+  // We want to call Localize only ONCE just as soon as they are running
+  const appsTransitionToRunningNow =
+    appJustTurnedRunningFromProvisioning(listAppsResponse);
+
+  if (appsTransitionToRunningNow.length === 0) {
+    return null;
+  }
+
+  appsTransitionToRunningNow.forEach((app) => {
+    fetchWithErrorModal(
+      async () =>
+        await localizeUserApp(
+          currentWorkspaceStore.getValue().namespace,
+          app.appName,
+          app.appType,
+          [],
+          false,
+          true
+        )
+    );
+  });
+};
+
 export const maybeStartPollingForUserApps = (namespace: string) => {
   const { updating } = userAppsStore.get();
   // Prevents multiple update processes from running concurrently.
   if (updating) {
     return;
   }
-
-  const checkIfAppJustTurnedRunning = (listAppsResponse) => {
-    if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
-      if (
-        !!listAppsResponse &&
-        listAppsResponse.size > 0 &&
-        listAppsResponse.some((app) => app.status === 'RUNNING')
-      ) {
-        return listAppsResponse.some((app) => app.status === 'RUNNING').appType;
-      }
-      return null;
-    }
-
-    const appJustTurnedRunningFromProv = userAppsStore
-      .get()
-      .userApps.filter((userApp) => {
-        if (
-          userApp.status === AppStatus.PROVISIONING &&
-          userApp.appType !== AppType.CROMWELL
-        ) {
-          const runningApp = listAppsResponse.filter(
-            (app) =>
-              app.appType === userApp.appType &&
-              app.status === AppStatus.RUNNING
-          );
-          return !!runningApp && runningApp.length > 0;
-        }
-        return false;
-      });
-
-    if (appJustTurnedRunningFromProv.length === 0) {
-      return null;
-    }
-    appJustTurnedRunningFromProv.forEach((app) => {
-      fetchWithErrorModal(
-        async () =>
-          await localizeUserApp(
-            currentWorkspaceStore.getValue().namespace,
-            app.appName,
-            app.appType,
-            [],
-            false,
-            true
-          )
-      );
-    });
-  };
 
   userAppsStore.set({ ...userAppsStore.get(), updating: true });
   appsApi()
@@ -143,7 +147,7 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
           : activityPollingTimeoutMs
       );
 
-      checkIfAppJustTurnedRunning(listAppsResponse);
+      callLocalizeIfApplicable(listAppsResponse);
 
       userAppsStore.set({
         userApps: listAppsResponse,
