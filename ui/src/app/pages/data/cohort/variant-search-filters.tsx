@@ -165,9 +165,8 @@ export const VariantSearchFilters = ({
           {expanded.includes('consequenceList') && (
             <div>
               {filters.consequenceList?.map((checkboxName, index) => (
-                <div style={{ display: 'flex' }}>
+                <div key={index} style={{ display: 'flex' }}>
                   <input
-                    key={index}
                     style={{ marginRight: '0.25rem' }}
                     type='checkbox'
                     name={checkboxName}

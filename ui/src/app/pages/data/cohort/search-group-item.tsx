@@ -169,8 +169,8 @@ class SearchGroupItemParameter extends React.Component<
                       key === 'sortBy'
                     )
                 )
-                .map(([key, value]) => (
-                  <li style={{ whiteSpace: 'normal' }}>
+                .map(([key, value], index) => (
+                  <li key={index} style={{ whiteSpace: 'normal' }}>
                     <b>{VARIANT_DISPLAY[key]}</b>:{' '}
                     {Array.isArray(value) ? (
                       <>

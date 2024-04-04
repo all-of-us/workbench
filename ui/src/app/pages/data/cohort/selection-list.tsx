@@ -33,6 +33,7 @@ import {
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
+  currentCohortSearchContextStore,
   currentWorkspaceStore,
   sidebarActiveIconStore,
 } from 'app/utils/navigation';
@@ -84,6 +85,13 @@ const styles = reactStyles({
     background: 'none',
     border: 0,
     color: colors.danger,
+    cursor: 'pointer',
+    marginRight: '0.375rem',
+    padding: 0,
+  },
+  editSelectAll: {
+    background: 'none',
+    border: 0,
     cursor: 'pointer',
     marginRight: '0.375rem',
     padding: 0,
@@ -196,6 +204,7 @@ interface SelectionInfoProps {
   index: number;
   selection: Selection;
   removeSelection: Function;
+  cohortContext?: any;
 }
 
 interface SelectionInfoState {
@@ -205,156 +214,201 @@ interface SelectionInfoState {
   variantFilterInfoResponse: VariantFilterInfoResponse;
 }
 
-export class SelectionInfo extends React.Component<
-  SelectionInfoProps,
-  SelectionInfoState
-> {
-  name: HTMLDivElement;
-  constructor(props: SelectionInfoProps) {
-    super(props);
-    this.state = {
-      filtersExpanded: false,
-      loadingVariantBuckets: !!props.selection.variantFilter,
-      truncated: false,
-      variantFilterInfoResponse: null,
-    };
-  }
-
-  componentDidMount(): void {
-    this.getVariantFilterBuckets();
-    const { offsetWidth, scrollWidth } = this.name;
-    this.setState({ truncated: scrollWidth > offsetWidth });
-  }
-
-  get showType() {
-    return ![
-      Domain.PHYSICAL_MEASUREMENT.toString(),
-      Domain.DRUG.toString(),
-      Domain.SURVEY.toString(),
-    ].includes(this.props.selection.domainId);
-  }
-
-  async getVariantFilterBuckets() {
-    const { namespace, id } = currentWorkspaceStore.getValue();
-    try {
-      const filterBucketResponse =
-        await cohortBuilderApi().findVariantFilterInfo(
-          namespace,
-          id,
-          this.props.selection.variantFilter
-        );
-      this.setState({ variantFilterInfoResponse: filterBucketResponse });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.setState({ loadingVariantBuckets: false });
+export const SelectionInfo = withCurrentCohortSearchContext()(
+  class extends React.Component<SelectionInfoProps, SelectionInfoState> {
+    name: HTMLDivElement;
+    constructor(props: SelectionInfoProps) {
+      super(props);
+      this.state = {
+        filtersExpanded: false,
+        loadingVariantBuckets: !!props.selection.variantFilter,
+        truncated: false,
+        variantFilterInfoResponse: null,
+      };
     }
-  }
 
-  renderVariantFilters() {
-    return (
-      <ul style={styles.filterList}>
-        {Object.entries(this.props.selection.variantFilter)
-          .filter(
-            ([key, value]) =>
-              !(
-                (Array.isArray(value) && value.length === 0) ||
-                ['', null].includes(value) ||
-                key === 'sortBy'
-              )
-          )
-          .map(([key, value]) => (
-            <li>
-              <b>{VARIANT_DISPLAY[key]}</b>:{' '}
-              {Array.isArray(value) ? (
-                <>
-                  <br />
-                  {value.join(', ')}
-                </>
-              ) : (
-                value.toLocaleString()
-              )}
-            </li>
-          ))}
-        <li>
-          <b>Participant Count Overview:</b>
-          {this.state.loadingVariantBuckets ? (
-            <div>
-              <Spinner size={24} style={{ margin: '1rem 5rem' }} />
-            </div>
-          ) : (
-            <ul style={styles.filterList}>
-              {Object.entries(this.state.variantFilterInfoResponse)
-                .filter(([, value]) => value !== 0)
-                .map(([key, value]) => (
-                  <li>
-                    <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
-                  </li>
-                ))}
-            </ul>
-          )}
-        </li>
-      </ul>
-    );
-  }
+    componentDidMount(): void {
+      if (this.props.selection.variantFilter) {
+        this.getVariantFilterBuckets();
+      }
+      const { offsetWidth, scrollWidth } = this.name;
+      this.setState({ truncated: scrollWidth > offsetWidth });
+    }
 
-  render() {
-    const { index, selection, removeSelection } = this.props;
-    const { filtersExpanded, truncated } = this.state;
-    const itemName = (
-      <React.Fragment>
-        {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
-        {nameDisplay(selection)}
-      </React.Fragment>
-    );
-    return (
-      <FlexColumn style={styles.selectionItem}>
-        {index > 0 && (
-          <div style={{ padding: '0.45rem 0rem 0.45rem 1.5rem' }}>OR&nbsp;</div>
-        )}
-        <FlexRow style={{ alignItems: 'baseline' }}>
-          <button
-            style={styles.removeSelection}
-            onClick={() => removeSelection()}
-          >
-            <ClrIcon shape='times-circle' />
-          </button>
-          <FlexColumn style={{ width: 'calc(100% - 1.5rem)' }}>
-            {selection.group && <div>Group</div>}
-            <TooltipTrigger disabled={!truncated} content={itemName}>
-              <div style={styles.itemName} ref={(e) => (this.name = e)}>
-                {itemName}
+    componentDidUpdate(prevProps: Readonly<SelectionInfoProps>) {
+      if (
+        this.props.selection.variantFilter &&
+        this.props.selection.variantFilter.exclusionList !==
+          prevProps.selection.variantFilter.exclusionList
+      ) {
+        this.setState({ loadingVariantBuckets: true });
+        this.getVariantFilterBuckets();
+      }
+    }
+
+    get showType() {
+      return ![
+        Domain.PHYSICAL_MEASUREMENT.toString(),
+        Domain.DRUG.toString(),
+        Domain.SURVEY.toString(),
+      ].includes(this.props.selection.domainId);
+    }
+
+    async getVariantFilterBuckets() {
+      const { namespace, id } = currentWorkspaceStore.getValue();
+      try {
+        const filterBucketResponse =
+          await cohortBuilderApi().findVariantFilterInfo(
+            namespace,
+            id,
+            this.props.selection.variantFilter
+          );
+        this.setState({ variantFilterInfoResponse: filterBucketResponse });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.setState({ loadingVariantBuckets: false });
+      }
+    }
+
+    renderVariantFilters() {
+      return (
+        <ul style={styles.filterList}>
+          {Object.entries(this.props.selection.variantFilter)
+            .filter(
+              ([key, value]) =>
+                !(
+                  (Array.isArray(value) && value.length === 0) ||
+                  ['', null].includes(value) ||
+                  key === 'sortBy'
+                )
+            )
+            .map(([key, value]) => (
+              <li>
+                <b>{VARIANT_DISPLAY[key]}</b>:{' '}
+                {Array.isArray(value) ? (
+                  <>
+                    <br />
+                    {value.join(', ')}
+                  </>
+                ) : (
+                  value.toLocaleString()
+                )}
+              </li>
+            ))}
+          <li>
+            <b>Participant Count Overview:</b>
+            {this.state.loadingVariantBuckets ? (
+              <div>
+                <Spinner size={24} style={{ margin: '1rem 5rem' }} />
               </div>
-            </TooltipTrigger>
-          </FlexColumn>
-          {!!selection.variantFilter && (
-            <ClrIcon
-              style={{
-                ...styles.caret,
-                ...(filtersExpanded ? { transform: 'rotate(90deg)' } : {}),
-              }}
-              shape={'caret right'}
-              size={18}
-              onClick={() =>
-                this.setState({ filtersExpanded: !filtersExpanded })
-              }
-            />
+            ) : (
+              <ul style={styles.filterList}>
+                {Object.entries(this.state.variantFilterInfoResponse)
+                  .filter(([, value]) => value !== 0)
+                  .map(([key, value]) => (
+                    <li>
+                      <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </li>
+        </ul>
+      );
+    }
+
+    render() {
+      const { cohortContext, index, selection, removeSelection } = this.props;
+      const { filtersExpanded, truncated } = this.state;
+      const itemName = (
+        <React.Fragment>
+          {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
+          {nameDisplay(selection)}
+        </React.Fragment>
+      );
+      return (
+        <FlexColumn style={styles.selectionItem}>
+          {index > 0 && (
+            <div style={{ padding: '0.45rem 0rem 0.45rem 1.5rem' }}>
+              OR&nbsp;
+            </div>
           )}
-        </FlexRow>
-        {!!selection.variantFilter && (
-          <div
+          <FlexRow
             style={{
-              ...styles.filterContainer,
-              maxHeight: filtersExpanded ? '22.5rem' : 0,
+              alignItems: 'baseline',
+              ...(cohortContext.editSelectAll?.parameterId ===
+              selection.parameterId
+                ? { cursor: 'not-allowed', opacity: 0.4 }
+                : {}),
             }}
           >
-            {this.renderVariantFilters()}
-          </div>
-        )}
-      </FlexColumn>
-    );
+            <button
+              style={styles.removeSelection}
+              onClick={() => removeSelection()}
+              title='Remove Selection'
+              disabled={
+                cohortContext.editSelectAll?.parameterId ===
+                selection.parameterId
+              }
+            >
+              <ClrIcon shape='times-circle' />
+            </button>
+            {!!selection.variantFilter && (
+              <button
+                style={styles.editSelectAll}
+                onClick={() =>
+                  currentCohortSearchContextStore.next({
+                    ...cohortContext,
+                    editSelectAll: selection,
+                  })
+                }
+                title='Edit Select All Group'
+                disabled={
+                  cohortContext.editSelectAll?.parameterId ===
+                  selection.parameterId
+                }
+              >
+                <ClrIcon shape={'pencil'} />
+              </button>
+            )}
+            <FlexColumn style={{ width: 'calc(100% - 1.5rem)' }}>
+              {selection.group && <div>Group</div>}
+              <TooltipTrigger disabled={!truncated} content={itemName}>
+                <div style={styles.itemName} ref={(e) => (this.name = e)}>
+                  {itemName}
+                </div>
+              </TooltipTrigger>
+            </FlexColumn>
+            {!!selection.variantFilter && (
+              <ClrIcon
+                style={{
+                  ...styles.caret,
+                  ...(filtersExpanded ? { transform: 'rotate(90deg)' } : {}),
+                }}
+                shape={'caret right'}
+                size={18}
+                onClick={() =>
+                  this.setState({ filtersExpanded: !filtersExpanded })
+                }
+              />
+            )}
+          </FlexRow>
+          {!!selection.variantFilter && (
+            <div
+              style={{
+                ...styles.filterContainer,
+                maxHeight: filtersExpanded ? '22.5rem' : 0,
+              }}
+            >
+              {this.renderVariantFilters()}
+            </div>
+          )}
+        </FlexColumn>
+      );
+    }
   }
-}
+);
 
 interface Props {
   back: Function;
