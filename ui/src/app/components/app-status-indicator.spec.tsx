@@ -23,7 +23,7 @@ describe('App Status Indicator', () => {
       );
       const iconContainer = getByTestId('app-status-icon-container');
       const statusIcon = within(iconContainer).getByTitle(
-        `Icon indicating item ${iconMeaning}`
+        `Icon indicating environment ${iconMeaning}`
       );
       expect(statusIcon).toBeInTheDocument();
     }
@@ -42,6 +42,8 @@ describe('App Status Indicator', () => {
       <AppStatusIndicator userSuspended appStatus={undefined} />
     );
     const iconContainer = getByTestId('app-status-icon-container');
-    within(iconContainer).getByTitle(`Icon indicating item is suspended`);
+    within(iconContainer).getByTitle(
+      `Icon indicating environment is suspended`
+    );
   });
 });
