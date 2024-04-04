@@ -25,6 +25,7 @@ const nodeStub = {
   type: 'PM',
 } as Criteria;
 describe('SearchBar', () => {
+  const searchTerms = 'selected search term';
   beforeEach(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
@@ -32,13 +33,13 @@ describe('SearchBar', () => {
     render(
       <SearchBar
         node={nodeStub}
-        searchTerms={''}
+        searchTerms={searchTerms}
         selectedSurvey={''}
         setIngredients={() => {}}
         selectOption={() => {}}
         setInput={() => {}}
       />
     );
-    expect(screen.getByRole('textbox')).toBeTruthy();
+    expect(screen.getByDisplayValue(searchTerms)).toBeTruthy();
   });
 });
