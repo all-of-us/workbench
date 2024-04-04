@@ -140,7 +140,7 @@ const localizeUserApp = (
   fileNames: Array<string>,
   playgroundMode: boolean
 ) =>
-  appsApi().localizeApp(namespace, appName,{
+  appsApi().localizeApp(namespace, appName, {
     fileNames,
     playgroundMode,
     appType,
