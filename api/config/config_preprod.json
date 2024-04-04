@@ -74,8 +74,7 @@
     "shortName": "preprod",
     "oauthClientId": "589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com",
     "traceAllRequests": false,
-    "appEngineLocationId": "us-central",
-    "openTelemetryGcpExporterEnabled": true
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"

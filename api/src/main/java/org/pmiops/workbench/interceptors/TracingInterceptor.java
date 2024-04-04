@@ -7,7 +7,6 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.context.Scope;
 import io.swagger.annotations.ApiOperation;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;

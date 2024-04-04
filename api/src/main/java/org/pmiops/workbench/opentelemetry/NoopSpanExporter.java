@@ -6,7 +6,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 
-
 public class NoopSpanExporter implements SpanExporter {
   /**
    * Noop implementation for exporting spans.

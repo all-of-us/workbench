@@ -238,9 +238,6 @@ public class WorkbenchConfig {
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
     public String appEngineLocationId;
-
-    // Whether to export OpenTelemetry metrics to GCP. This should be enabled in non-local.
-    public boolean openTelemetryGcpExporterEnabled;
   }
 
   public static class AdminConfig {
