@@ -39,7 +39,6 @@ describe('SearchBar', () => {
         setInput={() => {}}
       />
     );
-    screen.logTestingPlaygroundURL();
     expect(screen.getByRole('textbox')).toBeTruthy();
   });
 });
