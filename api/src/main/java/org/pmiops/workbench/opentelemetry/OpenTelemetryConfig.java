@@ -24,7 +24,6 @@ public class OpenTelemetryConfig {
   @Bean
   @Primary
   public SdkTracerProvider traceProvider() {
-    LOGGER.warning("!!!!!!!!!!!!!!" + System.getenv("WORKBENCH_ENV"));
     if (IS_GAE) {
       LOGGER.info("Running on GAE, enable GCP TraceExporter");
       return SdkTracerProvider.builder()
