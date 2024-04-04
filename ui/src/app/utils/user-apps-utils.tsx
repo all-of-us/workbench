@@ -58,12 +58,27 @@ export const updateLastActive = (userApps: ListAppsResponse) => {
   }
 };
 
+const localizeUserApp = (
+  namespace: string,
+  appName: string,
+  appType: AppType,
+  fileNames: Array<string>,
+  playgroundMode: boolean,
+  localizeAllFile: boolean
+) =>
+  appsApi().localizeApp(namespace, appName, localizeAllFile, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
+
 export const maybeStartPollingForUserApps = (namespace: string) => {
   const { updating } = userAppsStore.get();
   // Prevents multiple update processes from running concurrently.
   if (updating) {
     return;
   }
+
   const checkIfAppJustTurnedRunning = (listAppsResponse) => {
     if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
       if (
@@ -76,21 +91,27 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
       return null;
     }
 
-    const storeProvisioningApp = userAppsStore
+    const appJustTurnedRunningFromProv = userAppsStore
       .get()
       .userApps.filter((userApp) => {
-        return userApp.status === AppStatus.PROVISIONING;
+        if (
+          userApp.status === AppStatus.PROVISIONING &&
+          userApp.appType !== AppType.CROMWELL
+        ) {
+          const runningApp = listAppsResponse.filter(
+            (app) =>
+              app.appType === userApp.appType &&
+              app.status === AppStatus.RUNNING
+          );
+          return !!runningApp && runningApp.length > 0;
+        }
+        return false;
       });
 
-    // The assumption here is that Only 1 app is in provision state at a time
-    if (storeProvisioningApp.length === 0) {
+    if (appJustTurnedRunningFromProv.length === 0) {
       return null;
     }
-    const app = listAppsResponse.filter(
-      (app) => app.appType === storeProvisioningApp[0].appType
-    )[0];
-    console.log(app.status);
-    if (app.status === AppStatus.RUNNING) {
+    appJustTurnedRunningFromProv.forEach((app) => {
       fetchWithErrorModal(
         async () =>
           await localizeUserApp(
@@ -102,8 +123,7 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
             true
           )
       );
-    }
-    console.log(storeProvisioningApp);
+    });
   };
 
   userAppsStore.set({ ...userAppsStore.get(), updating: true });
@@ -177,20 +197,6 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-const localizeUserApp = (
-  namespace: string,
-  appName: string,
-  appType: AppType,
-  fileNames: Array<string>,
-  playgroundMode: boolean,
-  localizeAllFile: boolean
-) =>
-  appsApi().localizeApp(namespace, appName, localizeAllFile, {
-    fileNames,
-    playgroundMode,
-    appType,
-  });
-
 // does this app have a UI that the user can interact with?
 export const isInteractiveUIApp = (appType: UIAppType) =>
   (
@@ -206,17 +212,23 @@ export const openAppInIframe = (
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  // Confirm with yonghao
-  // fetchWithErrorModal(() =>
-  //   localizeUserApp(
-  //     workspaceNamespace,
-  //     userApp.appName,
-  //     userApp.appType,
-  //     [],
-  //       false,
-  //     false
-  //   )
-  // );
+  const url = window.location.href;
+  const urlRoute = url.substring(url.lastIndexOf('/') + 1);
+  const fileNameRegex = /[^\\]*\.(\w+)$/;
+  const fileName = urlRoute.match(fileNameRegex);
+  const localizeFileList =
+    !!fileName && fileName.length > 0 ? [fileName[0]] : [];
+
+  fetchWithErrorModal(() =>
+    localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      localizeFileList,
+      false,
+      false
+    )
+  );
   navigate([
     appDisplayPath(
       workspaceNamespace,
