@@ -20,6 +20,7 @@ import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
+import { currentWorkspaceStore } from './navigation';
 
 // the polling timeout to use when waiting for a transition (e.g. from Running to Paused)
 const transitionPollingTimeoutMs = 10e3; // 10 sec
@@ -63,6 +64,47 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
   if (updating) {
     return;
   }
+  const checkIfAppJustTurnedRunning = (listAppsResponse) => {
+    if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
+      if (
+        !!listAppsResponse &&
+        listAppsResponse.size > 0 &&
+        listAppsResponse.some((app) => app.status === 'RUNNING')
+      ) {
+        return listAppsResponse.some((app) => app.status === 'RUNNING').appType;
+      }
+      return null;
+    }
+
+    const storeProvisioningApp = userAppsStore
+      .get()
+      .userApps.filter((userApp) => {
+        return userApp.status === AppStatus.PROVISIONING;
+      });
+
+    // The assumption here is that Only 1 app is in provision state at a time
+    if (storeProvisioningApp.length === 0) {
+      return null;
+    }
+    const app = listAppsResponse.filter(
+      (app) => app.appType === storeProvisioningApp[0].appType
+    )[0];
+    console.log(app.status);
+    if (app.status === AppStatus.RUNNING) {
+      fetchWithErrorModal(
+        async () =>
+          await localizeUserApp(
+            currentWorkspaceStore.getValue().namespace,
+            app.appName,
+            app.appType,
+            [],
+            false,
+            true
+          )
+      );
+    }
+    console.log(storeProvisioningApp);
+  };
 
   userAppsStore.set({ ...userAppsStore.get(), updating: true });
   appsApi()
@@ -80,6 +122,8 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
           ? transitionPollingTimeoutMs
           : activityPollingTimeoutMs
       );
+
+      checkIfAppJustTurnedRunning(listAppsResponse);
 
       userAppsStore.set({
         userApps: listAppsResponse,
@@ -138,9 +182,10 @@ const localizeUserApp = (
   appName: string,
   appType: AppType,
   fileNames: Array<string>,
-  playgroundMode: boolean
+  playgroundMode: boolean,
+  localizeAllFile: boolean
 ) =>
-  appsApi().localizeApp(namespace, appName, {
+  appsApi().localizeApp(namespace, appName, localizeAllFile, {
     fileNames,
     playgroundMode,
     appType,
@@ -161,15 +206,17 @@ export const openAppInIframe = (
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  fetchWithErrorModal(() =>
-    localizeUserApp(
-      workspaceNamespace,
-      userApp.appName,
-      userApp.appType,
-      [],
-      false
-    )
-  );
+  // Confirm with yonghao
+  // fetchWithErrorModal(() =>
+  //   localizeUserApp(
+  //     workspaceNamespace,
+  //     userApp.appName,
+  //     userApp.appType,
+  //     [],
+  //       false,
+  //     false
+  //   )
+  // );
   navigate([
     appDisplayPath(
       workspaceNamespace,
