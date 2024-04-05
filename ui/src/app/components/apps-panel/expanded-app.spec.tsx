@@ -394,6 +394,7 @@ describe('ExpandedApp', () => {
           expect(localizeSpy).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
             appName,
+            false,
             {
               appType: toAppType[appType],
               fileNames: [],

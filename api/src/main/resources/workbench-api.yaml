@@ -832,6 +832,15 @@ paths:
         required: true
         schema:
           type: string
+      - in: query
+        name: localizeAllFiles
+        description: |
+          Optional query that will localize all files associate with this app. 
+          If true, it will ignore fileNames in body and localize all files instead.
+        required: false
+        schema:
+          type: boolean
+          default: false
       requestBody:
         description: Localization request.
         content:
@@ -1102,6 +1111,15 @@ paths:
         required: true
         schema:
           type: string
+      - in: query
+        name: localizeAllFiles
+        description: |
+          Optional query that will localize all files associate with this app. 
+          If true, it will ignore fileNames in body and localize all files instead.
+        required: false
+        schema:
+          type: boolean
+          default: false
       requestBody:
         description: Localization request.
         content:

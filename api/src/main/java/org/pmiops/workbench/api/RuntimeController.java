@@ -274,7 +274,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<RuntimeLocalizeResponse> localize(
-      String workspaceNamespace, RuntimeLocalizeRequest body) {
+      String workspaceNamespace, Boolean localizeAllFiles, RuntimeLocalizeRequest body) {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
@@ -295,6 +295,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                     appType,
                     body.getNotebookNames(),
                     body.isPlaygroundMode(),
-                    true)));
+                    true,
+                    localizeAllFiles)));
   }
 }

@@ -3,6 +3,7 @@ package org.pmiops.workbench.notebooks;
 import com.google.cloud.storage.Blob;
 import java.util.List;
 import org.json.JSONObject;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 
@@ -16,6 +17,12 @@ public interface NotebooksService {
    * input value should be trusted.
    */
   List<FileDetail> getNotebooksAsService(
+      String bucketName, String workspaceNamespace, String workspaceName);
+
+  List<FileDetail> getAllNotebooksByAppType(
+      String bucketName, String workspaceNamespace, String workspaceName, AppType appType);
+
+  List<FileDetail> getAllJupyterNotebooks(
       String bucketName, String workspaceNamespace, String workspaceName);
 
   /**
