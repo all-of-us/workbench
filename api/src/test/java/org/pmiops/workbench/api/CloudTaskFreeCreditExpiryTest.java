@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Doubles;
 import jakarta.mail.MessagingException;
@@ -152,11 +151,11 @@ class CloudTaskFreeCreditExpiryTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    Map<Long, Double> allDbCosts = Maps.newHashMap();
-    allDbCosts.put(user.getUserId(), 0.0d);
+    Map<String, Double> allDbCosts = Maps.newHashMap();
+    allDbCosts.put(String.valueOf(user.getUserId()), 0.0d);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), costUnderThreshold);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
 
     // check that we have not alerted before the threshold
     ExpiredFreeCreditsEventRequest request =
@@ -165,7 +164,7 @@ class CloudTaskFreeCreditExpiryTest {
     verifyNoInteractions(mailService);
 
     // check that we alert for the 50% threshold
-    allBQCosts.put(user.getUserId(), costOverThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     request.setLiveCostByCreator(allBQCosts);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService)
@@ -173,7 +172,7 @@ class CloudTaskFreeCreditExpiryTest {
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 50% threshold
-    allDbCosts.put(user.getUserId(), costOverThreshold);
+    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
 
@@ -182,7 +181,7 @@ class CloudTaskFreeCreditExpiryTest {
     costOverThreshold = 75.3;
     remaining = limit - costOverThreshold;
 
-    allBQCosts.put(user.getUserId(), costOverThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     request.setLiveCostByCreator(allBQCosts);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService)
@@ -190,21 +189,21 @@ class CloudTaskFreeCreditExpiryTest {
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 75% threshold
-    allDbCosts.put(user.getUserId(), costOverThreshold);
+    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
     final double costToTriggerExpiration = 100.01;
 
-    allBQCosts.put(user.getUserId(), costToTriggerExpiration);
+    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     request.setLiveCostByCreator(allBQCosts);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // check that we do not alert twice for 100%
-    allDbCosts.put(user.getUserId(), costToTriggerExpiration);
+    allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
   }
@@ -228,12 +227,12 @@ class CloudTaskFreeCreditExpiryTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    Map<Long, Double> allDbCosts = Maps.newHashMap();
-    allDbCosts.put(user.getUserId(), 0.0d);
+    Map<String, Double> allDbCosts = Maps.newHashMap();
+    allDbCosts.put(String.valueOf(user.getUserId()), 0.0d);
 
     // check that we have not alerted before the threshold
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), costUnderThreshold);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
 
     ExpiredFreeCreditsEventRequest request =
         buildExpiredFreeCreditsEventRequest(List.of(user), allBQCosts, allDbCosts);
@@ -242,16 +241,16 @@ class CloudTaskFreeCreditExpiryTest {
     verifyNoInteractions(mailService);
 
     // check that we alert for the 30% threshold
-    allBQCosts.put(user.getUserId(), costOverThreshold);
-    allDbCosts.put(user.getUserId(), costUnderThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
+    allDbCosts.put(String.valueOf(user.getUserId()), costUnderThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
             eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
 
     // check that we do not alert twice for the 30% threshold
-    allBQCosts.put(user.getUserId(), costOverThreshold);
-    allDbCosts.put(user.getUserId(), costOverThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
+    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
 
@@ -261,7 +260,7 @@ class CloudTaskFreeCreditExpiryTest {
     costOverThreshold = 65.01;
     remaining = limit - costOverThreshold;
 
-    allBQCosts.put(user.getUserId(), costOverThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(
@@ -269,23 +268,23 @@ class CloudTaskFreeCreditExpiryTest {
 
     // check that we do not alert twice for the 65% threshold
 
-    allBQCosts.put(user.getUserId(), costOverThreshold);
-    allDbCosts.put(user.getUserId(), costOverThreshold);
+    allBQCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
+    allDbCosts.put(String.valueOf(user.getUserId()), costOverThreshold);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
     final double costToTriggerExpiration = 100.01;
-    allBQCosts.put(user.getUserId(), costToTriggerExpiration);
+    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // check that we do not alert twice for 100%
 
-    allBQCosts.put(user.getUserId(), costToTriggerExpiration);
-    allDbCosts.put(user.getUserId(), costToTriggerExpiration);
+    allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
+    allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoMoreInteractions(mailService);
   }
@@ -299,14 +298,14 @@ class CloudTaskFreeCreditExpiryTest {
     user.setDisabled(true);
     userDao.save(user);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 100.01);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     ExpiredFreeCreditsEventRequest request =
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
 
@@ -324,12 +323,12 @@ class CloudTaskFreeCreditExpiryTest {
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(workspace);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 100.01);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
     ExpiredFreeCreditsEventRequest request =
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
 
@@ -345,12 +344,12 @@ class CloudTaskFreeCreditExpiryTest {
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 49.99);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 49.99);
 
     ExpiredFreeCreditsEventRequest request =
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoInteractions(mailService);
@@ -367,11 +366,11 @@ class CloudTaskFreeCreditExpiryTest {
     createWorkspace(null, "rumney");
 
     // set limit so usage is just under the 50% threshold
-    Map<Long, Double> allBQCosts = Map.of(user.getUserId(), 49.99);
+    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 49.99);
 
     ExpiredFreeCreditsEventRequest request =
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d));
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(request);
     verifyNoInteractions(mailService);
@@ -387,12 +386,12 @@ class CloudTaskFreeCreditExpiryTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 150.0);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 150.0);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
@@ -403,7 +402,7 @@ class CloudTaskFreeCreditExpiryTest {
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 150.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 150.0)));
 
     verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.ACTIVE);
@@ -421,12 +420,12 @@ class CloudTaskFreeCreditExpiryTest {
     workspaceFreeTierUsageDao.save(
         new DbWorkspaceFreeTierUsage(workspace).setUser(user).setCost(300.0));
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 300.0);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 300.0);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
 
@@ -435,7 +434,7 @@ class CloudTaskFreeCreditExpiryTest {
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 300.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 300.0)));
     verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
   }
@@ -455,12 +454,12 @@ class CloudTaskFreeCreditExpiryTest {
     final DbWorkspace ws1 = createWorkspace(user, proj1);
     final DbWorkspace ws2 = createWorkspace(user, proj2);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), sum);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), sum);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // confirm DB updates after handleFreeCreditsExpiry()
@@ -487,15 +486,15 @@ class CloudTaskFreeCreditExpiryTest {
     DbUser user2 = createUser("more@test.com");
     DbWorkspace ws2 = createWorkspace(user2, proj2);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user1.getUserId(), cost1);
-    allBQCosts.put(user2.getUserId(), cost2);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user1.getUserId()), cost1);
+    allBQCosts.put(String.valueOf(user2.getUserId()), cost2);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
             List.of(user1, user2),
             allBQCosts,
-            Map.of(user1.getUserId(), 0d, user2.getUserId(), 0d)));
+            Map.of(String.valueOf(user1.getUserId()), 0d, String.valueOf(user2.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user1));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user2));
 
@@ -514,24 +513,24 @@ class CloudTaskFreeCreditExpiryTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 100.01);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
 
     // time elapses, and this project incurs additional cost
 
     final double newTotalCost = 123.45;
-    allBQCosts.put(user.getUserId(), newTotalCost);
+    allBQCosts.put(String.valueOf(user.getUserId()), newTotalCost);
 
     // we do not alert again
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 100.01)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 100.01)));
     verify(mailService, times(1)).alertUserInitialCreditsExpiration(eq(user));
 
     // retrieve from DB again to reflect update after cron
@@ -547,12 +546,12 @@ class CloudTaskFreeCreditExpiryTest {
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    Map<Long, Double> allBQCosts = Maps.newHashMap();
-    allBQCosts.put(user.getUserId(), 100.01);
+    Map<String, Double> allBQCosts = Maps.newHashMap();
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.01);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
@@ -564,7 +563,7 @@ class CloudTaskFreeCreditExpiryTest {
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 100.01)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 100.01)));
     verifyNoMoreInteractions(mailService);
   }
 
@@ -584,10 +583,10 @@ class CloudTaskFreeCreditExpiryTest {
             .setBillingStatus(BillingStatus.ACTIVE);
     workspaceDao.save(userAccountWorkspace);
 
-    Map<Long, Double> allBQCosts = ImmutableMap.of(user.getUserId(), 100.01);
+    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.01);
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, Map.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(freeTierWorkspace, BillingStatus.INACTIVE);
@@ -605,7 +604,7 @@ class CloudTaskFreeCreditExpiryTest {
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    Map<Long, Double> allBQCosts = Map.of(user.getUserId(), 50.0);
+    Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 50.0);
 
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -613,14 +612,14 @@ class CloudTaskFreeCreditExpiryTest {
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, ImmutableMap.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
 
-    allBQCosts = Map.of(user.getUserId(), 100.1);
+    allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.1);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, ImmutableMap.of(user.getUserId(), 50.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
   }
 
@@ -632,8 +631,8 @@ class CloudTaskFreeCreditExpiryTest {
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-    Map<Long, Double> allBQCosts = new HashMap<>();
-    allBQCosts.put(user.getUserId(), 50.0);
+    Map<String, Double> allBQCosts = new HashMap<>();
+    allBQCosts.put(String.valueOf(user.getUserId()), 50.0);
 
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspace.setLastModifiedTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -641,18 +640,18 @@ class CloudTaskFreeCreditExpiryTest {
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, ImmutableMap.of(user.getUserId(), 0d)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
     verifyNoInteractions(mailService);
 
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.ACTIVE);
 
-    allBQCosts.put(user.getUserId(), 100.1);
+    allBQCosts.put(String.valueOf(user.getUserId()), 100.1);
 
     cloudTaskFreeCreditExpiry.handleFreeCreditsExpiry(
         buildExpiredFreeCreditsEventRequest(
-            List.of(user), allBQCosts, ImmutableMap.of(user.getUserId(), 50.0)));
+            List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
     verify(mailService).alertUserInitialCreditsExpiration(eq(user));
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
@@ -682,7 +681,7 @@ class CloudTaskFreeCreditExpiryTest {
 
   @NotNull
   private static ExpiredFreeCreditsEventRequest buildExpiredFreeCreditsEventRequest(
-      List<DbUser> users, Map<Long, Double> allBQCosts, Map<Long, Double> dbCostByCreator) {
+      List<DbUser> users, Map<String, Double> allBQCosts, Map<String, Double> dbCostByCreator) {
     ExpiredFreeCreditsEventRequest request = new ExpiredFreeCreditsEventRequest();
     request.setUsers(users.stream().map(DbUser::getUserId).collect(Collectors.toList()));
     request.setLiveCostByCreator(allBQCosts);

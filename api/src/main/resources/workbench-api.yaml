@@ -9607,16 +9607,19 @@ components:
         users:
           type: array
           description: List of User IDs to check for free credits
+          items:
+            type: integer
+            format: int64
         dbCostByCreator:
           type: object
           properties: { }
           description: |
-            A map of the total cost of the user's workspaces in the database, indexed by the user's email address.
+            A map of the total cost of the user's workspaces in the database, indexed by the user's ID'.
         liveCostByCreator:
           type: object
           properties: { }
           description: |
-            A map of the total live cost of the user's workspaces, indexed by the user's email address.
+            A map of the total live cost of the user's workspaces, indexed by the user's ID.
     WorkspaceAdminView:
       type: object
       properties:

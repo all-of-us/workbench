@@ -67,9 +67,13 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
       return ResponseEntity.badRequest().build();
     }
 
-    Iterable<DbUser> users = (Iterable<DbUser>) userDao.findAllById(request.getUsers());
-    Map<Long, Double> dbCostByCreator = (Map<Long, Double>) request.getDbCostByCreator();
-    Map<Long, Double> liveCostByCreator = (Map<Long, Double>) request.getLiveCostByCreator();
+    Iterable<DbUser> users = userDao.findAllById(request.getUsers());
+    Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
+    Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);
+
+    Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
+    Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
+
     Set<DbUser> usersSet =
         StreamSupport.stream(users.spliterator(), false).collect(Collectors.toSet());
     var newlyExpiredUsers = getNewlyExpiredUsers(usersSet, dbCostByCreator, liveCostByCreator);
@@ -281,5 +285,13 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
         break;
       }
     }
+  }
+
+  private Map<Long, Double> convertMapKeysToLong(Map<String, Double> stringKeyMap) {
+    Map<Long, Double> longKeyMap = new HashMap<>();
+    for (Map.Entry<String, Double> entry : stringKeyMap.entrySet()) {
+      longKeyMap.put(Long.parseLong(entry.getKey()), entry.getValue());
+    }
+    return longKeyMap;
   }
 }

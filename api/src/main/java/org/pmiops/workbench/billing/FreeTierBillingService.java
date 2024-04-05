@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +23,8 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.pmiops.workbench.workspaces.WorkspaceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,7 +42,7 @@ public class FreeTierBillingService {
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
 
-  private static final Logger logger = Logger.getLogger(FreeTierBillingService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FreeTierBillingService.class);
 
   @Autowired
   public FreeTierBillingService(
@@ -89,7 +90,10 @@ public class FreeTierBillingService {
     List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
 
     final Map<String, Long> workspaceByProject = getWorkspaceByProjectCache(allCostsInDbForUsers);
-    if (workspaceByProject == null) return;
+    if (workspaceByProject == null) {
+      logger.info("No workspaces require updates");
+      return;
+    }
     updateFreeTierUsageInDb(allCostsInDbForUsers, liveCostsInBQ, workspaceByProject);
 
     // Cache cost in DB by creator
@@ -104,6 +108,14 @@ public class FreeTierBillingService {
     if (users.isEmpty()) {
       return;
     }
+
+    /*List<UserCost> userCosts = users.stream()
+    .map(user -> new UserCost().userId(
+            user.getUserId()).dbCost(
+            dbCostByCreator.getOrDefault(user.getUserId(), 0.0)).liveCost(
+            liveCostByCreator.getOrDefault(user.getUserId(), 0.0)))
+    .collect(Collectors.toList());*/
+
     taskQueueService.pushExpiredFreeCreditsTask(
         users.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
