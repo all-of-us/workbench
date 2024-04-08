@@ -48,6 +48,7 @@ public class TracingInterceptor implements AsyncHandlerInterceptor {
     currentSpan.setAttribute("aou-env", workbenchConfigProvider.get().server.shortName);
     currentSpan.setAttribute("method", request.getMethod());
     currentSpan.setAttribute("path", request.getRequestURI());
+    currentSpan.setAttribute("query", request.getQueryString());
     ApiOperation apiOp =
         AnnotationUtils.findAnnotation(handlerMethod.getMethod(), ApiOperation.class);
     if (apiOp != null) {
