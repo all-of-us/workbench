@@ -216,7 +216,7 @@ export const openAppInIframe = (
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
-  const url = window.location.href;
+  const url = decodeURI(window.location.href);
   const urlRoute = url.substring(url.lastIndexOf('/') + 1);
   const fileNameRegex = /[^\\]*\.(\w+)$/;
   const fileName = urlRoute.match(fileNameRegex);
