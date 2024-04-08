@@ -473,10 +473,9 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                           <ul style={styles.subMenu}>
                                             {menuItem.children?.map(
                                               (subMenuItem, s) => (
-                                                <li>
+                                                <li key={s}>
                                                   <a
                                                     role='menuitem'
-                                                    key={s}
                                                     style={{
                                                       ...styles.subMenuItem,
                                                       ...(subHoverId ===

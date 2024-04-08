@@ -109,6 +109,7 @@ export class AppsApiStub extends AppsApi {
   public localizeApp(
     _workspaceNamespace: string,
     _appName: string,
+    _localizeAllFiles: boolean,
     _body: AppLocalizeRequest,
     _options: any
   ): Promise<AppLocalizeResponse> {

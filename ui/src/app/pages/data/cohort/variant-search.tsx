@@ -249,13 +249,13 @@ export const VariantSearch = fp.flow(
         setVariantFilters(variantFilter);
         setExcludeFromSelectAll(variantFilter.exclusionList ?? []);
         setEditSelectAllResults(true);
+        setLoading(true);
         setSearching(true);
       }
     }, [cohortContext]);
 
     useEffect(() => {
       if (editSelectAllResults) {
-        setLoading(true);
         searchVariants(false);
       }
     }, [editSelectAllResults]);
@@ -471,7 +471,7 @@ export const VariantSearch = fp.flow(
       criteria.some((crit) => crit.parameterId === getFilterParamId());
     const disableSelectAllSave =
       excludeFromSelectAll.length ===
-      cohortContext.editSelectAll?.variantFilter.exclusionList.length;
+      cohortContext.editSelectAll?.variantFilter.exclusionList?.length;
     const displayResults = searchResults?.slice(first, first + pageSize);
     return (
       <>
@@ -484,6 +484,7 @@ export const VariantSearch = fp.flow(
                 style={styles.searchInput}
                 value={searchTerms}
                 placeholder='Search Variants'
+                disabled={editSelectAllResults}
                 onChange={(e) => setSearchTerms(e)}
                 onKeyPress={handleInput}
               />
@@ -560,8 +561,8 @@ export const VariantSearch = fp.flow(
                     />
                     Save Select All Exclusions (
                     {excludeFromSelectAll.length -
-                      cohortContext.editSelectAll.variantFilter.exclusionList
-                        .length}
+                      (cohortContext.editSelectAll.variantFilter.exclusionList
+                        ?.length || 0)}
                     )
                   </Clickable>
                   <Clickable

@@ -20,6 +20,7 @@ import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
+import { currentWorkspaceStore } from './navigation';
 
 // the polling timeout to use when waiting for a transition (e.g. from Running to Paused)
 const transitionPollingTimeoutMs = 10e3; // 10 sec
@@ -57,6 +58,71 @@ export const updateLastActive = (userApps: ListAppsResponse) => {
   }
 };
 
+const localizeUserApp = (
+  namespace: string,
+  appName: string,
+  appType: AppType,
+  fileNames: Array<string>,
+  playgroundMode: boolean,
+  localizeAllFile: boolean
+) =>
+  appsApi().localizeApp(namespace, appName, localizeAllFile, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
+
+const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
+  // Note: We do not call localize for CROMWELL
+  // We want app that are transitioning from PROVISIONING to RUNNING
+  const appsJustStartedRunning = userAppsStore
+    .get()
+    .userApps.filter((userApp) => {
+      if (
+        userApp.status === AppStatus.PROVISIONING &&
+        userApp.appType !== AppType.CROMWELL
+      ) {
+        const runningAppFromApi = listAppsResponse.filter(
+          (app) =>
+            app.appType === userApp.appType && app.status === AppStatus.RUNNING
+        );
+        return !!runningAppFromApi && runningAppFromApi.length > 0;
+      }
+      return false;
+    });
+  return appsJustStartedRunning;
+};
+
+const callLocalizeIfApplicable = (listAppsResponse) => {
+  // If userAppsStore is not updated lets wait for it to be updated before checking
+  if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
+    return null;
+  }
+
+  // Get the list of Apps that are in PROVISIONING state in store but RUNNING in list of Apps from api response
+  // We want to call Localize only ONCE just as soon as they are running
+  const appsTransitionToRunningNow =
+    appJustTurnedRunningFromProvisioning(listAppsResponse);
+
+  if (appsTransitionToRunningNow.length === 0) {
+    return null;
+  }
+
+  appsTransitionToRunningNow.forEach((app) => {
+    fetchWithErrorModal(
+      async () =>
+        await localizeUserApp(
+          currentWorkspaceStore.getValue().namespace,
+          app.appName,
+          app.appType,
+          [],
+          false,
+          true
+        )
+    );
+  });
+};
+
 export const maybeStartPollingForUserApps = (namespace: string) => {
   const { updating } = userAppsStore.get();
   // Prevents multiple update processes from running concurrently.
@@ -80,6 +146,8 @@ export const maybeStartPollingForUserApps = (namespace: string) => {
           ? transitionPollingTimeoutMs
           : activityPollingTimeoutMs
       );
+
+      callLocalizeIfApplicable(listAppsResponse);
 
       userAppsStore.set({
         userApps: listAppsResponse,
@@ -133,19 +201,6 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-const localizeUserApp = (
-  namespace: string,
-  appName: string,
-  appType: AppType,
-  fileNames: Array<string>,
-  playgroundMode: boolean
-) =>
-  appsApi().localizeApp(namespace, appName, {
-    fileNames,
-    playgroundMode,
-    appType,
-  });
-
 // does this app have a UI that the user can interact with?
 export const isInteractiveUIApp = (appType: UIAppType) =>
   (
@@ -161,12 +216,20 @@ export const openAppInIframe = (
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
+  const url = window.location.href;
+  const urlRoute = url.substring(url.lastIndexOf('/') + 1);
+  const fileNameRegex = /[^\\]*\.(\w+)$/;
+  const fileName = urlRoute.match(fileNameRegex);
+  const localizeFileList =
+    !!fileName && fileName.length > 0 ? [fileName[0]] : [];
+
   fetchWithErrorModal(() =>
     localizeUserApp(
       workspaceNamespace,
       userApp.appName,
       userApp.appType,
-      [],
+      localizeFileList,
+      false,
       false
     )
   );

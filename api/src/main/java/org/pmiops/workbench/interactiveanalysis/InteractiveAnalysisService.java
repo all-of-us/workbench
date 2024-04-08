@@ -23,6 +23,8 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -43,6 +45,7 @@ public class InteractiveAnalysisService {
   private final UserRecentResourceService userRecentResourceService;
 
   private final LeonardoApiClient leonardoNotebooksClient;
+  private final NotebooksService notebooksService;
 
   private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
@@ -69,13 +72,15 @@ public class InteractiveAnalysisService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
-      LeonardoApiClient leonardoNotebooksClient) {
+      LeonardoApiClient leonardoNotebooksClient,
+      NotebooksService notebooksService) {
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.notebooksService = notebooksService;
   }
 
   public String localize(
@@ -84,7 +89,8 @@ public class InteractiveAnalysisService {
       @Nullable AppType appType,
       List<String> fileNames,
       boolean isPlayground,
-      boolean isGceRuntime) {
+      boolean isGceRuntime,
+      boolean localizeAllFiles) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     final RawlsWorkspaceDetails firecloudWorkspace;
     try {
@@ -161,12 +167,35 @@ public class InteractiveAnalysisService {
 
     localizeMap.put(aouConfigEditDir, aouConfigUri);
 
-    // Localize the requested notebooks, if any.
-    localizeMap.putAll(
-        fileNames.stream()
-            .collect(
-                Collectors.toMap(
-                    name -> localizeTargetDir + name, name -> gcsNotebooksDir + "/" + name)));
+    // Localize all files if localizeAllFiles is true, otherwise, localize the requested notebooks.
+    if (localizeAllFiles) {
+      List<FileDetail> notebooks;
+      if (isGceRuntime) {
+        notebooks =
+            notebooksService.getAllJupyterNotebooks(
+                firecloudWorkspace.getBucketName(),
+                workspaceNamespace,
+                firecloudWorkspace.getName());
+      } else {
+        notebooks =
+            notebooksService.getAllNotebooksByAppType(
+                firecloudWorkspace.getBucketName(),
+                workspaceNamespace,
+                firecloudWorkspace.getName(),
+                appType);
+      }
+      localizeMap.putAll(
+          notebooks.stream()
+              .collect(
+                  Collectors.toMap(
+                      notebook -> localizeTargetDir + notebook.getName(), FileDetail::getPath)));
+    } else {
+      localizeMap.putAll(
+          fileNames.stream()
+              .collect(
+                  Collectors.toMap(
+                      name -> localizeTargetDir + name, name -> gcsNotebooksDir + "/" + name)));
+    }
 
     if (isGceRuntime) {
       localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
