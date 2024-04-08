@@ -42,9 +42,6 @@ public class TracingInterceptor implements AsyncHandlerInterceptor {
     HandlerMethod handlerMethod = (HandlerMethod) handler;
     SpanBuilder requestSpanBuilder =
         tracer.spanBuilder(handlerMethod.getMethod().getName()).setSpanKind(SpanKind.SERVER);
-    if (workbenchConfigProvider.get().server.traceAllRequests) {
-      requestSpanBuilder.setSpanKind(SpanKind.SERVER);
-    }
     Context requestScopedSpan = requestSpanBuilder.startSpan().storeInContext(Context.current());
 
     final Span currentSpan = Span.fromContext(requestScopedSpan);
