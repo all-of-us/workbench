@@ -3,7 +3,7 @@ package org.pmiops.workbench.terra;
 import java.util.Optional;
 import java.util.function.Function;
 import jakarta.inject.Provider;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.UnauthorizedException;

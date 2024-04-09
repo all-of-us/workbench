@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cdr;
 
-import org.hibernate.dialect.MySQL5Dialect;
-import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.community.dialect.MySQL5Dialect;
+import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.type.StandardBasicTypes;
 
 public class CommonTestDialect extends MySQL5Dialect {
-
   public CommonTestDialect() {
     super();
     // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
@@ -14,13 +13,13 @@ public class CommonTestDialect extends MySQL5Dialect {
 
     registerFunction(
         "match",
-        new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "LOCATE(REPLACE(?2, '+'), ?1)"));
+        new StandardSQLFunction("LOCATE(REPLACE(?2, '+'), ?1)", StandardBasicTypes.DOUBLE));
 
     registerFunction(
         "matchConcept",
-        new SQLFunctionTemplate(
-            StandardBasicTypes.DOUBLE,
-            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
+        new StandardSQLFunction(
+            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))",
+            StandardBasicTypes.DOUBLE));
   }
 
   @Override

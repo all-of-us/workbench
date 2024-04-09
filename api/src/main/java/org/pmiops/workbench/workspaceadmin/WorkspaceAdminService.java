@@ -2,7 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;

@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.inject.Provider;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryDataSetTableInfo;

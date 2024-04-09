@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import okhttp3.Call;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.leonardo.ApiClient;

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.

@@ -468,6 +468,7 @@ dependencies {
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
     implementation "org.hibernate.orm:hibernate-core:$project.ext.HIBERNATE_VERSION"
+    implementation "org.hibernate.orm:hibernate-community-dialects:$project.ext.HIBERNATE_VERSION"
 
     implementation('org.apache.tomcat:tomcat-jdbc:10.0.23')
     implementation("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
@@ -525,12 +526,14 @@ dependencies {
     // jakarta
     implementation "jakarta.inject:jakarta.inject-api:2.0.1"
     implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
+    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
     generatedCompile "jakarta.xml.bind:jakarta.xml.bind-api:4.0.1"
     generatedCompile "jakarta.inject:jakarta.inject-api:2.0.1"
     generatedCompile 'jakarta.mail:jakarta.mail-api:2.1.3'
+    generatedCompile 'jakarta.annotation:jakarta.annotation-api:3.0.0'
     generatedCompile 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     generatedCompile 'jakarta.validation:jakarta.validation-api:3.0.2'
     generatedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
@@ -548,8 +551,6 @@ dependencies {
     // template file api.mustache for more details.
     generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
     generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
-
-    generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 
     // Swagger3 codegen deps
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
@@ -902,31 +903,8 @@ dependencies {
     testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
     testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
     modules {
-    module("com.sun.activation:jakarta.activation") {
-      replacedBy("jakarta.annotation:jakarta.annotation-api")
-    }
-    module("javax.annotation:javax.annotation-api") {
-      replacedBy("jakarta.annotation:jakarta.annotation-api")
-    }
-    module("org.apache.tomcat:tomcat-annotations-api") {
-      replacedBy("jakarta.annotation:jakarta.annotation-api")
-    }
-    module("jakarta.persistence:jakarta.persistence-api") {
-      replacedBy("jakarta.persistence:jakarta.persistence-api")
-    }
     module("org.aspectj:aspectjrt") { replacedBy("org.aspectj:aspectjweaver") }
-    module("javax.xml.bind:javax.xml.bind-api") {
-      replacedBy("jakarta.xml.bind:jakarta.xml.bind-api")
-    }
-    module("javax.xml.bind:jaxb-api") { replacedBy("jakarta.xml.bind:jakarta.xml.bind-api") }
-    module("javax.activation:javax.activation-api") {
-      replacedBy("jakarta.activation:jakarta.activation-api")
-    }
-    module("org.jboss.spec.javax.transaction:jboss-transaction-api_1.2_spec") {
-      replacedBy("jakarta.transaction:jakarta.transaction-api")
-    }
     module("org.springframework:spring-jcl") { replacedBy("commons-logging:commons-logging") }
-    module("javax.servlet:servlet-api") { replacedBy("jakarta.servlet:jakarta.servlet-api") }
     module("org.apache.tomcat:tomcat-juli") {
       replacedBy("org.apache.tomcat.embed:tomcat-embed-core")
     }

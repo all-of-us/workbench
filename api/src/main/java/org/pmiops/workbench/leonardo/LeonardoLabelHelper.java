@@ -3,7 +3,7 @@ package org.pmiops.workbench.leonardo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.pmiops.workbench.model.AppType;
 
 /** Helper class for setting Leonardo labels. */

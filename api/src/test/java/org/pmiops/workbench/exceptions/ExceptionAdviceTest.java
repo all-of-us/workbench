@@ -3,7 +3,7 @@ package org.pmiops.workbench.exceptions;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

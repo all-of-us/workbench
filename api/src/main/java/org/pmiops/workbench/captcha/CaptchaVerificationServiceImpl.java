@@ -33,8 +33,8 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   @Autowired
   public CaptchaVerificationServiceImpl(
       CloudStorageClient cloudStorageClient,
-      javax.inject.Provider<WorkbenchConfig> configProvider,
-      javax.inject.Provider<CaptchaApi> captchaApiProvider) {
+      jakarta.inject.Provider<WorkbenchConfig> configProvider,
+      jakarta.inject.Provider<CaptchaApi> captchaApiProvider) {
     this.cloudStorageClient = cloudStorageClient;
     this.configProvider = configProvider;
     this.captchaApiProvider = captchaApiProvider;

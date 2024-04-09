@@ -12,7 +12,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /** Utility class for working with FieldValueLists, FieldValues, and Fields */
 public final class FieldValues {
