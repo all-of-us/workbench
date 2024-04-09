@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;

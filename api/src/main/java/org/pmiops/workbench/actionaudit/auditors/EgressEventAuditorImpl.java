@@ -6,7 +6,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;

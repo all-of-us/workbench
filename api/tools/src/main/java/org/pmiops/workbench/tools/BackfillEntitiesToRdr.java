@@ -4,7 +4,7 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;

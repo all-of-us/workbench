@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.model.DbUser;

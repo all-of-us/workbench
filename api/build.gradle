@@ -6,10 +6,9 @@ buildscript {
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
-        GAE_VERSION = '2.0.9'
         GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.9.1'
-        HIBERNATE_VERSION = '5.6.15.Final'
+        HIBERNATE_VERSION = '6.4.4.Final'
         JACKSON_VERSION = '2.16.1'
         LIQUIBASE_VERSION = '4.27.0'
         LOGBACK_VERSION = '1.2.13'
@@ -19,8 +18,8 @@ buildscript {
         OPENTELEMETRY_JAVA_VERSION = '2.2.0'
         OPENTELEMETRY_GOOGLE_VERSION = '0.27.0'
         SPRINGFOX_VERSION = '3.0.0'
-        SPRING_BOOT_VERSION = '2.7.18'
-        SPRING_FRAMEWORK_VERSION = '5.3.32'
+        SPRING_BOOT_VERSION = '3.2.4'
+        SPRING_FRAMEWORK_VERSION = '6.1.5'
         SPRING_SECURITY_VERSION = '6.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.52'
     }
@@ -148,6 +147,7 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
                     'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
                     'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
                     'hideGenerationTimestamp': 'true',
+                    'jakarta'          : 'true',
             ]
         }
         // Validation only works for Swagger 2 - skip.
@@ -214,6 +214,7 @@ swaggerSources {
                     'delegatePattern': 'true',
                     'dateLibrary'    : 'java8',
                     'hideGenerationTimestamp': 'true',
+                    'jakarta'          : 'true',
             ]
         }
     }
@@ -429,7 +430,6 @@ dependencies {
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
-    implementation "javax.inject:javax.inject:1"
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation "org.apache.commons:commons-collections4:4.4"
@@ -467,7 +467,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.25.3'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
-    implementation "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
+    implementation "org.hibernate.orm:hibernate-core:$project.ext.HIBERNATE_VERSION"
 
     implementation('org.apache.tomcat:tomcat-jdbc:10.0.23')
     implementation("org.springframework.boot:spring-boot-starter-tomcat:$project.ext.SPRING_BOOT_VERSION")
@@ -522,6 +522,19 @@ dependencies {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
 
+    // jakarta
+    implementation "jakarta.inject:jakarta.inject-api:2.0.1"
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    generatedCompile "jakarta.xml.bind:jakarta.xml.bind-api:4.0.1"
+    generatedCompile "jakarta.inject:jakarta.inject-api:2.0.1"
+    generatedCompile 'jakarta.mail:jakarta.mail-api:2.1.3'
+    generatedCompile 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    generatedCompile 'jakarta.validation:jakarta.validation-api:3.0.2'
+    generatedCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
     // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
@@ -553,7 +566,7 @@ dependencies {
     generatedCompile 'io.springfox:springfox-oas:3.0.0'
 
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    providedCompile group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
 
     __tools__Implementation 'commons-cli:commons-cli:1.5.0'
     __tools__Implementation 'com.opencsv:opencsv:5.7.0'
@@ -898,7 +911,7 @@ dependencies {
     module("org.apache.tomcat:tomcat-annotations-api") {
       replacedBy("jakarta.annotation:jakarta.annotation-api")
     }
-    module("javax.persistence:javax.persistence-api") {
+    module("jakarta.persistence:jakarta.persistence-api") {
       replacedBy("jakarta.persistence:jakarta.persistence-api")
     }
     module("org.aspectj:aspectjrt") { replacedBy("org.aspectj:aspectjweaver") }
@@ -913,7 +926,7 @@ dependencies {
       replacedBy("jakarta.transaction:jakarta.transaction-api")
     }
     module("org.springframework:spring-jcl") { replacedBy("commons-logging:commons-logging") }
-    module("javax.servlet:servlet-api") { replacedBy("javax.servlet:javax.servlet-api") }
+    module("javax.servlet:servlet-api") { replacedBy("jakarta.servlet:jakarta.servlet-api") }
     module("org.apache.tomcat:tomcat-juli") {
       replacedBy("org.apache.tomcat.embed:tomcat-embed-core")
     }

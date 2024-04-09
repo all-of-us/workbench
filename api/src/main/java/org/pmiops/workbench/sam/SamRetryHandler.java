@@ -2,7 +2,7 @@ package org.pmiops.workbench.sam;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.broadinstitute.dsde.workbench.client.sam.ApiException;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;

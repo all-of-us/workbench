@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.jira.api.JiraApi;
 import org.pmiops.workbench.jira.model.AtlassianDocument;
 import org.pmiops.workbench.jira.model.Comment;

@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;

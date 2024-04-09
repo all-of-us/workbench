@@ -4,7 +4,7 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_OBJECT_
 
 import jakarta.mail.MessagingException;
 import java.time.Clock;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;

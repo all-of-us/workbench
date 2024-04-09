@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;

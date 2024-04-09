@@ -3,7 +3,7 @@ package org.pmiops.workbench.reporting;
 import com.google.common.base.Stopwatch;
 import java.time.Clock;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;

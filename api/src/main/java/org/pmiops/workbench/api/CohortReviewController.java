@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;

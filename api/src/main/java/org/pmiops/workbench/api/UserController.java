@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;

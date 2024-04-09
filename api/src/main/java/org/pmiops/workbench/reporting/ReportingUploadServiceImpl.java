@@ -15,7 +15,7 @@ import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingCohort;

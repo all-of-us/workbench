@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.model;
 
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Domain;
 

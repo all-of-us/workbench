@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.config.WorkbenchConfig;
