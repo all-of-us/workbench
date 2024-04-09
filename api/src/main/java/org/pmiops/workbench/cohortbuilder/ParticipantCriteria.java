@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.common.collect.ImmutableSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.GenderSexRaceOrEthType;

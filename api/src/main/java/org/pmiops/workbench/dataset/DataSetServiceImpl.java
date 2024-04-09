@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import jakarta.persistence.OptimisticLockException;
 import javax.transaction.Transactional;

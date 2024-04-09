@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import jakarta.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;

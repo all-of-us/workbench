@@ -4,7 +4,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class NoopSpanExporter implements SpanExporter {
   /**

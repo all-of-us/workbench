@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

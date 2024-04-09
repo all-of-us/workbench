@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;

@@ -3,7 +3,7 @@ package org.pmiops.workbench.leonardo;
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import jakarta.inject.Provider;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
