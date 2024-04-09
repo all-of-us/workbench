@@ -5,7 +5,7 @@ import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.AC
 import java.time.Clock;
 import java.util.Date;
 import java.util.Map;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;

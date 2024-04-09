@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

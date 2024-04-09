@@ -8,7 +8,7 @@ import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

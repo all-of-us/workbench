@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;

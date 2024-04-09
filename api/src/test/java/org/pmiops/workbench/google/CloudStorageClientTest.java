@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;

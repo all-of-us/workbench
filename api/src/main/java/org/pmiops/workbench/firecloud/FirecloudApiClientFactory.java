@@ -6,7 +6,7 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;

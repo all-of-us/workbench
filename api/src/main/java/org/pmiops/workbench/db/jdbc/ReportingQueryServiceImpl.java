@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;

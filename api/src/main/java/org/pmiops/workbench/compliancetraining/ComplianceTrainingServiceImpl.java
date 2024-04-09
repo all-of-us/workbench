@@ -3,7 +3,7 @@ package org.pmiops.workbench.compliancetraining;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.absorb.AbsorbService;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.absorb.Credentials;

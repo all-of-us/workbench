@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserTermsOfServiceDetails;

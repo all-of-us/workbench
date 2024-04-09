@@ -8,7 +8,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.swagger.annotations.ApiOperation;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;

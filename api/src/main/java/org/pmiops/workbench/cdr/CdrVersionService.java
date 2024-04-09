@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessTier;

@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;

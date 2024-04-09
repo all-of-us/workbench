@@ -24,7 +24,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;

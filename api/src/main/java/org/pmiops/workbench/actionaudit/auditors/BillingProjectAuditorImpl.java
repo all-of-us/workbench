@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
 
 import java.time.Clock;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;

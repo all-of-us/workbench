@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;

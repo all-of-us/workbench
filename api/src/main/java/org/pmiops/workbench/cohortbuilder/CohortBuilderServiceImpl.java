@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;

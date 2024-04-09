@@ -8,7 +8,7 @@ import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;
