@@ -1,9 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
 
 import { CdrVersionTier, Profile, UserTierEligibility } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { DATA_ACCESS_REQUIREMENTS_PATH } from 'app/utils/access-utils';
 import { cdrVersionStore, profileStore } from 'app/utils/stores';
@@ -22,15 +24,15 @@ describe('CTAvailableBannerMaybe', () => {
   const updateCache = jest.fn();
 
   const component = (path: string = '/') => {
-    return mount(
+    return render(
       <MemoryRouter initialEntries={[path]}>
         <CTAvailableBannerMaybe />
       </MemoryRouter>
     );
   };
 
-  const ctBannerExists = (wrapper) =>
-    wrapper.find('[data-test-id="controlled-tier-available"]').exists();
+  const ctBannerExists = async () =>
+    screen.findByTestId('controlled-tier-available');
 
   interface ProfileUpdate {
     newTierEligibilities?: UserTierEligibility[];
@@ -100,13 +102,11 @@ describe('CTAvailableBannerMaybe', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
-  it('should render if all of the requirements are met', () => {
+  it('should render if all of the requirements are met', async () => {
     fulfillAllBannerRequirements();
 
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
-
-    expect(ctBannerExists(wrapper)).toBeTruthy();
+    component();
+    expect(await ctBannerExists()).toBeInTheDocument();
   });
 
   const userIneligible = () => {
@@ -140,14 +140,13 @@ describe('CTAvailableBannerMaybe', () => {
     ['the user is currently visiting the DAR', () => {}, darActive],
   ])(
     'should not render if all of the requirements are met, except that %s',
-    (desc, preMountModifier, initWrapper) => {
+    async (desc, preMountModifier, initWrapper) => {
       fulfillAllBannerRequirements();
 
       preMountModifier();
 
-      const wrapper = initWrapper();
-      expect(wrapper.exists()).toBeTruthy();
-      expect(ctBannerExists(wrapper)).toBeFalsy();
+      initWrapper();
+      await expect(ctBannerExists()).rejects.toThrow();
     }
   );
 });

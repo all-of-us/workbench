@@ -1,11 +1,13 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
+
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import {
   panels,
   QuickTourReact,
   QuickTourReactProps,
-  QuickTourReactState,
 } from './quick-tour-modal';
 
 describe('QuickTourModalComponent', () => {
@@ -13,9 +15,7 @@ describe('QuickTourModalComponent', () => {
   const lastPanel = panels.length - 1;
 
   const component = () => {
-    return shallow<QuickTourReact, QuickTourReactProps, QuickTourReactState>(
-      <QuickTourReact {...props} />
-    );
+    return render(<QuickTourReact {...props} />);
   };
 
   beforeEach(() => {
@@ -25,73 +25,56 @@ describe('QuickTourModalComponent', () => {
   });
 
   it('should render, should have a next and close button', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="close"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="next"]')).toBeTruthy();
+    component();
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
   });
 
   it('should not show the previous button when we are on the first slide', () => {
-    const wrapper = component();
-    expect(wrapper.exists('[data-test-id="previous"]')).toBeFalsy();
+    component();
+
+    expect(
+      screen.queryByRole('button', { name: /previous/i })
+    ).not.toBeInTheDocument();
   });
 
   it('should go to the next slide when we click next', () => {
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[0].title
-    );
-    wrapper.find('[data-test-id="next"]').simulate('click');
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[1].title
-    );
+    const { getByTestId } = component();
+    expect(getByTestId('panel-title').textContent).toBe(panels[0].title);
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(getByTestId('panel-title').textContent).toBe(panels[1].title);
   });
 
   it('should go to the panel we select from the breadcrumbs', () => {
-    const wrapper = component();
+    const { getByTestId } = component();
     const panelNum = 2;
-    wrapper
-      .find('[data-test-id="breadcrumb' + panelNum + '"]')
-      .simulate('click');
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[panelNum].title
-    );
+    fireEvent.click(getByTestId(`breadcrumb${panelNum}`));
+    expect(getByTestId('panel-title').textContent).toBe(panels[panelNum].title);
   });
 
   it('should go to the previous slide when we click previous', () => {
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[0].title
-    );
-    wrapper.find('[data-test-id="next"]').simulate('click');
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[1].title
-    );
-    wrapper.find('[data-test-id="previous"]').simulate('click');
-    expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(
-      panels[0].title
-    );
+    const { getByTestId } = component();
+    expect(getByTestId('panel-title').textContent).toBe(panels[0].title);
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(getByTestId('panel-title').textContent).toBe(panels[1].title);
+    fireEvent.click(screen.getByRole('button', { name: /previous/i }));
+    expect(getByTestId('panel-title').textContent).toBe(panels[0].title);
   });
 
   it('should not show the next button when we are on the last slide', () => {
-    const wrapper = component();
-    wrapper
-      .find('[data-test-id="breadcrumb' + lastPanel + '"]')
-      .simulate('click');
-    expect(wrapper.exists('[data-test-id="close"]')).toBeFalsy();
-    expect(wrapper.find('[data-test-id="next"]').childAt(0).text()).toBe(
-      'Close'
-    );
+    const { getByTestId } = component();
+    fireEvent.click(getByTestId(`breadcrumb${lastPanel}`));
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
   });
 
   it('should expand and retract the image when the resize icon is clicked', () => {
-    const wrapper = component();
+    const { queryByTestId } = component();
     // You cannot expand the image on the first page of the quick tour
-    wrapper.find('[data-test-id="next"]').simulate('click');
-    expect(wrapper.find('[data-test-id="full-image-wrapper"]').length).toBe(0);
-    wrapper.find('[data-test-id="expand-icon"]').simulate('click');
-    expect(wrapper.find('[data-test-id="full-image-wrapper"]').length).toBe(1);
-    wrapper.find('[data-test-id="shrink-icon"]').simulate('click');
-    expect(wrapper.find('[data-test-id="full-image-wrapper"]').length).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    expect(queryByTestId('full-image-wrapper')).not.toBeInTheDocument();
+    fireEvent.click(queryByTestId('expand-icon'));
+    expect(queryByTestId('full-image-wrapper')).toBeInTheDocument();
+    fireEvent.click(queryByTestId('shrink-icon'));
+    expect(queryByTestId('full-image-wrapper')).not.toBeInTheDocument();
   });
 });

@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { CohortBuilderApi, Criteria } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
@@ -25,20 +25,21 @@ const nodeStub = {
   type: 'PM',
 } as Criteria;
 describe('SearchBar', () => {
+  const searchTerms = 'selected search term';
   beforeEach(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
   it('should render', () => {
-    const wrapper = shallow(
+    render(
       <SearchBar
         node={nodeStub}
-        searchTerms={''}
+        searchTerms={searchTerms}
         selectedSurvey={''}
         setIngredients={() => {}}
         selectOption={() => {}}
         setInput={() => {}}
       />
     );
-    expect(wrapper).toBeTruthy();
+    expect(screen.getByDisplayValue(searchTerms)).toBeTruthy();
   });
 });
