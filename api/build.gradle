@@ -14,7 +14,9 @@ buildscript {
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
-        OPENCENSUS_VERSION = '0.31.1'
+        OPENTELEMETRY_SDK_VERSION = '1.36.0'
+        OPENTELEMETRY_JAVA_VERSION = '2.2.0'
+        OPENTELEMETRY_GOOGLE_VERSION = '0.27.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.32'
@@ -405,10 +407,29 @@ dependencies {
     implementation 'org.javers:javers-core:5.15.0'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
-    implementation "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    implementation "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+
+    implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
+    implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
+        exclude group: 'com.google.cloud', module: 'libraries-bom'
+        exclude group: 'com.google.cloud', module: 'google-cloud-core'
+        exclude group: 'com.google.cloud', module: 'google-cloud-trace'
+    }
+    implementation("com.google.cloud.opentelemetry:exporter-metrics:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
+        exclude group: 'com.google.cloud', module: 'libraries-bom'
+        exclude group: 'com.google.cloud', module: 'google-cloud-core'
+        exclude group: 'com.google.cloud', module: 'google-cloud-trace'
+    }
+    implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
+    implementation group: 'io.opentelemetry.instrumentation', name: 'opentelemetry-instrumentation-annotations', version: '2.2.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot'
+
+
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
@@ -432,19 +453,20 @@ dependencies {
     implementation 'com.google.apis:google-api-services-oauth2:v2-rev20200213-2.0.0'
     implementation 'com.google.apis:google-api-services-iam:v1-rev20220825-2.0.0'
     implementation 'com.google.api-client:google-api-client-appengine:2.2.0'
-    implementation 'com.google.auth:google-auth-library-appengine:1.11.0'
-    implementation 'com.google.auth:google-auth-library-oauth2-http:1.11.0'
+    implementation 'com.google.auth:google-auth-library-appengine:1.23.0'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.7.0'
     implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
     implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
-    implementation 'com.google.cloud:google-cloud-monitoring:3.4.6'
+    implementation 'com.google.cloud:google-cloud-monitoring:3.40.0'
+    implementation 'com.google.cloud:google-cloud-trace:2.39.0'
     implementation 'com.google.cloud:google-cloud-storage:2.13.0'
     implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
     implementation 'com.google.guava:guava:32.0.1-jre'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
-    implementation 'com.google.protobuf:protobuf-java:3.21.7'
+    implementation 'com.google.protobuf:protobuf-java:3.25.3'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 
     implementation "org.hibernate:hibernate-core:$project.ext.HIBERNATE_VERSION"
@@ -510,11 +532,11 @@ dependencies {
     generatedCompile "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
+    // OpenTelemetry is an AoU-specific addition to the default Swagger API dependencies. See the
     // template file api.mustache for more details.
-    generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+    generatedCompile "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    generatedCompile "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
+
     generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 
     // Swagger3 codegen deps

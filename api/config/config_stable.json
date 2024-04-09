@@ -73,7 +73,6 @@
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
     "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
-    "traceAllRequests": false,
     "appEngineLocationId": "us-central"
   },
   "admin": {
