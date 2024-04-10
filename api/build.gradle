@@ -419,11 +419,13 @@ dependencies {
         exclude group: 'com.google.cloud', module: 'libraries-bom'
         exclude group: 'com.google.cloud', module: 'google-cloud-core'
         exclude group: 'com.google.cloud', module: 'google-cloud-trace'
+        exclude group: 'com.google.cloud', module: 'google-cloud-monitoring'
     }
     implementation("com.google.cloud.opentelemetry:exporter-metrics:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
         exclude group: 'com.google.cloud', module: 'libraries-bom'
         exclude group: 'com.google.cloud', module: 'google-cloud-core'
         exclude group: 'com.google.cloud', module: 'google-cloud-trace'
+        exclude group: 'com.google.cloud', module: 'google-cloud-monitoring'
     }
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
     implementation group: 'io.opentelemetry.instrumentation', name: 'opentelemetry-instrumentation-annotations', version: '2.2.0'
