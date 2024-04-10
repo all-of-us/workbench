@@ -1,21 +1,21 @@
-import * as React from 'react';
-import { shallow } from 'enzyme';
+import '@testing-library/jest-dom';
 
+import * as React from 'react';
+
+import { render, screen } from '@testing-library/react';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ComboChart } from './combo-chart.component';
 
-describe('GenderChart', () => {
+describe('ComboChart', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should render', () => {
-    const wrapper = shallow(
-      <ComboChart data={[]} legendTitle='Age' mode='percent' />
-    );
-    expect(wrapper.exists()).toBeTruthy();
+    render(<ComboChart data={[]} legendTitle='Age' mode='percent' />);
+    expect(screen.getByText('Age')).toBeInTheDocument();
   });
 });
