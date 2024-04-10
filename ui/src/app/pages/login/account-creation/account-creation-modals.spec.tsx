@@ -5,7 +5,6 @@ import * as React from 'react';
 import { ProfileApi } from 'generated/fetch';
 
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
