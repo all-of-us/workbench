@@ -73,6 +73,7 @@
     "projectId": "all-of-us-rw-preprod",
     "shortName": "preprod",
     "oauthClientId": "589109405884-bmoj9ra8849rqeepuamk8jpu102iq363.apps.googleusercontent.com",
+    "traceAllRequests": false,
     "appEngineLocationId": "us-central"
   },
   "admin": {

@@ -18,7 +18,6 @@
     "workspaceLogsProject": "fc-aou-logs-staging",
     "workspaceBucketLocation": "us-central1",
     "gceVmZone": "us-central1-a"
-
   },
   "billing": {
     "accountId": "01DDC8-7ED304-6E46FE",
@@ -74,6 +73,7 @@
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
     "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
+    "traceAllRequests": false,
     "appEngineLocationId": "us-central"
   },
   "admin": {
