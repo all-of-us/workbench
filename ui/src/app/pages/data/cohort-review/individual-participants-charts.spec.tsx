@@ -1,15 +1,19 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
+
+import { render, screen } from '@testing-library/react';
 
 import { IndividualParticipantsCharts } from './individual-participants-charts';
 
 describe('IndividualParticipantsChartsComponent', () => {
+  const testConditionTitle = 'Test Condition Title';
   it('should render IndividualParticipantsChartsComponent', () => {
-    const wrapper = shallow(
+    render(
       <IndividualParticipantsCharts
         chartData={{
           loading: false,
-          conditionTitle: '',
+          conditionTitle: testConditionTitle,
           items: [
             {
               startDate: '2019-01-01',
@@ -22,6 +26,6 @@ describe('IndividualParticipantsChartsComponent', () => {
         }}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    expect(screen.getByText(testConditionTitle)).toBeInTheDocument();
   });
 });
