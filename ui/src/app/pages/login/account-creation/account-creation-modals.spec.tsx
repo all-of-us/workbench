@@ -1,8 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { ProfileApi } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -18,20 +21,20 @@ beforeEach(() => {
 
 describe('AccountCreationResendModal', () => {
   it('should render', () => {
-    const wrapper = shallow(
+    render(
       <AccountCreationResendModal
         username='a'
         creationNonce='b'
         onClose={() => {}}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    expect(screen.getByText('Resend Instructions')).toBeInTheDocument();
   });
 });
 
 describe('AccountCreationUpdateModal', () => {
   it('should render', () => {
-    const wrapper = shallow(
+    render(
       <AccountCreationUpdateModal
         username='a'
         creationNonce='b'
@@ -39,6 +42,6 @@ describe('AccountCreationUpdateModal', () => {
         onClose={() => {}}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    expect(screen.getByText('Change contact email')).toBeInTheDocument();
   });
 });
