@@ -9,9 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "new_user_satisfaction_survey_one_time_code")
@@ -28,7 +28,7 @@ public class DbNewUserSatisfactionSurveyOneTimeCode {
       name = "new_user_satisfaction_survey_one_time_code_id",
       columnDefinition = "VARCHAR(36)",
       nullable = false)
-  @Type(type = "uuid-char")
+  @Type(type = "org.hibernate.type.UUIDCharType")
   public UUID getId() {
     return id;
   }

@@ -23,6 +23,19 @@ public class CommonTestDialect extends MySQL5Dialect {
   }
 
   @Override
+  public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+    super.initializeFunctionRegistry(functionContributions);
+
+    BasicTypeRegistry basicTypeRegistry = functionContributions.getTypeConfiguration().getBasicTypeRegistry();
+
+    functionContributions.getFunctionRegistry().registerPattern(
+        "hstore_find",
+        "(?1 -> ?2 = ?3)",
+        basicTypeRegistry.resolve( StandardBasicTypes.BOOLEAN ));
+    // ...
+  }
+
+  @Override
   public boolean dropConstraints() {
     // We don't need to drop constraints before dropping tables, that just leads to error
     // messages about missing tables when we don't have a schema in the database
