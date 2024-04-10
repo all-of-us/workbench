@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { CohortBuilderApi } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -20,7 +22,7 @@ describe('SearchGroupList', () => {
     });
   });
   it('should render', () => {
-    const wrapper = shallow(
+    render(
       <SearchGroupList
         role='includes'
         groups={[]}
@@ -29,6 +31,10 @@ describe('SearchGroupList', () => {
         updated={0}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    expect(
+      screen.getByRole('heading', {
+        name: /include participants/i,
+      })
+    ).toBeInTheDocument();
   });
 });
