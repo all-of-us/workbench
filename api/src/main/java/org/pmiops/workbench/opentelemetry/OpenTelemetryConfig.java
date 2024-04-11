@@ -1,5 +1,7 @@
 package org.pmiops.workbench.opentelemetry;
 
+import static org.pmiops.workbench.utils.AppEngineUtils.IS_GAE;
+
 import com.google.cloud.opentelemetry.metric.GoogleCloudMetricExporter;
 import com.google.cloud.opentelemetry.trace.TraceExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
@@ -19,10 +21,6 @@ public class OpenTelemetryConfig {
   // value than the running locally.
   private static final Double GAE_SAMPLER_RATE = 0.1;
   private static final Logger LOGGER = Logger.getLogger(OpenTelemetryConfig.class.getName());
-
-  public static boolean IS_GAE =
-      System.getProperty("com.google.appengine.runtime.version") != null
-          && !System.getProperty("com.google.appengine.runtime.version").startsWith("dev");
 
   /** Creates an OpenTelemetry {@link SdkTracerProvider} */
   @Bean

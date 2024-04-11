@@ -13,6 +13,7 @@
     <env-var name="CDR_DB_PASSWORD" value="${CDR_DB_PASSWORD}" />
   </env-variables>
 
+ <app-engine-apis>true</app-engine-apis>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
   </system-properties>

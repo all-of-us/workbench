@@ -55,6 +55,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "SAS 101 Data Fundamentals",
+      "namespace": "aou-rw-6d58fdd8",
+      "id": "sas101datafundamentals",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "This property is not used",
       "namespace": "aou-rw-6d5ab903",
       "id": "aourecoverlongcovidv6",
