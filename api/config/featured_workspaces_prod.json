@@ -51,13 +51,13 @@
     {
       "name": "Skills Assessment Training Notebooks For Users (v7)",
       "namespace": "aou-rw-ca9467b4",
-      "id": "sas101datafundamentals",
+      "id": "skillsassessmenttrainingnotebooksforusersv7",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
       "name": "SAS 101 Data Fundamentals",
       "namespace": "aou-rw-6d58fdd8",
-      "id": "sas101datafundamentalsv7",
+      "id": "sas101datafundamentals",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
