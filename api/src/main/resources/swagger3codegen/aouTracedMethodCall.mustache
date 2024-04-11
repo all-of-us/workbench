@@ -1,34 +1,33 @@
-        // Generate an OpenCensus tracing span for this API method call.
-        Scope scope = tracer.spanBuilderWithExplicitParent("{{classname}}.{{operationId}}", tracer.getCurrentSpan())
-            .setSpanKind(Span.Kind.CLIENT).startScopedSpan();
-        Span span = tracer.getCurrentSpan();
-        // Some of these attribute keys use naming from the OpenCensus standard. See
-        // https://github.com/census-instrumentation/opencensus-specs/blob/master/trace/HTTP.md
-        span.putAttribute("package", AttributeValue.stringAttributeValue("{{package}}"));
-        span.putAttribute("http.host", AttributeValue.stringAttributeValue(apiClient.getBasePath()));
-        span.putAttribute("http.path", AttributeValue.stringAttributeValue("{{path}}"));
-        span.putAttribute("http.method", AttributeValue.stringAttributeValue("{{httpMethod}}"));
-        span.putAttribute("description", AttributeValue.stringAttributeValue("{{summary}}"));
-        span.putAttribute("connectionTimeout", AttributeValue.longAttributeValue(apiClient.getConnectTimeout()));
-        {{#returnType}}
-            span.putAttribute("responseType", AttributeValue.stringAttributeValue("{{{returnType}}}"));
-        {{/returnType}}
+// Generate an OpenTelemetry tracing span for this API method call.
+Span span = tracer.spanBuilder("{{classname}}.{{operationId}}").setSpanKind(SpanKind.CLIENT).startSpan();
+try (Scope scope = span.makeCurrent()) {
+  // Some of these attribute keys use naming from the OpenTelemetry standard. See
+  // https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/
+  span.setAttribute(AttributeKey.stringKey("package"), "{{package}}");
+  span.setAttribute(AttributeKey.stringKey("http.host"), apiClient.getBasePath());
+  span.setAttribute(AttributeKey.stringKey("url.path"), "{{path}}");
+  span.setAttribute(AttributeKey.stringKey("url.query"), "{{query}}");
+  span.setAttribute(AttributeKey.stringKey("http.request.method"), "{{httpMethod}}");
+  span.setAttribute(AttributeKey.stringKey("description"), "{{summary}}");
+  span.setAttribute(AttributeKey.longKey("connectionTimeout"), apiClient.getConnectTimeout());
+  {{#returnType}}
+  span.setAttribute(AttributeKey.stringKey("responseType"), "{{{returnType}}}");
+  {{/returnType}}
 
-        try {
-            // Create and execute the API request.
-            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
-            {{#returnType}}
-            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(resp.getStatusCode()));
-            return {{localVariablePrefix}}resp.getData();
-            {{/returnType}}
-        } catch (ApiException e) {
-            // We could be more intelligent about aligning HTTP error codes with OpenCensus canonical
-            // status codes... but this is for tracing purposes, not logging / deeper debugging, so we'll
-            // be lazy and use UNKNOWN, including the actual code as an attribute.
-            span.setStatus(Status.UNKNOWN.withDescription(e.getMessage()));
-            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(e.getCode()));
-            span.putAttribute("errorMessage", AttributeValue.stringAttributeValue(e.getMessage()));
-            throw e;
-        } finally {
-            scope.close();
-        }
+  try {
+    // Create and execute the API request.
+    {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+    {{#returnType}}
+    span.setAttribute(AttributeKey.longKey("http.status_code"), (long) resp.getStatusCode());
+    return {{localVariablePrefix}}resp.getData();
+    {{/returnType}}
+  } catch (ApiException e) {
+    // We could be more intelligent about aligning HTTP error codes with OpenCensus canonical
+    // status codes... but this is for tracing purposes, not logging / deeper debugging, so we'll
+    // be lazy and use UNKNOWN, including the actual code as an attribute.
+    span.setStatus(StatusCode.ERROR, e.getMessage());
+    span.setAttribute(AttributeKey.longKey("http.status_code"), (long) e.getCode());
+    span.setAttribute(AttributeKey.stringKey("errorMessage"), e.getMessage());
+    throw e;
+  }
+}
