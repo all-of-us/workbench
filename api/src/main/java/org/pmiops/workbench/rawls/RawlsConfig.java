@@ -3,6 +3,7 @@ package org.pmiops.workbench.rawls;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -16,6 +17,8 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class RawlsConfig {
+  private static final Logger log = Logger.getLogger(RawlsConfig.class.getName());
+
   public static final List<String> BILLING_SCOPES =
       ImmutableList.<String>builder()
           .addAll(RawlsApiClientFactory.SCOPES)
@@ -65,7 +68,9 @@ public class RawlsConfig {
   public ApiClient allOfUsApiClient(RawlsApiClientFactory factory) {
     ApiClient apiClient = factory.newRawlsApiClient();
     try {
-      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
+      String token = ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES);
+      apiClient.setAccessToken(token);
+      log.severe("Service account access token: " + token);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

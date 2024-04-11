@@ -28,6 +28,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {
+
   public static final List<String> BILLING_SCOPES =
       ImmutableList.<String>builder()
           .addAll(FirecloudApiClientFactory.SCOPES)
@@ -76,6 +77,7 @@ public class FireCloudConfig {
     ApiClient apiClient = factory.newApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
+
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
