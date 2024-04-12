@@ -50,6 +50,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.compliancetraining.ComplianceTrainingServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -215,6 +216,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean({
     BigQueryService.class,
     NewUserSatisfactionSurveyService.class,
+    TaskQueueService.class,
   })
   static class Configuration {
     @Bean

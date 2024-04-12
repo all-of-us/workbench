@@ -44,6 +44,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +78,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
   private final UserDao userDao;
   private final LeonardoMapper leonardoMapper;
   private final Clock clock;
@@ -90,6 +93,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
       UserDao userDao,
       Clock clock,
       LeonardoMapper leonardoMapper) {
@@ -100,6 +104,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.leonardoApiClient = leonardoApiClient;
     this.disksApiProvider = disksApiProvider;
     this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.clock = clock;
     this.configProvider = configProvider;
@@ -347,7 +352,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     Double initialCreditsRemaining = null;
-    if (freeTierBillingService.isFreeTier(workspace.get())) {
+    if (WorkspaceUtils.isFreeTier(workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
           freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }
