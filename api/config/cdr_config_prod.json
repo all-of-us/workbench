@@ -192,7 +192,7 @@
       "hasSurveyConductData": true,
       "storageBasePath": "v7",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
-      "microarrayHailStoragePath": "microarray/hail.mt",
+      "microarrayHailStoragePath": "microarray/hail.mt_v7.1",
       "microarrayVcfManifestPath": "microarray/vcf/manifest.csv",
       "microarrayIdatManifestPath": "microarray/idat/manifest.csv",
       "wgsVdsPath": "wgs/short_read/snpindel/vds/hail.vds",
