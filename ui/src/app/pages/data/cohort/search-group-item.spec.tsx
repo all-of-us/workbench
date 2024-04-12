@@ -1,7 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { Domain } from 'generated/fetch';
+
+import { render, screen } from '@testing-library/react';
 
 import { SearchGroupItem } from './search-group-item';
 
@@ -11,17 +14,24 @@ const itemStub = {
   status: 'active',
   type: Domain.CONDITION,
 };
+
+const workspaceStub = {
+  id: 'workspace_id',
+  namespace: 'namespace',
+};
+
 describe('SearchGroupItem', () => {
   it('should render', () => {
-    const wrapper = shallow(
+    render(
       <SearchGroupItem
         role='includes'
         groupId='group_id'
         item={itemStub}
+        workspace={workspaceStub}
         index={0}
         updateGroup={() => {}}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    expect(screen.getByText('Contains Conditions Code')).toBeInTheDocument();
   });
 });
