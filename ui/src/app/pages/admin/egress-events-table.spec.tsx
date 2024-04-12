@@ -142,12 +142,13 @@ describe('EgressEventsTable', () => {
 
   it('should allow event status update', async () => {
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 5);
+    const eventId = 2;
+    const eventIdRowIndexDifference = 1;
+    renderWithRouter(<EgressEventsTable />);
+    await screen.findAllByText(EgressEventStatus.REMEDIATED);
 
-    const wrapper = mountWithRouter(<EgressEventsTable />);
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    await editRowToFalsePositive(wrapper, 2);
-    expect(eventsStub.events[2].status).toBe(
+    await editRowToFalsePositiveTheSequel(eventId);
+    expect(eventsStub.events[eventId - eventIdRowIndexDifference].status).toBe(
       EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
   });
