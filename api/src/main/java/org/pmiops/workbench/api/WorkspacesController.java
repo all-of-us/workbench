@@ -306,7 +306,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               "processWorkspaceTask: begin processing operation %d by transitioning from %s to %s",
               operation.getId(),
               operation.getStatus().toString(),
-              DbWorkspaceOperationStatus.PROCESSING.toString()));
+              DbWorkspaceOperationStatus.PROCESSING));
       operation =
           workspaceOperationDao.save(operation.setStatus(DbWorkspaceOperationStatus.PROCESSING));
 
