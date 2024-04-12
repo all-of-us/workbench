@@ -2,12 +2,10 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { Cohort } from 'generated/fetch';
-
-import { renderWithRouter } from '../../../../testing/react-test-helpers';
-import { exampleCohortStubs } from '../../../../testing/stubs/cohorts-api-stub';
 import { screen } from '@testing-library/react';
 
+import { renderWithRouter } from 'testing/react-test-helpers';
+import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ListOverview } from './overview';
