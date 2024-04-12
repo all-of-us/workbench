@@ -84,5 +84,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status) {}
+  public void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status) {
+    // no-op
+  }
 }

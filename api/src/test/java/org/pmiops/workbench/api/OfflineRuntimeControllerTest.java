@@ -76,6 +76,7 @@ public class OfflineRuntimeControllerTest {
   @MockBean({
     FireCloudService.class,
     FreeTierBillingService.class,
+    WorkspaceService.class,
     MailService.class,
   })
   @Import({FakeClockConfiguration.class, OfflineRuntimeController.class, LeonardoMapperImpl.class})
