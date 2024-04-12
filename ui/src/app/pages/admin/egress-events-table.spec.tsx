@@ -34,6 +34,17 @@ describe('EgressEventsTable', () => {
     jest.useRealTimers();
   });
 
+  // The getAll query is used here, because this query would fail if you are looking for a single
+  // digit number, but there is a multi-digit number that starts with the digit that you are
+  // looking for. For example, if you are looking for row 1, and there is a row 10. In this case,
+  // it is assumed that the single digit result will always be the first result.
+  const getRowWithMatchingEventId = async (
+    eventId: number
+  ): Promise<HTMLElement> =>
+    screen.getAllByRole('row', {
+      name: new RegExp(`^${eventId}`),
+    })[0];
+
   const editRowToFalsePositive = async (
     wrapper: ReactWrapper,
     rowIndex: number
@@ -49,42 +60,34 @@ describe('EgressEventsTable', () => {
   };
 
   const editRowToFalsePositiveTheSequel = async (eventId: number) => {
-    // The getAll query is used here, because this query would fail if you are looking for a single
-    // digit number, but there is a multi-digit number that starts with the digit that you are
-    // looking for. For example, if you are looking for row 1, and there is a row 10. In this case,
-    // it is assumed that the single digit result will always be the first result.
-    const row = screen.getAllByRole('row', {
-      name: new RegExp(`^${eventId}`),
-    })[0];
+    // Find the row with the matching event ID and click the edit button.
+    const row = await getRowWithMatchingEventId(eventId);
     const editButton = within(row).getByRole('button');
-    // const egressStatus = within(row).getByRole('cell', {
-    //   name: /remediated/i,
-    // });
-
     user.click(editButton);
+
+    // Open the status dropdown
     const statusDropdown = await screen.findByRole('button', {
       name: /select a status/i,
     });
     user.click(statusDropdown);
+
+    // Select the verified false positive option. This should close the dropdown.
     const falsePositiveOption = await screen.findByLabelText(
       /verified_false_positive/i
     );
     user.click(falsePositiveOption);
-
     await waitFor(() => {
       expect(
-        within(
-          screen.getAllByRole('row', {
-            name: new RegExp(`^${eventId}`),
-          })[0]
-        ).queryByText(EgressEventStatus.REMEDIATED)
+        within(row).queryByText(EgressEventStatus.REMEDIATED)
       ).not.toBeInTheDocument();
     });
 
-    // Not ideal, but since PrimeReact does not offer an accessible way to get the save button, we have to rely on the order of the buttons.
+    // Not ideal, but since PrimeReact does not offer an accessible way to get the save button,
+    // we have to rely on the order of the buttons.
     const saveButton = within(row).queryAllByRole('button')[1];
     user.click(saveButton);
 
+    // Once the save button is clicked, the row should no longer have the status dropdown.
     await waitFor(() => {
       expect(
         within(row).queryByRole('button', {
@@ -92,8 +95,6 @@ describe('EgressEventsTable', () => {
         })
       ).not.toBeInTheDocument();
     });
-
-    screen.logTestingPlaygroundURL();
   };
 
   it('should render basic', async () => {
