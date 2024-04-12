@@ -5,10 +5,13 @@ import { ReactWrapper } from 'enzyme';
 
 import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
 
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import {
   mountWithRouter,
+  renderWithRouter,
   waitForFakeTimersAndUpdate,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
@@ -17,8 +20,10 @@ import { EgressEventsTable } from './egress-events-table';
 
 describe('EgressEventsTable', () => {
   let eventsStub: EgressEventsAdminApiStub;
+  let user: UserEvent;
 
   beforeEach(() => {
+    user = userEvent.setup();
     eventsStub = new EgressEventsAdminApiStub();
     registerApiClient(EgressEventsAdminApi, eventsStub);
 
@@ -41,6 +46,54 @@ describe('EgressEventsTable', () => {
       .simulate('click');
     wrapper.find('[type="button"]').find('[name="row-save"]').simulate('click');
     await waitForFakeTimersAndUpdate(wrapper);
+  };
+
+  const editRowToFalsePositiveTheSequel = async (eventId: number) => {
+    // The getAll query is used here, because this query would fail if you are looking for a single
+    // digit number, but there is a multi-digit number that starts with the digit that you are
+    // looking for. For example, if you are looking for row 1, and there is a row 10. In this case,
+    // it is assumed that the single digit result will always be the first result.
+    const row = screen.getAllByRole('row', {
+      name: new RegExp(`^${eventId}`),
+    })[0];
+    const editButton = within(row).getByRole('button');
+    // const egressStatus = within(row).getByRole('cell', {
+    //   name: /remediated/i,
+    // });
+
+    user.click(editButton);
+    const statusDropdown = await screen.findByRole('button', {
+      name: /select a status/i,
+    });
+    user.click(statusDropdown);
+    const falsePositiveOption = await screen.findByLabelText(
+      /verified_false_positive/i
+    );
+    user.click(falsePositiveOption);
+
+    await waitFor(() => {
+      expect(
+        within(
+          screen.getAllByRole('row', {
+            name: new RegExp(`^${eventId}`),
+          })[0]
+        ).queryByText(EgressEventStatus.REMEDIATED)
+      ).not.toBeInTheDocument();
+    });
+
+    // Not ideal, but since PrimeReact does not offer an accessible way to get the save button, we have to rely on the order of the buttons.
+    const saveButton = within(row).queryAllByRole('button')[1];
+    user.click(saveButton);
+
+    await waitFor(() => {
+      expect(
+        within(row).queryByRole('button', {
+          name: /select a status/i,
+        })
+      ).not.toBeInTheDocument();
+    });
+
+    screen.logTestingPlaygroundURL();
   };
 
   it('should render basic', async () => {
@@ -100,18 +153,21 @@ describe('EgressEventsTable', () => {
 
   it('should allow multiple event status updates', async () => {
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 5);
+    const firstEventId = 3;
+    const secondEventId = 4;
+    const eventIdRowIndexDifference = 1;
 
-    const wrapper = mountWithRouter(<EgressEventsTable />);
-    await waitForFakeTimersAndUpdate(wrapper);
+    renderWithRouter(<EgressEventsTable />);
+    await screen.findAllByText(EgressEventStatus.REMEDIATED);
 
-    await editRowToFalsePositive(wrapper, 2);
-    await editRowToFalsePositive(wrapper, 3);
+    await editRowToFalsePositiveTheSequel(firstEventId);
+    await editRowToFalsePositiveTheSequel(secondEventId);
 
-    expect(eventsStub.events[2].status).toBe(
-      EgressEventStatus.VERIFIED_FALSE_POSITIVE
-    );
-    expect(eventsStub.events[3].status).toBe(
-      EgressEventStatus.VERIFIED_FALSE_POSITIVE
-    );
+    expect(
+      eventsStub.events[firstEventId - eventIdRowIndexDifference].status
+    ).toBe(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
+    expect(
+      eventsStub.events[secondEventId - eventIdRowIndexDifference].status
+    ).toBe(EgressEventStatus.VERIFIED_FALSE_POSITIVE);
   });
 });
