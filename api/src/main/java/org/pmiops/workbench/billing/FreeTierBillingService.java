@@ -106,20 +106,13 @@ public class FreeTierBillingService {
     final Map<Long, Double> liveCostByCreator =
         getLiveCostByCreatorCache(liveCostsInBQ, workspaceByProject, creatorByWorkspace);
 
-    users = filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
-    if (users.isEmpty()) {
+    Set<DbUser> filteredUsers = filterUsersHigherThanTheLowestThreshold(users, liveCostByCreator);
+    if (filteredUsers.isEmpty()) {
       return;
     }
 
-    /*List<UserCost> userCosts = users.stream()
-    .map(user -> new UserCost().userId(
-            user.getUserId()).dbCost(
-            dbCostByCreator.getOrDefault(user.getUserId(), 0.0)).liveCost(
-            liveCostByCreator.getOrDefault(user.getUserId(), 0.0)))
-    .collect(Collectors.toList());*/
-
     taskQueueService.pushExpiredFreeCreditsTask(
-        users.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
+            filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
 
   /**

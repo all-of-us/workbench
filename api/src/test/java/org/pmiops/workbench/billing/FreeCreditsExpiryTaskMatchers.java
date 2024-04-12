@@ -33,10 +33,7 @@ public class FreeCreditsExpiryTaskMatchers {
 
     @Override
     public boolean matches(Map<Long, Double> argument) {
-      if (!expectedMap.equals(argument)) {
-        return false;
-      }
-      return true;
+      return expectedMap.equals(argument);
     }
   }
 }

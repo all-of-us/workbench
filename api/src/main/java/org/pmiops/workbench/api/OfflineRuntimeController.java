@@ -78,7 +78,6 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
-  private final WorkspaceService workspaceService;
   private final UserDao userDao;
   private final LeonardoMapper leonardoMapper;
   private final Clock clock;
@@ -93,7 +92,6 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService,
       UserDao userDao,
       Clock clock,
       LeonardoMapper leonardoMapper) {
@@ -104,7 +102,6 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.leonardoApiClient = leonardoApiClient;
     this.disksApiProvider = disksApiProvider;
     this.workspaceDao = workspaceDao;
-    this.workspaceService = workspaceService;
     this.userDao = userDao;
     this.clock = clock;
     this.configProvider = configProvider;
