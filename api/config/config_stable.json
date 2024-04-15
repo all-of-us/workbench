@@ -114,7 +114,7 @@
     "enableSasGKEApp": true,
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
-    "enableVariantSelectAll": false
+    "enableVariantSelectAll": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
