@@ -20,7 +20,9 @@ describe(InactivityMonitor.name, () => {
       isSignedIn: true,
     });
 
-    setLastActive(Date.now() - environment.inactivityTimeoutSeconds * 1000 - 1);
+    setLastActive(
+      Date.now() - environment.inactivityTimeoutSecondsRt * 1000 - 1
+    );
 
     expect(notificationStore.get()).toBeNull();
     const wrapper = mount(<InactivityMonitor />);

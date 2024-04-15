@@ -42,8 +42,10 @@ export interface EnvironmentBase {
   publicUiUrl: string;
   // The Zendesk environment corresponding to this deployment.
   zendeskEnv: ZendeskEnv;
-  inactivityTimeoutSeconds: number;
-  inactivityWarningBeforeSeconds: number;
+  // Auto-timeout for registered tier users
+  inactivityTimeoutSecondsRt: number;
+  // Auto-timeout for controlled tier users
+  inactivityTimeoutSecondsCt: number;
   // Captcha site key registered with the domain
   captchaSiteKey: string;
 
