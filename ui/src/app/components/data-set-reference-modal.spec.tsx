@@ -10,12 +10,10 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 
-import { Button } from './buttons';
 import { DataSetReferenceModal } from './data-set-reference-modal';
 
 const testCohort = {
