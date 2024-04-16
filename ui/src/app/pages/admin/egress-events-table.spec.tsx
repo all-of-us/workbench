@@ -106,6 +106,8 @@ describe('EgressEventsTable', () => {
     renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
     await screen.findAllByText(EgressEventStatus.REMEDIATED);
 
+    const nextButton = screen.getByRole('button', { name: /next page/i });
+
     const ids = new Set<string>();
     let latestId;
     const numPages = totalRecords / pageSize;
@@ -134,13 +136,11 @@ describe('EgressEventsTable', () => {
 
       // Navigate to the next page unless test is on the last page
       if (i != numPages - 1) {
-        user.click(screen.getByRole('button', { name: /next page/i }));
+        user.click(nextButton);
       }
     }
 
-    screen.logTestingPlaygroundURL();
-    const nextPagebutton = screen.getByRole('button', { name: /next page/i });
-    expect(nextPagebutton.hasAttribute('disabled')).toBe(true);
+    expect(nextButton.hasAttribute('disabled')).toBe(true);
   });
 
   it('should allow event status update', async () => {
