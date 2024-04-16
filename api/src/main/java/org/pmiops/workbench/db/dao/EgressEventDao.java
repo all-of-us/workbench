@@ -8,9 +8,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface EgressEventDao extends PagingAndSortingRepository<DbEgressEvent, Long> {
+public interface EgressEventDao extends PagingAndSortingRepository<DbEgressEvent, Long>,
+    CrudRepository<DbEgressEvent, Long> {
   // The extra "By" infix is necessary in combination with OrderBy...
   Page<DbEgressEvent> findAllByOrderByCreationTimeDesc(Pageable p);
 
