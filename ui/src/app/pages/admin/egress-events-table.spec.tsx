@@ -86,8 +86,8 @@ describe('EgressEventsTable', () => {
   });
 
   it('should render paginated', async () => {
-    const pageSize = 5;
     const headerRows = 1;
+    const pageSize = 5;
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), pageSize);
 
     renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
@@ -95,32 +95,54 @@ describe('EgressEventsTable', () => {
     expect(screen.getAllByRole('row').length).toBe(headerRows + pageSize);
   });
 
-  // it('should paginate', async () => {
-  //   eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 100);
-  //
-  //   const wrapper = mountWithRouter(<EgressEventsTable displayPageSize={10} />);
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   const ids = new Set<string>();
-  //   for (let i = 0; i < 10; i++) {
-  //     const idNodes = wrapper.find({ 'data-test-id': 'egress-event-id' });
-  //     expect(idNodes.length).toBe(10);
-  //
-  //     idNodes
-  //       .map((w, _) => w.text())
-  //       .forEach((id) => {
-  //         ids.add(id);
-  //       });
-  //
-  //     act(() => {
-  //       wrapper.find('.p-paginator-next').simulate('click');
-  //     });
-  //     await waitForFakeTimersAndUpdate(wrapper);
-  //   }
-  //   expect(wrapper.find('.p-paginator-next').prop('disabled')).toBe(true);
-  //   expect(ids.size).toBe(100);
-  // });
-  //
+  it('should paginate', async () => {
+    const totalRecords = 30;
+    const pageSize = 10;
+    eventsStub.events = fp.times(
+      () => eventsStub.simulateNewEvent(),
+      totalRecords
+    );
+
+    renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
+    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+
+    const ids = new Set<string>();
+    let latestId;
+    const numPages = totalRecords / pageSize;
+    for (let i = 0; i < numPages; i++) {
+      // Wait for the next page to load
+      if (i != 0) {
+        await waitFor(() => {
+          expect(
+            screen.queryByRole('cell', {
+              name: latestId,
+            })
+          ).not.toBeInTheDocument();
+        });
+      }
+
+      const rows = screen.getAllByRole('row');
+      rows.shift(); // Remove header row
+      expect(rows.length).toBe(pageSize);
+
+      rows
+        .map((row, _) => within(row).getAllByRole('cell')[0].textContent)
+        .forEach((id) => {
+          ids.add(id);
+          latestId = id;
+        });
+
+      // Navigate to the next page unless test is on the last page
+      if (i != numPages - 1) {
+        user.click(screen.getByRole('button', { name: /next page/i }));
+      }
+    }
+
+    screen.logTestingPlaygroundURL();
+    const nextPagebutton = screen.getByRole('button', { name: /next page/i });
+    expect(nextPagebutton.hasAttribute('disabled')).toBe(true);
+  });
+
   it('should allow event status update', async () => {
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 5);
     const eventId = 2;
