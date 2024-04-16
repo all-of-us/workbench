@@ -45,21 +45,7 @@ describe('EgressEventsTable', () => {
       name: new RegExp(`^${eventId}`),
     })[0];
 
-  const editRowToFalsePositive = async (
-    wrapper: ReactWrapper,
-    rowIndex: number
-  ) => {
-    wrapper.find('.p-row-editor-init').at(rowIndex).simulate('click');
-    wrapper.find('.p-dropdown').simulate('click');
-    wrapper
-      .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIED_FALSE_POSITIVE })
-      .simulate('click');
-    wrapper.find('[type="button"]').find('[name="row-save"]').simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-  };
-
-  const editRowToFalsePositiveTheSequel = async (eventId: number) => {
+  const editRowToFalsePositive = async (eventId: number) => {
     // Find the row with the matching event ID and click the edit button.
     const row = await getRowWithMatchingEventId(eventId);
     const editButton = within(row).getByRole('button');
@@ -105,13 +91,13 @@ describe('EgressEventsTable', () => {
   });
 
   it('should render paginated', async () => {
-    eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 20);
+    const pageSize = 5;
+    const headerRows = 1;
+    eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), pageSize);
 
-    const wrapper = mountWithRouter(<EgressEventsTable displayPageSize={5} />);
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(wrapper.find(EgressEventsTable).exists()).toBeTruthy();
-    expect(wrapper.find({ 'data-test-id': 'egress-event-id' }).length).toBe(5);
+    renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
+    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+    expect(screen.getAllByRole('row').length).toBe(headerRows + pageSize);
   });
 
   it('should paginate', async () => {
@@ -147,7 +133,7 @@ describe('EgressEventsTable', () => {
     renderWithRouter(<EgressEventsTable />);
     await screen.findAllByText(EgressEventStatus.REMEDIATED);
 
-    await editRowToFalsePositiveTheSequel(eventId);
+    await editRowToFalsePositive(eventId);
     expect(eventsStub.events[eventId - eventIdRowIndexDifference].status).toBe(
       EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
@@ -162,8 +148,8 @@ describe('EgressEventsTable', () => {
     renderWithRouter(<EgressEventsTable />);
     await screen.findAllByText(EgressEventStatus.REMEDIATED);
 
-    await editRowToFalsePositiveTheSequel(firstEventId);
-    await editRowToFalsePositiveTheSequel(secondEventId);
+    await editRowToFalsePositive(firstEventId);
+    await editRowToFalsePositive(secondEventId);
 
     expect(
       eventsStub.events[firstEventId - eventIdRowIndexDifference].status
