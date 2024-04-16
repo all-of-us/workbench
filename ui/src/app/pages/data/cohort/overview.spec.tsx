@@ -1,11 +1,30 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
+
+import { screen } from '@testing-library/react';
+
+import { renderWithRouter } from 'testing/react-test-helpers';
+import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ListOverview } from './overview';
 
 describe('ListOverview', () => {
+  const searchRequestStub = { includes: [], excludes: [], dataFilters: [] };
   it('should render', () => {
-    const wrapper = shallow(<ListOverview searchRequest={{}} update={0} />);
-    expect(wrapper.exists()).toBeTruthy();
+    renderWithRouter(
+      <ListOverview
+        searchRequest={searchRequestStub}
+        update={0}
+        cohort={exampleCohortStubs[0]}
+        workspace={workspaceDataStub}
+      />
+    );
+    expect(
+      screen.getByRole('button', {
+        name: /save cohort/i,
+      })
+    ).toBeInTheDocument();
   });
 });

@@ -1,13 +1,16 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { Domain } from 'generated/fetch';
+
+import { render, screen } from '@testing-library/react';
 
 import { SelectionList } from './selection-list';
 
 describe('SelectionList', () => {
   it('should create', () => {
-    const wrapper = shallow(
+    render(
       <SelectionList
         back={() => {}}
         close={() => {}}
@@ -20,6 +23,8 @@ describe('SelectionList', () => {
         view={''}
       />
     );
-    expect(wrapper).toBeTruthy();
+    screen.getByRole('img', {
+      name: /close/i,
+    });
   });
 });

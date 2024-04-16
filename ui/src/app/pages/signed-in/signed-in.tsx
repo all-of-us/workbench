@@ -28,6 +28,8 @@ import {
 } from 'app/utils/stores';
 import backgroundImage from 'assets/images/BG-Pattern.png';
 
+import { InactivityMonitor } from './inactivity-monitor';
+
 const styles = reactStyles({
   appContainer: {
     width: '100%',
@@ -171,6 +173,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
       </FlexRow>
       {!hideFooter && <Footer type={FooterTypeEnum.Workbench} />}
       <ZendeskWidget />
+      <InactivityMonitor />
     </FlexColumn>
   );
 };

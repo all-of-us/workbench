@@ -6,7 +6,12 @@ import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
-import { render, RenderResult, screen } from '@testing-library/react';
+import {
+  render,
+  RenderOptions,
+  RenderResult,
+  screen,
+} from '@testing-library/react';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -72,6 +77,15 @@ export function mountWithRouter(
   // It would be ideal to unwrap down to the child wrapper here, but unfortunately
   // wrapper.update() only works on the root node - and most tests need to call that.
   return mount(<MemoryRouter>{children}</MemoryRouter>, options);
+}
+
+export function renderWithRouter(
+  children: string | React.ReactNode,
+  options?: RenderOptions
+) {
+  // It would be ideal to unwrap down to the child wrapper here, but unfortunately
+  // wrapper.update() only works on the root node - and most tests need to call that.
+  return render(<MemoryRouter>{children}</MemoryRouter>, options);
 }
 
 // We only want to check against the actual text node

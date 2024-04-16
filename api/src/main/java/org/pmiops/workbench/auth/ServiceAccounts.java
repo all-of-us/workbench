@@ -1,5 +1,9 @@
 package org.pmiops.workbench.auth;
 
+import static org.pmiops.workbench.utils.AppEngineUtils.IS_GAE;
+
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.auth.appengine.AppEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
@@ -34,7 +38,16 @@ public class ServiceAccounts {
    */
   public static GoogleCredentials getScopedServiceCredentials(List<String> scopes)
       throws IOException {
-    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
+    GoogleCredentials credentials;
+    if (IS_GAE) {
+      credentials =
+          AppEngineCredentials.newBuilder()
+              .setScopes(scopes)
+              .setAppIdentityService(AppIdentityServiceFactory.getAppIdentityService())
+              .build();
+    } else {
+      credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
+    }
     credentials.refreshIfExpired();
     return credentials;
   }

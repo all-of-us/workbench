@@ -15,8 +15,8 @@ export const environment: Environment = {
   gaLoggedInDimension: 'dimension2',
   gaUserInstitutionCategoryDimension: 'dimension3',
   zendeskEnv: ZendeskEnv.Sandbox,
-  inactivityTimeoutSeconds: 30 * 60,
-  inactivityWarningBeforeSeconds: 5 * 60,
+  inactivityTimeoutSecondsRt: 24 * 60 * 60, // 24 hours
+  inactivityTimeoutSecondsCt: 24 * 60 * 60, // 24 hours
   allowTestAccessTokenOverride: true,
   tanagraLocalAuth: false,
 };

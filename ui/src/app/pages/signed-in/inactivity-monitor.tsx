@@ -1,8 +1,10 @@
 import * as React from 'react';
 
+import { Profile } from 'generated/fetch';
+
 import { environment } from 'environments/environment';
 import { withErrorModal } from 'app/components/modals';
-import { InactivityModal } from 'app/pages/signed-in/inactivity-modal';
+import { AccessTierShortNames, hasTierAccess } from 'app/utils/access-tiers';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
 import {
@@ -11,9 +13,9 @@ import {
   INACTIVITY_CONFIG,
   setLastActiveNow,
 } from 'app/utils/inactivity';
-import { authStore, useStore } from 'app/utils/stores';
+import { authStore, profileStore, useStore } from 'app/utils/stores';
 
-const { useState, useEffect } = React;
+const { useEffect } = React;
 
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
@@ -35,8 +37,12 @@ export function debouncer(action, sensitivityMs) {
   };
 }
 
-const getInactivityTimeoutMs = () => {
-  return environment.inactivityTimeoutSeconds * 1000;
+const getInactivityTimeoutMs = (profile: Profile) => {
+  if (hasTierAccess(profile, AccessTierShortNames.Controlled)) {
+    return environment.inactivityTimeoutSecondsCt * 1000;
+  } else {
+    return environment.inactivityTimeoutSecondsRt * 1000;
+  }
 };
 
 const getInactivityElapsedMs = () => {
@@ -56,29 +62,16 @@ const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
   )();
 };
 
-const getDefaultSignOutForInactivityTimeMs = () =>
-  Date.now() + getInactivityTimeoutMs();
+const getDefaultSignOutForInactivityTimeMs = (profile: Profile) =>
+  Date.now() + getInactivityTimeoutMs(profile);
 
 export const InactivityMonitor = () => {
   const { authLoaded, isSignedIn } = useStore(authStore);
-  const [signOutForInactivityTimeMs, setSignOutForInactivityTimeMs] =
-    useState<number>(getDefaultSignOutForInactivityTimeMs());
-
-  // Using Date.now() will not trigger a re-render, so we use React state
-  const [currentTimeMs, setCurrentTimeMs] = useState<number>(Date.now());
-  useEffect(() => {
-    setInterval(() => {
-      setCurrentTimeMs(Date.now());
-    }, 1000);
-  }, []);
-
-  const resetSignOutForInactivityTime = () => {
-    setSignOutForInactivityTimeMs(getDefaultSignOutForInactivityTimeMs());
-  };
+  const { profile } = useStore(profileStore);
 
   function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = getInactivityElapsedMs();
-    if (elapsedMs && elapsedMs > getInactivityTimeoutMs()) {
+    if (elapsedMs && elapsedMs > getInactivityTimeoutMs(profile)) {
       invalidateInactivityCookieAndSignOut(continuePath);
     }
   }
@@ -115,22 +108,19 @@ export const InactivityMonitor = () => {
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
       const newSignOutForInactivityTimeMs =
-        getDefaultSignOutForInactivityTimeMs() - elapsedMs;
+        getDefaultSignOutForInactivityTimeMs(profile) - elapsedMs;
 
       clearTimeout(logoutTimer);
       logoutTimer = global.setTimeout(
         () => invalidateInactivityCookieAndSignOut('/session-expired'),
         Math.max(0, newSignOutForInactivityTimeMs - Date.now())
       );
-
-      setSignOutForInactivityTimeMs(newSignOutForInactivityTimeMs);
     };
 
     const startInactivityMonitoring = () => {
       startInactivityTimers();
 
       const resetTimers = () => {
-        resetSignOutForInactivityTime();
         startInactivityTimers();
       };
 
@@ -184,21 +174,9 @@ export const InactivityMonitor = () => {
     };
   }, [authLoaded, isSignedIn]);
 
-  const onCloseInactivityModal = () => {
-    resetSignOutForInactivityTime();
-    // todo: clicking to close the modal will fire a click event, which will reset the timer,
-    // however, we should still reset the timers here so we don't rely on that implicit behavior
-  };
-
   if (!authLoaded || !isSignedIn) {
     return null;
   }
 
-  return (
-    <InactivityModal
-      closeFunction={onCloseInactivityModal}
-      currentTimeMs={currentTimeMs}
-      signOutForInactivityTimeMs={signOutForInactivityTimeMs}
-    />
-  );
+  return null;
 };
