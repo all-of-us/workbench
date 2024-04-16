@@ -71,6 +71,11 @@ describe('EgressEventsTable', () => {
     });
   };
 
+  const renderAndWaitTableToLoadData = async (pageSize = undefined) => {
+    renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
+    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+  };
+
   it('should render basic', async () => {
     renderWithRouter(<EgressEventsTable />);
 
@@ -84,8 +89,7 @@ describe('EgressEventsTable', () => {
     const pageSize = 5;
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), pageSize);
 
-    renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
-    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+    await renderAndWaitTableToLoadData();
     expect(screen.getAllByRole('row').length).toBe(headerRows + pageSize);
   });
 
@@ -97,8 +101,7 @@ describe('EgressEventsTable', () => {
       totalRecords
     );
 
-    renderWithRouter(<EgressEventsTable displayPageSize={pageSize} />);
-    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+    await renderAndWaitTableToLoadData(pageSize);
 
     const nextButton = screen.getByRole('button', { name: /next page/i });
 
@@ -141,8 +144,7 @@ describe('EgressEventsTable', () => {
     eventsStub.events = fp.times(() => eventsStub.simulateNewEvent(), 5);
     const eventId = 2;
     const eventIdRowIndexDifference = 1;
-    renderWithRouter(<EgressEventsTable />);
-    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+    await renderAndWaitTableToLoadData();
 
     await editRowToFalsePositive(eventId);
     expect(eventsStub.events[eventId - eventIdRowIndexDifference].status).toBe(
@@ -156,8 +158,7 @@ describe('EgressEventsTable', () => {
     const secondEventId = 4;
     const eventIdRowIndexDifference = 1;
 
-    renderWithRouter(<EgressEventsTable />);
-    await screen.findAllByText(EgressEventStatus.REMEDIATED);
+    await renderAndWaitTableToLoadData();
 
     await editRowToFalsePositive(firstEventId);
     await editRowToFalsePositive(secondEventId);
