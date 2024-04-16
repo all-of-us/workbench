@@ -2,11 +2,11 @@ package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER;
 
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.inject.Provider;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;

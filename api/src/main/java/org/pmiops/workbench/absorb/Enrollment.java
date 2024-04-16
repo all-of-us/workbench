@@ -1,7 +1,7 @@
 package org.pmiops.workbench.absorb;
 
-import java.time.Instant;
 import jakarta.annotation.Nullable;
+import java.time.Instant;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Enrollment {

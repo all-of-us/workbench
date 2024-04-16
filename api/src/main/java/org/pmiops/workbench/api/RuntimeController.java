@@ -7,6 +7,8 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_W
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,8 +16,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.annotation.Nullable;
-import jakarta.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;

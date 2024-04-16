@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.model;
 
-import java.util.Objects;
-import java.util.function.Function;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
+import java.util.function.Function;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.SurveyModule;
 

@@ -1,7 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Timestamp;
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,6 +8,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
+import java.sql.Timestamp;
+import java.util.Objects;
 import org.pmiops.workbench.model.ArchivalStatus;
 
 @Entity

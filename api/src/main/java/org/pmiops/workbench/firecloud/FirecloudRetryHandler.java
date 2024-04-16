@@ -1,9 +1,9 @@
 package org.pmiops.workbench.firecloud;
 
-import java.net.SocketTimeoutException;
-import java.util.logging.Logger;
 import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.SocketTimeoutException;
+import java.util.logging.Logger;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;

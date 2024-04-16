@@ -1,8 +1,8 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfo;
-import java.util.Optional;
 import jakarta.servlet.ServletContext;
+import java.util.Optional;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;

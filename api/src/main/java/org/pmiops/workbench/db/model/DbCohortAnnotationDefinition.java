@@ -1,8 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +12,9 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.AnnotationType;
 

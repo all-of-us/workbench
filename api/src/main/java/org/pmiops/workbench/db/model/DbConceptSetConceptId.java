@@ -1,9 +1,9 @@
 package org.pmiops.workbench.db.model;
 
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Embeddable
 @Table(name = "concept_set_concept_id")

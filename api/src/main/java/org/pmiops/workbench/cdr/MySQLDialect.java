@@ -1,18 +1,26 @@
 package org.pmiops.workbench.cdr;
 
-import org.hibernate.dialect.function.StandardSQLFunction;
+import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
 public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect {
 
   public MySQLDialect() {
     super();
-    // Define the custom "match" function to use "match(column) against (<string> in boolean mode)"
-    // for MySQL.
-    // Because MATCH returns a number, we need to have this function use DOUBLE.
-    registerFunction(
-        "myFunction",
-        new StandardSQLFunction("match(?1) against  (?2 in boolean mode)", StandardBasicTypes.DOUBLE));
+  }
+
+  @Override
+  public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+    // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
+    // added with nothing; this will work for single-word query patterns only.
+    // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
+
+    super.initializeFunctionRegistry(functionContributions);
+    BasicTypeRegistry basicTypeRegistry =
+        functionContributions.getTypeConfiguration().getBasicTypeRegistry();
+    SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
 
     // Define matchConcept to use "match(<concept>.concept_name, <concept>.concept_code,
     // <concept>.vocabulary_id,
@@ -20,8 +28,18 @@ public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect 
     // corresponding fields -- conceptName, conceptCode, vocabularyId, synonymsStr --
     // to make JQL alias resolution work properly. Example:
     // matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0
-    registerFunction(
-        "myFunction",
-        new StandardSQLFunction("match(?1, ?2, ?3, ?4) against (?5 in boolean mode)", StandardBasicTypes.DOUBLE));
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "myFunction",
+            "match(?1) against  (?2 in boolean mode)",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
+
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "myFunction",
+            "match(?1, ?2, ?3, ?4) against (?5 in boolean mode)",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
   }
 }

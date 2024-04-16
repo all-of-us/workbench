@@ -1,7 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Timestamp;
-import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Table(name = "cohort")

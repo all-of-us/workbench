@@ -1,8 +1,8 @@
 package org.pmiops.workbench.sam;
 
 import com.google.auth.oauth2.OAuth2Credentials;
-import java.io.IOException;
 import jakarta.inject.Provider;
+import java.io.IOException;
 import org.broadinstitute.dsde.workbench.client.sam.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;

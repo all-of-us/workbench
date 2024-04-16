@@ -6,6 +6,8 @@ import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForContr
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierRenewal;
 
 import com.google.api.services.oauth2.model.Userinfo;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -21,8 +23,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import jakarta.annotation.Nonnull;
-import jakarta.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;

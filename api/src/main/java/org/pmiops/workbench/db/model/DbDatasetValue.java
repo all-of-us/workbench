@@ -1,10 +1,10 @@
 package org.pmiops.workbench.db.model;
 
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.util.Objects;
 import org.pmiops.workbench.model.Domain;
 
 @Embeddable
