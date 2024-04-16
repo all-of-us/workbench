@@ -1,13 +1,13 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Date;
-import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.sql.Date;
+import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.CohortStatus;
 

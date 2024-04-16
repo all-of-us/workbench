@@ -1,7 +1,7 @@
 package org.pmiops.workbench.testconfig;
 
-import java.util.Properties;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.Properties;
 import javax.sql.DataSource;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

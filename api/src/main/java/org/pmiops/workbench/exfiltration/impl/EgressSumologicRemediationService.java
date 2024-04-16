@@ -4,11 +4,11 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import com.google.common.base.Strings;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.util.Optional;
 import java.util.logging.Logger;
-import jakarta.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;

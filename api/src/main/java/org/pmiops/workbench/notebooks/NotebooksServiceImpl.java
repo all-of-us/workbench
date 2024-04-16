@@ -2,6 +2,7 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import jakarta.inject.Provider;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,7 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import jakarta.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;

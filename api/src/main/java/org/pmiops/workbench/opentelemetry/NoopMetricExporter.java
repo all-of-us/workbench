@@ -5,8 +5,8 @@ import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import java.util.Collection;
 import jakarta.annotation.Nonnull;
+import java.util.Collection;
 
 public class NoopMetricExporter implements MetricExporter {
   @Override

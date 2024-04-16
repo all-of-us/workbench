@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -10,7 +11,6 @@ import java.time.Clock;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jakarta.inject.Provider;
 import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;

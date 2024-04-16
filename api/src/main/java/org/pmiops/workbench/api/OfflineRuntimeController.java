@@ -4,6 +4,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LA
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.time.Duration;
@@ -18,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.inject.Provider;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;

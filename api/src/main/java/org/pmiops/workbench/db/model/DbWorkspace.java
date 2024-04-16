@@ -1,9 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -20,6 +16,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.pmiops.workbench.model.BillingStatus;

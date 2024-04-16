@@ -3,8 +3,8 @@ package org.pmiops.workbench.opentelemetry;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import java.util.Collection;
 import jakarta.annotation.Nonnull;
+import java.util.Collection;
 
 public class NoopSpanExporter implements SpanExporter {
   /**

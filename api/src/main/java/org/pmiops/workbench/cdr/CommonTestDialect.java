@@ -1,38 +1,40 @@
 package org.pmiops.workbench.cdr;
 
+import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.community.dialect.MySQL5Dialect;
-import org.hibernate.dialect.function.StandardSQLFunction;
+import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
 public class CommonTestDialect extends MySQL5Dialect {
   public CommonTestDialect() {
     super();
-    // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
-    // added with nothing; this will work for single-word query patterns only.
-    // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
-
-    registerFunction(
-        "match",
-        new StandardSQLFunction("LOCATE(REPLACE(?2, '+'), ?1)", StandardBasicTypes.DOUBLE));
-
-    registerFunction(
-        "matchConcept",
-        new StandardSQLFunction(
-            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))",
-            StandardBasicTypes.DOUBLE));
   }
 
   @Override
   public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+    // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
+    // added with nothing; this will work for single-word query patterns only.
+    // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
+
     super.initializeFunctionRegistry(functionContributions);
+    BasicTypeRegistry basicTypeRegistry =
+        functionContributions.getTypeConfiguration().getBasicTypeRegistry();
+    SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
 
-    BasicTypeRegistry basicTypeRegistry = functionContributions.getTypeConfiguration().getBasicTypeRegistry();
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "match",
+            "LOCATE(REPLACE(?2, '+'), ?1)",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
 
-    functionContributions.getFunctionRegistry().registerPattern(
-        "hstore_find",
-        "(?1 -> ?2 = ?3)",
-        basicTypeRegistry.resolve( StandardBasicTypes.BOOLEAN ));
-    // ...
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "matchConcept",
+            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
   }
 
   @Override

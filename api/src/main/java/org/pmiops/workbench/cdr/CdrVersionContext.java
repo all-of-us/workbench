@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cdr;
 
-import java.util.Optional;
 import jakarta.annotation.Nonnull;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 
 /** Maintains state of what CDR version is being used in the context of the current request. */

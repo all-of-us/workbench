@@ -1,9 +1,9 @@
 package org.pmiops.workbench.db.model;
 
-import java.io.Serializable;
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Embeddable

@@ -1,13 +1,13 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Timestamp;
-import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user_recent_workspace")

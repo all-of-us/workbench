@@ -1,8 +1,8 @@
 package org.pmiops.workbench.impersonation;
 
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
-import jakarta.annotation.Nonnull;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 

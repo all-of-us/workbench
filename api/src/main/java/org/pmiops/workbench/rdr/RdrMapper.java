@@ -1,5 +1,6 @@
 package org.pmiops.workbench.rdr;
 
+import jakarta.annotation.Nullable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -9,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.EnumMapping;
 import org.mapstruct.Mapper;
