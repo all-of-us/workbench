@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
-import { ReactWrapper } from 'enzyme';
 
 import { EgressEventsAdminApi, EgressEventStatus } from 'generated/fetch';
 
@@ -9,11 +7,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
-import {
-  mountWithRouter,
-  renderWithRouter,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 
 import { EgressEventsTable } from './egress-events-table';
