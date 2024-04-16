@@ -1,8 +1,8 @@
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-
-import { waitForFakeTimersAndUpdate } from 'testing/react-test-helpers';
 
 import { SecuritySuspendedMessage } from './notebook-frame-error';
 
@@ -12,7 +12,7 @@ describe('SecuritySuspendedMessage', () => {
   const nowPlusFiveMinutes = new Date('2000-01-01 03:05:00');
 
   const component = (suspendedUntil: Date) => {
-    return mount(
+    return render(
       <SecuritySuspendedMessage
         error={
           new ComputeSecuritySuspendedError({
@@ -32,29 +32,28 @@ describe('SecuritySuspendedMessage', () => {
   });
 
   it('should show pending suspension', async () => {
-    const wrapper = component(nowPlusFiveMinutes);
-    expect(wrapper).toBeTruthy();
-
-    expect(wrapper.text()).toContain('in 5 minutes');
+    component(nowPlusFiveMinutes);
+    expect(
+      screen.getByText(
+        /Your analysis environment is suspended due to security egress concerns/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/in 5 minutes/i)).toBeInTheDocument();
   });
 
   it('should indicate reload for past suspension', async () => {
-    const wrapper = component(nowMinus10Minutes);
-    expect(wrapper).toBeTruthy();
-
-    expect(wrapper.text()).toContain('Reload the page to continue');
+    component(nowMinus10Minutes);
+    expect(
+      screen.getByText(
+        /Your analysis environment was temporarily suspended but is now available for use. Reload the page to continue./i
+      )
+    ).toBeInTheDocument();
   });
 
   it('should update estimate over time', async () => {
-    const wrapper = component(nowPlusFiveMinutes);
-    expect(wrapper).toBeTruthy();
-
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.text()).toContain('in 5 minutes');
-
-    jest.setSystemTime(nowPlusFiveMinutes);
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(wrapper.text()).toContain('Reload the page to continue');
+    component(nowPlusFiveMinutes);
+    expect(screen.getByText(/in 5 minutes/i)).toBeInTheDocument();
+    jest.advanceTimersByTime(5 * 60 * 1000); // advance time by 5 minutes
+    await screen.findByText(/Reload the page to continue./i);
   });
 });
