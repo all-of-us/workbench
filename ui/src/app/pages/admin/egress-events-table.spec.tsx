@@ -110,7 +110,7 @@ describe('EgressEventsTable', () => {
     const numPages = totalRecords / pageSize;
     for (let i = 0; i < numPages; i++) {
       // Wait for the next page to load
-      if (i != 0) {
+      if (i !== 0) {
         await waitFor(() => {
           expect(
             screen.queryByRole('cell', {
@@ -132,7 +132,7 @@ describe('EgressEventsTable', () => {
         });
 
       // Navigate to the next page unless test is on the last page
-      if (i != numPages - 1) {
+      if (i !== numPages - 1) {
         user.click(nextButton);
       }
     }
