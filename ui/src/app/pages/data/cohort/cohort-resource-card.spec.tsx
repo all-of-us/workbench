@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { CohortResourceCard } from 'app/pages/data/cohort/cohort-resource-card';
 
 import { renderWithRouter } from 'testing/react-test-helpers';
