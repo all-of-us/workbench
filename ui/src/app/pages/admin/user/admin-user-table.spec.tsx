@@ -10,6 +10,7 @@ import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
@@ -20,7 +21,7 @@ describe('AdminUserTable', () => {
   let props: { profile: Profile; hideSpinner: () => {}; showSpinner: () => {} };
 
   const component = () => {
-    return render(<AdminUserTable {...props} />);
+    return renderWithRouter(<AdminUserTable {...props} />);
   };
 
   beforeEach(() => {
