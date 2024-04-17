@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 
 import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
