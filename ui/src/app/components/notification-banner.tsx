@@ -47,6 +47,7 @@ const styles = reactStyles({
     width: '102px',
     border: '0.8px solid #216FB4',
     borderRadius: '1.6px',
+    justifyContent: 'center',
   },
   buttonText: {
     height: '20px',
