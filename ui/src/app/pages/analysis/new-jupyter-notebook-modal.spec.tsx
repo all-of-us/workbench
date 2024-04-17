@@ -18,8 +18,8 @@ describe('NewNotebookModal', () => {
     fireEvent.change(getByTestId('create-jupyter-new-name-input'), {
       target: { value: '123' },
     });
-    await waitFor(() => {
-      expect(screen.getByText(/name already exists/i)).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(screen.getByText(/name already exists/i)).toBeInTheDocument()
+    );
   });
 });
