@@ -1,9 +1,10 @@
-import * as React from 'react';
+import '@testing-library/jest-dom';
+
 import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
 
 import { WorkspaceAccessLevel } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 
 describe('NotebookActionMenu', () => {
@@ -14,21 +15,19 @@ describe('NotebookActionMenu', () => {
       },
       permission: WorkspaceAccessLevel.WRITER,
     };
-
-    return mount(
+    return render(
       <MemoryRouter>
         <NotebookActionMenu
           resource={props}
           existingNameList={[]}
           onUpdate={() => {}}
         />
-        );
       </MemoryRouter>
     );
   };
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    const { container } = component();
+    expect(container).toBeInTheDocument();
   });
 });
