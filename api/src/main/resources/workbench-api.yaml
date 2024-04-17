@@ -4270,7 +4270,7 @@ paths:
         required: true
       responses:
         200:
-          description: User synchronization ran successfully
+          description: Handle Free Credits Expiry Task Ran Successfully
           content: {}
       x-codegen-request-body-name: request
   /v1/institutions:
