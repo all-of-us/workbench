@@ -9,7 +9,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppLocalizeRequest;
 import org.pmiops.workbench.model.AppLocalizeResponse;
-import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
@@ -54,11 +53,6 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
-    if (createAppRequest.getAppType() == AppType.SAS
-        && !configProvider.get().featureFlags.enableSasGKEApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
-
     leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -67,7 +61,6 @@ public class AppsController implements AppsApiDelegate {
   public ResponseEntity<EmptyResponse> deleteApp(
       String workspaceNamespace, String appName, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-
     leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
     return ResponseEntity.ok(new EmptyResponse());
   }

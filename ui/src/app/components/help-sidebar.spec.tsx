@@ -209,9 +209,7 @@ describe('HelpSidebar', () => {
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
       runtime: runtimeStub.runtime,
@@ -360,9 +358,6 @@ describe('HelpSidebar', () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
-    });
-    serverConfigStore.set({
-      config: defaultServerConfig,
     });
 
     const wrapper = await component();
@@ -629,7 +624,6 @@ describe('HelpSidebar', () => {
   });
 
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
-    serverConfigStore.set({ config: defaultServerConfig });
     await component();
 
     const rstudioIcon = screen.queryByLabelText('RStudio Icon');
@@ -646,20 +640,7 @@ describe('HelpSidebar', () => {
     );
   });
 
-  it('should not show the SAS icon if SAS is disabled', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableSasGKEApp: false },
-    });
-    await component();
-
-    const sasIcon = screen.queryByLabelText('SAS Icon');
-    expect(sasIcon).not.toBeInTheDocument();
-  });
-
   it('should open the SAS config panel after clicking the SAS icon', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableSasGKEApp: true },
-    });
     await component();
 
     const sasIcon = screen.queryByLabelText('SAS Icon');

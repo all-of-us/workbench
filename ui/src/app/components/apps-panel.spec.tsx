@@ -13,10 +13,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { runtimeStore, serverConfigStore } from 'app/utils/stores';
+import { runtimeStore } from 'app/utils/stores';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
-import defaultServerConfig from 'testing/default-server-config';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -63,10 +62,6 @@ const expectUnexpandedApp = (appName: string): HTMLElement => {
   return appBanner;
 };
 
-const expectAppIsMissing = (appName: string) => {
-  expect(findAppBanner(appName)).not.toBeInTheDocument();
-};
-
 const expectExpandedApp = (appName: string): HTMLElement => {
   expect(findAppBanner(appName)).toBeInTheDocument();
   // arbitrary button choice
@@ -83,9 +78,6 @@ describe(AppsPanel.name, () => {
   const leoAppsStub = new LeoAppsApiStub();
   let user;
   beforeEach(() => {
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
@@ -137,7 +129,8 @@ describe(AppsPanel.name, () => {
 
     expect(findActiveApps()).not.toBeInTheDocument();
     expect(findAvailableApps(false)).toBeInTheDocument();
-    // // Click unexpanded Jupyter app
+
+    // Click unexpanded Jupyter app
 
     const jupyter = expectUnexpandedApp('Jupyter');
     await user.pointer([{ pointerName: 'mouse', target: jupyter }]);
@@ -146,13 +139,13 @@ describe(AppsPanel.name, () => {
       'You have either run out of initial credits or have an inactive billing account.'
     );
     jupyter.click();
-    // Expecting Jupter to be disabled. If it was not, the
+    // Expecting Jupyter to be disabled. If it was not, the
     // "Create New" button would show after clicking on Jupyter.
     expect(screen.queryByText('Create New')).not.toBeInTheDocument();
 
     const cromwell = expectUnexpandedApp('Cromwell');
     await user.pointer([{ pointerName: 'mouse', target: cromwell }]);
-    // Show tooltip when hovering over disabled Jupyter.
+    // Show tooltip when hovering over disabled Cromwell.
     await screen.findByText(
       'You have either run out of initial credits or have an inactive billing account.'
     );
@@ -163,28 +156,13 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  test.each([true, false])(
-    'should / should not show apps based on feature flag enableSasGKEApp = %s',
-    async (enableSasGKEApp) => {
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableSasGKEApp,
-        },
-      });
-      appsStub.listAppsResponse = [];
+  it('should show unexpanded apps by default', async () => {
+    appsStub.listAppsResponse = [];
 
-      await component();
+    await component();
 
-      // Cromwell and RStudio are always available
-      expectUnexpandedApp('Cromwell');
-      expectUnexpandedApp('RStudio');
-
-      if (enableSasGKEApp) {
-        expectUnexpandedApp('SAS');
-      } else {
-        expectAppIsMissing('SAS');
-      }
-    }
-  );
+    expectUnexpandedApp('Cromwell');
+    expectUnexpandedApp('RStudio');
+    expectUnexpandedApp('SAS');
+  });
 });
