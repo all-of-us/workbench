@@ -28,12 +28,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import {
-  runtimeStore,
-  serverConfigStore,
-  userAppsStore,
-  useStore,
-} from 'app/utils/stores';
+import { runtimeStore, userAppsStore, useStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -184,15 +179,13 @@ export const RuntimeIcon = (props: {
   userSuspended: boolean;
 }) => {
   const { iconConfig, workspaceNamespace, userSuspended } = props;
-  // TODO is this needed?
-  const { config } = useStore(serverConfigStore);
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
   // We always want to show the Jupyter icon.
   return (
-    <CompoundIcon {...{ config, iconConfig }} iconPath={jupyterAssets.icon}>
+    <CompoundIcon {...{ iconConfig }} iconPath={jupyterAssets.icon}>
       <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
