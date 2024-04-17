@@ -184,6 +184,7 @@ export const RuntimeIcon = (props: {
   userSuspended: boolean;
 }) => {
   const { iconConfig, workspaceNamespace, userSuspended } = props;
+  // TODO is this needed?
   const { config } = useStore(serverConfigStore);
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
@@ -688,7 +689,6 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     userSuspended,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-  const { config } = useStore(serverConfigStore);
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',

@@ -8,12 +8,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {
-  runtimeStore,
-  serverConfigStore,
-  userAppsStore,
-  useStore,
-} from 'app/utils/stores';
+import { runtimeStore, userAppsStore, useStore } from 'app/utils/stores';
 import { BILLING_ACCOUNT_DISABLED_TOOLTIP } from 'app/utils/strings';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
@@ -80,7 +75,6 @@ export const AppsPanel = (props: {
 }) => {
   const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
-  const { config } = useStore(serverConfigStore);
   // all GKE apps (not Jupyter)
   const { userApps } = useStore(userAppsStore);
 

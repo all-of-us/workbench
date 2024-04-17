@@ -209,9 +209,7 @@ describe('HelpSidebar', () => {
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
       runtime: runtimeStub.runtime,
@@ -360,9 +358,6 @@ describe('HelpSidebar', () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
-    });
-    serverConfigStore.set({
-      config: defaultServerConfig,
     });
 
     const wrapper = await component();
@@ -629,7 +624,6 @@ describe('HelpSidebar', () => {
   });
 
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
-    serverConfigStore.set({ config: defaultServerConfig });
     await component();
 
     const rstudioIcon = screen.queryByLabelText('RStudio Icon');

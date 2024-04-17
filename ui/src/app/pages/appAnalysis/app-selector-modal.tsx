@@ -11,7 +11,6 @@ import {
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { serverConfigStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   appsLabel: {
