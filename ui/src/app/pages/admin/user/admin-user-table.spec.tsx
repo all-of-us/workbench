@@ -1,10 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
 
 import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -19,11 +20,7 @@ describe('AdminUserTable', () => {
   let props: { profile: Profile; hideSpinner: () => {}; showSpinner: () => {} };
 
   const component = () => {
-    return mount(
-      <MemoryRouter>
-        <AdminUserTable {...props} />
-      </MemoryRouter>
-    );
+    return render(<AdminUserTable {...props} />);
   };
 
   beforeEach(() => {
@@ -47,7 +44,7 @@ describe('AdminUserTable', () => {
   });
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(screen.getByText('User Admin Table')).toBeInTheDocument();
   });
 });
