@@ -31,13 +31,8 @@ interface AppSelectorModalProps {
 }
 export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose } = props;
-  const { config } = useStore(serverConfigStore);
   // in display order
-  const appList = [
-    UIAppType.JUPYTER,
-    UIAppType.RSTUDIO,
-    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
-  ];
+  const appList = [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS];
 
   return (
     <Modal

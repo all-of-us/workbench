@@ -708,11 +708,14 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('apps', cromwellConfigIconId, rstudioConfigIconId);
-    if (config.enableSasGKEApp) {
-      keys.push(sasConfigIconId);
-    }
-    keys.push('runtimeConfig', 'terminal');
+    keys.push(
+      'apps',
+      cromwellConfigIconId,
+      rstudioConfigIconId,
+      sasConfigIconId,
+      'runtimeConfig',
+      'terminal'
+    );
   }
 
   if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {

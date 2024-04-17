@@ -63,10 +63,6 @@ const expectUnexpandedApp = (appName: string): HTMLElement => {
   return appBanner;
 };
 
-const expectAppIsMissing = (appName: string) => {
-  expect(findAppBanner(appName)).not.toBeInTheDocument();
-};
-
 const expectExpandedApp = (appName: string): HTMLElement => {
   expect(findAppBanner(appName)).toBeInTheDocument();
   // arbitrary button choice
@@ -83,9 +79,6 @@ describe(AppsPanel.name, () => {
   const leoAppsStub = new LeoAppsApiStub();
   let user;
   beforeEach(() => {
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
@@ -163,28 +156,13 @@ describe(AppsPanel.name, () => {
     expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
-  test.each([true, false])(
-    'should / should not show apps based on feature flag enableSasGKEApp = %s',
-    async (enableSasGKEApp) => {
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableSasGKEApp,
-        },
-      });
-      appsStub.listAppsResponse = [];
+  it('should show unexpanded apps by default', async () => {
+    appsStub.listAppsResponse = [];
 
-      await component();
+    await component();
 
-      // Cromwell and RStudio are always available
-      expectUnexpandedApp('Cromwell');
-      expectUnexpandedApp('RStudio');
-
-      if (enableSasGKEApp) {
-        expectUnexpandedApp('SAS');
-      } else {
-        expectAppIsMissing('SAS');
-      }
-    }
-  );
+    expectUnexpandedApp('Cromwell');
+    expectUnexpandedApp('RStudio');
+    expectUnexpandedApp('SAS');
+  });
 });

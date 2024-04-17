@@ -39,7 +39,6 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { validateNewNotebookName } from 'app/utils/resources';
-import { serverConfigStore } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -350,7 +349,6 @@ export const ExportDatasetModal = ({
     );
   }
 
-  const { enableSasGKEApp } = serverConfigStore.get().config;
   return (
     <AnimatedModal
       loading={isExporting || isNotebooksLoading || loadingNotebookKernel}
@@ -364,8 +362,7 @@ export const ExportDatasetModal = ({
               You can export the code to an existing or new{' '}
               <b>Jupyter Notebook in {JUPYTER_FILE_EXT} format</b>. You can also
               copy the generated code to the clipboard and paste into any
-              application in the workbench, such as RStudio
-              {enableSasGKEApp && ' and SAS'}.
+              application in the workbench, such as RStudio and SAS.
             </div>
             <div style={headerStyles.formLabel}>
               Select programming language

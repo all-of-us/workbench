@@ -167,31 +167,6 @@ describe('App Selector', () => {
     // });
   });
 
-  it('should not list SAS as an option when the feature flag is false', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableSasGKEApp: false },
-    });
-
-    component();
-    const startButton = getStartButton();
-    startButton.click();
-
-    await waitFor(() => {
-      expect(screen.queryByText('Select an application')).toBeInTheDocument();
-    });
-
-    // the caret next to the dropdown
-    const dropdownTrigger = getDropdownTrigger();
-    expect(dropdownTrigger).toBeInTheDocument();
-    dropdownTrigger.click();
-
-    await waitFor(async () => {
-      // I'd prefer to do this, but it doesn't work
-      // screen.queryByRole('option', { name: 'SAS' });
-      expect(screen.queryByText('SAS')).not.toBeInTheDocument();
-    });
-  });
-
   it('should open the SAS config panel when SAS is selected and Next is clicked', async () => {
     component();
     const startButton = getStartButton();

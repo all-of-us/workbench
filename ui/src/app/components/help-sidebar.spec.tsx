@@ -646,20 +646,7 @@ describe('HelpSidebar', () => {
     );
   });
 
-  it('should not show the SAS icon if SAS is disabled', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableSasGKEApp: false },
-    });
-    await component();
-
-    const sasIcon = screen.queryByLabelText('SAS Icon');
-    expect(sasIcon).not.toBeInTheDocument();
-  });
-
   it('should open the SAS config panel after clicking the SAS icon', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableSasGKEApp: true },
-    });
     await component();
 
     const sasIcon = screen.queryByLabelText('SAS Icon');
