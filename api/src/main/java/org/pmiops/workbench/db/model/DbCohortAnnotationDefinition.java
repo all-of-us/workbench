@@ -121,7 +121,6 @@ public class DbCohortAnnotationDefinition {
       mappedBy = "cohortAnnotationDefinition",
       orphanRemoval = true,
       cascade = CascadeType.ALL)
-  @OrderBy("cohortAnnotationEnumValueId ASC")
   public SortedSet<DbCohortAnnotationEnumValue> getEnumValues() {
     return enumValues;
   }
