@@ -1,20 +1,19 @@
-import * as React from 'react';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
 import { WorkspaceResource } from 'generated/fetch';
 import { DataSetApi } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   dataSetApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 
-import { Button } from './buttons';
 import { DataSetReferenceModal } from './data-set-reference-modal';
 
 const testCohort = {
@@ -25,8 +24,8 @@ const testCohort = {
 const onCancelFn = jest.fn();
 const deleteResourceFn = jest.fn();
 
-const mountModal = () => {
-  return mount(
+const renderModal = () => {
+  return render(
     <DataSetReferenceModal
       referencedResource={testCohort}
       dataSets=''
@@ -38,32 +37,35 @@ const mountModal = () => {
 
 describe('DataSetReferenceModal', () => {
   it('should render', async () => {
-    const wrapper = mountModal();
-    expect(wrapper.exists()).toBeTruthy();
+    renderModal();
+    expect(screen.getByText('WARNING')).toBeInTheDocument();
   });
 
   it('should cancel deletion', async () => {
-    const wrapper = mountModal();
+    renderModal();
 
-    const cancelButton = wrapper.find(Button).find({ type: 'secondary' });
-    cancelButton.simulate('click');
+    const cancelButton = screen.getByText('Cancel');
+    userEvent.click(cancelButton);
 
-    expect(onCancelFn).toHaveBeenCalled();
-    expect(deleteResourceFn).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onCancelFn).toHaveBeenCalled();
+      expect(deleteResourceFn).not.toHaveBeenCalled();
+    });
   });
 
   it('should markDirty and delete', async () => {
     registerApiClient(DataSetApi, new DataSetApiStub());
     const markDirty = jest.spyOn(dataSetApi(), 'markDirty');
-    const wrapper = mountModal();
+    renderModal();
 
-    const deleteButton = wrapper.find(Button).find({ type: 'primary' });
-    deleteButton.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const deleteButton = screen.getByText('YES, DELETE');
+    userEvent.click(deleteButton);
 
-    expect(markDirty).toHaveBeenCalled();
-    expect(deleteResourceFn).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(markDirty).toHaveBeenCalled();
+      expect(deleteResourceFn).toHaveBeenCalled();
 
-    expect(onCancelFn).not.toHaveBeenCalled();
+      expect(onCancelFn).not.toHaveBeenCalled();
+    });
   });
 });
