@@ -27,21 +27,24 @@ public class LiquibaseTest {
     }
   }
 
-  @XmlRootElement(name = "databaseChangeLog", namespace = "http://www.liquibase.org/xml/ns/dbchangelog")
+  @XmlRootElement(
+      name = "databaseChangeLog",
+      namespace = "http://www.liquibase.org/xml/ns/dbchangelog")
   private static class DatabaseChangeLog {
     @XmlElement(name = "include", namespace = "http://www.liquibase.org/xml/ns/dbchangelog")
     private List<Include> includes;
   }
 
   private static class Include {
-    @XmlAttribute
-    private String file;
+    @XmlAttribute private String file;
   }
 
   private List<String> getIndexedChangeLogs() throws Exception {
     JAXBContext jaxbContext = JAXBContext.newInstance(DatabaseChangeLog.class);
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) unmarshaller.unmarshal(new File("db/changelog/db.changelog-master.xml"));
+    DatabaseChangeLog databaseChangeLog =
+        (DatabaseChangeLog)
+            unmarshaller.unmarshal(new File("db/changelog/db.changelog-master.xml"));
 
     return databaseChangeLog.includes.stream()
         .map(include -> include.file.split("changelog/")[1])
