@@ -230,7 +230,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
       value =
           "select c "
               + "from DbCriteria c "
-              + "where c.selectable = 1 "
+              + "where c.selectable "
               + "and c.standard=:standard "
               + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, c.name asc")
