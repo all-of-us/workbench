@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
@@ -42,17 +44,17 @@ describe(withLeoCookie.name, () => {
       .spyOn(leoProxyApi(), 'setCookie')
       .mockResolvedValue(null);
 
-    const Component = () => <div />;
+    const Component = () => <div>Test Component</div>;
     const WrappedComponent = withLeoCookie(Component);
     render(<WrappedComponent />);
 
     expect(setCookieStub).toHaveBeenCalled();
 
     // Children should not be rendered until the cookie loads
-    expect(screen.queryByText('Component')).toBeNull();
+    expect(screen.queryByText('Test Component')).toBeNull();
 
     await waitFor(() =>
-      expect(screen.getByText('Component')).toBeInTheDocument()
+      expect(screen.getByText('Test Component')).toBeInTheDocument()
     );
   });
 
