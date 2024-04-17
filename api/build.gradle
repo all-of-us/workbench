@@ -11,8 +11,8 @@ buildscript {
         GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '6.4.4.Final'
         JACKSON_VERSION = '2.16.1'
-        LIQUIBASE_VERSION = '4.16.1'
-        LOGBACK_VERSION = '1.2.13'
+        LIQUIBASE_VERSION = '4.27.0'
+        LOGBACK_VERSION = '1.5.5'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
         OPENTELEMETRY_SDK_VERSION = '1.36.0'
@@ -395,12 +395,6 @@ repositories {
 
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
-    all {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-    }
-
     annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
     __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
