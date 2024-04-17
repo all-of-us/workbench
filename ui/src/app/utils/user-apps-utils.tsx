@@ -72,12 +72,13 @@ const localizeUserApp = (
     appType,
   });
 
-const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
+const appJustTurnedRunningFromProvisioning = (
+  listAppsResponse: ListAppsResponse
+): UserAppEnvironment[] => {
   // Note: We do not call localize for CROMWELL
   // We want app that are transitioning from PROVISIONING to RUNNING
-  const appsJustStartedRunning = userAppsStore
-    .get()
-    .userApps.filter((userApp) => {
+  return (
+    userAppsStore.get()?.userApps.filter((userApp) => {
       if (
         userApp.status === AppStatus.PROVISIONING &&
         userApp.appType !== AppType.CROMWELL
@@ -89,26 +90,19 @@ const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
         return !!runningAppFromApi && runningAppFromApi.length > 0;
       }
       return false;
-    });
-  return appsJustStartedRunning;
+    }) || []
+  );
 };
 
-const callLocalizeIfApplicable = (listAppsResponse) => {
+const callLocalizeIfApplicable = (listAppsResponse: ListAppsResponse): void => {
   // If userAppsStore is not updated lets wait for it to be updated before checking
-  if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
-    return null;
+  if (userAppsStore.get()?.userApps === undefined) {
+    return;
   }
 
   // Get the list of Apps that are in PROVISIONING state in store but RUNNING in list of Apps from api response
   // We want to call Localize only ONCE just as soon as they are running
-  const appsTransitionToRunningNow =
-    appJustTurnedRunningFromProvisioning(listAppsResponse);
-
-  if (appsTransitionToRunningNow.length === 0) {
-    return null;
-  }
-
-  appsTransitionToRunningNow.forEach((app) => {
+  appJustTurnedRunningFromProvisioning(listAppsResponse).forEach((app) => {
     fetchWithErrorModal(
       async () =>
         await localizeUserApp(
