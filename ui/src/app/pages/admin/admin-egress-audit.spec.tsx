@@ -7,15 +7,12 @@ import {
   EgressEventStatus,
 } from 'generated/fetch';
 
-import { getByRole, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
-import {
-  expectButtonElementEnabled,
-  waitForFakeTimersAndUpdate,
-} from 'testing/react-test-helpers';
+import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 
 import { AdminEgressAudit } from './admin-egress-audit';
@@ -55,7 +52,7 @@ describe('AdminEgressAudit', () => {
   });
 
   it('should allow event status update', async () => {
-    const { getByTestId, getByText } = component();
+    const { getByText } = component();
 
     await waitFor(() => getByText(`Egress event ${event.egressEventId}`));
     screen.logTestingPlaygroundURL();
