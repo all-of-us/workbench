@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
-import { mount } from 'enzyme';
 
 import {
   EgressEvent,
@@ -8,9 +7,15 @@ import {
   EgressEventStatus,
 } from 'generated/fetch';
 
+import { getByRole, render, screen } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
-import { waitForFakeTimersAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementEnabled,
+  waitForFakeTimersAndUpdate,
+} from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 
 import { AdminEgressAudit } from './admin-egress-audit';
@@ -20,7 +25,7 @@ describe('AdminEgressAudit', () => {
   let eventsStub: EgressEventsAdminApiStub;
 
   const component = () => {
-    return mount(
+    return render(
       <MemoryRouter
         initialEntries={[`/admin/egress-events/${event.egressEventId}`]}
       >
@@ -45,27 +50,37 @@ describe('AdminEgressAudit', () => {
   });
 
   it('should render basic', async () => {
-    const wrapper = component();
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(wrapper.find(AdminEgressAudit).exists()).toBeTruthy();
+    const { getByText } = component();
+    await waitFor(() => getByText(`Egress event ${event.egressEventId}`));
   });
 
   it('should allow event status update', async () => {
-    const wrapper = component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    const { getByTestId, getByText } = component();
 
-    wrapper.find('#egress-event-status-dropdown').first().simulate('click');
+    await waitFor(() => getByText(`Egress event ${event.egressEventId}`));
+    screen.logTestingPlaygroundURL();
+    userEvent.click(screen.getByRole('button', { name: /select a status/i }));
+    let falsePositiveOption;
+    await waitFor(() => {
+      falsePositiveOption = getByText(
+        EgressEventStatus.VERIFIED_FALSE_POSITIVE
+      );
+    });
 
-    wrapper
-      .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIED_FALSE_POSITIVE })
-      .simulate('click');
-    wrapper.find({ 'data-test-id': 'save-egress-event' }).simulate('click');
+    userEvent.click(falsePositiveOption);
 
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(eventsStub.events[0].status).toBe(
-      EgressEventStatus.VERIFIED_FALSE_POSITIVE
-    );
+    const saveButton = screen.getByRole('button', { name: /save/i });
+
+    await waitFor(() => {
+      expectButtonElementEnabled(saveButton);
+    });
+
+    userEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(eventsStub.events[0].status).toBe(
+        EgressEventStatus.VERIFIED_FALSE_POSITIVE
+      );
+    });
   });
 });
