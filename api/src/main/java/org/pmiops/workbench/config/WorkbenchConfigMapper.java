@@ -15,8 +15,6 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface WorkbenchConfigMapper {
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
-  // temporary, will be removed ASAP
-  @Mapping(target = "enableSasGKEApp", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")

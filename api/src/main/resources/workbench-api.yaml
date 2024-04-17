@@ -6825,10 +6825,6 @@ components:
           description: Whether a captcha check is part of the new user registration
             process
           default: true
-        enableSasGKEApp:
-          type: boolean
-          description: Whether users are able to use the SAS GKE app.
-          default: false
         enableDataExplorer:
           type: boolean
           description: Whether to enable visual data explorer.
