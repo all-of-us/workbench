@@ -111,7 +111,6 @@
     "enableEventDateModifier": false,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableSasGKEApp": true,
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
     "enableVariantSelectAll": true
