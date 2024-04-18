@@ -91,7 +91,7 @@ describe('AttributesPageV2', () => {
   });
 
   it('should not call api and render a single dropdown for Height in Physical Measurements', async () => {
-    const wrapper = component();
+    component();
     await waitFor(() =>
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
     );
@@ -101,7 +101,6 @@ describe('AttributesPageV2', () => {
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    screen.logTestingPlaygroundURL();
     screen.getByRole('button', {
       name: /select operator/i,
     });
@@ -113,23 +112,29 @@ describe('AttributesPageV2', () => {
     );
   });
 
-  // it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
-  //   props.node = CriteriaWithAttributesStubVariables[1];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(0);
-  //   expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
-  //   expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(1);
-  //   expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
-  //   expect(
-  //     wrapper.find('div[id="attributes-add-btn"]').first().props().disabled
-  //   ).toBeFalsy();
-  // });
+  it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
+    props.node = CriteriaWithAttributesStubVariables[1];
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(0);
+    const dropDowns = screen.getAllByRole('button', {
+      name: /select operator/i,
+    });
+    expect(dropDowns.length).toBe(2);
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /add this/i,
+      })
+    );
+  });
   //
   // it('should call api for attributes for Labs and Measurements nodes', async () => {
   //   props.node = CriteriaWithAttributesStubVariables[2];
