@@ -14,6 +14,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -32,6 +33,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  renderWithRouter,
   simulateSelection,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -87,6 +89,17 @@ describe('WorkspaceEdit', () => {
           workspaceEditMode={workspaceEditMode}
         />
       </MemoryRouter>
+    );
+  };
+
+  const renderComponent = () => {
+    return renderWithRouter(
+      <WorkspaceEdit
+        cancel={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+        workspaceEditMode={workspaceEditMode}
+      />
     );
   };
 
@@ -160,26 +173,18 @@ describe('WorkspaceEdit', () => {
 
   it('displays workspaces create page', async () => {
     currentWorkspaceStore.next(undefined);
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain(
-      'Create a new workspace'
-    );
+    renderComponent();
+    await screen.findByText('Create a new workspace');
 
-    // Ensure the 'drug development' checkbox is not checked when creating.
-    expect(
-      wrapper
-        .find('[data-test-id="researchPurpose-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toEqual(false);
+    const researchPurposeCheckbox: HTMLInputElement = screen.getByTestId(
+      'researchPurpose-checkbox'
+    ) as HTMLInputElement;
+    expect(researchPurposeCheckbox.checked).toEqual(false);
 
-    expect(
-      wrapper
-        .find('[data-test-id="specific-population-no"]')
-        .first()
-        .prop('checked')
-    ).toEqual(false);
+    const specificPopulationRadio: HTMLInputElement = screen.getByTestId(
+      'specific-population-no'
+    ) as HTMLInputElement;
+    expect(specificPopulationRadio.checked).toEqual(false);
   });
 
   it('displays workspaces duplicate page', async () => {
