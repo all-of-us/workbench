@@ -63,6 +63,7 @@ describe('QuickTourModalComponent', () => {
     component();
     const lastPanel = panels.length - 1;
     fireEvent.click(screen.getByTestId(`breadcrumb${lastPanel}`));
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /next/i })
     ).not.toBeInTheDocument();
