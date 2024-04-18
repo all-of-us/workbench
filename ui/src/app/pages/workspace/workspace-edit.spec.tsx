@@ -190,19 +190,14 @@ describe('WorkspaceEdit', () => {
 
   it('displays workspaces duplicate page', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain(
-      `Duplicate workspace "${workspace.name}"`
-    );
+    renderComponent();
+    await screen.findByText(`Duplicate workspace "${workspace.name}"`);
 
     // Ensure the 'drug development' checkbox is checked when duplicating.
-    expect(
-      wrapper
-        .find('[data-test-id="drugDevelopment-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toEqual(true);
+    const drugDevelopmentCheckbox: HTMLInputElement = screen.getByTestId(
+      'drugDevelopment-checkbox'
+    ) as HTMLInputElement;
+    expect(drugDevelopmentCheckbox.checked).toEqual(true);
   });
 
   it('displays workspaces edit page', async () => {
