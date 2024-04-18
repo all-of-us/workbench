@@ -67,6 +67,10 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
       return ResponseEntity.badRequest().build();
     }
 
+    logger.info(
+        "Free tier Billing Service: Handling free credits expiry event for users: {}",
+        request.getUsers().toString());
+
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
     Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
     Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);
@@ -81,6 +85,10 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
     handleExpiredUsers(newlyExpiredUsers);
 
     alertUsersBasedOnTheThreshold(dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
+
+    logger.info(
+        "Free tier Billing Service: Finished handling free credits expiry event for users: {}",
+        request.getUsers().toString());
 
     return ResponseEntity.noContent().build();
   }
