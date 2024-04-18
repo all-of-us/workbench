@@ -59,11 +59,13 @@ describe('QuickTourModalComponent', () => {
     expect(screen.getByTestId('panel-title').textContent).toBe(panels[0].title);
   });
 
-  it('should not show the next button when we are on the last slide', () => {
+  it('should not show the next button when we are on the last slide', async () => {
     component();
     const lastPanel = panels.length - 1;
     fireEvent.click(screen.getByTestId(`breadcrumb${lastPanel}`));
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+    expect(
+      await screen.getByRole('button', { name: /close/i })
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /next/i })
     ).not.toBeInTheDocument();
