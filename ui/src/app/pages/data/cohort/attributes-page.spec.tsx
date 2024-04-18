@@ -42,8 +42,11 @@ let mockFindCriteriaAttributeByConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: SpyInstance;
 
-function component() {
-  return render(<AttributesPage {...props} />);
+async function component() {
+  render(<AttributesPage {...props} />);
+  await waitFor(() =>
+    expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+  );
 }
 
 function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
@@ -85,17 +88,12 @@ describe('AttributesPageV2', () => {
 
   it('should render', async () => {
     component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+
     expect(screen.getByText(/number of participants:/i)).toBeTruthy();
   });
 
   it('should not call api and render a single dropdown for Height in Physical Measurements', async () => {
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -115,10 +113,7 @@ describe('AttributesPageV2', () => {
 
   it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
     props.node = CriteriaWithAttributesStubVariables[1];
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -139,10 +134,7 @@ describe('AttributesPageV2', () => {
 
   it('should call api for attributes for Labs and Measurements nodes', async () => {
     props.node = CriteriaWithAttributesStubVariables[2];
-    const wrapper = component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -157,10 +149,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[3];
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -175,10 +164,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[4];
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
@@ -193,10 +179,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[5];
-    const wrapper = component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -211,10 +194,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[6];
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
@@ -225,10 +205,7 @@ describe('AttributesPageV2', () => {
 
   it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
     const user = userEvent.setup();
-    component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await component();
 
     screen.getByDisplayValue(/any value/i);
     // Simulate the dropdown change
