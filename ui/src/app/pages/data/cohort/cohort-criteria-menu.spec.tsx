@@ -12,7 +12,6 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 

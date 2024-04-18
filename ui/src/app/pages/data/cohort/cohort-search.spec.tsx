@@ -89,9 +89,11 @@ describe('CohortSearch', () => {
     };
     currentCohortCriteriaStore.next([selection]);
 
-    const unsavedDialogText =
-      /your cohort has not been saved\. if you’d like to save your cohort criteria, please click cancel and save your changes in the right sidebar\./i;
-
+    const unsavedDialogText = new RegExp(
+      'your cohort has not been saved\\. if you’d like to save your cohort criteria,' +
+        ' please click cancel and save your changes in the right sidebar\\.',
+      'i'
+    );
     await waitFor(() => {
       expect(screen.queryByText(unsavedDialogText)).not.toBeInTheDocument();
     });

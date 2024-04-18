@@ -49,8 +49,6 @@ describe('CohortPage', () => {
   };
 
   it('should render', async () => {
-    const { container } = component();
-    screen.logTestingPlaygroundURL();
     expect(await screen.findByText(/group 1/i)).toBeInTheDocument();
   });
 
