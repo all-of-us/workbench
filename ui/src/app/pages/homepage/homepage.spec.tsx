@@ -76,8 +76,8 @@ describe('HomepageComponent', () => {
   });
 
   it('should render the homepage', () => {
-    const { container } = component();
-    expect(container).toBeInTheDocument();
+    component();
+    expect(screen.getByText('Welcome to the')).toBeInTheDocument();
   });
 
   it('should display quick tour when clicked', () => {
@@ -109,7 +109,6 @@ describe('HomepageComponent', () => {
     };
     profileStore.set({ profile: newProfile, load, reload, updateCache });
     component();
-    screen.logTestingPlaygroundURL();
     expect(screen.queryByTestId('quick-tour-react')).not.toBeInTheDocument();
   });
 
@@ -120,7 +119,6 @@ describe('HomepageComponent', () => {
 
   it('should not display the zero workspace UI while workspaces are being fetched', async () => {
     component();
-    screen.logTestingPlaygroundURL();
     expect(
       screen.queryByText('Here are some tips to get you started')
     ).not.toBeInTheDocument();
