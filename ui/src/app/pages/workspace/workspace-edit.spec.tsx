@@ -202,19 +202,14 @@ describe('WorkspaceEdit', () => {
 
   it('displays workspaces edit page', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain(
-      'Edit workspace'
-    );
+    renderComponent();
+    await screen.findByText('Edit workspace');
 
     // Ensure the 'drug development' checkbox is checked when editing.
-    expect(
-      wrapper
-        .find('[data-test-id="drugDevelopment-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toEqual(true);
+    const drugDevelopmentCheckbox: HTMLInputElement = screen.getByTestId(
+      'drugDevelopment-checkbox'
+    ) as HTMLInputElement;
+    expect(drugDevelopmentCheckbox.checked).toEqual(true);
   });
 
   it('pre-fills "specific populations" form elements when editing', async () => {
