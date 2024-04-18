@@ -49,6 +49,7 @@ describe('CohortPage', () => {
   };
 
   it('should render', async () => {
+    component();
     expect(await screen.findByText(/group 1/i)).toBeInTheDocument();
   });
 
