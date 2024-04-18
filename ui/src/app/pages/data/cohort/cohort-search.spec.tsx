@@ -61,7 +61,6 @@ describe('CohortSearch', () => {
   it('should render CriteriaSearch component for any domain except Person', async () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
     component();
-    screen.logTestingPlaygroundURL();
     expect(
       await screen.findByRole('heading', { name: /conditions/i })
     ).toBeInTheDocument();
