@@ -1,12 +1,10 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
-import { CohortBuilderApi, Operator } from 'generated/fetch';
+import { CohortBuilderApi } from 'generated/fetch';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   ppiQuestions,
   ppiSurveys,
@@ -20,7 +18,6 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
@@ -34,8 +31,6 @@ import { AttributesPage, AttributesPageProps } from './attributes-page';
 import SpyInstance = jest.SpyInstance;
 import userEvent from '@testing-library/user-event';
 
-type AnyWrapper = ShallowWrapper | ReactWrapper;
-
 let props: AttributesPageProps;
 let mockCountParticipants: SpyInstance;
 let mockFindCriteriaAttributeByConceptId: SpyInstance;
@@ -47,17 +42,6 @@ async function component() {
   await waitFor(() =>
     expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
   );
-}
-
-function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
-  const elements = wrapper
-    .find(`Dropdown[id="numerical-dropdown-${index}"]`)
-    ?.getElements();
-  return elements?.length ? (elements[0] as unknown as Dropdown) : undefined;
-}
-
-function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {
-  return wrapper.find(`[id="numerical-input-${index}-0"]`).hostNodes();
 }
 
 describe('AttributesPageV2', () => {
