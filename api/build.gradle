@@ -8,10 +8,10 @@ buildscript {
     ext {
         GAE_VERSION = '2.0.9'
         GOOGLE_TRUTH_VERSION = '1.1.3'
-        GSON_VERSION = '2.9.0'
+        GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '5.6.15.Final'
         JACKSON_VERSION = '2.16.1'
-        LIQUIBASE_VERSION = '4.16.1'
+        LIQUIBASE_VERSION = '4.27.0'
         LOGBACK_VERSION = '1.2.13'
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
@@ -21,7 +21,7 @@ buildscript {
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '2.7.18'
         SPRING_FRAMEWORK_VERSION = '5.3.32'
-        SPRING_SECURITY_VERSION = '6.2.2'
+        SPRING_SECURITY_VERSION = '6.2.3'
         SWAGGER_3_CODEGEN_VERSION = '3.0.52'
     }
 
@@ -412,7 +412,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
@@ -427,9 +427,6 @@ dependencies {
         exclude group: 'com.google.cloud', module: 'google-cloud-trace'
     }
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
-    implementation group: 'io.opentelemetry.instrumentation', name: 'opentelemetry-instrumentation-annotations', version: '2.2.0'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot'
-
 
     implementation 'io.swagger:swagger-annotations:1.6.7'
     implementation "javax.inject:javax.inject:1"
