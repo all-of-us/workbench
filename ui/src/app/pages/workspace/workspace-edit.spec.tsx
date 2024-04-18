@@ -222,7 +222,6 @@ describe('WorkspaceEdit', () => {
 
     workspaceEditMode = WorkspaceEditMode.Edit;
     const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
