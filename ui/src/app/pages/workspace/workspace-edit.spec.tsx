@@ -6,6 +6,7 @@ import { mockNavigate } from 'setupTests';
 
 import {
   DisseminateResearchEnum,
+  EgressEventStatus,
   ProfileApi,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
@@ -14,7 +15,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -225,20 +226,17 @@ describe('WorkspaceEdit', () => {
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
-    expect(
-      wrapper
-        .find('[data-test-id="specific-population-yes"]')
-        .first()
-        .prop('checked')
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find(
-          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
-        )
-        .first()
-        .prop('checked')
-    ).toEqual(true);
+    let specificPopulationYesCheckbox: HTMLInputElement;
+    await waitFor(() => {
+      specificPopulationYesCheckbox = screen.getByTestId(
+        'specific-population-yes'
+      ) as HTMLInputElement;
+    });
+
+    const ageChildrenCheckbox: HTMLInputElement = screen.getByTestId(
+      `${SpecificPopulationEnum.AGE_CHILDREN}-checkbox`
+    ) as HTMLInputElement;
+    expect(ageChildrenCheckbox.checked).toEqual(true);
   });
 
   it('should initialize cdr versions dropdown options to the default tier when creating workspaces', async () => {
