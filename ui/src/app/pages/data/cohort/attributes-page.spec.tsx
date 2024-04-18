@@ -32,6 +32,7 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, AttributesPageProps } from './attributes-page';
 import SpyInstance = jest.SpyInstance;
+import userEvent from '@testing-library/user-event';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
@@ -135,107 +136,124 @@ describe('AttributesPageV2', () => {
       })
     );
   });
-  //
-  // it('should call api for attributes for Labs and Measurements nodes', async () => {
-  //   props.node = CriteriaWithAttributesStubVariables[2];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(0);
-  // });
-  //
-  // it('should call api for attributes for non COPE Survey nodes', async () => {
-  //   ppiSurveys.next({
-  //     [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
-  //   });
-  //   ppiQuestions.next(SurveyQuestionStubVariables);
-  //   props.node = CriteriaWithAttributesStubVariables[3];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(0);
-  // });
-  //
-  // it('should call api for survey versions for COPE questions', async () => {
-  //   ppiSurveys.next({
-  //     [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
-  //   });
-  //   ppiQuestions.next(SurveyQuestionStubVariables);
-  //   props.node = CriteriaWithAttributesStubVariables[4];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(0);
-  // });
-  //
-  // it('should call api for attributes and survey versions (Question and Answer conceptId call) for COPE answers', async () => {
-  //   ppiSurveys.next({
-  //     [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
-  //   });
-  //   ppiQuestions.next(SurveyQuestionStubVariables);
-  //   props.node = CriteriaWithAttributesStubVariables[5];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(1);
-  // });
-  //
-  // it('should call api for attributes and survey versions (Question conceptId call) for COPE Select a Value answers', async () => {
-  //   ppiSurveys.next({
-  //     [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
-  //   });
-  //   ppiQuestions.next(SurveyQuestionStubVariables);
-  //   props.node = CriteriaWithAttributesStubVariables[6];
-  //   const wrapper = component();
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-  //   expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
-  //   expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
-  //   expect(
-  //     mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-  //   ).toHaveBeenCalledTimes(0);
-  // });
-  //
-  // it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
-  //   const wrapper = component();
-  //   const numericalDropdown = getNumericalDropdown(wrapper, '0');
-  //   numericalDropdown.props.onChange({
-  //     originalEvent: undefined,
-  //     value: Operator.EQUAL,
-  //     target: { id: '', name: '', value: Operator.EQUAL },
-  //     stopPropagation: () => {},
-  //     preventDefault: () => {},
-  //   });
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(2);
-  //   expect(
-  //     wrapper.find('[data-test-id="attributes-calculate-btn"]').first().props()
-  //       .disabled
-  //   ).toBeTruthy();
-  //   const numericalInput = getNumericalInput(wrapper, '0');
-  //   numericalInput.simulate('change', { target: { value: 100 } });
-  //   await waitOneTickAndUpdate(wrapper);
-  //   expect(
-  //     wrapper.find('[data-test-id="attributes-calculate-btn"]').first().props()
-  //       .disabled
-  //   ).toBeFalsy();
-  //   wrapper.find('[data-test-id="attributes-calculate-btn"]').simulate('click');
-  //   expect(mockCountParticipants).toHaveBeenCalledTimes(1);
-  // });
+
+  it('should call api for attributes for Labs and Measurements nodes', async () => {
+    props.node = CriteriaWithAttributesStubVariables[2];
+    const wrapper = component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call api for attributes for non COPE Survey nodes', async () => {
+    ppiSurveys.next({
+      [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
+    });
+    ppiQuestions.next(SurveyQuestionStubVariables);
+    props.node = CriteriaWithAttributesStubVariables[3];
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call api for survey versions for COPE questions', async () => {
+    ppiSurveys.next({
+      [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
+    });
+    ppiQuestions.next(SurveyQuestionStubVariables);
+    props.node = CriteriaWithAttributesStubVariables[4];
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call api for attributes and survey versions (Question and Answer conceptId call) for COPE answers', async () => {
+    ppiSurveys.next({
+      [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
+    });
+    ppiQuestions.next(SurveyQuestionStubVariables);
+    props.node = CriteriaWithAttributesStubVariables[5];
+    const wrapper = component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call api for attributes and survey versions (Question conceptId call) for COPE Select a Value answers', async () => {
+    ppiSurveys.next({
+      [workspaceDataStub.cdrVersionId]: RootSurveyStubVariables,
+    });
+    ppiQuestions.next(SurveyQuestionStubVariables);
+    props.node = CriteriaWithAttributesStubVariables[6];
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
+    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
+    expect(
+      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+    ).toHaveBeenCalledTimes(0);
+  });
+
+  it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
+    const user = userEvent.setup();
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+
+    screen.getByDisplayValue(/any value/i);
+    // Simulate the dropdown change
+    const dropdown = screen.getByRole('button', { name: /select operator/i });
+    user.click(dropdown);
+    const equalOption = await screen.findByText('Equals');
+    user.click(equalOption);
+    await screen.findByDisplayValue('Equals');
+    expect(screen.queryByDisplayValue(/any value/i)).not.toBeInTheDocument();
+
+    // Check that the input field is rendered
+    const numericalInput = screen.getByRole('spinbutton');
+    expect(numericalInput).toBeInTheDocument();
+
+    // Check that the calculate button is disabled
+    const calculateButton = screen.getByRole('button', { name: /calculate/i });
+    expectButtonElementDisabled(calculateButton);
+
+    // Simulate the input change
+    user.type(numericalInput, '100');
+
+    await waitFor(() => expectButtonElementEnabled(calculateButton));
+
+    user.click(calculateButton);
+
+    await waitFor(() => expect(mockCountParticipants).toHaveBeenCalledTimes(1));
+  });
 });
