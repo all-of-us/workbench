@@ -741,11 +741,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public void deleteAllResources(String googleProject, boolean deleteDisk) {
-    leonardoRetryHandler.run(
+  public Boolean deleteAllResources(String googleProject, boolean deleteDisk) {
+    return leonardoRetryHandler.run(
         (context) -> {
-          resourcesApiProvider.get().deleteAllResources(googleProject, deleteDisk);
-          return null;
+          try {
+            resourcesApiProvider.get().deleteAllResources(googleProject, deleteDisk);
+            return true;
+          } catch (ApiException e) {
+            log.log(
+                Level.SEVERE,
+                String.format("failed to delete all resources for project %s", googleProject),
+                e);
+            return false;
+          }
         });
   }
 }

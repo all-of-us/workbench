@@ -96,14 +96,16 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
   private void handleExpiredUsers(Set<DbUser> newlyExpiredUsers) {
     newlyExpiredUsers.forEach(
         user -> {
-          logger.info("Free tier Billing Service: Sending email to user {}", user.getUsername());
+          logger.info(
+              "Free tier Billing Service: handling user with expired credits {}",
+              user.getUsername());
           workspaceService.updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
           // delete apps and runtimes
           deleteAppsAndRuntimesInFreeTierWorkspaces(user);
           try {
             mailService.alertUserInitialCreditsExpiration(user);
           } catch (MessagingException e) {
-            logger.warn("failed to mail free tier expiration email to {}", user.getUsername(), e);
+            logger.warn("failed to send free tier expiration email to {}", user.getUsername(), e);
           }
         });
   }
@@ -236,7 +238,7 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
             dbWorkspace -> {
               String namespace = dbWorkspace.getWorkspaceNamespace();
               leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-              logger.info("Deleting apps and runtimes for workspace " + namespace);
+              logger.info("Deleted apps and runtimes for workspace " + namespace);
             });
   }
 
