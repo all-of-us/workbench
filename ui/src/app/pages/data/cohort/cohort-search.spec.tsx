@@ -1,9 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
 
 import { CohortBuilderApi, CriteriaType, Domain } from 'generated/fetch';
 
+import { screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortCriteriaStore,
@@ -11,7 +13,7 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { renderModal } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
   CriteriaStubVariables,
@@ -38,7 +40,7 @@ const searchContextStubs = [
 
 describe('CohortSearch', () => {
   const component = () => {
-    return mount(
+    renderModal(
       <MemoryRouter>
         <CohortSearch setUnsavedChanges={() => {}} />
       </MemoryRouter>
@@ -50,41 +52,50 @@ describe('CohortSearch', () => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
 
-  it('should render', () => {
+  it('should render', async () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(await screen.findByRole('textbox')).toBeInTheDocument();
   });
 
-  it('should render CriteriaSearch component for any domain except Person', () => {
+  it('should render CriteriaSearch component for any domain except Person', async () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
-    const wrapper = component();
-    expect(wrapper.find('[id="criteria-search-container"]').length).toBe(1);
-    expect(wrapper.find('[data-test-id="demographics"]').length).toBe(0);
+    component();
+    screen.logTestingPlaygroundURL();
+    expect(
+      await screen.findByRole('heading', { name: /conditions/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('demographics')).not.toBeInTheDocument();
   });
 
   it('should render Demographics component for Person domain', () => {
     currentCohortSearchContextStore.next(searchContextStubs[1]);
-    const wrapper = component();
-    expect(wrapper.find('[id="criteria-search-container"]').length).toBe(0);
-    expect(wrapper.find('[data-test-id="demographics"]').length).toBe(1);
+    component();
+    expect(
+      screen.queryByTestId('criteria-search-container')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('demographics')).toBeInTheDocument();
   });
 
   it('should show warning modal for unsaved demographics selections', async () => {
     currentCohortSearchContextStore.next(searchContextStubs[1]);
-    const wrapper = component();
+    component();
     expect(
-      wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length
-    ).toBe(0);
+      screen.queryByTestId('cohort-search-unsaved-message')
+    ).not.toBeInTheDocument();
     const selection = {
       ...CriteriaStubVariables[1],
       parameterId: 'test param id',
     };
     currentCohortCriteriaStore.next([selection]);
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="cohort-search-back-arrow"]').simulate('click');
-    expect(
-      wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length
-    ).toBeGreaterThan(0);
+
+    const unsavedDialogText =
+      /your cohort has not been saved\. if you’d like to save your cohort criteria, please click cancel and save your changes in the right sidebar\./i;
+
+    await waitFor(() => {
+      expect(screen.queryByText(unsavedDialogText)).not.toBeInTheDocument();
+    });
+    screen.getByAltText('Go back').click();
+    expect(screen.queryByText(unsavedDialogText)).toBeInTheDocument();
   });
 });
