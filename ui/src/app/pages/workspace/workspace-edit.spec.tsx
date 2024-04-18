@@ -221,7 +221,7 @@ describe('WorkspaceEdit', () => {
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
+    renderComponent();
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
