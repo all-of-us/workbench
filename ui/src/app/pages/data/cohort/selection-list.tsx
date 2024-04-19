@@ -190,6 +190,7 @@ function mapCriteria(crit: Selection) {
     name: crit.name,
     parameterId: crit.parameterId,
     type: crit.type,
+    variantFilter: crit.variantFilter,
   };
 }
 
@@ -283,8 +284,8 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
                   key === 'sortBy'
                 )
             )
-            .map(([key, value]) => (
-              <li>
+            .map(([key, value], index) => (
+              <li key={index}>
                 <b>{VARIANT_DISPLAY[key]}</b>:{' '}
                 {Array.isArray(value) ? (
                   <>
@@ -306,8 +307,8 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
               <ul style={styles.filterList}>
                 {Object.entries(this.state.variantFilterInfoResponse)
                   .filter(([, value]) => value !== 0)
-                  .map(([key, value]) => (
-                    <li>
+                  .map(([key, value], index) => (
+                    <li key={index}>
                       <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
                     </li>
                   ))}
