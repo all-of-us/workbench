@@ -651,39 +651,24 @@ describe('WorkspaceEdit', () => {
   // regression test for RW-5132 - async version
   it('prevents multiple (async) Workspace creations via the same confirmation dialog', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    wrapper
-      .find('[data-test-id="review-request-btn-false"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    userEvent.click(await screen.findByTestId('review-request-btn-false'));
 
     const numBefore = workspacesApi.workspaceOperations.length;
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    userEvent.click(
+      await screen.findByRole('button', {
+        name: /Duplicate Workspace/i,
+      })
+    );
 
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const confirmSaveButton = await screen.findByRole('button', {
+      name: 'Confirm',
+    });
 
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(confirmSaveButton);
+    await user.click(confirmSaveButton);
+    await user.click(confirmSaveButton);
 
     expect(workspacesApi.workspaceOperations.length).toEqual(numBefore + 1);
     expect(mockNavigate).toHaveBeenCalledTimes(1);
