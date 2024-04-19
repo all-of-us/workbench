@@ -271,15 +271,14 @@ describe('WorkspaceEdit', () => {
       SpecificPopulationEnum.AGE_CHILDREN,
     ];
     workspaceEditMode = WorkspaceEditMode.Create;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(
-      wrapper
-        .find('[data-test-id="specific-population-yes"]')
-        .first()
-        .prop('checked')
-    ).toEqual(false);
+    renderComponent();
+    let specificPopulationYesCheckbox: HTMLInputElement;
+    await waitFor(() => {
+      specificPopulationYesCheckbox = screen.getByTestId(
+        'specific-population-yes'
+      ) as HTMLInputElement;
+    });
+    expect(specificPopulationYesCheckbox.checked).toEqual(false);
   });
 
   it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
