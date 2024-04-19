@@ -116,7 +116,6 @@ describe('WorkspaceEdit', () => {
       accessTierSelection = screen.getByRole('combobox', {
         name: /data access tier dropdown/i,
       }) as HTMLSelectElement;
-      // defaults to registered
       expect(accessTierSelection.disabled).toBe(true);
       expect(accessTierSelection.value).toBe(workspace.accessTierShortName);
     });
