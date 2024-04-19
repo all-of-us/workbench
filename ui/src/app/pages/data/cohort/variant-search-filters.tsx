@@ -134,9 +134,8 @@ export const VariantSearchFilters = ({
           {expanded.includes('geneList') && (
             <div>
               {filters.geneList?.map((checkboxName, index) => (
-                <div style={{ display: 'flex' }}>
+                <div key={index} style={{ display: 'flex' }}>
                   <input
-                    key={index}
                     style={{ marginRight: '0.25rem' }}
                     type='checkbox'
                     name={checkboxName}
@@ -201,9 +200,8 @@ export const VariantSearchFilters = ({
           {expanded.includes('clinicalSignificanceList') && (
             <div>
               {filters.clinicalSignificanceList?.map((checkboxName, index) => (
-                <div style={{ display: 'flex' }}>
+                <div key={index} style={{ display: 'flex' }}>
                   <input
-                    key={index}
                     style={{ marginRight: '0.25rem' }}
                     type='checkbox'
                     name={checkboxName}
