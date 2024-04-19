@@ -417,29 +417,41 @@ describe('WorkspaceEdit', () => {
 
   it('supports successful duplication in asynchronous mode', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    wrapper
-      .find('[data-test-id="review-request-btn-false"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const reviewRequestFalseRadioButton = await screen.findByTestId(
+      'review-request-btn-false'
+    );
+    user.click(reviewRequestFalseRadioButton);
 
+    const saveButton = await screen.findByRole('button', {
+      name: /Duplicate Workspace/i,
+    });
     const numBefore = workspacesApi.workspaceOperations.length;
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
 
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(workspacesApi.workspaceOperations.length).toEqual(numBefore + 1);
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expectButtonElementEnabled(saveButton);
+    });
+
+    user.click(saveButton);
+
+    await waitFor(() => {
+      // Wait for confirm duplication modal to appear
+      screen.queryByText(
+        /note: this workspace will take approximately one minute to create\./i
+      );
+    });
+
+    const confirmSaveButton = await screen.findByRole('button', {
+      name: 'Confirm',
+    });
+
+    user.click(confirmSaveButton);
+
+    await waitFor(() => {
+      expect(workspacesApi.workspaceOperations.length).toEqual(numBefore + 1);
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('defaults to upgrading the CDR Version when asynchronously duplicating a workspace with an older CDR Version', async () => {
