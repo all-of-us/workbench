@@ -1567,6 +1567,7 @@ export const WorkspaceEdit = fp.flow(
                           ...styles.selectInput,
                           ...styles.accessTierSpacing,
                         }}
+                        aria-label='data access tier dropdown'
                         value={accessTierShortName}
                         onChange={(value) =>
                           this.onAccessTierChange(

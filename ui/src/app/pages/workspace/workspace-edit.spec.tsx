@@ -512,67 +512,61 @@ describe('WorkspaceEdit', () => {
     });
   });
 
-  it(
-    'enables access tier selection on creation when multiple tiers are present' +
-      ' and the user has access to multiple',
-    async () => {
-      const twoTiers = [
-        AccessTierShortNames.Registered,
-        AccessTierShortNames.Controlled,
-      ];
-      workspaceEditMode = WorkspaceEditMode.Create;
-      profileStore.set({
-        ...profileStore.get(),
-        profile: {
-          ...profileStore.get().profile,
-          accessTierShortNames: twoTiers,
-        },
-      });
-      const wrapper = component();
-      await waitOneTickAndUpdate(wrapper);
+  it('enables access tier selection on creation when multiple tiers are present and the user has access to multiple', async () => {
+    const twoTiers = [
+      AccessTierShortNames.Registered,
+      AccessTierShortNames.Controlled,
+    ];
+    workspaceEditMode = WorkspaceEditMode.Create;
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profileStore.get().profile,
+        accessTierShortNames: twoTiers,
+      },
+    });
 
-      const accessTierSelection = wrapper
-        .find('[data-test-id="select-access-tier"]')
-        .find('select');
-      expect(accessTierSelection.exists()).toBeTruthy();
+    renderComponent();
 
+    let accessTierSelection: HTMLSelectElement;
+    await waitFor(() => {
+      accessTierSelection = screen.getByRole('combobox', {
+        name: /data access tier dropdown/i,
+      }) as HTMLSelectElement;
       // defaults to registered
-      const selectionProps = accessTierSelection.props();
-      expect(selectionProps.disabled).toBeFalsy();
-      expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
+      expect(accessTierSelection.value).toBe(AccessTierShortNames.Registered);
+    });
 
-      // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
-      // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+    const cdrVersionsSelect = screen.getByRole('combobox', {
+      name: /cdr version dropdown/i,
+    }) as HTMLSelectElement;
+    expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
 
-      const cdrVersionsSelect = () =>
-        wrapper.find('[data-test-id="select-cdr-version"]').find('select');
-      expect(cdrVersionsSelect().props().value).toBe(
-        defaultCdrVersion.cdrVersionId
-      );
+    const cdrVersionSelectOptions = Array.from(
+      cdrVersionsSelect.options,
+      (option) => option.value
+    );
+    expect(cdrVersionSelectOptions).toEqual([
+      defaultCdrVersion.cdrVersionId,
+      altCdrVersion.cdrVersionId,
+    ]);
 
-      const cdrVersionSelectOptions = (): Array<string> =>
-        cdrVersionsSelect()
-          .children()
-          .map((o) => o.props().value);
-      expect(cdrVersionSelectOptions()).toEqual([
-        defaultCdrVersion.cdrVersionId,
-        altCdrVersion.cdrVersionId,
-      ]);
+    // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
+    await userEvent.selectOptions(accessTierSelection, [
+      AccessTierShortNames.Controlled,
+    ]);
 
-      // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
-      await simulateSelection(
-        accessTierSelection,
-        AccessTierShortNames.Controlled
-      );
-
-      expect(cdrVersionsSelect().props().value).toBe(
-        controlledCdrVersion.cdrVersionId
-      );
-      expect(cdrVersionSelectOptions()).toEqual([
-        controlledCdrVersion.cdrVersionId,
-      ]);
-    }
-  );
+    expect(cdrVersionsSelect.value).toBe(controlledCdrVersion.cdrVersionId);
+    const cdrVersionSelectOptionsAfterChange = Array.from(
+      cdrVersionsSelect.options,
+      (option) => option.value
+    );
+    expect(cdrVersionSelectOptionsAfterChange).toEqual([
+      controlledCdrVersion.cdrVersionId,
+    ]);
+  });
 
   it(
     'enables the access tier selection dropdown on creation when multiple tiers are present' +
