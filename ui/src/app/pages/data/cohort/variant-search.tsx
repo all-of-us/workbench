@@ -154,6 +154,16 @@ const searchTooltip = (
     </ul>
   </div>
 );
+const resultsTooltip = (
+  <div style={{ marginLeft: '0.5rem' }}>
+    Number of results must be between 100 and 10,000 to Select All Results
+  </div>
+);
+const duplicateFilterTooltip = (
+  <div style={{ marginLeft: '0.5rem' }}>
+    A Select All Group with these filter selections has already been selected
+  </div>
+);
 
 export const VariantSearch = fp.flow(
   withCurrentWorkspace(),
@@ -586,25 +596,35 @@ export const VariantSearch = fp.flow(
                   </Clickable>
                 </>
               ) : (
-                <Clickable
-                  style={
-                    disableSelectAll
-                      ? { ...styles.selectAll, ...styles.disabled }
-                      : styles.selectAll
+                <TooltipTrigger
+                  side='top'
+                  content={
+                    totalCount < 100 || totalCount > 10000
+                      ? resultsTooltip
+                      : duplicateFilterTooltip
                   }
-                  onClick={() => handleSelectAllResults()}
-                  disabled={disableSelectAll}
+                  disabled={!disableSelectAll}
                 >
-                  <ClrIcon
-                    shape='plus-circle'
-                    class='is-solid'
-                    size={18}
-                    style={{
-                      marginRight: '0.25rem',
-                    }}
-                  />
-                  Select All Results
-                </Clickable>
+                  <Clickable
+                    style={
+                      disableSelectAll
+                        ? { ...styles.selectAll, ...styles.disabled }
+                        : styles.selectAll
+                    }
+                    onClick={() => handleSelectAllResults()}
+                    disabled={disableSelectAll}
+                  >
+                    <ClrIcon
+                      shape='plus-circle'
+                      class='is-solid'
+                      size={18}
+                      style={{
+                        marginRight: '0.25rem',
+                      }}
+                    />
+                    Select All Results
+                  </Clickable>
+                </TooltipTrigger>
               ))}
           </div>
         )}
