@@ -1606,6 +1606,7 @@ export const WorkspaceEdit = fp.flow(
                           ...styles.selectInput,
                           ...styles.cdrVersionSpacing,
                         }}
+                        aria-label='cdr version dropdown'
                         value={cdrVersionId}
                         onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                           const selectedVersion = v.currentTarget.value;

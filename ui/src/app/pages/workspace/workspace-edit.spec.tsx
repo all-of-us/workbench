@@ -465,28 +465,29 @@ describe('WorkspaceEdit', () => {
     // duplication will involve a CDR version upgrade by default
     workspaceEditMode = WorkspaceEditMode.Duplicate;
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const cdrSelection = wrapper
-      .find('[data-test-id="select-cdr-version"]')
-      .find('select')
-      .props().value;
-
-    // default CDR version, not the existing workspace's alt CDR version
-    expect(cdrSelection).toBe(
-      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-    );
+    await waitFor(() => {
+      const cdrSelection = screen.getByRole('combobox', {
+        name: /cdr version dropdown/i,
+      }) as HTMLSelectElement;
+      // default CDR version, not the existing workspace's alt CDR version
+      expect(cdrSelection.value).toBe(
+        CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      );
+    });
 
     const { ALT_WORKSPACE_CDR_VERSION, DEFAULT_WORKSPACE_CDR_VERSION } =
       CdrVersionsStubVariables;
     const expectedUpgradeMessage = `${ALT_WORKSPACE_CDR_VERSION} to ${DEFAULT_WORKSPACE_CDR_VERSION}.`;
-    const cdrUpgradeMessage = wrapper
-      .find('[data-test-id="cdr-version-upgrade"]')
-      .first()
-      .text();
-    expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
-    expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
+
+    await waitFor(() => {
+      const cdrUpgradeMessage = screen.getByTestId(
+        'cdr-version-upgrade'
+      ).textContent;
+      expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
+      expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
+    });
   });
 
   it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async () => {
