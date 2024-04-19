@@ -16,6 +16,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -79,6 +80,7 @@ describe('WorkspaceEdit', () => {
   let userApi: UserApiStub;
   let workspace: WorkspaceData;
   let workspaceEditMode: WorkspaceEditMode;
+  let user: UserEvent;
 
   const component = () => {
     return mount(
@@ -170,6 +172,7 @@ describe('WorkspaceEdit', () => {
     mockEnsureBillingScope = jest.spyOn(Authentication, 'ensureBillingScope');
     mockHasBillingScope.mockImplementation(() => false);
     mockEnsureBillingScope.mockImplementation(() => {});
+    user = userEvent.setup();
   });
 
   it('displays workspaces create page', async () => {
@@ -244,14 +247,18 @@ describe('WorkspaceEdit', () => {
 
     workspaceEditMode = WorkspaceEditMode.Create;
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const cdrSelectionOptions = wrapper
-      .find('[data-test-id="select-cdr-version"]')
-      .find('select')
-      .find('option')
-      .map((option) => option.prop('value'));
+    let cdrVersionSelect: HTMLElement;
+    await waitFor(() => {
+      cdrVersionSelect = screen.getByTestId(
+        'select-cdr-version'
+      ) as HTMLElement;
+    });
+
+    const cdrSelectionOptions: string[] = (
+      within(cdrVersionSelect).getAllByRole('option') as HTMLOptionElement[]
+    ).map((option) => option.value);
 
     expect(cdrSelectionOptions).toEqual([
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
