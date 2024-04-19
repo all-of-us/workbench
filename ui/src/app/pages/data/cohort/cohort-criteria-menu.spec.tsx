@@ -1,25 +1,25 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { CohortBuilderApi } from 'generated/fetch';
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   cohortBuilderApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { CohortCriteriaMenu } from './cohort-criteria-menu';
 
 describe('CohortCriteriaMenu', () => {
-  const component = () => {
-    return mount(
-      <CohortCriteriaMenu launchSearch={() => {}} menuOptions={[]} />
-    );
+  const component = async () => {
+    render(<CohortCriteriaMenu launchSearch={() => {}} menuOptions={[]} />);
   };
 
   beforeEach(() => {
@@ -30,71 +30,68 @@ describe('CohortCriteriaMenu', () => {
     });
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+  it('should render', async () => {
+    await component();
+    const addCriteriaButton = await screen.findByRole('button', {
+      name: 'Add Criteria',
+    });
+    expect(addCriteriaButton).toBeInTheDocument();
   });
 
-  it('should open the menu on button click', () => {
-    const wrapper = component();
+  it('should open the menu on button click', async () => {
+    component();
     expect(
-      wrapper.find('[data-test-id="criteria-menu-dropdown"]').exists()
-    ).toBeFalsy();
-    wrapper
-      .find('[data-test-id="criteria-menu-button"]')
-      .first()
-      .simulate('click');
+      screen.queryByTestId('criteria-menu-dropdown')
+    ).not.toBeInTheDocument();
+    const addCriteriaButton = await screen.findByRole('button', {
+      name: 'Add Criteria',
+    });
+    userEvent.click(addCriteriaButton);
     expect(
-      wrapper.find('[data-test-id="criteria-menu-dropdown"]').exists()
-    ).toBeTruthy();
+      await screen.findByTestId('criteria-menu-dropdown')
+    ).toBeInTheDocument();
   });
 
   it('should call the api when a valid search term is entered', async () => {
-    const wrapper = component();
+    component();
     const shortInput = 'i';
     const validInput = 'valid input';
-    wrapper
-      .find('[data-test-id="criteria-menu-button"]')
-      .first()
-      .simulate('click');
+    const addCriteriaButton = await screen.findByRole('button', {
+      name: 'Add Criteria',
+    });
+    userEvent.click(addCriteriaButton);
     const domainCountsSpy = jest.spyOn(
       cohortBuilderApi(),
       'findUniversalDomainCounts'
     );
     expect(domainCountsSpy).toHaveBeenCalledTimes(0);
 
+    const criteriaInput = await screen.findByRole('textbox');
+
     // Show the alert message when only a single char is entered
-    wrapper
-      .find('[data-test-id="criteria-menu-input"]')
-      .first()
-      .simulate('change', { target: { value: shortInput } });
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="criteria-menu-input"]')
-      .first()
-      .simulate('keydown', { key: 'Enter' });
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="criteria-menu-input"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="criteria-menu-input-alert"]').exists()
-    ).toBeTruthy();
+    await userEvent.type(criteriaInput, shortInput);
+    fireEvent.keyDown(criteriaInput, {
+      key: 'Enter',
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('criteria-menu-input-alert')
+      ).toBeInTheDocument()
+    );
+
     expect(domainCountsSpy).toHaveBeenCalledTimes(0);
 
     // No alert and call api for valid search term
-    wrapper
-      .find('[data-test-id="criteria-menu-input"]')
-      .first()
-      .simulate('change', { target: { value: validInput } });
-    wrapper
-      .find('[data-test-id="criteria-menu-input"]')
-      .first()
-      .simulate('keydown', { key: 'Enter' });
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="criteria-menu-input-alert"]').exists()
-    ).toBeFalsy();
-    expect(domainCountsSpy).toHaveBeenCalledTimes(1);
+    await userEvent.type(criteriaInput, validInput);
+    fireEvent.keyDown(criteriaInput, {
+      key: 'Enter',
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('criteria-menu-input-alert')
+      ).not.toBeInTheDocument();
+      expect(domainCountsSpy).toHaveBeenCalledTimes(1);
+    });
   });
 });
