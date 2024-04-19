@@ -173,7 +173,10 @@ describe('WorkspaceEdit', () => {
     mockEnsureBillingScope = jest.spyOn(Authentication, 'ensureBillingScope');
     mockHasBillingScope.mockImplementation(() => false);
     mockEnsureBillingScope.mockImplementation(() => {});
-    user = userEvent.setup();
+    // Since we are testing delays in these tests, it is helpful to set no dleay in user actions
+    // themselves, so we can focus on delays in our apis:
+    // https://github.com/testing-library/user-event/issues/833
+    user = userEvent.setup({ delay: null });
   });
 
   it('displays workspaces create page', async () => {
@@ -675,9 +678,9 @@ describe('WorkspaceEdit', () => {
   });
 
   it('supports waiting on access delays', async () => {
+    jest.useFakeTimers();
     workspaceEditMode = WorkspaceEditMode.Duplicate;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({
@@ -686,26 +689,24 @@ describe('WorkspaceEdit', () => {
       });
     };
 
-    jest.useFakeTimers();
-    wrapper
-      .find('[data-test-id="review-request-btn-false"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).not.toHaveBeenCalled();
+    const reviewRequestFalseRadioButton = await screen.findByTestId(
+      'review-request-btn-false'
+    );
+    await user.click(reviewRequestFalseRadioButton);
 
+    await user.click(
+      screen.getByRole('button', {
+        name: /Duplicate Workspace/i,
+      })
+    );
+
+    const confirmButton = await screen.findByRole('button', {
+      name: 'Confirm',
+    });
+
+    await user.click(confirmButton);
+    expect(mockNavigate).not.toHaveBeenCalled();
     jest.advanceTimersByTime(15e3);
-    await waitOneTickAndUpdate(wrapper);
     expect(mockNavigate).not.toHaveBeenCalled();
 
     workspacesApi.getWorkspace = (..._) => {
@@ -715,10 +716,9 @@ describe('WorkspaceEdit', () => {
       });
     };
     jest.advanceTimersByTime(10e3);
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockNavigate).toHaveBeenCalled();
-
-    jest.useRealTimers();
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalled();
+    });
   });
 
   it('shows confirmation on extended access delays', async () => {
