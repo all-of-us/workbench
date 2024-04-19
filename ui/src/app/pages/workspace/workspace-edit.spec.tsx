@@ -348,65 +348,59 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should select Research Purpose checkbox if sub category is selected', async () => {
-    const wrapper = component();
-
-    // Research Purpose should not be selected and sub categories should be collapsed by default
-    expect(
-      wrapper
-        .find('[data-test-id="researchPurpose-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toBe(false);
+    renderComponent();
+    // Research Purpose should not be selected and sub categories should be collapsed by defaul
+    const researchPurposeCheckbox: HTMLInputElement = screen.getByTestId(
+      'researchPurpose-checkbox'
+    ) as HTMLInputElement;
+    expect(researchPurposeCheckbox.checked).toEqual(false);
 
     expect(
-      wrapper.find('[data-test-id="research-purpose-categories"]').length
-    ).toBe(0);
+      screen.queryByText(
+        'Choose options below to describe your research purpose'
+      )
+    ).toBeNull();
 
     // Click the arrow icon to expand the research purpose sub categories
-    wrapper
-      .find('[data-test-id="research-purpose-button"]')
-      .first()
-      .simulate('click');
+    const researchPurposeButton = screen.getByRole('button', {
+      name: /Research Purpose/i,
+    });
+    user.click(researchPurposeButton);
 
     // Select any sub category for Research Purpose
-    wrapper
-      .find('[data-test-id="ancestry-checkbox"]')
-      .first()
-      .simulate('change', { target: { checked: true } });
+    const ancestoryCheckbox: HTMLInputElement = (await screen.findByTestId(
+      'ancestry-checkbox'
+    )) as HTMLInputElement;
 
-    // Research Purpose checkbox should be selected now
-    expect(
-      wrapper
-        .find('[data-test-id="researchPurpose-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toBe(true);
+    user.click(ancestoryCheckbox);
 
-    wrapper
-      .find('[data-test-id="ancestry-checkbox"]')
-      .first()
-      .simulate('change', { target: { checked: false } });
+    await waitFor(() => {
+      // Research Purpose checkbox should be selected now
+      expect(researchPurposeCheckbox.checked).toEqual(true);
+    });
+
+    user.click(ancestoryCheckbox);
 
     // Un-selecting the sub categories should unselect the research purpose checkbox
     // BUT THE SUB CATEGORIES SHOULD STILL BE VISIBLE
-    expect(
-      wrapper
-        .find('[data-test-id="researchPurpose-checkbox"]')
-        .first()
-        .prop('checked')
-    ).toBe(false);
-    expect(
-      wrapper.find('[data-test-id="research-purpose-categories"]').length
-    ).not.toBe(0);
+    await waitFor(() => {
+      // Research Purpose checkbox should be selected now
+      expect(researchPurposeCheckbox.checked).toEqual(false);
+      expect(
+        screen.queryByText(
+          'Choose options below to describe your research purpose'
+        )
+      ).not.toBeNull();
+    });
 
     // Clicking the icon should collapse all the research purpose sub-categories
-    wrapper
-      .find('[data-test-id="research-purpose-button"]')
-      .first()
-      .simulate('click');
+    user.click(researchPurposeButton);
+
     expect(
-      wrapper.find('[data-test-id="research-purpose-categories"]').length
-    ).toBe(0);
+      screen.queryByText(
+        'Choose options below to describe your research purpose'
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('supports disable save button if Research Outcome is not answered', async () => {
