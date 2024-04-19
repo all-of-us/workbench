@@ -35,6 +35,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementDisabled,
   expectButtonElementEnabled,
   renderWithRouter,
   simulateSelection,
@@ -406,15 +407,12 @@ describe('WorkspaceEdit', () => {
   it('supports disable save button if Research Outcome is not answered', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     workspace.researchPurpose.researchOutcomeList = [];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const saveButton = wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .prop('disabled');
-    expect(saveButton).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    const saveButton = await screen.findByRole('button', {
+      name: /Duplicate Workspace/i,
+    });
+    expectButtonElementDisabled(saveButton);
   });
 
   it('supports successful duplication in asynchronous mode', async () => {
