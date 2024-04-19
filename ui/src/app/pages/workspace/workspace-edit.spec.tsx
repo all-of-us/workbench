@@ -500,18 +500,16 @@ describe('WorkspaceEdit', () => {
 
     workspaceEditMode = WorkspaceEditMode.Duplicate;
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    // upgrade message does not appear
-    expect(
-      wrapper.find('[data-test-id="cdr-version-upgrade"]').exists()
-    ).toBeFalsy();
-
-    // old CDR Version warning does not appear
-    expect(
-      wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()
-    ).toBeFalsy();
+    await waitFor(() => {
+      // Ensuring the component has loaded
+      expect(screen.getByText('Workspace name')).toBeInTheDocument();
+      // upgrade message does not appear
+      expect(screen.queryByTestId('cdr-version-upgrade')).toBeNull();
+      // old CDR Version warning does not appear
+      expect(screen.queryByTestId('old-cdr-version-warning')).toBeNull();
+    });
   });
 
   it(
