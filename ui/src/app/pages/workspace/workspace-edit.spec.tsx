@@ -35,6 +35,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementEnabled,
   renderWithRouter,
   simulateSelection,
   waitOneTickAndUpdate,
@@ -291,59 +292,59 @@ describe('WorkspaceEdit', () => {
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
+    let specificPopulationYesCheckbox: HTMLInputElement;
+    await waitFor(() => {
+      specificPopulationYesCheckbox = screen.getByTestId(
+        'specific-population-yes'
+      ) as HTMLInputElement;
+    });
+    expect(specificPopulationYesCheckbox.checked).toEqual(true);
 
     expect(
-      wrapper
-        .find('[data-test-id="specific-population-yes"]')
-        .first()
-        .prop('checked')
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find(
-          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
-        )
-        .first()
-        .prop('checked')
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.RACE_MENA}-checkbox"]`)
-        .first()
-        .prop('checked')
-    ).toEqual(true);
-    expect(
-      wrapper
-        .find(
-          `[data-test-id="${SpecificPopulationEnum.DISABILITY_STATUS}-checkbox"]`
-        )
-        .first()
-        .prop('checked')
+      (
+        screen.getByTestId(
+          `${SpecificPopulationEnum.AGE_CHILDREN}-checkbox`
+        ) as HTMLInputElement
+      ).checked
     ).toEqual(true);
 
-    wrapper
-      .find('[data-test-id="specific-population-no"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper
-      .find('[data-test-id="workspace-confirm-save-btn"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    expect(
+      (
+        screen.getByTestId(
+          `${SpecificPopulationEnum.RACE_MENA}-checkbox`
+        ) as HTMLInputElement
+      ).checked
+    ).toEqual(true);
 
     expect(
-      workspacesApi.workspaces[0].researchPurpose.populationDetails.length
-    ).toBe(0);
+      (
+        screen.getByTestId(
+          `${SpecificPopulationEnum.DISABILITY_STATUS}-checkbox`
+        ) as HTMLInputElement
+      ).checked
+    ).toEqual(true);
+
+    user.click(screen.getByTestId('specific-population-no'));
+
+    const saveButton = screen.getByRole('button', { name: 'Update Workspace' });
+
+    await waitFor(() => {
+      expectButtonElementEnabled(saveButton);
+    });
+    user.click(saveButton);
+
+    const confirmSaveButton = await screen.findByRole('button', {
+      name: 'Confirm',
+    });
+
+    user.click(confirmSaveButton);
+
+    await waitFor(() => {
+      expect(
+        workspacesApi.workspaces[0].researchPurpose.populationDetails.length
+      ).toBe(0);
+    });
   });
 
   it('should select Research Purpose checkbox if sub category is selected', async () => {
