@@ -109,17 +109,17 @@ describe('WorkspaceEdit', () => {
   };
 
   async function expectNoTierChangesAllowed() {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const accessTierSelection = wrapper.find(
-      '[data-test-id="select-access-tier"]'
-    );
-    expect(accessTierSelection.exists()).toBeTruthy();
-
-    const selectionProps = accessTierSelection.find('select').props();
-    expect(selectionProps.disabled).toBeTruthy();
-    expect(selectionProps.value).toBe(workspace.accessTierShortName);
+    let accessTierSelection: HTMLSelectElement;
+    await waitFor(() => {
+      accessTierSelection = screen.getByRole('combobox', {
+        name: /data access tier dropdown/i,
+      }) as HTMLSelectElement;
+      // defaults to registered
+      expect(accessTierSelection.disabled).toBe(true);
+      expect(accessTierSelection.value).toBe(workspace.accessTierShortName);
+    });
   }
 
   beforeEach(async () => {
