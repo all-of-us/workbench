@@ -568,71 +568,62 @@ describe('WorkspaceEdit', () => {
     ]);
   });
 
-  it(
-    'enables the access tier selection dropdown on creation when multiple tiers are present' +
-      ' but prevents selection when the user does not have access',
-    async () => {
-      workspaceEditMode = WorkspaceEditMode.Create;
-      profileStore.set({
-        ...profileStore.get(),
-        profile: {
-          ...profileStore.get().profile,
-          accessTierShortNames: [AccessTierShortNames.Registered],
-        },
-      });
+  it('enables the access tier selection dropdown on creation when multiple tiers are present but prevents selection when the user does not have access', async () => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+    profileStore.set({
+      ...profileStore.get(),
+      profile: {
+        ...profileStore.get().profile,
+        accessTierShortNames: [AccessTierShortNames.Registered],
+      },
+    });
 
-      const wrapper = component();
-      await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-      const accessTierSelection = wrapper
-        .find('[data-test-id="select-access-tier"]')
-        .find('select');
-      expect(accessTierSelection.exists()).toBeTruthy();
-
+    let accessTierSelection: HTMLSelectElement;
+    await waitFor(() => {
+      accessTierSelection = screen.getByRole('combobox', {
+        name: /data access tier dropdown/i,
+      }) as HTMLSelectElement;
       // defaults to registered
-      const selectionProps = accessTierSelection.props();
-      expect(selectionProps.disabled).toBeFalsy();
-      expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
+      expect(accessTierSelection.disabled).toBe(false);
+      expect(accessTierSelection.value).toBe(AccessTierShortNames.Registered);
+    });
 
-      // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
-      // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+    const cdrVersionsSelect = screen.getByRole('combobox', {
+      name: /cdr version dropdown/i,
+    }) as HTMLSelectElement;
+    expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
 
-      const cdrVersionsSelect = () =>
-        wrapper.find('[data-test-id="select-cdr-version"]').find('select');
-      expect(cdrVersionsSelect().props().value).toBe(
-        defaultCdrVersion.cdrVersionId
-      );
+    const cdrVersionSelectOptions = Array.from(
+      cdrVersionsSelect.options,
+      (option) => option.value
+    );
+    expect(cdrVersionSelectOptions).toEqual([
+      defaultCdrVersion.cdrVersionId,
+      altCdrVersion.cdrVersionId,
+    ]);
 
-      const cdrVersionSelectOptions = (): Array<string> =>
-        cdrVersionsSelect()
-          .children()
-          .map((o) => o.props().value);
-      expect(cdrVersionSelectOptions()).toEqual([
-        defaultCdrVersion.cdrVersionId,
-        altCdrVersion.cdrVersionId,
-      ]);
+    // when Controlled is selected, the UnavailableTierModal appears, and the CDR Version dropdown continues to
+    // list the registered tier CDR Versions
+    await userEvent.selectOptions(accessTierSelection, [
+      AccessTierShortNames.Controlled,
+    ]);
 
-      // when Controlled is selected, the UnavailableTierModal appears, and the CDR Version dropdown continues to
-      // list the registered tier CDR Versions
+    expect(screen.getByTestId('unavailable-tier-modal')).toBeInTheDocument();
 
-      await simulateSelection(
-        accessTierSelection,
-        AccessTierShortNames.Controlled
-      );
-
-      expect(
-        wrapper.find('[data-test-id="unavailable-tier-modal"]').exists()
-      ).toBeTruthy();
-
-      expect(cdrVersionsSelect().props().value).toBe(
-        defaultCdrVersion.cdrVersionId
-      );
-      expect(cdrVersionSelectOptions()).toEqual([
-        defaultCdrVersion.cdrVersionId,
-        altCdrVersion.cdrVersionId,
-      ]);
-    }
-  );
+    expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
+    const cdrVersionSelectOptionsAfterChange = Array.from(
+      cdrVersionsSelect.options,
+      (option) => option.value
+    );
+    expect(cdrVersionSelectOptionsAfterChange).toEqual([
+      defaultCdrVersion.cdrVersionId,
+      altCdrVersion.cdrVersionId,
+    ]);
+  });
 
   it('retains the tier on edit and does not permit changes - Registered', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
