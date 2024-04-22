@@ -725,27 +725,23 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if research purpose summary has reached 1000 characters', async () => {
-    const wrapper = component();
+    renderComponent();
     // Intended Study Text
-    const testInput = fp.repeat(1000, 'a');
+    const testInput = 'a'.repeat(1000);
+
     // since its a new page the characters box for Intended study should say 1000 characters remaining
-    const intendedStudySection = wrapper.find(
-      '[data-test-id="intendedStudyText"]'
-    );
-    expect(
-      intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props
-        .children
-    ).toBe('1000 characters remaining');
+    const intendedStudySection = await screen.findByTestId('intendedStudyText');
+    expect(intendedStudySection).toHaveTextContent('1000 characters remaining');
 
-    intendedStudySection
-      .find('textarea#intendedStudyText')
-      .simulate('change', { target: { value: testInput } });
+    const intendedStudySectionTextArea = await screen.getByRole('textbox', {
+      name: /text area describing the intention of the study/i,
+    });
 
-    wrapper.find('[data-test-id="intendedStudyText"]');
+    await user.click(intendedStudySectionTextArea);
+    await user.paste(testInput);
 
-    expect(
-      wrapper.find('[data-test-id="characterLimit"]').first().props().children
-    ).toContain('0 characters remaining');
+    // Check that the character limit text has updated
+    expect(intendedStudySection).toHaveTextContent('0 characters remaining');
   });
 
   it('should show error message if Other primary purpose is more than 500 characters', async () => {
