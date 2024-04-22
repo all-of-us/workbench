@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { RuntimeStatus } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import {
   registerCompoundRuntimeOperation,
   runtimeStore,
@@ -19,7 +19,7 @@ import {
 } from './environment-status-icon';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
-describe('Runtime Status Indicator', () => {
+describe(RuntimeStatusIndicator.name, () => {
   test.each([
     [RuntimeStatus.CREATING, UpdatingIcon],
     [RuntimeStatus.STOPPED, StoppedIcon],
@@ -36,10 +36,9 @@ describe('Runtime Status Indicator', () => {
         runtime: runtimeStub.runtime,
         runtimeLoaded: true,
       });
-      const wrapper = mount(<RuntimeStatusIndicator />);
-      expect(wrapper.exists()).toBeTruthy();
-      const statusIcon = wrapper.find(icon);
-      expect(statusIcon.exists()).toBeTruthy();
+      render(<RuntimeStatusIndicator />);
+      const statusIcon = screen.getByTestId(`runtime-status-icon-${status}`);
+      expect(statusIcon).toBeInTheDocument();
     }
   );
 
@@ -51,13 +50,10 @@ describe('Runtime Status Indicator', () => {
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
-    const wrapper = mount(<RuntimeStatusIndicator />);
-    expect(wrapper.exists()).toBeTruthy();
-    const iconContainer = wrapper.find(
-      'div[data-test-id="runtime-status-icon-container"]'
-    );
-    expect(iconContainer.exists()).toBeTruthy();
-    expect(iconContainer.children().length).toEqual(0);
+    render(<RuntimeStatusIndicator />);
+    const iconContainer = screen.getByTestId('runtime-status-icon-container');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer.children.length).toEqual(0);
   });
 
   it('Verify that a runtime that is part of a compound runtimeop is shown as updating', () => {
@@ -75,11 +71,10 @@ describe('Runtime Status Indicator', () => {
       aborter,
     });
 
-    const wrapper = mount(
+    render(
       <RuntimeStatusIndicator workspaceNamespace={currentWorkspaceNamespace} />
     );
-    expect(wrapper.exists()).toBeTruthy();
-    const statusIcon = wrapper.find(UpdatingIcon);
-    expect(statusIcon.exists()).toBeTruthy();
+    const statusIcon = screen.getByTestId('runtime-status-icon-updating');
+    expect(statusIcon).toBeInTheDocument();
   });
 });
