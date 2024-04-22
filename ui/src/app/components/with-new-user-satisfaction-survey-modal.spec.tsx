@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
 
 import { SurveysApi } from 'generated/fetch';
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { withNewUserSatisfactionSurveyModal } from 'app/components/with-new-user-satisfaction-survey-modal-wrapper';
 import {
   registerApiClient,
@@ -11,32 +11,22 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { notificationStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { SurveysApiStub } from 'testing/stubs/surveys-api-stub';
 
-import { NewUserSatisfactionSurveyModal } from './new-user-satisfaction-survey-modal';
-
-describe('withNewUserSatisfactionSurveyModal', () => {
+describe(withNewUserSatisfactionSurveyModal.name, () => {
   beforeEach(() => {
     registerApiClient(SurveysApi, new SurveysApiStub());
   });
 
-  const createSurveyData = () => {
-    return {
-      satisfaction: undefined,
-      additionalInfo: '',
-    };
-  };
-
   const createWrapperAtPath = async (path: string) => {
     const Component = withNewUserSatisfactionSurveyModal(() => <div />);
-    const wrapper = mount(
+    const { getByTestId } = render(
       <MemoryRouter initialEntries={[path]}>
         <Component />
       </MemoryRouter>
     );
-    await waitOneTickAndUpdate(wrapper);
-    return wrapper;
+    await waitFor(() => getByTestId('component'));
+    return getByTestId;
   };
 
   const createWrapperWithValidCode = (code: string) => {
@@ -51,17 +41,18 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     const validationMock = jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(true));
-
-    const wrapper = await createWrapperAtPath(`?surveyCode=${code}`);
-
-    expect(validationMock.mock.calls[0][0]).toEqual(code);
-    expect(wrapper.find(NewUserSatisfactionSurveyModal).exists()).toBeTruthy();
+    const getByTestId = await createWrapperAtPath(`?surveyCode=${code}`);
+    expect(validationMock).toHaveBeenCalledWith(code);
+    expect(
+      getByTestId('new-user-satisfaction-survey-modal')
+    ).toBeInTheDocument();
   });
 
   it('should not show the modal if the code query parameter is not present', async () => {
-    const wrapper = await createWrapperAtPath('');
-
-    expect(wrapper.find(NewUserSatisfactionSurveyModal).exists()).toBeFalsy();
+    const getByTestId = await createWrapperAtPath('');
+    expect(
+      getByTestId('new-user-satisfaction-survey-modal')
+    ).not.toBeInTheDocument();
   });
 
   it('should not show the modal if the code query parameter is invalid', async () => {
@@ -69,10 +60,10 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(false));
-
-    const wrapper = await createWrapperAtPath(`?surveyCode=${code}`);
-
-    expect(wrapper.find(NewUserSatisfactionSurveyModal).exists()).toBeFalsy();
+    const getByTestId = await createWrapperAtPath(`?surveyCode=${code}`);
+    expect(
+      getByTestId('new-user-satisfaction-survey-modal')
+    ).not.toBeInTheDocument();
   });
 
   it('should not show an error if the code query parameter validation request succeeds', async () => {
@@ -80,9 +71,7 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(true));
-
     await createWrapperAtPath(`?surveyCode=${code}`);
-
     expect(notificationStore.get()).toBeNull();
   });
 
@@ -91,28 +80,24 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.reject());
-
     expect(notificationStore.get()).toBeNull();
-
     await createWrapperAtPath(`?surveyCode=${code}`);
-
     expect(notificationStore.get().title).toBeTruthy();
     expect(notificationStore.get().message).toBeTruthy();
   });
 
   it('should call create API with the code', async () => {
     const code = 'abc';
-    const surveyData = createSurveyData();
+    const surveyData = {
+      satisfaction: undefined,
+      additionalInfo: '',
+    };
     const validationMock = jest
       .spyOn(surveysApi(), 'createNewUserSatisfactionSurveyWithOneTimeCode')
       .mockImplementationOnce(() => Promise.resolve(undefined));
-
-    const wrapper = await createWrapperWithValidCode(code);
-    await wrapper
-      .find(NewUserSatisfactionSurveyModal)
-      .prop('createSurveyApiCall')(surveyData);
-
-    expect(validationMock.mock.calls[0][0]).toEqual({
+    const getByTestId = await createWrapperWithValidCode(code);
+    fireEvent.click(getByTestId('new-user-satisfaction-survey-modal-submit'));
+    expect(validationMock).toHaveBeenCalledWith({
       createNewUserSatisfactionSurvey: surveyData,
       oneTimeCode: code,
     });
