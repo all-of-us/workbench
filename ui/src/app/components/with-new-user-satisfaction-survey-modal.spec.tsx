@@ -92,6 +92,7 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
   });
 
   it('should call create API with the code', async () => {
+    const user = userEvent.setup();
     const code = 'abc';
     const surveyData = {
       satisfaction: NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED,
@@ -101,16 +102,12 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
       .spyOn(surveysApi(), 'createNewUserSatisfactionSurveyWithOneTimeCode')
       .mockImplementationOnce(() => Promise.resolve(undefined));
 
-    const { getByText, getByRole } = await createWrapperWithValidCode(code);
+    const { getByRole } = await createWrapperWithValidCode(code);
 
     const button = getByRole('button', { name: 'submit' });
     // because we haven't chosen a satisfaction level yet
     expectButtonElementDisabled(button);
 
-    const satisfaction = getByText(overallSatisfaction);
-    satisfaction.focus();
-
-    const user = userEvent.setup();
     await user.click(getByRole('radio', { name: /very satisfied/i }));
 
     await waitFor(() => expectButtonElementEnabled(button));
