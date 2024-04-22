@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 
@@ -20,13 +22,11 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
 
   const createWrapperAtPath = async (path: string) => {
     const Component = withNewUserSatisfactionSurveyModal(() => <div />);
-    const { getByTestId } = render(
+    return render(
       <MemoryRouter initialEntries={[path]}>
         <Component />
       </MemoryRouter>
     );
-    await waitFor(() => getByTestId('component'));
-    return getByTestId;
   };
 
   const createWrapperWithValidCode = (code: string) => {
@@ -36,23 +36,22 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
     return createWrapperAtPath(`?surveyCode=${code}`);
   };
 
+  const overallQuestionText =
+    'How would you rate your overall satisfaction with the Researcher Workbench?';
+
   it('should show the modal if the code query parameter is valid', async () => {
     const code = 'abc';
     const validationMock = jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(true));
-    const getByTestId = await createWrapperAtPath(`?surveyCode=${code}`);
+    const { queryByText } = await createWrapperAtPath(`?surveyCode=${code}`);
     expect(validationMock).toHaveBeenCalledWith(code);
-    expect(
-      getByTestId('new-user-satisfaction-survey-modal')
-    ).toBeInTheDocument();
+    expect(queryByText(overallQuestionText)).toBeInTheDocument();
   });
 
   it('should not show the modal if the code query parameter is not present', async () => {
-    const getByTestId = await createWrapperAtPath('');
-    expect(
-      getByTestId('new-user-satisfaction-survey-modal')
-    ).not.toBeInTheDocument();
+    const { queryByText } = await createWrapperAtPath('');
+    expect(queryByText(overallQuestionText)).not.toBeInTheDocument();
   });
 
   it('should not show the modal if the code query parameter is invalid', async () => {
@@ -60,10 +59,8 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
     jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(false));
-    const getByTestId = await createWrapperAtPath(`?surveyCode=${code}`);
-    expect(
-      getByTestId('new-user-satisfaction-survey-modal')
-    ).not.toBeInTheDocument();
+    const { queryByText } = await createWrapperAtPath(`?surveyCode=${code}`);
+    expect(queryByText(overallQuestionText)).not.toBeInTheDocument();
   });
 
   it('should not show an error if the code query parameter validation request succeeds', async () => {
@@ -82,8 +79,8 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
       .mockImplementationOnce(() => Promise.reject());
     expect(notificationStore.get()).toBeNull();
     await createWrapperAtPath(`?surveyCode=${code}`);
-    expect(notificationStore.get().title).toBeTruthy();
-    expect(notificationStore.get().message).toBeTruthy();
+    await waitFor(() => expect(notificationStore.get().title).toBeTruthy());
+    await waitFor(() => expect(notificationStore.get().message).toBeTruthy());
   });
 
   it('should call create API with the code', async () => {
@@ -95,11 +92,13 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
     const validationMock = jest
       .spyOn(surveysApi(), 'createNewUserSatisfactionSurveyWithOneTimeCode')
       .mockImplementationOnce(() => Promise.resolve(undefined));
-    const getByTestId = await createWrapperWithValidCode(code);
-    fireEvent.click(getByTestId('new-user-satisfaction-survey-modal-submit'));
-    expect(validationMock).toHaveBeenCalledWith({
-      createNewUserSatisfactionSurvey: surveyData,
-      oneTimeCode: code,
-    });
+    const { queryByRole } = await createWrapperWithValidCode(code);
+    fireEvent.click(queryByRole('button', { name: 'submit' }));
+    await waitFor(() =>
+      expect(validationMock).toHaveBeenCalledWith({
+        createNewUserSatisfactionSurvey: surveyData,
+        oneTimeCode: code,
+      })
+    );
   });
 });
