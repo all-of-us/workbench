@@ -1843,6 +1843,7 @@ export const WorkspaceEdit = fp.flow(
                   }
                   index='2.1'
                   id='intendedStudyText'
+                  ariaLabel='intention of the study'
                 />
 
                 {/* TextBox: scientific approaches section*/}

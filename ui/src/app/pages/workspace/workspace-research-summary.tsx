@@ -12,6 +12,7 @@ interface Props {
   onChange: Function;
   researchPurpose: ResearchPurposeQuestion;
   researchValue: string;
+  ariaLabel?: string;
 }
 
 export const WorkspaceResearchSummary = (props: Props) => {
@@ -30,6 +31,11 @@ export const WorkspaceResearchSummary = (props: Props) => {
         onChange={(s: string) => props.onChange(s)}
         tooShortWarningCharacters={100}
         tooShortWarning={NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION}
+        ariaLabel={
+          props.ariaLabel
+            ? `Text area describing the ${props.ariaLabel.toLowerCase()}`
+            : undefined
+        }
       />
     </WorkspaceEditSection>
   );
