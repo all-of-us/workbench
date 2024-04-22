@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 
 import {
   CreateNewUserSatisfactionSurvey,
@@ -7,7 +6,7 @@ import {
   SurveysApi,
 } from 'generated/fetch';
 
-import { ErrorMessage } from 'app/components/inputs';
+import { fireEvent, render } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { createNewUserSatisfactionSurveyStore } from 'app/utils/stores';
 
@@ -47,12 +46,12 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     setValidNewUserSatisfactionSurveyData();
   });
 
-  const createShallowWrapper = ({
+  const createRenderResult = ({
     onCancel = () => {},
     onSubmitSuccess = () => {},
     createSurveyApiCall = () => Promise.resolve(),
   } = {}) => {
-    return shallow(
+    return render(
       <NewUserSatisfactionSurveyModal
         onCancel={onCancel}
         onSubmitSuccess={onSubmitSuccess}
@@ -61,14 +60,14 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     );
   };
 
-  const findSubmitButton = (wrapper: ShallowWrapper) => {
-    return wrapper.find({ children: 'Submit' });
+  const findSubmitButton = (renderResult) => {
+    return renderResult.getByText('Submit');
   };
 
   it('should disable the submit button until a satisfaction value is selected', () => {
     setNewUserSatisfactionSurveyData('satisfaction', undefined);
     expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
+      findSubmitButton(createRenderResult()).hasAttribute('disabled')
     ).toBeTruthy();
 
     setNewUserSatisfactionSurveyData(
@@ -76,7 +75,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
     expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
+      findSubmitButton(createRenderResult()).hasAttribute('disabled')
     ).toBeFalsy();
   });
 
@@ -86,7 +85,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS + 1)
     );
     expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
+      findSubmitButton(createRenderResult()).hasAttribute('disabled')
     ).toBeTruthy();
 
     setNewUserSatisfactionSurveyData(
@@ -94,34 +93,36 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS)
     );
     expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
+      findSubmitButton(createRenderResult()).hasAttribute('disabled')
     ).toBeFalsy();
   });
 
   it('should disable the submit button while awaiting submission response', async () => {
-    const wrapper = createShallowWrapper();
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeFalsy();
+    const renderResult = createRenderResult();
+    expect(findSubmitButton(renderResult).hasAttribute('disabled')).toBeFalsy();
 
-    const submitPromise = findSubmitButton(wrapper).prop('onClick')();
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeTruthy();
+    const submitPromise = fireEvent.click(findSubmitButton(renderResult));
+    expect(
+      findSubmitButton(renderResult).hasAttribute('disabled')
+    ).toBeTruthy();
 
     await submitPromise;
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeFalsy();
+    expect(findSubmitButton(renderResult).hasAttribute('disabled')).toBeFalsy();
   });
 
   it('should display an error on API failure and remove it on API success', async () => {
     const createSurveyApiCall = jest.fn();
-    const wrapper = createShallowWrapper({
+    const renderResult = createRenderResult({
       createSurveyApiCall,
     });
-    expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
+    expect(renderResult.queryByRole('alert')).toBeNull();
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.reject());
-    await findSubmitButton(wrapper).prop('onClick')();
-    expect(wrapper.find(ErrorMessage).exists()).toBeTruthy();
+    await fireEvent.click(findSubmitButton(renderResult));
+    expect(renderResult.getByRole('alert')).toBeTruthy();
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.resolve());
-    await findSubmitButton(wrapper).prop('onClick')();
-    expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
+    await fireEvent.click(findSubmitButton(renderResult));
+    expect(renderResult.queryByRole('alert')).toBeNull();
   });
 });
