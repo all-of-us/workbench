@@ -696,36 +696,32 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show warning message if research purpose summary Intended study have answer less than 50 characters', async () => {
-    const wrapper = component();
+    renderComponent();
     // Intended Study Text
     const text = 'intended Study text';
     // since its a new page the characters box for Intended study should say 1000 characters remaining
-    let intendedStudySection = wrapper.find(
-      '[data-test-id="intendedStudyText"]'
-    );
-    expect(
-      intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props
-        .children
-    ).toBe('1000 characters remaining');
+    const intendedStudySection = await screen.findByTestId('intendedStudyText');
+    within(intendedStudySection).getByText('1000 characters remaining');
 
-    intendedStudySection
-      .find('textarea#intendedStudyText')
-      .simulate('change', { target: { value: text } });
-
-    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const intendedStudySectionTextArea = await screen.getByRole('textbox', {
+      name: /text area describing the intention of the study/i,
+    });
+    // You got rid of delay at the top of the document. If you can get take that section out, this will probally work without having to use userEvnt instead of user.
+    await userEvent.type(intendedStudySectionTextArea, text, { delay: 100 });
     const charsRemaining = 1000 - text.length;
 
-    expect(
-      intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props
-        .children
-    ).toContain(charsRemaining.toString());
+    within(intendedStudySection).getByText(
+      `${charsRemaining.toString()} characters remaining`
+    );
 
     // Warning message will appear onBlur
-
-    intendedStudySection.find('textarea#intendedStudyText').simulate('blur');
+    await user.tab();
     expect(
-      wrapper.find('[data-test-id="warning"]').first().props().children
-    ).toContain('The description you entered seems too short.');
+      within(intendedStudySection).queryByText(
+        'The description you entered seems too short.',
+        { exact: false }
+      )
+    ).toBeInTheDocument();
   });
 
   it('should show error message if research purpose summary has reached 1000 characters', async () => {
