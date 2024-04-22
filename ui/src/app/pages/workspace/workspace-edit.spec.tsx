@@ -15,7 +15,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   WorkspaceEdit,
@@ -678,15 +678,21 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should disallow whitespace-only intended study text', async () => {
-    const wrapper = component();
-    const intendedStudySection = wrapper.find(
-      '[data-test-id="intendedStudyText"]'
-    );
-    intendedStudySection
-      .find('textarea#intendedStudyText')
-      .simulate('change', { target: { value: '    ' } });
-
-    expect(getSaveButtonDisableMsg(wrapper, 'intendedStudy')).toBeDefined();
+    renderComponent();
+    const intendedStudySection = await screen.getByRole('textbox', {
+      name: /text area describing the intention of the study/i,
+    });
+    await user.type(intendedStudySection, '    ');
+    const saveButton = screen.getByRole('button', {
+      name: /create workspace/i,
+    });
+    await user.hover(saveButton);
+    // Testing to see if error appears
+    expect(
+      screen.queryByText(
+        /what are the specific scientific question\(s\) you intend to study \(question 2\.1\)/i
+      )
+    ).toBeInTheDocument();
   });
 
   it('should show warning message if research purpose summary Intended study have answer less than 50 characters', async () => {
