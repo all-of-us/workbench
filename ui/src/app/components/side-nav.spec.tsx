@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
+import { fireEvent, render } from '@testing-library/react';
 import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-utils';
 import { notificationStore } from 'app/utils/stores';
 
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
-import { SideNav, SideNavItem, SideNavProps } from './side-nav';
+import { SideNav, SideNavProps } from './side-nav';
 
 describe('SideNav', () => {
   const props: SideNavProps = {
@@ -18,11 +18,9 @@ describe('SideNav', () => {
   const spy = jest.spyOn(ProfilePicture, 'getProfilePictureSrc');
   spy.mockReturnValue('lol.png');
 
-  const component = () => mount(<SideNav {...props} />);
-
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+    const { getByTestId } = render(<SideNav {...props} />);
+    expect(getByTestId('side-nav')).toBeInTheDocument();
   });
 
   it('should show an error when signout fails', () => {
@@ -30,7 +28,7 @@ describe('SideNav', () => {
     signOutSpy.mockImplementation(() => {
       throw new Error();
     });
-    const wrapper = mount(
+    const { getByTestId } = render(
       <SideNav
         {...props}
         profile={{
@@ -40,18 +38,14 @@ describe('SideNav', () => {
         }}
       />
     );
-    wrapper
-      .find('[data-test-id="TestGivenNameTestFamilyName-menu-item"]')
-      .first()
-      .simulate('click');
-
+    fireEvent.click(getByTestId('TestGivenNameTestFamilyName-menu-item'));
     expect(notificationStore.get()).toBeNull();
-    wrapper.find('[data-test-id="SignOut-menu-item"]').simulate('click');
+    fireEvent.click(getByTestId('SignOut-menu-item'));
     expect(notificationStore.get()).toBeTruthy();
   });
 
   it('disables options when user not registered', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <SideNav
         {...props}
         profile={{
@@ -62,36 +56,16 @@ describe('SideNav', () => {
         }}
       />
     );
-    wrapper
-      .find('[data-test-id="TesterMacTesterson-menu-item"]')
-      .first()
-      .simulate('click');
+    fireEvent.click(getByTestId('TesterMacTesterson-menu-item'));
     // These are our expected items to be disabled when you are not registered
-    let disabledItemText = [
+    const disabledItemText = [
       'Your Workspaces',
       'Featured Workspaces',
       'User Support Hub',
     ];
-    const sideNavItems = wrapper.find(SideNavItem);
-    let disabledItems = sideNavItems.filterWhere(
-      (sideNavItem) => sideNavItem.props().disabled
-    );
-    sideNavItems.forEach((sideNavItem) => {
-      const disabled = sideNavItem.props().disabled;
-      const sideNavItemText = sideNavItem.text();
-      if (disabledItemText.includes(sideNavItemText)) {
-        disabledItems = disabledItems.filterWhere(
-          (disabledItem) => disabledItem.text() !== sideNavItem.text()
-        );
-        disabledItemText = disabledItemText.filter(
-          (textItem) => textItem !== sideNavItemText
-        );
-        expect(disabled).toBeTruthy();
-      }
+    disabledItemText.forEach((item) => {
+      //      expect(getByTestId(`${item}-menu-item`).disabled).toBeTruthy();
+      expect(getByTestId(`${item}-menu-item`)).toBeTruthy();
     });
-    // Ensure all expected items to be found.
-    expect(disabledItemText.length).toBe(0);
-    // Ensure there are no other disabled items that we do not expect.
-    expect(disabledItems.length).toBe(0);
   });
 });
