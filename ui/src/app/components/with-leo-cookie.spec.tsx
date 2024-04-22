@@ -51,7 +51,7 @@ describe(withLeoCookie.name, () => {
     expect(setCookieStub).toHaveBeenCalled();
 
     // Children should not be rendered until the cookie loads
-    expect(screen.queryByText('Test Component')).toBeNull();
+    expect(screen.queryByText('Test Component')).not.toBeInTheDocument();
 
     await waitFor(() =>
       expect(screen.getByText('Test Component')).toBeInTheDocument()
