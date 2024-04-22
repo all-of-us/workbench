@@ -18,7 +18,7 @@ interface Props {
 export const WorkspaceResearchSummary = (props: Props) => {
   return (
     <WorkspaceEditSection
-      data-test-id={props.id}
+      dataTestId={props.id}
       header={props.researchPurpose.header}
       description={props.researchPurpose.description}
       index={props.index}

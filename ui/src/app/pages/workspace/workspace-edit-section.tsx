@@ -35,6 +35,7 @@ export const styles = reactStyles({
 
 interface Props {
   children?: string | React.ReactNode;
+  dataTestId?: string;
   description?: string | React.ReactNode;
   descriptionStyle?: React.CSSProperties;
   header: any;
@@ -51,7 +52,11 @@ interface Props {
 
 export const WorkspaceEditSection = (props: Props) => {
   return (
-    <div key={props.header} style={{ ...props.style, marginBottom: '0.75rem' }}>
+    <div
+      data-test-id={props.dataTestId}
+      key={props.header}
+      style={{ ...props.style, marginBottom: '0.75rem' }}
+    >
       <FlexRow
         style={{
           marginBottom: props.largeHeader ? 12 : 0,
