@@ -63,26 +63,32 @@ export const QuickTourAndVideos = (props: Props) => {
   const quickTourResources = [
     {
       src: thumbnail,
+      altText: 'show quick tour',
       onClick: () => setShowQuickTour(true),
     },
     {
       src: intro,
+      altText: 'show intro video',
       onClick: () => openVideo('NTLJtwLcavo'),
     },
     {
       src: cohortBuilder,
+      altText: 'show cohort builder video',
       onClick: () => openVideo('G6_GG2CJ9mA'),
     },
     {
       src: datasetBuilder,
+      altText: 'show dataset builder video',
       onClick: () => openVideo('cUuDKUxjQoo'),
     },
     {
       src: snippets,
+      altText: 'show snippet video',
       onClick: () => openVideo('NvMWBlVyyUU'),
     },
     {
       src: support,
+      altText: 'show support video',
       onClick: () => openVideo('HbjPvGW2HtQ'),
     },
   ];
@@ -154,6 +160,7 @@ export const QuickTourAndVideos = (props: Props) => {
                         <img
                           style={{ width: '16.6rem', marginRight: '0.75rem' }}
                           src={resource.src}
+                          alt={resource.altText}
                         />
                       </Clickable>
                     </React.Fragment>

@@ -1,34 +1,35 @@
-import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
 import { WorkspaceAccessLevel } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 
-describe('NotebookActionMenu', () => {
-  const component = () => {
-    const props = {
-      notebook: {
-        name: 'name',
-      },
-      permission: WorkspaceAccessLevel.WRITER,
-    };
+import { renderWithRouter } from 'testing/react-test-helpers';
 
-    return mount(
-      <MemoryRouter>
-        <NotebookActionMenu
-          resource={props}
-          existingNameList={[]}
-          onUpdate={() => {}}
-        />
-        );
-      </MemoryRouter>
+describe('NotebookActionMenu', () => {
+  const props = {
+    notebook: {
+      name: 'name',
+    },
+    permission: WorkspaceAccessLevel.WRITER,
+  };
+  const component = () => {
+    return renderWithRouter(
+      <NotebookActionMenu
+        resource={props}
+        existingNameList={[]}
+        onUpdate={() => {}}
+      />
     );
   };
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    // screen.logTestingPlaygroundURL();
+    expect(
+      screen.getByRole('link', { name: props.notebook.name })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/last modified:/i)).toBeInTheDocument();
   });
 });
