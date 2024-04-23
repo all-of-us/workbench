@@ -787,9 +787,7 @@ describe('WorkspaceEdit', () => {
     await user.paste(invalidInput);
 
     await user.hover(saveButton);
-    expect(
-      screen.queryByText(/other primary purpose cannot exceed 500 characters/i)
-    ).toBeInTheDocument();
+    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
   });
 
   it('should show error message if Disease of focus is more than 80 characters', async () => {
