@@ -88,7 +88,7 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
     expect(notificationStore.get()).toBeNull();
     await createWrapperAtPath(`?surveyCode=${code}`);
     await waitFor(() => expect(notificationStore.get().title).toBeTruthy());
-    await waitFor(() => expect(notificationStore.get().message).toBeTruthy());
+    expect(notificationStore.get().message).toBeTruthy();
   });
 
   it('should call create API with the code', async () => {
