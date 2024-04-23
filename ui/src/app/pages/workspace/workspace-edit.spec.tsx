@@ -745,37 +745,51 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if Other primary purpose is more than 500 characters', async () => {
-    const wrapper = component();
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')
-    ).toBeUndefined();
-    wrapper
-      .find('[data-test-id="otherPurpose-checkbox"]')
-      .at(1)
-      .simulate('change', { target: { checked: true } });
+    const errorMessage = /other primary purpose cannot exceed 500 characters/i;
+    renderComponent();
 
+    const saveButton = screen.getByRole('button', {
+      name: /create workspace/i,
+    });
+    await user.hover(saveButton);
+    // Testing to see if error appears
     expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')
-    ).toBeDefined();
+      screen.queryByText('other primary purpose cannot', { exact: false })
+    ).not.toBeInTheDocument();
+
+    const otherPurposeCheckbox = screen.getByTestId('otherPurpose-checkbox');
+    await userEvent.click(otherPurposeCheckbox);
+
+    await user.hover(saveButton);
+    expect(
+      screen.queryByText('other primary purpose cannot be blank', {
+        exact: false,
+      })
+    ).toBeInTheDocument();
 
     // Other Primary Purpose
     const validInput = fp.repeat(500, 'a');
-    wrapper
-      .find('[data-test-id="otherPrimaryPurposeText"]')
-      .first()
-      .simulate('change', { target: { value: validInput } });
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')
-    ).toBeUndefined();
+    const otherPrimaryPurposeText = screen.getByTestId(
+      'otherPrimaryPurposeText'
+    );
 
-    const inValidInput = fp.repeat(501, 'b');
-    wrapper
-      .find('[data-test-id="otherPrimaryPurposeText"]')
-      .first()
-      .simulate('change', { target: { value: inValidInput } });
+    await user.click(otherPrimaryPurposeText);
+    await user.paste(validInput);
+
+    await user.hover(saveButton);
+    // Testing to see if error appears
     expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')
-    ).toBeDefined();
+      screen.queryByText('other primary purpose cannot', { exact: false })
+    ).not.toBeInTheDocument();
+
+    const invalidInput = fp.repeat(501, 'b');
+    await user.click(otherPrimaryPurposeText);
+    await user.paste(invalidInput);
+
+    await user.hover(saveButton);
+    expect(
+      screen.queryByText(/other primary purpose cannot exceed 500 characters/i)
+    ).toBeInTheDocument();
   });
 
   it('should show error message if Disease of focus is more than 80 characters', async () => {
