@@ -15,7 +15,7 @@ buildscript {
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
         OPENTELEMETRY_SDK_VERSION = '1.36.0'
-        OPENTELEMETRY_JAVA_VERSION = '2.2.0'
+        OPENTELEMETRY_JAVA_VERSION = '2.3.0'
         OPENTELEMETRY_GOOGLE_VERSION = '0.27.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '3.2.4'
@@ -412,9 +412,7 @@ dependencies {
 
     implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
-    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
@@ -589,6 +587,8 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
+
+    runtime("org.springframework.boot:spring-boot-properties-migrator")
 }
 
 tasks.compileJava {
@@ -919,3 +919,4 @@ dependencies {
 explodeWar {
   dependsOn(bootWar)
 }
+

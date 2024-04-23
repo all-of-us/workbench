@@ -34,6 +34,8 @@ public class Params {
     hostname = envVars.get("DB_HOST").orElse(null);
     cloudSqlInstanceName = envVars.get("CLOUD_SQL_INSTANCE_NAME").orElse(null);
     password = envVars.get("WORKBENCH_DB_PASSWORD").orElse(null);
+    System.out.println("~~~~~!!!!loadFromEnvironment!!!!~~~~~");
+    System.out.println(envVars.get("DB_HOST"));
   }
 
   protected void logParams() {
@@ -62,8 +64,13 @@ public class Params {
     }
     if (hostname != null) {
       try {
+        System.out.println("~~~~~!!!!Socket");
+        System.out.println(mysqlDefaultPort);
         new Socket(hostname, mysqlDefaultPort).close();
       } catch (ConnectException e) {
+        System.out.println("ConnectException~~~!!!!!!!");
+        System.out.println(mysqlDefaultPort);
+        System.out.println(e.getMessage());
         throw new RuntimeException(
             String.format("Failed to connect to database on host %s.", hostname), e);
       } catch (IOException e) {

@@ -3,18 +3,35 @@ package org.pmiops.workbench.tools;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.gson.Gson;
+import io.opentelemetry.instrumentation.spring.autoconfigure.instrumentation.logging.OpenTelemetryAppenderAutoConfiguration;
+import io.opentelemetry.instrumentation.spring.autoconfigure.instrumentation.web.SpringWebInstrumentationAutoConfiguration;
+import io.opentelemetry.instrumentation.spring.autoconfigure.instrumentation.webmvc.SpringWebMvc6InstrumentationAutoConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
+import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.dao.PersistenceExceptionTranslationAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -35,8 +52,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  * SQL Proxy.
  */
 @Configuration
-@EnableAutoConfiguration
-@Import({RetryConfig.class, CommonConfig.class, StorageConfig.class})
+@Import({WorkbenchDbConfig.class, CdrConfig.class, JdbcTemplateAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class, HibernateJpaAutoConfiguration.class, RetryConfig.class, CommonConfig.class, StorageConfig.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class CommandLineToolConfig {
