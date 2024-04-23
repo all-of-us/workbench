@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { ConceptNavigationBar } from 'app/pages/data/concept/concept-navigation-bar';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -13,7 +15,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 describe('ConceptNavigationBar', () => {
   const component = () => {
-    return mount(
+    return render(
       <ConceptNavigationBar ns='test' wsId='1' showConcepts={true} />
     );
   };
@@ -25,7 +27,12 @@ describe('ConceptNavigationBar', () => {
   });
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(
+      screen.getByRole('button', { name: /concepts/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /concept sets/i })
+    ).toBeInTheDocument();
   });
 });

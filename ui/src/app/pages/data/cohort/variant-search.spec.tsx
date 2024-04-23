@@ -1,9 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
+import { BrowserRouter } from 'react-router-dom';
 
 import { CohortBuilderApi } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { VariantSearch } from 'app/pages/data/cohort/variant-search';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -11,6 +13,7 @@ import {
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
@@ -21,15 +24,15 @@ describe('VariantSearch', () => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
   const component = () => {
-    return mount(
-      <MemoryRouter>
+    return renderWithRouter(
+      <BrowserRouter>
         <VariantSearch select={() => {}} selectedIds={[]} />
-      </MemoryRouter>
+      </BrowserRouter>
     );
   };
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 });

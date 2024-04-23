@@ -1,6 +1,4 @@
-import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
 import { ProfileApi } from 'generated/fetch';
 import {
@@ -10,6 +8,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   cdrVersionStore,
@@ -17,7 +16,7 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortsApiStub } from 'testing/stubs/cohorts-api-stub';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
@@ -36,11 +35,7 @@ describe('HomepageComponent', () => {
   let profileApi: ProfileApiStub;
 
   const component = () => {
-    return mount(
-      <MemoryRouter>
-        <Homepage hideSpinner={() => {}} />
-      </MemoryRouter>
-    );
+    return renderWithRouter(<Homepage hideSpinner={() => {}} />);
   };
 
   const load = jest.fn();
@@ -81,8 +76,8 @@ describe('HomepageComponent', () => {
   });
 
   it('should render the homepage', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+    component();
+    expect(screen.getByText('Welcome to the')).toBeInTheDocument();
   });
 
   it('should display quick tour when clicked', () => {
@@ -95,14 +90,10 @@ describe('HomepageComponent', () => {
       configurable: true,
       value: 1000,
     });
-    const wrapper = component();
-    wrapper
-      .find('[data-test-id="quick-tour-resource-0"]')
-      .first()
-      .simulate('click');
-    expect(
-      wrapper.find('[data-test-id="quick-tour-react"]').exists()
-    ).toBeTruthy();
+    component();
+
+    screen.getByAltText('show quick tour').click();
+    expect(screen.getByTestId('quick-tour-react')).toBeInTheDocument();
     // set offsetWidth back to original
     Object.defineProperty(
       HTMLElement.prototype,
@@ -117,24 +108,19 @@ describe('HomepageComponent', () => {
       pageVisits: [{ page: 'homepage' }],
     };
     profileStore.set({ profile: newProfile, load, reload, updateCache });
-    const wrapper = component();
-    expect(
-      wrapper.find('[data-test-id="quick-tour-react"]').exists()
-    ).toBeFalsy();
+    component();
+    expect(screen.queryByTestId('quick-tour-react')).not.toBeInTheDocument();
   });
 
   it('should display quick tour if first visit', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="quick-tour-react"]').exists()
-    ).toBeTruthy();
+    component();
+    expect(screen.getByTestId('quick-tour-react')).toBeInTheDocument();
   });
 
   it('should not display the zero workspace UI while workspaces are being fetched', async () => {
-    const wrapper = component();
+    component();
     expect(
-      wrapper.html().includes('Here are some tips to get you started')
-    ).toBeFalsy();
+      screen.queryByText('Here are some tips to get you started')
+    ).not.toBeInTheDocument();
   });
 });

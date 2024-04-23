@@ -1,8 +1,11 @@
-import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
+import * as React from 'react';
+
+import { screen } from '@testing-library/react';
 import { CohortResourceCard } from 'app/pages/data/cohort/cohort-resource-card';
+
+import { renderWithRouter } from 'testing/react-test-helpers';
 
 describe('CohortResourceCard', () => {
   const component = () => {
@@ -10,15 +13,13 @@ describe('CohortResourceCard', () => {
       cohort: {},
     };
 
-    return mount(
-      <MemoryRouter>
-        <CohortResourceCard resource={props} onUpdate={() => {}} />
-      </MemoryRouter>
+    return renderWithRouter(
+      <CohortResourceCard resource={props} onUpdate={() => {}} />
     );
   };
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(screen.getByText(/cohort/i)).toBeInTheDocument();
   });
 });

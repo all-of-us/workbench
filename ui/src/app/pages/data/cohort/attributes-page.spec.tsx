@@ -1,9 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
-import { CohortBuilderApi, Operator } from 'generated/fetch';
+import { CohortBuilderApi } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   ppiQuestions,
   ppiSurveys,
@@ -14,7 +15,10 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
   CriteriaWithAttributesStubVariables,
@@ -25,8 +29,7 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, AttributesPageProps } from './attributes-page';
 import SpyInstance = jest.SpyInstance;
-
-type AnyWrapper = ShallowWrapper | ReactWrapper;
+import userEvent from '@testing-library/user-event';
 
 let props: AttributesPageProps;
 let mockCountParticipants: SpyInstance;
@@ -34,19 +37,11 @@ let mockFindCriteriaAttributeByConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: SpyInstance;
 
-function component(): ReactWrapper {
-  return mount(<AttributesPage {...props} />);
-}
-
-function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
-  const elements = wrapper
-    .find(`Dropdown[id="numerical-dropdown-${index}"]`)
-    ?.getElements();
-  return elements?.length ? (elements[0] as unknown as Dropdown) : undefined;
-}
-
-function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {
-  return wrapper.find(`[id="numerical-input-${index}-0"]`).hostNodes();
+async function component() {
+  render(<AttributesPage {...props} />);
+  await waitFor(() =>
+    expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+  );
 }
 
 describe('AttributesPageV2', () => {
@@ -75,51 +70,55 @@ describe('AttributesPageV2', () => {
     };
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+  it('should render', async () => {
+    component();
+
+    expect(screen.getByText(/number of participants:/i)).toBeTruthy();
   });
 
   it('should not call api and render a single dropdown for Height in Physical Measurements', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
-    expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(0);
-    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
-    expect(
-      wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
-        .disabled
-    ).toBeFalsy();
+    screen.getByRole('button', {
+      name: /select operator/i,
+    });
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /add this/i,
+      })
+    );
   });
 
   it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
     props.node = CriteriaWithAttributesStubVariables[1];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
-    expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(1);
-    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
-    expect(
-      wrapper.find('div[id="attributes-add-btn"]').first().props().disabled
-    ).toBeFalsy();
+    const dropDowns = screen.getAllByRole('button', {
+      name: /select operator/i,
+    });
+    expect(dropDowns.length).toBe(2);
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /add this/i,
+      })
+    );
   });
 
   it('should call api for attributes for Labs and Measurements nodes', async () => {
     props.node = CriteriaWithAttributesStubVariables[2];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -134,8 +133,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[3];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -150,8 +148,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[4];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
@@ -166,8 +163,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[5];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
@@ -182,8 +178,7 @@ describe('AttributesPageV2', () => {
     });
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[6];
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
     expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(1);
     expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(1);
@@ -193,29 +188,33 @@ describe('AttributesPageV2', () => {
   });
 
   it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
-    const wrapper = component();
-    const numericalDropdown = getNumericalDropdown(wrapper, '0');
-    numericalDropdown.props.onChange({
-      originalEvent: undefined,
-      value: Operator.EQUAL,
-      target: { id: '', name: '', value: Operator.EQUAL },
-      stopPropagation: () => {},
-      preventDefault: () => {},
-    });
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(2);
-    expect(
-      wrapper.find('[data-test-id="attributes-calculate-btn"]').first().props()
-        .disabled
-    ).toBeTruthy();
-    const numericalInput = getNumericalInput(wrapper, '0');
-    numericalInput.simulate('change', { target: { value: 100 } });
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="attributes-calculate-btn"]').first().props()
-        .disabled
-    ).toBeFalsy();
-    wrapper.find('[data-test-id="attributes-calculate-btn"]').simulate('click');
-    expect(mockCountParticipants).toHaveBeenCalledTimes(1);
+    const user = userEvent.setup();
+    await component();
+
+    screen.getByDisplayValue(/any value/i);
+    // Simulate the dropdown change
+    const dropdown = screen.getByRole('button', { name: /select operator/i });
+    user.click(dropdown);
+    const equalOption = await screen.findByText('Equals');
+    user.click(equalOption);
+    await screen.findByDisplayValue('Equals');
+    expect(screen.queryByDisplayValue(/any value/i)).not.toBeInTheDocument();
+
+    // Check that the input field is rendered
+    const numericalInput = screen.getByRole('spinbutton');
+    expect(numericalInput).toBeInTheDocument();
+
+    // Check that the calculate button is disabled
+    const calculateButton = screen.getByRole('button', { name: /calculate/i });
+    expectButtonElementDisabled(calculateButton);
+
+    // Simulate the input change
+    user.type(numericalInput, '100');
+
+    await waitFor(() => expectButtonElementEnabled(calculateButton));
+
+    user.click(calculateButton);
+
+    await waitFor(() => expect(mockCountParticipants).toHaveBeenCalledTimes(1));
   });
 });

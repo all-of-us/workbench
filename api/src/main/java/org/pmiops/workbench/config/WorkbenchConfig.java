@@ -310,8 +310,6 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable user creation of SAS GKE apps
-    public boolean enableSasGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
     // If true, allow users to pause their GKE apps

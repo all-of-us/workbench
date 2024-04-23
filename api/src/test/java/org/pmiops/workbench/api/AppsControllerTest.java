@@ -126,20 +126,10 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateSASAppSuccess_featureEnabled() {
-    config.featureFlags.enableSasGKEApp = true;
+  public void testCreateSASAppSuccess() {
     CreateAppRequest createSASAppRequest = new CreateAppRequest().appType(AppType.SAS);
     controller.createApp(WORKSPACE_NS, createSASAppRequest);
     verify(mockLeonardoApiClient).createApp(createSASAppRequest, testWorkspace);
-  }
-
-  @Test
-  public void testCreateSASAppFail_featureNotEnabled() {
-    config.featureFlags.enableSasGKEApp = false;
-    CreateAppRequest createSASAppRequest = new CreateAppRequest().appType(AppType.SAS);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.createApp(WORKSPACE_NS, createSASAppRequest));
   }
 
   @Test

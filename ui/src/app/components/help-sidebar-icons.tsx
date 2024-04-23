@@ -28,12 +28,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import {
-  runtimeStore,
-  serverConfigStore,
-  userAppsStore,
-  useStore,
-} from 'app/utils/stores';
+import { runtimeStore, userAppsStore, useStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -184,14 +179,13 @@ export const RuntimeIcon = (props: {
   userSuspended: boolean;
 }) => {
   const { iconConfig, workspaceNamespace, userSuspended } = props;
-  const { config } = useStore(serverConfigStore);
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
   // We always want to show the Jupyter icon.
   return (
-    <CompoundIcon {...{ config, iconConfig }} iconPath={jupyterAssets.icon}>
+    <CompoundIcon {...{ iconConfig }} iconPath={jupyterAssets.icon}>
       <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
@@ -688,7 +682,6 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     userSuspended,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-  const { config } = useStore(serverConfigStore);
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
@@ -708,11 +701,14 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('apps', cromwellConfigIconId, rstudioConfigIconId);
-    if (config.enableSasGKEApp) {
-      keys.push(sasConfigIconId);
-    }
-    keys.push('runtimeConfig', 'terminal');
+    keys.push(
+      'apps',
+      cromwellConfigIconId,
+      rstudioConfigIconId,
+      sasConfigIconId,
+      'runtimeConfig',
+      'terminal'
+    );
   }
 
   if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {

@@ -15,6 +15,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface WorkbenchConfigMapper {
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
+  // temporary, will be removed ASAP
+  @Mapping(target = "enableSasGKEApp", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
@@ -46,7 +48,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
-  @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
   @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")

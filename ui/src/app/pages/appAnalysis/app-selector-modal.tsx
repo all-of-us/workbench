@@ -11,7 +11,6 @@ import {
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { serverConfigStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   appsLabel: {
@@ -31,13 +30,8 @@ interface AppSelectorModalProps {
 }
 export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose } = props;
-  const { config } = useStore(serverConfigStore);
   // in display order
-  const appList = [
-    UIAppType.JUPYTER,
-    UIAppType.RSTUDIO,
-    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
-  ];
+  const appList = [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS];
 
   return (
     <Modal

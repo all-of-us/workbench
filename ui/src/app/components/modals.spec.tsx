@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { NotificationModal } from 'app/components/modals';
 import { notificationStore } from 'app/utils/stores';
 
-import {
-  findNodesByExactText,
-  waitOnTimersAndUpdate,
-} from 'testing/react-test-helpers';
-
 describe('NotificationModal', () => {
   const component = () => {
-    return mount(
+    return render(
       <div>
         <NotificationModal />
       </div>
@@ -23,26 +24,22 @@ describe('NotificationModal', () => {
   });
 
   it('should appear and disappear based on store changes', async () => {
-    const wrapper = component();
+    component();
     const meta = { title: 'Hello', message: 'World' };
     // Notification modal should not render
-    expect(wrapper.find(NotificationModal)).toEqual({});
+    expect(screen.queryByText(meta.title)).not.toBeInTheDocument();
     notificationStore.set(meta);
 
-    // enzyme needs some encouragement
-    await waitOnTimersAndUpdate(wrapper);
-    expect(notificationStore.get()).toEqual(meta);
-
     // When the store has data it should render
-    await waitOnTimersAndUpdate(wrapper);
-    expect(findNodesByExactText(wrapper, meta.title).length).toBe(1);
-    expect(findNodesByExactText(wrapper, meta.message).length).toBe(1);
+    await waitFor(() => {
+      expect(screen.getByText(meta.title)).toBeInTheDocument();
+      expect(screen.getByText(meta.message)).toBeInTheDocument();
+    });
 
     // Click button to dismiss - modal should not render
-    wrapper.find('[role="button"]').first().simulate('click');
+    userEvent.click(screen.getByRole('button'));
 
     // Modal should be gone
-    await waitOnTimersAndUpdate(wrapper);
-    expect(findNodesByExactText(wrapper, meta.title).length).toBe(0);
+    await waitForElementToBeRemoved(() => screen.queryByText(meta.title));
   });
 });

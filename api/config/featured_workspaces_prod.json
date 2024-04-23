@@ -305,6 +305,12 @@
       "namespace": "aou-rw-407ce3b0",
       "id": "allofusv7gwasonldlcholesterolwithregenie",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "SAS Demonstration: Diabetes mellitus medication prescription patterns (v7)",
+      "namespace": "aou-rw-9b601e56",
+      "id": "sasdemonstrationdiabetesmellitusmedicationprescriptionpatternsv7",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

@@ -190,6 +190,7 @@ function mapCriteria(crit: Selection) {
     name: crit.name,
     parameterId: crit.parameterId,
     type: crit.type,
+    variantFilter: crit.variantFilter,
   };
 }
 
@@ -237,9 +238,8 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
 
     componentDidUpdate(prevProps: Readonly<SelectionInfoProps>) {
       if (
-        this.props.selection.variantFilter &&
-        this.props.selection.variantFilter.exclusionList !==
-          prevProps.selection.variantFilter.exclusionList
+        this.props.selection.variantFilter?.exclusionList !==
+        prevProps.selection.variantFilter?.exclusionList
       ) {
         this.setState({ loadingVariantBuckets: true });
         this.getVariantFilterBuckets();
@@ -283,8 +283,8 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
                   key === 'sortBy'
                 )
             )
-            .map(([key, value]) => (
-              <li>
+            .map(([key, value], index) => (
+              <li key={index}>
                 <b>{VARIANT_DISPLAY[key]}</b>:{' '}
                 {Array.isArray(value) ? (
                   <>
@@ -304,13 +304,14 @@ export const SelectionInfo = withCurrentCohortSearchContext()(
               </div>
             ) : (
               <ul style={styles.filterList}>
-                {Object.entries(this.state.variantFilterInfoResponse)
-                  .filter(([, value]) => value !== 0)
-                  .map(([key, value]) => (
-                    <li>
-                      <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
-                    </li>
-                  ))}
+                {!!this.state.variantFilterInfoResponse &&
+                  Object.entries(this.state.variantFilterInfoResponse)
+                    .filter(([, value]) => value !== 0)
+                    .map(([key, value], index) => (
+                      <li key={index}>
+                        <b>{VARIANT_DISPLAY[key]}</b>: {value.toLocaleString()}
+                      </li>
+                    ))}
               </ul>
             )}
           </li>
