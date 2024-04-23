@@ -3,6 +3,7 @@ package org.pmiops.workbench.tools;
 import org.pmiops.workbench.config.EnvVars;
 import org.pmiops.workbench.db.Params;
 import org.pmiops.workbench.db.WorkbenchDbConfig;
+import org.pmiops.workbench.opentelemetry.OpenTelemetryConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
