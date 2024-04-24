@@ -38,6 +38,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -104,6 +105,10 @@ public interface LeonardoMapper {
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
+
+  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "diskSize", source = "persistentDisk.size")
+  LeonardoUpdateGceConfig toLeonardoUpdateGceWithConfig(GceWithPdConfig gceWithPdConfig);
 
   @AfterMapping
   default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {

@@ -186,7 +186,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
             .customEnvironmentVariables(customEnvironmentVariables)
             .autopauseThreshold(runtime.getAutopauseThreshold())
-            .runtimeConfig(buildRuntimeConfig(runtime));
+            .runtimeConfig(buildRuntimeConfigForCreate(runtime));
 
     // .autopause is ONLY set if the given .autopauseThreshold value should be respected
     // setting to .autopause to `false` will turn off autopause completely and create
@@ -198,15 +198,25 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
-  private Object buildRuntimeConfig(Runtime runtime) {
-    if (runtime.getGceConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceConfig(runtime.getGceConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
-    } else if (runtime.getGceWithPdConfig() != null) {
+  private Object buildRuntimeConfigForCreate(Runtime runtime) {
+    if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper
           .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
           .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+    } else {
+      LeonardoMachineConfig machineConfig =
+          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
+        machineConfig.setWorkerPrivateAccess(true);
+      }
+      return machineConfig;
+    }
+  }
+
+  private Object buildRuntimeConfigForUpdate(Runtime runtime) {
+    if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper
+          .toLeonardoUpdateGceWithConfig(runtime.getGceWithPdConfig());
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
@@ -261,7 +271,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildRuntimeConfig(runtime))
+                      .runtimeConfig(buildRuntimeConfigForUpdate(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
