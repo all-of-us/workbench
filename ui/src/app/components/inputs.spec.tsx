@@ -58,7 +58,7 @@ describe('inputs', () => {
   });
 
   it('renders with HTML label', () => {
-    const { getByText } = render(
+    const { getByRole } = render(
       <CheckBox
         label={
           <span>
@@ -67,7 +67,7 @@ describe('inputs', () => {
         }
       />
     );
-    expect(getByText('Hello, world')).toBeTruthy();
+    expect(getByRole('checkbox', { name: 'Hello, world' })).toBeTruthy();
   });
 
   it('Shows characters remaining warning ', () => {
@@ -99,21 +99,23 @@ describe('inputs', () => {
   });
 
   it('Shows too short warning if text input is less the short characters', () => {
-    const { getByTestId, queryByTestId, rerender } = render(
+    const { getByRole, getByTestId, queryByTestId, rerender } = render(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
+        id='test'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
       />
     );
 
-    fireEvent.blur(getByTestId('test'));
+    const getTextArea = () => getByRole('textbox', { name: 'test' });
+
+    fireEvent.blur(getTextArea());
     expect(queryByTestId('warning')).toBeNull();
 
     rerender(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
+        id='test'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
@@ -122,12 +124,12 @@ describe('inputs', () => {
       />
     );
 
-    fireEvent.blur(getByTestId('test'));
+    fireEvent.blur(getTextArea());
     expect(getByTestId('warning').textContent).toBe('Testing too short');
 
     rerender(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
+        id='test'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
@@ -136,7 +138,7 @@ describe('inputs', () => {
       />
     );
 
-    fireEvent.blur(getByTestId('test'));
+    fireEvent.blur(getTextArea());
     expect(queryByTestId('warning')).toBeNull();
   });
 });

@@ -232,12 +232,13 @@ export const TextAreaWithLengthValidationMessage = (
   return (
     <React.Fragment>
       <TextArea
+        {...{ id }}
+        aria-label={id}
         style={{
           ...styles.textBoxWithLengthValidationTextBoxStyle,
           ...textBoxStyleOverrides,
           ...heightOverride,
         }}
-        id={id}
         value={text}
         onBlur={() => updateShowTooShortWarning()}
         onChange={(v) => onTextUpdate(v)}
