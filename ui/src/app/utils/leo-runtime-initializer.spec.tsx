@@ -23,7 +23,6 @@ import {
 } from 'app/utils/leo-runtime-initializer';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
-import SpyInstance = jest.SpyInstance;
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
 import { setImmediate } from 'timers';
 
@@ -39,9 +38,9 @@ import {
 
 import { runtimePresets } from './runtime-presets';
 
-let mockGetRuntime: SpyInstance;
-let mockCreateRuntime: SpyInstance;
-let mockStartRuntime: SpyInstance;
+let mockGetRuntime: jest.SpyInstance;
+let mockCreateRuntime: jest.SpyInstance;
+let mockStartRuntime: jest.SpyInstance;
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',

@@ -15,7 +15,6 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import SpyInstance = jest.SpyInstance;
 
 import {
   expectButtonElementDisabled,
@@ -32,10 +31,10 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { AttributesPage, AttributesPageProps } from './attributes-page';
 
 let props: AttributesPageProps;
-let mockCountParticipants: SpyInstance;
-let mockFindCriteriaAttributeByConceptId: SpyInstance;
-let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
-let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: SpyInstance;
+let mockCountParticipants: jest.SpyInstance;
+let mockFindCriteriaAttributeByConceptId: jest.SpyInstance;
+let mockFindSurveyVersionByQuestionConceptId: jest.SpyInstance;
+let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: jest.SpyInstance;
 
 async function component() {
   render(<AttributesPage {...props} />);
