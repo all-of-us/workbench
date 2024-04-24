@@ -215,8 +215,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private Object buildRuntimeConfigForUpdate(Runtime runtime) {
     if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper
-          .toLeonardoUpdateGceWithConfig(runtime.getGceWithPdConfig());
+      return leonardoMapper.toLeonardoUpdateGceWithConfig(runtime.getGceWithPdConfig());
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
