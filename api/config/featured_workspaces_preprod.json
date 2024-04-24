@@ -65,6 +65,12 @@
       "namespace": "aou-rw-preprod-3d26e8aa",
       "id": "phenotypebreastcancer",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "How to Work with All of Us Genomics Data (Hail - Plink)_v7",
+      "namespace": "aou-rw-preprod-41923d5d",
+      "id": "fwhowtoworkwithallofusgenomicsdatahailplinkv7",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }
