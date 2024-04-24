@@ -5,6 +5,7 @@ import * as React from 'react';
 import { CohortBuilderApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   ppiQuestions,
   ppiSurveys,
@@ -14,6 +15,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import SpyInstance = jest.SpyInstance;
 
 import {
   expectButtonElementDisabled,
@@ -28,8 +30,6 @@ import {
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, AttributesPageProps } from './attributes-page';
-import SpyInstance = jest.SpyInstance;
-import userEvent from '@testing-library/user-event';
 
 let props: AttributesPageProps;
 let mockCountParticipants: SpyInstance;
