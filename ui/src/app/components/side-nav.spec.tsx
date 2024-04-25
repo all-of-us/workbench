@@ -2,11 +2,15 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-utils';
 import { notificationStore } from 'app/utils/stores';
 
+import {
+  expectButtonElementDisabled,
+  expectMenuItemElementDisabled,
+} from 'testing/react-test-helpers';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { SideNav, SideNavProps } from './side-nav';
@@ -30,44 +34,52 @@ describe(SideNav.name, () => {
     signOutSpy.mockImplementation(() => {
       throw new Error();
     });
-    const { getByTestId } = render(
+
+    const givenName = 'TestGivenName';
+    const familyName = 'TestFamilyName';
+    const { getByText } = render(
       <SideNav
         {...props}
         profile={{
           ...ProfileStubVariables.PROFILE_STUB,
-          givenName: 'TestGivenName',
-          familyName: 'TestFamilyName',
+          givenName,
+          familyName,
         }}
       />
     );
-    fireEvent.click(getByTestId('TestGivenNameTestFamilyName-menu-item'));
+
+    fireEvent.click(getByText(`${givenName} ${familyName}`));
     expect(notificationStore.get()).toBeNull();
-    fireEvent.click(getByTestId('SignOut-menu-item'));
+
+    fireEvent.click(getByText('Sign Out'));
     expect(notificationStore.get()).toBeTruthy();
   });
 
   it('disables options when user not registered', () => {
-    const { getByTestId } = render(
+    const givenName = 'TestGivenName';
+    const familyName = 'TestFamilyName';
+    const { getByText, getByRole } = render(
       <SideNav
         {...props}
         profile={{
           ...ProfileStubVariables.PROFILE_STUB,
           accessTierShortNames: [],
-          givenName: 'Tester',
-          familyName: 'MacTesterson',
+          givenName,
+          familyName,
         }}
       />
     );
-    fireEvent.click(getByTestId('TesterMacTesterson-menu-item'));
+    fireEvent.click(getByText(`${givenName} ${familyName}`));
+
     // These are our expected items to be disabled when you are not registered
     const disabledItemText = [
       'Your Workspaces',
       'Featured Workspaces',
       'User Support Hub',
     ];
-    disabledItemText.forEach((item) => {
-      //      expect(getByTestId(`${item}-menu-item`).disabled).toBeTruthy();
-      expect(getByTestId(`${item}-menu-item`)).toBeTruthy();
-    });
+    screen.debug();
+    disabledItemText.forEach((name) =>
+      expectButtonElementDisabled(getByRole('button', { name }))
+    );
   });
 });
