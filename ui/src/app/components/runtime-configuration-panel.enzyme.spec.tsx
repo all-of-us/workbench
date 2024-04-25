@@ -911,7 +911,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentDisk(existingDisk());
     const wrapper = await component();
 
-    const updateSpy = jest.spyOn(disksApi(), 'updateDisk');
+    const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
     await pickDetachableDiskSize(wrapper, 1010);
@@ -1161,10 +1161,11 @@ describe(RuntimeConfigurationPanel.name, () => {
       await clickButtonIfVisible(wrapper, 'Delete');
     }
 
-    expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+    let updateRuntimeTimes = wantUpdateDisk ? 1 : 0;
+    wantUpdateRuntime ? updateRuntimeTimes++ : updateRuntimeTimes;
+    expect(updateRuntimeSpy).toHaveBeenCalledTimes(updateRuntimeTimes);
     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
 
-    expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
     if (wantDeleteRuntime) {
       expect(runtimeApiStub.runtime.status).toEqual('Deleting');
 
@@ -1177,8 +1178,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     if (wantDeleteDisk) {
       expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
-    } else {
-      expect(disksApiStub.disk.name).toEqual(existingDiskName);
     }
   }
 

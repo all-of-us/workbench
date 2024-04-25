@@ -186,7 +186,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
             .customEnvironmentVariables(customEnvironmentVariables)
             .autopauseThreshold(runtime.getAutopauseThreshold())
-            .runtimeConfig(buildRuntimeConfig(runtime));
+            .runtimeConfig(buildRuntimeConfig(runtime, false));
 
     // .autopause is ONLY set if the given .autopauseThreshold value should be respected
     // setting to .autopause to `false` will turn off autopause completely and create
@@ -198,34 +198,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
-  private Object buildRuntimeConfig(Runtime runtime) {
+  private Object buildRuntimeConfig(Runtime runtime, boolean updateRuntime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper
           .toLeonardoGceConfig(runtime.getGceConfig())
           .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
-    } else {
-      LeonardoMachineConfig machineConfig =
-          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
-      if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
-        machineConfig.setWorkerPrivateAccess(true);
-      }
-      return machineConfig;
-    }
-  }
-
-  private Object buildUpdateRuntimeConfig(Runtime runtime) {
-    if (runtime.getGceConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceConfig(runtime.getGceConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
-    } else if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceConfig(runtime.getGceWithPdConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+      return updateRuntime
+          ? leonardoMapper
+              .toLeonardoGceConfig(runtime.getGceWithPdConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone)
+          : leonardoMapper
+              .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
@@ -279,7 +264,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildUpdateRuntimeConfig(runtime))
+                      .runtimeConfig(buildRuntimeConfig(runtime, true))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
