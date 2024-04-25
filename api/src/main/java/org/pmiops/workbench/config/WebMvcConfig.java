@@ -2,7 +2,6 @@ package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfo;
 import jakarta.servlet.ServletContext;
-
 import java.util.Optional;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
@@ -86,7 +85,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
+    registry
+        .addMapping("/**")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedOrigins("*")
         .allowedHeaders("*")
