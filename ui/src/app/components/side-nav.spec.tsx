@@ -7,10 +7,7 @@ import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-utils';
 import { notificationStore } from 'app/utils/stores';
 
-import {
-  expectButtonElementDisabled,
-  expectMenuItemElementDisabled,
-} from 'testing/react-test-helpers';
+import { expectButtonElementDisabled } from 'testing/react-test-helpers';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { SideNav, SideNavProps } from './side-nav';
@@ -77,7 +74,6 @@ describe(SideNav.name, () => {
       'Featured Workspaces',
       'User Support Hub',
     ];
-    screen.debug();
     disabledItemText.forEach((name) =>
       expectButtonElementDisabled(getByRole('button', { name }))
     );
