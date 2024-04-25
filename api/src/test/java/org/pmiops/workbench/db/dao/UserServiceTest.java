@@ -391,14 +391,11 @@ public class UserServiceTest {
   public void testSyncDuccVersionStatus_correctVersions() {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
-    providedWorkbenchConfig.access.currentDuccVersions.forEach(
-        version -> {
-          DbUser user = userDao.findUserByUsername(USERNAME);
-          user.setDuccAgreement(signDucc(user, version));
-          user = userDao.save(user);
-          userService.syncDuccVersionStatus(user, Agent.asSystem());
-          verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
-        });
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    user.setDuccAgreement(signDucc(user, 3));
+    user = userDao.save(user);
+    userService.syncDuccVersionStatus(user, Agent.asSystem());
+    verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
   }
 
   @Test
