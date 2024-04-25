@@ -205,8 +205,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper
-              .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
-              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
@@ -220,8 +220,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private Object buildUpdateRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper
-              .toLeonardoGceConfig(runtime.getGceConfig())
-              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+          .toLeonardoGceConfig(runtime.getGceConfig())
+          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper
           .toLeonardoGceConfig(runtime.getGceWithPdConfig())
@@ -270,11 +270,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void updateRuntime(Runtime runtime) {
     Map<String, String> runtimeLabels =
         buildRuntimeConfigurationLabels(runtime.getConfigurationType());
-    System.out.println(runtime);
-    System.out.println("This is debug $$$$$");
-    ApiClient apiClient = runtimesApiProvider.get().getApiClient();
-    apiClient.setDebugging(true);
-    runtimesApiProvider.get().setApiClient(apiClient);
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApiProvider
