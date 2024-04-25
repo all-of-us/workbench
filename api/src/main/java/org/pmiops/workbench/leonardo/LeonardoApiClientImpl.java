@@ -205,7 +205,26 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else if (runtime.getGceWithPdConfig() != null) {
       return leonardoMapper
-          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+              .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+    } else {
+      LeonardoMachineConfig machineConfig =
+          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
+        machineConfig.setWorkerPrivateAccess(true);
+      }
+      return machineConfig;
+    }
+  }
+
+  private Object buildUpdateRuntimeConfig(Runtime runtime) {
+    if (runtime.getGceConfig() != null) {
+      return leonardoMapper
+              .toLeonardoGceConfig(runtime.getGceConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+    } else if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper
+          .toLeonardoGceConfig(runtime.getGceWithPdConfig())
           .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
     } else {
       LeonardoMachineConfig machineConfig =
@@ -251,7 +270,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void updateRuntime(Runtime runtime) {
     Map<String, String> runtimeLabels =
         buildRuntimeConfigurationLabels(runtime.getConfigurationType());
-
+    System.out.println(runtime);
+    System.out.println("This is debug $$$$$");
+    ApiClient apiClient = runtimesApiProvider.get().getApiClient();
+    apiClient.setDebugging(true);
+    runtimesApiProvider.get().setApiClient(apiClient);
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApiProvider
@@ -261,7 +284,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildRuntimeConfig(runtime))
+                      .runtimeConfig(buildUpdateRuntimeConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));

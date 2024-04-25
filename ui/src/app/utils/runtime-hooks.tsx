@@ -313,11 +313,9 @@ export const useCustomRuntime = (
 
         // A disk update may be need in combination with a runtime update.
         if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
-          await disksApi().updateDisk(
-            currentWorkspaceNamespace,
-            existingDisk.name,
-            requestedDisk.size
-          );
+          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+            runtime: request.runtime,
+          });
         }
 
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
@@ -361,11 +359,9 @@ export const useCustomRuntime = (
         if (isVisible(runtime?.status)) {
           await applyRuntimeUpdate();
         } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
-          await disksApi().updateDisk(
-            currentWorkspaceNamespace,
-            existingDisk.name,
-            requestedDisk.size
-          );
+          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+            runtime: request.runtime,
+          });
         }
 
         if (runtime?.status === RuntimeStatus.ERROR) {
