@@ -1140,7 +1140,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     ]: DetachableDiskCase,
     existingDiskName: string
   ) {
-    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
     const deleteDiskSpy = jest.spyOn(disksApi(), 'deleteDisk');
     const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
     const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
