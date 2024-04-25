@@ -841,28 +841,33 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if Other text for disseminate research is more than 100 characters', async () => {
-    const wrapper = component();
-    wrapper
-      .find('[data-test-id="OTHER-checkbox"]')
-      .at(1)
-      .simulate('change', { target: { checked: true } });
-    const validInput = fp.repeat(8, 'a');
-    wrapper
-      .find('[data-test-id="otherDisseminateResearch-text"]')
-      .first()
-      .simulate('change', { target: { value: validInput } });
+    const errorMessage = /other methods of disseminating research findings/i;
+    renderComponent();
 
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')
-    ).toBeUndefined();
-    const inValidInput = fp.repeat(101, 'b');
-    wrapper
-      .find('[data-test-id="otherDisseminateResearch-text"]')
-      .first()
-      .simulate('change', { target: { value: inValidInput } });
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')
-    ).toBeDefined();
+    const otherDisseminationCheckbox = await screen.findByTestId(
+      'OTHER-checkbox'
+    );
+    await user.click(otherDisseminationCheckbox);
+    const validInput = fp.repeat(8, 'a');
+    const otherDisseminateResearchText = screen.getByPlaceholderText(
+      /specify the name of the forum \(journal, scientific conference, blog etc\.\) through which you will disseminate your findings, if available\./i
+    );
+    await user.type(otherDisseminateResearchText, validInput);
+
+    const saveButton = screen.getByRole('button', {
+      name: /create workspace/i,
+    });
+
+    await user.hover(saveButton);
+
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+
+    const invalidInput = fp.repeat(101, 'b');
+    await user.clear(otherDisseminateResearchText);
+    await user.type(otherDisseminateResearchText, invalidInput);
+    await user.hover(saveButton);
+
+    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
   });
 
   it('should show error message if Other text for Special Population is more than 100 characters', async () => {
