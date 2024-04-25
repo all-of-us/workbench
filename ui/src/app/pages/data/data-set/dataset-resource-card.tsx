@@ -35,6 +35,7 @@ import {
 } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { ExportDatasetModal } from './export-dataset-modal';
 
@@ -44,6 +45,7 @@ interface Props
     WithErrorModalProps,
     WithSpinnerOverlayProps,
     NavigationProps {
+  workspace: WorkspaceData;
   inactiveBilling: boolean;
 }
 

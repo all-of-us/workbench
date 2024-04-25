@@ -19,7 +19,6 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 export interface ResourceActionMenuProps {
   resource: WorkspaceResource;
-  workspace: WorkspaceData;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
 }
@@ -33,7 +32,6 @@ export const renderResourceMenu = (
 ) => {
   const commonProps: ResourceActionMenuProps = {
     resource,
-    workspace,
     existingNameList,
     onUpdate,
   };
@@ -50,7 +48,11 @@ export const renderResourceMenu = (
     [isConceptSet(resource), () => <ConceptSetResourceCard {...commonProps} />],
     [
       isDataSet(resource),
-      () => <DatasetResourceCard {...{ ...commonProps, inactiveBilling }} />,
+      () => (
+        <DatasetResourceCard
+          {...{ ...commonProps, workspace, inactiveBilling }}
+        />
+      ),
     ],
     [
       isNotebook(resource),
