@@ -8,7 +8,12 @@ import {
   SurveysApi,
 } from 'generated/fetch';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  RenderResult,
+  waitFor,
+} from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { createNewUserSatisfactionSurveyStore } from 'app/utils/stores';
 
@@ -52,7 +57,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     setValidNewUserSatisfactionSurveyData();
   });
 
-  const createRenderResult = ({
+  const renderTestComponent = ({
     onCancel = () => {},
     onSubmitSuccess = () => {},
     createSurveyApiCall = () => Promise.resolve(),
@@ -64,14 +69,14 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     );
   };
 
-  const findSubmitButton = (renderResult) => {
-    return renderResult.getByRole('button', { name: 'submit' });
+  const findSubmitButton = (component: RenderResult) => {
+    return component.getByRole('button', { name: 'submit' });
   };
 
-  it('should disable the submit button until a satisfaction value is selected', async () => {
+  it('should disable the submit button until a satisfaction value is selected', () => {
     setNewUserSatisfactionSurveyData('satisfaction', undefined);
 
-    let component = createRenderResult();
+    let component = renderTestComponent();
     expectButtonElementDisabled(findSubmitButton(component));
     component.unmount();
 
@@ -79,7 +84,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'satisfaction',
       NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
-    component = createRenderResult();
+    component = renderTestComponent();
     expectButtonElementEnabled(findSubmitButton(component));
   });
 
@@ -88,7 +93,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS + 1)
     );
-    let component = createRenderResult();
+    let component = renderTestComponent();
     expectButtonElementDisabled(findSubmitButton(component));
     component.unmount();
 
@@ -96,7 +101,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS)
     );
-    component = createRenderResult();
+    component = renderTestComponent();
     expectButtonElementEnabled(findSubmitButton(component));
   });
 
@@ -107,13 +112,13 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     );
 
     // Allows the createSurveyApiCall to remain unresolved until resolveSubmit is called.
-    let resolveSubmit: (value: void | PromiseLike<void>) => void;
+    let resolveSubmit;
     const createSurveyApiCall: () => Promise<void> = () =>
       new Promise((resolve) => {
         resolveSubmit = resolve;
       });
 
-    const component = createRenderResult({
+    const component = renderTestComponent({
       createSurveyApiCall,
     });
 
@@ -131,7 +136,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
 
   it('should display an error on API failure and remove it on API success', async () => {
     const createSurveyApiCall = jest.fn();
-    const component = createRenderResult({
+    const component = renderTestComponent({
       createSurveyApiCall,
     });
 
