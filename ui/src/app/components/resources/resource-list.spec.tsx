@@ -31,7 +31,7 @@ const COHORT: WorkspaceResource = {
   },
 };
 
-describe('ResourceList', () => {
+describe(ResourceList.name, () => {
   it('should render when there are no resources', async () => {
     const wrapper = mount(
       <MemoryRouter>

@@ -7,7 +7,7 @@ import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { ResourceList } from 'app/components/resource-list';
+import { ResourceList } from 'app/components/resources/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';

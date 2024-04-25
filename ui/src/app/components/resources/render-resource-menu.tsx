@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as fp from 'lodash/fp';
 
 import { BillingStatus, WorkspaceResource } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { CohortResourceCard } from 'app/pages/data/cohort/cohort-resource-card';
 import { CohortReviewResourceCard } from 'app/pages/data/cohort-review/cohort-review-resource-card';
@@ -25,26 +25,36 @@ interface RenderResourceCardProps {
   menuOnly: boolean;
 }
 
-function renderResourceCard(props: RenderResourceCardProps) {
-  const { resource } = props;
+export const renderResourceMenu = (
+  resource: WorkspaceResource,
+  workspace: WorkspaceData,
+  existingNameList: string[],
+  onUpdate: () => Promise<void>
+) => {
+  const props: RenderResourceCardProps = {
+    resource,
+    workspace,
+    existingNameList,
+    onUpdate,
+    menuOnly: true,
+  };
+
   const inactiveBilling =
     resource.workspaceBillingStatus === BillingStatus.INACTIVE;
 
-  return fp.cond([
-    [isCohort, () => <CohortResourceCard {...props} />],
-    [isCohortReview, () => <CohortReviewResourceCard {...props} />],
-    [isConceptSet, () => <ConceptSetResourceCard {...props} />],
+  return cond(
+    [isCohort(resource), () => <CohortResourceCard {...props} />],
+    [isCohortReview(resource), () => <CohortReviewResourceCard {...props} />],
+    [isConceptSet(resource), () => <ConceptSetResourceCard {...props} />],
     [
-      isDataSet,
+      isDataSet(resource),
       () => <DatasetResourceCard {...{ ...props, inactiveBilling }} />,
     ],
     [
-      isNotebook,
+      isNotebook(resource),
       () => (
         <NotebookActionMenu {...props} disableDuplicate={inactiveBilling} />
       ),
-    ],
-  ])(resource);
-}
-
-export { renderResourceCard };
+    ]
+  );
+};

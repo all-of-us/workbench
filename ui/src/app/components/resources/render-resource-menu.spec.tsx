@@ -11,9 +11,9 @@ import { stubDataSet } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import { renderResourceCard } from './render-resource-card';
+import { renderResourceMenu } from './render-resource-menu';
 
-describe('renderResourceCard', () => {
+describe(renderResourceMenu.name, () => {
   const component = (card) => {
     return mount(<MemoryRouter>{card}</MemoryRouter>);
   };
@@ -24,51 +24,28 @@ describe('renderResourceCard', () => {
     });
   });
 
-  it('renders a CohortResourceCard', () => {
+  it('does not render a menu for an invalid resource', () => {
+    const menu = renderResourceMenu(
+      stubResource,
+      workspaceDataStub,
+      [],
+      async () => {}
+    );
+    expect(menu).toBeFalsy();
+  });
+
+  it('renders a Cohort menu', () => {
     const testCohort = {
       ...stubResource,
       cohort: exampleCohortStubs[0],
     } as WorkspaceResource;
 
-    const card = renderResourceCard({
-      resource: testCohort,
-      workspace: workspaceDataStub,
-      existingNameList: [],
-      onUpdate: async () => {},
-      menuOnly: false,
-    });
-    const wrapper = component(card);
-    expect(wrapper.exists()).toBeTruthy();
-    expect(wrapper.text()).toContain('Cohort');
-    expect(wrapper.text()).toContain(testCohort.cohort.name);
-    expect(wrapper.text()).toContain(testCohort.cohort.description);
-    expect(wrapper.text()).toContain('Last Modified');
-  });
-
-  it('does not render a card for an invalid resource', () => {
-    const card = renderResourceCard({
-      resource: stubResource,
-      workspace: workspaceDataStub,
-      existingNameList: [],
-      onUpdate: async () => {},
-      menuOnly: false,
-    });
-    expect(card).toBeFalsy();
-  });
-
-  it('renders a Cohort menu without other card elements', () => {
-    const testCohort = {
-      ...stubResource,
-      cohort: exampleCohortStubs[0],
-    } as WorkspaceResource;
-
-    const menu = renderResourceCard({
-      resource: testCohort,
-      workspace: workspaceDataStub,
-      existingNameList: [],
-      onUpdate: async () => {},
-      menuOnly: true,
-    });
+    const menu = renderResourceMenu(
+      testCohort,
+      workspaceDataStub,
+      [],
+      async () => {}
+    );
     const wrapper = component(menu);
     expect(wrapper.exists()).toBeTruthy();
     expect(wrapper.text()).toBe('');
@@ -83,13 +60,12 @@ describe('renderResourceCard', () => {
       },
     } as WorkspaceResource;
 
-    const menu = renderResourceCard({
-      resource: testDataSet,
-      workspace: workspaceDataStub,
-      existingNameList: [],
-      onUpdate: async () => {},
-      menuOnly: true,
-    });
+    const menu = renderResourceMenu(
+      testDataSet,
+      workspaceDataStub,
+      [],
+      async () => {}
+    );
     const wrapper = component(menu);
     wrapper
       .find({ 'data-test-id': 'resource-card-menu' })
@@ -111,13 +87,12 @@ describe('renderResourceCard', () => {
       },
     } as WorkspaceResource;
 
-    const menu = renderResourceCard({
-      resource: testDataSet,
-      workspace: workspaceDataStub,
-      existingNameList: [],
-      onUpdate: async () => {},
-      menuOnly: true,
-    });
+    const menu = renderResourceMenu(
+      testDataSet,
+      workspaceDataStub,
+      [],
+      async () => {}
+    );
     const wrapper = component(menu);
     wrapper
       .find({ 'data-test-id': 'resource-card-menu' })

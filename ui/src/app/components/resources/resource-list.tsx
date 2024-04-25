@@ -16,11 +16,11 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
-import { renderResourceCard } from 'app/components/render-resource-card';
 import {
   ResourceNavigation,
   StyledResourceType,
 } from 'app/components/resource-card';
+import { renderResourceMenu } from 'app/components/resources/render-resource-menu';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -99,7 +99,7 @@ interface TableData {
 interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
   workspaces: WorkspaceData[];
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
@@ -122,19 +122,6 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
     return resourceTypeNameListMap;
   };
   const resourceTypeNameMap = getResourceMap();
-
-  const renderResourceMenu = (
-    resource: WorkspaceResource,
-    workspace: WorkspaceData
-  ) => {
-    return renderResourceCard({
-      resource,
-      workspace,
-      menuOnly: true,
-      existingNameList: resourceTypeNameMap.get(getType(resource)),
-      onUpdate: () => props.onUpdate(),
-    });
-  };
 
   const getCdrVersionName = (r: WorkspaceResource) => {
     const { cdrVersionTiersResponse } = props;
@@ -171,7 +158,12 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
                 {
                   resource: r,
                   workspace,
-                  menu: renderResourceMenu(r, workspace),
+                  menu: renderResourceMenu(
+                    r,
+                    workspace,
+                    resourceTypeNameMap.get(getType(r)),
+                    props.onUpdate
+                  ),
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
                   lastModifiedForSorting: r.lastModifiedEpochMillis,
