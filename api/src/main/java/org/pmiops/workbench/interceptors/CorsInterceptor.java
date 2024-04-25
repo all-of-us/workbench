@@ -23,6 +23,8 @@ public class CorsInterceptor implements AsyncHandlerInterceptor {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+    System.out.println("~~~~~~~~~~~~~~~CorsInterceptor~~~~~~~~~~~~~~~");
+    System.out.println(request);
     response.setHeader(CREDENTIALS_NAME, "true");
     response.setHeader(ORIGIN_NAME, "*");
     response.setHeader(METHODS_NAME, "GET, HEAD, POST, PUT, DELETE, PATCH, TRACE, OPTIONS");

@@ -78,6 +78,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     registry.addInterceptor(cloudTaskInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
+    System.out.println("~~~~~~~~~~~~~~~WebMvcConfig~~~~~~~~~~~~~~~");
+    System.out.println(corsInterceptor.toString());
+
   }
 
   @Override

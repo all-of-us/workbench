@@ -6,7 +6,7 @@ buildscript {
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
-        GAE_VERSION = '2.0.9'
+        GAE_VERSION = '2.0.26'
         GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '6.4.4.Final'
@@ -415,6 +415,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-exporter-otlp:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
