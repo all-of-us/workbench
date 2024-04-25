@@ -9,7 +9,6 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete, canWrite } from 'app/components/resource-card';
 import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
@@ -27,6 +26,8 @@ import { dataTabPath } from 'app/routing/utils';
 import { cohortsApi, dataSetApi } from 'app/services/swagger-fetch-clients';
 import { NavigationProps } from 'app/utils/navigation';
 import {
+  canDelete,
+  canWrite,
   getDescription,
   getDisplayName,
   getId,

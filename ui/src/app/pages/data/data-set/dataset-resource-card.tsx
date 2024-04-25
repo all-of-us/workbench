@@ -9,7 +9,6 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete, canWrite } from 'app/components/resource-card';
 import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
@@ -27,7 +26,13 @@ import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extracti
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { NavigationProps } from 'app/utils/navigation';
-import { getDescription, getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDescription,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 

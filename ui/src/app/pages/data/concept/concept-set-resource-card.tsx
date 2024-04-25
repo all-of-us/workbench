@@ -10,7 +10,6 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete, canWrite } from 'app/components/resource-card';
 import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
@@ -26,6 +25,8 @@ import {
 } from 'app/components/with-spinner-overlay';
 import { conceptSetsApi, dataSetApi } from 'app/services/swagger-fetch-clients';
 import {
+  canDelete,
+  canWrite,
   getDescription,
   getDisplayName,
   getId,

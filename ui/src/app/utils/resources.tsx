@@ -230,3 +230,11 @@ export const validateNewNotebookName = (
       ),
     }
   );
+
+export function canWrite(resource: WorkspaceResource): boolean {
+  return resource.permission === 'OWNER' || resource.permission === 'WRITER';
+}
+
+export function canDelete(resource: WorkspaceResource): boolean {
+  return resource.permission === 'OWNER' || resource.permission === 'WRITER';
+}

@@ -6,7 +6,6 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete, canWrite } from 'app/components/resource-card';
 import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
@@ -21,7 +20,13 @@ import {
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
-import { getDescription, getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDescription,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 
 interface Props
   extends ResourceActionMenuProps,

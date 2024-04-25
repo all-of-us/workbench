@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CSSProperties, useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -17,7 +17,6 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete } from 'app/components/resource-card';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -40,6 +39,7 @@ import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
+import { canDelete } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -82,9 +82,9 @@ const WorkspaceNavigation = (props: NavProps) => {
 
   return (
     <Clickable>
-      <RouterLink to={url} style={style} data-test-id='workspace-navigation'>
+      <Link to={url} style={style} data-test-id='workspace-navigation'>
         {name}
-      </RouterLink>
+      </Link>
     </Clickable>
   );
 };
@@ -247,11 +247,11 @@ export const TanagraResourceList = fp.flow(
     }
     return (
       <Clickable>
-        <RouterLink to={url} style={styles.navigation}>
+        <Link to={url} style={styles.navigation}>
           <TooltipTrigger content={displayName}>
             <span>{displayName}</span>
           </TooltipTrigger>
-        </RouterLink>
+        </Link>
       </Clickable>
     );
   };
