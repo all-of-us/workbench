@@ -9,11 +9,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+import { canDelete, canWrite } from 'app/components/resource-card';
 import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
@@ -44,7 +40,6 @@ interface Props
     WithSpinnerOverlayProps,
     NavigationProps {
   inactiveBilling: boolean;
-  menuOnly: boolean;
 }
 
 interface State {
@@ -183,7 +178,7 @@ export const DatasetResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, workspace, menuOnly } = this.props;
+      const { resource, workspace } = this.props;
       return (
         <React.Fragment>
           {this.state.showExportToNotebookModal && (
@@ -215,14 +210,10 @@ export const DatasetResourceCard = fp.flow(
               existingNames={this.props.existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+          />
         </React.Fragment>
       );
     }

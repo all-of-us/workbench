@@ -22,7 +22,6 @@ export interface ResourceActionMenuProps {
   workspace: WorkspaceData;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
-  menuOnly: boolean;
 }
 
 export const renderResourceMenu = (
@@ -36,7 +35,6 @@ export const renderResourceMenu = (
     workspace,
     existingNameList,
     onUpdate,
-    menuOnly: true,
   };
 
   const inactiveBilling =
