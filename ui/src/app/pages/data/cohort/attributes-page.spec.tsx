@@ -5,6 +5,7 @@ import * as React from 'react';
 import { CohortBuilderApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   ppiQuestions,
   ppiSurveys,
@@ -28,14 +29,12 @@ import {
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, AttributesPageProps } from './attributes-page';
-import SpyInstance = jest.SpyInstance;
-import userEvent from '@testing-library/user-event';
 
 let props: AttributesPageProps;
-let mockCountParticipants: SpyInstance;
-let mockFindCriteriaAttributeByConceptId: SpyInstance;
-let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
-let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: SpyInstance;
+let mockCountParticipants: jest.SpyInstance;
+let mockFindCriteriaAttributeByConceptId: jest.SpyInstance;
+let mockFindSurveyVersionByQuestionConceptId: jest.SpyInstance;
+let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: jest.SpyInstance;
 
 async function component() {
   render(<AttributesPage {...props} />);
