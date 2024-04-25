@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 
 import { RuntimeStatus } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import {
   registerCompoundRuntimeOperation,
   runtimeStore,
@@ -10,25 +12,18 @@ import {
 
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
-import {
-  ErrorIcon,
-  RunningIcon,
-  StoppedIcon,
-  StoppingIcon,
-  UpdatingIcon,
-} from './environment-status-icon';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
 describe(RuntimeStatusIndicator.name, () => {
   test.each([
-    [RuntimeStatus.CREATING, UpdatingIcon],
-    [RuntimeStatus.STOPPED, StoppedIcon],
-    [RuntimeStatus.RUNNING, RunningIcon],
-    [RuntimeStatus.STOPPING, StoppingIcon],
-    [RuntimeStatus.ERROR, ErrorIcon],
+    [RuntimeStatus.CREATING, 'is updating'],
+    [RuntimeStatus.STOPPED, 'has stopped'],
+    [RuntimeStatus.RUNNING, 'is running'],
+    [RuntimeStatus.STOPPING, 'is stopping'],
+    [RuntimeStatus.ERROR, 'has encountered an error'],
   ])(
     'Runtime Status indicator renders correct indicator when runtime is in %s state',
-    (status, icon) => {
+    (status, iconMeaning) => {
       const runtimeStub = new RuntimeApiStub();
       runtimeStub.runtime.status = status;
       runtimeStore.set({
@@ -36,8 +31,12 @@ describe(RuntimeStatusIndicator.name, () => {
         runtime: runtimeStub.runtime,
         runtimeLoaded: true,
       });
-      render(<RuntimeStatusIndicator />);
-      const statusIcon = screen.getByTestId(`runtime-status-icon-${status}`);
+      const { getByTestId } = render(<RuntimeStatusIndicator />);
+
+      const iconContainer = getByTestId('runtime-status-icon-container');
+      const statusIcon = within(iconContainer).getByTitle(
+        `Icon indicating environment ${iconMeaning}`
+      );
       expect(statusIcon).toBeInTheDocument();
     }
   );
@@ -71,10 +70,14 @@ describe(RuntimeStatusIndicator.name, () => {
       aborter,
     });
 
-    render(
+    const { getByTestId } = render(
       <RuntimeStatusIndicator workspaceNamespace={currentWorkspaceNamespace} />
     );
-    const statusIcon = screen.getByTestId('runtime-status-icon-updating');
+
+    const iconContainer = getByTestId('runtime-status-icon-container');
+    const statusIcon = within(iconContainer).getByTitle(
+      'Icon indicating environment is updating'
+    );
     expect(statusIcon).toBeInTheDocument();
   });
 });
