@@ -6,39 +6,35 @@ import { CheckBox, TextAreaWithLengthValidationMessage } from './inputs';
 
 const initialText = 'Hey';
 
-const expectChecked = (checkbox, checked: boolean) => {
-  expect(checkbox.checked).toEqual(checked);
-};
-
 describe('inputs', () => {
   it('click causes DOM checked state to change', () => {
     const { getByRole } = render(<CheckBox label='asdf' />);
-    const checkbox = getByRole('checkbox');
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
 
-    expectChecked(checkbox, false);
+    expect(checkbox.checked).toEqual(false);
     fireEvent.click(checkbox);
-    expectChecked(checkbox, true);
+    expect(checkbox.checked).toEqual(true);
   });
 
   it('uses "checked" to set initial state', () => {
     const { getByRole } = render(<CheckBox checked={true} />);
-    const checkbox = getByRole('checkbox');
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
 
-    expectChecked(checkbox, true);
+    expect(checkbox.checked).toEqual(true);
   });
 
   it('uses props only when manageOwnState=false', () => {
     const { getByRole, rerender } = render(
       <CheckBox checked={true} manageOwnState={false} />
     );
-    const checkbox = getByRole('checkbox');
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
 
-    expectChecked(checkbox, true);
+    expect(checkbox.checked).toEqual(true);
     fireEvent.click(checkbox);
-    expectChecked(checkbox, true);
+    expect(checkbox.checked).toEqual(true);
 
     rerender(<CheckBox checked={false} manageOwnState={false} />);
-    expectChecked(checkbox, false);
+    expect(checkbox.checked).toEqual(false);
   });
 
   it('calls onChange with target checked state', () => {
