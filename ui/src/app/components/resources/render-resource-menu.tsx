@@ -24,6 +24,7 @@ export interface ResourceActionMenuProps {
   onUpdate: () => Promise<void>;
 }
 
+// TODO: this is only used by resource-list.  move it there?
 export const renderResourceMenu = (
   resource: WorkspaceResource,
   workspace: WorkspaceData,
