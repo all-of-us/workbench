@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
@@ -9,7 +11,7 @@ import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { SideNav, SideNavProps } from './side-nav';
 
-describe('SideNav', () => {
+describe(SideNav.name, () => {
   const props: SideNavProps = {
     profile: ProfileStubVariables.PROFILE_STUB,
     onToggleSideNav: () => {},
@@ -19,8 +21,8 @@ describe('SideNav', () => {
   spy.mockReturnValue('lol.png');
 
   it('should render', () => {
-    const { getByTestId } = render(<SideNav {...props} />);
-    expect(getByTestId('side-nav')).toBeInTheDocument();
+    const { getByLabelText } = render(<SideNav {...props} />);
+    expect(getByLabelText('Side Navigation Bar')).toBeInTheDocument();
   });
 
   it('should show an error when signout fails', () => {

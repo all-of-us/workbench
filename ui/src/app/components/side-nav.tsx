@@ -285,7 +285,7 @@ export const SideNav = (props: SideNavProps) => {
   ];
 
   return (
-    <div style={styles.sideNav}>
+    <div style={styles.sideNav} aria-label='Side Navigation Bar'>
       <SideNavItem
         hasProfileImage={true}
         content={`${profile.givenName} ${profile.familyName}`}
