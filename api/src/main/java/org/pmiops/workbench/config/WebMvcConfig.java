@@ -1,6 +1,9 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfo;
+import io.opentelemetry.instrumentation.spring.autoconfigure.OpenTelemetryAutoConfiguration;
+import io.opentelemetry.instrumentation.spring.autoconfigure.instrumentation.annotations.InstrumentationAnnotationsAutoConfiguration;
+import io.opentelemetry.instrumentation.spring.autoconfigure.instrumentation.webmvc.SpringWebMvc6InstrumentationAutoConfiguration;
 import jakarta.servlet.ServletContext;
 import java.util.Optional;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -13,10 +16,9 @@ import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
+import org.springframework.context.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebMvc
 @Configuration
+@Import({InstrumentationAnnotationsAutoConfiguration.class, XADataSourceAutoConfiguration.class, OpenTelemetryAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class, SpringWebMvc6InstrumentationAutoConfiguration.class})
 @ComponentScan(basePackages = {"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig implements WebMvcConfigurer {
 

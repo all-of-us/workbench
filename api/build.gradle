@@ -6,6 +6,7 @@ buildscript {
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
+        GAE_VERSION = '2.0.26'
         GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '6.4.4.Final'
@@ -108,6 +109,12 @@ configurations {
     generatedCompile {
         exclude group: 'com.google.guava', module: 'guava-jdk5'
     }
+
+    all {
+        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-core'
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    }
+
 }
 
 // Shared variables for Swagger codegen. Use "ext" rather than "def" to allow
@@ -413,6 +420,8 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-api:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-context:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry:opentelemetry-sdk:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$project.ext.OPENTELEMETRY_SDK_VERSION"
+    implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
@@ -454,7 +463,7 @@ dependencies {
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.7.0'
     implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
-    implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
+    implementation 'com.google.cloud:google-cloud-iamcredentials:2.41.0'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
     implementation 'com.google.cloud:google-cloud-monitoring:3.40.0'
     implementation 'com.google.cloud:google-cloud-trace:2.39.0'

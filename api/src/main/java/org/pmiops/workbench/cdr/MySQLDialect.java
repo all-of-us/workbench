@@ -7,10 +7,6 @@ import org.hibernate.type.StandardBasicTypes;
 
 public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect {
 
-  public MySQLDialect() {
-    super();
-  }
-
   @Override
   public void initializeFunctionRegistry(FunctionContributions functionContributions) {
     // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
@@ -28,17 +24,15 @@ public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect 
     // corresponding fields -- conceptName, conceptCode, vocabularyId, synonymsStr --
     // to make JQL alias resolution work properly. Example:
     // matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0
-    functionContributions
-        .getFunctionRegistry()
+    functionRegistry
         .registerPattern(
             "myFunction",
             "match(?1) against  (?2 in boolean mode)",
             basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
 
-    functionContributions
-        .getFunctionRegistry()
+    functionRegistry
         .registerPattern(
-            "myFunction",
+            "myFunction2",
             "match(?1, ?2, ?3, ?4) against (?5 in boolean mode)",
             basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
   }
