@@ -123,25 +123,11 @@ describe('inputs', () => {
     );
   });
 
-  it('Shows too short warning if text input is less the short characters', () => {
-    const { getByRole, getByTestId, queryByTestId, rerender } = render(
+  it('Shows too short warning if text input is less than tooShortWarningCharacters', () => {
+    const { getByTestId, getByRole } = render(
       <TextAreaWithLengthValidationMessage
         id='test'
-        initialText={initialText}
-        maxCharacters={15}
-        onChange={() => {}}
-      />
-    );
-
-    const getTextArea = () => getByRole('textbox', { name: 'test' });
-
-    fireEvent.blur(getTextArea());
-    expect(queryByTestId('warning')).toBeNull(); // tooShortWarning prop was not set
-
-    rerender(
-      <TextAreaWithLengthValidationMessage
-        id='test'
-        initialText={initialText}
+        initialText='Hey'
         maxCharacters={15}
         onChange={() => {}}
         tooShortWarning='Testing too short'
@@ -149,22 +135,37 @@ describe('inputs', () => {
       />
     );
 
-    fireEvent.blur(getTextArea());
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
     expect(getByTestId('warning').textContent).toBe('Testing too short');
+  });
 
-    // Props for tooShortWarning should not show any warning if the text length is more than tooShortWarningCharacters
-    rerender(
+  it('Does not show the too short warning when there are enough characters', () => {
+    const { getByRole, queryByTestId } = render(
       <TextAreaWithLengthValidationMessage
         id='test'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
-        tooShortWarning={'Testing too short'}
+        tooShortWarning='Testing too short'
         tooShortWarningCharacters={2}
       />
     );
 
-    fireEvent.blur(getTextArea());
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    expect(queryByTestId('warning')).toBeNull();
+  });
+
+  it('Does not show the too short warning when tooShortWarning is not set', () => {
+    const { getByRole, queryByTestId } = render(
+      <TextAreaWithLengthValidationMessage
+        id='test'
+        initialText={initialText}
+        maxCharacters={15}
+        onChange={() => {}}
+      />
+    );
+
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
     expect(queryByTestId('warning')).toBeNull();
   });
 });
