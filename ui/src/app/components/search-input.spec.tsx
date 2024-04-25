@@ -43,13 +43,14 @@ describe(SearchInput.name, () => {
         accept(['bar']);
       });
     }
-    const { getByTestId } = render(<SearchInput onSearch={onSearch} />);
+    const { getByTestId, queryByTestId } = render(
+      <SearchInput onSearch={onSearch} />
+    );
     fireEvent.change(getSearchInput(), { target: { value: 'foo' } });
-    await waitFor(() => {
-      fireEvent.mouseDown(getByTestId('search-input-drop-down-element-0'));
-      fireEvent.blur(getSearchInput());
-      expect(getByTestId('search-input-drop-down')).not.toBeInTheDocument();
-    });
+    await waitFor(() => getByTestId('search-input-drop-down-element-0'));
+    fireEvent.mouseDown(getByTestId('search-input-drop-down-element-0'));
+    fireEvent.blur(getSearchInput());
+    expect(queryByTestId('search-input-drop-down')).not.toBeInTheDocument();
   });
 
   test('onChange handler is called when the contents changes', async () => {
