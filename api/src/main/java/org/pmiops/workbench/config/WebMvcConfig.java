@@ -34,7 +34,6 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration
 @ComponentScan(basePackages = {"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig implements WebMvcConfigurer {
-
   @Autowired private AuthInterceptor authInterceptor;
 
   @Autowired private CorsInterceptor corsInterceptor;
@@ -98,9 +97,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedOrigins("*")
-            .allowedHeaders("*")
-            .exposedHeaders("Origin, X-Requested-With, Content-Type, Accept, Authorization");
+            .allowedMethods("GET, HEAD, POST, PUT, DELETE, PATCH, TRACE, OPTIONS")
+            .allowedOrigins("*").allowCredentials(true)
+            .allowedHeaders("Origin, X-Requested-With, Content-Type, Accept, Authorization");
   }
 }
