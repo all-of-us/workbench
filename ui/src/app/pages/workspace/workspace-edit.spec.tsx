@@ -871,38 +871,41 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if Other text for Special Population is more than 100 characters', async () => {
+    const errorMessage = /other specific population cannot/i;
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
-    expect(
-      wrapper
-        .find('[data-test-id="specific-population-yes"]')
-        .first()
-        .prop('checked')
-    ).toEqual(true);
-    wrapper
-      .find('[data-test-id="other-specialPopulation-checkbox"]')
-      .at(1)
-      .simulate('change', { target: { checked: true } });
+    renderComponent();
 
-    const validInput = fp.repeat(100, 'a');
-    wrapper
-      .find('[data-test-id="other-specialPopulation-text"]')
-      .first()
-      .simulate('change', { target: { value: validInput } });
+    const specificPopulationYesRadio = await screen.findByTestId(
+      'specific-population-yes'
+    );
+    await user.click(specificPopulationYesRadio);
 
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')
-    ).toBeUndefined();
+    const otherSpecialPopulationCheckbox = screen.getByTestId(
+      'other-specialPopulation-checkbox'
+    );
+    await user.click(otherSpecialPopulationCheckbox);
 
-    const inValidInput = fp.repeat(101, 'a');
-    wrapper
-      .find('[data-test-id="other-specialPopulation-text"]')
-      .first()
-      .simulate('change', { target: { value: inValidInput } });
+    // Simulate entering valid input into the "other-specialPopulation-text" text field
+    const validInput = 'a'.repeat(100);
+    const otherSpecialPopulationTextField = screen.getByTestId(
+      'other-specialPopulation-text'
+    );
+    await user.type(otherSpecialPopulationTextField, validInput);
 
-    expect(
-      getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')
-    ).toBeDefined();
+    const saveButton = screen.getByRole('button', {
+      name: /update workspace/i,
+    });
+
+    await user.hover(saveButton);
+
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
+
+    const invalidInput = 'a'.repeat(101);
+    await user.clear(otherSpecialPopulationTextField);
+    await user.type(otherSpecialPopulationTextField, invalidInput);
+    await user.hover(saveButton);
+
+    expect(screen.queryByText(errorMessage)).toBeInTheDocument();
   });
 
   it('should show error message when other disseminate checked but empty', async () => {
