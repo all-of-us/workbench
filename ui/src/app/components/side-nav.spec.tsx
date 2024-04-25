@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-utils';
 import { notificationStore } from 'app/utils/stores';
