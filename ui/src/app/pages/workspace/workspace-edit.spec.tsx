@@ -791,34 +791,51 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if Disease of focus is more than 80 characters', async () => {
-    const wrapper = component();
-    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
+    const errorMessage = /disease of focus cannot exceed 80 characters/i;
+    renderComponent();
+    const saveButton = await screen.findByRole('button', {
+      name: /create workspace/i,
+    });
+    expectButtonElementDisabled(saveButton);
+    await user.hover(saveButton);
+    // Testing to see if error appears
+    expect(screen.queryByText(errorMessage)).not.toBeInTheDocument();
 
-    wrapper
-      .find('[data-test-id="researchPurpose-checkbox"]')
-      .at(1)
-      .simulate('change', { target: { checked: true } });
-    wrapper
-      .find('[data-test-id="diseaseFocusedResearch-checkbox"]')
-      .at(1)
-      .simulate('change', { target: { checked: true } });
+    const researchPurposeCheckbox: HTMLInputElement = screen.getByTestId(
+      'researchPurpose-checkbox'
+    ) as HTMLInputElement;
 
-    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
+    await user.click(researchPurposeCheckbox);
+
+    const diseaseFocusedCheckbox: HTMLInputElement = screen.getByTestId(
+      'diseaseFocusedResearch-checkbox'
+    ) as HTMLInputElement;
+
+    await user.click(diseaseFocusedCheckbox);
+
+    await user.hover(saveButton);
+
+    expect(
+      screen.queryByText(/disease of focus cannot be blank/i)
+    ).toBeInTheDocument();
 
     const validInput = fp.repeat(8, 'a');
-    wrapper
-      .find('[data-test-id="search-input"]')
-      .first()
-      .simulate('change', { target: { value: validInput } });
 
-    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
+    const diseaseOfFocusInput = screen.getByPlaceholderText(/name of disease/i);
+    await user.type(diseaseOfFocusInput, validInput);
+
+    await user.hover(saveButton);
+
+    expect(screen.queryByText(/disease of focus/i)).not.toBeInTheDocument();
 
     const inValidInput = fp.repeat(81, 'b');
-    wrapper
-      .find('[data-test-id="search-input"]')
-      .first()
-      .simulate('change', { target: { value: inValidInput } });
-    expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
+    await user.type(diseaseOfFocusInput, inValidInput);
+
+    await user.hover(saveButton);
+
+    expect(
+      screen.queryByText(/disease of focus cannot exceed 80 characters/i)
+    ).toBeInTheDocument();
   });
 
   it('should show error message if Other text for disseminate research is more than 100 characters', async () => {
