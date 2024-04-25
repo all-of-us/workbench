@@ -508,26 +508,9 @@ const cardButtonStyle = {
     },
     disabledStyle: { ...cardButtonBase.disabledStyle },
   },
-
-  small: {
-    style: {
-      ...cardStyles.resourceCard,
-      ...cardButtonBase.style,
-      fontSize: 18,
-      lineHeight: '22px',
-      minWidth: '200px',
-      maxWidth: '200px',
-      minHeight: '105px',
-      maxHeight: '105px',
-      marginTop: '1.5rem',
-      marginRight: '1.5rem',
-    },
-    disabledStyle: { ...cardButtonBase.disabledStyle },
-  },
 };
 
 export const CardButton = ({
-  type = 'large',
   disabled = false,
   style = {},
   children,
@@ -537,7 +520,7 @@ export const CardButton = ({
     <Clickable
       disabled={disabled}
       {...props}
-      {...fp.merge(computeStyle(cardButtonStyle[type], { disabled }), {
+      {...fp.merge(computeStyle(cardButtonStyle.large, { disabled }), {
         style,
       })}
     >
