@@ -369,7 +369,7 @@ interface CheckBoxProps {
   manageOwnState: boolean;
   // Callback called when the user clicks the checkbox or label, containing the
   // new checked value.
-  onChange?: (boolean) => void;
+  onChange?: (_: boolean) => void;
   // Styles for the <input> checkbox component.
   style?: React.CSSProperties;
   // If the label is non-empty, styles to be applied to the <span> wrapper.
