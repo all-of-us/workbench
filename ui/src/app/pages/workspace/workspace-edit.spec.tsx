@@ -773,6 +773,7 @@ describe('WorkspaceEdit', () => {
       'otherPrimaryPurposeText'
     );
 
+    await user.clear(otherPrimaryPurposeText);
     await user.click(otherPrimaryPurposeText);
     await user.paste(validInput);
 
@@ -783,6 +784,7 @@ describe('WorkspaceEdit', () => {
     ).not.toBeInTheDocument();
 
     const invalidInput = fp.repeat(501, 'b');
+    await user.clear(otherPrimaryPurposeText);
     await user.click(otherPrimaryPurposeText);
     await user.paste(invalidInput);
 
