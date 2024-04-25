@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { WorkspaceResource } from 'generated/fetch';
-
 import { RenameModal } from 'app/components/rename-modal';
 import {
   Action,
@@ -13,6 +11,7 @@ import {
   canWrite,
   ResourceCard,
 } from 'app/components/resource-card';
+import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,14 +28,10 @@ import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import { getDescription, getDisplayName, getType } from 'app/utils/resources';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends ResourceActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
-    WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
-  menuOnly: boolean;
-}
+    WithSpinnerOverlayProps {}
 
 interface State {
   showRenameModal: boolean;

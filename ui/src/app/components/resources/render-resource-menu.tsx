@@ -17,7 +17,7 @@ import {
 } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-interface RenderResourceCardProps {
+export interface ResourceActionMenuProps {
   resource: WorkspaceResource;
   workspace: WorkspaceData;
   existingNameList: string[];
@@ -31,7 +31,7 @@ export const renderResourceMenu = (
   existingNameList: string[],
   onUpdate: () => Promise<void>
 ) => {
-  const props: RenderResourceCardProps = {
+  const commonProps: ResourceActionMenuProps = {
     resource,
     workspace,
     existingNameList,
@@ -43,17 +43,23 @@ export const renderResourceMenu = (
     resource.workspaceBillingStatus === BillingStatus.INACTIVE;
 
   return cond(
-    [isCohort(resource), () => <CohortResourceCard {...props} />],
-    [isCohortReview(resource), () => <CohortReviewResourceCard {...props} />],
-    [isConceptSet(resource), () => <ConceptSetResourceCard {...props} />],
+    [isCohort(resource), () => <CohortResourceCard {...commonProps} />],
+    [
+      isCohortReview(resource),
+      () => <CohortReviewResourceCard {...commonProps} />,
+    ],
+    [isConceptSet(resource), () => <ConceptSetResourceCard {...commonProps} />],
     [
       isDataSet(resource),
-      () => <DatasetResourceCard {...{ ...props, inactiveBilling }} />,
+      () => <DatasetResourceCard {...{ ...commonProps, inactiveBilling }} />,
     ],
     [
       isNotebook(resource),
       () => (
-        <NotebookActionMenu {...props} disableDuplicate={inactiveBilling} />
+        <NotebookActionMenu
+          {...commonProps}
+          disableDuplicate={inactiveBilling}
+        />
       ),
     ]
   );

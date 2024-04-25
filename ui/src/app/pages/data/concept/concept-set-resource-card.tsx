@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { CopyRequest, DataSet, WorkspaceResource } from 'generated/fetch';
+import { CopyRequest, DataSet } from 'generated/fetch';
 
 import { CopyModal } from 'app/components/copy-modal';
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
@@ -15,6 +15,7 @@ import {
   canWrite,
   ResourceCard,
 } from 'app/components/resource-card';
+import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -36,14 +37,10 @@ import {
 } from 'app/utils/resources';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends ResourceActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
-    WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
-  menuOnly: boolean;
-}
+    WithSpinnerOverlayProps {}
 
 interface State {
   showRenameModal: boolean;
