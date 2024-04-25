@@ -218,9 +218,9 @@ export class SearchInput extends React.Component<
         <TooltipTrigger
           content={this.props.tooltip}
           disabled={this.props.enabled}
-          data-test-id='search-input'
         >
           <TextInput
+            aria-label='Search'
             value={this.props.value}
             style={inputStyle}
             onFocus={this._onFocus.bind(this)}
