@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
