@@ -58,6 +58,7 @@ describe(ResourceListActionMenu.name, () => {
     );
     fireEvent.click(getByTitle('Dataset Action Menu'));
     expect(getByText('Export to Notebook')).toBeInTheDocument();
+    // can't extract without WGS
     expect(queryByText('Extract VCF Files')).not.toBeInTheDocument();
   });
 
@@ -83,6 +84,7 @@ describe(ResourceListActionMenu.name, () => {
     );
     fireEvent.click(getByTitle('Dataset Action Menu'));
     expect(getByText('Export to Notebook')).toBeInTheDocument();
+    // WGS allows extraction
     expect(queryByText('Extract VCF Files')).toBeInTheDocument();
   });
 });
