@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
 
 import {
   DisseminateResearchEnum,
-  EgressEventStatus,
   ProfileApi,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
@@ -25,7 +23,6 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { WorkspaceEditSection } from 'app/pages/workspace/workspace-edit-section';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import * as Authentication from 'app/utils/authentication';
@@ -41,10 +38,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  getDropdownOption,
   renderWithRouter,
-  simulateSelection,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   altCdrVersion,
@@ -219,11 +213,10 @@ describe('WorkspaceEdit', () => {
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
-    let specificPopulationYesCheckbox: HTMLInputElement;
     await waitFor(() => {
-      specificPopulationYesCheckbox = screen.getByTestId(
-        'specific-population-yes'
-      ) as HTMLInputElement;
+      expect(
+        screen.queryByTestId('specific-population-yes')
+      ).toBeInTheDocument();
     });
 
     const ageChildrenCheckbox: HTMLInputElement = screen.getByTestId(
@@ -557,62 +550,66 @@ describe('WorkspaceEdit', () => {
     ]);
   });
 
-  it('enables the access tier selection dropdown on creation when multiple tiers are present but prevents selection when the user does not have access', async () => {
-    workspaceEditMode = WorkspaceEditMode.Create;
-    profileStore.set({
-      ...profileStore.get(),
-      profile: {
-        ...profileStore.get().profile,
-        accessTierShortNames: [AccessTierShortNames.Registered],
-      },
-    });
+  it(
+    'enables the access tier selection dropdown on creation when multiple tiers are present' +
+      'but prevents selection when the user does not have access',
+    async () => {
+      workspaceEditMode = WorkspaceEditMode.Create;
+      profileStore.set({
+        ...profileStore.get(),
+        profile: {
+          ...profileStore.get().profile,
+          accessTierShortNames: [AccessTierShortNames.Registered],
+        },
+      });
 
-    renderComponent();
+      renderComponent();
 
-    let accessTierSelection: HTMLSelectElement;
-    await waitFor(() => {
-      accessTierSelection = screen.getByRole('combobox', {
-        name: /data access tier dropdown/i,
+      let accessTierSelection: HTMLSelectElement;
+      await waitFor(() => {
+        accessTierSelection = screen.getByRole('combobox', {
+          name: /data access tier dropdown/i,
+        }) as HTMLSelectElement;
+        // defaults to registered
+        expect(accessTierSelection.disabled).toBe(false);
+        expect(accessTierSelection.value).toBe(AccessTierShortNames.Registered);
+      });
+
+      // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+      // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+      const cdrVersionsSelect = screen.getByRole('combobox', {
+        name: /cdr version dropdown/i,
       }) as HTMLSelectElement;
-      // defaults to registered
-      expect(accessTierSelection.disabled).toBe(false);
-      expect(accessTierSelection.value).toBe(AccessTierShortNames.Registered);
-    });
+      expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
 
-    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
-    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
-    const cdrVersionsSelect = screen.getByRole('combobox', {
-      name: /cdr version dropdown/i,
-    }) as HTMLSelectElement;
-    expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
+      const cdrVersionSelectOptions = Array.from(
+        cdrVersionsSelect.options,
+        (option) => option.value
+      );
+      expect(cdrVersionSelectOptions).toEqual([
+        defaultCdrVersion.cdrVersionId,
+        altCdrVersion.cdrVersionId,
+      ]);
 
-    const cdrVersionSelectOptions = Array.from(
-      cdrVersionsSelect.options,
-      (option) => option.value
-    );
-    expect(cdrVersionSelectOptions).toEqual([
-      defaultCdrVersion.cdrVersionId,
-      altCdrVersion.cdrVersionId,
-    ]);
+      // when Controlled is selected, the UnavailableTierModal appears, and the CDR Version dropdown continues to
+      // list the registered tier CDR Versions
+      await userEvent.selectOptions(accessTierSelection, [
+        AccessTierShortNames.Controlled,
+      ]);
 
-    // when Controlled is selected, the UnavailableTierModal appears, and the CDR Version dropdown continues to
-    // list the registered tier CDR Versions
-    await userEvent.selectOptions(accessTierSelection, [
-      AccessTierShortNames.Controlled,
-    ]);
+      expect(screen.getByTestId('unavailable-tier-modal')).toBeInTheDocument();
 
-    expect(screen.getByTestId('unavailable-tier-modal')).toBeInTheDocument();
-
-    expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
-    const cdrVersionSelectOptionsAfterChange = Array.from(
-      cdrVersionsSelect.options,
-      (option) => option.value
-    );
-    expect(cdrVersionSelectOptionsAfterChange).toEqual([
-      defaultCdrVersion.cdrVersionId,
-      altCdrVersion.cdrVersionId,
-    ]);
-  });
+      expect(cdrVersionsSelect.value).toBe(defaultCdrVersion.cdrVersionId);
+      const cdrVersionSelectOptionsAfterChange = Array.from(
+        cdrVersionsSelect.options,
+        (option) => option.value
+      );
+      expect(cdrVersionSelectOptionsAfterChange).toEqual([
+        defaultCdrVersion.cdrVersionId,
+        altCdrVersion.cdrVersionId,
+      ]);
+    }
+  );
 
   it('retains the tier on edit and does not permit changes - Registered', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
@@ -837,7 +834,11 @@ describe('WorkspaceEdit', () => {
     await user.click(otherDisseminationCheckbox);
     const validInput = fp.repeat(8, 'a');
     const otherDisseminateResearchText = screen.getByPlaceholderText(
-      /specify the name of the forum \(journal, scientific conference, blog etc\.\) through which you will disseminate your findings, if available\./i
+      new RegExp(
+        'specify the name of the forum \\(journal, scientific conference, blog etc\\.\\) ' +
+          'through which you will disseminate your findings, if available\\.',
+        'i'
+      )
     );
     await user.type(otherDisseminateResearchText, validInput);
 
