@@ -1093,50 +1093,42 @@ describe('WorkspaceEdit', () => {
 
   it('should show user provided text when they not granting billing scope when editing workspace', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    let billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
+    renderComponent();
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 4 options: Free tier, user's billing account, workspace billing account
-    expect(billingDropDown.props().value).toEqual('billing-account');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'billing-account',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'User Provided Billing Account',
-    ]);
+    expect(
+      await screen.findByDisplayValue(USER_PROVIDED_BILLING_OPTION_REGEX)
+    ).toBeInTheDocument();
 
-    // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
-    // real billing accounts user has access to.
-    mockHasBillingScope.mockImplementation(() => true);
-    wrapper
-      .find('[data-test-id="billing-dropdown-div"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').first();
+    // Open dropdown, this triggers updating billing options
+    await user.click(screen.getByTestId('billing-dropdown'));
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props().value).toEqual('billing-account');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-      'billing-account',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-      'User Billing',
-      'User Provided Billing Account',
-    ]);
+
+    // Close the dropdown in order to allow the dropdown to update?
+    await user.click(screen.getByTestId('billing-dropdown'));
+
+    expect(
+      screen.getAllByRole('option', {
+        name: FREE_TIER_OPTION_REGEX,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('option', {
+        name: USER_BILLING_OPTION_REGEX,
+        hidden: true,
+      })
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getAllByRole('option', {
+        name: USER_PROVIDED_BILLING_OPTION_REGEX,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
   });
   it('Should trim workspace name', async () => {
     const wrapper = component();
