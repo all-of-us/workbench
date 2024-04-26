@@ -44,13 +44,11 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      <div>
-        {useAppListIcon ? (
-          <KebabCircleButton {...{ disabled, title }} />
-        ) : (
-          <SnowmanButton {...{ disabled, title }} />
-        )}
-      </div>
+      {useAppListIcon ? (
+        <KebabCircleButton {...{ disabled, title }} />
+      ) : (
+        <SnowmanButton {...{ disabled, title }} />
+      )}
     </PopupTrigger>
   );
 };
