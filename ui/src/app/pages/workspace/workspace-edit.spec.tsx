@@ -221,7 +221,7 @@ describe('WorkspaceEdit', () => {
   it('displays workspaces edit page', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
     renderComponent();
-    await screen.findByText('Edit workspace');
+    await screen.findByText(/edit workspace/i);
 
     // Ensure the 'drug development' checkbox is checked when editing.
     const drugDevelopmentCheckbox: HTMLInputElement = screen.getByTestId(
