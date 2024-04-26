@@ -974,6 +974,8 @@ describe('WorkspaceEdit', () => {
 
     // Open dropdown, this triggers updating billing options
     await user.click(screen.getByTestId('billing-dropdown'));
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
+
     // Close the dropdown in order to allow the dropdown to update?
     await user.click(screen.getByTestId('billing-dropdown'));
 
