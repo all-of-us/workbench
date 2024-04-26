@@ -21,9 +21,9 @@ export const ResourceActionsMenu = (props: {
   actions: ResourceAction[];
   title: string;
   disabled?: boolean;
-  useAppListIcon?: boolean;
+  useAppFilesListIcon?: boolean;
 }) => {
-  const { actions, title, disabled, useAppListIcon } = props;
+  const { actions, title, disabled, useAppFilesListIcon } = props;
   return (
     <PopupTrigger
       data-test-id='resource-card-menu'
@@ -44,7 +44,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {useAppListIcon ? (
+      {useAppFilesListIcon ? (
         <KebabCircleButton {...{ disabled, title }} />
       ) : (
         <SnowmanButton {...{ disabled, title }} />

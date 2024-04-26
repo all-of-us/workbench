@@ -39,7 +39,7 @@ interface Props
     WithErrorModalProps,
     WithSpinnerOverlayProps {
   disableDuplicate: boolean;
-  useAppListIcon?: boolean;
+  useAppFilesListIcon: boolean;
 }
 
 interface State {
@@ -177,12 +177,8 @@ export const NotebookActionMenu = fp.flow(
     }
 
     render() {
-      const {
-        resource,
-        onUpdate,
-        existingNameList,
-        useAppListIcon = false,
-      } = this.props;
+      const { resource, onUpdate, existingNameList, useAppFilesListIcon } =
+        this.props;
       const actions = this.actions;
       const oldName = getDisplayName(resource);
       return (
@@ -220,7 +216,7 @@ export const NotebookActionMenu = fp.flow(
             />
           )}
           <ResourceActionsMenu
-            {...{ useAppListIcon, actions }}
+            {...{ useAppFilesListIcon, actions }}
             title='Notebook Action Menu'
             disabled={resource.adminLocked}
           />

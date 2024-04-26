@@ -150,7 +150,7 @@ export const AppFilesList = withCurrentWorkspace()(
         <NotebookActionMenu
           {...{ workspace }}
           resource={convertToResources([row], props.workspace)[0]}
-          useApplistIcon={true}
+          useAppFilesListIcon={true}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />

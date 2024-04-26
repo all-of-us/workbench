@@ -42,7 +42,11 @@ export const ResourceListActionMenu = (props: Props) => {
     [
       isNotebook(resource),
       () => (
-        <NotebookActionMenu {...props} disableDuplicate={inactiveBilling} />
+        <NotebookActionMenu
+          {...props}
+          disableDuplicate={inactiveBilling}
+          useAppFilesListIcon={false}
+        />
       ),
     ]
   );
