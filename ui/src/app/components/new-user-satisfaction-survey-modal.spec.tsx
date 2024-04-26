@@ -86,21 +86,19 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
-  it('should disable the submit button if additional info exceeds the max length', () => {
+  it('should disable the submit button if additional info exceeds the max length', async () => {
     setNewUserSatisfactionSurveyData(
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS + 1)
     );
-    let component = renderTestComponent();
+    const component = renderTestComponent();
     expectButtonElementDisabled(getSubmitButton(component));
-    component.unmount();
 
     setNewUserSatisfactionSurveyData(
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS)
     );
-    component = renderTestComponent();
-    expectButtonElementEnabled(getSubmitButton(component));
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
   it('should disable the submit button while awaiting submission response', async () => {
