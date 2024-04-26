@@ -80,6 +80,7 @@ const WORKSPACE_NAME_TEXT = 'This is a text with space';
 const FREE_TIER_OPTION_REGEX =
   /use all of us initial credits \- \$33\.33 left/i;
 const USER_BILLING_OPTION_REGEX = /user billing/i;
+const USER_PROVIDED_BILLING_OPTION_REGEX = /user provided billing account/i;
 
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
@@ -1056,29 +1057,38 @@ describe('WorkspaceEdit', () => {
   it('should show User Provided Billing Account when user does not have permission on the billing account workspace is using', async () => {
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Edit;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    const billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
+    renderComponent();
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 3 options: Free tier, user's billing account, workspace billing account
-    expect(billingDropDown.props().value).toEqual('billing-account');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-      'billing-account',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-      'User Billing',
-      'User Provided Billing Account',
-    ]);
+    expect(
+      await screen.findByDisplayValue(USER_PROVIDED_BILLING_OPTION_REGEX)
+    ).toBeInTheDocument();
+
+    // Need to open the dropdown to view the billing options
+    await user.click(screen.getByTestId('billing-dropdown'));
+
+    expect(
+      screen.getAllByRole('option', {
+        name: FREE_TIER_OPTION_REGEX,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('option', {
+        name: USER_BILLING_OPTION_REGEX,
+        hidden: true,
+      })
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getAllByRole('option', {
+        name: USER_PROVIDED_BILLING_OPTION_REGEX,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
   });
 
   it('should show user provided text when they not granting billing scope when editing workspace', async () => {
