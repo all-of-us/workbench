@@ -943,17 +943,15 @@ describe('WorkspaceEdit', () => {
     workspaceEditMode = WorkspaceEditMode.Create;
     renderComponent();
 
-    const billingDropDown = (await screen.findByTestId(
-      'billing-dropdown'
-    )) as HTMLSelectElement;
-
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
 
     const freeTierOptionText =
       /use all of us initial credits \- \$33\.33 left/i;
     const userBillingOptionText = 'User Billing';
 
-    expect(screen.queryByDisplayValue(freeTierOptionText)).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue(freeTierOptionText)
+    ).toBeInTheDocument();
 
     // PrimeReact dropdowns are hidden by default, so we need to check for the hidden attribute
     // Options are presented in the DOM as both option and li tags
@@ -996,24 +994,32 @@ describe('WorkspaceEdit', () => {
   it('should show free tier user account and user-billing when user granted billing scope', async () => {
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Create;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
+    const freeTierOptionText =
+      /use all of us initial credits \- \$33\.33 left/i;
+    const userBillingOptionText = 'User Billing';
 
-    expect(billingDropDown.props().value).toEqual('free-tier');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-      'zUser Billing',
-    ]);
+    expect(
+      await screen.findByDisplayValue(freeTierOptionText)
+    ).toBeInTheDocument();
+
+    // Need to open the dropdown to view the billing options
+    await user.click(screen.getByTestId('billing-dropdown'));
+
+    expect(
+      screen.getAllByRole('option', {
+        name: freeTierOptionText,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('option', {
+        name: userBillingOptionText,
+        hidden: true,
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show free tier user account correctly when usage is undefined', async () => {
