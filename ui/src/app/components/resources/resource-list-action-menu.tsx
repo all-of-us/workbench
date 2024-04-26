@@ -25,7 +25,7 @@ export interface CommonActionMenuProps {
 interface Props extends CommonActionMenuProps {
   workspace: WorkspaceData;
 }
-export const ResourceActionMenu = (props: Props) => {
+export const ResourceListActionMenu = (props: Props) => {
   const { resource } = props;
 
   const inactiveBilling =

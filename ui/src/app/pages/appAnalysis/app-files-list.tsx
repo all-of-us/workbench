@@ -149,10 +149,9 @@ export const AppFilesList = withCurrentWorkspace()(
     const displayMenu = (row: FileDetail) => {
       return (
         <NotebookActionMenu
+          {...{ workspace }}
           resource={convertToResources([row], props.workspace)[0]}
-          workspace
-          menuOnly
-          menuButtonComponentOverride={KebabCircleButton}
+          useApplistIcon={true}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />

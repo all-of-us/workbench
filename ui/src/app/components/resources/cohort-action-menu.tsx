@@ -6,10 +6,10 @@ import { DataSet } from 'generated/fetch';
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -73,7 +73,7 @@ export const CohortActionMenu = fp.flow(
       );
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {

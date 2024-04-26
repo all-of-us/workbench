@@ -13,9 +13,9 @@ import { stubDataSet } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import { ResourceActionMenu } from './resource-action-menu';
+import { ResourceListActionMenu } from './resource-list-action-menu';
 
-describe(ResourceActionMenu.name, () => {
+describe(ResourceListActionMenu.name, () => {
   beforeEach(() => {
     serverConfigStore.set({
       config: { gsuiteDomain: '' },
@@ -30,7 +30,7 @@ describe(ResourceActionMenu.name, () => {
 
     const { getByTestId } = render(
       <MemoryRouter>
-        <ResourceActionMenu
+        <ResourceListActionMenu
           resource={testCohort}
           workspace={workspaceDataStub}
           existingNameList={[]}
@@ -52,7 +52,7 @@ describe(ResourceActionMenu.name, () => {
 
     const { getByTestId } = render(
       <MemoryRouter>
-        <ResourceActionMenu
+        <ResourceListActionMenu
           resource={testDataSet}
           workspace={workspaceDataStub}
           existingNameList={[]}
@@ -83,7 +83,7 @@ describe(ResourceActionMenu.name, () => {
 
     const { getByTestId } = render(
       <MemoryRouter>
-        <ResourceActionMenu
+        <ResourceListActionMenu
           resource={testDataSet}
           workspace={workspaceDataStub}
           existingNameList={[]}

@@ -14,9 +14,9 @@ import {
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
+} from 'app/components/resources/resource-actions-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -148,7 +148,7 @@ export const TanagraResourceList = fp.flow(
     }
   };
 
-  const actions = (resource): Action[] => {
+  const actions = (resource): ResourceAction[] => {
     return [
       {
         icon: 'trash',

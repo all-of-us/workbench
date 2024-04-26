@@ -14,9 +14,10 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { workspaceDataStub } from '../../../testing/stubs/workspaces';
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
-import { ResourceActionMenu } from 'app/components/resources/resource-action-menu';
+import { ResourceListActionMenu } from 'app/components/resources/resource-list-action-menu';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -157,11 +158,13 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
                 {
                   resource: r,
                   workspace,
-                  menu: ResourceActionMenu(
-                    r,
-                    workspace,
-                    resourceTypeNameMap.get(getType(r)),
-                    props.onUpdate
+                  menu: (
+                    <ResourceListActionMenu
+                      {...{ workspace }}
+                      resource={r}
+                      existingNameList={resourceTypeNameMap.get(getType(r))}
+                      onUpdate={props.onUpdate}
+                    />
                   ),
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),

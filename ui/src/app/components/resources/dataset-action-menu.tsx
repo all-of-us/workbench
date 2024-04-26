@@ -6,10 +6,10 @@ import { PrePackagedConceptSetEnum } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -70,7 +70,7 @@ export const DatasetActionMenu = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource, inactiveBilling } = this.props;
       const enableExtraction = (
         resource.dataSet.prePackagedConceptSet || []

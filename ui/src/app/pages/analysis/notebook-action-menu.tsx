@@ -6,10 +6,10 @@ import { CopyRequest } from 'generated/fetch';
 import { CopyModal } from 'app/components/copy-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -39,7 +39,7 @@ interface Props
     WithErrorModalProps,
     WithSpinnerOverlayProps {
   disableDuplicate: boolean;
-  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
+  useAppListIcon?: boolean;
 }
 
 interface State {
@@ -61,7 +61,7 @@ export const NotebookActionMenu = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -181,7 +181,7 @@ export const NotebookActionMenu = fp.flow(
         resource,
         onUpdate,
         existingNameList,
-        menuButtonComponentOverride,
+        useAppListIcon = false,
       } = this.props;
       const actions = this.actions;
       const oldName = getDisplayName(resource);
@@ -220,7 +220,7 @@ export const NotebookActionMenu = fp.flow(
             />
           )}
           <ResourceActionsMenu
-            {...{ menuButtonComponentOverride, actions }}
+            {...{ useAppListIcon, actions }}
             menuButtonTitle='Notebook Action Menu'
             disabled={resource.adminLocked}
           />
