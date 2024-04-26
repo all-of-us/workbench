@@ -20,7 +20,6 @@ public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect 
     super.initializeFunctionRegistry(functionContributions);
     BasicTypeRegistry basicTypeRegistry =
         functionContributions.getTypeConfiguration().getBasicTypeRegistry();
-    SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
 
     // Define matchConcept to use "match(<concept>.concept_name, <concept>.concept_code,
     // <concept>.vocabulary_id,
