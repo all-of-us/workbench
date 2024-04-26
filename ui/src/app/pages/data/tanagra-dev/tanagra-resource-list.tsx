@@ -181,7 +181,12 @@ export const TanagraResourceList = fp.flow(
                 {
                   resource: r,
                   workspace,
-                  menu: <ResourceActionsMenu actions={actions(r)} />,
+                  menu: (
+                    <ResourceActionsMenu
+                      actions={actions(r)}
+                      title={`${getTypeString(r)} Action Menu `}
+                    />
+                  ),
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
                   lastModifiedForSorting: r.lastModifiedEpochMillis,

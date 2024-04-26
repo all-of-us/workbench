@@ -158,7 +158,11 @@ export const CohortReviewListItem = fp.flow(
             }}
           >
             <div style={{ height: '50%', textAlign: 'right' }}>
-              <ResourceActionsMenu actions={actions()} disabled={readOnly} />
+              <ResourceActionsMenu
+                actions={actions()}
+                disabled={readOnly}
+                title='Cohort Review Item Action Menu'
+              />
             </div>
             {cohortModifiedTime > cohortReview.creationTime ? (
               <div style={{ color: colors.warning, padding: '0.375rem 0' }}>
