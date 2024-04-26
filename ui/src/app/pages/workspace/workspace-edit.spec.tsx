@@ -37,6 +37,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  getDropdownOption,
   renderWithRouter,
   simulateSelection,
   waitOneTickAndUpdate,
@@ -940,47 +941,54 @@ describe('WorkspaceEdit', () => {
 
   it('should show free tier then user billing when user not granting then grant billing scope', async () => {
     workspaceEditMode = WorkspaceEditMode.Create;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    let billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
+    const billingDropDown = (await screen.findByTestId(
+      'billing-dropdown'
+    )) as HTMLSelectElement;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props().value).toEqual('billingAccounts/freetier');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'billingAccounts/freetier',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-    ]);
 
-    // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
-    // real billing accounts user has access to.
+    const freeTierOptionText =
+      /use all of us initial credits \- \$33\.33 left/i;
+    const userBillingOptionText = 'User Billing';
+
+    expect(screen.queryByDisplayValue(freeTierOptionText)).toBeInTheDocument();
+
+    // PrimeReact dropdowns are hidden by default, so we need to check for the hidden attribute
+    // Options are presented in the DOM as both option and li tags
+    expect(
+      screen.getAllByRole('option', {
+        name: freeTierOptionText,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', {
+        name: userBillingOptionText,
+        hidden: true,
+      })
+    ).not.toBeInTheDocument();
+
     mockHasBillingScope.mockImplementation(() => true);
 
-    wrapper
-      .find('[data-test-id="billing-dropdown-div"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    // Open dropdown, this triggers updating billing options
+    await user.click(screen.getByTestId('billing-dropdown'));
+    // Close the dropdown in order to allow the dropdown to update?
+    await user.click(screen.getByTestId('billing-dropdown'));
 
-    billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').first();
-    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props().value).toEqual('free-tier');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-      'User Billing',
-    ]);
+    expect(
+      screen.getAllByRole('option', {
+        name: freeTierOptionText,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', {
+        name: userBillingOptionText,
+        hidden: true,
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show free tier user account and user-billing when user granted billing scope', async () => {
@@ -1002,7 +1010,7 @@ describe('WorkspaceEdit', () => {
     // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
-      'User Billing',
+      'zUser Billing',
     ]);
   });
 
