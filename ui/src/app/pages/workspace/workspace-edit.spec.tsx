@@ -999,6 +999,8 @@ describe('WorkspaceEdit', () => {
       await screen.findByDisplayValue(FREE_TIER_OPTION_REGEX)
     ).toBeInTheDocument();
 
+    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
+
     // Need to open the dropdown to view the billing options
     await user.click(screen.getByTestId('billing-dropdown'));
 
