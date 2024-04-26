@@ -161,7 +161,7 @@ export const CohortReviewListItem = fp.flow(
               <ResourceActionsMenu
                 actions={actions()}
                 disabled={readOnly}
-                title='Cohort Review Item Action Menu'
+                title='Cohort Review Action Menu'
               />
             </div>
             {cohortModifiedTime > cohortReview.creationTime ? (
