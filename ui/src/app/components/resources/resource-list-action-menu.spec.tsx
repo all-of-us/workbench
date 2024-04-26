@@ -1,13 +1,13 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubDataSet } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
@@ -28,15 +28,13 @@ describe(ResourceListActionMenu.name, () => {
       cohort: exampleCohortStubs[0],
     } as WorkspaceResource;
 
-    const { getByTitle } = render(
-      <MemoryRouter>
-        <ResourceListActionMenu
-          resource={testCohort}
-          workspace={workspaceDataStub}
-          existingNameList={[]}
-          onUpdate={async () => {}}
-        />
-      </MemoryRouter>
+    const { getByTitle } = renderWithRouter(
+      <ResourceListActionMenu
+        resource={testCohort}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     expect(getByTitle('Cohort Action Menu')).toBeInTheDocument();
   });
@@ -50,15 +48,13 @@ describe(ResourceListActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const { getByTitle, getByText, queryByText } = render(
-      <MemoryRouter>
-        <ResourceListActionMenu
-          resource={testDataSet}
-          workspace={workspaceDataStub}
-          existingNameList={[]}
-          onUpdate={async () => {}}
-        />
-      </MemoryRouter>
+    const { getByTitle, getByText, queryByText } = renderWithRouter(
+      <ResourceListActionMenu
+        resource={testDataSet}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     fireEvent.click(getByTitle('Dataset Action Menu'));
     expect(getByText('Export to Notebook')).toBeInTheDocument();
@@ -77,15 +73,13 @@ describe(ResourceListActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const { getByTitle, getByText, queryByText } = render(
-      <MemoryRouter>
-        <ResourceListActionMenu
-          resource={testDataSet}
-          workspace={workspaceDataStub}
-          existingNameList={[]}
-          onUpdate={async () => {}}
-        />
-      </MemoryRouter>
+    const { getByTitle, getByText, queryByText } = renderWithRouter(
+      <ResourceListActionMenu
+        resource={testDataSet}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     fireEvent.click(getByTitle('Dataset Action Menu'));
     expect(getByText('Export to Notebook')).toBeInTheDocument();
