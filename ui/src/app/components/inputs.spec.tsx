@@ -1,69 +1,74 @@
 import * as React from 'react';
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+
+import { fireEvent, render } from '@testing-library/react';
 
 import { CheckBox, TextAreaWithLengthValidationMessage } from './inputs';
 
 const initialText = 'Hey';
 
-function findInput(
-  wrapper: ShallowWrapper | ReactWrapper
-): ShallowWrapper | ReactWrapper {
-  return wrapper.find('input[type="checkbox"]').first();
-}
-
-function clickCheckbox(wrapper: ShallowWrapper | ReactWrapper) {
-  const currentChecked = findInput(wrapper).prop('checked');
-  findInput(wrapper).simulate('change', {
-    target: { checked: !currentChecked },
-  });
-}
-
 describe('inputs', () => {
   it('click causes DOM checked state to change', () => {
-    // When the checkbox manages its own state, a click should cause the input
-    // to change.
-    const wrapper = shallow(<CheckBox label='asdf' />);
-    expect(findInput(wrapper).prop('checked')).toEqual(false);
-    clickCheckbox(wrapper);
-    wrapper.update();
-    expect(findInput(wrapper).prop('checked')).toEqual(true);
+    // When the checkbox manages its own state, a click should cause the input to change.
+    const { getByRole } = render(<CheckBox label='asdf' />);
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
+
+    expect(checkbox.checked).toEqual(false);
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toEqual(true);
   });
 
-  it('uses "checked" to set initial state', () => {
-    const wrapper = shallow(<CheckBox checked={true} />);
-    expect(findInput(wrapper).prop('checked')).toEqual(true);
+  it('uses "checked" to set initial state - true', () => {
+    const { getByRole } = render(<CheckBox checked={true} />);
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
+    expect(checkbox.checked).toEqual(true);
+  });
+
+  it('uses "checked" to set initial state - false', () => {
+    const { getByRole } = render(<CheckBox checked={false} />);
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
+    expect(checkbox.checked).toEqual(false);
   });
 
   it('uses props only when manageOwnState=false', () => {
     // This pattern is disfavored but still exists in the RW codebase, where
     // the caller of CheckBox provides "checked" as a prop and handles updates
     // by reacting to onChange callbacks.
-    const wrapper = mount(<CheckBox checked={true} manageOwnState={false} />);
-    expect(findInput(wrapper).prop('checked')).toEqual(true);
+    const { getByRole, rerender } = render(
+      <CheckBox checked={true} manageOwnState={false} />
+    );
+    const checkbox = getByRole('checkbox') as HTMLInputElement;
+
+    expect(checkbox.checked).toEqual(true);
+
     // A user click shouldn't directly affect the checked state.
-    clickCheckbox(wrapper);
-    expect(findInput(wrapper).prop('checked')).toEqual(true);
-    // Changing the props will change the checked state.
-    wrapper.setProps({ checked: false } as any);
-    expect(findInput(wrapper).prop('checked')).toEqual(false);
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toEqual(true);
+
+    rerender(<CheckBox checked={false} manageOwnState={false} />);
+    expect(checkbox.checked).toEqual(false);
   });
 
   it('calls onChange with target checked state', () => {
-    let checked = null;
-    const wrapper = shallow(
-      <CheckBox onChange={(value) => (checked = value)} />
+    let externalValue = null;
+    const { getByRole } = render(
+      <CheckBox onChange={(value) => (externalValue = value)} />
     );
-    clickCheckbox(wrapper);
-    expect(checked).toEqual(true);
+    const checkbox = getByRole('checkbox');
+
+    fireEvent.click(checkbox);
+    expect(externalValue).toEqual(true);
+
+    fireEvent.click(checkbox);
+    expect(externalValue).toEqual(false);
   });
 
   it('renders with plain-text label', () => {
-    const wrapper = mount(<CheckBox label='hello' />);
-    expect(wrapper).toBeTruthy();
+    const { getByText } = render(<CheckBox label='hello' />);
+    expect(getByText('hello')).toBeTruthy();
   });
 
   it('renders with HTML label', () => {
-    const wrapper = mount(
+    const { getByRole } = render(
       <CheckBox
         label={
           <span>
@@ -72,39 +77,40 @@ describe('inputs', () => {
         }
       />
     );
-    expect(wrapper).toBeTruthy();
+    expect(getByRole('checkbox', { name: 'Hello, world' })).toBeTruthy();
   });
 
-  it('Shows characters remaining warning ', () => {
-    let wrapper = mount(
+  it('Shows characters remaining warning', () => {
+    const { getByTestId } = render(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
-        initialText={initialText}
+        id='test'
+        initialText='Hey'
         maxCharacters={5}
         onChange={() => {}}
       />
     );
     // Length of initialText (Hey): 3, characters remaining 5 - 3
-    expect(
-      wrapper.find('[data-test-id="characterLimit"]').first().text()
-    ).toEqual(`2 characters remaining`);
+    expect(getByTestId('characterLimit').textContent).toEqual(
+      '2 characters remaining'
+    );
+  });
 
-    wrapper = mount(
+  it('Shows characters remaining warning for 0', () => {
+    const { getByTestId } = render(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
-        initialText={initialText + 'me'}
-        maxCharacters={5}
+        id='test'
+        initialText='Hey'
+        maxCharacters={3}
         onChange={() => {}}
       />
     );
-
-    expect(
-      wrapper.find('[data-test-id="characterLimit"]').first().text()
-    ).toEqual(`0 characters remaining`);
+    expect(getByTestId('characterLimit').textContent).toEqual(
+      '0 characters remaining'
+    );
   });
 
   it('Shows characters over warning', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TextAreaWithLengthValidationMessage
         id={'test'}
         initialText={initialText + ' lets test'}
@@ -112,55 +118,54 @@ describe('inputs', () => {
         onChange={() => {}}
       />
     );
-
-    expect(
-      wrapper.find('[data-test-id="characterLimit"]').first().text()
-    ).toEqual('8 characters over');
+    expect(getByTestId('characterLimit').textContent).toEqual(
+      '8 characters over'
+    );
   });
 
-  it('Shows too short warning if text input is less the short characters', () => {
-    // No tooShortWarning props: should not show any warning
-    let wrapper = mount(
+  it('Shows too short warning if text input is less than tooShortWarningCharacters', () => {
+    const { getByTestId, getByRole } = render(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
-        initialText={initialText}
+        id='test'
+        initialText='Hey'
         maxCharacters={15}
         onChange={() => {}}
-      />
-    );
-
-    wrapper.find('textarea').simulate('blur');
-    expect(wrapper.find('[data-test-id="warning"]').length).toBe(0);
-
-    // Props for tooShortWarning should show tooShortWarning if the text length is less than tooShortWarningCharacters
-    wrapper = mount(
-      <TextAreaWithLengthValidationMessage
-        id={'test'}
-        initialText={initialText}
-        maxCharacters={15}
-        onChange={() => {}}
-        tooShortWarning={'Testing too short'}
+        tooShortWarning='Testing too short'
         tooShortWarningCharacters={5}
       />
     );
-    wrapper.find('textarea').simulate('blur');
-    expect(wrapper.find('[data-test-id="warning"]').length).toBe(1);
-    expect(wrapper.find('[data-test-id="warning"]').first().text()).toBe(
-      'Testing too short'
-    );
 
-    // Props for tooShortWarning should not show any warning if the text length is more than tooShortWarningCharacters
-    wrapper = mount(
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    expect(getByTestId('warning').textContent).toBe('Testing too short');
+  });
+
+  it('Does not show the too short warning when there are enough characters', () => {
+    const { getByRole, queryByTestId } = render(
       <TextAreaWithLengthValidationMessage
-        id={'test'}
+        id='test'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
-        tooShortWarning={'Testing too short'}
+        tooShortWarning='Testing too short'
         tooShortWarningCharacters={2}
       />
     );
-    wrapper.find('textarea').simulate('blur');
-    expect(wrapper.find('[data-test-id="warning"]').length).toBe(0);
+
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    expect(queryByTestId('warning')).toBeNull();
+  });
+
+  it('Does not show the too short warning when tooShortWarning is not set', () => {
+    const { getByRole, queryByTestId } = render(
+      <TextAreaWithLengthValidationMessage
+        id='test'
+        initialText={initialText}
+        maxCharacters={15}
+        onChange={() => {}}
+      />
+    );
+
+    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    expect(queryByTestId('warning')).toBeNull();
   });
 });

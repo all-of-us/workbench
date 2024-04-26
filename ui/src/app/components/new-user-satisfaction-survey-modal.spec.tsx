@@ -1,5 +1,6 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 
 import {
   CreateNewUserSatisfactionSurvey,
@@ -7,10 +8,19 @@ import {
   SurveysApi,
 } from 'generated/fetch';
 
-import { ErrorMessage } from 'app/components/inputs';
+import {
+  fireEvent,
+  render,
+  RenderResult,
+  waitFor,
+} from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { createNewUserSatisfactionSurveyStore } from 'app/utils/stores';
 
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
 import { SurveysApiStub } from 'testing/stubs/surveys-api-stub';
 
 import {
@@ -47,81 +57,94 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     setValidNewUserSatisfactionSurveyData();
   });
 
-  const createShallowWrapper = ({
+  const renderTestComponent = ({
     onCancel = () => {},
     onSubmitSuccess = () => {},
     createSurveyApiCall = () => Promise.resolve(),
   } = {}) => {
-    return shallow(
+    return render(
       <NewUserSatisfactionSurveyModal
-        onCancel={onCancel}
-        onSubmitSuccess={onSubmitSuccess}
-        createSurveyApiCall={createSurveyApiCall}
+        {...{ onCancel, onSubmitSuccess, createSurveyApiCall }}
       />
     );
   };
 
-  const findSubmitButton = (wrapper: ShallowWrapper) => {
-    return wrapper.find({ children: 'Submit' });
+  const getSubmitButton = (component: RenderResult) => {
+    return component.getByRole('button', { name: 'submit' });
   };
 
-  it('should disable the submit button until a satisfaction value is selected', () => {
+  it('should disable the submit button until a satisfaction value is selected', async () => {
     setNewUserSatisfactionSurveyData('satisfaction', undefined);
-    expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
-    ).toBeTruthy();
+
+    const component = renderTestComponent();
+    expectButtonElementDisabled(getSubmitButton(component));
 
     setNewUserSatisfactionSurveyData(
       'satisfaction',
       NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
-    expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
-    ).toBeFalsy();
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
-  it('should disable the submit button if additional info exceeds the max length', () => {
+  it('should disable the submit button if additional info exceeds the max length', async () => {
     setNewUserSatisfactionSurveyData(
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS + 1)
     );
-    expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
-    ).toBeTruthy();
+    const component = renderTestComponent();
+    expectButtonElementDisabled(getSubmitButton(component));
 
     setNewUserSatisfactionSurveyData(
       'additionalInfo',
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS)
     );
-    expect(
-      findSubmitButton(createShallowWrapper()).prop('disabled')
-    ).toBeFalsy();
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
   it('should disable the submit button while awaiting submission response', async () => {
-    const wrapper = createShallowWrapper();
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeFalsy();
+    setNewUserSatisfactionSurveyData(
+      'satisfaction',
+      NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
+    );
 
-    const submitPromise = findSubmitButton(wrapper).prop('onClick')();
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeTruthy();
+    // Allows the createSurveyApiCall to remain unresolved until resolveSubmit is called.
+    let resolveSubmit;
+    const createSurveyApiCall: () => Promise<void> = () =>
+      new Promise((resolve) => {
+        resolveSubmit = resolve;
+      });
 
-    await submitPromise;
-    expect(findSubmitButton(wrapper).prop('disabled')).toBeFalsy();
+    const component = renderTestComponent({
+      createSurveyApiCall,
+    });
+
+    expectButtonElementEnabled(getSubmitButton(component));
+
+    fireEvent.click(getSubmitButton(component));
+    // the promise is not yet resolved, so the button should be disabled
+    expectButtonElementDisabled(getSubmitButton(component));
+
+    resolveSubmit();
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
   it('should display an error on API failure and remove it on API success', async () => {
     const createSurveyApiCall = jest.fn();
-    const wrapper = createShallowWrapper({
+    const component = renderTestComponent({
       createSurveyApiCall,
     });
-    expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
+
+    const queryForError = () =>
+      component.queryByText(/There was an error processing your request/);
+
+    expect(queryForError()).not.toBeInTheDocument();
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.reject());
-    await findSubmitButton(wrapper).prop('onClick')();
-    expect(wrapper.find(ErrorMessage).exists()).toBeTruthy();
+    fireEvent.click(getSubmitButton(component));
+    await waitFor(() => expect(queryForError()).toBeInTheDocument());
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.resolve());
-    await findSubmitButton(wrapper).prop('onClick')();
-    expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
+    fireEvent.click(getSubmitButton(component));
+    await waitFor(() => expect(queryForError()).not.toBeInTheDocument());
   });
 });
