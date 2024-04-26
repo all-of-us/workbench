@@ -9,7 +9,7 @@ import {
   NAME_COLUMN_NUMBER,
   RESOURCE_TYPE_COLUMN_NUMBER,
   resourceTableColumns,
-} from 'app/components/resource-list.spec';
+} from 'app/components/resources/resource-list.spec';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 

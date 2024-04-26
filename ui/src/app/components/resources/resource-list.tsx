@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CSSProperties, useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -16,11 +16,7 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
-import { renderResourceCard } from 'app/components/render-resource-card';
-import {
-  ResourceNavigation,
-  StyledResourceType,
-} from 'app/components/resource-card';
+import { renderResourceMenu } from 'app/components/resources/render-resource-menu';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -34,6 +30,9 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
+
+import { ResourceNavigation } from './resource-navigation';
+import { StyledResourceType } from './styled-resource-type';
 
 const styles = reactStyles({
   column: {
@@ -77,9 +76,9 @@ const WorkspaceNavigation = (props: NavProps) => {
     : dataTabPath(namespace, id);
   return (
     <Clickable>
-      <RouterLink to={url} style={style} data-test-id='workspace-navigation'>
+      <Link to={url} style={style} data-test-id='workspace-navigation'>
         {name}
-      </RouterLink>
+      </Link>
     </Clickable>
   );
 };
@@ -99,7 +98,7 @@ interface TableData {
 interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
-  onUpdate: Function;
+  onUpdate: () => Promise<void>;
   workspaces: WorkspaceData[];
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
@@ -122,19 +121,6 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
     return resourceTypeNameListMap;
   };
   const resourceTypeNameMap = getResourceMap();
-
-  const renderResourceMenu = (
-    resource: WorkspaceResource,
-    workspace: WorkspaceData
-  ) => {
-    return renderResourceCard({
-      resource,
-      workspace,
-      menuOnly: true,
-      existingNameList: resourceTypeNameMap.get(getType(resource)),
-      onUpdate: () => props.onUpdate(),
-    });
-  };
 
   const getCdrVersionName = (r: WorkspaceResource) => {
     const { cdrVersionTiersResponse } = props;
@@ -171,7 +157,12 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
                 {
                   resource: r,
                   workspace,
-                  menu: renderResourceMenu(r, workspace),
+                  menu: renderResourceMenu(
+                    r,
+                    workspace,
+                    resourceTypeNameMap.get(getType(r)),
+                    props.onUpdate
+                  ),
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
                   lastModifiedForSorting: r.lastModifiedEpochMillis,

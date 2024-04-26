@@ -12,7 +12,7 @@ import { cond } from '@terra-ui-packages/core-utils';
 import { AlertWarning } from 'app/components/alert';
 import { SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
-import { ResourceList } from 'app/components/resource-list';
+import { ResourceList } from 'app/components/resources/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { withCdrVersions } from 'app/utils';

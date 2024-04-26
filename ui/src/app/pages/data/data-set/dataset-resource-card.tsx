@@ -2,18 +2,14 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 import { faDna } from '@fortawesome/free-solid-svg-icons';
 
-import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
+import { PrePackagedConceptSetEnum } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -30,7 +26,13 @@ import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extracti
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { NavigationProps } from 'app/utils/navigation';
-import { getDescription, getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDescription,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -38,16 +40,13 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { ExportDatasetModal } from './export-dataset-modal';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends ResourceActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps,
     NavigationProps {
-  resource: WorkspaceResource;
   workspace: WorkspaceData;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
   inactiveBilling: boolean;
-  menuOnly: boolean;
 }
 
 interface State {
@@ -186,7 +185,7 @@ export const DatasetResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, workspace, menuOnly } = this.props;
+      const { resource, workspace } = this.props;
       return (
         <React.Fragment>
           {this.state.showExportToNotebookModal && (
@@ -218,14 +217,10 @@ export const DatasetResourceCard = fp.flow(
               existingNames={this.props.existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+          />
         </React.Fragment>
       );
     }

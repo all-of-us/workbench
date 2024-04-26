@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { CopyRequest, WorkspaceResource } from 'generated/fetch';
+import { CopyRequest } from 'generated/fetch';
 
 import { CopyModal } from 'app/components/copy-modal';
 import { RenameModal } from 'app/components/rename-modal';
@@ -9,11 +9,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,18 +25,20 @@ import {
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends ResourceActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
-  menuOnly: boolean;
   menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
 }
 
@@ -181,7 +179,6 @@ export const NotebookActionMenu = fp.flow(
     render() {
       const {
         resource,
-        menuOnly,
         onUpdate,
         existingNameList,
         menuButtonComponentOverride,
@@ -222,15 +219,11 @@ export const NotebookActionMenu = fp.flow(
               existingNames={existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              {...{ menuButtonComponentOverride, actions }}
-              menuButtonTitle='Notebook Action Menu'
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard {...{ resource, actions }} />
-          )}
+          <ResourceActionsMenu
+            {...{ menuButtonComponentOverride, actions }}
+            menuButtonTitle='Notebook Action Menu'
+            disabled={resource.adminLocked}
+          />
         </React.Fragment>
       );
     }
