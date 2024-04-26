@@ -170,7 +170,6 @@ describe('WorkspaceEdit', () => {
     renderComponent();
     await screen.findByText('Create a new workspace');
 
-    // Ensure the 'drug development' checkbox is not checked when creating.
     const researchPurposeCheckbox: HTMLInputElement = screen.getByTestId(
       'researchPurpose-checkbox'
     ) as HTMLInputElement;
