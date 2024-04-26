@@ -1018,6 +1018,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show free tier user account correctly when usage is undefined', async () => {
+    const freeTierRegex = /use all of us initial credits \- \$34\.56 left/i;
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Create;
     profileStore.set({
@@ -1028,24 +1029,26 @@ describe('WorkspaceEdit', () => {
       },
     });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    renderComponent();
 
-    const billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
+    expect(await screen.findByDisplayValue(freeTierRegex)).toBeInTheDocument();
 
-    expect(billingDropDown.props().value).toEqual('free-tier');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $34.56 left',
-      'User Billing',
-    ]);
+    // Need to open the dropdown to view the billing options
+    await user.click(screen.getByTestId('billing-dropdown'));
+
+    expect(
+      screen.getAllByRole('option', {
+        name: freeTierRegex,
+        hidden: true,
+      })[0]
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('option', {
+        name: USER_BILLING_OPTION_REGEX,
+        hidden: true,
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
