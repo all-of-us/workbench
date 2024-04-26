@@ -70,6 +70,11 @@ const FREE_TIER_OPTION_REGEX =
   /use all of us initial credits \- \$33\.33 left/i;
 const USER_BILLING_OPTION_REGEX = /user billing/i;
 const USER_PROVIDED_BILLING_OPTION_REGEX = /user provided billing account/i;
+const OTHER_DISSEMINATION_REGEX = new RegExp(
+  'specify the name of the forum \\(journal, scientific conference, blog etc\\.\\) ' +
+    'through which you will disseminate your findings, if available\\.',
+  'i'
+);
 
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
@@ -834,11 +839,7 @@ describe('WorkspaceEdit', () => {
     await user.click(otherDisseminationCheckbox);
     const validInput = fp.repeat(8, 'a');
     const otherDisseminateResearchText = screen.getByPlaceholderText(
-      new RegExp(
-        'specify the name of the forum \\(journal, scientific conference, blog etc\\.\\) ' +
-          'through which you will disseminate your findings, if available\\.',
-        'i'
-      )
+      OTHER_DISSEMINATION_REGEX
     );
     await user.type(otherDisseminateResearchText, validInput);
 
@@ -906,7 +907,7 @@ describe('WorkspaceEdit', () => {
     await user.click(otherDisseminationCheckbox);
     const validInput = fp.repeat(8, 'a');
     const otherDisseminateResearchText = screen.getByPlaceholderText(
-      /specify the name of the forum \(journal, scientific conference, blog etc\.\) through which you will disseminate your findings, if available\./i
+      OTHER_DISSEMINATION_REGEX
     );
     await user.type(otherDisseminateResearchText, validInput);
 
