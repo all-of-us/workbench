@@ -14,7 +14,6 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { workspaceDataStub } from '../../../testing/stubs/workspaces';
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { ResourceListActionMenu } from 'app/components/resources/resource-list-action-menu';
