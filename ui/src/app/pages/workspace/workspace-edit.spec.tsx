@@ -77,6 +77,9 @@ function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
 }
 
 const WORKSPACE_NAME_TEXT = 'This is a text with space';
+const FREE_TIER_OPTION_REGEX =
+  /use all of us initial credits \- \$33\.33 left/i;
+const USER_BILLING_OPTION_REGEX = /user billing/i;
 
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
@@ -945,25 +948,21 @@ describe('WorkspaceEdit', () => {
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
 
-    const freeTierOptionText =
-      /use all of us initial credits \- \$33\.33 left/i;
-    const userBillingOptionText = 'User Billing';
-
     expect(
-      await screen.findByDisplayValue(freeTierOptionText)
+      await screen.findByDisplayValue(FREE_TIER_OPTION_REGEX)
     ).toBeInTheDocument();
 
     // PrimeReact dropdowns are hidden by default, so we need to check for the hidden attribute
     // Options are presented in the DOM as both option and li tags
     expect(
       screen.getAllByRole('option', {
-        name: freeTierOptionText,
+        name: FREE_TIER_OPTION_REGEX,
         hidden: true,
       })[0]
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('option', {
-        name: userBillingOptionText,
+        name: USER_BILLING_OPTION_REGEX,
         hidden: true,
       })
     ).not.toBeInTheDocument();
@@ -979,13 +978,13 @@ describe('WorkspaceEdit', () => {
 
     expect(
       screen.getAllByRole('option', {
-        name: freeTierOptionText,
+        name: FREE_TIER_OPTION_REGEX,
         hidden: true,
       })[0]
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('option', {
-        name: userBillingOptionText,
+        name: USER_BILLING_OPTION_REGEX,
         hidden: true,
       })
     ).toBeInTheDocument();
@@ -996,12 +995,8 @@ describe('WorkspaceEdit', () => {
     workspaceEditMode = WorkspaceEditMode.Create;
     renderComponent();
 
-    const freeTierOptionText =
-      /use all of us initial credits \- \$33\.33 left/i;
-    const userBillingOptionText = 'User Billing';
-
     expect(
-      await screen.findByDisplayValue(freeTierOptionText)
+      await screen.findByDisplayValue(FREE_TIER_OPTION_REGEX)
     ).toBeInTheDocument();
 
     // Need to open the dropdown to view the billing options
@@ -1009,14 +1004,14 @@ describe('WorkspaceEdit', () => {
 
     expect(
       screen.getAllByRole('option', {
-        name: freeTierOptionText,
+        name: FREE_TIER_OPTION_REGEX,
         hidden: true,
       })[0]
     ).toBeInTheDocument();
 
     expect(
       screen.queryByRole('option', {
-        name: userBillingOptionText,
+        name: USER_BILLING_OPTION_REGEX,
         hidden: true,
       })
     ).toBeInTheDocument();
