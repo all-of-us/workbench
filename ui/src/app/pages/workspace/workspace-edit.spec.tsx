@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
 import {
@@ -62,8 +61,6 @@ import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-type AnyWrapper = ShallowWrapper | ReactWrapper;
-
 jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
     new Promise((resolve) =>
@@ -73,13 +70,6 @@ jest.mock('app/utils/project-billing-info', () => ({
 
 let mockHasBillingScope: jest.SpyInstance;
 let mockEnsureBillingScope: jest.SpyInstance;
-
-function getSaveButtonDisableMsg(wrapper: AnyWrapper, attributeName: string) {
-  return wrapper
-    .find('[data-test-id="workspace-save-btn"]')
-    .first()
-    .prop('disabled')[attributeName];
-}
 
 const WORKSPACE_NAME_TEXT = 'This is a text with space';
 const FREE_TIER_OPTION_REGEX =
@@ -93,19 +83,6 @@ describe('WorkspaceEdit', () => {
   let workspace: WorkspaceData;
   let workspaceEditMode: WorkspaceEditMode;
   let user: UserEvent;
-
-  const component = () => {
-    return mount(
-      <MemoryRouter>
-        <WorkspaceEdit
-          cancel={() => {}}
-          hideSpinner={() => {}}
-          showSpinner={() => {}}
-          workspaceEditMode={workspaceEditMode}
-        />
-      </MemoryRouter>
-    );
-  };
 
   const renderComponent = () => {
     return renderWithRouter(
