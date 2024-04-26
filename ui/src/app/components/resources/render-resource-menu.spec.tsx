@@ -25,8 +25,12 @@ describe(renderResourceMenu.name, () => {
   });
 
   it('does not render a menu for an invalid resource', () => {
+    // stubResource is only a base type for valid resources.
+    // To be valid, it needs exactly one of these to be defined:
+    // cohort, cohortReview, conceptSet, dataSet, notebook
+    const invalidResource: WorkspaceResource = stubResource;
     const menu = renderResourceMenu(
-      stubResource,
+      invalidResource,
       workspaceDataStub,
       [],
       async () => {}
