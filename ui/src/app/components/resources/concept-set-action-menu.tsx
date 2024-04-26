@@ -208,7 +208,6 @@ export const ConceptSetActionMenu = fp.flow(
             disabled={resource.adminLocked}
             title='Concept Set Action Menu'
           />
-          )
         </React.Fragment>
       );
     }
