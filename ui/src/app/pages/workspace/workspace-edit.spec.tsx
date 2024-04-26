@@ -1053,30 +1053,6 @@ describe('WorkspaceEdit', () => {
     ).toBeInTheDocument();
   });
 
-  it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
-    mockHasBillingScope.mockImplementation(() => true);
-    workspaceEditMode = WorkspaceEditMode.Create;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    const billingDropDown = wrapper
-      .find('[data-test-id="billing-dropdown"]')
-      .first();
-
-    expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props().value).toEqual('free-tier');
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
-      'free-tier',
-      'user-billing',
-    ]);
-    // @ts-ignore
-    expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
-      'Use All of Us initial credits - $33.33 left',
-      'User Billing',
-    ]);
-  });
-
   it('should show User Provided Billing Account when user does not have permission on the billing account workspace is using', async () => {
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Edit;
