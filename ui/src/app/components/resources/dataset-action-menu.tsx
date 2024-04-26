@@ -22,6 +22,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
+import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -36,8 +37,6 @@ import {
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-
-import { ExportDatasetModal } from './export-dataset-modal';
 
 interface Props
   extends CommonActionMenuProps,
@@ -55,7 +54,7 @@ interface State {
   showGenomicExtractionModal: boolean;
 }
 
-export const DatasetResourceCard = fp.flow(
+export const DatasetActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),

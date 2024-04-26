@@ -3,11 +3,11 @@ import * as React from 'react';
 import { BillingStatus, WorkspaceResource } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { CohortActionMenu } from 'app/components/resources/cohort-action-menu';
+import { CohortReviewActionMenu } from 'app/components/resources/cohort-review-action-menu';
+import { ConceptSetActionMenu } from 'app/components/resources/concept-set-action-menu';
+import { DatasetActionMenu } from 'app/components/resources/dataset-action-menu';
 import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
-import { CohortResourceCard } from 'app/pages/data/cohort/cohort-resource-card';
-import { CohortReviewResourceCard } from 'app/pages/data/cohort-review/cohort-review-resource-card';
-import { ConceptSetResourceCard } from 'app/pages/data/concept/concept-set-resource-card';
-import { DatasetResourceCard } from 'app/pages/data/data-set/dataset-resource-card';
 import {
   isCohort,
   isCohortReview,
@@ -32,12 +32,12 @@ export const ResourceActionMenu = (props: Props) => {
     resource.workspaceBillingStatus === BillingStatus.INACTIVE;
 
   return cond(
-    [isCohort(resource), () => <CohortResourceCard {...props} />],
-    [isCohortReview(resource), () => <CohortReviewResourceCard {...props} />],
-    [isConceptSet(resource), () => <ConceptSetResourceCard {...props} />],
+    [isCohort(resource), () => <CohortActionMenu {...props} />],
+    [isCohortReview(resource), () => <CohortReviewActionMenu {...props} />],
+    [isConceptSet(resource), () => <ConceptSetActionMenu {...props} />],
     [
       isDataSet(resource),
-      () => <DatasetResourceCard {...{ ...props, inactiveBilling }} />,
+      () => <DatasetActionMenu {...{ ...props, inactiveBilling }} />,
     ],
     [
       isNotebook(resource),

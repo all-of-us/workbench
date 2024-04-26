@@ -48,7 +48,7 @@ interface State {
   referencingDataSets: Array<DataSet>;
 }
 
-export const CohortResourceCard = fp.flow(
+export const CohortActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),

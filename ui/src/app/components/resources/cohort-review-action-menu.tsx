@@ -38,7 +38,7 @@ interface State {
   showRenameModal: boolean;
 }
 
-export const CohortReviewResourceCard = fp.flow(
+export const CohortReviewActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()

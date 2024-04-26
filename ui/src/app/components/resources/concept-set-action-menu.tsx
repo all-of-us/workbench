@@ -45,7 +45,7 @@ interface State {
   referencingDataSets: Array<DataSet>;
 }
 
-export const ConceptSetResourceCard = fp.flow(
+export const ConceptSetActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
