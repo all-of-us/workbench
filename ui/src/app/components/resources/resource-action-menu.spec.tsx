@@ -2,10 +2,10 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 
+import { fireEvent, render } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
@@ -16,52 +16,32 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { ResourceActionMenu } from './resource-action-menu';
 
 describe(ResourceActionMenu.name, () => {
-  const component = (card) => {
-    return mount(<MemoryRouter>{card}</MemoryRouter>);
-  };
-
   beforeEach(() => {
     serverConfigStore.set({
       config: { gsuiteDomain: '' },
     });
   });
 
-  it('does not render a menu for an invalid resource', () => {
-    // stubResource is only a base type for valid resources.
-    // To be valid, it needs exactly one of these to be defined:
-    // cohort, cohortReview, conceptSet, dataSet, notebook
-    const invalidResource: WorkspaceResource = stubResource;
-    const menu = (
-      <ResourceActionMenu
-        resource={invalidResource}
-        workspace={workspaceDataStub}
-        existingNameList={[]}
-        onUpdate={async () => {}}
-      />
-    );
-    expect(menu).not.toBeInTheDocument();
-  });
-
-  it('renders a Cohort menu', () => {
+  it('renders a Cohort menu', async () => {
     const testCohort = {
       ...stubResource,
       cohort: exampleCohortStubs[0],
     } as WorkspaceResource;
 
-    const menu = (
-      <ResourceActionMenu
-        resource={testCohort}
-        workspace={workspaceDataStub}
-        existingNameList={[]}
-        onUpdate={async () => {}}
-      />
+    const { getByTestId } = render(
+      <MemoryRouter>
+        <ResourceActionMenu
+          resource={testCohort}
+          workspace={workspaceDataStub}
+          existingNameList={[]}
+          onUpdate={async () => {}}
+        />
+      </MemoryRouter>
     );
-    const wrapper = component(menu);
-    expect(wrapper.exists()).toBeTruthy();
-    expect(wrapper.text()).toBe('');
+    expect(getByTestId('resource-card-menu')).toBeInTheDocument();
   });
 
-  it('renders a dataset menu', () => {
+  it('renders a dataset menu', async () => {
     const testDataSet = {
       ...stubResource,
       dataSet: {
@@ -70,24 +50,26 @@ describe(ResourceActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const menu = (
-      <ResourceActionMenu
-        resource={testDataSet}
-        workspace={workspaceDataStub}
-        existingNameList={[]}
-        onUpdate={async () => {}}
-      />
+    const { getByTestId } = render(
+      <MemoryRouter>
+        <ResourceActionMenu
+          resource={testDataSet}
+          workspace={workspaceDataStub}
+          existingNameList={[]}
+          onUpdate={async () => {}}
+        />
+      </MemoryRouter>
     );
-    const wrapper = component(menu);
-    wrapper
-      .find({ 'data-test-id': 'resource-card-menu' })
-      .first()
-      .simulate('click');
-    expect(wrapper.text()).toContain('Export to Notebook');
-    expect(wrapper.text()).not.toContain('Extract VCF Files');
+    fireEvent.click(getByTestId('resource-card-menu'));
+    expect(getByTestId('resource-card-menu')).toHaveTextContent(
+      'Export to Notebook'
+    );
+    expect(getByTestId('resource-card-menu')).not.toHaveTextContent(
+      'Extract VCF Files'
+    );
   });
 
-  it('renders a dataset menu, with WGS', () => {
+  it('renders a dataset menu, with WGS', async () => {
     const testDataSet = {
       ...stubResource,
       dataSet: {
@@ -99,20 +81,22 @@ describe(ResourceActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const menu = (
-      <ResourceActionMenu
-        resource={testDataSet}
-        workspace={workspaceDataStub}
-        existingNameList={[]}
-        onUpdate={async () => {}}
-      />
+    const { getByTestId } = render(
+      <MemoryRouter>
+        <ResourceActionMenu
+          resource={testDataSet}
+          workspace={workspaceDataStub}
+          existingNameList={[]}
+          onUpdate={async () => {}}
+        />
+      </MemoryRouter>
     );
-    const wrapper = component(menu);
-    wrapper
-      .find({ 'data-test-id': 'resource-card-menu' })
-      .first()
-      .simulate('click');
-    expect(wrapper.text()).toContain('Export to Notebook');
-    expect(wrapper.text()).toContain('Extract VCF Files');
+    fireEvent.click(getByTestId('resource-card-menu'));
+    expect(getByTestId('resource-card-menu')).toHaveTextContent(
+      'Export to Notebook'
+    );
+    expect(getByTestId('resource-card-menu')).toHaveTextContent(
+      'Extract VCF Files'
+    );
   });
 });
