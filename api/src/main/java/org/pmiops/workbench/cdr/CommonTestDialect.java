@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr;
 
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.community.dialect.MySQL5Dialect;
-import org.hibernate.query.sqm.function.SqmFunctionRegistry;
 import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
@@ -20,7 +19,6 @@ public class CommonTestDialect extends MySQL5Dialect {
     super.initializeFunctionRegistry(functionContributions);
     BasicTypeRegistry basicTypeRegistry =
         functionContributions.getTypeConfiguration().getBasicTypeRegistry();
-    SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
 
     functionContributions
         .getFunctionRegistry()

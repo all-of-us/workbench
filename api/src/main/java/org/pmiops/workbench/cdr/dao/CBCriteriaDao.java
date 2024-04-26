@@ -201,7 +201,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where c.standard=:standard "
               + "and c.code like upper(concat(:term,'%')) "
-              + "and cast(match(c.fullText, concat('+[', :domain, '_rank1]')) as integer) > 0 "
+              + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "and c.type != :type "
               + "order by c.count desc")
   Page<DbCriteria> findCriteriaByDomainAndCodeAndStandardAndNotType(
@@ -216,7 +216,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
           "select c "
               + "from DbCriteria c "
               + "where c.standard=:standard "
-              + "and cast(match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) as integer) > 0 "
+              + "and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
               + "and c.type != :type "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandardAndNotType(

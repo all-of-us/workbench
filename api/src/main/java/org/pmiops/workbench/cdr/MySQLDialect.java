@@ -29,14 +29,14 @@ public class MySQLDialect extends org.hibernate.community.dialect.MySQL5Dialect 
     functionContributions
         .getFunctionRegistry()
         .registerPattern(
-            "myFunction",
+            "match",
             "match(?1) against  (?2 in boolean mode)",
             basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
 
     functionContributions
         .getFunctionRegistry()
         .registerPattern(
-            "myFunction",
+            "matchConcept",
             "match(?1, ?2, ?3, ?4) against (?5 in boolean mode)",
             basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
   }
