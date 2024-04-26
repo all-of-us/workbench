@@ -378,21 +378,21 @@ describe('WorkspaceEdit', () => {
     const researchPurposeButton = screen.getByRole('button', {
       name: /Research Purpose/i,
     });
-    user.click(researchPurposeButton);
+    await user.click(researchPurposeButton);
 
     // Select any sub category for Research Purpose
     const ancestoryCheckbox: HTMLInputElement = (await screen.findByTestId(
       'ancestry-checkbox'
     )) as HTMLInputElement;
 
-    user.click(ancestoryCheckbox);
+    await user.click(ancestoryCheckbox);
 
     await waitFor(() => {
       // Research Purpose checkbox should be selected now
       expect(researchPurposeCheckbox.checked).toEqual(true);
     });
 
-    user.click(ancestoryCheckbox);
+    await user.click(ancestoryCheckbox);
 
     // Un-selecting the sub categories should unselect the research purpose checkbox
     // BUT THE SUB CATEGORIES SHOULD STILL BE VISIBLE
@@ -407,7 +407,7 @@ describe('WorkspaceEdit', () => {
     });
 
     // Clicking the icon should collapse all the research purpose sub-categories
-    user.click(researchPurposeButton);
+    await user.click(researchPurposeButton);
 
     expect(
       screen.queryByText(
