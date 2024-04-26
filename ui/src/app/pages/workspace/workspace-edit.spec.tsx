@@ -15,7 +15,12 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { screen, waitFor, within } from '@testing-library/react';
+import {
+  getDefaultNormalizer,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   WorkspaceEdit,
@@ -1131,18 +1136,24 @@ describe('WorkspaceEdit', () => {
     ).toBeInTheDocument();
   });
   it('Should trim workspace name', async () => {
-    const wrapper = component();
-    let workspaceNameTextBox = wrapper
-      .find('[data-test-id="workspace-name"]')
-      .first();
-    workspaceNameTextBox.simulate('change', {
-      target: { value: '  ' + WORKSPACE_NAME_TEXT + '    ' },
-    });
-    expect(workspaceNameTextBox.prop('value')).not.toBe(WORKSPACE_NAME_TEXT);
-    workspaceNameTextBox.simulate('blur');
-    workspaceNameTextBox = wrapper
-      .find('[data-test-id="workspace-name"]')
-      .first();
-    expect(workspaceNameTextBox.prop('value')).toBe(WORKSPACE_NAME_TEXT);
+    renderComponent();
+    const workspaceNameTextBox = await screen.findByTestId('workspace-name');
+    await userEvent.type(
+      workspaceNameTextBox,
+      '  ' + WORKSPACE_NAME_TEXT + '    '
+    );
+    expect(
+      screen.queryByDisplayValue(WORKSPACE_NAME_TEXT, {
+        normalizer: getDefaultNormalizer({ trim: false }),
+      })
+    ).not.toBeInTheDocument();
+
+    await user.tab();
+
+    expect(
+      screen.getByDisplayValue(WORKSPACE_NAME_TEXT, {
+        normalizer: getDefaultNormalizer({ trim: false }),
+      })
+    ).toBeInTheDocument();
   });
 });
