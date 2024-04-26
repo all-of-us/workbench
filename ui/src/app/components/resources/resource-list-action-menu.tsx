@@ -48,6 +48,7 @@ export const ResourceListActionMenu = (props: Props) => {
           useAppFilesListIcon={false}
         />
       ),
-    ]
+    ],
+    null
   );
 };

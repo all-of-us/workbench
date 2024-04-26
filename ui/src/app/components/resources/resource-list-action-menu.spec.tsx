@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 
+import { render } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -20,6 +21,22 @@ describe(ResourceListActionMenu.name, () => {
     serverConfigStore.set({
       config: { gsuiteDomain: '' },
     });
+  });
+
+  it('does not render a menu for an invalid resource', () => {
+    // stubResource is only a base type for valid resources.
+    // To be valid, it needs exactly one of these to be defined:
+    // cohort, cohortReview, conceptSet, dataSet, notebook
+    const invalidResource: WorkspaceResource = stubResource;
+    const menu = render(
+      <ResourceListActionMenu
+        resource={invalidResource}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
+    );
+    expect(menu.container).toBeEmptyDOMElement();
   });
 
   it('renders a Cohort menu', async () => {
