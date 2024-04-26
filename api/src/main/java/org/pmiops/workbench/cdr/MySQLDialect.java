@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr;
 
 import org.hibernate.boot.model.FunctionContributions;
-import org.hibernate.query.sqm.function.SqmFunctionRegistry;
 import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
