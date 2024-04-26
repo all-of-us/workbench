@@ -129,6 +129,7 @@ export const CohortReviewActionMenu = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Cohort Review Action Menu'
           />
         </React.Fragment>
       );

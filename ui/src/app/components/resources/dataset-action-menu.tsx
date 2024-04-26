@@ -219,6 +219,7 @@ export const DatasetActionMenu = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Dataset Action Menu'
           />
         </React.Fragment>
       );

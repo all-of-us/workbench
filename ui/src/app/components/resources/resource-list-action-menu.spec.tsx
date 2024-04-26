@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router';
 
 import { PrePackagedConceptSetEnum, WorkspaceResource } from 'generated/fetch';
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
@@ -28,7 +28,7 @@ describe(ResourceListActionMenu.name, () => {
       cohort: exampleCohortStubs[0],
     } as WorkspaceResource;
 
-    const { getByTestId } = render(
+    const { getByTitle } = render(
       <MemoryRouter>
         <ResourceListActionMenu
           resource={testCohort}
@@ -38,10 +38,10 @@ describe(ResourceListActionMenu.name, () => {
         />
       </MemoryRouter>
     );
-    expect(getByTestId('resource-card-menu')).toBeInTheDocument();
+    expect(getByTitle('Cohort Action Menu')).toBeInTheDocument();
   });
 
-  it('renders a dataset menu', async () => {
+  it('renders a dataset menu, without WGS', async () => {
     const testDataSet = {
       ...stubResource,
       dataSet: {
@@ -50,7 +50,7 @@ describe(ResourceListActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const { getByTestId } = render(
+    const { getByTitle, getByText, queryByText } = render(
       <MemoryRouter>
         <ResourceListActionMenu
           resource={testDataSet}
@@ -60,13 +60,9 @@ describe(ResourceListActionMenu.name, () => {
         />
       </MemoryRouter>
     );
-    fireEvent.click(getByTestId('resource-card-menu'));
-    expect(getByTestId('resource-card-menu')).toHaveTextContent(
-      'Export to Notebook'
-    );
-    expect(getByTestId('resource-card-menu')).not.toHaveTextContent(
-      'Extract VCF Files'
-    );
+    fireEvent.click(getByTitle('Dataset Action Menu'));
+    expect(getByText('Export to Notebook')).toBeInTheDocument();
+    expect(queryByText('Extract VCF Files')).not.toBeInTheDocument();
   });
 
   it('renders a dataset menu, with WGS', async () => {
@@ -81,7 +77,7 @@ describe(ResourceListActionMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const { getByTestId } = render(
+    const { getByTitle, getByText, queryByText } = render(
       <MemoryRouter>
         <ResourceListActionMenu
           resource={testDataSet}
@@ -91,12 +87,8 @@ describe(ResourceListActionMenu.name, () => {
         />
       </MemoryRouter>
     );
-    fireEvent.click(getByTestId('resource-card-menu'));
-    expect(getByTestId('resource-card-menu')).toHaveTextContent(
-      'Export to Notebook'
-    );
-    expect(getByTestId('resource-card-menu')).toHaveTextContent(
-      'Extract VCF Files'
-    );
+    fireEvent.click(getByTitle('Dataset Action Menu'));
+    expect(getByText('Export to Notebook')).toBeInTheDocument();
+    expect(queryByText('Extract VCF Files')).toBeInTheDocument();
   });
 });

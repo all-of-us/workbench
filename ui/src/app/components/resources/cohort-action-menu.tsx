@@ -236,6 +236,7 @@ export const CohortActionMenu = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Cohort Action Menu'
           />
         </React.Fragment>
       );

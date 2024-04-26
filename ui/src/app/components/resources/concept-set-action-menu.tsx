@@ -206,6 +206,7 @@ export const ConceptSetActionMenu = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Concept Set Action Menu'
           />
           )
         </React.Fragment>

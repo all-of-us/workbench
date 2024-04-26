@@ -221,7 +221,7 @@ export const NotebookActionMenu = fp.flow(
           )}
           <ResourceActionsMenu
             {...{ useAppListIcon, actions }}
-            menuButtonTitle='Notebook Action Menu'
+            title='Notebook Action Menu'
             disabled={resource.adminLocked}
           />
         </React.Fragment>
