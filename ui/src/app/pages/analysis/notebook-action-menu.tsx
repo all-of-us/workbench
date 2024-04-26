@@ -9,7 +9,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -34,7 +34,7 @@ import {
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {

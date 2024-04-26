@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
@@ -11,9 +13,9 @@ import { stubDataSet } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import { renderResourceMenu } from './render-resource-menu';
+import { ResourceActionMenu } from './resource-action-menu';
 
-describe(renderResourceMenu.name, () => {
+describe(ResourceActionMenu.name, () => {
   const component = (card) => {
     return mount(<MemoryRouter>{card}</MemoryRouter>);
   };
@@ -29,13 +31,15 @@ describe(renderResourceMenu.name, () => {
     // To be valid, it needs exactly one of these to be defined:
     // cohort, cohortReview, conceptSet, dataSet, notebook
     const invalidResource: WorkspaceResource = stubResource;
-    const menu = renderResourceMenu(
-      invalidResource,
-      workspaceDataStub,
-      [],
-      async () => {}
+    const menu = (
+      <ResourceActionMenu
+        resource={invalidResource}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
-    expect(menu).toBeFalsy();
+    expect(menu).not.toBeInTheDocument();
   });
 
   it('renders a Cohort menu', () => {
@@ -44,11 +48,13 @@ describe(renderResourceMenu.name, () => {
       cohort: exampleCohortStubs[0],
     } as WorkspaceResource;
 
-    const menu = renderResourceMenu(
-      testCohort,
-      workspaceDataStub,
-      [],
-      async () => {}
+    const menu = (
+      <ResourceActionMenu
+        resource={testCohort}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     const wrapper = component(menu);
     expect(wrapper.exists()).toBeTruthy();
@@ -64,11 +70,13 @@ describe(renderResourceMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const menu = renderResourceMenu(
-      testDataSet,
-      workspaceDataStub,
-      [],
-      async () => {}
+    const menu = (
+      <ResourceActionMenu
+        resource={testDataSet}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     const wrapper = component(menu);
     wrapper
@@ -91,11 +99,13 @@ describe(renderResourceMenu.name, () => {
       },
     } as WorkspaceResource;
 
-    const menu = renderResourceMenu(
-      testDataSet,
-      workspaceDataStub,
-      [],
-      async () => {}
+    const menu = (
+      <ResourceActionMenu
+        resource={testDataSet}
+        workspace={workspaceDataStub}
+        existingNameList={[]}
+        onUpdate={async () => {}}
+      />
     );
     const wrapper = component(menu);
     wrapper

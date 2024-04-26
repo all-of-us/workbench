@@ -17,50 +17,32 @@ import {
 } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-export interface ResourceActionMenuProps {
+export interface CommonActionMenuProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
 }
-
-// TODO: this is only used by resource-list.  move it there?
-export const renderResourceMenu = (
-  resource: WorkspaceResource,
-  workspace: WorkspaceData,
-  existingNameList: string[],
-  onUpdate: () => Promise<void>
-) => {
-  const commonProps: ResourceActionMenuProps = {
-    resource,
-    existingNameList,
-    onUpdate,
-  };
+interface Props extends CommonActionMenuProps {
+  workspace: WorkspaceData;
+}
+export const ResourceActionMenu = (props: Props) => {
+  const { resource } = props;
 
   const inactiveBilling =
     resource.workspaceBillingStatus === BillingStatus.INACTIVE;
 
   return cond(
-    [isCohort(resource), () => <CohortResourceCard {...commonProps} />],
-    [
-      isCohortReview(resource),
-      () => <CohortReviewResourceCard {...commonProps} />,
-    ],
-    [isConceptSet(resource), () => <ConceptSetResourceCard {...commonProps} />],
+    [isCohort(resource), () => <CohortResourceCard {...props} />],
+    [isCohortReview(resource), () => <CohortReviewResourceCard {...props} />],
+    [isConceptSet(resource), () => <ConceptSetResourceCard {...props} />],
     [
       isDataSet(resource),
-      () => (
-        <DatasetResourceCard
-          {...{ ...commonProps, workspace, inactiveBilling }}
-        />
-      ),
+      () => <DatasetResourceCard {...{ ...props, inactiveBilling }} />,
     ],
     [
       isNotebook(resource),
       () => (
-        <NotebookActionMenu
-          {...commonProps}
-          disableDuplicate={inactiveBilling}
-        />
+        <NotebookActionMenu {...props} disableDuplicate={inactiveBilling} />
       ),
     ]
   );

@@ -6,7 +6,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,7 +29,7 @@ import {
 } from 'app/utils/resources';
 
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {}

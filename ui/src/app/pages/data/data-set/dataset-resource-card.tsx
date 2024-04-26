@@ -9,7 +9,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -40,7 +40,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { ExportDatasetModal } from './export-dataset-modal';
 
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps,
