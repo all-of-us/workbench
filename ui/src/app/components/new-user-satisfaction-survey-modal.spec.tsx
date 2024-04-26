@@ -69,23 +69,21 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     );
   };
 
-  const findSubmitButton = (component: RenderResult) => {
+  const getSubmitButton = (component: RenderResult) => {
     return component.getByRole('button', { name: 'submit' });
   };
 
-  it('should disable the submit button until a satisfaction value is selected', () => {
+  it('should disable the submit button until a satisfaction value is selected', async () => {
     setNewUserSatisfactionSurveyData('satisfaction', undefined);
 
-    let component = renderTestComponent();
-    expectButtonElementDisabled(findSubmitButton(component));
-    component.unmount();
+    const component = renderTestComponent();
+    expectButtonElementDisabled(getSubmitButton(component));
 
     setNewUserSatisfactionSurveyData(
       'satisfaction',
       NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
-    component = renderTestComponent();
-    expectButtonElementEnabled(findSubmitButton(component));
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
   it('should disable the submit button if additional info exceeds the max length', () => {
@@ -94,7 +92,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS + 1)
     );
     let component = renderTestComponent();
-    expectButtonElementDisabled(findSubmitButton(component));
+    expectButtonElementDisabled(getSubmitButton(component));
     component.unmount();
 
     setNewUserSatisfactionSurveyData(
@@ -102,7 +100,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       'A'.repeat(ADDITIONAL_INFO_MAX_CHARACTERS)
     );
     component = renderTestComponent();
-    expectButtonElementEnabled(findSubmitButton(component));
+    expectButtonElementEnabled(getSubmitButton(component));
   });
 
   it('should disable the submit button while awaiting submission response', async () => {
@@ -122,16 +120,14 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
       createSurveyApiCall,
     });
 
-    expectButtonElementEnabled(findSubmitButton(component));
+    expectButtonElementEnabled(getSubmitButton(component));
 
-    fireEvent.click(findSubmitButton(component));
+    fireEvent.click(getSubmitButton(component));
     // the promise is not yet resolved, so the button should be disabled
-    expectButtonElementDisabled(findSubmitButton(component));
+    expectButtonElementDisabled(getSubmitButton(component));
 
     resolveSubmit();
-    await waitFor(() =>
-      expectButtonElementEnabled(findSubmitButton(component))
-    );
+    await waitFor(() => expectButtonElementEnabled(getSubmitButton(component)));
   });
 
   it('should display an error on API failure and remove it on API success', async () => {
@@ -146,11 +142,11 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
     expect(queryForError()).not.toBeInTheDocument();
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.reject());
-    fireEvent.click(findSubmitButton(component));
+    fireEvent.click(getSubmitButton(component));
     await waitFor(() => expect(queryForError()).toBeInTheDocument());
 
     createSurveyApiCall.mockImplementationOnce(() => Promise.resolve());
-    fireEvent.click(findSubmitButton(component));
+    fireEvent.click(getSubmitButton(component));
     await waitFor(() => expect(queryForError()).not.toBeInTheDocument());
   });
 });
