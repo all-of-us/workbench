@@ -240,8 +240,7 @@ export const TextAreaWithLengthValidationMessage = (
   return (
     <React.Fragment>
       <TextArea
-        {...{ id }}
-        aria-label={id}
+        {...{ ariaLabel, id }}
         style={{
           ...styles.textBoxWithLengthValidationTextBoxStyle,
           ...textBoxStyleOverrides,
@@ -250,7 +249,6 @@ export const TextAreaWithLengthValidationMessage = (
         value={text}
         onBlur={() => updateShowTooShortWarning()}
         onChange={(v) => onTextUpdate(v)}
-        ariaLabel={ariaLabel}
       />
       <FlexRow
         style={{
