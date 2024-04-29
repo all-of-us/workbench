@@ -125,10 +125,16 @@ export const ValidationError = ({ children }) => {
   );
 };
 
-export const TextArea = ({ style = {}, onChange, ...props }) => {
+export const TextArea = ({
+  style = {},
+  onChange,
+  ariaLabel = undefined,
+  ...props
+}) => {
   return (
     <textarea
       {...props}
+      aria-label={ariaLabel}
       onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       style={{
         width: '100%',
@@ -153,6 +159,7 @@ interface TextAreaWithLengthValidationMessageProps {
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
   textBoxStyleOverrides?: {};
+  ariaLabel?: string;
 }
 
 export const TextAreaWithLengthValidationMessage = (
@@ -227,6 +234,7 @@ export const TextAreaWithLengthValidationMessage = (
     id,
     tooShortWarning,
     maxCharacters,
+    ariaLabel,
   } = props;
 
   return (
@@ -242,6 +250,7 @@ export const TextAreaWithLengthValidationMessage = (
         value={text}
         onBlur={() => updateShowTooShortWarning()}
         onChange={(v) => onTextUpdate(v)}
+        ariaLabel={ariaLabel}
       />
       <FlexRow
         style={{
