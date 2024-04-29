@@ -343,15 +343,15 @@ describe(CopyModal.name, () => {
 
     await selectWorkspace(controlledCdrWorkspace);
 
+    const mismatchError = screen.getByTestId('access-tier-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
     expect(
-      screen.getByText(
+      within(mismatchError).getByText(
         'Can’t copy to that workspace. It has a different access tier ' +
           `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`,
         { exact: false }
       )
     ).toBeInTheDocument();
-
-    expect(screen.getByTestId('access-tier-mismatch-error')).toBeTruthy();
 
     await renameNotebook('Some new notebook name');
 
@@ -408,16 +408,16 @@ describe(CopyModal.name, () => {
 
     await selectWorkspace(altCdrWorkspace);
 
+    const mismatchError = screen.getByTestId('concept-set-cdr-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
     expect(
-      screen.getByText(
+      within(mismatchError).getByText(
         'Can’t copy to that workspace. It uses a different dataset version ' +
           `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
           `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}).`,
         { exact: false }
       )
     ).toBeInTheDocument();
-
-    expect(screen.getByTestId('concept-set-cdr-mismatch-error')).toBeTruthy();
 
     await renameConceptSet('whatever');
 
@@ -436,15 +436,15 @@ describe(CopyModal.name, () => {
 
     await selectWorkspace(controlledCdrWorkspace);
 
+    const mismatchError = screen.getByTestId('access-tier-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
     expect(
-      screen.getByText(
+      within(mismatchError).getByText(
         'Can’t copy to that workspace. It has a different access tier ' +
           `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`,
         { exact: false }
       )
     ).toBeInTheDocument();
-
-    expect(screen.getByTestId('access-tier-mismatch-error')).toBeTruthy();
 
     await renameConceptSet('whatever');
 
