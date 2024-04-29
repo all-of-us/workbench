@@ -217,11 +217,15 @@ describe('WorkspaceEdit', () => {
 
     // Ensure the radiobox and checkbox are pre-filled for the "specific
     // populations" section.
+    let specificPopulationYesRadio: HTMLInputElement;
     await waitFor(() => {
-      expect(
-        screen.queryByTestId('specific-population-yes')
-      ).toBeInTheDocument();
+      specificPopulationYesRadio = screen.queryByTestId(
+        'specific-population-yes'
+      );
+      expect(specificPopulationYesRadio).toBeInTheDocument();
     });
+
+    expect(specificPopulationYesRadio.checked).toEqual(true);
 
     const ageChildrenCheckbox: HTMLInputElement = screen.getByTestId(
       `${SpecificPopulationEnum.AGE_CHILDREN}-checkbox`
