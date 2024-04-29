@@ -350,7 +350,7 @@ describe('WorkspaceEdit', () => {
       screen.queryByText(
         'Choose options below to describe your research purpose'
       )
-    ).toBeNull();
+    ).not.toBeInTheDocument();
 
     // Click the arrow icon to expand the research purpose sub categories
     const researchPurposeButton = screen.getByRole('button', {
@@ -375,14 +375,15 @@ describe('WorkspaceEdit', () => {
     // Un-selecting the sub categories should unselect the research purpose checkbox
     // BUT THE SUB CATEGORIES SHOULD STILL BE VISIBLE
     await waitFor(() => {
-      // Research Purpose checkbox should be selected now
+      // Research Purpose checkbox should not be selected now
       expect(researchPurposeCheckbox.checked).toEqual(false);
-      expect(
-        screen.queryByText(
-          'Choose options below to describe your research purpose'
-        )
-      ).not.toBeNull();
     });
+
+    expect(
+      screen.queryByText(
+        'Choose options below to describe your research purpose'
+      )
+    ).toBeInTheDocument();
 
     // Clicking the icon should collapse all the research purpose sub-categories
     await user.click(researchPurposeButton);
