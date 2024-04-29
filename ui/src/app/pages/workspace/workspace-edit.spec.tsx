@@ -172,12 +172,12 @@ describe('WorkspaceEdit', () => {
 
     const researchPurposeCheckbox: HTMLInputElement = screen.getByTestId(
       'researchPurpose-checkbox'
-    ) as HTMLInputElement;
+    );
     expect(researchPurposeCheckbox.checked).toEqual(false);
 
     const specificPopulationRadio: HTMLInputElement = screen.getByTestId(
       'specific-population-no'
-    ) as HTMLInputElement;
+    );
     expect(specificPopulationRadio.checked).toEqual(false);
   });
 
