@@ -221,6 +221,7 @@ describe(CopyModal.name, () => {
       writerAltCdrWsOption,
       writerControlledCdrWsOption,
     ];
+
     component();
 
     // verify that copy-to options are not displayed by default
