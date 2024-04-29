@@ -70,9 +70,6 @@ const renameConceptSet = async (newName: string) => {
   await userEvent.paste(newName);
 };
 
-const csApiStub = new ConceptSetsApiStub();
-const firstConceptSet = csApiStub.conceptSets[0].name;
-
 describe(CopyModal.name, () => {
   let props: CopyModalProps;
 
@@ -152,7 +149,7 @@ describe(CopyModal.name, () => {
 
   const setupConceptSetTest = () => {
     props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = firstConceptSet;
+    props.fromResourceName = new ConceptSetsApiStub().conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
         props.fromWorkspaceNamespace,
@@ -167,7 +164,7 @@ describe(CopyModal.name, () => {
     const wsApiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, wsApiStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
-    registerApiClient(ConceptSetsApi, csApiStub);
+    registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
 
     props = {
       fromWorkspaceNamespace: fromWorkspaceNamespace,
