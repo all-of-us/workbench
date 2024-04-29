@@ -40,16 +40,20 @@ interface TestWorkspace {
   accessTierShortName: string;
 }
 
-const selectWorkspace = async (workspace: TestWorkspace) => {
+const openWorkspaceSelection = async () => {
   const copyButton = screen.getByText('Copy to Workspace');
   await userEvent.click(copyButton);
 
   const selectButton = screen.getByText(/select\.\.\./i);
-  await userEvent.click(selectButton);
+  return userEvent.click(selectButton);
+};
 
-  const selection = screen.queryByText(workspace.name);
-  expect(selection).toBeInTheDocument();
-  return userEvent.click(selection);
+const selectWorkspace = async (workspace: TestWorkspace) => {
+  await openWorkspaceSelection();
+
+  const selectedOption = screen.queryByText(workspace.name);
+  expect(selectedOption).toBeInTheDocument();
+  return userEvent.click(selectedOption);
 };
 
 const renameNotebook = async (newName: string) => {
@@ -224,11 +228,7 @@ describe(CopyModal.name, () => {
       expect(screen.queryByText(option)).not.toBeInTheDocument()
     );
 
-    const copyButton = screen.getByText('Copy to Workspace');
-    await userEvent.click(copyButton);
-
-    const selectButton = screen.getByText(/select\.\.\./i);
-    await userEvent.click(selectButton);
+    await openWorkspaceSelection();
 
     expectedOptions.forEach((option) =>
       expect(screen.queryByText(option)).toBeInTheDocument()
@@ -243,11 +243,7 @@ describe(CopyModal.name, () => {
 
     component();
 
-    const copyButton = screen.getByText('Copy to Workspace');
-    await userEvent.click(copyButton);
-
-    const selectButton = screen.getByText(/select\.\.\./i);
-    await userEvent.click(selectButton);
+    await openWorkspaceSelection();
 
     // this is ugly and fragile, but I haven't been able to do better yet
 
