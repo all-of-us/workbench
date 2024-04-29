@@ -127,6 +127,7 @@ describe('inputs', () => {
     const { getByTestId, getByRole } = render(
       <TextAreaWithLengthValidationMessage
         id='test'
+        ariaLabel='testLabel'
         initialText='Hey'
         maxCharacters={15}
         onChange={() => {}}
@@ -135,7 +136,7 @@ describe('inputs', () => {
       />
     );
 
-    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    fireEvent.blur(getByRole('textbox', { name: 'testLabel' }));
     expect(getByTestId('warning').textContent).toBe('Testing too short');
   });
 
@@ -143,6 +144,7 @@ describe('inputs', () => {
     const { getByRole, queryByTestId } = render(
       <TextAreaWithLengthValidationMessage
         id='test'
+        ariaLabel='testLabel'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
@@ -151,7 +153,7 @@ describe('inputs', () => {
       />
     );
 
-    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    fireEvent.blur(getByRole('textbox', { name: 'testLabel' }));
     expect(queryByTestId('warning')).toBeNull();
   });
 
@@ -159,13 +161,14 @@ describe('inputs', () => {
     const { getByRole, queryByTestId } = render(
       <TextAreaWithLengthValidationMessage
         id='test'
+        ariaLabel='testLabel'
         initialText={initialText}
         maxCharacters={15}
         onChange={() => {}}
       />
     );
 
-    fireEvent.blur(getByRole('textbox', { name: 'test' }));
+    fireEvent.blur(getByRole('textbox', { name: 'testLabel' }));
     expect(queryByTestId('warning')).toBeNull();
   });
 });
