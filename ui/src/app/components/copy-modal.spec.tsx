@@ -10,7 +10,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { expectButtonElementDisabled } from '../../testing/react-test-helpers';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
@@ -22,6 +21,7 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
+import { expectButtonElementDisabled } from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
