@@ -111,7 +111,7 @@ public class FreeTierBillingService {
       return;
     }
 
-    taskQueueService.pushExpiredFreeCreditsTask(
+    taskQueueService.pushInitialCreditsExpiryTask(
         filteredUsers.stream().map(DbUser::getUserId).toList(), dbCostByCreator, liveCostByCreator);
   }
 

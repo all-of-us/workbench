@@ -40,7 +40,8 @@ public class TaskQueueService {
   private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
       BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
 
-  private static final String EXPIRED_FREE_CREDITS_PATH = BASE_PATH + "/handleFreeCreditsExpiry";
+  private static final String INITIAL_CREDITS_EXPIRY_PATH =
+      BASE_PATH + "/handleInitialCreditsExpiry";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
@@ -199,12 +200,12 @@ public class TaskQueueService {
             "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
   }
 
-  public void pushExpiredFreeCreditsTask(
+  public void pushInitialCreditsExpiryTask(
       List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
     createAndPushTask(
         EXPIRED_FREE_CREDITS_QUEUE_NAME,
-        EXPIRED_FREE_CREDITS_PATH,
-        new ExpiredFreeCreditsEventRequest()
+        INITIAL_CREDITS_EXPIRY_PATH,
+        new ExpiredInitialCreditsEventRequest()
             .users(users)
             .dbCostByCreator(dbCostByCreator)
             .liveCostByCreator(liveCostByCreator));

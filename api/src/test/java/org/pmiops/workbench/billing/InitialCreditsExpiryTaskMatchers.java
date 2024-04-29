@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import org.mockito.ArgumentMatcher;
 
-public class FreeCreditsExpiryTaskMatchers {
+public class InitialCreditsExpiryTaskMatchers {
 
   static class UserListMatcher implements ArgumentMatcher<List<Long>> {
     private final List<Long> expectedUserIds;

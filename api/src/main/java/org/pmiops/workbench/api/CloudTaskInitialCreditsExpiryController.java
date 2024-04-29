@@ -14,13 +14,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.ExpiredFreeCreditsEventRequest;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.slf4j.Logger;
@@ -29,11 +26,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDelegate {
+public class CloudTaskInitialCreditsExpiryController
+    implements CloudTaskInitialCreditExpiryApiDelegate {
 
-  private static final Logger logger = LoggerFactory.getLogger(CloudTaskFreeCreditExpiry.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(CloudTaskInitialCreditsExpiryController.class);
 
-  private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
   private final UserDao userDao;
@@ -41,15 +39,13 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
   private final LeonardoApiClient leonardoApiClient;
   private final MailService mailService;
 
-  CloudTaskFreeCreditExpiry(
-      ImpersonatedWorkspaceService impersonatedWorkspaceService,
+  CloudTaskInitialCreditsExpiryController(
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
       Provider<WorkbenchConfig> workbenchConfig1,
       LeonardoApiClient leonardoApiClient,
       MailService mailService) {
-    this.impersonatedWorkspaceService = impersonatedWorkspaceService;
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
@@ -58,9 +54,9 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
     this.mailService = mailService;
   }
 
-  @Override
   @SuppressWarnings("unchecked")
-  public ResponseEntity<Void> handleFreeCreditsExpiry(ExpiredFreeCreditsEventRequest request) {
+  public ResponseEntity<Void> handleInitialCreditsExpiry(
+      ExpiredInitialCreditsEventRequest request) {
 
     if (request.getUsers().isEmpty()) {
       logger.warn("users are empty");
@@ -68,26 +64,27 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
     }
 
     logger.info(
-        "Free tier Billing Service: Handling free credits expiry event for users: {}",
+        "Free tier Billing Service: Handling initial credits expiry event for users: {}",
         request.getUsers().toString());
 
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
+    Set<DbUser> usersSet =
+        StreamSupport.stream(users.spliterator(), false).collect(Collectors.toSet());
+
     Map<String, Double> stringKeyDbCostMap = (Map<String, Double>) request.getDbCostByCreator();
     Map<Long, Double> dbCostByCreator = convertMapKeysToLong(stringKeyDbCostMap);
 
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
-    Set<DbUser> usersSet =
-        StreamSupport.stream(users.spliterator(), false).collect(Collectors.toSet());
     var newlyExpiredUsers = getNewlyExpiredUsers(usersSet, dbCostByCreator, liveCostByCreator);
 
     handleExpiredUsers(newlyExpiredUsers);
 
-    alertUsersBasedOnTheThreshold(dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
+    alertUsersBasedOnTheThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
 
     logger.info(
-        "Free tier Billing Service: Finished handling free credits expiry event for users: {}",
+        "Free tier Billing Service: Finished handling initial credits expiry event for users: {}",
         request.getUsers().toString());
 
     return ResponseEntity.noContent().build();
@@ -111,6 +108,7 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
   }
 
   private void alertUsersBasedOnTheThreshold(
+      Set<DbUser> users,
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator,
       Set<DbUser> newlyExpiredUsers) {
@@ -119,7 +117,8 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     Map<Long, DbUser> usersCache =
-        StreamSupport.stream(userDao.findAllById(liveCostByCreator.keySet()).spliterator(), false)
+        users.stream()
+            .filter(u -> liveCostByCreator.containsKey(u.getUserId()))
             .collect(Collectors.toMap(DbUser::getUserId, Function.identity()));
 
     // Filter out the users who have recently expired because we already alerted them
@@ -154,7 +153,7 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
       Map<Long, Double> liveCostByCreator) {
 
     final Map<Long, DbUser> dbUsersWithChangedCosts =
-        findDbUsersWithChangedCosts(dbCostByCreator, liveCostByCreator);
+        findDbUsersWithChangedCosts(allUsers, dbCostByCreator, liveCostByCreator);
     Set<DbUser> freeTierUsers = getFreeTierActiveWorkspaceCreatorsIn(allUsers);
 
     // Find users who exceeded their free tier limit
@@ -187,13 +186,16 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
   /**
    * Find the users with db costs different from the live costs
    *
+   * @param allUsers
    * @param dbCostByCreator Map of userId->dbCost
    * @param liveCostByCreator Map of userId->liveCost
    * @return a {@link Map} of user Ids to their DbUsers
    */
   @NotNull
   private Map<Long, DbUser> findDbUsersWithChangedCosts(
-      Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
+      Set<DbUser> allUsers,
+      Map<Long, Double> dbCostByCreator,
+      Map<Long, Double> liveCostByCreator) {
     final Set<Long> usersWithChangedCosts =
         liveCostByCreator.keySet().stream()
             .filter(
@@ -206,8 +208,10 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
     logger.info(String.format("Found %d users with changed costs.", usersWithChangedCosts.size()));
 
     Map<Long, DbUser> dbUsersWithChangedCosts =
-        StreamSupport.stream(userDao.findAllById(usersWithChangedCosts).spliterator(), false)
+        allUsers.stream()
+            .filter(u -> usersWithChangedCosts.contains(u.getUserId()))
             .collect(Collectors.toMap(DbUser::getUserId, Function.identity()));
+
     return dbUsersWithChangedCosts;
   }
 
@@ -221,12 +225,7 @@ public class CloudTaskFreeCreditExpiry implements CloudTaskFreeCreditExpiryApiDe
   private void deleteAppsAndRuntimesInFreeTierWorkspaces(DbUser user) {
     logger.info("Deleting apps and runtimes for user " + user.getUsername());
 
-    impersonatedWorkspaceService.getOwnedWorkspaces(user.getUsername()).stream()
-        .map(WorkspaceResponse::getWorkspace)
-        .map(Workspace::getNamespace)
-        .map(workspaceDao::getByNamespace)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
+    workspaceDao.findAllByCreator(user).stream()
         .filter(
             dbWorkspace ->
                 workbenchConfig

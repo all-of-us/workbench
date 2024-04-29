@@ -4252,26 +4252,26 @@ paths:
           description: Users alerted
           content: { }
       x-codegen-request-body-name: request
-  /v1/cloudTask/handleFreeCreditsExpiry:
+  /v1/cloudTask/handleInitialCreditsExpiry:
     post:
       tags:
-        - cloudTaskFreeCreditExpiry
+        - cloudTaskInitialCreditExpiry
         - cloudTask
       description: |
         Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
-      operationId: handleFreeCreditsExpiry
-      security: []
+      operationId: handleInitialCreditsExpiry
+      security: [ ]
       requestBody:
         description: Users that should be alerted about their free credits use.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExpiredFreeCreditsEventRequest'
+              $ref: '#/components/schemas/ExpiredInitialCreditsEventRequest'
         required: true
       responses:
         200:
           description: Handle Free Credits Expiry Task Ran Successfully
-          content: {}
+          content: { }
       x-codegen-request-body-name: request
   /v1/institutions:
     get:
@@ -9595,7 +9595,7 @@ components:
           items:
             type: string
       description: Institution-specific access tier membership requirement and configs.
-    ExpiredFreeCreditsEventRequest:
+    ExpiredInitialCreditsEventRequest:
       required:
         - users
       type: object
