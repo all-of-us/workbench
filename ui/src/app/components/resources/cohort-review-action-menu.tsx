@@ -3,10 +3,10 @@ import * as fp from 'lodash/fp';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,7 +29,7 @@ import {
 } from 'app/utils/resources';
 
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {}
@@ -38,7 +38,7 @@ interface State {
   showRenameModal: boolean;
 }
 
-export const CohortReviewResourceCard = fp.flow(
+export const CohortReviewActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
@@ -51,7 +51,7 @@ export const CohortReviewResourceCard = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -129,6 +129,7 @@ export const CohortReviewResourceCard = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Cohort Review Action Menu'
           />
         </React.Fragment>
       );

@@ -6,10 +6,10 @@ import { PrePackagedConceptSetEnum } from 'generated/fetch';
 
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -22,6 +22,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
+import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -37,10 +38,8 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { ExportDatasetModal } from './export-dataset-modal';
-
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps,
@@ -55,7 +54,7 @@ interface State {
   showGenomicExtractionModal: boolean;
 }
 
-export const DatasetResourceCard = fp.flow(
+export const DatasetActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
@@ -71,7 +70,7 @@ export const DatasetResourceCard = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource, inactiveBilling } = this.props;
       const enableExtraction = (
         resource.dataSet.prePackagedConceptSet || []
@@ -220,6 +219,7 @@ export const DatasetResourceCard = fp.flow(
           <ResourceActionsMenu
             actions={this.actions}
             disabled={resource.adminLocked}
+            title='Dataset Action Menu'
           />
         </React.Fragment>
       );

@@ -113,15 +113,13 @@ export const ClrIcon = ({ className = '', ...props }) => {
   });
 };
 
-export const SnowmanIcon = ({ style = {}, ...props }) => {
-  return (
-    <ClrIcon
-      shape='ellipsis-vertical'
-      {...props}
-      style={{ ...styles.snowmanIcon, ...style }}
-    />
-  );
-};
+export const SnowmanIcon = ({ style = {}, ...props }) => (
+  <ClrIcon
+    shape='ellipsis-vertical'
+    {...props}
+    style={{ ...styles.snowmanIcon, ...style }}
+  />
+);
 
 export const InfoIcon = ({ style = {}, ...props }) => (
   <ClrIcon

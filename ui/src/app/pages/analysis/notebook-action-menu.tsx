@@ -6,10 +6,10 @@ import { CopyRequest } from 'generated/fetch';
 import { CopyModal } from 'app/components/copy-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import { ResourceActionMenuProps } from 'app/components/resources/render-resource-menu';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -34,12 +34,12 @@ import {
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 
 interface Props
-  extends ResourceActionMenuProps,
+  extends CommonActionMenuProps,
     WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {
   disableDuplicate: boolean;
-  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
+  useAppFilesListIcon: boolean;
 }
 
 interface State {
@@ -61,7 +61,7 @@ export const NotebookActionMenu = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -177,12 +177,8 @@ export const NotebookActionMenu = fp.flow(
     }
 
     render() {
-      const {
-        resource,
-        onUpdate,
-        existingNameList,
-        menuButtonComponentOverride,
-      } = this.props;
+      const { resource, onUpdate, existingNameList, useAppFilesListIcon } =
+        this.props;
       const actions = this.actions;
       const oldName = getDisplayName(resource);
       return (
@@ -220,8 +216,8 @@ export const NotebookActionMenu = fp.flow(
             />
           )}
           <ResourceActionsMenu
-            {...{ menuButtonComponentOverride, actions }}
-            menuButtonTitle='Notebook Action Menu'
+            {...{ useAppFilesListIcon, actions }}
+            title='Notebook Action Menu'
             disabled={resource.adminLocked}
           />
         </React.Fragment>

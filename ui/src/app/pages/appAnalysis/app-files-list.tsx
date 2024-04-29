@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FileDetail } from 'generated/fetch';
 
 import { AppBanner } from 'app/components/apps-panel/app-banner';
-import { KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -149,10 +148,9 @@ export const AppFilesList = withCurrentWorkspace()(
     const displayMenu = (row: FileDetail) => {
       return (
         <NotebookActionMenu
+          {...{ workspace }}
           resource={convertToResources([row], props.workspace)[0]}
-          workspace
-          menuOnly
-          menuButtonComponentOverride={KebabCircleButton}
+          useAppFilesListIcon={true}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />
