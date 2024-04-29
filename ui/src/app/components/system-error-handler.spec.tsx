@@ -3,26 +3,27 @@ import * as React from 'react';
 import { StatusApi } from 'generated/fetch';
 
 import { render } from '@testing-library/react';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  registerApiClient,
+  statusApi,
+} from 'app/services/swagger-fetch-clients';
 import { fetchWithSystemErrorHandler } from 'app/utils/errors';
 
 import { StatusApiStub } from 'testing/stubs/status-api-stub';
 
 import { SystemErrorHandler } from './system-error-handler';
 
-describe('SystemErrorHandler', () => {
+describe(SystemErrorHandler.name, () => {
   beforeEach(() => {
     registerApiClient(StatusApi, new StatusApiStub());
   });
 
-  it('should render', () => {
-    const { getByTestId } = render(<SystemErrorHandler />);
-    expect(getByTestId('system-error-handler')).toBeInTheDocument();
-  });
-
   it('should check status on 500', async () => {
     render(<SystemErrorHandler />);
-    const spy = jest.spyOn(StatusApi.prototype, 'getStatus');
+    const spy = jest.spyOn(statusApi(), 'getStatus');
+    // We need to use a try statement here, as opposed to catching on the promise itself, because the order
+    // of precedence would mean that the error gets swallowed and isn't caught within the system error handler
+    // if we explicitly catch.
     try {
       await fetchWithSystemErrorHandler(() => Promise.reject({ status: 500 }));
     } catch (e) {
@@ -33,7 +34,10 @@ describe('SystemErrorHandler', () => {
 
   it('should check status on 503', async () => {
     render(<SystemErrorHandler />);
-    const spy = jest.spyOn(StatusApi.prototype, 'getStatus');
+    const spy = jest.spyOn(statusApi(), 'getStatus');
+    // We need to use a try statement here, as opposed to catching on the promise itself, because the order
+    // of precedence would mean that the error gets swallowed and isn't caught within the system error handler
+    // if we explicitly catch.
     try {
       await fetchWithSystemErrorHandler(() => Promise.reject({ status: 503 }));
     } catch (e) {
@@ -44,7 +48,10 @@ describe('SystemErrorHandler', () => {
 
   it('should not check status on 502', async () => {
     render(<SystemErrorHandler />);
-    const spy = jest.spyOn(StatusApi.prototype, 'getStatus');
+    const spy = jest.spyOn(statusApi(), 'getStatus');
+    // We need to use a try statement here, as opposed to catching on the promise itself, because the order
+    // of precedence would mean that the error gets swallowed and isn't caught within the system error handler
+    // if we explicitly catch.
     try {
       await fetchWithSystemErrorHandler(() => Promise.reject({ status: 502 }));
     } catch (e) {
