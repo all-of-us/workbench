@@ -59,7 +59,7 @@ const styles = reactStyles({
   },
   sideNavItemDisabled: {
     color: colors.disabled,
-    cursor: 'auto',
+    cursor: 'not-allowed',
   },
   navIcon: {
     marginRight: '12px',
@@ -217,7 +217,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
           {props.icon && (
             <ClrIcon
               shape={props.icon}
-              className={'is-solid'}
+              className='is-solid'
               style={styles.navIcon}
               size={iconSize}
             />
@@ -285,7 +285,7 @@ export const SideNav = (props: SideNavProps) => {
   ];
 
   return (
-    <div style={styles.sideNav}>
+    <div style={styles.sideNav} aria-label='Side Navigation Bar'>
       <SideNavItem
         hasProfileImage={true}
         content={`${profile.givenName} ${profile.familyName}`}
@@ -297,6 +297,7 @@ export const SideNav = (props: SideNavProps) => {
         userOptionsSubMenu.map((menu) => {
           return (
             <SideNavItem
+              key={menu.label}
               content={menu.label}
               onToggleSideNav={() => onToggleSideNav()}
               href={menu.href}
@@ -306,7 +307,7 @@ export const SideNav = (props: SideNavProps) => {
         })}
       {showUserOptions && (
         <SideNavItem
-          content={'Sign Out'}
+          content='Sign Out'
           onToggleSideNav={() => onToggleSideNav()}
           parentOnClick={withErrorModal(
             {
@@ -328,7 +329,7 @@ export const SideNav = (props: SideNavProps) => {
         icon='applications'
         content='Your Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
-        href={'/workspaces'}
+        href='/workspaces'
         active={workspacesActive()}
         disabled={!hasRegisteredTierAccess(profile)}
       />
@@ -336,20 +337,20 @@ export const SideNav = (props: SideNavProps) => {
         icon='star'
         content='Featured Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
-        href={'/library'}
+        href='/library'
         active={libraryActive()}
         disabled={!hasRegisteredTierAccess(profile)}
       />
       <SideNavItem
         icon='help'
-        content={'User Support Hub'}
+        content='User Support Hub'
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
         disabled={!hasRegisteredTierAccess(profile)}
       />
       <SideNavItem
         icon='envelope'
-        content={'Contact Us'}
+        content='Contact Us'
         onToggleSideNav={() => onToggleSideNav()}
         parentOnClick={() => openContactWidget()}
       />
@@ -368,54 +369,54 @@ export const SideNav = (props: SideNavProps) => {
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
         showAdminOptions && (
           <SideNavItem
-            content={'User Admin'}
+            content='User Admin'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/user'}
+            href='/admin/user'
             active={userAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Bulk Sync of User Access'}
+            content='Bulk Sync of User Access'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/bulk-sync-user-access'}
+            href='/admin/bulk-sync-user-access'
             active={userAccessActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) &&
         showAdminOptions && (
           <SideNavItem
-            content={'User Audit'}
+            content='User Audit'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/user-audit/'}
+            href='/admin/user-audit/'
             active={userAuditActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Service Banners'}
+            content='Service Banners'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/banner'}
+            href='/admin/banner'
             active={bannerAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Workspaces'}
+            content='Workspaces'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'admin/workspaces'}
+            href='admin/workspaces'
             active={workspaceAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Workspace Audit'}
+            content='Workspace Audit'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/workspace-audit/'}
+            href='/admin/workspace-audit/'
             active={workspaceAuditActive()}
           />
         )}
@@ -425,18 +426,18 @@ export const SideNav = (props: SideNavProps) => {
       ) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Institution Admin'}
+            content='Institution Admin'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'admin/institution'}
+            href='admin/institution'
             active={institutionAdminActive()}
           />
         )}
       {hasAuthorityForAction(profile, AuthorityGuardedAction.EGRESS_EVENTS) &&
         showAdminOptions && (
           <SideNavItem
-            content={'Egress Events'}
+            content='Egress Events'
             onToggleSideNav={() => onToggleSideNav()}
-            href={'/admin/egress-events'}
+            href='/admin/egress-events'
             active={egressAdminActive()}
           />
         )}

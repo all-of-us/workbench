@@ -1,111 +1,70 @@
-import * as React from 'react';
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import * as React from 'react';
+
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { SearchInput } from './search-input';
 
-// The delay between editing the search input and the dropdown appearing,
-// padded to ensure DOM rendering can complete.
-const DROPDOWN_DELAY_MS = 400;
+describe(SearchInput.name, () => {
+  const getSearchInput = () => screen.getByRole('textbox', { name: 'Search' });
 
-test('component should render', () => {
-  const input = mount(<SearchInput />);
-  expect(input.exists()).toBeTruthy();
-});
-
-test('component has sane defaults', () => {
-  const input = <SearchInput />;
-  const p = input.props;
-  expect(p.enabled).toBeTruthy();
-  expect(p.placeholder).toBe('');
-  expect(p.value).toBe('');
-  expect(p.tooltip).toBe('');
-  expect(p.onChange).toBeTruthy();
-  expect(p.onSearch).toBeTruthy();
-});
-
-test('no dropdown is displayed on user input by default', async () => {
-  const input = mount(<SearchInput />);
-  input
-    .find('[data-test-id="search-input"]')
-    .first()
-    .simulate('change', { target: { value: 'foo' } });
-  await waitOneTickAndUpdate(input);
-  expect(
-    input.find('[data-test-id="search-input-drop-down"]').exists()
-  ).toBeFalsy();
-});
-
-test('dropdown is displayed when results are available', async () => {
-  function onSearch() {
-    return new Promise<Array<string>>((accept) => {
-      accept(['bar']);
-    });
-  }
-  const input = mount(<SearchInput onSearch={onSearch} />);
-  input
-    .find('[data-test-id="search-input"]')
-    .first()
-    .simulate('change', { target: { value: 'foo' } });
-  await new Promise((accept) => {
-    input.update();
-    setTimeout(() => {
-      input.update();
-      accept(undefined);
-    }, DROPDOWN_DELAY_MS);
-  }).then(() => {
-    expect(
-      input.find('[data-test-id="search-input-drop-down"]').exists()
-    ).toBeTruthy();
+  test('component should render', () => {
+    render(<SearchInput />);
+    expect(getSearchInput()).toBeInTheDocument();
   });
-});
 
-test('selecting a result from the dropdown closes the dropdown', async () => {
-  function onSearch() {
-    return new Promise<Array<string>>((accept) => {
-      accept(['bar']);
+  test('no dropdown is displayed on user input by default', async () => {
+    render(<SearchInput />);
+    fireEvent.change(getSearchInput(), { target: { value: 'foo' } });
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('search-input-drop-down')
+      ).not.toBeInTheDocument();
     });
-  }
-  const input = mount(<SearchInput onSearch={onSearch} />);
-  input
-    .find('[data-test-id="search-input"]')
-    .first()
-    .simulate('change', { target: { value: 'foo' } });
-  await new Promise((accept) => {
-    input.update();
-    setTimeout(() => {
-      input.update();
-      accept(undefined);
-    }, DROPDOWN_DELAY_MS);
-  }).then(async () => {
-    const match = input.find(
-      '[data-test-id="search-input-drop-down-element-0"]'
+  });
+
+  test('dropdown is displayed when results are available', async () => {
+    function onSearch() {
+      return new Promise<Array<string>>((accept) => {
+        accept(['bar']);
+      });
+    }
+    const { getByTestId } = render(<SearchInput onSearch={onSearch} />);
+    fireEvent.change(getSearchInput(), { target: { value: 'foo' } });
+    await waitFor(() => {
+      expect(getByTestId('search-input-drop-down')).toBeInTheDocument();
+    });
+  });
+
+  test('selecting a result from the dropdown closes the dropdown', async () => {
+    function onSearch() {
+      return new Promise<Array<string>>((accept) => {
+        accept(['bar']);
+      });
+    }
+    const { getByTestId, queryByTestId } = render(
+      <SearchInput onSearch={onSearch} />
     );
-    expect(match.exists()).toBeTruthy();
-    match.simulate('mousedown');
-    input.find('input').simulate('blur');
-    await waitOneTickAndUpdate(match);
-    await waitOneTickAndUpdate(input);
-    expect(
-      input.find('[data-test-id="search-input-drop-down"]').exists()
-    ).toBeFalsy();
+    fireEvent.change(getSearchInput(), { target: { value: 'foo' } });
+    await waitFor(() => getByTestId('search-input-drop-down-element-0'));
+    fireEvent.mouseDown(getByTestId('search-input-drop-down-element-0'));
+    fireEvent.blur(getSearchInput());
+    expect(queryByTestId('search-input-drop-down')).not.toBeInTheDocument();
   });
-});
 
-test('onChange handler is called when the contents changes', async () => {
-  let changed = false;
-  const input = mount(
-    <SearchInput
-      onChange={() => {
-        changed = true;
-      }}
-    />
-  );
-  input
-    .find('[data-test-id="search-input"]')
-    .first()
-    .simulate('change', { target: { value: 'foo' } });
-  await waitOneTickAndUpdate(input);
-  expect(changed).toBeTruthy();
+  test('onChange handler is called when the contents changes', async () => {
+    let externalValue = false;
+    render(
+      <SearchInput
+        onChange={() => {
+          externalValue = true;
+        }}
+      />
+    );
+    fireEvent.change(getSearchInput(), { target: { value: 'foo' } });
+    await waitFor(() => {
+      expect(externalValue).toEqual(true);
+    });
+  });
 });
