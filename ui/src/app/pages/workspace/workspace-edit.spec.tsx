@@ -1087,7 +1087,7 @@ describe('WorkspaceEdit', () => {
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
-    // There would be 4 options: Free tier, user's billing account, workspace billing account
+    // There would be 3 options: Free tier, user's billing account, workspace billing account
     expect(
       await screen.findByDisplayValue(USER_PROVIDED_BILLING_OPTION_REGEX)
     ).toBeInTheDocument();
