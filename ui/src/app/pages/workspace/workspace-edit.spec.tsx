@@ -162,7 +162,7 @@ describe('WorkspaceEdit', () => {
     // Since we are testing delays in these tests, it is helpful to set no dleay in user actions
     // themselves, so we can focus on delays in our apis:
     // https://github.com/testing-library/user-event/issues/833
-    user = userEvent.setup({ delay: null });
+    user = userEvent.setup();
   });
 
   it('displays workspaces create page', async () => {
