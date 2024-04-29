@@ -869,10 +869,9 @@ describe('WorkspaceEdit', () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
     renderComponent();
 
-    const specificPopulationYesRadio = await screen.findByTestId(
-      'specific-population-yes'
-    );
-    await user.click(specificPopulationYesRadio);
+    const specificPopulationYesRadio: HTMLInputElement =
+      await screen.findByTestId('specific-population-yes');
+    expect(specificPopulationYesRadio.checked).toEqual(true);
 
     const otherSpecialPopulationCheckbox = screen.getByTestId(
       'other-specialPopulation-checkbox'
@@ -884,7 +883,8 @@ describe('WorkspaceEdit', () => {
     const otherSpecialPopulationTextField = screen.getByTestId(
       'other-specialPopulation-text'
     );
-    await user.type(otherSpecialPopulationTextField, validInput);
+    await user.click(otherSpecialPopulationTextField);
+    await user.paste(validInput);
 
     const saveButton = screen.getByRole('button', {
       name: /update workspace/i,
@@ -896,7 +896,8 @@ describe('WorkspaceEdit', () => {
 
     const invalidInput = 'a'.repeat(101);
     await user.clear(otherSpecialPopulationTextField);
-    await user.type(otherSpecialPopulationTextField, invalidInput);
+    await user.click(otherSpecialPopulationTextField);
+    await user.paste(invalidInput);
     await user.hover(saveButton);
 
     expect(screen.queryByText(errorMessage)).toBeInTheDocument();
