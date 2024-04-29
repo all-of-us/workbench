@@ -70,6 +70,9 @@ const renameConceptSet = async (newName: string) => {
   await userEvent.paste(newName);
 };
 
+const csApiStub = new ConceptSetsApiStub();
+const firstConceptSet = csApiStub.conceptSets[0].name;
+
 describe(CopyModal.name, () => {
   let props: CopyModalProps;
 
@@ -146,25 +149,25 @@ describe(CopyModal.name, () => {
       copyRequest
     );
   };
-  //
-  // type AnyWrapper = ShallowWrapper | ReactWrapper;
-  //
-  // function getConceptSetCdrMismatchError(wrapper: AnyWrapper): AnyWrapper {
-  //   return wrapper.find('[data-test-id="concept-set-cdr-mismatch-error"]');
-  // }
-  //
-  // function getNotebookCdrMismatchWarning(wrapper: AnyWrapper): AnyWrapper {
-  //   return wrapper.find('[data-test-id="notebook-cdr-mismatch-warning"]');
-  // }
-  //
-  // function getAccessTierMismatchError(wrapper: AnyWrapper): AnyWrapper {
-  //   return wrapper.find('[data-test-id="access-tier-mismatch-error"]');
-  // }
+
+  const setupConceptSetTest = () => {
+    props.resourceType = ResourceType.CONCEPT_SET;
+    props.fromResourceName = firstConceptSet;
+    props.saveFunction = (copyRequest) => {
+      return conceptSetsApi().copyConceptSet(
+        props.fromWorkspaceNamespace,
+        props.fromWorkspaceFirecloudName,
+        props.fromResourceName,
+        copyRequest
+      );
+    };
+  };
 
   beforeEach(() => {
     const wsApiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, wsApiStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
+    registerApiClient(ConceptSetsApi, csApiStub);
 
     props = {
       fromWorkspaceNamespace: fromWorkspaceNamespace,
@@ -379,19 +382,7 @@ describe(CopyModal.name, () => {
   });
 
   it('should call correct copyConceptSet() call after selecting an option with a matching CDR and entering a name', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
-
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    setupConceptSetTest();
 
     component();
 
@@ -401,7 +392,7 @@ describe(CopyModal.name, () => {
     await renameConceptSet(newName);
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
-    // Click copy button
+
     await userEvent.click(screen.getByRole('button', { name: /copy/i }));
 
     expect(spy).toHaveBeenCalledWith(
@@ -417,19 +408,7 @@ describe(CopyModal.name, () => {
   });
 
   it('should disable concept set copy button when a mismatched CDR is selected', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
-
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    setupConceptSetTest();
 
     component();
 
@@ -446,8 +425,7 @@ describe(CopyModal.name, () => {
 
     expect(screen.getByTestId('concept-set-cdr-mismatch-error')).toBeTruthy();
 
-    const newName = 'Some Concepts';
-    await renameConceptSet(newName);
+    await renameConceptSet('whatever');
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
 
@@ -458,19 +436,7 @@ describe(CopyModal.name, () => {
   });
 
   it('should disable concept set copy button when a mismatched access tier is selected', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
-
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    setupConceptSetTest();
 
     component();
 
@@ -486,8 +452,7 @@ describe(CopyModal.name, () => {
 
     expect(screen.getByTestId('access-tier-mismatch-error')).toBeTruthy();
 
-    const newName = 'Some Concepts';
-    await renameConceptSet(newName);
+    await renameConceptSet('whatever');
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
 
