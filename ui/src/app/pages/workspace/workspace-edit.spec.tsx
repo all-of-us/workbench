@@ -1089,6 +1089,9 @@ describe('WorkspaceEdit', () => {
       '  ' + WORKSPACE_NAME_TEXT + '    '
     );
     expect(
+      // By default, RTL trims the whitespace around text in the DOM when querying. Since this test
+      // is verifying our own whitespace trimming, we need to disable RTL's trim option.
+      // https://testing-library.com/docs/queries/about/#normalization
       screen.queryByDisplayValue(WORKSPACE_NAME_TEXT, {
         normalizer: getDefaultNormalizer({ trim: false }),
       })
