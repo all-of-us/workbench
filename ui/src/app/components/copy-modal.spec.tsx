@@ -259,7 +259,6 @@ describe(CopyModal.name, () => {
       (c) => c as HTMLElement
     );
 
-    // alt CDR, with respect to the other tests
     const sameCdrElem = optionElems[0];
     const controlledCdrElem = optionElems[1];
     const otherCdrElem = optionElems[2];
@@ -306,8 +305,10 @@ describe(CopyModal.name, () => {
 
     await selectWorkspace(altCdrWorkspace);
 
+    const mismatchWarning = screen.getByTestId('notebook-cdr-mismatch-warning');
+    expect(mismatchWarning).toBeInTheDocument();
     expect(
-      screen.getByText(
+      within(mismatchWarning).getByText(
         'The selected destination workspace uses a different dataset version ' +
           `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
           `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}). ` +
