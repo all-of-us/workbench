@@ -699,8 +699,9 @@ describe('WorkspaceEdit', () => {
     const intendedStudySectionTextArea = await screen.getByRole('textbox', {
       name: /text area describing the intention of the study/i,
     });
-    // You got rid of delay at the top of the document. If you can get take that section out, this will probally work without having to use userEvnt instead of user.
-    await userEvent.type(intendedStudySectionTextArea, text, { delay: 100 });
+
+    await user.click(intendedStudySectionTextArea);
+    await user.paste(text);
     const charsRemaining = 1000 - text.length;
 
     within(intendedStudySection).getByText(
