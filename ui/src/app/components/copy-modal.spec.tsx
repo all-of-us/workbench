@@ -1,6 +1,6 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import Select from 'react-select';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 
 import {
   ConceptSetsApi,
@@ -10,7 +10,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { TextInput } from 'app/components/inputs';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
   conceptSetsApi,
@@ -20,7 +21,7 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { expectButtonElementDisabled } from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -31,25 +32,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { CopyModal, CopyModalProps } from './copy-modal';
 
-function simulateSelect(
-  wrapper: ReactWrapper,
-  reactSelect: Select,
-  selection: string
-) {
-  // Open Select options. Simulating a click doesn't work for some reason
-  const select = wrapper.find(reactSelect);
-  select.instance().setState({ menuIsOpen: true });
-  wrapper.update();
-
-  // Select an option
-  wrapper
-    .find(Select)
-    .find({ type: 'option' })
-    .findWhere((e) => e.text() === selection)
-    .first()
-    .simulate('click');
-}
-
 interface TestWorkspace {
   namespace: string;
   name: string;
@@ -58,58 +40,89 @@ interface TestWorkspace {
   accessTierShortName: string;
 }
 
-function simulateWorkspaceSelection(
-  wrapper: ReactWrapper,
-  workspace: TestWorkspace
-) {
-  simulateSelect(wrapper, Select, workspace.name);
-}
+const openWorkspaceSelection = async () => {
+  const copyButton = screen.getByText('Copy to Workspace');
+  await userEvent.click(copyButton);
 
-describe('CopyModal', () => {
+  const selectButton = screen.getByText(/select\.\.\./i);
+  return userEvent.click(selectButton);
+};
+
+const selectWorkspace = async (workspace: TestWorkspace) => {
+  await openWorkspaceSelection();
+
+  const selectedOption = screen.queryByText(workspace.name);
+  expect(selectedOption).toBeInTheDocument();
+  return userEvent.click(selectedOption);
+};
+
+const renameNotebook = async (newName: string) => {
+  const notebookTextBox = screen.getByDisplayValue(/notebook/i);
+  expect(notebookTextBox).toBeInTheDocument();
+
+  await userEvent.click(notebookTextBox);
+  await userEvent.clear(notebookTextBox);
+  await userEvent.paste(newName);
+};
+
+const renameConceptSet = async (newName: string) => {
+  const csTextBox = screen.getByDisplayValue(/concept set/i);
+  expect(csTextBox).toBeInTheDocument();
+
+  await userEvent.click(csTextBox);
+  await userEvent.clear(csTextBox);
+  await userEvent.paste(newName);
+};
+
+describe(CopyModal.name, () => {
   let props: CopyModalProps;
 
   const component = () => {
-    return mount(<CopyModal {...props} />);
+    return render(<CopyModal {...props} />);
   };
+
+  const defaultNamespace = 'El Capitan';
+  const altNamespace = 'Something Different';
+  const controlledNamespace = 'Workspaces under control';
 
   const workspaces: TestWorkspace[] = [
     {
-      namespace: 'El Capitan',
+      namespace: defaultNamespace,
       name: 'Freerider',
       id: 'freerider',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
-      namespace: 'El Capitan',
+      namespace: defaultNamespace,
       name: 'Dawn Wall',
       id: 'dawn wall',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
-      namespace: 'El Capitan',
+      namespace: defaultNamespace,
       name: 'Zodiac',
       id: 'zodiac',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
-      namespace: 'El Capitan',
+      namespace: defaultNamespace,
       name: 'The Nose',
       id: 'the nose',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
-      namespace: 'Something Different',
+      namespace: altNamespace,
       name: 'Sesame Street',
       id: 'sesame-street',
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
-      namespace: 'Workspaces under control',
+      namespace: controlledNamespace,
       name: 'A tightly controlled workspace',
       id: 'controlled-ws-1',
       cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
@@ -117,13 +130,17 @@ describe('CopyModal', () => {
     },
   ];
 
+  const ownerWorkspace = workspaces[0];
+  const readerWorkspace = workspaces[1];
+  const writerWorkspace = workspaces[2];
+  const noAccessWorkspace = workspaces[3];
   const altCdrWorkspace = workspaces[4];
   const controlledCdrWorkspace = workspaces[5];
 
-  const fromWorkspaceNamespace = workspaces[0].namespace;
-  const fromWorkspaceFirecloudName = workspaces[0].id;
-  const fromCdrVersionId = workspaces[0].cdrVersionId;
-  const fromAccessTierShortName = workspaces[0].accessTierShortName;
+  const fromWorkspaceNamespace = ownerWorkspace.namespace;
+  const fromWorkspaceFirecloudName = ownerWorkspace.id;
+  const fromCdrVersionId = ownerWorkspace.cdrVersionId;
+  const fromAccessTierShortName = ownerWorkspace.accessTierShortName;
   const fromResourceName = 'notebook';
   const notebookSaveFunction = (copyRequest) => {
     return notebooksApi().copyNotebook(
@@ -134,24 +151,24 @@ describe('CopyModal', () => {
     );
   };
 
-  type AnyWrapper = ShallowWrapper | ReactWrapper;
-
-  function getConceptSetCdrMismatchError(wrapper: AnyWrapper): AnyWrapper {
-    return wrapper.find('[data-test-id="concept-set-cdr-mismatch-error"]');
-  }
-
-  function getNotebookCdrMismatchWarning(wrapper: AnyWrapper): AnyWrapper {
-    return wrapper.find('[data-test-id="notebook-cdr-mismatch-warning"]');
-  }
-
-  function getAccessTierMismatchError(wrapper: AnyWrapper): AnyWrapper {
-    return wrapper.find('[data-test-id="access-tier-mismatch-error"]');
-  }
+  const setupConceptSetTest = () => {
+    props.resourceType = ResourceType.CONCEPT_SET;
+    props.fromResourceName = new ConceptSetsApiStub().conceptSets[0].name;
+    props.saveFunction = (copyRequest) => {
+      return conceptSetsApi().copyConceptSet(
+        props.fromWorkspaceNamespace,
+        props.fromWorkspaceFirecloudName,
+        props.fromResourceName,
+        copyRequest
+      );
+    };
+  };
 
   beforeEach(() => {
     const wsApiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, wsApiStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
+    registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
 
     props = {
       fromWorkspaceNamespace: fromWorkspaceNamespace,
@@ -164,57 +181,59 @@ describe('CopyModal', () => {
       onCopy: () => {},
       saveFunction: notebookSaveFunction,
     };
-    wsApiStub.workspaceAccess.set(workspaces[0].id, WorkspaceAccessLevel.OWNER);
     wsApiStub.workspaceAccess.set(
-      workspaces[1].id,
+      ownerWorkspace.id,
+      WorkspaceAccessLevel.OWNER
+    );
+    wsApiStub.workspaceAccess.set(
+      readerWorkspace.id,
       WorkspaceAccessLevel.READER
     );
     wsApiStub.workspaceAccess.set(
-      workspaces[2].id,
+      writerWorkspace.id,
       WorkspaceAccessLevel.WRITER
     );
     wsApiStub.workspaceAccess.set(
-      workspaces[3].id,
+      noAccessWorkspace.id,
       WorkspaceAccessLevel.NO_ACCESS
     );
     wsApiStub.workspaceAccess.set(
-      workspaces[4].id,
+      altCdrWorkspace.id,
       WorkspaceAccessLevel.WRITER
     );
-    wsApiStub.workspaceAccess.set(workspaces[5].id, WorkspaceAccessLevel.OWNER);
+    wsApiStub.workspaceAccess.set(
+      controlledCdrWorkspace.id,
+      WorkspaceAccessLevel.OWNER
+    );
 
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
-  it('should render', async () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-  });
-
   it('should populate select options with writeable Workspaces from getWorkspaces()', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const currentWsOption = ownerWorkspace.name + ' (current workspace)';
+    const writerWsOption = writerWorkspace.name;
+    const writerAltCdrWsOption = altCdrWorkspace.name;
+    const writerControlledCdrWsOption = controlledCdrWorkspace.name;
 
-    const select = wrapper.find(Select);
-    select.instance().setState({ menuIsOpen: true });
-    wrapper.update();
-
-    const options = wrapper
-      .find(Select)
-      .find({ type: 'option' })
-      .map((e) => e.text());
-
-    const currentWsOption = workspaces[0].name + ' (current workspace)';
-    const writerWsOption = workspaces[2].name;
-    const writerAltCdrWsOption = workspaces[4].name;
-    const writerControlledCdrWsOption = workspaces[5].name;
-
-    expect(options).toEqual([
+    const expectedOptions = [
       currentWsOption,
       writerWsOption,
       writerAltCdrWsOption,
       writerControlledCdrWsOption,
-    ]);
+    ];
+
+    component();
+
+    // verify that copy-to options are not displayed by default
+    expectedOptions.forEach((option) =>
+      expect(screen.queryByText(option)).not.toBeInTheDocument()
+    );
+
+    await openWorkspaceSelection();
+
+    expectedOptions.forEach((option) =>
+      expect(screen.queryByText(option)).toBeInTheDocument()
+    );
   });
 
   it('should list workspaces with the same CDR version first', async () => {
@@ -223,81 +242,90 @@ describe('CopyModal', () => {
     props.fromWorkspaceFirecloudName = altCdrWorkspace.id;
     props.fromCdrVersionId = altCdrWorkspace.cdrVersionId;
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
-    const select = wrapper.find(Select);
-    select.instance().setState({ menuIsOpen: true });
-    wrapper.update();
+    await openWorkspaceSelection();
 
-    const options = wrapper
-      .find(Select)
-      .find({ type: 'option' })
-      .map((e) => e.text());
+    // this is ugly and fragile, but I haven't been able to do better yet
 
     const currentWsOption = altCdrWorkspace.name + ' (current workspace)';
-    const controlledCdrWriterWsOption = workspaces[5].name;
-    const otherCdrOwnerWsOption = workspaces[0].name;
-    const otherCdrWriterWsOption = workspaces[2].name;
+    const controlledCdrWriterWsOption = controlledCdrWorkspace.name;
+    const otherCdrOwnerWsOption = ownerWorkspace.name;
+    const otherCdrWriterWsOption = writerWorkspace.name;
 
-    expect(options).toEqual([
-      currentWsOption,
-      controlledCdrWriterWsOption,
-      otherCdrOwnerWsOption,
-      otherCdrWriterWsOption,
-    ]);
+    const optionAncestor =
+      screen.queryByText(currentWsOption).parentNode.parentNode.parentNode;
+    const optionElems: HTMLElement[] = Array.from(optionAncestor.children).map(
+      (c) => c as HTMLElement
+    );
+
+    const sameCdrElem = optionElems[0];
+    const controlledCdrElem = optionElems[1];
+    const otherCdrElem = optionElems[2];
+
+    expect(within(sameCdrElem).getByText(currentWsOption)).toBeInTheDocument();
+    expect(
+      within(controlledCdrElem).getByText(controlledCdrWriterWsOption)
+    ).toBeInTheDocument();
+    expect(
+      within(otherCdrElem).getByText(otherCdrOwnerWsOption)
+    ).toBeInTheDocument();
+    expect(
+      within(otherCdrElem).getByText(otherCdrWriterWsOption)
+    ).toBeInTheDocument();
   });
 
   it('should call correct copyNotebook() call after selecting an option and entering a name', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
-    simulateWorkspaceSelection(wrapper, workspaces[2]);
+    await selectWorkspace(writerWorkspace);
 
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Freeblast' } });
+    const newName = 'Freeblast';
+    await renameNotebook(newName);
 
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
-    // Click copy button
-    wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
+
+    const copyButton = screen.getByText('Copy Notebook');
+    await userEvent.click(copyButton);
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
       props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
-        toWorkspaceName: workspaces[2].id,
-        toWorkspaceNamespace: workspaces[2].namespace,
-        newName: 'Freeblast',
+        toWorkspaceName: writerWorkspace.id,
+        toWorkspaceNamespace: writerWorkspace.namespace,
+        newName,
       }
     );
   });
 
   it('should call correct copyNotebook() call when a mismatched CDR is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
-    simulateWorkspaceSelection(wrapper, altCdrWorkspace);
+    await selectWorkspace(altCdrWorkspace);
 
+    const mismatchWarning = screen.getByTestId('notebook-cdr-mismatch-warning');
+    expect(mismatchWarning).toBeInTheDocument();
     expect(
-      getNotebookCdrMismatchWarning(wrapper).getDOMNode().textContent
-    ).toBe(
-      'The selected destination workspace uses a different dataset version ' +
-        `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
-        `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}). ` +
-        'Edits may be required to ensure your analysis is functional and accurate.'
-    );
+      within(mismatchWarning).getByText(
+        'The selected destination workspace uses a different dataset version ' +
+          `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
+          `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}). ` +
+          'Edits may be required to ensure your analysis is functional and accurate.',
+        { exact: false }
+      )
+    ).toBeInTheDocument();
 
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Freeblast' } });
+    screen.debug();
+
+    const newName = 'Freeblast';
+    await renameNotebook(newName);
 
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
-    // Click copy button
-    wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
+
+    const copyButton = screen.getByText('Copy Notebook');
+    await userEvent.click(copyButton);
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
@@ -306,169 +334,126 @@ describe('CopyModal', () => {
       {
         toWorkspaceName: altCdrWorkspace.id,
         toWorkspaceNamespace: altCdrWorkspace.namespace,
-        newName: 'Freeblast',
+        newName,
       }
     );
   });
 
   it('should disable notebook copy button when a mismatched access tier is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
-    simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
+    await selectWorkspace(controlledCdrWorkspace);
 
-    expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-      'Can’t copy to that workspace. It has a different access tier ' +
-        `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`
-    );
+    const mismatchError = screen.getByTestId('access-tier-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
+    expect(
+      within(mismatchError).getByText(
+        'Can’t copy to that workspace. It has a different access tier ' +
+          `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`,
+        { exact: false }
+      )
+    ).toBeInTheDocument();
 
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Freeblast' } });
+    await renameNotebook('Some new notebook name');
 
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
-    // Click copy button
-    const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
-    copyButton.simulate('click');
 
-    expect(copyButton.prop('disabled')).toBe(true);
+    const copyButton = screen.getByRole('button', { name: /copy/i });
+    await userEvent.click(copyButton);
+    expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
   it('should disable copy notebook button if option is not selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
 
     // Click copy button
-    const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
-    copyButton.simulate('click');
-
-    expect(copyButton.prop('disabled')).toBe(true);
+    const copyButton = screen.getByRole('button', { name: /copy/i });
+    await userEvent.click(copyButton);
+    expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
   it('should call correct copyConceptSet() call after selecting an option with a matching CDR and entering a name', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
+    setupConceptSetTest();
 
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        fromWorkspaceNamespace,
-        fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    component();
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await selectWorkspace(writerWorkspace);
 
-    simulateWorkspaceSelection(wrapper, workspaces[2]);
-
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Some Concepts' } });
+    const newName = 'Some Concepts';
+    await renameConceptSet(newName);
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
-    // Click copy button
-    wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
+
+    await userEvent.click(screen.getByRole('button', { name: /copy/i }));
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
       props.fromWorkspaceFirecloudName,
       props.fromResourceName,
       {
-        toWorkspaceName: workspaces[2].id,
-        toWorkspaceNamespace: workspaces[2].namespace,
-        newName: 'Some Concepts',
+        toWorkspaceName: writerWorkspace.id,
+        toWorkspaceNamespace: writerWorkspace.namespace,
+        newName,
       }
     );
   });
 
   it('should disable concept set copy button when a mismatched CDR is selected', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
+    setupConceptSetTest();
 
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        fromWorkspaceNamespace,
-        fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    component();
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await selectWorkspace(altCdrWorkspace);
 
-    simulateWorkspaceSelection(wrapper, altCdrWorkspace);
-
+    const mismatchError = screen.getByTestId('concept-set-cdr-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
     expect(
-      getConceptSetCdrMismatchError(wrapper).getDOMNode().textContent
-    ).toBe(
-      'Can’t copy to that workspace. It uses a different dataset version ' +
-        `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
-        `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}).`
-    );
+      within(mismatchError).getByText(
+        'Can’t copy to that workspace. It uses a different dataset version ' +
+          `(${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION}) from the current workspace ` +
+          `(${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}).`,
+        { exact: false }
+      )
+    ).toBeInTheDocument();
 
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Some Concepts' } });
+    await renameConceptSet('whatever');
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
-    // Click copy button
-    const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
-    copyButton.simulate('click');
 
-    expect(copyButton.prop('disabled')).toBe(true);
+    const copyButton = screen.getByRole('button', { name: /copy/i });
+    await userEvent.click(copyButton);
+    expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
   it('should disable concept set copy button when a mismatched access tier is selected', async () => {
-    const csApiStub = new ConceptSetsApiStub();
-    registerApiClient(ConceptSetsApi, csApiStub);
+    setupConceptSetTest();
 
-    props.resourceType = ResourceType.CONCEPT_SET;
-    props.fromResourceName = csApiStub.conceptSets[0].name;
-    props.saveFunction = (copyRequest) => {
-      return conceptSetsApi().copyConceptSet(
-        fromWorkspaceNamespace,
-        fromWorkspaceFirecloudName,
-        props.fromResourceName,
-        copyRequest
-      );
-    };
+    component();
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    await selectWorkspace(controlledCdrWorkspace);
 
-    simulateWorkspaceSelection(wrapper, controlledCdrWorkspace);
+    const mismatchError = screen.getByTestId('access-tier-mismatch-error');
+    expect(mismatchError).toBeInTheDocument();
+    expect(
+      within(mismatchError).getByText(
+        'Can’t copy to that workspace. It has a different access tier ' +
+          `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`,
+        { exact: false }
+      )
+    ).toBeInTheDocument();
 
-    expect(getAccessTierMismatchError(wrapper).getDOMNode().textContent).toBe(
-      'Can’t copy to that workspace. It has a different access tier ' +
-        `(${AccessTierShortNames.Controlled}) from the current workspace (${AccessTierShortNames.Registered}).`
-    );
-
-    // Type out new name
-    wrapper
-      .find(TextInput)
-      .simulate('change', { target: { value: 'Some Concepts' } });
+    await renameConceptSet('whatever');
 
     const spy = jest.spyOn(conceptSetsApi(), 'copyConceptSet');
-    // Click copy button
-    const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
-    copyButton.simulate('click');
 
-    expect(copyButton.prop('disabled')).toBe(true);
+    const copyButton = screen.getByRole('button', { name: /copy/i });
+    await userEvent.click(copyButton);
+    expectButtonElementDisabled(copyButton);
     expect(spy).toHaveBeenCalledTimes(0);
   });
 });
