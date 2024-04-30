@@ -46,6 +46,7 @@ export const MachineSelector = ({
         </label>
         <Dropdown
           id={`${idPrefix}-cpu`}
+          name={`${idPrefix}-cpu`}
           options={fp.flow(
             // Show all CPU options.
             fp.map('cpu'),
@@ -76,6 +77,7 @@ export const MachineSelector = ({
         </label>
         <Dropdown
           id={`${idPrefix}-ram`}
+          name={`${idPrefix}-ram`}
           options={fp.flow(
             // Show valid memory options as constrained by the currently selected CPU.
             fp.filter(({ cpu: availableCpu }) => availableCpu === cpu),

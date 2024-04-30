@@ -24,6 +24,7 @@ export const DiskSizeSelector = ({
     <InputNumber
       aria-label={`${idPrefix}-disk`}
       id={`${idPrefix}-disk`}
+      name={`${idPrefix}-disk`}
       showButtons
       disabled={disabled}
       decrementButtonClassName='p-button-secondary'

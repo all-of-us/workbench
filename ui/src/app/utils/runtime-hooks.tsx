@@ -12,6 +12,7 @@ import {
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
+import { delay } from 'app/utils/subscribable';
 
 import { canUseExistingDisk, toAnalysisConfig } from './analysis-config';
 import { withAsyncErrorHandling } from './index';
@@ -311,13 +312,6 @@ export const useCustomRuntime = (
           )
         );
 
-        // A disk update may be need in combination with a runtime update.
-        if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
-          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-            runtime: request.runtime,
-          });
-        }
-
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
           const deleteAttachedDisk =
             mostSevereDiskDiff === AnalysisDiffState.NEEDS_DELETE;
@@ -328,6 +322,13 @@ export const useCustomRuntime = (
               signal: aborter.signal,
             }
           );
+        }
+        if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
+          console.log('first');
+
+          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+            runtime: request.runtime,
+          });
         } else if (
           [
             AnalysisDiffState.CAN_UPDATE_WITH_REBOOT,
@@ -338,6 +339,7 @@ export const useCustomRuntime = (
             runtime.status === RuntimeStatus.RUNNING ||
             runtime.status === RuntimeStatus.STOPPED
           ) {
+            console.log('second');
             await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
               runtime: request.runtime,
             });
@@ -359,9 +361,11 @@ export const useCustomRuntime = (
         if (isVisible(runtime?.status)) {
           await applyRuntimeUpdate();
         } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
-          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-            runtime: request.runtime,
-          });
+          await disksApi().updateDisk(
+            currentWorkspaceNamespace,
+            existingDisk.name,
+            requestedDisk.size
+          );
         }
 
         if (runtime?.status === RuntimeStatus.ERROR) {
