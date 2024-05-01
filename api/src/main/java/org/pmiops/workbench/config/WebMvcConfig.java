@@ -89,7 +89,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         .addMapping("/**")
         .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "OPTIONS")
         .allowedOrigins("*")
-        .allowedHeaders("*")
+        .allowCredentials(true)
+        .allowedHeaders("Origin, X-Requested-With, Content-Type, Accept, Authorization")
         .exposedHeaders("Origin, X-Requested-With, Content-Type, Accept, Authorization");
   }
 }
