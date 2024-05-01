@@ -7,8 +7,8 @@ import static org.pmiops.workbench.ras.RasLinkConstants.USER_INFO_URL_SUFFIX;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import jakarta.inject.Provider;
 import java.io.IOException;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Qualifier;

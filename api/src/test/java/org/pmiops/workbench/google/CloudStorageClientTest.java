@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
+import jakarta.inject.Provider;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;

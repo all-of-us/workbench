@@ -2,9 +2,9 @@ package org.pmiops.workbench.impersonation;
 
 import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.FIRECLOUD_WORKSPACE_REQUIRED_FIELDS;
 
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;

@@ -1,14 +1,13 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfo;
+import jakarta.servlet.ServletContext;
 import java.util.Optional;
-import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
-import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
@@ -23,19 +22,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 @EnableWebMvc
 @Configuration
 @ComponentScan(basePackages = {"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig implements WebMvcConfigurer {
-
   @Autowired private AuthInterceptor authInterceptor;
-
-  @Autowired private CorsInterceptor corsInterceptor;
 
   @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
 
@@ -71,7 +64,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
@@ -89,5 +81,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
         .getRequest()
         .getServletContext();
+  }
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry
+        .addMapping("/**")
+        .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "TRACE", "OPTIONS")
+        .allowedOrigins("*")
+        .allowedHeaders("*")
+        .exposedHeaders("Origin, X-Requested-With, Content-Type, Accept, Authorization");
   }
 }

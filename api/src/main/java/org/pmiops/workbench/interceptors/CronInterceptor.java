@@ -2,8 +2,8 @@ package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
 import io.swagger.v3.oas.annotations.Operation;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
