@@ -117,30 +117,6 @@ const getInvalidEmailDomains = (emailDomains: Array<string>): Array<string> =>
   emailDomains.filter(isDomainInvalid);
 
 const nonEmpty = (item: string): boolean => item && !!item.trim();
-
-const EraRequiredSwitch = (props: {
-  tierConfig: InstitutionTierConfig;
-  onToggle: (boolean) => void;
-}) => {
-  const { tierConfig, onToggle } = props;
-  const {
-    config: { enableRasLoginGovLinking },
-  } = useStore(serverConfigStore);
-  return (
-    <CommonToggle
-      name='eRA account required'
-      dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
-      onToggle={(e) => onToggle(e)}
-      checked={tierConfig.eraRequired}
-      disabled={
-        !enableRasLoginGovLinking ||
-        tierConfig.membershipRequirement ===
-          InstitutionMembershipRequirement.NO_ACCESS
-      }
-    />
-  );
-};
-
 const EnableCtSwitch = (props: {
   institution: Institution;
   onToggle: (boolean) => void;
@@ -254,10 +230,6 @@ const TierConfig = (props: TierConfigProps) => {
           {displayNameForTier(accessTierShortName)} access
         </label>
         <FlexRow style={{ gap: '0.45rem' }}>
-          <EraRequiredSwitch
-            tierConfig={tierConfig}
-            onToggle={setEraRequired}
-          />
           {accessTierShortName === AccessTierShortNames.Controlled && (
             <EnableCtSwitch
               institution={institution}
