@@ -10,7 +10,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { resourceTableRows } from 'app/components/resource-list.spec';
+import { resourceTableRows } from 'app/components/resources/resource-list.spec';
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';

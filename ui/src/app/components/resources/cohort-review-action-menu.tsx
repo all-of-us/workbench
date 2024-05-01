@@ -1,18 +1,12 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { WorkspaceResource } from 'generated/fetch';
-
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -26,23 +20,25 @@ import {
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
-import { getDescription, getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDescription,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends CommonActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
-    WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
-  menuOnly: boolean;
-}
+    WithSpinnerOverlayProps {}
 
 interface State {
   showRenameModal: boolean;
 }
 
-export const CohortReviewResourceCard = fp.flow(
+export const CohortReviewActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
@@ -55,7 +51,7 @@ export const CohortReviewResourceCard = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -117,7 +113,7 @@ export const CohortReviewResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const { resource } = this.props;
       return (
         <React.Fragment>
           {this.state.showRenameModal && (
@@ -130,14 +126,11 @@ export const CohortReviewResourceCard = fp.flow(
               existingNames={this.props.existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+            title='Cohort Review Action Menu'
+          />
         </React.Fragment>
       );
     }

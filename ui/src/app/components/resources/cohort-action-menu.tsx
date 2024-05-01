@@ -1,19 +1,15 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { DataSet, WorkspaceResource } from 'generated/fetch';
+import { DataSet } from 'generated/fetch';
 
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -30,6 +26,8 @@ import { dataTabPath } from 'app/routing/utils';
 import { cohortsApi, dataSetApi } from 'app/services/swagger-fetch-clients';
 import { NavigationProps } from 'app/utils/navigation';
 import {
+  canDelete,
+  canWrite,
   getDescription,
   getDisplayName,
   getId,
@@ -39,22 +37,18 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends CommonActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps,
-    NavigationProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
-  menuOnly: boolean;
-}
+    NavigationProps {}
 
 interface State {
   showRenameModal: boolean;
   referencingDataSets: Array<DataSet>;
 }
 
-export const CohortResourceCard = fp.flow(
+export const CohortActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
@@ -79,7 +73,7 @@ export const CohortResourceCard = fp.flow(
       );
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -210,7 +204,7 @@ export const CohortResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const { resource } = this.props;
       return (
         <React.Fragment>
           {this.state.showRenameModal && (
@@ -239,14 +233,11 @@ export const CohortResourceCard = fp.flow(
               }}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+            title='Cohort Action Menu'
+          />
         </React.Fragment>
       );
     }

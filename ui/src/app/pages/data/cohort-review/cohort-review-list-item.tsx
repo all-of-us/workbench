@@ -8,9 +8,9 @@ import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 import { Clickable } from 'app/components/buttons';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
+} from 'app/components/resources/resource-actions-menu';
 import { withConfirmDeleteModal } from 'app/components/with-confirm-delete-modal';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -63,7 +63,7 @@ export const CohortReviewListItem = fp.flow(
         .finally(() => setShowRenameModal(false));
     };
 
-    const actions = (): Action[] => {
+    const actions = (): ResourceAction[] => {
       return [
         {
           icon: 'note',
@@ -158,7 +158,11 @@ export const CohortReviewListItem = fp.flow(
             }}
           >
             <div style={{ height: '50%', textAlign: 'right' }}>
-              <ResourceActionsMenu actions={actions()} disabled={readOnly} />
+              <ResourceActionsMenu
+                actions={actions()}
+                disabled={readOnly}
+                title='Cohort Review Action Menu'
+              />
             </div>
             {cohortModifiedTime > cohortReview.creationTime ? (
               <div style={{ color: colors.warning, padding: '0.375rem 0' }}>

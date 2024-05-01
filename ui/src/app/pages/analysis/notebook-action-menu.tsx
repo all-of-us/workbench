@@ -1,19 +1,15 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { CopyRequest, WorkspaceResource } from 'generated/fetch';
+import { CopyRequest } from 'generated/fetch';
 
 import { CopyModal } from 'app/components/copy-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,19 +25,21 @@ import {
 import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getDisplayName, getType } from 'app/utils/resources';
+import {
+  canDelete,
+  canWrite,
+  getDisplayName,
+  getType,
+} from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends CommonActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
     WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
-  menuOnly: boolean;
-  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
+  useAppFilesListIcon: boolean;
 }
 
 interface State {
@@ -63,7 +61,7 @@ export const NotebookActionMenu = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -179,13 +177,8 @@ export const NotebookActionMenu = fp.flow(
     }
 
     render() {
-      const {
-        resource,
-        menuOnly,
-        onUpdate,
-        existingNameList,
-        menuButtonComponentOverride,
-      } = this.props;
+      const { resource, onUpdate, existingNameList, useAppFilesListIcon } =
+        this.props;
       const actions = this.actions;
       const oldName = getDisplayName(resource);
       return (
@@ -222,15 +215,11 @@ export const NotebookActionMenu = fp.flow(
               existingNames={existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              {...{ menuButtonComponentOverride, actions }}
-              menuButtonTitle='Notebook Action Menu'
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard {...{ resource, actions }} />
-          )}
+          <ResourceActionsMenu
+            {...{ useAppFilesListIcon, actions }}
+            title='Notebook Action Menu'
+            disabled={resource.adminLocked}
+          />
         </React.Fragment>
       );
     }
