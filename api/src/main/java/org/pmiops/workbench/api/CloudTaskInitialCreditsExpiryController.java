@@ -3,12 +3,12 @@ package org.pmiops.workbench.api;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDollarLimit;
 
 import com.google.common.collect.Sets;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -44,13 +44,13 @@ public class CloudTaskInitialCreditsExpiryController
       WorkspaceDao workspaceDao,
       WorkspaceService workspaceService,
       UserDao userDao,
-      Provider<WorkbenchConfig> workbenchConfig1,
+      Provider<WorkbenchConfig> workbenchConfig,
       LeonardoApiClient leonardoApiClient,
       MailService mailService) {
     this.workspaceDao = workspaceDao;
     this.workspaceService = workspaceService;
     this.userDao = userDao;
-    this.workbenchConfig = workbenchConfig1;
+    this.workbenchConfig = workbenchConfig;
     this.leonardoApiClient = leonardoApiClient;
     this.mailService = mailService;
   }

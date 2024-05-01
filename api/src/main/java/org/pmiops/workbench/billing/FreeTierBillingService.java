@@ -2,9 +2,7 @@ package org.pmiops.workbench.billing;
 
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
-import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
-import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
