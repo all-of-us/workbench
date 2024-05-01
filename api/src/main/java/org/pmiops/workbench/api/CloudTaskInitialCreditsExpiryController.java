@@ -14,6 +14,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -223,7 +224,7 @@ public class CloudTaskInitialCreditsExpiryController
   }
 
   private void deleteAppsAndRuntimesInFreeTierWorkspaces(DbUser user) {
-    logger.info("Deleting apps and runtimes for user " + user.getUsername());
+    logger.info("Deleting apps and runtimes for user {}", user.getUsername());
 
     workspaceDao.findAllByCreator(user).stream()
         .filter(
@@ -236,8 +237,12 @@ public class CloudTaskInitialCreditsExpiryController
         .forEach(
             dbWorkspace -> {
               String namespace = dbWorkspace.getWorkspaceNamespace();
-              leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-              logger.info("Deleted apps and runtimes for workspace " + namespace);
+              try {
+                leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
+                logger.info("Deleted apps and runtimes for workspace {}", namespace);
+              } catch (WorkbenchException e) {
+                logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+              }
             });
   }
 

@@ -92,7 +92,7 @@ public class FreeTierBillingService {
     List<WorkspaceCostView> allCostsInDbForUsers = getAllCostsInDbForUsers(users);
 
     final Map<String, Long> workspaceByProject = getWorkspaceByProjectCache(allCostsInDbForUsers);
-    if (workspaceByProject == null) {
+    if (workspaceByProject.isEmpty()) {
       logger.info("No workspaces require updates");
       return;
     }
@@ -389,7 +389,7 @@ public class FreeTierBillingService {
       List<WorkspaceCostView> allCostsInDbForUsers) {
     // No need to proceed since there's nothing to update anyway
     if (allCostsInDbForUsers.isEmpty()) {
-      return null;
+      return Collections.emptyMap();
     }
 
     final Map<String, Long> workspaceByProject =
