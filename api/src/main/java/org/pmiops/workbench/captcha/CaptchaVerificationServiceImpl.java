@@ -1,9 +1,9 @@
 package org.pmiops.workbench.captcha;
 
-import jakarta.inject.Provider;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -33,8 +33,8 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   @Autowired
   public CaptchaVerificationServiceImpl(
       CloudStorageClient cloudStorageClient,
-      jakarta.inject.Provider<WorkbenchConfig> configProvider,
-      jakarta.inject.Provider<CaptchaApi> captchaApiProvider) {
+      javax.inject.Provider<WorkbenchConfig> configProvider,
+      javax.inject.Provider<CaptchaApi> captchaApiProvider) {
     this.cloudStorageClient = cloudStorageClient;
     this.configProvider = configProvider;
     this.captchaApiProvider = captchaApiProvider;

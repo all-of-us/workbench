@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbUser;

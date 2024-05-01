@@ -16,8 +16,7 @@ dependencies {
     liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:3.0.2'
     liquibaseRuntime 'info.picocli:picocli:4.6.1'
     liquibaseRuntime 'com.mysql:mysql-connector-j:8.3.0'
-    liquibaseRuntime 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
-    liquibaseRuntime 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+    liquibaseRuntime group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
 }
 
 liquibase {

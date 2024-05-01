@@ -1,8 +1,6 @@
 package org.pmiops.workbench.conceptset;
 
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.inject.Provider;
-import jakarta.persistence.OptimisticLockException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collection;
@@ -11,6 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;

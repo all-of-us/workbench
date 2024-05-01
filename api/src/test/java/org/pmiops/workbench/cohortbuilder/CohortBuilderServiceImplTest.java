@@ -3,13 +3,13 @@ package org.pmiops.workbench.cohortbuilder;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.when;
 
-import jakarta.inject.Provider;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

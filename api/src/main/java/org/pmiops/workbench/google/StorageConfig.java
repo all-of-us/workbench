@@ -3,7 +3,7 @@ package org.pmiops.workbench.google;
 import com.google.auth.Credentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.springframework.beans.factory.annotation.Qualifier;

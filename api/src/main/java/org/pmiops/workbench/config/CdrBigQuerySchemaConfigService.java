@@ -1,6 +1,6 @@
 package org.pmiops.workbench.config;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;

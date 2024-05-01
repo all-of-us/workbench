@@ -1,6 +1,6 @@
 package org.pmiops.workbench.absorb;
 
-import jakarta.annotation.Nullable;
+import javax.annotation.Nullable;
 
 public class Credentials {
   public String apiKey = null;

@@ -13,11 +13,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Rule;

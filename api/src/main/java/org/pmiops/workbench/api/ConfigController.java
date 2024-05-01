@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import jakarta.inject.Provider;
+import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfigMapper;
 import org.pmiops.workbench.db.dao.AccessModuleDao;

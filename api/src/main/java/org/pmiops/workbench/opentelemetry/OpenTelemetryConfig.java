@@ -8,6 +8,7 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.logging.Logger;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,10 @@ public class OpenTelemetryConfig {
           .build();
     } else {
       LOGGER.warning("Disable Trace exporter, this should only happen in local dev environment.");
-      return SdkTracerProvider.builder().build();
+      return SdkTracerProvider.builder()
+          .addSpanProcessor(SimpleSpanProcessor.create(new NoopSpanExporter()))
+          .setSampler(Sampler.traceIdRatioBased(1.0))
+          .build();
     }
   }
 
@@ -50,7 +54,9 @@ public class OpenTelemetryConfig {
           .build();
     } else {
       LOGGER.warning("Disable MetricReader, this should only happen in local dev environment.");
-      return SdkMeterProvider.builder().build();
+      return SdkMeterProvider.builder()
+          .registerMetricReader(PeriodicMetricReader.create(new NoopMetricExporter()))
+          .build();
     }
   }
 }

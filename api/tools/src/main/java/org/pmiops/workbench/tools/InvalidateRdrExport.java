@@ -1,12 +1,12 @@
 package org.pmiops.workbench.tools;
 
-import jakarta.inject.Provider;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.Clock;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;

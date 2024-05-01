@@ -1,18 +1,17 @@
 package org.pmiops.workbench.db.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "new_user_satisfaction_survey_one_time_code")
@@ -29,7 +28,7 @@ public class DbNewUserSatisfactionSurveyOneTimeCode {
       name = "new_user_satisfaction_survey_one_time_code_id",
       columnDefinition = "VARCHAR(36)",
       nullable = false)
-  @JdbcTypeCode(SqlTypes.VARCHAR)
+  @Type(type = "uuid-char")
   public UUID getId() {
     return id;
   }

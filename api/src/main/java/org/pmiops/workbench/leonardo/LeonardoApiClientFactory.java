@@ -1,8 +1,8 @@
 package org.pmiops.workbench.leonardo;
 
 import com.google.auth.oauth2.OAuth2Credentials;
-import jakarta.inject.Provider;
 import java.io.IOException;
+import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;

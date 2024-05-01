@@ -18,13 +18,13 @@ import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.auth.oauth2.TokenResponse;
-import jakarta.inject.Provider;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;

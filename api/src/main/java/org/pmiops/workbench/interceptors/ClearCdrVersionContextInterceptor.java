@@ -1,7 +1,7 @@
 package org.pmiops.workbench.interceptors;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;

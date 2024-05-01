@@ -6,16 +6,12 @@ import com.google.gson.Gson;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
-import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,16 +35,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  * SQL Proxy.
  */
 @Configuration
-@Import({
-  WorkbenchDbConfig.class,
-  CdrConfig.class,
-  JdbcTemplateAutoConfiguration.class,
-  JpaRepositoriesAutoConfiguration.class,
-  HibernateJpaAutoConfiguration.class,
-  RetryConfig.class,
-  CommonConfig.class,
-  StorageConfig.class
-})
+@EnableAutoConfiguration
+@Import({RetryConfig.class, CommonConfig.class, StorageConfig.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class CommandLineToolConfig {
