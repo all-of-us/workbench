@@ -19,6 +19,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { getCreator } from 'app/utils/runtime-utils';
 
@@ -65,8 +66,8 @@ interface Props {
 export const CloudEnvironmentsTable = ({
   workspaceNamespace,
   onDelete,
-  runtimes = [],
-  userApps = [],
+  runtimes,
+  userApps,
 }: Props) => {
   const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
@@ -112,11 +113,11 @@ export const CloudEnvironmentsTable = ({
   };
 
   const cloudEnvironments = [
-    ...runtimes?.map(runtimeToRow),
-    ...userApps?.map(userAppToRow),
+    ...(runtimes?.map(runtimeToRow) || []),
+    ...(userApps?.map(userAppToRow) || []),
   ];
 
-  return (
+  return runtimes && userApps ? (
     <div>
       {confirmDeleteRuntime && (
         <Modal onRequestClose={cancelDeleteRuntime}>
@@ -153,5 +154,7 @@ export const CloudEnvironmentsTable = ({
         />
       </DataTable>
     </div>
+  ) : (
+    <Spinner />
   );
 };
