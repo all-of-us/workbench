@@ -9688,12 +9688,12 @@ components:
         cloudStorage:
           $ref: '#/components/schemas/AdminWorkspaceCloudStorageCounts'
         runtimes:
-          description: DEPRECATED.  Call [TBD] separately for improved performance
+          description: DEPRECATED - will be removed after a release.  Replaced by listRuntimes.
           type: array
           items:
             $ref: '#/components/schemas/ListRuntimeResponse'
         userApps:
-          description: DEPRECATED.  Call [TBD] separately for improved performance
+          description: DEPRECATED - will be removed after a release.  Replaced by listUserApps.
           type: array
           items:
             $ref: '#/components/schemas/UserAppEnvironment'
