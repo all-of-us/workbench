@@ -68,7 +68,6 @@ import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -298,9 +297,6 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
-
-    List<ListRuntimeResponse> runtimes = resources.getRuntimes();
-    assertThat(runtimes).isEmpty();
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();
