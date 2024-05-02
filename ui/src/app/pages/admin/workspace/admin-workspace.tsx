@@ -34,9 +34,7 @@ interface Props
 interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
-  loadingAdminView?: boolean;
-  loadingRuntimes?: boolean;
-  loadingUserApps?: boolean;
+  loadingWorkspace?: boolean;
   dataLoadError?: Response;
   runtimes?: ListRuntimeResponse[];
   userApps?: UserAppEnvironment[];
@@ -74,11 +72,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   async populateFederatedWorkspaceInformation() {
     const { ns } = this.props.match.params;
-    this.setState({
-      loadingAdminView: true,
-      loadingRuntimes: true,
-      loadingUserApps: true,
-    });
+    this.setState({ loadingWorkspace: true });
 
     // cloud storage traffic isn't always available (e.g. for a deleted workspace) so we need to allow for that
     workspaceAdminApi()
@@ -92,28 +86,24 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     workspaceAdminApi()
       .listRuntimes(ns)
       .then((runtimes) => this.setState({ runtimes }))
-      .catch(this.handleDataLoadError)
-      .finally(() => this.setState({ loadingRuntimes: false }));
+      .catch(this.handleDataLoadError);
 
     workspaceAdminApi()
       .listUserApps(ns)
       .then((userApps) => this.setState({ userApps }))
-      .catch(this.handleDataLoadError)
-      .finally(() => this.setState({ loadingUserApps: false }));
+      .catch(this.handleDataLoadError);
 
     workspaceAdminApi()
       .getWorkspaceAdminView(ns)
       .then((workspaceDetails) => this.setState({ workspaceDetails }))
       .catch(this.handleDataLoadError)
-      .finally(() => this.setState({ loadingAdminView: false }));
+      .finally(() => this.setState({ loadingWorkspace: false }));
   }
 
   render() {
     const {
       cloudStorageTraffic,
-      loadingAdminView,
-      loadingRuntimes,
-      loadingUserApps,
+      loadingWorkspace,
       dataLoadError,
       workspaceDetails: { collaborators, resources, workspace, activeStatus },
       runtimes,
@@ -129,9 +119,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             development team.
           </ErrorDiv>
         )}
-        {(loadingAdminView || loadingRuntimes || loadingUserApps) && (
-          <SpinnerOverlay />
-        )}
+        {loadingWorkspace && <SpinnerOverlay />}
         {workspace && (
           <div>
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
