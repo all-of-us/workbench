@@ -112,11 +112,6 @@ export const CloudEnvironmentsTable = ({
     );
   };
 
-  const cloudEnvironments = [
-    ...(runtimes?.map(runtimeToRow) || []),
-    ...(userApps?.map(userAppToRow) || []),
-  ];
-
   return runtimes && userApps ? (
     <div>
       {confirmDeleteRuntime && (
@@ -140,7 +135,10 @@ export const CloudEnvironmentsTable = ({
         </Modal>
       )}
       <DataTable
-        value={cloudEnvironments}
+        value={[
+          ...(runtimes?.map(runtimeToRow) || []),
+          ...(userApps?.map(userAppToRow) || []),
+        ]}
         emptyMessage='No active cloud environments exist for this workspace.'
       >
         <Column field='appType' header='Environment Type' />
