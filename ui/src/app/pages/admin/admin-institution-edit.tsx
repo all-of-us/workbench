@@ -55,7 +55,7 @@ import {
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -192,7 +192,6 @@ interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
   setEnableControlledTier?: (boolean) => void;
-  setEraRequired: (boolean) => void;
   setTierRequirement: (InstitutionMembershipRequirement) => void;
   filterEmptyAddresses: Function;
   setTierAddresses: (string) => void;
@@ -204,7 +203,6 @@ const TierConfig = (props: TierConfigProps) => {
     institution,
     accessTierShortName,
     setEnableControlledTier,
-    setEraRequired,
     setTierRequirement,
     filterEmptyAddresses,
     setTierAddresses,
@@ -916,9 +914,6 @@ export const AdminInstitutionEdit = fp.flow(
                   institution={institution}
                   setEnableControlledTier={(value) =>
                     this.setEnableControlledTier(value)
-                  }
-                  setEraRequired={(value) =>
-                    this.setRequireEra(accessTierShortName, value)
                   }
                   setTierRequirement={(requirement) =>
                     this.setMembershipRequirement(
