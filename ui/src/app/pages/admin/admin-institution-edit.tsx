@@ -55,7 +55,7 @@ import {
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams, serverConfigStore, useStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -117,30 +117,6 @@ const getInvalidEmailDomains = (emailDomains: Array<string>): Array<string> =>
   emailDomains.filter(isDomainInvalid);
 
 const nonEmpty = (item: string): boolean => item && !!item.trim();
-
-const EraRequiredSwitch = (props: {
-  tierConfig: InstitutionTierConfig;
-  onToggle: (boolean) => void;
-}) => {
-  const { tierConfig, onToggle } = props;
-  const {
-    config: { enableRasLoginGovLinking },
-  } = useStore(serverConfigStore);
-  return (
-    <CommonToggle
-      name='eRA account required'
-      dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
-      onToggle={(e) => onToggle(e)}
-      checked={tierConfig.eraRequired}
-      disabled={
-        !enableRasLoginGovLinking ||
-        tierConfig.membershipRequirement ===
-          InstitutionMembershipRequirement.NO_ACCESS
-      }
-    />
-  );
-};
-
 const EnableCtSwitch = (props: {
   institution: Institution;
   onToggle: (boolean) => void;
@@ -216,7 +192,6 @@ interface TierConfigProps {
   institution: Institution;
   accessTierShortName: string;
   setEnableControlledTier?: (boolean) => void;
-  setEraRequired: (boolean) => void;
   setTierRequirement: (InstitutionMembershipRequirement) => void;
   filterEmptyAddresses: Function;
   setTierAddresses: (string) => void;
@@ -228,7 +203,6 @@ const TierConfig = (props: TierConfigProps) => {
     institution,
     accessTierShortName,
     setEnableControlledTier,
-    setEraRequired,
     setTierRequirement,
     filterEmptyAddresses,
     setTierAddresses,
@@ -254,10 +228,6 @@ const TierConfig = (props: TierConfigProps) => {
           {displayNameForTier(accessTierShortName)} access
         </label>
         <FlexRow style={{ gap: '0.45rem' }}>
-          <EraRequiredSwitch
-            tierConfig={tierConfig}
-            onToggle={setEraRequired}
-          />
           {accessTierShortName === AccessTierShortNames.Controlled && (
             <EnableCtSwitch
               institution={institution}
@@ -944,9 +914,6 @@ export const AdminInstitutionEdit = fp.flow(
                   institution={institution}
                   setEnableControlledTier={(value) =>
                     this.setEnableControlledTier(value)
-                  }
-                  setEraRequired={(value) =>
-                    this.setRequireEra(accessTierShortName, value)
                   }
                   setTierRequirement={(requirement) =>
                     this.setMembershipRequirement(
