@@ -3,11 +3,7 @@ import { useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import {
-  AdminWorkspaceResources,
-  ListRuntimeResponse,
-  UserAppEnvironment,
-} from 'generated/fetch';
+import { ListRuntimeResponse, UserAppEnvironment } from 'generated/fetch';
 
 import {
   fromRuntimeStatus,
@@ -61,14 +57,16 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
 };
 
 interface Props {
-  resources: AdminWorkspaceResources;
   workspaceNamespace: string;
   onDelete: () => void;
+  runtimes?: ListRuntimeResponse[];
+  userApps?: UserAppEnvironment[];
 }
 export const CloudEnvironmentsTable = ({
-  resources: { runtimes, userApps },
   workspaceNamespace,
   onDelete,
+  runtimes = [],
+  userApps = [],
 }: Props) => {
   const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);

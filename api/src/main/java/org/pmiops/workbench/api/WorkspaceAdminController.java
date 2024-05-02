@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
@@ -41,6 +42,18 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<WorkspaceAdminView> getWorkspaceAdminView(String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.getWorkspaceAdminView(workspaceNamespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<ListRuntimeResponse>> listRuntimes(String workspaceNamespace) {
+    return ResponseEntity.ok(workspaceAdminService.listRuntimes(workspaceNamespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<UserAppEnvironment>> listUserApps(String workspaceNamespace) {
+    return ResponseEntity.ok(workspaceAdminService.listUserApps(workspaceNamespace));
   }
 
   /**
