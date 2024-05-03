@@ -233,12 +233,6 @@ export const styles = reactStyles({
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
 
-// Poll parameters to check Workspace ACLs after creation of a new workspace. See
-// SATURN-104 for details, eventually the root cause should be resolved by fixes
-// to Sam (as part of Postgres migration).
-const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
-const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
-
 // Poll parameters for checking the result of an async Workspace Create or Duplicate operation
 const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 6 * 60 * 1000;
 const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
@@ -333,8 +327,6 @@ export interface WorkspaceEditState {
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
   workspaceCreationErrorMessage: string;
-  workspaceNewAclDelayed: boolean;
-  workspaceNewAclDelayedContinueFn: Function;
   unavailableTier?: string;
 }
 
@@ -370,8 +362,6 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
-        workspaceNewAclDelayed: false,
-        workspaceNewAclDelayedContinueFn: () => {},
       };
     }
 
@@ -1164,6 +1154,7 @@ export const WorkspaceEdit = fp.flow(
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
+        let accessLevel = null;
         let workspace = this.state.workspace;
         if (!this.state.populationChecked) {
           workspace.researchPurpose.populationDetails = [];
@@ -1200,23 +1191,10 @@ export const WorkspaceEdit = fp.flow(
           return;
         }
 
-        // Remaining logic covers newly created workspace (creates or clones). The high complexity
-        // in this case is to paper over Sam consistency issues on initial creation (see RW-2818).
-        let accessLevel = null;
-        let pollTimedOut = false;
-        setTimeout(() => (pollTimedOut = true), NEW_ACL_DELAY_POLL_TIMEOUT_MS);
-        while (!pollTimedOut) {
-          ({ workspace, accessLevel } = await workspacesApi().getWorkspace(
-            workspace.namespace,
-            workspace.id
-          ));
-          if (accessLevel === WorkspaceAccessLevel.OWNER) {
-            break;
-          }
-          await new Promise((accept) =>
-            setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS)
-          );
-        }
+        ({ workspace, accessLevel } = await workspacesApi().getWorkspace(
+          workspace.namespace,
+          workspace.id
+        ));
 
         const navigateToWorkspace = () => {
           this.props.navigate([
@@ -1226,26 +1204,12 @@ export const WorkspaceEdit = fp.flow(
             'data',
           ]);
         };
-        if (accessLevel !== WorkspaceAccessLevel.OWNER) {
-          reportError(
-            `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-              ` accessLevel: ${accessLevel}`
-          );
-          // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
-          // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
-          // might have finally propagated by the time the navigate button is clicked.
-          this.setState({
-            loading: false,
-            workspaceNewAclDelayed: true,
-            workspaceNewAclDelayedContinueFn: navigateToWorkspace,
-          });
-          return;
-        }
 
         // Preload the newly created workspace to avoid a redundant GET on the following navigate.
-        // This is also important for guarding against the ACL delay issue, as we have observed
-        // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
-        nextWorkspaceWarmupStore.next({ ...workspace, accessLevel });
+        nextWorkspaceWarmupStore.next({
+          ...workspace,
+          accessLevel,
+        });
         navigateToWorkspace();
       } catch (error) {
         console.log(error);
@@ -1466,7 +1430,6 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationConflictError,
         workspaceCreationError,
         workspaceCreationErrorMessage,
-        workspaceNewAclDelayed,
         unavailableTier,
       } = this.state;
       const {
@@ -2306,28 +2269,6 @@ export const WorkspaceEdit = fp.flow(
                     onClick={() => this.resetWorkspaceEditor()}
                   >
                     Keep Editing
-                  </Button>
-                </ModalFooter>
-              </Modal>
-            )}
-            {workspaceNewAclDelayed && (
-              <Modal>
-                <ModalTitle>Workspace permissions delay</ModalTitle>
-                <ModalBody>
-                  The permissions for this workspace are currently being set up.
-                  You can continue to use this workspace as a 'Reader'. Please
-                  refresh the workspace page in a few minutes to be able to
-                  create Cohorts, Datasets and Notebooks.
-                </ModalBody>
-                <ModalFooter>
-                  <Button
-                    type='primary'
-                    data-test-id='workspace-acl-delay-btn'
-                    onClick={() =>
-                      this.state.workspaceNewAclDelayedContinueFn()
-                    }
-                  >
-                    Continue
                   </Button>
                 </ModalFooter>
               </Modal>
