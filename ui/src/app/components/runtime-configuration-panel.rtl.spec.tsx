@@ -911,6 +911,13 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
+  afterEach(() => {
+    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    act(() => clearCompoundRuntimeOperations());
+  });
+
   it('should show loading spinner while loading', async () => {
     // simulate not done loading
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
@@ -2120,36 +2127,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getPausedCost()).toEqual('$0.13 per hour');
   });
 
-  it('should prevent runtime creation when disk size is invalid', async () => {
-    const user = userEvent.setup();
-    const getCreateButton = () =>
-      screen.getByRole('button', { name: 'Create' });
-
-    setCurrentRuntime(null);
-    const { container } = await component();
-    clickExpectedButton('Customize');
-
-    await screen.findByText('Compute type');
-    await pickComputeType(container, user, ComputeType.Dataproc);
-    await pickStandardDiskSize(user, 49);
-    expectButtonElementDisabled(getCreateButton());
-
-    await pickStandardDiskSize(user, 4900);
-    expectButtonElementDisabled(getCreateButton());
-
-    await pickStandardDiskSize(user, MIN_DISK_SIZE_GB);
-    await pickComputeType(container, user, ComputeType.Dataproc);
-    await pickWorkerDiskSize(user, 49);
-    expectButtonElementDisabled(getCreateButton());
-
-    await pickWorkerDiskSize(user, 4900);
-    expectButtonElementDisabled(getCreateButton());
-
-    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
-    await pickWorkerDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
-    expectButtonElementEnabled(getCreateButton());
-  });
-
   it('should prevent runtime update when disk size is invalid', async () => {
     const user = userEvent.setup();
 
@@ -2194,11 +2171,33 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableType(container, user, DiskType.STANDARD);
     expectButtonElementDisabled(getNextButton());
   });
+  it('should prevent runtime creation when disk size is invalid', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime(null);
 
-  afterEach(() => {
-    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    act(() => clearCompoundRuntimeOperations());
+    const getCreateButton = () =>
+        screen.getByRole('button', { name: 'Create' });
+
+    const { container } = await component();
+    clickExpectedButton('Customize');
+
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickStandardDiskSize(user, 49);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, 4900);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, MIN_DISK_SIZE_GB);
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickWorkerDiskSize(user, 49);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickWorkerDiskSize(user, 4900);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    expectButtonElementEnabled(getCreateButton());
   });
 });
