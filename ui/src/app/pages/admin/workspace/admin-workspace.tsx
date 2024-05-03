@@ -3,6 +3,8 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
   CloudStorageTraffic,
+  ListRuntimeResponse,
+  UserAppEnvironment,
   WorkspaceActiveStatus,
   WorkspaceAdminView,
 } from 'generated/fetch';
@@ -32,8 +34,10 @@ interface Props
 interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
-  loadingData?: boolean;
+  loadingWorkspace?: boolean;
   dataLoadError?: Response;
+  runtimes?: ListRuntimeResponse[];
+  userApps?: UserAppEnvironment[];
 }
 
 export class AdminWorkspaceImpl extends React.Component<Props, State> {
@@ -59,11 +63,16 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     }
   }
 
+  handleDataLoadError = async (error) => {
+    if (error instanceof Response) {
+      console.log('error', error, await error.json());
+      this.setState({ dataLoadError: error });
+    }
+  };
+
   async populateFederatedWorkspaceInformation() {
     const { ns } = this.props.match.params;
-    this.setState({
-      loadingData: true,
-    });
+    this.setState({ loadingWorkspace: true });
 
     // cloud storage traffic isn't always available (e.g. for a deleted workspace) so we need to allow for that
     workspaceAdminApi()
@@ -71,27 +80,34 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       .then((cloudStorageTraffic) => this.setState({ cloudStorageTraffic }))
       .catch(() => {});
 
-    try {
-      const workspaceDetails = await workspaceAdminApi().getWorkspaceAdminView(
-        ns
-      );
-      this.setState({ workspaceDetails });
-    } catch (error) {
-      if (error instanceof Response) {
-        console.log('error', error, await error.json());
-        this.setState({ dataLoadError: error });
-      }
-    } finally {
-      this.setState({ loadingData: false });
-    }
+    // runtimes and user apps calls have error modes which cause them to be slow, so execute these in parallel
+    // to the main admin view call
+
+    workspaceAdminApi()
+      .adminListRuntimesInWorkspace(ns)
+      .then((runtimes) => this.setState({ runtimes }))
+      .catch(this.handleDataLoadError);
+
+    workspaceAdminApi()
+      .adminListUserAppsInWorkspace(ns)
+      .then((userApps) => this.setState({ userApps }))
+      .catch(this.handleDataLoadError);
+
+    workspaceAdminApi()
+      .getWorkspaceAdminView(ns)
+      .then((workspaceDetails) => this.setState({ workspaceDetails }))
+      .catch(this.handleDataLoadError)
+      .finally(() => this.setState({ loadingWorkspace: false }));
   }
 
   render() {
     const {
       cloudStorageTraffic,
-      loadingData,
+      loadingWorkspace,
       dataLoadError,
       workspaceDetails: { collaborators, resources, workspace, activeStatus },
+      runtimes,
+      userApps,
     } = this.state;
     const { workspaceObjects, cloudStorage } = resources || {};
     const { researchPurpose } = workspace || {};
@@ -103,7 +119,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             development team.
           </ErrorDiv>
         )}
-        {loadingData && <SpinnerOverlay />}
+        {loadingWorkspace && <SpinnerOverlay />}
         {workspace && (
           <div>
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
@@ -129,7 +145,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 )}
                 <h2>Cloud Environments</h2>
                 <CloudEnvironmentsTable
-                  {...{ resources }}
+                  {...{ runtimes, userApps }}
                   workspaceNamespace={workspace.namespace}
                   onDelete={() => this.populateFederatedWorkspaceInformation()}
                 />

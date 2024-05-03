@@ -2191,6 +2191,50 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FileDetail'
+  /v1/admin/workspaces/{workspaceNamespace}/runtimes:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminListRuntimesInWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of runtimes in this Workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListRuntimeResponse'
+  /v1/admin/workspaces/{workspaceNamespace}/userApps:
+    get:
+      tags:
+        - workspaceAdmin
+      description: Get a list of user apps in this Workspace. RESEARCHER_DATA_VIEW authority required.
+      operationId: adminListUserAppsInWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of user apps in this Workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserAppEnvironment'
   /v1/admin/egressEvents:
     post:
       tags:
@@ -9644,10 +9688,12 @@ components:
         cloudStorage:
           $ref: '#/components/schemas/AdminWorkspaceCloudStorageCounts'
         runtimes:
+          description: DEPRECATED - will be removed after a release.  Replaced by adminListRuntimesInWorkspace.
           type: array
           items:
             $ref: '#/components/schemas/ListRuntimeResponse'
         userApps:
+          description: DEPRECATED - will be removed after a release.  Replaced by adminListUserAppsInWorkspace.
           type: array
           items:
             $ref: '#/components/schemas/UserAppEnvironment'

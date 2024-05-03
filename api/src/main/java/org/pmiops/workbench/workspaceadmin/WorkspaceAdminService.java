@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 
@@ -26,6 +27,10 @@ public interface WorkspaceAdminService {
   CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace);
 
   WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace);
+
+  List<ListRuntimeResponse> listRuntimes(String workspaceNamespace);
+
+  List<UserAppEnvironment> listUserApps(String workspaceNamespace);
 
   WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
       String workspaceNamespace,
