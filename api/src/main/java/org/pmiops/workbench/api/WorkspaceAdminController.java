@@ -46,13 +46,15 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<ListRuntimeResponse>> listRuntimes(String workspaceNamespace) {
+  public ResponseEntity<List<ListRuntimeResponse>> adminListRuntimesInWorkspace(
+      String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.listRuntimes(workspaceNamespace));
   }
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<UserAppEnvironment>> listUserApps(String workspaceNamespace) {
+  public ResponseEntity<List<UserAppEnvironment>> adminListUserAppsInWorkspace(
+      String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.listUserApps(workspaceNamespace));
   }
 

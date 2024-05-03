@@ -2196,7 +2196,7 @@ paths:
       tags:
         - workspaceAdmin
       description: Get a list of runtimes in this Workspace. RESEARCHER_DATA_VIEW authority required.
-      operationId: listRuntimes
+      operationId: adminListRuntimesInWorkspace
       parameters:
         - name: workspaceNamespace
           in: path
@@ -2218,7 +2218,7 @@ paths:
       tags:
         - workspaceAdmin
       description: Get a list of user apps in this Workspace. RESEARCHER_DATA_VIEW authority required.
-      operationId: listUserApps
+      operationId: adminListUserAppsInWorkspace
       parameters:
         - name: workspaceNamespace
           in: path
@@ -9688,12 +9688,12 @@ components:
         cloudStorage:
           $ref: '#/components/schemas/AdminWorkspaceCloudStorageCounts'
         runtimes:
-          description: DEPRECATED - will be removed after a release.  Replaced by listRuntimes.
+          description: DEPRECATED - will be removed after a release.  Replaced by adminListRuntimesInWorkspace.
           type: array
           items:
             $ref: '#/components/schemas/ListRuntimeResponse'
         userApps:
-          description: DEPRECATED - will be removed after a release.  Replaced by listUserApps.
+          description: DEPRECATED - will be removed after a release.  Replaced by adminListUserAppsInWorkspace.
           type: array
           items:
             $ref: '#/components/schemas/UserAppEnvironment'
