@@ -234,6 +234,7 @@ public class CloudTaskInitialCreditsExpiryController
                     .billing
                     .freeTierBillingAccountNames()
                     .contains(dbWorkspace.getBillingAccountName()))
+        .filter(dbWorkspace -> dbWorkspace.isActive())
         .forEach(
             dbWorkspace -> {
               String namespace = dbWorkspace.getWorkspaceNamespace();
