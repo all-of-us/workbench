@@ -330,7 +330,7 @@ describe(createOrCustomize.name, () => {
 
 describe(getErrorsAndWarnings.name, () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers();
     serverConfigStore.set({ config: defaultServerConfig });
   });
   it('should show no errors or warnings by default', () => {
@@ -909,13 +909,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       workspaceNamespace: workspaceStubs[0].namespace,
       gcePersistentDisk: null,
     });
-  });
-
-  afterEach(() => {
-    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    act(() => clearCompoundRuntimeOperations());
   });
 
   it('should show loading spinner while loading', async () => {
@@ -2129,13 +2122,14 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when disk size is invalid', async () => {
     const user = userEvent.setup();
+    const getCreateButton = () =>
+      screen.getByRole('button', { name: 'Create' });
 
     setCurrentRuntime(null);
     const { container } = await component();
     clickExpectedButton('Customize');
 
-    const getCreateButton = () =>
-      screen.getByRole('button', { name: 'Create' });
+    await screen.findByText('Compute type');
     await pickComputeType(container, user, ComputeType.Dataproc);
     await pickStandardDiskSize(user, 49);
     expectButtonElementDisabled(getCreateButton());
@@ -2199,5 +2193,12 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await pickDetachableType(container, user, DiskType.STANDARD);
     expectButtonElementDisabled(getNextButton());
+  });
+
+  afterEach(() => {
+    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    act(() => clearCompoundRuntimeOperations());
   });
 });
