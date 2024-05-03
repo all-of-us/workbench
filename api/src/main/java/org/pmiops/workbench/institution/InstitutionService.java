@@ -1,8 +1,8 @@
 package org.pmiops.workbench.institution;
 
+import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;

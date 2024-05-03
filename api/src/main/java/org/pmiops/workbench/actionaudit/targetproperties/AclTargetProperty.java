@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 // This is a bit of a one-off for workspace collaboration, where we have a
 // target type of User but properties that don't really belong to a User model.

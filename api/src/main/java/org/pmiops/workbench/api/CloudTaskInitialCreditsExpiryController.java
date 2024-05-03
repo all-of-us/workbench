@@ -5,11 +5,11 @@ import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDoll
 import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
+import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;

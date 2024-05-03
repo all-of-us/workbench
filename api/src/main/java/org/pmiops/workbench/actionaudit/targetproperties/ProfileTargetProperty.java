@@ -1,7 +1,7 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.function.Function;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.model.Profile;
 
 // N.B. entries will rarely be referred to by name, but are accessed via values(). I.e. they are

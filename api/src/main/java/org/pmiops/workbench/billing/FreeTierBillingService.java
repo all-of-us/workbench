@@ -2,15 +2,15 @@ package org.pmiops.workbench.billing;
 
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
+import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
+import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
