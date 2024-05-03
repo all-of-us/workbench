@@ -330,6 +330,7 @@ describe(createOrCustomize.name, () => {
 
 describe(getErrorsAndWarnings.name, () => {
   beforeEach(() => {
+    jest.useFakeTimers()
     serverConfigStore.set({ config: defaultServerConfig });
   });
   it('should show no errors or warnings by default', () => {
@@ -911,6 +912,9 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   afterEach(() => {
+    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
     act(() => clearCompoundRuntimeOperations());
   });
 
