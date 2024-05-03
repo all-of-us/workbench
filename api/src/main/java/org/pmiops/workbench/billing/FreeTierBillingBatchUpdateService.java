@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
+import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.GoogleProjectPerCostDao;
@@ -144,20 +144,15 @@ public class FreeTierBillingBatchUpdateService {
     Integer freeTierCronUserBatchSize =
         workbenchConfigProvider.get().billing.freeTierCronUserBatchSize;
     logger.info(String.format("freeTierCronUserBatchSize is %d", freeTierCronUserBatchSize));
-    // If the batch size is somehow not configured or incorrectly configured, return the minimum
-    // batch size
-    if (freeTierCronUserBatchSize == null || freeTierCronUserBatchSize <= 0) {
-      return batchSizeRange.lowerEndpoint();
+
+    if (freeTierCronUserBatchSize == null || !batchSizeRange.contains(freeTierCronUserBatchSize)) {
+      freeTierCronUserBatchSize =
+          freeTierCronUserBatchSize != null
+                  && freeTierCronUserBatchSize < batchSizeRange.lowerEndpoint()
+              ? batchSizeRange.lowerEndpoint()
+              : batchSizeRange.upperEndpoint();
     }
-    // If it's configured correctly within range, then just return it
-    if (batchSizeRange.contains(freeTierCronUserBatchSize)) {
-      return freeTierCronUserBatchSize;
-    } else {
-      // Otherwise, check if it's lower than the min, then take the min, or if it's higher, then
-      // take the max
-      return freeTierCronUserBatchSize < batchSizeRange.lowerEndpoint()
-          ? batchSizeRange.lowerEndpoint()
-          : batchSizeRange.upperEndpoint();
-    }
+
+    return freeTierCronUserBatchSize;
   }
 }

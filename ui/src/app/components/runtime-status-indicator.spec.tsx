@@ -1,8 +1,10 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { RuntimeStatus } from 'generated/fetch';
 
+import { render, screen, within } from '@testing-library/react';
 import {
   registerCompoundRuntimeOperation,
   runtimeStore,
@@ -10,25 +12,18 @@ import {
 
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
-import {
-  ErrorIcon,
-  RunningIcon,
-  StoppedIcon,
-  StoppingIcon,
-  UpdatingIcon,
-} from './environment-status-icon';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
-describe('Runtime Status Indicator', () => {
+describe(RuntimeStatusIndicator.name, () => {
   test.each([
-    [RuntimeStatus.CREATING, UpdatingIcon],
-    [RuntimeStatus.STOPPED, StoppedIcon],
-    [RuntimeStatus.RUNNING, RunningIcon],
-    [RuntimeStatus.STOPPING, StoppingIcon],
-    [RuntimeStatus.ERROR, ErrorIcon],
+    [RuntimeStatus.CREATING, 'is updating'],
+    [RuntimeStatus.STOPPED, 'has stopped'],
+    [RuntimeStatus.RUNNING, 'is running'],
+    [RuntimeStatus.STOPPING, 'is stopping'],
+    [RuntimeStatus.ERROR, 'has encountered an error'],
   ])(
     'Runtime Status indicator renders correct indicator when runtime is in %s state',
-    (status, icon) => {
+    (status, iconMeaning) => {
       const runtimeStub = new RuntimeApiStub();
       runtimeStub.runtime.status = status;
       runtimeStore.set({
@@ -36,10 +31,13 @@ describe('Runtime Status Indicator', () => {
         runtime: runtimeStub.runtime,
         runtimeLoaded: true,
       });
-      const wrapper = mount(<RuntimeStatusIndicator />);
-      expect(wrapper.exists()).toBeTruthy();
-      const statusIcon = wrapper.find(icon);
-      expect(statusIcon.exists()).toBeTruthy();
+      const { getByTestId } = render(<RuntimeStatusIndicator />);
+
+      const iconContainer = getByTestId('runtime-status-icon-container');
+      const statusIcon = within(iconContainer).getByTitle(
+        `Icon indicating environment ${iconMeaning}`
+      );
+      expect(statusIcon).toBeInTheDocument();
     }
   );
 
@@ -51,13 +49,10 @@ describe('Runtime Status Indicator', () => {
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
-    const wrapper = mount(<RuntimeStatusIndicator />);
-    expect(wrapper.exists()).toBeTruthy();
-    const iconContainer = wrapper.find(
-      'div[data-test-id="runtime-status-icon-container"]'
-    );
-    expect(iconContainer.exists()).toBeTruthy();
-    expect(iconContainer.children().length).toEqual(0);
+    render(<RuntimeStatusIndicator />);
+    const iconContainer = screen.getByTestId('runtime-status-icon-container');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer.children.length).toEqual(0);
   });
 
   it('Verify that a runtime that is part of a compound runtimeop is shown as updating', () => {
@@ -75,11 +70,14 @@ describe('Runtime Status Indicator', () => {
       aborter,
     });
 
-    const wrapper = mount(
+    const { getByTestId } = render(
       <RuntimeStatusIndicator workspaceNamespace={currentWorkspaceNamespace} />
     );
-    expect(wrapper.exists()).toBeTruthy();
-    const statusIcon = wrapper.find(UpdatingIcon);
-    expect(statusIcon.exists()).toBeTruthy();
+
+    const iconContainer = getByTestId('runtime-status-icon-container');
+    const statusIcon = within(iconContainer).getByTitle(
+      'Icon indicating environment is updating'
+    );
+    expect(statusIcon).toBeInTheDocument();
   });
 });

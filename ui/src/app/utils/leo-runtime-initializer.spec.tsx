@@ -21,10 +21,12 @@ import {
   LeoRuntimeInitializerOptions,
   throwRuntimeNotFound,
 } from 'app/utils/leo-runtime-initializer';
+import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
 import { setImmediate } from 'timers';
 
+import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import {
   defaultDataprocConfig,
@@ -36,14 +38,9 @@ import {
 
 import { runtimePresets } from './runtime-presets';
 
-import SpyInstance = jest.SpyInstance;
-import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
-
-import { stubDisk } from 'testing/stubs/disks-api-stub';
-
-let mockGetRuntime: SpyInstance;
-let mockCreateRuntime: SpyInstance;
-let mockStartRuntime: SpyInstance;
+let mockGetRuntime: jest.SpyInstance;
+let mockCreateRuntime: jest.SpyInstance;
+let mockStartRuntime: jest.SpyInstance;
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',

@@ -125,10 +125,16 @@ export const ValidationError = ({ children }) => {
   );
 };
 
-export const TextArea = ({ style = {}, onChange, ...props }) => {
+export const TextArea = ({
+  style = {},
+  onChange,
+  ariaLabel = undefined,
+  ...props
+}) => {
   return (
     <textarea
       {...props}
+      aria-label={ariaLabel}
       onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       style={{
         width: '100%',
@@ -153,6 +159,7 @@ interface TextAreaWithLengthValidationMessageProps {
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
   textBoxStyleOverrides?: {};
+  ariaLabel?: string;
 }
 
 export const TextAreaWithLengthValidationMessage = (
@@ -227,17 +234,18 @@ export const TextAreaWithLengthValidationMessage = (
     id,
     tooShortWarning,
     maxCharacters,
+    ariaLabel,
   } = props;
 
   return (
     <React.Fragment>
       <TextArea
+        {...{ ariaLabel, id }}
         style={{
           ...styles.textBoxWithLengthValidationTextBoxStyle,
           ...textBoxStyleOverrides,
           ...heightOverride,
         }}
-        id={id}
         value={text}
         onBlur={() => updateShowTooShortWarning()}
         onChange={(v) => onTextUpdate(v)}
@@ -368,7 +376,7 @@ interface CheckBoxProps {
   manageOwnState: boolean;
   // Callback called when the user clicks the checkbox or label, containing the
   // new checked value.
-  onChange?: (boolean) => void;
+  onChange?: (_: boolean) => void;
   // Styles for the <input> checkbox component.
   style?: React.CSSProperties;
   // If the label is non-empty, styles to be applied to the <span> wrapper.

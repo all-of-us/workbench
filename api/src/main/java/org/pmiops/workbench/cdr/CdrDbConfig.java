@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cdr;
 
+import jakarta.persistence.EntityManagerFactory;
 import java.util.logging.Logger;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;

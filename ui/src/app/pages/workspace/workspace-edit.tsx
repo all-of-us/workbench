@@ -1567,6 +1567,7 @@ export const WorkspaceEdit = fp.flow(
                           ...styles.selectInput,
                           ...styles.accessTierSpacing,
                         }}
+                        aria-label='data access tier dropdown'
                         value={accessTierShortName}
                         onChange={(value) =>
                           this.onAccessTierChange(
@@ -1606,6 +1607,7 @@ export const WorkspaceEdit = fp.flow(
                           ...styles.selectInput,
                           ...styles.cdrVersionSpacing,
                         }}
+                        aria-label='cdr version dropdown'
                         value={cdrVersionId}
                         onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                           const selectedVersion = v.currentTarget.value;
@@ -1841,6 +1843,7 @@ export const WorkspaceEdit = fp.flow(
                   }
                   index='2.1'
                   id='intendedStudyText'
+                  ariaLabel='intention of the study'
                 />
 
                 {/* TextBox: scientific approaches section*/}

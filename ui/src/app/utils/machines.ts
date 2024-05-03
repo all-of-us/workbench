@@ -237,42 +237,6 @@ export const gpuTypes = [
     preemptiblePrice: 0.44,
   },
   {
-    name: 'NVIDIA Tesla K80',
-    type: 'nvidia-tesla-k80',
-    numGpus: 1,
-    maxNumCpus: 8,
-    maxMem: 52,
-    price: 0.45,
-    preemptiblePrice: 0.135,
-  },
-  {
-    name: 'NVIDIA Tesla K80',
-    type: 'nvidia-tesla-k80',
-    numGpus: 2,
-    maxNumCpus: 16,
-    maxMem: 104,
-    price: 0.9,
-    preemptiblePrice: 0.27,
-  },
-  {
-    name: 'NVIDIA Tesla K80',
-    type: 'nvidia-tesla-k80',
-    numGpus: 4,
-    maxNumCpus: 32,
-    maxMem: 208,
-    price: 1.35,
-    preemptiblePrice: 0.54,
-  },
-  {
-    name: 'NVIDIA Tesla K80',
-    type: 'nvidia-tesla-k80',
-    numGpus: 8,
-    maxNumCpus: 64,
-    maxMem: 208,
-    price: 1.8,
-    preemptiblePrice: 1.08,
-  },
-  {
     name: 'NVIDIA Tesla P4',
     type: 'nvidia-tesla-p4',
     numGpus: 1,
@@ -340,7 +304,6 @@ export const gpuTypes = [
 export const gpuTypeToDisplayName = (type) => {
   return switchCase(
     type,
-    ['nvidia-tesla-k80', () => 'NVIDIA Tesla K80'],
     ['nvidia-tesla-p4', () => 'NVIDIA Tesla P4'],
     ['nvidia-tesla-v100', () => 'NVIDIA Tesla V100'],
     [DEFAULT, () => 'NVIDIA Tesla T4']

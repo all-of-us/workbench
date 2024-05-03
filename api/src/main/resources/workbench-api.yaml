@@ -4252,6 +4252,27 @@ paths:
           description: Users alerted
           content: { }
       x-codegen-request-body-name: request
+  /v1/cloudTask/handleInitialCreditsExpiry:
+    post:
+      tags:
+        - cloudTaskInitialCreditExpiry
+        - cloudTask
+      description: |
+        Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
+      operationId: handleInitialCreditsExpiry
+      security: [ ]
+      requestBody:
+        description: Users that should be alerted about their free credits use.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpiredInitialCreditsEventRequest'
+        required: true
+      responses:
+        200:
+          description: Handle Free Credits Expiry Task Ran Successfully
+          content: { }
+      x-codegen-request-body-name: request
   /v1/institutions:
     get:
       tags:
@@ -6825,10 +6846,6 @@ components:
           description: Whether a captcha check is part of the new user registration
             process
           default: true
-        enableSasGKEApp:
-          type: boolean
-          description: Whether users are able to use the SAS GKE app.
-          default: false
         enableDataExplorer:
           type: boolean
           description: Whether to enable visual data explorer.
@@ -9578,6 +9595,27 @@ components:
           items:
             type: string
       description: Institution-specific access tier membership requirement and configs.
+    ExpiredInitialCreditsEventRequest:
+      required:
+        - users
+      type: object
+      properties:
+        users:
+          type: array
+          description: List of User IDs to check for free credits
+          items:
+            type: integer
+            format: int64
+        dbCostByCreator:
+          type: object
+          properties: { }
+          description: |
+            A map of the total cost of the user's workspaces in the database, indexed by the user's ID'.
+        liveCostByCreator:
+          type: object
+          properties: { }
+          description: |
+            A map of the total live cost of the user's workspaces, indexed by the user's ID.
     WorkspaceAdminView:
       type: object
       properties:

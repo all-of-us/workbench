@@ -496,38 +496,18 @@ const cardButtonBase = {
   },
 };
 
-const cardButtonStyle = {
-  large: {
-    style: {
-      ...cardStyles.workspaceCard,
-      ...cardButtonBase.style,
-      boxShadow:
-        '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-      fontSize: 20,
-      lineHeight: '28px',
-    },
-    disabledStyle: { ...cardButtonBase.disabledStyle },
+const cardButtonStyle = reactStyles({
+  style: {
+    ...cardStyles.workspaceCard,
+    ...cardButtonBase.style,
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    fontSize: 20,
+    lineHeight: '28px',
   },
-
-  small: {
-    style: {
-      ...cardStyles.resourceCard,
-      ...cardButtonBase.style,
-      fontSize: 18,
-      lineHeight: '22px',
-      minWidth: '200px',
-      maxWidth: '200px',
-      minHeight: '105px',
-      maxHeight: '105px',
-      marginTop: '1.5rem',
-      marginRight: '1.5rem',
-    },
-    disabledStyle: { ...cardButtonBase.disabledStyle },
-  },
-};
+  disabledStyle: { ...cardButtonBase.disabledStyle },
+});
 
 export const CardButton = ({
-  type = 'large',
   disabled = false,
   style = {},
   children,
@@ -537,7 +517,7 @@ export const CardButton = ({
     <Clickable
       disabled={disabled}
       {...props}
-      {...fp.merge(computeStyle(cardButtonStyle[type], { disabled }), {
+      {...fp.merge(computeStyle(cardButtonStyle, { disabled }), {
         style,
       })}
     >

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces.resources;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.ConceptSet;

@@ -30,15 +30,12 @@ const findRTDetails = (wrapper) =>
   wrapper.find('[data-test-id="registered-card-details"]');
 const findRTDropdown = (wrapper) =>
   wrapper.find('[data-test-id="registered-agreement-dropdown"]').first();
-const findRTERARequired = (wrapper) =>
-  wrapper.find('[data-test-id="registered-era-required-switch"]').first();
 
 const findCTDetails = (wrapper) =>
   wrapper.find('[data-test-id="controlled-card-details"]');
 const findCTDropdown = (wrapper) =>
   wrapper.find('[data-test-id="controlled-agreement-dropdown"]').first();
-const findCTERARequired = (wrapper) =>
-  wrapper.find('[data-test-id="controlled-era-required-switch"]').first();
+
 const findCTEnabled = (wrapper) =>
   wrapper.find('input[data-test-id="controlled-enabled-switch"]').first();
 
@@ -159,8 +156,6 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
-
     // update RT domains
 
     const testDomains = 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com';
@@ -180,7 +175,6 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
 
     expect(textInputValue(findCTDomainInput(wrapper))).toBe(testDomains);
   });
@@ -190,8 +184,6 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
-
-    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
 
@@ -228,37 +220,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTAddress(wrapper).exists()).toBeTruthy();
     expect(findCTDomain(wrapper).exists()).toBeFalsy();
-    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
 
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('');
-  });
-
-  it('should not change eRA Required and tier enabled switches when changing tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-
-    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-
-    // change Registered from DOMAIN to ADDRESS
-
-    expect(findRTDomain(wrapper).exists()).toBeTruthy();
-    expect(findRTAddress(wrapper).exists()).toBeFalsy();
-
-    await simulateComponentChange(
-      wrapper,
-      findRTDropdown(wrapper),
-      InstitutionMembershipRequirement.ADDRESSES
-    );
-
-    expect(findRTAddress(wrapper).exists()).toBeTruthy();
-    expect(findRTDomain(wrapper).exists()).toBeFalsy();
-
-    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
   });
 
   it('should update institution tier requirement', async () => {
@@ -797,32 +760,6 @@ describe('AdminInstitutionEditSpec - add mode', () => {
 
     // RT no change
     expect(textInputValue(findRTAddressInput(wrapper))).toBe('user@domain.com');
-  });
-
-  it('should not change eRA Required and tier enabled switches when changing tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-
-    // false by default
-    expect(findRTERARequired(wrapper).props().checked).toBeFalsy();
-    expect(findCTERARequired(wrapper).props().checked).toBeFalsy();
-
-    // change Registered to ADDRESS
-
-    expect(findRTAddress(wrapper).exists()).toBeFalsy();
-
-    await simulateComponentChange(
-      wrapper,
-      findRTDropdown(wrapper),
-      InstitutionMembershipRequirement.ADDRESSES
-    );
-
-    expect(findRTAddress(wrapper).exists()).toBeTruthy();
-    expect(findRTDomain(wrapper).exists()).toBeFalsy();
-
-    expect(findRTERARequired(wrapper).props().checked).toBeFalsy();
-    expect(findCTERARequired(wrapper).props().checked).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {

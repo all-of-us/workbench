@@ -8,25 +8,18 @@ import com.google.cloud.tasks.v2.Task;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
+import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.ProcessEgressEventRequest;
-import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
-import org.pmiops.workbench.model.TestUserRawlsWorkspace;
-import org.pmiops.workbench.model.TestUserWorkspace;
-import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,6 +39,9 @@ public class TaskQueueService {
 
   private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
       BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
+
+  private static final String INITIAL_CREDITS_EXPIRY_PATH =
+      BASE_PATH + "/handleInitialCreditsExpiry";
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
   private static final String EGRESS_EVENT_QUEUE_NAME = "egressEventQueue";
@@ -56,6 +52,8 @@ public class TaskQueueService {
       "deleteTestUserRawlsWorkspacesQueue";
 
   private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
+
+  private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
   private WorkbenchLocationConfigService locationConfigService;
@@ -200,6 +198,17 @@ public class TaskQueueService {
             .workspace(workspace),
         ImmutableMap.of(
             "Authorization", "Bearer " + userAuthenticationProvider.get().getCredentials()));
+  }
+
+  public void pushInitialCreditsExpiryTask(
+      List<Long> users, Map<Long, Double> dbCostByCreator, Map<Long, Double> liveCostByCreator) {
+    createAndPushTask(
+        EXPIRED_FREE_CREDITS_QUEUE_NAME,
+        INITIAL_CREDITS_EXPIRY_PATH,
+        new ExpiredInitialCreditsEventRequest()
+            .users(users)
+            .dbCostByCreator(dbCostByCreator)
+            .liveCostByCreator(liveCostByCreator));
   }
 
   private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {

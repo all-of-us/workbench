@@ -9,6 +9,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLa
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import jakarta.inject.Provider;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -29,10 +29,7 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.leonardo.api.*;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
@@ -91,6 +88,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final LeonardoApiClientFactory leonardoApiClientFactory;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<RuntimesApi> serviceRuntimesApiProvider;
+
+  private final Provider<ResourcesApi> resourcesApiProvider;
   private final Provider<ProxyApi> proxyApiProvider;
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -111,6 +110,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
           Provider<RuntimesApi> serviceRuntimesApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_RESOURCE_API) Provider<ResourcesApi> resourcesApiProvider,
       Provider<ProxyApi> proxyApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -127,6 +127,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
+    this.resourcesApiProvider = resourcesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -740,5 +741,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
 
     return results.size();
+  }
+
+  @Override
+  public void deleteAllResources(String googleProject, boolean deleteDisk) {
+    leonardoRetryHandler.run(
+        (context) -> {
+          try {
+            resourcesApiProvider.get().deleteAllResources(googleProject, deleteDisk);
+          } catch (ApiException e) {
+            throw ExceptionUtils.convertLeonardoException(e);
+          }
+          return null;
+        });
   }
 }

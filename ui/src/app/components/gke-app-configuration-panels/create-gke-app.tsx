@@ -215,8 +215,7 @@ export const CreateGkeApp = ({
             aria-label={`gke-autodelete-checkbox`}
             disabled={isAppActive(app)}
             checked={
-              createAppRequest.autodeleteEnabled ||
-              (app && app.autodeleteEnabled)
+              createAppRequest.autodeleteEnabled || app?.autodeleteEnabled
             }
             onChange={(autodeleteEnabled) => {
               setCreateAppRequest((prevState) => ({

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import jakarta.inject.Provider;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -16,7 +17,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -464,5 +464,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     StudyCreateInfo studyCreateInfo =
         new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
     return tanagraApiProvider.get().createStudy(studyCreateInfo);
+  }
+
+  @Override
+  public void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                WorkspaceUtils.isFreeTier(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .map(DbWorkspace::getWorkspaceId)
+        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
   }
 }

@@ -307,37 +307,37 @@ FROM
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` as b on a.measurement_id = b.measurement_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` as b on a.condition_occurrence_id = b.condition_occurrence_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.device_exposure\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.device_exposure_ext\` as b on a.device_exposure_id = b.device_exposure_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` as b on a.drug_exposure_id = b.drug_exposure_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` as b on a.observation_id = b.observation_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` as b on a.procedure_occurrence_id = b.procedure_occurrence_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
                 UNION DISTINCT
                 SELECT DISTINCT person_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` as a
                 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence_ext\` as b on a.visit_occurrence_id = b.visit_occurrence_id
-                WHERE lower(b.src_id) like 'ehr site%'
+                WHERE lower(b.src_id) like '%ehr%'
             ) b on a.person_id = b.person_id
     ) y
 WHERE x.person_id = y.person_id"

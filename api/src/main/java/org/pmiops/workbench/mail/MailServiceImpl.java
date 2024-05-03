@@ -9,6 +9,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -27,8 +29,6 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
@@ -205,9 +205,9 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
-
     final String logMsg =
-        String.format("Initial credits have expired for User %s", userForLogging(user));
+        String.format(
+            "Sending email because initial credits have expired for User %s", userForLogging(user));
     log.info(logMsg);
 
     final String htmlMessage =

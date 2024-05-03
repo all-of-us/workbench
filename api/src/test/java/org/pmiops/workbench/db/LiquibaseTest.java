@@ -2,15 +2,16 @@ package org.pmiops.workbench.db;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public class LiquibaseTest {
 
@@ -26,20 +27,27 @@ public class LiquibaseTest {
     }
   }
 
+  @XmlRootElement(
+      name = "databaseChangeLog",
+      namespace = "http://www.liquibase.org/xml/ns/dbchangelog")
+  private static class DatabaseChangeLog {
+    @XmlElement(name = "include", namespace = "http://www.liquibase.org/xml/ns/dbchangelog")
+    private List<Include> includes;
+  }
+
+  private static class Include {
+    @XmlAttribute private String file;
+  }
+
   private List<String> getIndexedChangeLogs() throws Exception {
-    Document doc =
-        DocumentBuilderFactory.newInstance()
-            .newDocumentBuilder()
-            .parse(new File("db/changelog/db.changelog-master.xml"));
+    JAXBContext jaxbContext = JAXBContext.newInstance(DatabaseChangeLog.class);
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    DatabaseChangeLog databaseChangeLog =
+        (DatabaseChangeLog)
+            unmarshaller.unmarshal(new File("db/changelog/db.changelog-master.xml"));
 
-    NodeList changeLogs = doc.getElementsByTagName("include");
-
-    List<String> changeLogFilenames = new ArrayList<>();
-    for (int i = 0; i < changeLogs.getLength(); i++) {
-      changeLogFilenames.add(
-          ((Element) changeLogs.item(i)).getAttribute("file").split("changelog/")[1]);
-    }
-
-    return changeLogFilenames;
+    return databaseChangeLog.includes.stream()
+        .map(include -> include.file.split("changelog/")[1])
+        .collect(Collectors.toList());
   }
 }

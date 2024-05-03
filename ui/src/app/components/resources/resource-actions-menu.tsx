@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-import { MenuItem, SnowmanButton } from './buttons';
-import { PopupTrigger, TooltipTrigger } from './popups';
+import {
+  KebabCircleButton,
+  MenuItem,
+  SnowmanButton,
+} from 'app/components/buttons';
+import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 
-export interface Action {
+export interface ResourceAction {
   icon?: string;
   faIcon?: IconDefinition;
   displayName: string;
@@ -14,22 +18,12 @@ export interface Action {
 }
 
 export const ResourceActionsMenu = (props: {
-  actions: Action[];
+  actions: ResourceAction[];
+  title: string;
   disabled?: boolean;
-  menuButtonComponentOverride?: (props: {
-    disabled: boolean;
-    title?: string;
-  }) => JSX.Element;
-  menuButtonTitle?: string;
+  useAppFilesListIcon?: boolean;
 }) => {
-  const { actions, disabled, menuButtonTitle, menuButtonComponentOverride } =
-    props;
-
-  const menuButtonComponent: (props: {
-    disabled: boolean;
-    title?: string;
-  }) => JSX.Element = menuButtonComponentOverride ?? SnowmanButton;
-
+  const { actions, title, disabled, useAppFilesListIcon } = props;
   return (
     <PopupTrigger
       data-test-id='resource-card-menu'
@@ -50,7 +44,11 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {menuButtonComponent({ ...{ disabled }, title: menuButtonTitle })}
+      {useAppFilesListIcon ? (
+        <KebabCircleButton {...{ disabled, title }} />
+      ) : (
+        <SnowmanButton {...{ disabled, title }} />
+      )}
     </PopupTrigger>
   );
 };

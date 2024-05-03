@@ -1,20 +1,16 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { CopyRequest, DataSet, WorkspaceResource } from 'generated/fetch';
+import { CopyRequest, DataSet } from 'generated/fetch';
 
 import { CopyModal } from 'app/components/copy-modal';
 import { DataSetReferenceModal } from 'app/components/data-set-reference-modal';
 import { RenameModal } from 'app/components/rename-modal';
 import {
-  Action,
+  ResourceAction,
   ResourceActionsMenu,
-} from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+} from 'app/components/resources/resource-actions-menu';
+import { CommonActionMenuProps } from 'app/components/resources/resource-list-action-menu';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -29,6 +25,8 @@ import {
 } from 'app/components/with-spinner-overlay';
 import { conceptSetsApi, dataSetApi } from 'app/services/swagger-fetch-clients';
 import {
+  canDelete,
+  canWrite,
   getDescription,
   getDisplayName,
   getId,
@@ -36,14 +34,10 @@ import {
 } from 'app/utils/resources';
 
 interface Props
-  extends WithConfirmDeleteModalProps,
+  extends CommonActionMenuProps,
+    WithConfirmDeleteModalProps,
     WithErrorModalProps,
-    WithSpinnerOverlayProps {
-  resource: WorkspaceResource;
-  existingNameList: string[];
-  onUpdate: () => Promise<void>;
-  menuOnly: boolean;
-}
+    WithSpinnerOverlayProps {}
 
 interface State {
   showRenameModal: boolean;
@@ -51,7 +45,7 @@ interface State {
   referencingDataSets: Array<DataSet>;
 }
 
-export const ConceptSetResourceCard = fp.flow(
+export const ConceptSetActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
@@ -66,7 +60,7 @@ export const ConceptSetResourceCard = fp.flow(
       };
     }
 
-    get actions(): Action[] {
+    get actions(): ResourceAction[] {
       const { resource } = this.props;
       return [
         {
@@ -165,7 +159,7 @@ export const ConceptSetResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const { resource } = this.props;
       return (
         <React.Fragment>
           {this.state.showRenameModal && (
@@ -209,14 +203,11 @@ export const ConceptSetResourceCard = fp.flow(
               }}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+            title='Concept Set Action Menu'
+          />
         </React.Fragment>
       );
     }

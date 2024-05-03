@@ -389,9 +389,10 @@ public class UserServiceTest {
 
   @Test
   public void testSyncDuccVersionStatus_correctVersions() {
-    providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
+    var currentDuccVersions = ImmutableList.of(3, 4, 5);
+    providedWorkbenchConfig.access.currentDuccVersions = currentDuccVersions;
 
-    providedWorkbenchConfig.access.currentDuccVersions.forEach(
+    currentDuccVersions.forEach(
         version -> {
           DbUser user = userDao.findUserByUsername(USERNAME);
           user.setDuccAgreement(signDucc(user, version));
@@ -622,7 +623,12 @@ public class UserServiceTest {
   }
 
   private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
-    return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
+    var existingDucc = dbUser.getDuccAgreement();
+    if (existingDucc == null) {
+      return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
+    } else {
+      return existingDucc.setSignedVersion(version);
+    }
   }
 
   private DbUser createUserWithAoUTOSVersion(int tosVersion) {

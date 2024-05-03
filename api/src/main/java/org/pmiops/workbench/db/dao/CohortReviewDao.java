@@ -18,7 +18,7 @@ public interface CohortReviewDao extends JpaRepository<DbCohortReview, Long> {
 
   @Query(
       value =
-          "select * from cohort_review cr "
+          "select cr.* from cohort_review cr "
               + "join cohort c on (cr.cohort_id = c.cohort_id) "
               + "join workspace ws on (c.workspace_id = ws.workspace_id) "
               + "where ws.workspace_namespace = :ns "

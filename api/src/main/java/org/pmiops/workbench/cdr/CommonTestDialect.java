@@ -1,26 +1,38 @@
 package org.pmiops.workbench.cdr;
 
-import org.hibernate.dialect.MySQL5Dialect;
-import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.community.dialect.MySQL5Dialect;
+import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 
 public class CommonTestDialect extends MySQL5Dialect {
-
   public CommonTestDialect() {
     super();
+  }
+
+  @Override
+  public void initializeFunctionRegistry(FunctionContributions functionContributions) {
     // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
     // added with nothing; this will work for single-word query patterns only.
     // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
 
-    registerFunction(
-        "match",
-        new SQLFunctionTemplate(StandardBasicTypes.DOUBLE, "LOCATE(REPLACE(?2, '+'), ?1)"));
+    super.initializeFunctionRegistry(functionContributions);
+    BasicTypeRegistry basicTypeRegistry =
+        functionContributions.getTypeConfiguration().getBasicTypeRegistry();
 
-    registerFunction(
-        "matchConcept",
-        new SQLFunctionTemplate(
-            StandardBasicTypes.DOUBLE,
-            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "match",
+            "LOCATE(REPLACE(?2, '+'), ?1)",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
+
+    functionContributions
+        .getFunctionRegistry()
+        .registerPattern(
+            "matchConcept",
+            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))",
+            basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE));
   }
 
   @Override
