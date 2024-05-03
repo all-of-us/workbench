@@ -229,9 +229,8 @@ export const CreateGkeApp = ({
   const machineTypeDisabledText = cond(
     [
       differentMachineTypeExists,
-      'Cannot configure the compute profile when environments already exist in the workspace.  ' +
-        'They must all have the same configuration.  You must delete other environments before configuring a new one with a ' +
-        'different compute profile.',
+      'Cannot configure the compute profile when environments already exist in the workspace with differing compute profiles.  ' +
+        'You must delete other environments before configuring a new one with a different compute profile.',
     ],
     [
       app?.status === AppStatus.DELETING,
@@ -243,6 +242,9 @@ export const CreateGkeApp = ({
         'Please delete the current environment and create a new environment with the desired profile.',
     ]
   );
+
+  // TODO determine appropriate machine types for the app type
+  const validMachineTypes = allMachineTypes;
 
   return (
     <FlexColumn
@@ -271,6 +273,7 @@ export const CreateGkeApp = ({
             </h3>
             <div style={styles.formGrid3}>
               <MachineSelector
+                {...{ validMachineTypes }}
                 idPrefix='runtime'
                 disabled={false}
                 selectedMachine={toMachine(createAppRequest)}
@@ -283,7 +286,6 @@ export const CreateGkeApp = ({
                     },
                   }))
                 }
-                validMachineTypes={allMachineTypes}
                 machineType={
                   createAppRequest?.kubernetesRuntimeConfig.machineType
                 }
