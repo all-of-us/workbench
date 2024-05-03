@@ -1749,7 +1749,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     const { container } = await component();
 
     const mainCpuSize = parseInt(getMainCpu(container)) + 4;
-    console.log(mainCpuSize);
     await pickMainCpu(container, user, mainCpuSize);
     clickExpectedButton('Next');
     expect(
