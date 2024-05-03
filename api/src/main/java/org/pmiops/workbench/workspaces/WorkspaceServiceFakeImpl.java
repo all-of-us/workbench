@@ -3,9 +3,11 @@ package org.pmiops.workbench.workspaces;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.tanagra.ApiException;
@@ -79,5 +81,10 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
       throws ApiException {
     return null;
+  }
+
+  @Override
+  public void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status) {
+    // no-op
   }
 }

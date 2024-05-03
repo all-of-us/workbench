@@ -205,9 +205,9 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
-
     final String logMsg =
-        String.format("Initial credits have expired for User %s", userForLogging(user));
+        String.format(
+            "Sending email because initial credits have expired for User %s", userForLogging(user));
     log.info(logMsg);
 
     final String htmlMessage =

@@ -44,6 +44,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -347,7 +348,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     Double initialCreditsRemaining = null;
-    if (freeTierBillingService.isFreeTier(workspace.get())) {
+    if (WorkspaceUtils.isFreeTier(workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
           freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }

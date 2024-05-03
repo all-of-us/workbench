@@ -9,10 +9,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.leonardo.api.*;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,6 +35,8 @@ public class LeonardoConfig {
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
+
+  public static final String SERVICE_RESOURCE_API = "serviceResourceApi";
 
   private static final Logger log = Logger.getLogger(LeonardoConfig.class.getName());
 
@@ -180,6 +179,15 @@ public class LeonardoConfig {
   public AppsApi serviceAppsApi(
       @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     AppsApi api = new AppsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_RESOURCE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ResourcesApi serviceResourceApi(
+      @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    ResourcesApi api = new ResourcesApi();
     api.setApiClient(apiClient);
     return api;
   }

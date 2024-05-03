@@ -134,4 +134,6 @@ public interface LeonardoApiClient {
 
   /** List all persistent disks in google project */
   List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+
+  void deleteAllResources(String googleProject, boolean deleteDisk);
 }
