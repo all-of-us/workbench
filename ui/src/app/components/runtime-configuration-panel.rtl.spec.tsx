@@ -2176,7 +2176,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(null);
 
     const getCreateButton = () =>
-        screen.getByRole('button', { name: 'Create' });
+      screen.getByRole('button', { name: 'Create' });
 
     const { container } = await component();
     clickExpectedButton('Customize');
