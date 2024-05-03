@@ -12,7 +12,6 @@ import {
 import { switchCase } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
-import { delay } from 'app/utils/subscribable';
 
 import { canUseExistingDisk, toAnalysisConfig } from './analysis-config';
 import { withAsyncErrorHandling } from './index';

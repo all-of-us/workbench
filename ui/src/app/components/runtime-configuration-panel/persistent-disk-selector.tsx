@@ -38,7 +38,8 @@ export const PersistentDiskSelector = ({
               </label>
               <Dropdown
                 {...{ disabled }}
-                id={'disk-type'}
+                id={`disk-type`}
+                name={`disk-type`}
                 options={[DiskType.STANDARD, DiskType.SSD].map((value) => ({
                   label: diskTypeLabels[value],
                   value,
@@ -46,6 +47,7 @@ export const PersistentDiskSelector = ({
                 style={{ width: '150px' }}
                 onChange={({ value }) => onChange({ detachableType: value })}
                 value={diskConfig.detachableType}
+                appendTo='self'
               />
             </FlexRow>
             <DiskSizeSelector

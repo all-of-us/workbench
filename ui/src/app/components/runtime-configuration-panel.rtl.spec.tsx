@@ -19,7 +19,10 @@ import {
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  registerApiClient,
+  runtimeApi,
+} from 'app/services/swagger-fetch-clients';
 import { AnalysisConfig, toAnalysisConfig } from 'app/utils/analysis-config';
 import {
   ComputeType,
@@ -30,6 +33,7 @@ import {
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { runtimePresets } from 'app/utils/runtime-presets';
+import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -663,6 +667,26 @@ describe(RuntimeConfigurationPanel.name, () => {
     };
   };
 
+  const detachableDiskRuntime = (): Runtime => {
+    const { size, diskType, name } = existingDisk();
+    return {
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+      gceWithPdConfig: {
+        machineType: 'n1-standard-16',
+        persistentDisk: {
+          size,
+          diskType,
+          name,
+          labels: {},
+        },
+        gpuConfig: null,
+      },
+      gceConfig: null,
+      dataprocConfig: null,
+    };
+  };
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -703,11 +727,29 @@ describe(RuntimeConfigurationPanel.name, () => {
       option.toString()
     );
 
+  const pickDetachableType = (
+    container: HTMLElement,
+    user: UserEvent,
+    diskType: DiskType
+  ): Promise<void> =>
+    pickDropdownOptionAndClick(
+      container,
+      user,
+      'disk-type',
+      diskTypeLabels[diskType]
+    );
+
   const getMainCpu = (container: HTMLElement): string =>
     getDropdownSelection(container, 'runtime-cpu');
 
   const getMainRam = (container: HTMLElement): string =>
     getDropdownSelection(container, 'runtime-ram');
+
+  const getWorkerCpu = (container: HTMLElement): string =>
+    getDropdownSelection(container, 'worker-cpu');
+
+  const getWorkerRam = (container: HTMLElement): string =>
+    getDropdownSelection(container, 'worker-ram');
 
   const pickComputeType = (
     container: HTMLElement,
@@ -797,8 +839,24 @@ describe(RuntimeConfigurationPanel.name, () => {
       name: diskName,
     });
 
+  const getMasterDiskValue = () =>
+    spinDiskElement('standard-disk').getAttribute('value');
+
+  const getDetachableDiskValue = () =>
+    spinDiskElement('detachable-disk').getAttribute('value');
+
+  const getWorkerDiskValue = () =>
+    spinDiskElement('worker-disk').getAttribute('value');
+
+  const getNumOfWorkersValue = () =>
+    spinDiskElement('num-workers').getAttribute('value');
+
+  const getNumOfPreemptibleWorkersValue = () =>
+    spinDiskElement('num-preemptible').getAttribute('value');
+
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
+
   const expectConfirmDeletePanel = () =>
     expect(screen.queryByText(confirmDeleteText)).not.toBeNull();
 
@@ -812,6 +870,12 @@ describe(RuntimeConfigurationPanel.name, () => {
       </MemoryRouter>
     );
   };
+
+  const getRunningCost = () =>
+    screen.getByLabelText('cost while running').textContent;
+
+  const getPausedCost = () =>
+    screen.getByLabelText('cost while paused').textContent;
 
   beforeEach(async () => {
     runtimeApiStub = new RuntimeApiStub();
@@ -1375,10 +1439,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(getMainRam(container)).toEqual(
         findMachineByName(machineType).memory.toString()
       );
-      const detachableDiskElement = spinDiskElement(/detachable\-disk/i);
-      await waitFor(() => {
-        expect(detachableDiskElement).toHaveValue('120');
-      });
+      expect(getDetachableDiskValue()).toEqual('120');
     }
   );
 
@@ -1429,15 +1490,9 @@ describe(RuntimeConfigurationPanel.name, () => {
         findMachineByName(masterMachineType).memory.toString()
       );
 
-      const masterDiskValue =
-        spinDiskElement(/standard\-disk/i).getAttribute('value');
-      const workerDiskValue =
-        spinDiskElement(/worker\-disk/i).getAttribute('value');
-      const numOfWorkersValue =
-        spinDiskElement(/num\-workers/i).getAttribute('value');
-      expect(masterDiskValue).toEqual(masterDiskSize.toString());
-      expect(workerDiskValue).toEqual(workerDiskSize.toString());
-      expect(numOfWorkersValue).toEqual(numberOfWorkers.toString());
+      expect(getMasterDiskValue()).toEqual(masterDiskSize.toString());
+      expect(getWorkerDiskValue()).toEqual(workerDiskSize.toString());
+      expect(getNumOfWorkersValue()).toEqual(numberOfWorkers.toString());
     }
   );
 
@@ -1456,13 +1511,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
 
     await component();
-    const detachableDiskElement = spinDiskElement(/detachable\-disk/i);
-    await waitFor(() => {
-      const numberFormatter = new Intl.NumberFormat('en-US');
-      expect(detachableDiskElement).toHaveValue(
-        numberFormatter.format(disk.size)
-      );
-    });
+    const numberFormatter = new Intl.NumberFormat('en-US');
+    expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
   it('should allow configuration via dataproc preset from modified form', async () => {
     const user = userEvent.setup();
@@ -1608,7 +1658,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /any in\-memory state and local file modifications will be erased\. data stored in workspace buckets is never affected by changes to your cloud environment\./i
+        /any in\-memory state and local file modifications will be erased\./i
       )
     ).toBeInTheDocument();
   });
@@ -1638,7 +1688,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /any in\-memory state will be erased, but local file modifications will be preserved\. data stored in workspace buckets is never affected by changes to your cloud environment\./i
+        /any in\-memory state will be erased, but local file modifications will be preserved\. /i
       )
     ).toBeInTheDocument();
   });
@@ -1663,5 +1713,488 @@ describe(RuntimeConfigurationPanel.name, () => {
     clickExpectedButton('Next');
     expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument();
     expect(screen.queryByText('These changes')).not.toBeInTheDocument();
+  });
+
+  it('should not warn user for updates where not needed - number of preemptibles', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    await component();
+    const numWorkers = screen
+      .getByRole('spinbutton', {
+        name: /num\-workers/i,
+      })
+      .getAttribute('value');
+
+    await pickNumWorkers(user, parseInt(numWorkers) + 2);
+    clickExpectedButton('Next');
+    expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument();
+    expect(screen.queryByText('These changes')).not.toBeInTheDocument();
+  });
+
+  it('should warn user about reboot if there are updates that require one - CPU', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const { container } = await component();
+
+    const mainCpuSize = parseInt(getMainCpu(container)) + 4;
+    console.log(mainCpuSize);
+    await pickMainCpu(container, user, mainCpuSize);
+    clickExpectedButton('Next');
+    expect(
+      screen.getByText(
+        /these changes require a reboot of your cloud environment to take effect\./i
+      )
+    ).toBeInTheDocument();
+  });
+  it('should warn user about reboot if there are updates that require one - Memory', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const { container } = await component();
+
+    expect(getMainRam(container)).toEqual('15');
+    // 15 GB -> 26 GB
+    await pickMainRam(container, user, 26);
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /these changes require a reboot of your cloud environment to take effect\./i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should warn user about re-creation if there are updates that require one - CPU', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+    await pickMainCpu(container, user, parseInt(getMainCpu(container)) + 4);
+    clickExpectedButton('Next');
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeTruthy();
+  });
+
+  it('should warn user about re-creation if there are updates that require one - Memory', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+
+    expect(getMainRam(container)).toEqual('15');
+    // 15 GB -> 26 GB
+    await pickMainRam(container, user, 26);
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeTruthy();
+  });
+
+  it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    clickExpectedButton('Next');
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeTruthy();
+  });
+
+  it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime(detachableDiskRuntime());
+    await component();
+    const diskValueAsInt = parseInt(getDetachableDiskValue().replace(/,/g, ''));
+    const newDiskValue = diskValueAsInt - 10;
+    await pickDetachableDiskSize(user, newDiskValue);
+    clickExpectedButton('Next');
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your persistent disk and cloud environment to take effect\./i
+      )
+    ).toBeTruthy();
+  });
+
+  it('should warn the user about deletion if there are updates that require one - Worker CPU', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const { container } = await component();
+
+    expect(getWorkerCpu(container)).toEqual('4');
+    // 4 -> 8
+    await pickWorkerCpu(container, user, 8);
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should warn the user about deletion if there are updates that require one - Worker RAM', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const { container } = await component();
+
+    expect(getWorkerRam(container)).toEqual('15');
+    // 15 -> 26
+    await pickWorkerRam(container, user, 26);
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should warn the user about deletion if there are updates that require one - Worker Disk', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+    await component();
+
+    await pickWorkerDiskSize(user, parseInt(getWorkerDiskValue()) + 10);
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /these changes require deletion and re\-creation of your cloud environment to take effect\./i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should retain original inputs when hitting cancel from the Confirm panel', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const { container } = await component();
+
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB + 10);
+    await pickMainCpu(container, user, 8);
+    await pickMainRam(container, user, 30);
+    await pickWorkerCpu(container, user, 16);
+    await pickWorkerRam(container, user, 60);
+    await pickNumPreemptibleWorkers(user, 3);
+    await pickNumWorkers(user, 5);
+    await pickWorkerDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+
+    clickExpectedButton('Next');
+    clickExpectedButton('Cancel');
+
+    expect(getMasterDiskValue()).toBe(
+      (DATAPROC_MIN_DISK_SIZE_GB + 10).toString()
+    );
+    expect(getMainCpu(container)).toBe('8');
+    expect(getMainRam(container)).toBe('30');
+    expect(getWorkerCpu(container)).toBe('16');
+    expect(getWorkerRam(container)).toBe('60');
+    expect(getNumOfPreemptibleWorkersValue()).toBe('3');
+    expect(getNumOfWorkersValue()).toBe('5');
+    expect(getWorkerDiskValue()).toBe(DATAPROC_MIN_DISK_SIZE_GB.toString());
+  });
+
+  it('should disable Next button if Runtime is in between states', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+      status: RuntimeStatus.CREATING,
+    });
+
+    await component();
+
+    const nextButton = screen.getByRole('button', { name: 'Next' });
+    expectButtonElementDisabled(nextButton);
+  });
+
+  it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+      },
+    });
+
+    await component();
+    const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+    const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
+
+    await pickStandardDiskSize(
+      user,
+      parseInt(getMasterDiskValue().replace(/,/g, '')) + 20
+    );
+
+    clickExpectedButton('Next');
+
+    clickExpectedButton('Update');
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalled();
+      expect(deleteSpy).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  it('should send an updateDisk API call if disk changes do not require a delete', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(detachableDiskRuntime());
+    setCurrentDisk(existingDisk());
+    await component();
+
+    const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+    const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
+
+    await pickDetachableDiskSize(user, 1010);
+
+    clickExpectedButton('Next');
+
+    clickExpectedButton('Update');
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalled();
+      expect(deleteSpy).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  it('should send a delete call if an update requires delete', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+
+    await pickComputeType(container, user, ComputeType.Dataproc);
+
+    clickExpectedButton('Next');
+    clickExpectedButton('Update');
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Deleting');
+    });
+  });
+
+  it('should add additional options when the compute type changes', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+
+    await pickComputeType(container, user, ComputeType.Dataproc);
+
+    expect(getNumOfWorkersValue()).toBeTruthy();
+    expect(getNumOfPreemptibleWorkersValue()).toBeTruthy();
+    expect(getWorkerCpu(container)).toBeTruthy();
+    expect(getWorkerRam(container)).toBeTruthy();
+    expect(getWorkerDiskValue()).toBeTruthy();
+  });
+
+  it('should update the cost estimator when the compute profile changes', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+
+    expect(screen.getByText('Cost when running')).toBeTruthy();
+    expect(screen.getByText('Cost when paused')).toBeTruthy();
+
+    // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
+    expect(getRunningCost()).toEqual('$0.20 per hour');
+    expect(getPausedCost()).toEqual('< $0.01 per hour');
+
+    // Change the machine to n1-standard-8 and bump the storage to 300GB.
+    await pickMainCpu(container, user, 8);
+    await pickMainRam(container, user, 30);
+    await pickDetachableDiskSize(user, 300);
+    expect(getRunningCost()).toEqual('$0.40 per hour');
+    expect(getPausedCost()).toEqual('$0.02 per hour');
+
+    await pickPresets(
+      container,
+      user,
+      runtimePresets.generalAnalysis.displayName
+    );
+    expect(getRunningCost()).toEqual('$0.20 per hour');
+    expect(getPausedCost()).toEqual('< $0.01 per hour');
+
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    expect(getRunningCost()).toEqual('$0.73 per hour');
+    expect(getPausedCost()).toEqual('$0.02 per hour');
+
+    // Bump up all the worker values to increase the price on everything.
+    await pickNumWorkers(user, 4);
+    await pickNumPreemptibleWorkers(user, 4);
+    await pickWorkerCpu(container, user, 8);
+    await pickWorkerRam(container, user, 30);
+    await pickWorkerDiskSize(user, 300);
+    expect(getRunningCost()).toEqual('$2.88 per hour');
+    expect(getPausedCost()).toEqual('$0.14 per hour');
+  });
+
+  it('should update the cost estimator when master machine changes', async () => {
+    const user = userEvent.setup();
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+      },
+    });
+
+    const { container } = await component();
+
+    // with Master disk size: 1000
+    expect(screen.getByText('Cost when running')).toBeTruthy();
+    expect(screen.getByText('Cost when paused')).toBeTruthy();
+
+    expect(getRunningCost()).toEqual('$0.77 per hour');
+    expect(getPausedCost()).toEqual('$0.07 per hour');
+
+    // Change the Master disk size or master size to 150
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+
+    expect(screen.getByText('Cost when running')).toBeTruthy();
+    expect(screen.getByText('Cost when paused')).toBeTruthy();
+
+    expect(getRunningCost()).toEqual('$0.73 per hour');
+    expect(getPausedCost()).toEqual('$0.02 per hour');
+    // Switch to n1-highmem-4, double disk size.
+    await pickMainRam(container, user, 26);
+    await pickStandardDiskSize(user, 2000);
+    expect(getRunningCost()).toEqual('$0.87 per hour');
+    expect(getPausedCost()).toEqual('$0.13 per hour');
+  });
+
+  it('should prevent runtime creation when disk size is invalid', async () => {
+    const user = userEvent.setup();
+
+    setCurrentRuntime(null);
+    const { container } = await component();
+    clickExpectedButton('Customize');
+
+    const getCreateButton = () =>
+      screen.getByRole('button', { name: 'Create' });
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickStandardDiskSize(user, 49);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, 4900);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, MIN_DISK_SIZE_GB);
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickWorkerDiskSize(user, 49);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickWorkerDiskSize(user, 4900);
+    expectButtonElementDisabled(getCreateButton());
+
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    expectButtonElementEnabled(getCreateButton());
+  });
+
+  it('should prevent runtime update when disk size is invalid', async () => {
+    const user = userEvent.setup();
+
+    const { container } = await component();
+
+    const getNextButton = () => screen.getByRole('button', { name: 'Next' });
+
+    await pickDetachableDiskSize(user, 49);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableDiskSize(user, 4900);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableDiskSize(user, MIN_DISK_SIZE_GB);
+    await pickComputeType(container, user, ComputeType.Dataproc);
+    await pickWorkerDiskSize(user, 49);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickWorkerDiskSize(user, 4900);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickStandardDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    await pickWorkerDiskSize(user, DATAPROC_MIN_DISK_SIZE_GB);
+    expectButtonElementEnabled(getNextButton());
+  });
+
+  it('should prevent runtime update when PD disk size is invalid', async () => {
+    const user = userEvent.setup();
+    const { container } = await component();
+    const getNextButton = () => screen.getByRole('button', { name: 'Next' });
+
+    await pickDetachableType(container, user, DiskType.STANDARD);
+    await pickDetachableDiskSize(user, 49);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableType(container, user, DiskType.SSD);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableDiskSize(user, 4900);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableType(container, user, DiskType.STANDARD);
+    expectButtonElementDisabled(getNextButton());
   });
 });
