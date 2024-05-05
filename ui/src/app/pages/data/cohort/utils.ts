@@ -1,3 +1,4 @@
+import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
@@ -464,3 +465,15 @@ export function getTypeAndStandard(searchParameters: Array<any>, type: Domain) {
 export function sanitizeNumericalInput(input: string) {
   return input && input.length > 10 ? input.slice(0, 10) : input;
 }
+
+export const withDisabledStyle = (
+  styles: React.CSSProperties,
+  isDisabled: boolean
+) =>
+  isDisabled
+    ? {
+        ...styles,
+        opacity: 0.4,
+        cursor: 'not-allowed',
+      }
+    : styles;

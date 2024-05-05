@@ -18,7 +18,7 @@ import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { Selection } from 'app/pages/data/cohort/selection-list';
-import { domainToTitle } from 'app/pages/data/cohort/utils';
+import { domainToTitle, withDisabledStyle } from 'app/pages/data/cohort/utils';
 import { VariantSearchFilters } from 'app/pages/data/cohort/variant-search-filters';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -481,7 +481,7 @@ export const VariantSearch = fp.flow(
       criteria.some((crit) => crit.parameterId === getFilterParamId());
     const disableSelectAllSave =
       excludeFromSelectAll.length ===
-      cohortContext.editSelectAll?.variantFilter.exclusionList?.length;
+      (cohortContext.editSelectAll?.variantFilter.exclusionList?.length ?? 0);
     const displayResults = searchResults?.slice(first, first + pageSize);
     return (
       <>
@@ -526,7 +526,10 @@ export const VariantSearch = fp.flow(
         {!loading && variantFilters && (
           <div style={{ display: 'flex', position: 'relative' }}>
             <Clickable
-              style={{ color: colors.primary }}
+              style={withDisabledStyle(
+                { color: colors.primary },
+                loadingMore || !!cohortContext.editSelectAll
+              )}
               onClick={() => setFiltersOpen((prevState) => !prevState)}
               disabled={loadingMore || !!cohortContext.editSelectAll}
             >
@@ -552,11 +555,14 @@ export const VariantSearch = fp.flow(
               (!!cohortContext.editSelectAll ? (
                 <>
                   <Clickable
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      marginLeft: '1rem',
-                    }}
+                    style={withDisabledStyle(
+                      {
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        marginLeft: '1rem',
+                      },
+                      disableSelectAllSave
+                    )}
                     onClick={() => handleSelectAllEdit()}
                     disabled={disableSelectAllSave}
                   >
@@ -606,11 +612,10 @@ export const VariantSearch = fp.flow(
                   disabled={!disableSelectAll}
                 >
                   <Clickable
-                    style={
+                    style={withDisabledStyle(
+                      styles.selectAll,
                       disableSelectAll
-                        ? { ...styles.selectAll, ...styles.disabled }
-                        : styles.selectAll
-                    }
+                    )}
                     onClick={() => handleSelectAllResults()}
                     disabled={disableSelectAll}
                   >
