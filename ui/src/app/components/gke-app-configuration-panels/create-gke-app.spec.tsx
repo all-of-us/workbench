@@ -6,7 +6,6 @@ import {
   AppsApi,
   AppStatus,
   AppType,
-  CreateAppRequest,
   DisksApi,
   UserAppEnvironment,
   WorkspaceAccessLevel,
@@ -384,6 +383,7 @@ describe(CreateGkeApp.name, () => {
       );
       expect(cpuDropdown).not.toBeInTheDocument();
 
+      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
       const fixedConfiguration = screen.getByText(/CPUS/);
       await user.hover(fixedConfiguration);
 
@@ -412,6 +412,7 @@ describe(CreateGkeApp.name, () => {
       );
       expect(cpuDropdown).not.toBeInTheDocument();
 
+      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
       const fixedConfiguration = screen.getByText(/CPUS/);
       await user.hover(fixedConfiguration);
 
@@ -440,6 +441,7 @@ describe(CreateGkeApp.name, () => {
       );
       expect(cpuDropdown).not.toBeInTheDocument();
 
+      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
       const fixedConfiguration = screen.getByText(/CPUS/);
       await user.hover(fixedConfiguration);
 
@@ -491,6 +493,7 @@ describe(CreateGkeApp.name, () => {
       );
       expect(cpuDropdown).not.toBeInTheDocument();
 
+      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
       const fixedConfiguration = screen.getByText(/CPUS/);
       await user.hover(fixedConfiguration);
 
