@@ -6,6 +6,7 @@ import {
   AppsApi,
   AppStatus,
   AppType,
+  ConfigResponse,
   DisksApi,
   UserAppEnvironment,
   WorkspaceAccessLevel,
@@ -287,6 +288,8 @@ describe(CreateGkeApp.name, () => {
       expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
     });
 
+    // positive tests for machine type configuration
+
     it.each([
       ['there are no running apps', {}],
       [
@@ -364,127 +367,84 @@ describe(CreateGkeApp.name, () => {
       }
     );
 
-    it('should not allow machine type configuration when the feature flag is false', async () => {
-      serverConfigStore.set({
-        config: {
+    // negative tests for machine type configuration
+
+    it.each([
+      [
+        'the feature flag is false',
+        {
           ...serverConfigStore.get().config,
           enableGKEAppMachineTypeChoice: false,
         },
-      });
-
-      // can't configure when running, so set to deleted
-      const { container } = await component(appType, {
-        userApps: [{ ...listAppsResponse(), status: AppStatus.DELETED }],
-      });
-
-      const cpuDropdown = container.querySelector(
-        `${appTypeToString[appType]}-cpu`
-      );
-      expect(cpuDropdown).not.toBeInTheDocument();
-
-      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
-      const fixedConfiguration = screen.getByText(/CPUS/);
-      await user.hover(fixedConfiguration);
-
-      expect(
-        screen.getByText(
-          `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('should not allow machine type configuration when the app is running', async () => {
-      serverConfigStore.set({
-        config: {
+        {},
+        `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
+      ],
+      [
+        'the app is running',
+        {
           ...serverConfigStore.get().config,
           enableGKEAppMachineTypeChoice: true,
         },
-      });
-
-      const { container } = await component(appType, {
-        userApps: [{ ...listAppsResponse(), status: AppStatus.RUNNING }],
-      });
-
-      const cpuDropdown = container.querySelector(
-        `${appTypeToString[appType]}-cpu`
-      );
-      expect(cpuDropdown).not.toBeInTheDocument();
-
-      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
-      const fixedConfiguration = screen.getByText(/CPUS/);
-      await user.hover(fixedConfiguration);
-
-      expect(
-        screen.getByText(
-          /Cannot configure the compute profile of an active environment/
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('should not allow machine type configuration when the app is deleting', async () => {
-      serverConfigStore.set({
-        config: {
+        {
+          userApps: [{ ...listAppsResponse(), status: AppStatus.RUNNING }],
+        },
+        /Cannot configure the compute profile of an active environment/,
+      ],
+      [
+        'the app is deleting',
+        {
           ...serverConfigStore.get().config,
           enableGKEAppMachineTypeChoice: true,
         },
-      });
-
-      const { container } = await component(appType, {
-        userApps: [{ ...listAppsResponse(), status: AppStatus.DELETING }],
-      });
-
-      const cpuDropdown = container.querySelector(
-        `${appTypeToString[appType]}-cpu`
-      );
-      expect(cpuDropdown).not.toBeInTheDocument();
-
-      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
-      const fixedConfiguration = screen.getByText(/CPUS/);
-      await user.hover(fixedConfiguration);
-
-      expect(
-        screen.getByText(
-          /Cannot configure the compute profile of an environment which is being deleted/
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('should not allow machine type configuration when another app exists', async () => {
-      serverConfigStore.set({
-        config: {
+        {
+          userApps: [{ ...listAppsResponse(), status: AppStatus.DELETING }],
+        },
+        /Cannot configure the compute profile of an environment which is being deleted/,
+      ],
+      [
+        'another app exists',
+        {
           ...serverConfigStore.get().config,
           enableGKEAppMachineTypeChoice: true,
         },
-      });
+        {
+          userApps: [
+            {
+              ...listAppsResponse(),
+              status: AppStatus.DELETED,
+            },
+            {
+              ...listAppsResponse(),
+              appType: otherAppType[appType],
+              status: AppStatus.RUNNING,
+            },
+          ],
+        },
+        /Cannot configure the compute profile when environments already exist in the workspace/,
+      ],
+    ])(
+      `should not allow machine type configuration when %s`,
+      async (
+        _,
+        config: ConfigResponse,
+        propOverrides: Partial<CreateGkeAppProps>,
+        tooltip: string | RegExp
+      ) => {
+        serverConfigStore.set({ config });
 
-      const thisAppConfig: UserAppEnvironment = {
-        ...listAppsResponse(),
-        status: AppStatus.DELETED,
-      };
-      const otherAppConfig: UserAppEnvironment = {
-        ...listAppsResponse(),
-        appType: otherAppType[appType],
-        status: AppStatus.RUNNING,
-      };
+        const { container } = await component(appType, propOverrides);
 
-      const { container } = await component(appType, {
-        userApps: [thisAppConfig, otherAppConfig],
-      });
+        const cpuDropdown = container.querySelector(
+          `${appTypeToString[appType]}-cpu`
+        );
+        expect(cpuDropdown).not.toBeInTheDocument();
 
-      const cpuDropdown = container.querySelector(
-        `${appTypeToString[appType]}-cpu`
-      );
-      expect(cpuDropdown).not.toBeInTheDocument();
+        // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
+        const fixedConfiguration = screen.getByText(/CPUS/);
+        await user.hover(fixedConfiguration);
 
-      // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
-      const fixedConfiguration = screen.getByText(/CPUS/);
-      await user.hover(fixedConfiguration);
-
-      expect(
-        screen.getByText(
-          /Cannot configure the compute profile when environments already exist in the workspace/
-        )
-      ).toBeInTheDocument();
-    });
+        expect(screen.getByText(tooltip)).toBeInTheDocument();
+      }
+    );
   });
 });
