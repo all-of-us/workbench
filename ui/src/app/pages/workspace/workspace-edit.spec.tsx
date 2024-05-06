@@ -316,20 +316,20 @@ describe('WorkspaceEdit', () => {
       ).checked
     ).toEqual(true);
 
-    user.click(screen.getByTestId('specific-population-no'));
+    await user.click(screen.getByTestId('specific-population-no'));
 
     const saveButton = screen.getByRole('button', { name: 'Update Workspace' });
 
     await waitFor(() => {
       expectButtonElementEnabled(saveButton);
     });
-    user.click(saveButton);
+    await user.click(saveButton);
 
     const confirmSaveButton = await screen.findByRole('button', {
       name: 'Confirm',
     });
 
-    user.click(confirmSaveButton);
+    await user.click(confirmSaveButton);
 
     await waitFor(() => {
       expect(
