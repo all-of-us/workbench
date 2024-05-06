@@ -1154,7 +1154,10 @@ export const WorkspaceEdit = fp.flow(
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
-        let workspace = null;
+        let workspace = this.state.workspace;
+        if (!this.state.populationChecked) {
+          workspace.researchPurpose.populationDetails = [];
+        }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace = await this.apiCreateWorkspaceAsync();
