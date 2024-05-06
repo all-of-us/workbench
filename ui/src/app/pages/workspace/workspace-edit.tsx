@@ -1154,11 +1154,7 @@ export const WorkspaceEdit = fp.flow(
     async saveWorkspace() {
       try {
         this.setState({ loading: true });
-        let accessLevel = null;
-        let workspace = this.state.workspace;
-        if (!this.state.populationChecked) {
-          workspace.researchPurpose.populationDetails = [];
-        }
+        let workspace = null;
 
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace = await this.apiCreateWorkspaceAsync();
@@ -1191,24 +1187,22 @@ export const WorkspaceEdit = fp.flow(
           return;
         }
 
-        ({ workspace, accessLevel } = await workspacesApi().getWorkspace(
-          workspace.namespace,
-          workspace.id
-        ));
+        const { workspace: updatedWorkspace, accessLevel: updatedAccessLevel } =
+          await workspacesApi().getWorkspace(workspace.namespace, workspace.id);
 
         const navigateToWorkspace = () => {
           this.props.navigate([
             'workspaces',
-            workspace.namespace,
-            workspace.id,
+            updatedWorkspace.namespace,
+            updatedWorkspace.id,
             'data',
           ]);
         };
 
         // Preload the newly created workspace to avoid a redundant GET on the following navigate.
         nextWorkspaceWarmupStore.next({
-          ...workspace,
-          accessLevel,
+          ...updatedWorkspace,
+          accessLevel: updatedAccessLevel,
         });
         navigateToWorkspace();
       } catch (error) {
