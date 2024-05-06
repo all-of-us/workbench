@@ -7,7 +7,6 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
-  User,
   UserAppEnvironment,
 } from 'generated/fetch';
 
