@@ -274,7 +274,7 @@ export const CreateGkeApp = ({
             <div style={styles.formGrid3}>
               <MachineSelector
                 {...{ validMachineTypes }}
-                idPrefix='runtime'
+                idPrefix={appTypeToString[appType]}
                 disabled={false}
                 selectedMachine={toMachine(createAppRequest)}
                 onChange={(machine: Machine) =>

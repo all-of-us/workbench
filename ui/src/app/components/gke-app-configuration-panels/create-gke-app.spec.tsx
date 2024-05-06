@@ -4,20 +4,26 @@ import * as React from 'react';
 
 import {
   AppsApi,
+  AppStatus,
   AppType,
+  CreateAppRequest,
   DisksApi,
   UserAppEnvironment,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { expectButtonElementEnabled } from 'testing/react-test-helpers';
+import {
+  expectButtonElementEnabled,
+  expectDropdown,
+} from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
@@ -69,6 +75,13 @@ const defaultApp: UserAppEnvironment = {
   appType: AppType.RSTUDIO,
   dateAccessed: new Date().toISOString(),
   autodeleteEnabled: false,
+};
+
+// when we need an arbitrary choice of a different type
+const otherAppType: Record<AppType, AppType> = {
+  [AppType.CROMWELL]: AppType.RSTUDIO,
+  [AppType.RSTUDIO]: AppType.SAS,
+  [AppType.SAS]: AppType.CROMWELL,
 };
 
 // tests for behavior common to all GKE Apps.  For app-specific tests, see e.g. create-cromwell-spec
@@ -177,10 +190,7 @@ describe(CreateGkeApp.name, () => {
       const disk = stubDisk();
       const onClickDeleteUnattachedPersistentDisk = jest.fn();
 
-      await component(appType, {
-        disk,
-        onClickDeleteUnattachedPersistentDisk,
-      });
+      await component(appType, { disk, onClickDeleteUnattachedPersistentDisk });
 
       const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
       expectButtonElementEnabled(deleteButton);
@@ -272,6 +282,223 @@ describe(CreateGkeApp.name, () => {
 
       // Assert that the autodeleteRemainingDays text is not in the document
       expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
+    });
+
+    it('should allow machine type configuration when there are no running apps', async () => {
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      // can't configure when running, so set to deleted
+      const { container } = await component(appType);
+
+      const cpuDropdown = expectDropdown(
+        container,
+        `${appTypeToString[appType]}-cpu`
+      );
+
+      expect(cpuDropdown).toBeInTheDocument();
+
+      // TODO now do something with the dropdown
+    });
+
+    it('should allow machine type configuration when the current app is DELETED', async () => {
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      // can't configure when running, so set to deleted
+      const { container } = await component(appType, {
+        userApps: [{ ...listAppsResponse(), status: AppStatus.DELETED }],
+      });
+
+      const cpuDropdown = expectDropdown(
+        container,
+        `${appTypeToString[appType]}-cpu`
+      );
+
+      expect(cpuDropdown).toBeInTheDocument();
+
+      // TODO now do something with the dropdown
+    });
+
+    it('should allow machine type configuration when an existing app has the same configuration', async () => {
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      const thisAppConfig: UserAppEnvironment = {
+        ...listAppsResponse(),
+        status: AppStatus.DELETED,
+      };
+      const otherAppConfig: UserAppEnvironment = {
+        ...listAppsResponse(),
+        appType: otherAppType[appType],
+        status: AppStatus.RUNNING,
+      };
+
+      // sanity check: same machine type
+      expect(thisAppConfig.kubernetesRuntimeConfig.machineType).toEqual(
+        otherAppConfig.kubernetesRuntimeConfig.machineType
+      );
+
+      const { container } = await component(appType, {
+        userApps: [thisAppConfig, otherAppConfig],
+      });
+
+      const cpuDropdown = expectDropdown(
+        container,
+        `${appTypeToString[appType]}-cpu`
+      );
+
+      expect(cpuDropdown).toBeInTheDocument();
+
+      // TODO now do something with the dropdown
+    });
+
+    it('should not allow machine type configuration when the feature flag is false', async () => {
+      const user = userEvent.setup();
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: false,
+        },
+      });
+
+      // can't configure when running, so set to deleted
+      const { container } = await component(appType, {
+        userApps: [{ ...listAppsResponse(), status: AppStatus.DELETED }],
+      });
+
+      const cpuDropdown = container.querySelector(
+        `${appTypeToString[appType]}-cpu`
+      );
+      expect(cpuDropdown).not.toBeInTheDocument();
+
+      const fixedConfiguration = screen.getByText(/CPUS/);
+      await user.hover(fixedConfiguration);
+
+      expect(
+        screen.getByText(
+          `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should not allow machine type configuration when the app is running', async () => {
+      const user = userEvent.setup();
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      const { container } = await component(appType, {
+        userApps: [{ ...listAppsResponse(), status: AppStatus.RUNNING }],
+      });
+
+      const cpuDropdown = container.querySelector(
+        `${appTypeToString[appType]}-cpu`
+      );
+      expect(cpuDropdown).not.toBeInTheDocument();
+
+      const fixedConfiguration = screen.getByText(/CPUS/);
+      await user.hover(fixedConfiguration);
+
+      expect(
+        screen.getByText(
+          /Cannot configure the compute profile of an active environment/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should not allow machine type configuration when the app is deleting', async () => {
+      const user = userEvent.setup();
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      const { container } = await component(appType, {
+        userApps: [{ ...listAppsResponse(), status: AppStatus.DELETING }],
+      });
+
+      const cpuDropdown = container.querySelector(
+        `${appTypeToString[appType]}-cpu`
+      );
+      expect(cpuDropdown).not.toBeInTheDocument();
+
+      const fixedConfiguration = screen.getByText(/CPUS/);
+      await user.hover(fixedConfiguration);
+
+      expect(
+        screen.getByText(
+          /Cannot configure the compute profile of an environment which is being deleted/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should not allow machine type configuration when another app has a different machine type', async () => {
+      const user = userEvent.setup();
+      serverConfigStore.set({
+        config: {
+          ...serverConfigStore.get().config,
+          enableGKEAppMachineTypeChoice: true,
+        },
+      });
+
+      const thisAppConfig: UserAppEnvironment = {
+        ...listAppsResponse(),
+        status: AppStatus.DELETED,
+        kubernetesRuntimeConfig: {
+          ...listAppsResponse().kubernetesRuntimeConfig,
+          machineType: 'n1-standard-1',
+        },
+      };
+      const otherAppConfig: UserAppEnvironment = {
+        ...listAppsResponse(),
+        appType: otherAppType[appType],
+        status: AppStatus.RUNNING,
+        kubernetesRuntimeConfig: {
+          ...listAppsResponse().kubernetesRuntimeConfig,
+          machineType: 'n1-standard-2',
+        },
+      };
+
+      // sanity check: different machine type
+      expect(thisAppConfig.kubernetesRuntimeConfig.machineType).not.toEqual(
+        otherAppConfig.kubernetesRuntimeConfig.machineType
+      );
+
+      const { container } = await component(appType, {
+        userApps: [thisAppConfig, otherAppConfig],
+      });
+
+      const cpuDropdown = container.querySelector(
+        `${appTypeToString[appType]}-cpu`
+      );
+      expect(cpuDropdown).not.toBeInTheDocument();
+
+      const fixedConfiguration = screen.getByText(/CPUS/);
+      await user.hover(fixedConfiguration);
+
+      expect(
+        screen.getByText(
+          /environments already exist in the workspace with differing compute profiles/
+        )
+      ).toBeInTheDocument();
     });
   });
 });
