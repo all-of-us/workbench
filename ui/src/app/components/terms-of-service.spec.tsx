@@ -1,14 +1,31 @@
 import * as React from 'react';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 
+import { expectButtonElementDisabled } from '../../testing/react-test-helpers';
+import {
+  getDefaultNormalizer,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { TermsOfService, TosProps } from 'app/components/terms-of-service';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 const getAgreementCheckbox = (wrapper: AnyWrapper): AnyWrapper => {
   return wrapper.find('input[aria-label="Acknowledge Terms"]');
 };
+const getAgreementCheckboxAlternate = (): HTMLInputElement => {
+  return screen.getByRole('checkbox', { name: /acknowledge terms/i });
+};
 const getNextButton = (wrapper: AnyWrapper): AnyWrapper => {
   return wrapper.find('[data-test-id="next-button"]');
+};
+
+const getNextButtonAlternate = (): HTMLElement => {
+  return screen.getByRole('button', {
+    name: /next/i,
+  });
 };
 
 let props: TosProps;
@@ -25,8 +42,10 @@ beforeEach(() => {
 });
 
 it('should render', async () => {
-  const wrapper = mount(<TermsOfService {...props} />);
-  expect(wrapper.exists()).toBeTruthy();
+  const wrapper = render(<TermsOfService {...props} />);
+  await screen.findByText(
+    'Please read through the entire agreement to continue.'
+  );
 });
 
 it('should enable checkbox and next button with user input', async () => {
