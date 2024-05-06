@@ -677,7 +677,7 @@ export const SelectionList = fp.flow(
                 <Button
                   type='primary'
                   style={styles.saveButton}
-                  disabled={disableSave}
+                  disabled={disableSave || !!cohortContext?.editSelectAll}
                   onClick={() => saveCriteria()}
                 >
                   Save Criteria
