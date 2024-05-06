@@ -81,8 +81,11 @@ const toAnalysisConfig = (
   };
 };
 
-// we only allow a single machine type across all user apps in the workspace,
-// so we need to determine the machine types of existing apps, if any
+const otherApps = (
+  userApps: UserAppEnvironment[] | undefined,
+  thisAppType: AppType
+): UserAppEnvironment[] =>
+  userApps?.filter((app) => app.appType !== thisAppType) ?? [];
 
 const otherMachineTypes = (
   userApps: UserAppEnvironment[] | undefined,
@@ -90,10 +93,8 @@ const otherMachineTypes = (
 ): string[] =>
   Array.from(
     new Set(
-      userApps
-        // filter out this app
-        ?.filter((app) => app.appType !== thisAppType)
-        ?.map(
+      otherApps(userApps, thisAppType)
+        .map(
           (app: UserAppEnvironment) => app.kubernetesRuntimeConfig?.machineType
         )
         // filter out undefined values
@@ -101,7 +102,7 @@ const otherMachineTypes = (
     )
   );
 
-// if there are other apps with a common machine type, return that machine type
+// if there are other app(s) with a common machine type, return that machine type
 // TODO: what should we do if there is more than one (shouldn't happen) - for now, return undefined
 
 const maybeGetOtherMachineType = (
@@ -110,19 +111,6 @@ const maybeGetOtherMachineType = (
 ): string | undefined => {
   const otherTypes = otherMachineTypes(userApps, thisAppType);
   return otherTypes.length === 1 ? otherTypes[0] : undefined;
-};
-
-const differentMachineTypeExists = (
-  createAppRequest: CreateAppRequest,
-  userApps: UserAppEnvironment[]
-) => {
-  const thisMachineType: string | undefined = toMachine(createAppRequest)?.name;
-  const otherType: string | undefined = maybeGetOtherMachineType(
-    userApps,
-    createAppRequest.appType
-  );
-
-  return thisMachineType && otherType && thisMachineType !== otherType;
 };
 
 export interface CreateGkeAppProps {
@@ -237,12 +225,13 @@ export const CreateGkeApp = ({
 
   const canConfigureMachineType =
     enableGKEAppMachineTypeChoice &&
-    !differentMachineTypeExists(createAppRequest, userApps) &&
-    !isAppActive(app);
+    !isAppActive(app) &&
+    otherApps(userApps, appType).length === 0;
+
   const machineTypeDisabledText = cond(
     [
-      differentMachineTypeExists(createAppRequest, userApps),
-      'Cannot configure the compute profile when environments already exist in the workspace with differing compute profiles.  ' +
+      otherApps(userApps, appType).length > 0,
+      'Cannot configure the compute profile when environments already exist in the workspace.  ' +
         'You must delete other environments before configuring a new one with a different compute profile.',
     ],
     [
