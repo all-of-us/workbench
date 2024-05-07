@@ -3,7 +3,7 @@ import * as React from 'react';
 import { AppType, Disk, PersistentDiskRequest } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
-import { FlexRow } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { Machine } from 'app/utils/machines';
 import { appTypeToString } from 'app/utils/user-apps-utils';
@@ -18,17 +18,28 @@ export const DisabledCloudComputeProfile = ({
   persistentDiskRequest: { size },
   appType,
 }: Props) => (
-  <FlexRow style={{ alignItems: 'center' }}>
-    <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-      Cloud compute profile
-    </div>
-    <TooltipTrigger
-      content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
-      side={'right'}
-    >
-      <div style={styles.disabledCloudProfile}>
-        {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+  <FlexColumn style={{ rowGap: '1em' }}>
+    <FlexRow style={{ alignItems: 'center' }}>
+      <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
+        Cloud compute profile
       </div>
-    </TooltipTrigger>
-  </FlexRow>
+      <TooltipTrigger
+        content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
+        side={'right'}
+      >
+        <div style={styles.disabledCloudProfile}>
+          {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+    <FlexColumn>
+      <div>
+        Note that CPU and RAM resources may be{' '}
+        <b>shared between cloud environments</b>,
+      </div>
+      <div>
+        with the exception of Jupyter which has its own separate environment.
+      </div>
+    </FlexColumn>
+  </FlexColumn>
 );
