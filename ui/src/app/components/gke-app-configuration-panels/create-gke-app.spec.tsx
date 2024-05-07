@@ -208,7 +208,7 @@ describe(CreateGkeApp.name, () => {
     it('should not render a Delete Persistent Disk link when an app is present', async () => {
       const disk = stubDisk();
 
-        await component(appType, { userApps: [listAppsResponse()], disk });
+      await component(appType, { userApps: [listAppsResponse()], disk });
 
       const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
       expect(deleteButton).toBeNull();
@@ -388,7 +388,7 @@ describe(CreateGkeApp.name, () => {
         {
           userApps: [{ ...listAppsResponse(), status: AppStatus.RUNNING }],
         },
-        /Cannot configure the compute profile of an active environment/,
+        /Cannot configure the compute profile of a running application/,
       ],
       [
         'the app is deleting',
@@ -399,7 +399,7 @@ describe(CreateGkeApp.name, () => {
         {
           userApps: [{ ...listAppsResponse(), status: AppStatus.DELETING }],
         },
-        /Cannot configure the compute profile of an environment which is being deleted/,
+        /Cannot configure the compute profile of an application which is being deleted/,
       ],
       [
         'another app exists',
@@ -420,7 +420,7 @@ describe(CreateGkeApp.name, () => {
             },
           ],
         },
-        /Cannot configure the compute profile when environments already exist in the workspace/,
+        /Cannot configure the compute profile when there are applications running in the workspace/,
       ],
     ])(
       `should not allow machine type configuration when %s`,

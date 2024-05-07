@@ -172,9 +172,12 @@ export const CreateGkeApp = ({
       kubernetesRuntimeConfig: {
         ...defaultCreateRequest.kubernetesRuntimeConfig,
         machineType:
+          // if there is an active app, use its machineType for display
           app?.kubernetesRuntimeConfig.machineType ??
+          // otherwise, if there is an active app of a different type, use its machine type to configure this one
           maybeGetOtherMachineType(userApps, appType) ??
-            defaultCreateRequest.kubernetesRuntimeConfig.machineType,
+          // use the default if neither of these cases apply
+          defaultCreateRequest.kubernetesRuntimeConfig.machineType,
       },
 
       persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
@@ -230,17 +233,17 @@ export const CreateGkeApp = ({
   const machineTypeDisabledText = cond(
     [
       otherApps(userApps, appType).length > 0,
-      'Cannot configure the compute profile when environments already exist in the workspace.  ' +
-        'You must delete other environments before configuring a new one with a different compute profile.',
+      'Cannot configure the compute profile when there are applications running in the workspace.  ' +
+        'You must delete other applications before configuring a new one with a different compute profile.',
     ],
     [
       app?.status === AppStatus.DELETING,
-      'Cannot configure the compute profile of an environment which is being deleted.  Please wait for deletion to complete.',
+      'Cannot configure the compute profile of an application which is being deleted.  Please wait for deletion to complete.',
     ],
     [
       isAppActive(app),
-      'Cannot configure the compute profile of an active environment.  ' +
-        'Please delete the current environment and create a new environment with the desired profile.',
+      'Cannot configure the compute profile of a running application.  ' +
+        'Please delete the current application and create a new application with the desired profile.',
     ]
   );
 
