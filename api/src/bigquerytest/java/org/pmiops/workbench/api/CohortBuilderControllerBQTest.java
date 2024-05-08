@@ -1718,12 +1718,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countParticipantsWearConsent() {
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.WEAR_CONSENT.toString(),
-                    ImmutableList.of(fitbit(Domain.WEAR_CONSENT)),
-                    new ArrayList<>());
+        createCohortDefinition(
+            Domain.WEAR_CONSENT.toString(),
+            ImmutableList.of(fitbit(Domain.WEAR_CONSENT)),
+            new ArrayList<>());
     assertParticipants(
-            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
