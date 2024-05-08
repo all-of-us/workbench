@@ -59,7 +59,7 @@ export const defaultProps: CommonCreateGkeAppProps = {
     reload: jest.fn(),
     updateCache: jest.fn(),
   },
-  app: undefined,
+  userApps: [],
   disk: undefined,
   onClickDeleteGkeApp: jest.fn(),
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
@@ -117,10 +117,7 @@ describe(CreateGkeApp.name, () => {
       const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
 
       it('Should create an app and close the panel when the create button is clicked', async () => {
-        await component(appType, {
-          app: undefined,
-          disk: undefined,
-        });
+        await component(appType);
 
         const spyCreateApp = jest
           .spyOn(appsApi(), 'createApp')
@@ -142,10 +139,7 @@ describe(CreateGkeApp.name, () => {
 
       it('should use the existing PD when creating', async () => {
         const disk = stubDisk();
-        await component(appType, {
-          app: undefined,
-          disk,
-        });
+        await component(appType, { disk });
 
         const spyCreateApp = jest
           .spyOn(appsApi(), 'createApp')
@@ -169,7 +163,7 @@ describe(CreateGkeApp.name, () => {
         const onClickDeleteGkeApp = jest.fn();
 
         await component(appType, {
-          app: listAppsResponse(),
+          userApps: [listAppsResponse()],
           disk,
           onClickDeleteGkeApp,
         });
@@ -194,7 +188,6 @@ describe(CreateGkeApp.name, () => {
         const onClickDeleteUnattachedPersistentDisk = jest.fn();
 
         await component(appType, {
-          app: undefined,
           disk,
           onClickDeleteUnattachedPersistentDisk,
         });
@@ -213,24 +206,24 @@ describe(CreateGkeApp.name, () => {
       it('should not render a Delete Persistent Disk link when an app is present', async () => {
         const disk = stubDisk();
 
-        await component(appType, {
-          app: createListAppsSASResponse(),
-          disk,
-        });
+        await component(appType, { userApps: [listAppsResponse()], disk });
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
       });
 
       it('should not render a Delete Persistent Disk link when no disk is present', async () => {
-        await component(appType, {
-          app: undefined,
-          disk: undefined,
-        });
+        await component(appType);
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
       });
+
+      const autodeleteTestApp: UserAppEnvironment = {
+        ...defaultApp,
+        appType,
+        autodeleteEnabled: true,
+      };
 
       it('should correctly calculate autodeleteRemainingDays', async () => {
         const now = new Date();
@@ -239,12 +232,13 @@ describe(CreateGkeApp.name, () => {
         const autodeleteThreshold = 7 * 24 * 60 + 1; // 7 days in minutes plus a small buffer
 
         await component(appType, {
-          app: {
-            ...defaultApp,
-            autodeleteEnabled: true,
-            dateAccessed: dateAccessed.toISOString(),
-            autodeleteThreshold,
-          },
+          userApps: [
+            {
+              ...autodeleteTestApp,
+              dateAccessed: dateAccessed.toISOString(),
+              autodeleteThreshold,
+            },
+          ],
         });
 
         expect(
@@ -259,12 +253,13 @@ describe(CreateGkeApp.name, () => {
         const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
 
         await component(appType, {
-          app: {
-            ...defaultApp,
-            autodeleteEnabled: true,
-            dateAccessed: dateAccessed.toISOString(),
-            autodeleteThreshold,
-          },
+          userApps: [
+            {
+              ...autodeleteTestApp,
+              dateAccessed: dateAccessed.toISOString(),
+              autodeleteThreshold,
+            },
+          ],
         });
 
         // less than 1 day (0 days) remaining until deletion.
@@ -275,10 +270,7 @@ describe(CreateGkeApp.name, () => {
 
       it('should not show autodeleteRemainingDays when app is not running', async () => {
         // Render the component with the app not running
-        await component(appType, {
-          app: undefined,
-          disk: undefined,
-        });
+        await component(appType);
 
         // Query for the autodeleteRemainingDays text
         const autodeleteRemainingDaysText = screen.queryByLabelText(

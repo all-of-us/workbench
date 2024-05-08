@@ -17,6 +17,7 @@ import {
   defaultCromwellConfig,
   defaultRStudioConfig,
   defaultSASConfig,
+  findApp,
   isAppActive,
   toUIAppType,
 } from 'app/components/apps-panel/utils';
@@ -55,12 +56,12 @@ const defaultIntroText =
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
 export interface CreateGkeAppProps {
+  userApps: UserAppEnvironment[];
   appType: AppType;
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
   onClickDeleteUnattachedPersistentDisk: () => void;
@@ -81,12 +82,12 @@ type ToOmit =
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
 export const CreateGkeApp = ({
+  userApps,
   appType,
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  app,
   disk,
   onClickDeleteGkeApp,
   onClickDeleteUnattachedPersistentDisk,
@@ -132,6 +133,8 @@ export const CreateGkeApp = ({
     detachedDisk: undefined,
     autopauseThreshold: undefined,
   };
+
+  const app = findApp(userApps, toUIAppType[appType]);
 
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
