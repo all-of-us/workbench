@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link as RouterLink, matchPath } from 'react-router-dom';
+import { Link, matchPath } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
@@ -294,7 +294,7 @@ export const getTrail = (
 };
 
 const BreadcrumbLink = ({ href, ...props }) => {
-  return <RouterLink to={href} {...props} />;
+  return <Link to={href} {...props} />;
 };
 
 interface Props {
