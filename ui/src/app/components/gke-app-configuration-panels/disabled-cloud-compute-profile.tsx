@@ -6,6 +6,7 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { Machine } from 'app/utils/machines';
+import { oxfordCommaString } from 'app/utils/strings';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
 interface Props {
@@ -17,29 +18,32 @@ export const DisabledCloudComputeProfile = ({
   machine: { cpu, memory },
   persistentDiskRequest: { size },
   appType,
-}: Props) => (
-  <FlexColumn style={{ rowGap: '1em' }}>
-    <FlexRow style={{ alignItems: 'center' }}>
-      <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-        Cloud compute profile
-      </div>
-      <TooltipTrigger
-        content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
-        side={'right'}
-      >
-        <div style={styles.disabledCloudProfile}>
-          {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+}: Props) => {
+  const otherAppTypes: string[] = Object.keys(AppType)
+    .filter((k) => AppType[k] !== appType)
+    .map((k) => appTypeToString[AppType[k]]);
+  const otherAppsString = oxfordCommaString(otherAppTypes);
+
+  return (
+    <FlexColumn style={{ rowGap: '1em' }}>
+      <FlexRow style={{ alignItems: 'center' }}>
+        <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
+          Cloud compute profile
         </div>
-      </TooltipTrigger>
-    </FlexRow>
-    <FlexColumn>
+        <TooltipTrigger
+          content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
+          side={'right'}
+        >
+          <div style={styles.disabledCloudProfile}>
+            {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+          </div>
+        </TooltipTrigger>
+      </FlexRow>
       <div>
-        Note that CPU and RAM resources may be{' '}
-        <b>shared between cloud environments</b>,
-      </div>
-      <div>
-        with the exception of Jupyter which has its own separate environment.
+        Your {appTypeToString[appType]} environment will share CPU and RAM
+        resources with any {otherAppsString} environments you run in this
+        workspace.
       </div>
     </FlexColumn>
-  </FlexColumn>
-);
+  );
+};
