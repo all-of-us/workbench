@@ -21,7 +21,8 @@
     "has_whole_genome_variant": 1,
     "has_array_data": 1,
     "has_lr_whole_genome_variant": 1,
-    "has_structural_variant_data": 1
+    "has_structural_variant_data": 1,
+    "has_wear_consent": 1
   },
   {
     "person_id": 2,

@@ -34,6 +34,11 @@ query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\
 where has_structural_variant_data = 1"
 structuralVariantDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
+echo "Getting Wear Consent data count"
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
+where has_wear_consent = 1"
+wearConsentDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 ###############################
 # CREATE cb_criteria_menu TABLE
 ###############################
@@ -54,7 +59,7 @@ insertCriteriaMenu "
 if [[ $fitbitCount > 0 ]];
 then
   echo "Insert fitbit into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','FITBIT','FITBIT','Fitbit',1,$ID)"
+  insertCriteriaMenu "($((++ID)),0,'Program Data','WEARABLES','','Wearables',1,$ID)"
 fi
 
 if [[ $wgvCount > 0 || $longReadWGSCount > 0 || $arrayCount > 0 || $structuralVariantDataCount > 0 || "$TABLE_LIST" == *"prep_vat"* ]];
@@ -123,6 +128,12 @@ then
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_INTRADAY_STEPS','FITBIT_INTRADAY_STEPS','Fitbit Steps Intraday',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_DAILY_SUMMARY','FITBIT_SLEEP_DAILY_SUMMARY','Fitbit Sleep Daily Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_LEVEL','FITBIT_SLEEP_LEVEL','Fitbit Sleep Level',0,$((++SORT_ORDER)))"
+  
+  if [[ $wearConsentDataCount > 0 ]];
+  then
+    echo "Insert wear consent into cb_criteria_menu"
+    insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','WEAR_CONSENT','WEAR_CONSENT','Wear Consent',0,$((++SORT_ORDER)))"
+  fi
 fi
 
 echo "Getting parent id for GENOMICS"
