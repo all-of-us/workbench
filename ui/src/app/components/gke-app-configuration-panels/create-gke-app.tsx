@@ -14,9 +14,9 @@ import {
 import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  defaultCromwellConfig,
-  defaultRStudioConfig,
-  defaultSASConfig,
+  defaultCromwellCreateRequest,
+  defaultRStudioCreateRequest,
+  defaultSASCreateRequest,
   findApp,
   isAppActive,
   toUIAppType,
@@ -104,16 +104,16 @@ export const CreateGkeApp = ({
     setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
   };
 
-  const defaultConfig = switchCase(
+  const defaultCreateRequest = switchCase(
     appType,
-    [AppType.CROMWELL, () => defaultCromwellConfig],
-    [AppType.RSTUDIO, () => defaultRStudioConfig],
-    [AppType.SAS, () => defaultSASConfig]
+    [AppType.CROMWELL, () => defaultCromwellCreateRequest],
+    [AppType.RSTUDIO, () => defaultRStudioCreateRequest],
+    [AppType.SAS, () => defaultSASCreateRequest]
   );
 
   const persistentDiskRequest: PersistentDiskRequest =
-    disk ?? defaultConfig.persistentDiskRequest;
-  const { kubernetesRuntimeConfig } = defaultConfig;
+    disk ?? defaultCreateRequest.persistentDiskRequest;
+  const { kubernetesRuntimeConfig } = defaultCreateRequest;
   const machine: Machine = findMachineByName(
     kubernetesRuntimeConfig.machineType
   );
@@ -138,12 +138,12 @@ export const CreateGkeApp = ({
 
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
-      ...defaultConfig,
+      ...defaultCreateRequest,
       persistentDiskRequest,
       autodeleteEnabled:
-        app?.autodeleteEnabled ?? defaultConfig.autodeleteEnabled,
+        app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
       autodeleteThreshold:
-        app?.autodeleteThreshold ?? defaultConfig.autodeleteThreshold,
+        app?.autodeleteThreshold ?? defaultCreateRequest.autodeleteThreshold,
     });
 
   const autodeleteRemainingDays: number = (() => {

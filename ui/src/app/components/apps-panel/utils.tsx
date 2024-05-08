@@ -69,7 +69,7 @@ export const appAssets: AppAssets[] = [
 ];
 
 // TODO replace with better defaults?
-export const defaultCromwellConfig: CreateAppRequest = {
+export const defaultCromwellCreateRequest: CreateAppRequest = {
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
     numNodes: 1,
@@ -86,7 +86,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
 };
 
 // TODO replace with better defaults?
-export const defaultRStudioConfig: CreateAppRequest = {
+export const defaultRStudioCreateRequest: CreateAppRequest = {
   appType: AppType.RSTUDIO,
   kubernetesRuntimeConfig: {
     numNodes: 1,
@@ -103,7 +103,7 @@ export const defaultRStudioConfig: CreateAppRequest = {
 };
 
 // TODO replace with better defaults?
-export const defaultSASConfig: CreateAppRequest = {
+export const defaultSASCreateRequest: CreateAppRequest = {
   appType: AppType.SAS,
   kubernetesRuntimeConfig: {
     numNodes: 1,

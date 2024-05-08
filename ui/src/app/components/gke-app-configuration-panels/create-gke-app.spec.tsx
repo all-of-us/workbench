@@ -12,9 +12,9 @@ import {
 
 import { render, screen, waitFor } from '@testing-library/react';
 import {
-  defaultCromwellConfig,
-  defaultRStudioConfig,
-  defaultSASConfig,
+  defaultCromwellCreateRequest,
+  defaultRStudioCreateRequest,
+  defaultSASCreateRequest,
 } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
@@ -104,9 +104,17 @@ describe(CreateGkeApp.name, () => {
   });
 
   describe.each([
-    [AppType.CROMWELL, defaultCromwellConfig, createListAppsCromwellResponse],
-    [AppType.RSTUDIO, defaultRStudioConfig, createListAppsRStudioResponse],
-    [AppType.SAS, defaultSASConfig, createListAppsSASResponse],
+    [
+      AppType.CROMWELL,
+      defaultCromwellCreateRequest,
+      createListAppsCromwellResponse,
+    ],
+    [
+      AppType.RSTUDIO,
+      defaultRStudioCreateRequest,
+      createListAppsRStudioResponse,
+    ],
+    [AppType.SAS, defaultSASCreateRequest, createListAppsSASResponse],
   ])(
     '%s',
     (
