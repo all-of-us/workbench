@@ -409,3 +409,26 @@ FROM
             ) sl on (p.person_id = sl.person_id)
     ) y
 WHERE x.person_id = y.person_id"
+
+################################################
+# set wear consent table flags
+################################################
+echo "set wear consent table flags in cb_search_person"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+SET x.has_wear_consent = y.has_wear_consent
+FROM
+    (
+        SELECT
+              p.person_id
+            , CASE
+                WHEN ws.person_id is null THEN 0
+                ELSE 1
+              END has_wear_consent
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.wear_study\`
+            ) ws on (p.person_id = ws.person_id)
+    ) y
+WHERE x.person_id = y.person_id"
