@@ -128,18 +128,17 @@ public class CloudTaskInitialCreditsExpiryController
             .filter(entry -> !newlyExpiredUsers.contains(usersCache.get(entry.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+    logger.info("Free tier Billing Service: Handling cost alerts for users: {}", users);
     logger.info(
-            "Free tier Billing Service: Handling cost alerts for users: {}", users);
-    logger.info(
-            "DB costs by creator: {}, live costs by creator: {}",
-            dbCostByCreator,
-            liveCostByCreator);
+        "DB costs by creator: {}, live costs by creator: {}", dbCostByCreator, liveCostByCreator);
 
     filteredLiveCostByCreator.forEach(
         (userId, currentCost) -> {
           final double previousCost = dbCostByCreator.getOrDefault(userId, 0.0);
           maybeAlertOnCostThresholds(
-              usersCache.containsKey(userId)? usersCache.get(userId) : userDao.findUserByUserId(userId),
+              usersCache.containsKey(userId)
+                  ? usersCache.get(userId)
+                  : userDao.findUserByUserId(userId),
               Math.max(currentCost, previousCost),
               previousCost,
               costThresholdsInDescOrder);
