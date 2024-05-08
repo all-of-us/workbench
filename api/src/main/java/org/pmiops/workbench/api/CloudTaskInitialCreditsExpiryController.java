@@ -128,7 +128,7 @@ public class CloudTaskInitialCreditsExpiryController
             .filter(entry -> !newlyExpiredUsers.contains(usersCache.get(entry.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    logger.info("Free tier Billing Service: Handling cost alerts for users: {}", users);
+    logger.info("Handling cost alerts for users: {}", usersCache.keySet());
     logger.info(
         "DB costs by creator: {}, live costs by creator: {}", dbCostByCreator, liveCostByCreator);
 
