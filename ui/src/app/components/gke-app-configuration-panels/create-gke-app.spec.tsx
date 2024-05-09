@@ -16,13 +16,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { DEFAULT_MACHINE_TYPE, findMachineByName } from 'app/utils/machines';
+import { findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  debugAll,
   expectButtonElementEnabled,
   expectDropdown,
   getDropdownOption,
@@ -556,56 +555,6 @@ describe(CreateGkeApp.name, () => {
           )
         ).toBeInTheDocument();
       });
-
-      //
-      // it(`should use an existing app's machine type when one exists`, async () => {
-      //   serverConfigStore.set({
-      //     config: {
-      //       ...serverConfigStore.get().config,
-      //       enableGKEAppMachineTypeChoice: true,
-      //     },
-      //   });
-      //
-      //   const otherAppMachineType = 'n1-standard-8';
-      //   // sanity check
-      //   expect(otherAppMachineType).not.toEqual(
-      //       defaultAppRequest[appType].kubernetesRuntimeConfig.machineType
-      //   );
-      //
-      //   const { container } = await component(appType, {
-      //     userApps: [
-      //       {
-      //         ...listAppsResponse(),
-      //         kubernetesRuntimeConfig: {
-      //           ...listAppsResponse().kubernetesRuntimeConfig,
-      //           machineType: otherAppMachineType,
-      //         },
-      //       },
-      //     ],
-      //   });
-      //
-      //   // show that the other-app machine configuration is selected
-      //
-      //   const { cpu, memory } = findMachineByName(otherAppMachineType);
-      //
-      //   const cpuId = `${appTypeToString[appType]}-cpu`;
-      //   const defaultCpuOption = getDropdownOption(
-      //       container,
-      //       cpuId,
-      //       cpu.toString()
-      //   );
-      //   expect(defaultCpuOption).toBeInTheDocument();
-      //   expect(defaultCpuOption).toHaveAttribute('aria-selected', 'true');
-      //
-      //   const ramId = `${appTypeToString[appType]}-ram`;
-      //   const defaultRamOption = getDropdownOption(
-      //       container,
-      //       ramId,
-      //       memory.toString()
-      //   );
-      //   expect(defaultRamOption).toBeInTheDocument();
-      //   expect(defaultRamOption).toHaveAttribute('aria-selected', 'true');
-      // });
     }
   );
 });
