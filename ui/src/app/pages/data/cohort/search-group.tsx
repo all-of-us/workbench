@@ -204,6 +204,7 @@ const disabledTemporalTooltip = (
       <li>Surveys</li>
       <li>Physical Measurements</li>
       <li>Fitbit</li>
+      <li>Wear Consent</li>
       <li>Short Read WGS</li>
       <li>Long Read WGS</li>
       <li>Global Diversity Array</li>
