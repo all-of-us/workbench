@@ -22,6 +22,7 @@ export const DisabledCloudComputeProfile = ({
   const otherAppTypes: string[] = Object.keys(AppType)
     .filter((k) => AppType[k] !== appType)
     .map((k) => appTypeToString[AppType[k]]);
+  // also handles a potential future when we have more than two other app types
   const otherAppsString = oxfordCommaString(otherAppTypes);
 
   return (
