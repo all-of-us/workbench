@@ -422,7 +422,7 @@ export const CohortSearch = fp.flow(
         attributes: [],
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
-          'Select Has Wear Consent data'
+        'Select Has Wear Consent data'
       );
       saveCriteria([param]);
     }
