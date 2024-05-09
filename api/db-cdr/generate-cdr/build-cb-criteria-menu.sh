@@ -117,7 +117,7 @@ then
   echo "Insert fitbit into cb_criteria_menu"
 
   echo "Getting parent id"
-  query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'FITBIT'"
+  query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'WEARABLES'"
   PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
   SORT_ORDER=0
