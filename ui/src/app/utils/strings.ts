@@ -23,9 +23,9 @@ export const oxfordCommaString = (
     [1, () => elements[0]],
     [2, () => `${elements[0]} and ${elements[1]}`],
     () => {
-      // join all but the last two with commas, then add 'and' before the last one
-      const allButLastTwo = elements.slice(0, -2).join(', ');
-      const lastTwo = elements.slice(-2).join(', and ');
-      return `${allButLastTwo}, ${lastTwo}`;
+      // join all but the last with commas, but use 'and' before the last one
+      const allButLast = elements.slice(0, -1).join(', ');
+      const [last] = elements.slice(-1);
+      return `${allButLast}, and ${last}`;
     }
   );
