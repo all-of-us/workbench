@@ -7,16 +7,13 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
-  PersistentDiskRequest,
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  defaultCromwellCreateRequest,
-  defaultRStudioCreateRequest,
-  defaultSASCreateRequest,
+  defaultAppRequest,
   findApp,
   isAppActive,
   toUIAppType,
@@ -24,6 +21,7 @@ import {
 import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
+import { MachineSelector } from 'app/components/common-env-conf-panels/machine-selector';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
@@ -33,6 +31,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
+  allMachineTypes,
   AutodeleteDaysThresholds,
   ComputeType,
   DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
@@ -40,7 +39,8 @@ import {
   Machine,
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
-import { ProfileStore } from 'app/utils/stores';
+import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { oxfordCommaString } from 'app/utils/strings';
 import {
   appTypeToString,
   isInteractiveUserApp,
@@ -51,9 +51,67 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { CreateGkeAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
 import { OpenGkeAppButton } from './open-gke-app-button';
+
 const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
+
+const toMachine = (createAppRequest: CreateAppRequest): Machine =>
+  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
+
+const toAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): AnalysisConfig => {
+  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
+  return {
+    machine: toMachine(createAppRequest),
+    diskConfig: {
+      size: persistentDiskRequest.size,
+      detachable: true,
+      detachableType: persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: kubernetesRuntimeConfig.numNodes,
+    // defaults
+    computeType: ComputeType.Standard,
+    dataprocConfig: undefined,
+    gpuConfig: undefined,
+    detachedDisk: undefined,
+    autopauseThreshold: undefined,
+  };
+};
+
+const otherApps = (
+  userApps: UserAppEnvironment[] | undefined,
+  thisAppType: AppType
+): UserAppEnvironment[] =>
+  userApps?.filter((app) => app.appType !== thisAppType) ?? [];
+
+const otherMachineTypes = (
+  userApps: UserAppEnvironment[] | undefined,
+  thisAppType: AppType
+): string[] =>
+  Array.from(
+    new Set(
+      otherApps(userApps, thisAppType)
+        .map(
+          (app: UserAppEnvironment) => app.kubernetesRuntimeConfig?.machineType
+        )
+        // filter out undefined values
+        .filter((x) => x) ?? []
+    )
+  );
+
+// if there are other app(s) with a common machine type, return that machine type
+// TODO: what should we do if there is more than one (shouldn't happen) - for now, return undefined
+
+const maybeGetOtherMachineType = (
+  userApps: UserAppEnvironment[] | undefined,
+  thisAppType: AppType
+): string | undefined => {
+  const otherTypes = otherMachineTypes(userApps, thisAppType);
+  return otherTypes.length === 1 ? otherTypes[0] : undefined;
+};
 
 export interface CreateGkeAppProps {
   userApps: UserAppEnvironment[];
@@ -96,50 +154,34 @@ export const CreateGkeApp = ({
   SupportNote = () => null,
   CreateAppText = () => null,
 }: CreateGkeAppProps) => {
+  const {
+    config: { enableGKEAppMachineTypeChoice },
+  } = useStore(serverConfigStore);
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
-  const onDismiss = () => {
-    onClose();
-    setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
-  };
-
-  const defaultCreateRequest = switchCase(
-    appType,
-    [AppType.CROMWELL, () => defaultCromwellCreateRequest],
-    [AppType.RSTUDIO, () => defaultRStudioCreateRequest],
-    [AppType.SAS, () => defaultSASCreateRequest]
-  );
-
-  const persistentDiskRequest: PersistentDiskRequest =
-    disk ?? defaultCreateRequest.persistentDiskRequest;
-  const { kubernetesRuntimeConfig } = defaultCreateRequest;
-  const machine: Machine = findMachineByName(
-    kubernetesRuntimeConfig.machineType
-  );
-  const analysisConfig: AnalysisConfig = {
-    machine,
-    diskConfig: {
-      size: persistentDiskRequest.size,
-      detachable: true,
-      detachableType: persistentDiskRequest.diskType,
-      existingDiskName: null,
-    },
-    numNodes: kubernetesRuntimeConfig.numNodes,
-    // defaults
-    computeType: ComputeType.Standard,
-    dataprocConfig: undefined,
-    gpuConfig: undefined,
-    detachedDisk: undefined,
-    autopauseThreshold: undefined,
-  };
+  const defaultCreateRequest = defaultAppRequest[appType];
 
   const app = findApp(userApps, toUIAppType[appType]);
+
+  // there may or may not be an existing `app` and/or `disk`
+  // start with the default config, but override with the existing app and disk configs
 
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
       ...defaultCreateRequest,
-      persistentDiskRequest,
+      kubernetesRuntimeConfig: {
+        ...defaultCreateRequest.kubernetesRuntimeConfig,
+        machineType:
+          // if there is an active app, use its machineType for display
+          app?.kubernetesRuntimeConfig.machineType ??
+          // otherwise, if there is an active app of a different type, use its machine type to configure this one
+          maybeGetOtherMachineType(userApps, appType) ??
+          // use the default if neither of these cases apply
+          defaultCreateRequest.kubernetesRuntimeConfig.machineType,
+      },
+
+      persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
       autodeleteEnabled:
         app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
       autodeleteThreshold:
@@ -184,6 +226,40 @@ export const CreateGkeApp = ({
       }
     : {};
 
+  const canConfigureMachineType =
+    enableGKEAppMachineTypeChoice &&
+    !isAppActive(app) &&
+    otherApps(userApps, appType).length === 0;
+
+  const machineTypeDisabledText = cond(
+    [
+      otherApps(userApps, appType).length > 0,
+      'Cannot configure the compute profile when there are applications running in the workspace.  ' +
+        'You must delete other applications before configuring a new one with a different compute profile.',
+    ],
+    [
+      app?.status === AppStatus.DELETING,
+      'Cannot configure the compute profile of an application which is being deleted.  Please wait for deletion to complete.',
+    ],
+    [
+      isAppActive(app),
+      'Cannot configure the compute profile of a running application.  ' +
+        'Please delete the current application and create a new application with the desired profile.',
+    ]
+  );
+
+  // TODO determine appropriate machine types for the app type
+  const validMachineTypes = allMachineTypes;
+
+  const otherAppTypes: string[] = Object.keys(AppType)
+    .filter((k) => AppType[k] !== appType)
+    .map((k) => appTypeToString[AppType[k]]);
+  // also handles a potential future when we have more than two other app types
+  const otherAppsString = oxfordCommaString(otherAppTypes);
+  const sharingNote =
+    `Your ${appTypeToString[appType]} environment will share CPU and RAM ` +
+    `resources with any ${otherAppsString} environments you run in this workspace.`;
+
   return (
     <FlexColumn
       id={`${appTypeToString[appType]}-configuration-panel`}
@@ -196,17 +272,59 @@ export const CreateGkeApp = ({
             creatorFreeCreditsRemaining,
             profile,
             workspace,
-            analysisConfig,
           }}
+          analysisConfig={toAnalysisConfig(createAppRequest)}
           appType={toUIAppType[appType]}
           status={app?.status}
         />
         <CostNote />
       </div>
       <div style={{ ...styles.controlSection }}>
-        <DisabledCloudComputeProfile
-          {...{ appType, machine, persistentDiskRequest }}
-        />
+        {canConfigureMachineType ? (
+          <FlexColumn
+            style={{ ...styles.controlSection, padding: 0, rowGap: '1em' }}
+          >
+            <FlexRow>
+              <h3
+                style={{
+                  ...styles.sectionHeader,
+                  ...styles.bold,
+                  marginRight: '3rem',
+                }}
+              >
+                Cloud compute profile
+              </h3>
+              <div style={styles.formGrid2}>
+                <MachineSelector
+                  {...{ validMachineTypes }}
+                  idPrefix={appTypeToString[appType]}
+                  disabled={false}
+                  selectedMachine={toMachine(createAppRequest)}
+                  onChange={(machine: Machine) =>
+                    setCreateAppRequest((prevState) => ({
+                      ...prevState,
+                      kubernetesRuntimeConfig: {
+                        ...prevState.kubernetesRuntimeConfig,
+                        machineType: machine.name,
+                      },
+                    }))
+                  }
+                  machineType={
+                    createAppRequest?.kubernetesRuntimeConfig.machineType
+                  }
+                />
+              </div>
+            </FlexRow>
+            <div>{sharingNote}</div>
+          </FlexColumn>
+        ) : (
+          <DisabledCloudComputeProfile
+            {...{ appType, sharingNote }}
+            persistentDiskRequest={createAppRequest?.persistentDiskRequest}
+            machine={toMachine(createAppRequest)}
+            disabledText={machineTypeDisabledText}
+          />
+        )}
       </div>
       <div style={{ ...styles.controlSection }}>
         <FlexRow
@@ -316,11 +434,15 @@ export const CreateGkeApp = ({
           />
         ) : (
           <CreateGkeAppButton
-            {...{ billingStatus, createAppRequest, onDismiss }}
+            {...{ billingStatus, createAppRequest }}
             existingApp={app}
             workspaceNamespace={workspace.namespace}
             username={profile.username}
             style={openOrCreateButtonStyle}
+            onDismiss={() => {
+              onClose();
+              setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
+            }}
           />
         )}
       </FlexRow>

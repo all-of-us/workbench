@@ -6,45 +6,33 @@ import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { Machine } from 'app/utils/machines';
-import { oxfordCommaString } from 'app/utils/strings';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
 interface Props {
   machine: Machine;
   persistentDiskRequest: Disk | PersistentDiskRequest;
   appType: AppType;
+  sharingNote: string;
+  disabledText?: string;
 }
 export const DisabledCloudComputeProfile = ({
   machine: { cpu, memory },
   persistentDiskRequest: { size },
   appType,
-}: Props) => {
-  const otherAppTypes: string[] = Object.keys(AppType)
-    .filter((k) => AppType[k] !== appType)
-    .map((k) => appTypeToString[AppType[k]]);
-  // also handles a potential future when we have more than two other app types
-  const otherAppsString = oxfordCommaString(otherAppTypes);
-
-  return (
-    <FlexColumn style={{ rowGap: '1em' }}>
-      <FlexRow style={{ alignItems: 'center' }}>
-        <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-          Cloud compute profile
-        </div>
-        <TooltipTrigger
-          content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
-          side={'right'}
-        >
-          <div style={styles.disabledCloudProfile}>
-            {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
-          </div>
-        </TooltipTrigger>
-      </FlexRow>
-      <div>
-        Your {appTypeToString[appType]} environment will share CPU and RAM
-        resources with any {otherAppsString} environments you run in this
-        workspace.
+  sharingNote,
+  disabledText = `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
+}: Props) => (
+  <FlexColumn style={{ rowGap: '1em' }}>
+    <FlexRow style={{ alignItems: 'center' }}>
+      <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
+        Cloud compute profile
       </div>
-    </FlexColumn>
-  );
-};
+      <TooltipTrigger content={disabledText} side={'right'}>
+        <div style={styles.disabledCloudProfile}>
+          {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+    <div>{sharingNote}</div>
+  </FlexColumn>
+);

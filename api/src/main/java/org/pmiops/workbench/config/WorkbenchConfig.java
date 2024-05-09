@@ -314,6 +314,8 @@ public class WorkbenchConfig {
     public boolean enableDataExplorer;
     // If true, allow users to pause their GKE apps
     public boolean enableGKEAppPausing;
+    // If true, allows users to set machine type for their GKE apps
+    public boolean enableGKEAppMachineTypeChoice;
     // If true, enable variant select all
     public boolean enableVariantSelectAll;
   }

@@ -6902,6 +6902,10 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to pause GKE applications.
+        enableGKEAppMachineTypeChoice:
+          type: boolean
+          default: false
+          description: Whether users are allowed to choose machine type when creating GKE applications.
         enableVariantSelectAll:
           type: boolean
           default: false

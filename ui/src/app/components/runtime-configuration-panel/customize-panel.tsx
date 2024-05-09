@@ -14,6 +14,7 @@ import {
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
+import { MachineSelector } from 'app/components/common-env-conf-panels/machine-selector';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
@@ -43,7 +44,6 @@ import { CustomizePanelFooter } from './customize-panel-footer';
 import { DataProcConfigSelector } from './dataproc-config-selector';
 import { DiskSelector } from './disk-selector';
 import { GpuConfigSelector } from './gpu-config-selector';
-import { MachineSelector } from './machine-selector';
 import { PresetSelector } from './preset-selector';
 import { PanelContent } from './utils';
 
