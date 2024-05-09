@@ -14,9 +14,10 @@ import {
 import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  defaultCromwellConfig,
-  defaultRStudioConfig,
-  defaultSASConfig,
+  defaultCromwellCreateRequest,
+  defaultRStudioCreateRequest,
+  defaultSASCreateRequest,
+  findApp,
   isAppActive,
   toUIAppType,
 } from 'app/components/apps-panel/utils';
@@ -55,12 +56,12 @@ const defaultIntroText =
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
 export interface CreateGkeAppProps {
+  userApps: UserAppEnvironment[];
   appType: AppType;
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
   onClickDeleteUnattachedPersistentDisk: () => void;
@@ -81,12 +82,12 @@ type ToOmit =
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
 export const CreateGkeApp = ({
+  userApps,
   appType,
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  app,
   disk,
   onClickDeleteGkeApp,
   onClickDeleteUnattachedPersistentDisk,
@@ -103,16 +104,16 @@ export const CreateGkeApp = ({
     setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
   };
 
-  const defaultConfig = switchCase(
+  const defaultCreateRequest = switchCase(
     appType,
-    [AppType.CROMWELL, () => defaultCromwellConfig],
-    [AppType.RSTUDIO, () => defaultRStudioConfig],
-    [AppType.SAS, () => defaultSASConfig]
+    [AppType.CROMWELL, () => defaultCromwellCreateRequest],
+    [AppType.RSTUDIO, () => defaultRStudioCreateRequest],
+    [AppType.SAS, () => defaultSASCreateRequest]
   );
 
   const persistentDiskRequest: PersistentDiskRequest =
-    disk ?? defaultConfig.persistentDiskRequest;
-  const { kubernetesRuntimeConfig } = defaultConfig;
+    disk ?? defaultCreateRequest.persistentDiskRequest;
+  const { kubernetesRuntimeConfig } = defaultCreateRequest;
   const machine: Machine = findMachineByName(
     kubernetesRuntimeConfig.machineType
   );
@@ -133,14 +134,16 @@ export const CreateGkeApp = ({
     autopauseThreshold: undefined,
   };
 
+  const app = findApp(userApps, toUIAppType[appType]);
+
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
-      ...defaultConfig,
+      ...defaultCreateRequest,
       persistentDiskRequest,
       autodeleteEnabled:
-        app?.autodeleteEnabled ?? defaultConfig.autodeleteEnabled,
+        app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
       autodeleteThreshold:
-        app?.autodeleteThreshold ?? defaultConfig.autodeleteThreshold,
+        app?.autodeleteThreshold ?? defaultCreateRequest.autodeleteThreshold,
     });
 
   const autodeleteRemainingDays: number = (() => {

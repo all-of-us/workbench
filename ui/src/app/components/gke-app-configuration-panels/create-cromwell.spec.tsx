@@ -39,7 +39,7 @@ describe(CreateCromwell.name, () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     },
-    app: undefined,
+    userApps: undefined,
     disk: undefined,
     onClickDeleteGkeApp: jest.fn(),
     onClickDeleteUnattachedPersistentDisk: jest.fn(),

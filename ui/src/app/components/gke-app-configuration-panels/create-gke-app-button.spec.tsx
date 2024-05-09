@@ -4,7 +4,7 @@ import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
+import { defaultCromwellCreateRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 
 import {
@@ -25,7 +25,7 @@ import {
 
 describe(CreateGkeAppButton.name, () => {
   const defaultProps: CreateGKEAppButtonProps = {
-    createAppRequest: defaultCromwellConfig,
+    createAppRequest: defaultCromwellCreateRequest,
     existingApp: null,
     workspaceNamespace: 'aou-rw-test-1',
     onDismiss: () => {},
@@ -68,7 +68,7 @@ describe(CreateGkeAppButton.name, () => {
         .mockImplementation((): Promise<any> => Promise.resolve());
 
       await component({
-        createAppRequest: defaultCromwellConfig,
+        createAppRequest: defaultCromwellCreateRequest,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
 
@@ -88,7 +88,7 @@ describe(CreateGkeAppButton.name, () => {
   describe('should not allow creating a GKE app for certain app statuses', () => {
     test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
       await component({
-        createAppRequest: defaultCromwellConfig,
+        createAppRequest: defaultCromwellCreateRequest,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
       const button = await waitFor(() => {
@@ -105,7 +105,7 @@ describe(CreateGkeAppButton.name, () => {
 
   it('should not allow creating a GKE app when billing status is not active.', async () => {
     await component({
-      createAppRequest: defaultCromwellConfig,
+      createAppRequest: defaultCromwellCreateRequest,
       billingStatus: BillingStatus.INACTIVE,
     });
     const button = await waitFor(() => {
