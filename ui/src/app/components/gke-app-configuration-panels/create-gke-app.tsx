@@ -81,6 +81,31 @@ type ToOmit =
 // for use by the individual gke app creation components, e.g. CreateCromwell
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
+const toMachine = (createAppRequest: CreateAppRequest): Machine =>
+  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
+
+const toAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): AnalysisConfig => {
+  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
+  return {
+    machine: toMachine(createAppRequest),
+    diskConfig: {
+      size: persistentDiskRequest.size,
+      detachable: true,
+      detachableType: persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: kubernetesRuntimeConfig.numNodes,
+    // defaults
+    computeType: ComputeType.Standard,
+    dataprocConfig: undefined,
+    gpuConfig: undefined,
+    detachedDisk: undefined,
+    autopauseThreshold: undefined,
+  };
+};
+
 export const CreateGkeApp = ({
   userApps,
   appType,

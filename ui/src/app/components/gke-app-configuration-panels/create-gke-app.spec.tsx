@@ -11,11 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import {
-  defaultCromwellCreateRequest,
-  defaultRStudioCreateRequest,
-  defaultSASCreateRequest,
-} from 'app/components/apps-panel/utils';
+import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
@@ -104,195 +100,178 @@ describe(CreateGkeApp.name, () => {
   });
 
   describe.each([
-    [
-      AppType.CROMWELL,
-      defaultCromwellCreateRequest,
-      createListAppsCromwellResponse,
-    ],
-    [
-      AppType.RSTUDIO,
-      defaultRStudioCreateRequest,
-      createListAppsRStudioResponse,
-    ],
-    [AppType.SAS, defaultSASCreateRequest, createListAppsSASResponse],
-  ])(
-    '%s',
-    (
-      appType: AppType,
-      appConfig: UserAppEnvironment,
-      listAppsResponse: () => UserAppEnvironment
-    ) => {
-      const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
+    [AppType.CROMWELL, createListAppsCromwellResponse],
+    [AppType.RSTUDIO, createListAppsRStudioResponse],
+    [AppType.SAS, createListAppsSASResponse],
+  ])('%s', (appType: AppType, listAppsResponse: () => UserAppEnvironment) => {
+    const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
 
-      it('Should create an app and close the panel when the create button is clicked', async () => {
-        await component(appType);
+    it('Should create an app and close the panel when the create button is clicked', async () => {
+      await component(appType);
 
-        const spyCreateApp = jest
-          .spyOn(appsApi(), 'createApp')
-          .mockImplementation((): Promise<any> => Promise.resolve());
+      const spyCreateApp = jest
+        .spyOn(appsApi(), 'createApp')
+        .mockImplementation((): Promise<any> => Promise.resolve());
 
-        const startButton = screen.getByLabelText(startButtonText);
-        expectButtonElementEnabled(startButton);
-        startButton.click();
+      const startButton = screen.getByLabelText(startButtonText);
+      expectButtonElementEnabled(startButton);
+      startButton.click();
 
-        await waitFor(() => {
-          expect(spyCreateApp).toHaveBeenCalledTimes(1);
-          expect(spyCreateApp).toHaveBeenCalledWith(
-            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-            appConfig
-          );
-          expect(onClose).toHaveBeenCalledTimes(1);
-        });
+      await waitFor(() => {
+        expect(spyCreateApp).toHaveBeenCalledTimes(1);
+        expect(spyCreateApp).toHaveBeenCalledWith(
+          WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+          defaultAppRequest[appType]
+        );
+        expect(onClose).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should use the existing PD when creating', async () => {
+      const disk = stubDisk();
+      await component(appType, { disk });
+
+      const spyCreateApp = jest
+        .spyOn(appsApi(), 'createApp')
+        .mockImplementation((): Promise<any> => Promise.resolve());
+
+      const startButton = screen.getByLabelText(startButtonText);
+      expectButtonElementEnabled(startButton);
+      startButton.click();
+
+      await waitFor(() => {
+        expect(spyCreateApp).toHaveBeenCalledTimes(1);
+        expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(
+          disk
+        );
+        expect(onClose).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should allow deleting the environment when an app is running', async () => {
+      const disk = stubDisk();
+      const onClickDeleteGkeApp = jest.fn();
+
+      await component(appType, {
+        userApps: [listAppsResponse()],
+        disk,
+        onClickDeleteGkeApp,
       });
 
-      it('should use the existing PD when creating', async () => {
-        const disk = stubDisk();
-        await component(appType, { disk });
+      const deleteButton = screen.queryByLabelText('Delete Environment');
+      expectButtonElementEnabled(deleteButton);
+      deleteButton.click();
 
-        const spyCreateApp = jest
-          .spyOn(appsApi(), 'createApp')
-          .mockImplementation((): Promise<any> => Promise.resolve());
+      await waitFor(() => {
+        expect(onClickDeleteGkeApp).toHaveBeenCalledTimes(1);
+      });
+    });
 
-        const startButton = screen.getByLabelText(startButtonText);
-        expectButtonElementEnabled(startButton);
-        startButton.click();
+    it('should not render a Delete Environment link when no app is present', async () => {
+      await component(appType);
+      const deleteButton = screen.queryByLabelText('Delete Environment');
+      expect(deleteButton).not.toBeInTheDocument();
+    });
 
-        await waitFor(() => {
-          expect(spyCreateApp).toHaveBeenCalledTimes(1);
-          expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(
-            disk
-          );
-          expect(onClose).toHaveBeenCalledTimes(1);
-        });
+    it('should allow deletion of a Persistent Disk when a disk is present but no app', async () => {
+      const disk = stubDisk();
+      const onClickDeleteUnattachedPersistentDisk = jest.fn();
+
+      await component(appType, {
+        disk,
+        onClickDeleteUnattachedPersistentDisk,
       });
 
-      it('should allow deleting the environment when an app is running', async () => {
-        const disk = stubDisk();
-        const onClickDeleteGkeApp = jest.fn();
+      const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+      expectButtonElementEnabled(deleteButton);
+      deleteButton.click();
 
-        await component(appType, {
-          userApps: [listAppsResponse()],
-          disk,
-          onClickDeleteGkeApp,
-        });
-
-        const deleteButton = screen.queryByLabelText('Delete Environment');
-        expectButtonElementEnabled(deleteButton);
-        deleteButton.click();
-
-        await waitFor(() => {
-          expect(onClickDeleteGkeApp).toHaveBeenCalledTimes(1);
-        });
+      await waitFor(() => {
+        expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(1);
       });
+    });
 
-      it('should not render a Delete Environment link when no app is present', async () => {
-        await component(appType);
-        const deleteButton = screen.queryByLabelText('Delete Environment');
-        expect(deleteButton).not.toBeInTheDocument();
-      });
-
-      it('should allow deletion of a Persistent Disk when a disk is present but no app', async () => {
-        const disk = stubDisk();
-        const onClickDeleteUnattachedPersistentDisk = jest.fn();
-
-        await component(appType, {
-          disk,
-          onClickDeleteUnattachedPersistentDisk,
-        });
-
-        const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-        expectButtonElementEnabled(deleteButton);
-        deleteButton.click();
-
-        await waitFor(() => {
-          expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(
-            1
-          );
-        });
-      });
-
-      it('should not render a Delete Persistent Disk link when an app is present', async () => {
-        const disk = stubDisk();
+    it('should not render a Delete Persistent Disk link when an app is present', async () => {
+      const disk = stubDisk();
 
         await component(appType, { userApps: [listAppsResponse()], disk });
 
-        const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-        expect(deleteButton).toBeNull();
+      const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+      expect(deleteButton).toBeNull();
+    });
+
+    it('should not render a Delete Persistent Disk link when no disk is present', async () => {
+      await component(appType);
+
+      const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+      expect(deleteButton).toBeNull();
+    });
+
+    const autodeleteTestApp: UserAppEnvironment = {
+      ...defaultApp,
+      appType,
+      autodeleteEnabled: true,
+      kubernetesRuntimeConfig: {
+        machineType: 'n1-standard-4',
+        numNodes: 0,
+        autoscalingEnabled: false,
+      },
+    };
+
+    it('should correctly calculate autodeleteRemainingDays', async () => {
+      const now = new Date();
+      now.setDate(now.getDate() - 2); // Subtract 2 days
+      const dateAccessed = now;
+      const autodeleteThreshold = 7 * 24 * 60 + 1; // 7 days in minutes plus a small buffer
+
+      await component(appType, {
+        userApps: [
+          {
+            ...autodeleteTestApp,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        ],
       });
 
-      it('should not render a Delete Persistent Disk link when no disk is present', async () => {
-        await component(appType);
+      expect(
+        screen.queryByLabelText('Autodelete remaining days')
+      ).toHaveTextContent('5 days remain until deletion');
+    });
 
-        const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-        expect(deleteButton).toBeNull();
+    it('should show correct message when autodeleteRemainingDays is 0', async () => {
+      const now = new Date();
+      now.setDate(now.getDate() - 2); // Subtract 2 days
+      const dateAccessed = now;
+      const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
+
+      await component(appType, {
+        userApps: [
+          {
+            ...autodeleteTestApp,
+            dateAccessed: dateAccessed.toISOString(),
+            autodeleteThreshold,
+          },
+        ],
       });
 
-      const autodeleteTestApp: UserAppEnvironment = {
-        ...defaultApp,
-        appType,
-        autodeleteEnabled: true,
-        kubernetesRuntimeConfig: {
-          machineType: 'n1-standard-4',
-          numNodes: 0,
-          autoscalingEnabled: false,
-        },
-      };
+      // less than 1 day (0 days) remaining until deletion.
+      expect(
+        screen.queryByLabelText('Autodelete remaining days')
+      ).toHaveTextContent('App will be deleted within 1 day');
+    });
 
-      it('should correctly calculate autodeleteRemainingDays', async () => {
-        const now = new Date();
-        now.setDate(now.getDate() - 2); // Subtract 2 days
-        const dateAccessed = now;
-        const autodeleteThreshold = 7 * 24 * 60 + 1; // 7 days in minutes plus a small buffer
+    it('should not show autodeleteRemainingDays when app is not running', async () => {
+      // Render the component with the app not running
+      await component(appType);
 
-        await component(appType, {
-          userApps: [
-            {
-              ...autodeleteTestApp,
-              dateAccessed: dateAccessed.toISOString(),
-              autodeleteThreshold,
-            },
-          ],
-        });
+      // Query for the autodeleteRemainingDays text
+      const autodeleteRemainingDaysText = screen.queryByLabelText(
+        'Autodelete remaining days'
+      );
 
-        expect(
-          screen.queryByLabelText('Autodelete remaining days')
-        ).toHaveTextContent('5 days remain until deletion');
-      });
-
-      it('should show correct message when autodeleteRemainingDays is 0', async () => {
-        const now = new Date();
-        now.setDate(now.getDate() - 2); // Subtract 2 days
-        const dateAccessed = now;
-        const autodeleteThreshold = 2 * 24 * 60 + 1; // 2 days in minutes plus small buffer.
-
-        await component(appType, {
-          userApps: [
-            {
-              ...autodeleteTestApp,
-              dateAccessed: dateAccessed.toISOString(),
-              autodeleteThreshold,
-            },
-          ],
-        });
-
-        // less than 1 day (0 days) remaining until deletion.
-        expect(
-          screen.queryByLabelText('Autodelete remaining days')
-        ).toHaveTextContent('App will be deleted within 1 day');
-      });
-
-      it('should not show autodeleteRemainingDays when app is not running', async () => {
-        // Render the component with the app not running
-        await component(appType);
-
-        // Query for the autodeleteRemainingDays text
-        const autodeleteRemainingDaysText = screen.queryByLabelText(
-          'Autodelete remaining days'
-        );
-
-        // Assert that the autodeleteRemainingDays text is not in the document
-        expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
-      });
-    }
-  );
+      // Assert that the autodeleteRemainingDays text is not in the document
+      expect(autodeleteRemainingDaysText).not.toBeInTheDocument();
+    });
+  });
 });
