@@ -12,14 +12,14 @@ interface Props {
   machine: Machine;
   persistentDiskRequest: Disk | PersistentDiskRequest;
   appType: AppType;
-  otherAppsString: string;
+  sharingNote: string;
   disabledText?: string;
 }
 export const DisabledCloudComputeProfile = ({
   machine: { cpu, memory },
   persistentDiskRequest: { size },
   appType,
-  otherAppsString,
+  sharingNote,
   disabledText = `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
 }: Props) => (
   <FlexColumn style={{ rowGap: '1em' }}>
@@ -33,10 +33,6 @@ export const DisabledCloudComputeProfile = ({
         </div>
       </TooltipTrigger>
     </FlexRow>
-    <div>
-      Your {appTypeToString[appType]} environment will share CPU and RAM
-      resources with any {otherAppsString} environments you run in this
-      workspace.
-    </div>
+    <div>{sharingNote}</div>
   </FlexColumn>
 );

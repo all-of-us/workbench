@@ -256,6 +256,9 @@ export const CreateGkeApp = ({
     .map((k) => appTypeToString[AppType[k]]);
   // also handles a potential future when we have more than two other app types
   const otherAppsString = oxfordCommaString(otherAppTypes);
+  const sharingNote =
+    `Your ${appTypeToString[appType]} environment will share CPU and RAM ` +
+    `resources with any ${otherAppsString} environments you run in this workspace.`;
 
   return (
     <FlexColumn
@@ -312,15 +315,11 @@ export const CreateGkeApp = ({
                 />
               </div>
             </FlexRow>
-            <div>
-              Your {appTypeToString[appType]} environment will share CPU and RAM
-              resources with any {otherAppsString} environments you run in this
-              workspace.
-            </div>
+            <div>{sharingNote}</div>
           </FlexColumn>
         ) : (
           <DisabledCloudComputeProfile
-            {...{ appType, otherAppsString }}
+            {...{ appType, sharingNote }}
             persistentDiskRequest={createAppRequest?.persistentDiskRequest}
             machine={toMachine(createAppRequest)}
             disabledText={machineTypeDisabledText}
