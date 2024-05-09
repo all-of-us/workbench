@@ -16,11 +16,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { DEFAULT_MACHINE_TYPE, findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  debugAll,
   expectButtonElementEnabled,
   expectDropdown,
   getDropdownOption,
@@ -333,10 +335,6 @@ describe(CreateGkeApp.name, () => {
           );
 
           const cpuId = `${appTypeToString[appType]}-cpu`;
-          const cpuDropdown = expectDropdown(container, cpuId);
-          expect(cpuDropdown).toBeInTheDocument();
-          await userEvent.click(cpuDropdown);
-
           const differentCpuOption = getDropdownOption(
             container,
             cpuId,
@@ -345,10 +343,6 @@ describe(CreateGkeApp.name, () => {
           await userEvent.click(differentCpuOption);
 
           const ramId = `${appTypeToString[appType]}-ram`;
-          const ramDropdown = expectDropdown(container, ramId);
-          expect(ramDropdown).toBeInTheDocument();
-          await userEvent.click(ramDropdown);
-
           const differentRamOption = getDropdownOption(
             container,
             ramId,
@@ -405,6 +399,41 @@ describe(CreateGkeApp.name, () => {
         ).toBeInTheDocument();
       });
 
+      it(`should use the default machine type for ${appType} when there are no running apps`, async () => {
+        const { cpu, memory } = findMachineByName(
+          defaultAppRequest[appType].kubernetesRuntimeConfig.machineType
+        );
+
+        serverConfigStore.set({
+          config: {
+            ...serverConfigStore.get().config,
+            enableGKEAppMachineTypeChoice: true,
+          },
+        });
+
+        const { container } = await component(appType);
+
+        // show that the default machine configuration is selected
+
+        const cpuId = `${appTypeToString[appType]}-cpu`;
+        const defaultCpuOption = getDropdownOption(
+          container,
+          cpuId,
+          cpu.toString()
+        );
+        expect(defaultCpuOption).toBeInTheDocument();
+        expect(defaultCpuOption).toHaveAttribute('aria-selected', 'true');
+
+        const ramId = `${appTypeToString[appType]}-ram`;
+        const defaultRamOption = getDropdownOption(
+          container,
+          ramId,
+          memory.toString()
+        );
+        expect(defaultRamOption).toBeInTheDocument();
+        expect(defaultRamOption).toHaveAttribute('aria-selected', 'true');
+      });
+
       // negative tests for machine type configuration
 
       it.each([
@@ -416,6 +445,7 @@ describe(CreateGkeApp.name, () => {
           },
           {},
           `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
+          /4 CPUS, 15GB RAM/, // default machine type
         ],
         [
           'the app is running',
@@ -424,9 +454,19 @@ describe(CreateGkeApp.name, () => {
             enableGKEAppMachineTypeChoice: true,
           },
           {
-            userApps: [{ ...listAppsResponse(), status: AppStatus.RUNNING }],
+            userApps: [
+              {
+                ...listAppsResponse(),
+                status: AppStatus.RUNNING,
+                kubernetesRuntimeConfig: {
+                  ...listAppsResponse().kubernetesRuntimeConfig,
+                  machineType: 'n1-standard-8',
+                },
+              },
+            ],
           },
           /Cannot configure the compute profile of a running application/,
+          /8 CPUS, 30GB RAM/, // n1-standard-8 - matches the running app
         ],
         [
           'the app is deleting',
@@ -438,6 +478,7 @@ describe(CreateGkeApp.name, () => {
             userApps: [{ ...listAppsResponse(), status: AppStatus.DELETING }],
           },
           /Cannot configure the compute profile of an application which is being deleted/,
+          /4 CPUS, 15GB RAM/,
         ],
         [
           'another app exists',
@@ -449,16 +490,17 @@ describe(CreateGkeApp.name, () => {
             userApps: [
               {
                 ...listAppsResponse(),
-                status: AppStatus.DELETED,
-              },
-              {
-                ...listAppsResponse(),
                 appType: otherAppType[appType],
                 status: AppStatus.RUNNING,
+                kubernetesRuntimeConfig: {
+                  ...listAppsResponse().kubernetesRuntimeConfig,
+                  machineType: 'n1-standard-8',
+                },
               },
             ],
           },
           /Cannot configure the compute profile when there are applications running in the workspace/,
+          /8 CPUS, 30GB RAM/, // n1-standard-8 - matches the other app
         ],
       ])(
         `should not allow machine type configuration when %s`,
@@ -466,7 +508,8 @@ describe(CreateGkeApp.name, () => {
           _,
           config: ConfigResponse,
           propOverrides: Partial<CreateGkeAppProps>,
-          tooltip: string | RegExp
+          tooltip: string | RegExp,
+          expectedConfiguration: RegExp
         ) => {
           serverConfigStore.set({ config });
 
@@ -477,8 +520,10 @@ describe(CreateGkeApp.name, () => {
           );
           expect(cpuDropdown).not.toBeInTheDocument();
 
-          // matches the default configuration text output: 4 CPUS, 15GB RAM, 50GB disk
-          const fixedConfiguration = screen.getByText(/CPUS/);
+          const fixedConfiguration = screen.getByText(expectedConfiguration, {
+            exact: false,
+          });
+          expect(fixedConfiguration).toBeInTheDocument();
           await user.hover(fixedConfiguration);
 
           expect(screen.getByText(tooltip)).toBeInTheDocument();
@@ -511,6 +556,56 @@ describe(CreateGkeApp.name, () => {
           )
         ).toBeInTheDocument();
       });
+
+      //
+      // it(`should use an existing app's machine type when one exists`, async () => {
+      //   serverConfigStore.set({
+      //     config: {
+      //       ...serverConfigStore.get().config,
+      //       enableGKEAppMachineTypeChoice: true,
+      //     },
+      //   });
+      //
+      //   const otherAppMachineType = 'n1-standard-8';
+      //   // sanity check
+      //   expect(otherAppMachineType).not.toEqual(
+      //       defaultAppRequest[appType].kubernetesRuntimeConfig.machineType
+      //   );
+      //
+      //   const { container } = await component(appType, {
+      //     userApps: [
+      //       {
+      //         ...listAppsResponse(),
+      //         kubernetesRuntimeConfig: {
+      //           ...listAppsResponse().kubernetesRuntimeConfig,
+      //           machineType: otherAppMachineType,
+      //         },
+      //       },
+      //     ],
+      //   });
+      //
+      //   // show that the other-app machine configuration is selected
+      //
+      //   const { cpu, memory } = findMachineByName(otherAppMachineType);
+      //
+      //   const cpuId = `${appTypeToString[appType]}-cpu`;
+      //   const defaultCpuOption = getDropdownOption(
+      //       container,
+      //       cpuId,
+      //       cpu.toString()
+      //   );
+      //   expect(defaultCpuOption).toBeInTheDocument();
+      //   expect(defaultCpuOption).toHaveAttribute('aria-selected', 'true');
+      //
+      //   const ramId = `${appTypeToString[appType]}-ram`;
+      //   const defaultRamOption = getDropdownOption(
+      //       container,
+      //       ramId,
+      //       memory.toString()
+      //   );
+      //   expect(defaultRamOption).toBeInTheDocument();
+      //   expect(defaultRamOption).toHaveAttribute('aria-selected', 'true');
+      // });
     }
   );
 });
