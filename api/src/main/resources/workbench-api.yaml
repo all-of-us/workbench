@@ -9692,16 +9692,6 @@ components:
           $ref: '#/components/schemas/AdminWorkspaceObjectsCounts'
         cloudStorage:
           $ref: '#/components/schemas/AdminWorkspaceCloudStorageCounts'
-        runtimes:
-          description: DEPRECATED - will be removed after a release.  Replaced by adminListRuntimesInWorkspace.
-          type: array
-          items:
-            $ref: '#/components/schemas/ListRuntimeResponse'
-        userApps:
-          description: DEPRECATED - will be removed after a release.  Replaced by adminListUserAppsInWorkspace.
-          type: array
-          items:
-            $ref: '#/components/schemas/UserAppEnvironment'
       description: A summary of application-level resources associated with a workspace.
         Includes data about Cohort Builder objects, analysis runtimes, and cloud-storage
         contents.
