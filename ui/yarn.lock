@@ -1761,10 +1761,10 @@
   resolved "https://registry.yarnpkg.com/@lukeed/csprng/-/csprng-1.1.0.tgz#1e3e4bd05c1cc7a0b2ddbd8a03f39f6e4b5e6cfe"
   integrity sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==
 
-"@nestjs/axios@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.0.1.tgz#b006f81dd54a49def92cfaf9a8970434567e75ce"
-  integrity sha512-VlOZhAGDmOoFdsmewn8AyClAdGpKXQQaY1+3PGB+g6ceurGIdTxZgRX3VXc1T6Zs60PedWjg3A82TDOB05mrzQ==
+"@nestjs/axios@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-3.0.2.tgz#0078c101a29fb46f5c566d68a4315fddabc083ed"
+  integrity sha512-Z6GuOUdNQjP7FX+OuV2Ybyamse+/e0BFdTWBX5JxpBDKA+YkdLynDgG6HTF04zy6e9zPa19UX0WA2VDoehwhXQ==
 
 "@nestjs/common@10.3.0":
   version "10.3.0"
@@ -1824,16 +1824,16 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
-"@openapitools/openapi-generator-cli@^2.13.1":
-  version "2.13.1"
-  resolved "https://registry.yarnpkg.com/@openapitools/openapi-generator-cli/-/openapi-generator-cli-2.13.1.tgz#2f72887523749489c18bd90097d384a5693bb727"
-  integrity sha512-WJB6MsFXlA69mpKCuR3hBsdFr7MptNhoIGlyvoYEorBQEg3cd6n1gACHx0fz20B3e03/imvorQlNMsrHTIeU9w==
+"@openapitools/openapi-generator-cli@^2.13.4":
+  version "2.13.4"
+  resolved "https://registry.yarnpkg.com/@openapitools/openapi-generator-cli/-/openapi-generator-cli-2.13.4.tgz#8557fdec317cc6a669c615a35a5ddaa00fc269b4"
+  integrity sha512-4JKyrk55ohQK2FcuZbPdNvxdyXD14jjOIvE8hYjJ+E1cHbRbfXQXbYnjTODFE52Gx8eAxz8C9icuhDYDLn7nww==
   dependencies:
-    "@nestjs/axios" "3.0.1"
+    "@nestjs/axios" "3.0.2"
     "@nestjs/common" "10.3.0"
     "@nestjs/core" "10.3.0"
     "@nuxtjs/opencollective" "0.3.2"
-    axios "1.6.5"
+    axios "1.6.8"
     chalk "4.1.2"
     commander "8.3.0"
     compare-versions "4.1.4"
@@ -1841,6 +1841,7 @@
     console.table "0.10.0"
     fs-extra "10.1.0"
     glob "7.2.3"
+    https-proxy-agent "7.0.4"
     inquirer "8.2.6"
     lodash "4.17.21"
     reflect-metadata "0.1.13"
@@ -2985,6 +2986,13 @@ agent-base@6:
   dependencies:
     debug "4"
 
+agent-base@^7.0.2:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.1.tgz#bdbded7dfb096b751a2a087eeeb9664725b2e317"
+  integrity sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==
+  dependencies:
+    debug "^4.3.4"
+
 ajv-formats@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-2.1.1.tgz#6e669400659eb74973bbf2e33327180a0996b520"
@@ -3280,12 +3288,12 @@ axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.8.3.tgz#205df863dd9917d5979e9435dab4d47692759051"
   integrity sha512-d5ZQHPSPkF9Tw+yfyDcRoUOc4g/8UloJJe5J8m4L5+c7AtDdjDLRxew/knnI4CxvtdxEUVgWz4x3OIQUIFiMfw==
 
-axios@1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.5.tgz#2c090da14aeeab3770ad30c3a1461bc970fb0cd8"
-  integrity sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==
+axios@1.6.8:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.8.tgz#66d294951f5d988a00e87a0ffb955316a619ea66"
+  integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
   dependencies:
-    follow-redirects "^1.15.4"
+    follow-redirects "^1.15.6"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -5673,7 +5681,7 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.7.tgz#609f39207cb614b89d0765b477cb2d437fbf9787"
   integrity sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==
 
-follow-redirects@^1.0.0, follow-redirects@^1.15.4:
+follow-redirects@^1.0.0, follow-redirects@^1.15.6:
   version "1.15.6"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
   integrity sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==
@@ -6176,10 +6184,18 @@ http-proxy@^1.18.1:
     follow-redirects "^1.0.0"
     requires-port "^1.0.0"
 
+https-proxy-agent@7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-7.0.4.tgz#8e97b841a029ad8ddc8731f26595bad868cb4168"
+  integrity sha512-wlwpilI7YdjSkWaQ/7omYBMTliDcmCN8OLihO6I9B86g06lMyAoqgoDpV0XqoaPOKj+0DIdAvnsWfyAAhmimcg==
+  dependencies:
+    agent-base "^7.0.2"
+    debug "4"
+
 https-proxy-agent@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.0.tgz#e2a90542abb68a762e0a0850f6c9edadfd8506b2"
-  integrity sha512-EkYm5BcKUGiduxzSt3Eppko+PiNWNEpa4ySk9vTC6wDsQJW9rHSa+UhGNJoRYp7bz6Ht1eaRIa6QaJqO5rCFbA==
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
+  integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
   dependencies:
     agent-base "6"
     debug "4"
