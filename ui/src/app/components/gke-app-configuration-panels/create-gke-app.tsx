@@ -55,6 +55,56 @@ const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
+const toMachine = (createAppRequest: CreateAppRequest): Machine =>
+  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
+
+const toAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): AnalysisConfig => {
+  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
+  return {
+    machine: toMachine(createAppRequest),
+    diskConfig: {
+      size: persistentDiskRequest.size,
+      detachable: true,
+      detachableType: persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: kubernetesRuntimeConfig.numNodes,
+    // defaults
+    computeType: ComputeType.Standard,
+    dataprocConfig: undefined,
+    gpuConfig: undefined,
+    detachedDisk: undefined,
+    autopauseThreshold: undefined,
+  };
+};
+
+// we only allow a single machine type across all user apps in the workspace,
+// so we need to determine the machine types of existing apps, if any
+
+const existingMachineTypes = (userApps?: UserAppEnvironment[]): string[] =>
+  Array.from(
+    new Set(
+      userApps
+        ?.map(
+          (app: UserAppEnvironment) => app.kubernetesRuntimeConfig?.machineType
+        )
+        // filter out undefined values
+        .filter((x) => x) ?? []
+    )
+  );
+
+// return the single machine type if there is only one
+// TODO: what should we do if there is more than one (shouldn't happen) - for now, return undefined
+
+const getExistingMachineType = (
+  userApps?: UserAppEnvironment[]
+): string | undefined => {
+  const machineTypes = existingMachineTypes(userApps);
+  return machineTypes.length === 1 ? machineTypes[0] : undefined;
+};
+
 export interface CreateGkeAppProps {
   userApps: UserAppEnvironment[];
   appType: AppType;
@@ -81,31 +131,6 @@ type ToOmit =
 // for use by the individual gke app creation components, e.g. CreateCromwell
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
-const toMachine = (createAppRequest: CreateAppRequest): Machine =>
-  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
-
-const toAnalysisConfig = (
-  createAppRequest: CreateAppRequest
-): AnalysisConfig => {
-  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
-  return {
-    machine: toMachine(createAppRequest),
-    diskConfig: {
-      size: persistentDiskRequest.size,
-      detachable: true,
-      detachableType: persistentDiskRequest.diskType,
-      existingDiskName: null,
-    },
-    numNodes: kubernetesRuntimeConfig.numNodes,
-    // defaults
-    computeType: ComputeType.Standard,
-    dataprocConfig: undefined,
-    gpuConfig: undefined,
-    detachedDisk: undefined,
-    autopauseThreshold: undefined,
-  };
-};
-
 export const CreateGkeApp = ({
   userApps,
   appType,
@@ -131,14 +156,6 @@ export const CreateGkeApp = ({
 
   const app = findApp(userApps, toUIAppType[appType]);
 
-  // we only allow a single machine type across all user apps in the workspace,
-  // so we need to detect if there are any existing apps
-  // with differing machine types
-
-  const arbitraryExistingApp = userApps?.find((app) => isAppActive(app));
-  const existingMachineType =
-    arbitraryExistingApp?.kubernetesRuntimeConfig?.machineType;
-
   // there may or may not be an existing `app` and/or `disk`
   // start with the default config, but override with the existing app and disk configs
 
@@ -149,7 +166,7 @@ export const CreateGkeApp = ({
         ...defaultCreateRequest.kubernetesRuntimeConfig,
         machineType:
           app?.kubernetesRuntimeConfig.machineType ??
-          existingMachineType ??
+            getExistingMachineType(userApps) ??
           defaultCreateRequest.kubernetesRuntimeConfig.machineType,
       },
 
@@ -198,13 +215,11 @@ export const CreateGkeApp = ({
       }
     : {};
 
-  // TODO: do we also need to detect other users' apps here?
-
   // we only allow a single machine type across all user apps in the workspace, so we need to detect if there are any existing apps
   // with differing machine types
 
   const differentMachineTypeExists =
-    existingMachineType !==
+    getExistingMachineType(userApps) !==
     createAppRequest?.kubernetesRuntimeConfig?.machineType;
 
   const canConfigureMachineType =
