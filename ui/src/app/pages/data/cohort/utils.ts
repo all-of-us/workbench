@@ -122,6 +122,9 @@ export function domainToTitle(domain: any): string {
     case Domain.FITBIT:
       domain = 'Fitbit';
       break;
+    case Domain.WEAR_CONSENT:
+      domain = 'Wear Consent';
+      break;
     case Domain.WHOLE_GENOME_VARIANT:
       domain = 'Short Read WGS';
       break;

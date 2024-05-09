@@ -209,6 +209,8 @@ export const CohortSearch = fp.flow(
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
+      } else if (domain.includes(Domain.WEAR_CONSENT.toString())) {
+        this.selectWearConsent();
       } else if (domain === Domain.WHOLE_GENOME_VARIANT) {
         this.selectGenome();
       } else if (domain === Domain.LR_WHOLE_GENOME_VARIANT) {
@@ -402,6 +404,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Has any Fitbit data'
+      );
+      saveCriteria([param]);
+    }
+
+    selectWearConsent() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Wear Consent',
+        group: false,
+        domainId: Domain.WEAR_CONSENT.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Has Wear Consent data'
       );
       saveCriteria([param]);
     }
