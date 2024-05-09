@@ -231,6 +231,11 @@ describe(CreateGkeApp.name, () => {
         ...defaultApp,
         appType,
         autodeleteEnabled: true,
+        kubernetesRuntimeConfig: {
+          machineType: 'n1-standard-4',
+          numNodes: 0,
+          autoscalingEnabled: false,
+        },
       };
 
       it('should correctly calculate autodeleteRemainingDays', async () => {

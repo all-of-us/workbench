@@ -13,11 +13,13 @@ interface Props {
   machine: Machine;
   persistentDiskRequest: Disk | PersistentDiskRequest;
   appType: AppType;
+  disabledText?: string;
 }
 export const DisabledCloudComputeProfile = ({
   machine: { cpu, memory },
   persistentDiskRequest: { size },
   appType,
+  disabledText = `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
 }: Props) => {
   const otherAppTypes: string[] = Object.keys(AppType)
     .filter((k) => AppType[k] !== appType)
@@ -31,10 +33,7 @@ export const DisabledCloudComputeProfile = ({
         <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
           Cloud compute profile
         </div>
-        <TooltipTrigger
-          content={`The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`}
-          side={'right'}
-        >
+        <TooltipTrigger content={disabledText} side={'right'}>
           <div style={styles.disabledCloudProfile}>
             {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
           </div>
