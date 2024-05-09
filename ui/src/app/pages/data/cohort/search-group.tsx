@@ -416,6 +416,7 @@ export const SearchGroup = withCurrentWorkspace()(
             Domain.FITBIT_INTRADAY_STEPS,
             Domain.FITBIT_SLEEP_DAILY_SUMMARY,
             Domain.FITBIT_SLEEP_LEVEL,
+            Domain.WEAR_CONSENT,
             Domain.WHOLE_GENOME_VARIANT,
             Domain.LR_WHOLE_GENOME_VARIANT,
             Domain.ARRAY_DATA,
