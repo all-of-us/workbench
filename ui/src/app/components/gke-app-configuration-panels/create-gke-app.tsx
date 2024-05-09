@@ -276,47 +276,57 @@ export const CreateGkeApp = ({
         />
         <CostNote />
       </div>
-      <FlexColumn style={{ rowGap: '1em' }}>
+      <div style={{ ...styles.controlSection }}>
         {canConfigureMachineType ? (
-          <FlexRow style={{ ...styles.controlSection }}>
-            <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
-              Cloud compute profile
-            </h3>
-            <div style={styles.formGrid3}>
-              <MachineSelector
-                {...{ validMachineTypes }}
-                idPrefix={appTypeToString[appType]}
-                disabled={false}
-                selectedMachine={toMachine(createAppRequest)}
-                onChange={(machine: Machine) =>
-                  setCreateAppRequest((prevState) => ({
-                    ...prevState,
-                    kubernetesRuntimeConfig: {
-                      ...prevState.kubernetesRuntimeConfig,
-                      machineType: machine.name,
-                    },
-                  }))
-                }
-                machineType={
-                  createAppRequest?.kubernetesRuntimeConfig.machineType
-                }
-              />
+          <FlexColumn
+            style={{ ...styles.controlSection, padding: 0, rowGap: '1em' }}
+          >
+            <FlexRow>
+              <h3
+                style={{
+                  ...styles.sectionHeader,
+                  ...styles.bold,
+                  marginRight: '3rem',
+                }}
+              >
+                Cloud compute profile
+              </h3>
+              <div style={styles.formGrid2}>
+                <MachineSelector
+                  {...{ validMachineTypes }}
+                  idPrefix={appTypeToString[appType]}
+                  disabled={false}
+                  selectedMachine={toMachine(createAppRequest)}
+                  onChange={(machine: Machine) =>
+                    setCreateAppRequest((prevState) => ({
+                      ...prevState,
+                      kubernetesRuntimeConfig: {
+                        ...prevState.kubernetesRuntimeConfig,
+                        machineType: machine.name,
+                      },
+                    }))
+                  }
+                  machineType={
+                    createAppRequest?.kubernetesRuntimeConfig.machineType
+                  }
+                />
+              </div>
+            </FlexRow>
+            <div>
+              Your {appTypeToString[appType]} environment will share CPU and RAM
+              resources with any {otherAppsString} environments you run in this
+              workspace.
             </div>
-          </FlexRow>
+          </FlexColumn>
         ) : (
           <DisabledCloudComputeProfile
-            {...{ appType }}
+            {...{ appType, otherAppsString }}
             persistentDiskRequest={createAppRequest?.persistentDiskRequest}
             machine={toMachine(createAppRequest)}
             disabledText={machineTypeDisabledText}
           />
         )}
-        <div>
-          Your {appTypeToString[appType]} environment will share CPU and RAM
-          resources with any {otherAppsString} environments you run in this
-          workspace.
-        </div>
-      </FlexColumn>
+      </div>
       <div style={{ ...styles.controlSection }}>
         <FlexRow
           style={{
