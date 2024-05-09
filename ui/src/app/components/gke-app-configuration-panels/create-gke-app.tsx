@@ -40,6 +40,7 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
+import { oxfordCommaString } from 'app/utils/strings';
 import {
   appTypeToString,
   isInteractiveUserApp,
@@ -250,6 +251,12 @@ export const CreateGkeApp = ({
   // TODO determine appropriate machine types for the app type
   const validMachineTypes = allMachineTypes;
 
+  const otherAppTypes: string[] = Object.keys(AppType)
+    .filter((k) => AppType[k] !== appType)
+    .map((k) => appTypeToString[AppType[k]]);
+  // also handles a potential future when we have more than two other app types
+  const otherAppsString = oxfordCommaString(otherAppTypes);
+
   return (
     <FlexColumn
       id={`${appTypeToString[appType]}-configuration-panel`}
@@ -269,9 +276,9 @@ export const CreateGkeApp = ({
         />
         <CostNote />
       </div>
-      <div style={{ ...styles.controlSection, flex: 'row' }}>
+      <FlexColumn style={{ rowGap: '1em' }}>
         {canConfigureMachineType ? (
-          <>
+          <FlexRow style={{ ...styles.controlSection }}>
             <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
               Cloud compute profile
             </h3>
@@ -295,7 +302,7 @@ export const CreateGkeApp = ({
                 }
               />
             </div>
-          </>
+          </FlexRow>
         ) : (
           <DisabledCloudComputeProfile
             {...{ appType }}
@@ -304,7 +311,12 @@ export const CreateGkeApp = ({
             disabledText={machineTypeDisabledText}
           />
         )}
-      </div>
+        <div>
+          Your {appTypeToString[appType]} environment will share CPU and RAM
+          resources with any {otherAppsString} environments you run in this
+          workspace.
+        </div>
+      </FlexColumn>
       <div style={{ ...styles.controlSection }}>
         <FlexRow
           style={{
