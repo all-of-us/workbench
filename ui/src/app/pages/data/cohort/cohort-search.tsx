@@ -414,7 +414,7 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: "Wear Consent",
+        name: 'Wear Consent',
         group: false,
         domainId: Domain.WEAR_CONSENT.toString(),
         hasAttributes: false,
