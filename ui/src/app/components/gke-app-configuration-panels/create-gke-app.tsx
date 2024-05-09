@@ -7,16 +7,12 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
-  PersistentDiskRequest,
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  defaultCromwellCreateRequest,
-  defaultRStudioCreateRequest,
-  defaultSASCreateRequest,
+  defaultAppRequest,
   findApp,
   isAppActive,
   toUIAppType,
@@ -81,6 +77,31 @@ type ToOmit =
 // for use by the individual gke app creation components, e.g. CreateCromwell
 export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
 
+const toMachine = (createAppRequest: CreateAppRequest): Machine =>
+  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
+
+const toAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): AnalysisConfig => {
+  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
+  return {
+    machine: toMachine(createAppRequest),
+    diskConfig: {
+      size: persistentDiskRequest.size,
+      detachable: true,
+      detachableType: persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: kubernetesRuntimeConfig.numNodes,
+    // defaults
+    computeType: ComputeType.Standard,
+    dataprocConfig: undefined,
+    gpuConfig: undefined,
+    detachedDisk: undefined,
+    autopauseThreshold: undefined,
+  };
+};
+
 export const CreateGkeApp = ({
   userApps,
   appType,
@@ -99,47 +120,14 @@ export const CreateGkeApp = ({
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
-  const onDismiss = () => {
-    onClose();
-    setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
-  };
-
-  const defaultCreateRequest = switchCase(
-    appType,
-    [AppType.CROMWELL, () => defaultCromwellCreateRequest],
-    [AppType.RSTUDIO, () => defaultRStudioCreateRequest],
-    [AppType.SAS, () => defaultSASCreateRequest]
-  );
-
-  const persistentDiskRequest: PersistentDiskRequest =
-    disk ?? defaultCreateRequest.persistentDiskRequest;
-  const { kubernetesRuntimeConfig } = defaultCreateRequest;
-  const machine: Machine = findMachineByName(
-    kubernetesRuntimeConfig.machineType
-  );
-  const analysisConfig: AnalysisConfig = {
-    machine,
-    diskConfig: {
-      size: persistentDiskRequest.size,
-      detachable: true,
-      detachableType: persistentDiskRequest.diskType,
-      existingDiskName: null,
-    },
-    numNodes: kubernetesRuntimeConfig.numNodes,
-    // defaults
-    computeType: ComputeType.Standard,
-    dataprocConfig: undefined,
-    gpuConfig: undefined,
-    detachedDisk: undefined,
-    autopauseThreshold: undefined,
-  };
+  const defaultCreateRequest = defaultAppRequest[appType];
 
   const app = findApp(userApps, toUIAppType[appType]);
 
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
       ...defaultCreateRequest,
-      persistentDiskRequest,
+      persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
       autodeleteEnabled:
         app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
       autodeleteThreshold:
@@ -196,8 +184,8 @@ export const CreateGkeApp = ({
             creatorFreeCreditsRemaining,
             profile,
             workspace,
-            analysisConfig,
           }}
+          analysisConfig={toAnalysisConfig(createAppRequest)}
           appType={toUIAppType[appType]}
           status={app?.status}
         />
@@ -205,7 +193,9 @@ export const CreateGkeApp = ({
       </div>
       <div style={{ ...styles.controlSection }}>
         <DisabledCloudComputeProfile
-          {...{ appType, machine, persistentDiskRequest }}
+          {...{ appType }}
+          persistentDiskRequest={createAppRequest?.persistentDiskRequest}
+          machine={toMachine(createAppRequest)}
         />
       </div>
       <div style={{ ...styles.controlSection }}>
@@ -316,11 +306,15 @@ export const CreateGkeApp = ({
           />
         ) : (
           <CreateGkeAppButton
-            {...{ billingStatus, createAppRequest, onDismiss }}
+            {...{ billingStatus, createAppRequest }}
             existingApp={app}
             workspaceNamespace={workspace.namespace}
             username={profile.username}
             style={openOrCreateButtonStyle}
+            onDismiss={() => {
+              onClose();
+              setTimeout(() => sidebarActiveIconStore.next('apps'), 3000);
+            }}
           />
         )}
       </FlexRow>

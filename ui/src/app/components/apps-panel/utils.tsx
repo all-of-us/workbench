@@ -119,6 +119,12 @@ export const defaultSASCreateRequest: CreateAppRequest = {
   autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
+export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
+  [AppType.CROMWELL]: defaultCromwellCreateRequest,
+  [AppType.RSTUDIO]: defaultRStudioCreateRequest,
+  [AppType.SAS]: defaultSASCreateRequest,
+};
+
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
 
