@@ -2,12 +2,12 @@ package org.pmiops.workbench.actionaudit.auditors;
 
 import static org.pmiops.workbench.actionaudit.ActionAuditSpringConfiguration.ACTION_ID_BEAN;
 
+import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.actionaudit.ActionAuditService;

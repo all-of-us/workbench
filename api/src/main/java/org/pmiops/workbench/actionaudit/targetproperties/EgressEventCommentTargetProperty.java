@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * A simple comment property relating to a high-egress event received by the Workbench. This

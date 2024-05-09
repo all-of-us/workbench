@@ -1,7 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
+import jakarta.annotation.Nullable;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;

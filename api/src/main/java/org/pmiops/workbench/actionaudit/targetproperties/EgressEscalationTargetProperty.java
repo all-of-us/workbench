@@ -1,8 +1,8 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.function.Function;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.Escalation;
 
 /**

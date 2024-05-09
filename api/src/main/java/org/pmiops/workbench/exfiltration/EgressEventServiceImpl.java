@@ -5,6 +5,7 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gkeServiceName
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
+import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
