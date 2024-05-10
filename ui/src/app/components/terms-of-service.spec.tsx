@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TermsOfService, TosProps } from 'app/components/terms-of-service';
 
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';
@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 it('should render', async () => {
-  const wrapper = render(<TermsOfService {...props} />);
+  render(<TermsOfService {...props} />);
   await screen.findByText(
     'Please read through the entire agreement to continue.'
   );
