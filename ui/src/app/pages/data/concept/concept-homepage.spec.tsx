@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import {
   CohortBuilderApi,
@@ -7,11 +6,11 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import {
   CohortBuilderServiceStub,
   DomainStubVariables,
@@ -23,7 +22,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 describe('ConceptHomepage', () => {
   const component = () => {
-    return mount(
+    return render(
       <ConceptHomepage
         setConceptSetUpdating={() => {}}
         setShowUnsavedModal={() => {}}
@@ -41,24 +40,20 @@ describe('ConceptHomepage', () => {
     currentWorkspaceStore.next(workspaceDataStub);
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('should render', async () => {
+    component();
+    await screen.findByPlaceholderText(/search concepts in domain/i);
   });
 
   it('should have one card per domain.', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="domain-box-name"]').length).toBe(
-      DomainStubVariables.STUB_DOMAINS.length
-    );
+    component();
+    const domainBoxes = await screen.findAllByTestId('domain-box');
+    expect(domainBoxes.length).toBe(DomainStubVariables.STUB_DOMAINS.length);
   });
 
   it('should have one card per survey.', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="survey-box-name"]').length).toBe(
-      SurveyStubVariables.STUB_SURVEYS.length
-    );
+    component();
+    const surveyBoxes = await screen.findAllByTestId('survey-box');
+    expect(surveyBoxes.length).toBe(SurveyStubVariables.STUB_SURVEYS.length);
   });
 });
