@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Methods relating to Free Tier credit usage and limits */
 @Service
@@ -73,10 +71,7 @@ public class FreeTierBillingService {
 
   /**
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
-   * passing thresholds or exceeding limits. RW-6280 - REQUIRES_NEW transactional mode was added to
-   * make the call to this method create a new transaction with each set of users. In order to
-   * commit the transaction after the call. However, if the user has many workspaces, this method
-   * may still timeout.
+   * passing thresholds or exceeding limits.
    */
   public void checkFreeTierBillingUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
