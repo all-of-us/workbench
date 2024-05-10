@@ -61,26 +61,4 @@ describe('ConceptHomepage', () => {
       SurveyStubVariables.STUB_SURVEYS.length
     );
   });
-
-  // Need to update with new api calls
-  /* it('should show warning and not search if invalid characters have been entered', async() => {
-    const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
-    const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
-    const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');
-    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                           setShowUnsavedModal={() => {}}
-                                           setUnsavedConceptChanges={() => {}}/>);
-    await waitOneTickAndUpdate(wrapper);
-    const termWithInvalidChars = defaultSearchTerm + '(';
-    searchTable(termWithInvalidChars, wrapper);
-    await waitOneTickAndUpdate(wrapper);
-
-    // Test that it doesn't make any api calls
-    expect(countSpy).toHaveBeenCalledTimes(0);
-    expect(conceptSpy).toHaveBeenCalledTimes(0);
-    expect(surveySpy).toHaveBeenCalledTimes(0);
-
-    // Test that one input error alert is displayed with the proper message
-    expect(wrapper.find('[data-test-id="input-error-alert"]').text()).toBe('There is an unclosed ( in the search string');
-  });*/
 });
