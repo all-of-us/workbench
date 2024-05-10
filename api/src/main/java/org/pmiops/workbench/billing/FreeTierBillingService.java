@@ -8,13 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -32,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Methods relating to Free Tier credit usage and limits */
 @Service
@@ -78,12 +71,8 @@ public class FreeTierBillingService {
 
   /**
    * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
-   * passing thresholds or exceeding limits. RW-6280 - REQUIRES_NEW transactional mode was added to
-   * make the call to this method create a new transaction with each set of users. In order to
-   * commit the transaction after the call. However, if the user has many workspaces, this method
-   * may still timeout.
+   * passing thresholds or exceeding limits.
    */
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void checkFreeTierBillingUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
@@ -131,20 +120,21 @@ public class FreeTierBillingService {
    */
   private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
-    final List<Double> costThresholdsInDescOrder =
-        workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
-    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
-    final double lowestThreshold =
-        costThresholdsInDescOrder.get(costThresholdsInDescOrder.size() - 1);
-    return users.stream()
-        .filter(
-            user -> {
-              final double limit = getUserFreeTierDollarLimit(user);
-              final double userLiveCost =
-                  Optional.ofNullable(liveCostByCreator.get(user.getUserId())).orElse(0.0);
-              return userLiveCost / limit >= lowestThreshold;
-            })
-        .collect(Collectors.toSet());
+    return workbenchConfigProvider.get().billing.freeTierCostAlertThresholds.stream()
+        .min(Comparator.naturalOrder())
+        .map(
+            lowestThreshold ->
+                users.stream()
+                    .filter(
+                        user -> {
+                          final double limit = getUserFreeTierDollarLimit(user);
+                          final double userLiveCost =
+                              Optional.ofNullable(liveCostByCreator.get(user.getUserId()))
+                                  .orElse(0.0);
+                          return userLiveCost / limit >= lowestThreshold;
+                        })
+                    .collect(Collectors.toSet()))
+        .orElse(Collections.emptySet());
   }
 
   /**
