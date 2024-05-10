@@ -1,38 +1,35 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
 
+import { findByText, render, screen, waitFor } from '@testing-library/react';
 import {
   DataAccessPanel,
   DataAccessPanelProps,
 } from 'app/pages/profile/data-access-panel';
 import { cdrVersionStore } from 'app/utils/stores';
 
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 
-const findRTGranted = (wrapper) =>
-  wrapper.find('[data-test-id="registered-tier-access-granted"]');
-const findRTDenied = (wrapper) =>
-  wrapper.find('[data-test-id="registered-tier-access-denied"]');
-const findCTGranted = (wrapper) =>
-  wrapper.find('[data-test-id="controlled-tier-access-granted"]');
-const findCTDenied = (wrapper) =>
-  wrapper.find('[data-test-id="controlled-tier-access-denied"]');
+const queryRTGranted = (wrapper) =>
+  screen.queryByTestId('registered-tier-access-granted');
+const queryRTDenied = (wrapper) =>
+  screen.queryByTestId('registered-tier-access-denied');
+const queryCTGranted = (wrapper) =>
+  screen.queryByTestId('controlled-tier-access-granted');
+const queryCTDenied = (wrapper) =>
+  screen.queryByTestId('controlled-tier-access-denied');
 
 const expectAccessStatus = (wrapper, rtStatus: boolean, ctStatus: boolean) => {
-  expect(findRTGranted(wrapper).exists()).toEqual(rtStatus);
-  expect(findRTDenied(wrapper).exists()).not.toEqual(rtStatus);
-  expect(findCTGranted(wrapper).exists()).toEqual(ctStatus);
-  expect(findCTDenied(wrapper).exists()).not.toEqual(ctStatus);
+  expect(!!queryRTGranted(wrapper)).toEqual(rtStatus);
+  expect(!!queryRTDenied(wrapper)).not.toEqual(rtStatus);
+  expect(!!queryCTGranted(wrapper)).toEqual(ctStatus);
+  expect(!!queryCTDenied(wrapper)).not.toEqual(ctStatus);
 };
 
 describe('Data Access Panel', () => {
   const component = (props: DataAccessPanelProps) => {
-    return mount(
-      <MemoryRouter>
-        <DataAccessPanel {...props} />
-      </MemoryRouter>
-    );
+    return renderWithRouter(<DataAccessPanel {...props} />);
   };
 
   beforeEach(() => {
