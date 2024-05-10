@@ -8,13 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -83,7 +78,6 @@ public class FreeTierBillingService {
    * commit the transaction after the call. However, if the user has many workspaces, this method
    * may still timeout.
    */
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void checkFreeTierBillingUsageForUsers(
       Set<DbUser> users, final Map<String, Double> liveCostsInBQ) {
     String userIdsAsString =
@@ -132,7 +126,7 @@ public class FreeTierBillingService {
   private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
     final List<Double> costThresholdsInDescOrder =
-        workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
+        new ArrayList<>(workbenchConfigProvider.get().billing.freeTierCostAlertThresholds);
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
     final double lowestThreshold =
         costThresholdsInDescOrder.get(costThresholdsInDescOrder.size() - 1);
