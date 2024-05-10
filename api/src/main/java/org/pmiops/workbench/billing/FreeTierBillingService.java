@@ -120,20 +120,21 @@ public class FreeTierBillingService {
    */
   private Set<DbUser> filterUsersHigherThanTheLowestThreshold(
       Set<DbUser> users, final Map<Long, Double> liveCostByCreator) {
-    final List<Double> costThresholdsInDescOrder =
-        new ArrayList<>(workbenchConfigProvider.get().billing.freeTierCostAlertThresholds);
-    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
-    final double lowestThreshold =
-        costThresholdsInDescOrder.get(costThresholdsInDescOrder.size() - 1);
-    return users.stream()
-        .filter(
-            user -> {
-              final double limit = getUserFreeTierDollarLimit(user);
-              final double userLiveCost =
-                  Optional.ofNullable(liveCostByCreator.get(user.getUserId())).orElse(0.0);
-              return userLiveCost / limit >= lowestThreshold;
-            })
-        .collect(Collectors.toSet());
+    return workbenchConfigProvider.get().billing.freeTierCostAlertThresholds.stream()
+        .min(Comparator.naturalOrder())
+        .map(
+            lowestThreshold ->
+                users.stream()
+                    .filter(
+                        user -> {
+                          final double limit = getUserFreeTierDollarLimit(user);
+                          final double userLiveCost =
+                              Optional.ofNullable(liveCostByCreator.get(user.getUserId()))
+                                  .orElse(0.0);
+                          return userLiveCost / limit >= lowestThreshold;
+                        })
+                    .collect(Collectors.toSet()))
+        .orElse(Collections.emptySet());
   }
 
   /**
