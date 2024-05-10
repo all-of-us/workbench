@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { environment } from 'environments/environment';
+import { render, screen, waitFor } from '@testing-library/react';
 import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import * as Authentication from 'app/utils/authentication';
 import { setLastActive } from 'app/utils/inactivity';
@@ -36,8 +36,7 @@ describe(InactivityMonitor.name, () => {
     );
 
     expect(notificationStore.get()).toBeNull();
-    const wrapper = mount(<InactivityMonitor />);
-    await waitOneTickAndUpdate(wrapper);
-    expect(notificationStore.get()).toBeTruthy();
+    render(<InactivityMonitor />);
+    await waitFor(() => expect(notificationStore.get()).toBeTruthy());
   });
 });
