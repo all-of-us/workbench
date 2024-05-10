@@ -4,9 +4,11 @@ import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
-import { parseDirectory } from 'app/pages/analysis/util';
+import {
+  getAppInfoFromFileName,
+  parseDirectory,
+} from 'app/pages/analysis/util';
 import { reactStyles } from 'app/utils';
-import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 
 import { formatMB } from './file-table';
@@ -74,16 +76,16 @@ export const FilenameCell = (props: Props) => {
   );
 
   // remove first check after RW-5626
-  const isNotebook =
+  const isAnalysisFile =
     NOTEBOOKS_DIRECTORY === parseDirectory(file, storageBucketPath) &&
-    filename.endsWith(JUPYTER_FILE_EXT);
+    getAppInfoFromFileName(filename) !== undefined;
 
-  const isTooLargeNotebook =
-    isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
+  const isTooLargeAnalysisFile =
+    isAnalysisFile && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
   return cond(
-    [isTooLargeNotebook, FileTooLarge],
-    [isNotebook, FileWithPreviewButton],
+    [isTooLargeAnalysisFile, FileTooLarge],
+    [isAnalysisFile, FileWithPreviewButton],
     FileSpan
   );
 };
