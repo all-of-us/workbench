@@ -38,56 +38,53 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('FilenameCell', () => {
-  it('allows notebook preview', async () => {
-    const user = userEvent.setup();
+describe(FilenameCell.name, () => {
+  it.each(['notes.ipynb', 'data.sas', 'myAnalysis.Rmd', 'scripts.R'])(
+    `allows preview for the file %s`,
+    async (filename: string) => {
+      const user = userEvent.setup();
 
-    const { container } = render(
-      <FilenameCell
-        {...{ accessReason, workspaceNamespace, storageBucketPath }}
-        file={notebookFile}
-      />
-    );
-    expect(container).toBeInTheDocument();
-    expect(screen.getByText(notebookFilename)).toBeInTheDocument();
+      notebookFilename = filename;
+      notebookFile = {
+        name: notebookFilename,
+        path: `${storageBucketPath}/notebooks/${notebookFilename}`,
+        lastModifiedTime: new Date().valueOf(),
+        sizeInBytes: 1e6, // 1 MB
+      };
 
-    const previewButton = screen.getByRole('button', { name: 'Preview' });
-    expect(previewButton).toBeInTheDocument();
-    expectButtonElementEnabled(previewButton);
+      const { container } = render(
+        <FilenameCell
+          {...{ accessReason, workspaceNamespace, storageBucketPath }}
+          file={notebookFile}
+        />
+      );
+      expect(container).toBeInTheDocument();
+      expect(screen.getByText(notebookFilename)).toBeInTheDocument();
 
-    const expectedNavigation = [
-      'admin',
-      'workspaces',
-      workspaceNamespace,
-      notebookFilename,
-    ];
-    await waitFor(async () => {
-      await user.click(previewButton);
-      expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
-        queryParams: { accessReason },
+      const previewButton = screen.getByRole('button', { name: 'Preview' });
+      expect(previewButton).toBeInTheDocument();
+      expectButtonElementEnabled(previewButton);
+
+      const expectedNavigation = [
+        'admin',
+        'workspaces',
+        workspaceNamespace,
+        notebookFilename,
+      ];
+      await waitFor(async () => {
+        await user.click(previewButton);
+        expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation, {
+          queryParams: { accessReason },
+        });
       });
-    });
-  });
+    }
+  );
 
-  it('does not enable the Preview button when a notebook is too large', async () => {
-    notebookFile.sizeInBytes = 10e6; // 10 MB is too large
-
-    const { container } = render(
-      <FilenameCell
-        {...{ accessReason, workspaceNamespace, storageBucketPath }}
-        file={notebookFile}
-      />
-    );
-    expect(container).toBeInTheDocument();
-    expect(screen.getByText(notebookFilename)).toBeInTheDocument();
-
-    const previewButton = screen.getByRole('button');
-    expect(previewButton).toBeInTheDocument();
-    expectButtonElementDisabled(previewButton);
-  });
-
-  it('does not enable the Preview button when the access reason is empty', async () => {
-    accessReason = '';
+  it.each([
+    ['the notebook is too large', () => (notebookFile.sizeInBytes = 10e6)],
+    ['the access reason is empty', () => (accessReason = '')],
+  ])(`does not enable the Preview button when %s`, async (_, setup) => {
+    setup();
 
     const { container } = render(
       <FilenameCell
