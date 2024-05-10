@@ -1,18 +1,9 @@
 import * as React from 'react';
-import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 
-import {
-  expectButtonElementDisabled,
-  expectButtonElementEnabled,
-} from '../../testing/react-test-helpers';
-import {
-  getDefaultNormalizer,
-  render,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { TermsOfService, TosProps } from 'app/components/terms-of-service';
+
+import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 
 let props: TosProps;
 const onCompleteSpy = jest.fn();
