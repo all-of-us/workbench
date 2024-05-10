@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { Profile, ProfileApi } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import {
   DataUserCodeOfConduct,
   DuccSignatureState,
