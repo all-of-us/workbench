@@ -358,10 +358,10 @@ export const CreateGkeApp = ({
           }}
         >
           <CheckBox
-            aria-label={`gke-autodelete-checkbox`}
+            aria-label='Auto-deletion toggle'
             disabled={isAppActive(app)}
             checked={createAppRequest.autodeleteEnabled}
-            onChange={(autodeleteEnabled) => {
+            onChange={(autodeleteEnabled: boolean) => {
               setCreateAppRequest((prevState) => ({
                 ...prevState,
                 autodeleteEnabled,
@@ -370,7 +370,7 @@ export const CreateGkeApp = ({
             style={{ marginRight: '1rem', zoom: 1.5 }}
           />
           <FlexColumn>
-            <label style={styles.label} htmlFor='gke-autodelete-label'>
+            <label style={styles.label}>
               Automatically delete application after
             </label>
             <p style={{ marginTop: '0' }}>
@@ -392,7 +392,8 @@ export const CreateGkeApp = ({
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown
-              aria-label={`Auto-deletion time limit`}
+              aria-label='Auto-deletion time limit'
+              id={`${appTypeToString[appType]}-autodelete-threshold-dropdown`}
               appendTo='self'
               disabled={isAppActive(app) || !createAppRequest.autodeleteEnabled}
               options={AutodeleteDaysThresholds.map((days) => ({
@@ -410,7 +411,7 @@ export const CreateGkeApp = ({
             />
             {autodeleteRemainingDays !== null && (
               <p
-                aria-label={`Autodelete remaining days`}
+                aria-label='Autodelete remaining days'
                 style={{ marginTop: '0', marginLeft: '1rem' }}
               >
                 {autodeleteRemainingDays > 0

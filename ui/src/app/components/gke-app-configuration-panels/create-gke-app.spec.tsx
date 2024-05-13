@@ -20,7 +20,10 @@ import {
   defaultAppRequest,
 } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { findMachineByName } from 'app/utils/machines';
+import {
+  AutodeleteDaysThresholds,
+  findMachineByName,
+} from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
@@ -128,6 +131,23 @@ describe(CreateGkeApp.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
+  const expectCreation = async (
+    appType: AppType
+  ): Promise<jest.SpyInstance> => {
+    const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+
+    const startButton = screen.getByLabelText(startButtonText);
+    expectButtonElementEnabled(startButton);
+    startButton.click();
+
+    await waitFor(() => expect(spyCreateApp).toHaveBeenCalledTimes(1));
+    return spyCreateApp;
+  };
+
   // note: update these if we add more app types
   describe.each([
     [AppType.CROMWELL, createListAppsCromwellResponse, 'RStudio and SAS'],
@@ -140,21 +160,12 @@ describe(CreateGkeApp.name, () => {
       listAppsResponse: () => UserAppEnvironment,
       otherAppTypes: string
     ) => {
-      const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
-
       it('Should create an app and close the panel when the create button is clicked', async () => {
         await component(appType);
 
-        const spyCreateApp = jest
-          .spyOn(appsApi(), 'createApp')
-          .mockImplementation((): Promise<any> => Promise.resolve());
-
-        const startButton = screen.getByLabelText(startButtonText);
-        expectButtonElementEnabled(startButton);
-        startButton.click();
+        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
 
         await waitFor(() => {
-          expect(spyCreateApp).toHaveBeenCalledTimes(1);
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
             defaultAppRequest[appType]
@@ -167,16 +178,8 @@ describe(CreateGkeApp.name, () => {
         const disk = stubDisk();
         await component(appType, { disk });
 
-        const spyCreateApp = jest
-          .spyOn(appsApi(), 'createApp')
-          .mockImplementation((): Promise<any> => Promise.resolve());
-
-        const startButton = screen.getByLabelText(startButtonText);
-        expectButtonElementEnabled(startButton);
-        startButton.click();
-
+        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
         await waitFor(() => {
-          expect(spyCreateApp).toHaveBeenCalledTimes(1);
           expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(
             disk
           );
@@ -243,6 +246,56 @@ describe(CreateGkeApp.name, () => {
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
+      });
+
+      it('should allow disabling autodelete', async () => {
+        await component(appType);
+
+        const autodeleteCheckbox = screen.getByRole('checkbox', {
+          name: 'Auto-deletion toggle',
+        });
+        expect(autodeleteCheckbox).toBeChecked(); // default = true
+        autodeleteCheckbox.click();
+        expect(autodeleteCheckbox).not.toBeChecked();
+
+        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+        await waitFor(() => {
+          expect(spyCreateApp).toHaveBeenCalledWith(
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+            { ...defaultAppRequest[appType], autodeleteEnabled: false }
+          );
+          expect(onClose).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      it('should allow setting the autodelete threshold', async () => {
+        const { container } = await component(appType);
+
+        // must match one of the choices
+        const autodeleteDays = AutodeleteDaysThresholds[1];
+        const autodeleteThreshold = autodeleteDays * 24 * 60;
+
+        // sanity check: does not match default
+        expect(autodeleteThreshold).not.toEqual(
+          defaultAppRequest[appType].autodeleteThreshold
+        );
+
+        const autodeleteId = `${appTypeToString[appType]}-autodelete-threshold-dropdown`;
+        const autodeleteOption = getDropdownOption(
+          container,
+          autodeleteId,
+          `Idle for ${autodeleteDays} days`
+        );
+        await userEvent.click(autodeleteOption);
+
+        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+        await waitFor(() => {
+          expect(spyCreateApp).toHaveBeenCalledWith(
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+            { ...defaultAppRequest[appType], autodeleteThreshold }
+          );
+          expect(onClose).toHaveBeenCalledTimes(1);
+        });
       });
 
       const autodeleteTestApp: UserAppEnvironment = {
@@ -360,16 +413,8 @@ describe(CreateGkeApp.name, () => {
           );
           await userEvent.click(differentRamOption);
 
-          const spyCreateApp = jest
-            .spyOn(appsApi(), 'createApp')
-            .mockImplementation((): Promise<any> => Promise.resolve());
-
-          const startButton = screen.getByLabelText(startButtonText);
-          expectButtonElementEnabled(startButton);
-          startButton.click();
-
+          const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
           await waitFor(() => {
-            expect(spyCreateApp).toHaveBeenCalledTimes(1);
             expect(spyCreateApp).toHaveBeenCalledWith(
               WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
               expect.objectContaining({
