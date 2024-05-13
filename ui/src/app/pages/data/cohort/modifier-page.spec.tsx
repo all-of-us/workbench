@@ -85,10 +85,10 @@ describe('ModifierPage', () => {
     expect(
       screen.getAllByTestId(ModifierType.AGE_AT_EVENT).length
     ).toBeGreaterThan(0);
-    expect(screen.getAllByTestId(ModifierType.NUM_OF_OCCURRENCES).length).toBe(
-      0
-    );
-    expect(screen.getAllByTestId(ModifierType.ENCOUNTERS).length).toBe(0);
-    expect(screen.getAllByTestId(ModifierType.EVENT_DATE).length).toBe(0);
+    expect(
+      screen.queryAllByTestId(ModifierType.NUM_OF_OCCURRENCES).length
+    ).toBe(0);
+    expect(screen.queryAllByTestId(ModifierType.ENCOUNTERS).length).toBe(0);
+    expect(screen.queryAllByTestId(ModifierType.EVENT_DATE).length).toBe(0);
   });
 });
