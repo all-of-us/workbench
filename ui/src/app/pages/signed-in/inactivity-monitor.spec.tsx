@@ -1,13 +1,12 @@
 import * as React from 'react';
 
 import { environment } from 'environments/environment';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
 import * as Authentication from 'app/utils/authentication';
 import { setLastActive } from 'app/utils/inactivity';
 import { authStore, notificationStore, profileStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 const load = jest.fn();

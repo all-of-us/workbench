@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { CohortBuilderApi, Domain } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
