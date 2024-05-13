@@ -4,9 +4,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="nsaxena" id="db.changelog-230-create-publish-workspace-table">
+  <changeSet author="nsaxena" id="db.changelog-230-create-published-workspace-table">
     <createTable tableName="published_workspace">
-      <column name="id" type="varchar(255)">
+      <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="workspace_id" type="bigint">
