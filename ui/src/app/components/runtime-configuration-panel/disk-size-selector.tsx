@@ -11,6 +11,7 @@ interface Props {
   diskSize: number;
   idPrefix: string;
   style?: CSSProperties;
+  minSize?: number;
 }
 export const DiskSizeSelector = ({
   onChange,
@@ -18,6 +19,7 @@ export const DiskSizeSelector = ({
   diskSize,
   idPrefix,
   style = {},
+  minSize,
 }: Props) => (
   <FlexRow style={{ ...styles.labelAndInput, ...style }}>
     <label style={styles.label}>Disk (GB)</label>
@@ -25,10 +27,12 @@ export const DiskSizeSelector = ({
       aria-label={`${idPrefix}-disk`}
       id={`${idPrefix}-disk`}
       showButtons
+      allowEmpty={false}
       disabled={disabled}
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'
       value={diskSize}
+      min={minSize}
       inputStyle={styles.largeInputNumber}
       onChange={({ value }) => onChange(value)}
     />

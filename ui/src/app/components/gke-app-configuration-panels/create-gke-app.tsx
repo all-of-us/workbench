@@ -27,8 +27,11 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { ClrIcon } from 'app/components/icons';
 import { CheckBox } from 'app/components/inputs';
+import { ErrorMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
+import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { AnalysisConfig } from 'app/utils/analysis-config';
+import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
   allMachineTypes,
@@ -42,7 +45,9 @@ import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { oxfordCommaString } from 'app/utils/strings';
 import {
+  appMinDiskSize,
   appTypeToString,
+  isDiskSizeValid,
   isInteractiveUserApp,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
@@ -214,6 +219,11 @@ export const CreateGkeApp = ({
 
   const showDeleteDiskButton = unattachedDiskExists(app, disk);
   const showDeleteAppButton = canDeleteApp(app);
+
+  const disableDiskSizeSelector = !!app || unattachedDiskExists(app, disk);
+
+  const showErrorBanner =
+    createAppRequest && !isDiskSizeValid(createAppRequest);
 
   // when there is a delete button, FlexRow aligns the open/create button to the right
   // for consistency of location when there is no delete button, we shift it to the right with `margin-left: auto`
@@ -401,7 +411,41 @@ export const CreateGkeApp = ({
           </FlexColumn>
         </FlexRow>
       </div>
+      <div style={{ ...styles.controlSection }}>
+        <FlexRow>
+          <TooltipTrigger
+            disabled={!disableDiskSizeSelector}
+            content={'Cannot modify Disk size if App or Persistent Disk exist'}
+          >
+            <div>
+              <DiskSizeSelector
+                onChange={(size: number) =>
+                  setCreateAppRequest((prevState) => ({
+                    ...prevState,
+                    persistentDiskRequest: {
+                      ...prevState.persistentDiskRequest,
+                      size: size,
+                    },
+                  }))
+                }
+                disabled={disableDiskSizeSelector}
+                minSize={0}
+                diskSize={createAppRequest.persistentDiskRequest.size}
+                idPrefix={'gke-app'}
+              />
+            </div>
+          </TooltipTrigger>
+        </FlexRow>
+      </div>
       <SupportNote />
+      <FlexRow>
+        {showErrorBanner && (
+          <ErrorMessage>
+            Disk size must be between {appMinDiskSize[appType]} and{' '}
+            {MAX_GKE_APP_DISK_SIZE} GB
+          </ErrorMessage>
+        )}
+      </FlexRow>
       <FlexRow
         style={{
           alignItems: 'center',

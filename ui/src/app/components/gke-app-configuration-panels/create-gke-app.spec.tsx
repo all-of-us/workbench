@@ -16,15 +16,19 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
-import { appTypeToString } from 'app/utils/user-apps-utils';
+import { appMinDiskSize, appTypeToString } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementDisabled,
   expectButtonElementEnabled,
   expectDropdown,
   getDropdownOption,
+  pickSpinButtonSize,
+  spinDiskElement,
 } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
@@ -554,6 +558,142 @@ describe(CreateGkeApp.name, () => {
             { exact: false }
           )
         ).toBeInTheDocument();
+      });
+
+      // Disk size Tests
+      it(`Display default disk Size for ${appType}`, async () => {
+        await component(appType);
+        const defaultDiskSize =
+          defaultAppRequest[appType].persistentDiskRequest.size;
+
+        expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
+          defaultDiskSize.toString()
+        );
+      });
+
+      it(`Should allow to create app request for valid disk size for ${appType}`, async () => {
+        // Arrange
+        await component(appType);
+        const spyCreateApp = jest
+          .spyOn(appsApi(), 'createApp')
+          .mockImplementation((): Promise<any> => Promise.resolve());
+
+        const diskSize = 750;
+
+        const appRequest = {
+          ...defaultAppRequest[appType],
+          persistentDiskRequest: {
+            ...defaultAppRequest[appType].persistentDiskRequest,
+            size: diskSize,
+          },
+        };
+
+        // Act
+        await pickSpinButtonSize(user, 'gke-app-disk', diskSize);
+        expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
+          diskSize.toString()
+        );
+
+        const startButton = screen.getByLabelText(startButtonText);
+        expectButtonElementEnabled(startButton);
+        startButton.click();
+
+        // Assert
+        await waitFor(() => {
+          expect(spyCreateApp).toHaveBeenCalledTimes(1);
+          expect(spyCreateApp).toHaveBeenCalledWith(
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+            appRequest
+          );
+          expect(onClose).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      it(`Should not not allow disk size less than minimum for ${appType}`, async () => {
+        // Arrange
+        await component(appType);
+        const minAppSize = appMinDiskSize[appType];
+
+        // Act
+        await pickSpinButtonSize(user, 'gke-app-disk', minAppSize);
+        expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
+          minAppSize.toString()
+        );
+        expectButtonElementEnabled(screen.queryByLabelText(startButtonText));
+
+        // Set disk size one less than minimum size to trigger warning
+        await pickSpinButtonSize(user, 'gke-app-disk', minAppSize - 1);
+
+        // Assert
+        // Expect a warning message now and create button should be disabled
+        expect(screen.getByText(/disk size must be between/i)).toBeTruthy();
+        expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
+          (minAppSize - 1).toString()
+        );
+        expectButtonElementDisabled(screen.queryByLabelText(startButtonText));
+      });
+
+      it(`Should not not allow disk size more than maximum for ${appType}`, async () => {
+        // Arrange
+        await component(appType);
+        const createButton = `${appTypeToString[appType]} cloud environment create button`;
+
+        // Act
+        await pickSpinButtonSize(user, 'gke-app-disk', MAX_GKE_APP_DISK_SIZE);
+        let spinDiskInitValue = parseInt(
+          spinDiskElement('gke-app-disk')
+            .getAttribute('value')
+            .replace(/,/g, ''),
+          10
+        );
+        expect(spinDiskInitValue).toEqual(MAX_GKE_APP_DISK_SIZE);
+        expectButtonElementEnabled(screen.queryByLabelText(createButton));
+
+        // Set disk size one more than maximum size to trigger warning
+        await pickSpinButtonSize(
+          user,
+          'gke-app-disk',
+          MAX_GKE_APP_DISK_SIZE + 1
+        );
+
+        // Assert
+        // We do this to remove an comma from numbers
+        spinDiskInitValue = parseInt(
+          spinDiskElement('gke-app-disk')
+            .getAttribute('value')
+            .replace(/,/g, ''),
+          10
+        );
+        // Expect a warning message now and create button should be disabled
+        expect(screen.getByText(/disk size must be between/i)).toBeTruthy();
+        expect(spinDiskInitValue).toEqual(MAX_GKE_APP_DISK_SIZE + 1);
+        expectButtonElementDisabled(screen.queryByLabelText(createButton));
+      });
+
+      it('Should disable disk size input if App exist', async () => {
+        // Arrange
+        const disk = stubDisk();
+
+        await component(appType, {
+          userApps: [listAppsResponse()],
+          disk,
+        });
+
+        // Assert
+        expect(
+          spinDiskElement('gke-app-disk').attributes.getNamedItem('disabled')
+        ).toBeTruthy();
+      });
+
+      it('Should disable disk size input if App does not exist but PD is present', async () => {
+        // Arrange
+        const disk = stubDisk();
+        await component(appType, { disk });
+
+        // Assert
+        expect(
+          spinDiskElement('gke-app-disk').attributes.getNamedItem('disabled')
+        ).toBeTruthy();
       });
     }
   );

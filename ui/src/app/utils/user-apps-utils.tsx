@@ -18,6 +18,7 @@ import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import { userAppsStore } from 'app/utils/stores';
 
+import { MAX_GKE_APP_DISK_SIZE } from './constants';
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
 import { currentWorkspaceStore } from './navigation';
@@ -31,6 +32,12 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
   [AppType.SAS]: 'SAS',
+};
+
+export const appMinDiskSize: Record<AppType, number> = {
+  [AppType.CROMWELL]: 50,
+  [AppType.RSTUDIO]: 100,
+  [AppType.SAS]: 150,
 };
 
 const transitionalAppStatuses: Array<AppStatus> = [
@@ -241,6 +248,10 @@ export const openAppInIframe = (
     ),
   ]);
 };
+
+export const isDiskSizeValid = (appRequest) =>
+  appRequest.persistentDiskRequest.size <= MAX_GKE_APP_DISK_SIZE &&
+  appRequest.persistentDiskRequest.size >= appMinDiskSize[appRequest.appType];
 
 export const openAppOrConfigPanel = (
   workspaceNamespace: string,
