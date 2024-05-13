@@ -12,6 +12,17 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ResourceList } from './resource-list';
 
+export const RESOURCE_TYPE_COLUMN_NUMBER = 1;
+export const NAME_COLUMN_NUMBER = 2;
+export const MODIFIED_DATE_COLUMN_NUMBER = 3;
+export const MODIFIED_BY_COLUMN_NUMBER = 4;
+
+export const resourceTable = (wrapper) =>
+  wrapper.find('[data-test-id="resource-list"]').find('tbody');
+export const resourceTableRows = (wrapper) => resourceTable(wrapper).find('tr');
+export const resourceTableColumns = (wrapper) =>
+  resourceTable(wrapper).find('td');
+
 const COHORT_NAME = 'My Cohort';
 const COHORT: WorkspaceResource = {
   ...stubResource,
