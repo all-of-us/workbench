@@ -125,7 +125,6 @@ describe('WorkspaceList', () => {
     );
     expect(getCardNames().length).toEqual(3);
 
-    screen.logTestingPlaygroundURL();
     await pickAccessLevel('All', 'Reader');
     expect(getCardNames()).toEqual([workspaceRead.name]);
 
