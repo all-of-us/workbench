@@ -176,7 +176,10 @@ interface SurveyProps {
 }
 const SurveyCard = ({ survey, browseSurvey }: SurveyProps) => {
   return (
-    <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1.5rem)' }}>
+    <DomainCardBase
+      style={{ maxHeight: 'auto', width: 'calc(25% - 1.5rem)' }}
+      data-test-id='survey-box'
+    >
       <Clickable
         style={styles.domainBoxHeader}
         onClick={browseSurvey}

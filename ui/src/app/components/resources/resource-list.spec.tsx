@@ -1,25 +1,20 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
 
 import { WorkspaceResource } from 'generated/fetch';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { screen } from '@testing-library/react';
+
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ResourceList } from './resource-list';
 
-export const RESOURCE_TYPE_COLUMN_NUMBER = 1;
-export const NAME_COLUMN_NUMBER = 2;
-export const MODIFIED_DATE_COLUMN_NUMBER = 3;
-export const MODIFIED_BY_COLUMN_NUMBER = 4;
-
 export const resourceTable = (wrapper) =>
   wrapper.find('[data-test-id="resource-list"]').find('tbody');
 export const resourceTableRows = (wrapper) => resourceTable(wrapper).find('tr');
-export const resourceTableColumns = (wrapper) =>
-  resourceTable(wrapper).find('td');
 
 const COHORT_NAME = 'My Cohort';
 const COHORT: WorkspaceResource = {
@@ -33,66 +28,41 @@ const COHORT: WorkspaceResource = {
 
 describe(ResourceList.name, () => {
   it('should render when there are no resources', async () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <ResourceList workspaceResources={[]} />
-      </MemoryRouter>
-    );
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
+    renderWithRouter(<ResourceList workspaceResources={[]} />);
+    await screen.findByTestId('resources-table');
 
     // no resources are rendered
+    expect(screen.queryByText(/item type/i)).not.toBeInTheDocument();
     expect(
-      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).exists()
-    ).toBeFalsy();
-    expect(
-      resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).exists()
-    ).toBeFalsy();
+      screen.queryByPlaceholderText(/search name/i)
+    ).not.toBeInTheDocument();
   });
 
   it('should render a cohort resource', async () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <ResourceList
-          workspaces={[workspaceDataStub]}
-          workspaceResources={[COHORT]}
-        />
-      </MemoryRouter>
+    renderWithRouter(
+      <ResourceList
+        workspaces={[workspaceDataStub]}
+        workspaceResources={[COHORT]}
+      />
     );
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
 
-    expect(
-      resourceTableColumns(wrapper)
-        .at(RESOURCE_TYPE_COLUMN_NUMBER)
-        .find('div')
-        .first()
-        .text()
-    ).toBe('Cohort');
-    expect(
-      resourceTableColumns(wrapper)
-        .at(NAME_COLUMN_NUMBER)
-        .find('div')
-        .first()
-        .text()
-    ).toBe(COHORT_NAME);
+    await screen.findByTestId('resources-table');
+    expect(screen.queryByText(/item type/i)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/search name/i)).toBeInTheDocument();
+    expect(screen.getByText('Cohort')).toBeInTheDocument();
+    expect(screen.getByText(COHORT_NAME)).toBeInTheDocument();
   });
 
   it('should not render a resource when its workspace is not available', async () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <ResourceList workspaces={[]} workspaceResources={[COHORT]} />
-      </MemoryRouter>
+    renderWithRouter(
+      <ResourceList workspaces={[]} workspaceResources={[COHORT]} />
     );
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
+    await screen.findByTestId('resources-table');
 
-    // the resource is not rendered, because its workspace is not available
+    // no resources are rendered
+    expect(screen.queryByText(/item type/i)).not.toBeInTheDocument();
     expect(
-      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).exists()
-    ).toBeFalsy();
-    expect(
-      resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).exists()
-    ).toBeFalsy();
+      screen.queryByPlaceholderText(/search name/i)
+    ).not.toBeInTheDocument();
   });
 });

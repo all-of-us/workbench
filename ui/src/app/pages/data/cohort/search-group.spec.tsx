@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { CohortBuilderApi, Domain } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
@@ -61,8 +61,8 @@ describe('SearchGroup', () => {
     serverConfigStore.set({ config: defaultServerConfig });
   });
 
-  it('should render', () => {
-    const wrapper = mount(
+  it('should render', async () => {
+    render(
       <SearchGroup
         role='includes'
         group={groupStub}
@@ -70,11 +70,11 @@ describe('SearchGroup', () => {
         updateRequest={() => {}}
       />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    await screen.findByText(/group count:/i);
   });
 
   it('Should render each item in items prop', async () => {
-    const wrapper = mount(
+    const { rerender } = render(
       <SearchGroup
         role='includes'
         group={groupStub}
@@ -82,15 +82,22 @@ describe('SearchGroup', () => {
         updateRequest={() => {}}
       />
     );
-    expect(wrapper.find('[data-test-id="item-list"]').length).toBe(
+    expect((await screen.findAllByTestId('item-list')).length).toBe(
       itemsStub.length
     );
-    wrapper.setProps({ group: { ...groupStub, temporal: true } });
+    rerender(
+      <SearchGroup
+        role='includes'
+        group={{ ...groupStub, temporal: true }}
+        index={0}
+        updateRequest={() => {}}
+      />
+    );
     // Should split the items by temporalGroup when temporal is true
-    expect(wrapper.find('[data-test-id="item-list"]').length).toBe(
+    expect((await screen.findAllByTestId('item-list')).length).toBe(
       itemsStub.filter((it) => it.temporalGroup === 0).length
     );
-    expect(wrapper.find('[data-test-id="temporal-item-list"]').length).toBe(
+    expect((await screen.findAllByTestId('temporal-item-list')).length).toBe(
       itemsStub.filter((it) => it.temporalGroup === 1).length
     );
   });

@@ -209,7 +209,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
                 key={m.name}
                 name={m.name}
                 checked={selectedModules.includes(m.module)}
-                data-test-id={m['data-test-id']}
+                dataTestId={m['data-test-id']}
                 onToggle={() => {
                   this.setState({
                     selectedModules: fp.xor(selectedModules, [m.module]),

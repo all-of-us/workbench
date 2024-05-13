@@ -1,18 +1,18 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
 
 import {
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortReviewStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
 
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { CohortAnnotationDefinitionServiceStub } from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {
   CohortReviewServiceStub,
@@ -33,14 +33,12 @@ describe('SidebarContent', () => {
     currentCohortReviewStore.next(cohortReviewStubs[0]);
   });
 
-  it('should render', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <SidebarContent
-          participant={cohortReviewStubs[0].participantCohortStatuses[0]}
-        />
-      </MemoryRouter>
+  it('should render', async () => {
+    renderWithRouter(
+      <SidebarContent
+        participant={cohortReviewStubs[0].participantCohortStatuses[0]}
+      />
     );
-    expect(wrapper.exists()).toBeTruthy();
+    await screen.findByText(/Choose a Review Status for Participant/i);
   });
 });
