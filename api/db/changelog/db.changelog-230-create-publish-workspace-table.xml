@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="nsaxena" id="db.changelog-230-create-publish-workspace-table">
+    <createTable tableName="published_workspace">
+      <column name="id" type="varchar(255)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+           <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="category" type="ENUM('TUTORIAL_WORKSPACES','DEMO_PROJECTS','PHENOTYPE_LIBRARY', 'COMMUNITY')">
+           <constraints nullable="false"/>
+     </column>
+     <column name="description" type="varchar(255)">
+        <constraints nullable="true"/>
+     </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+                               baseTableName="published_workspace"
+                               constraintName="fk_workspace_published_workspace"
+                               referencedColumnNames="workspace_id"
+                               referencedTableName="workspace" onDelete="CASCADE"/>
+   
+    <rollback>
+      <dropTable tableName="published_workspace"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
