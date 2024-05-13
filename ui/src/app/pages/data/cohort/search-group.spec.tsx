@@ -98,7 +98,7 @@ describe('SearchGroup', () => {
       itemsStub.filter((it) => it.temporalGroup === 0).length
     );
     expect((await screen.findAllByTestId('temporal-item-list')).length).toBe(
-      itemsStub.filter((it) => it.temporalGroup === 0).length
+      itemsStub.filter((it) => it.temporalGroup === 1).length
     );
   });
 });
