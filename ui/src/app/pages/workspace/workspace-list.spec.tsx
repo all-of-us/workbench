@@ -1,5 +1,4 @@
 import * as React from 'react';
-import RSelect from 'react-select';
 
 import {
   ProfileApi,
