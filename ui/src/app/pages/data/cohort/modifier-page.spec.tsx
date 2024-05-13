@@ -1,6 +1,7 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mount } from 'enzyme';
 
 import {
   CohortBuilderApi,
@@ -9,6 +10,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import { dataTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -48,7 +50,7 @@ describe('ModifierPage', () => {
   });
 
   const component = () => {
-    return mount(
+    return render(
       <MemoryRouter
         initialEntries={[
           `${dataTabPath(
@@ -64,9 +66,11 @@ describe('ModifierPage', () => {
     );
   };
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
+  it('should render', async () => {
+    component();
+    await screen.findByRole('heading', {
+      name: /apply optional modifiers/i,
+    });
   });
 
   it('should display Only Age Event and CATI modifiers for SURVEY', async () => {
@@ -74,21 +78,18 @@ describe('ModifierPage', () => {
       domain: Domain.SURVEY,
       item: { modifiers: [] },
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
+    component();
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
+    });
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.AGE_AT_EVENT + '"]').length
+      screen.getAllByTestId(ModifierType.AGE_AT_EVENT).length
     ).toBeGreaterThan(0);
-    expect(
-      wrapper.find('[data-test-id="' + ModifierType.NUM_OF_OCCURRENCES + '"]')
-        .length
-    ).toBe(0);
-    expect(
-      wrapper.find('[data-test-id="' + ModifierType.ENCOUNTERS + '"]').length
-    ).toBe(0);
-    expect(
-      wrapper.find('[data-test-id="' + ModifierType.EVENT_DATE + '"]').length
-    ).toBe(0);
+    expect(screen.getAllByTestId(ModifierType.NUM_OF_OCCURRENCES).length).toBe(
+      0
+    );
+    expect(screen.getAllByTestId(ModifierType.ENCOUNTERS).length).toBe(0);
+    expect(screen.getAllByTestId(ModifierType.EVENT_DATE).length).toBe(0);
   });
 });
