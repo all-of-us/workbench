@@ -39,7 +39,6 @@ import {
   allMachineTypes,
   AutodeleteDaysThresholds,
   ComputeType,
-  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
   findMachineByName,
   Machine,
 } from 'app/utils/machines';
@@ -361,9 +360,7 @@ export const CreateGkeApp = ({
           <CheckBox
             aria-label={`gke-autodelete-checkbox`}
             disabled={isAppActive(app)}
-            checked={
-              createAppRequest.autodeleteEnabled || app?.autodeleteEnabled
-            }
+            checked={createAppRequest.autodeleteEnabled}
             onChange={(autodeleteEnabled) => {
               setCreateAppRequest((prevState) => ({
                 ...prevState,
@@ -402,10 +399,7 @@ export const CreateGkeApp = ({
                 value: days * 24 * 60,
                 label: `Idle for ${days} days`,
               }))}
-              value={
-                createAppRequest.autodeleteThreshold ||
-                DEFAULT_AUTODELETE_THRESHOLD_MINUTES
-              }
+              value={createAppRequest.autodeleteThreshold}
               onChange={(e) => {
                 setCreateAppRequest((prevState) => ({
                   ...prevState,
