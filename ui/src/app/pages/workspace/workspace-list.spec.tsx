@@ -1,6 +1,5 @@
 import * as React from 'react';
 import RSelect from 'react-select';
-import { ReactWrapper } from 'enzyme';
 
 import {
   ProfileApi,
@@ -8,11 +7,14 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import {
   mountWithRouter,
+  renderWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -29,6 +31,7 @@ import { WorkspaceList } from './workspace-list';
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
+  let user;
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -41,28 +44,20 @@ describe('WorkspaceList', () => {
   };
 
   const component = () => {
-    return mountWithRouter(<WorkspaceList {...props} />, {
-      attachTo: document.getElementById('root'),
-    });
+    return renderWithRouter(<WorkspaceList {...props} />);
   };
 
-  async function pickAccessLevel(wrapper: ReactWrapper, label: string) {
-    wrapper.find(RSelect).instance().setState({ menuIsOpen: true });
-    await waitOneTickAndUpdate(wrapper);
+  async function pickAccessLevel(label: string, accessLevelText) {
+    await user.click(screen.getByText(label));
+    const accessLevelOption = await screen.findByText(accessLevelText);
 
-    wrapper
-      .find(RSelect)
-      .find({ type: 'option' })
-      .findWhere((e) => e.text() === label)
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(accessLevelOption);
   }
 
-  function getCardNames(wrapper: ReactWrapper) {
-    return wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+  function getCardNames() {
+    return screen
+      .getAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
   }
 
   beforeEach(() => {
@@ -81,24 +76,32 @@ describe('WorkspaceList', () => {
     serverConfigStore.set({
       config: { gsuiteDomain: 'abc' },
     });
+
+    user = userEvent.setup();
   });
 
   it('displays the correct number of workspaces', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(getCardNames(wrapper)).toEqual(workspaceStubs.map((w) => w.name));
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(getCardNames()).toEqual(workspaceStubs.map((w) => w.name));
   });
 
   it('has the correct permissions classes', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper
-        .find('[data-test-id="workspace-card"]')
-        .first()
-        .find('[data-test-id="workspace-access-level"]')
-        .text()
-    ).toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+
+    const firstWorkspace = screen.getAllByTestId('workspace-card')[0];
+    const accessLevel = within(firstWorkspace).getByTestId(
+      'workspace-access-level'
+    );
+
+    expect(accessLevel.textContent).toBe(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION
+    );
   });
 
   it('filters workspace list', async () => {
@@ -116,20 +119,23 @@ describe('WorkspaceList', () => {
       [workspaceOwn.id, WorkspaceAccessLevel.OWNER],
     ]);
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(getCardNames(wrapper).length).toEqual(3);
+    component();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(getCardNames().length).toEqual(3);
 
-    await pickAccessLevel(wrapper, 'Reader');
-    expect(getCardNames(wrapper)).toEqual([workspaceRead.name]);
+    screen.logTestingPlaygroundURL();
+    await pickAccessLevel('All', 'Reader');
+    expect(getCardNames()).toEqual([workspaceRead.name]);
 
-    await pickAccessLevel(wrapper, 'Owner');
-    expect(getCardNames(wrapper)).toEqual([workspaceOwn.name]);
+    await pickAccessLevel('Reader', 'Owner');
+    expect(getCardNames()).toEqual([workspaceOwn.name]);
 
-    await pickAccessLevel(wrapper, 'Writer');
-    expect(getCardNames(wrapper)).toEqual([workspaceWrite.name]);
+    await pickAccessLevel('Owner', 'Writer');
+    expect(getCardNames()).toEqual([workspaceWrite.name]);
 
-    await pickAccessLevel(wrapper, 'All');
-    expect(getCardNames(wrapper).length).toEqual(3);
+    await pickAccessLevel('Writer', 'All');
+    expect(getCardNames().length).toEqual(3);
   });
 });
