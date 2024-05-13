@@ -4,13 +4,13 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="nsaxena" id="db.changelog-230-create-published-workspace-table">
-    <createTable tableName="published_workspace">
+  <changeSet author="nsaxena" id="db.changelog-230-create-featured-workspace-table">
+    <createTable tableName="featured_workspace">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="workspace_id" type="bigint">
-           <constraints nullable="false" unique="true"/>
+           <constraints unique="true" nullable="false"/>
       </column>
       <column name="category" type="ENUM('TUTORIAL_WORKSPACES','DEMO_PROJECTS','PHENOTYPE_LIBRARY', 'COMMUNITY')">
            <constraints nullable="false"/>
@@ -20,8 +20,8 @@
      </column>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="workspace_id"
-                               baseTableName="published_workspace"
-                               constraintName="fk_workspace_published_workspace"
+                               baseTableName="featured_workspace"
+                               constraintName="fk_workspace_id_featured_workspace"
                                referencedColumnNames="workspace_id"
                                referencedTableName="workspace" onDelete="CASCADE"/>
    
