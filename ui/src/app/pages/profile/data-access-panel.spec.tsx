@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 
-import { findByText, render, screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import {
   DataAccessPanel,
   DataAccessPanelProps,
@@ -11,20 +10,20 @@ import { cdrVersionStore } from 'app/utils/stores';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 
-const queryRTGranted = (wrapper) =>
+const queryRTGranted = () =>
   screen.queryByTestId('registered-tier-access-granted');
-const queryRTDenied = (wrapper) =>
+const queryRTDenied = () =>
   screen.queryByTestId('registered-tier-access-denied');
-const queryCTGranted = (wrapper) =>
+const queryCTGranted = () =>
   screen.queryByTestId('controlled-tier-access-granted');
-const queryCTDenied = (wrapper) =>
+const queryCTDenied = () =>
   screen.queryByTestId('controlled-tier-access-denied');
 
-const expectAccessStatus = (wrapper, rtStatus: boolean, ctStatus: boolean) => {
-  expect(!!queryRTGranted(wrapper)).toEqual(rtStatus);
-  expect(!!queryRTDenied(wrapper)).not.toEqual(rtStatus);
-  expect(!!queryCTGranted(wrapper)).toEqual(ctStatus);
-  expect(!!queryCTDenied(wrapper)).not.toEqual(ctStatus);
+const expectAccessStatus = (rtStatus: boolean, ctStatus: boolean) => {
+  expect(!!queryRTGranted()).toEqual(rtStatus);
+  expect(!!queryRTDenied()).not.toEqual(rtStatus);
+  expect(!!queryCTGranted()).toEqual(ctStatus);
+  expect(!!queryCTDenied()).not.toEqual(ctStatus);
 };
 
 describe('Data Access Panel', () => {
@@ -37,24 +36,24 @@ describe('Data Access Panel', () => {
   });
 
   it('Should show success status for registered tier when the user has access', async () => {
-    const wrapper = component({ userAccessTiers: ['registered'] });
-    expectAccessStatus(wrapper, true, false);
+    component({ userAccessTiers: ['registered'] });
+    expectAccessStatus(true, false);
   });
 
   it('Should show success status for controlled tier when the user has access', async () => {
-    const wrapper = component({ userAccessTiers: ['controlled'] });
-    expectAccessStatus(wrapper, false, true);
+    component({ userAccessTiers: ['controlled'] });
+    expectAccessStatus(false, true);
   });
 
   it('Should show success status when the user is in the registered tier and controlled tier', async () => {
-    const wrapper = component({
+    component({
       userAccessTiers: ['registered', 'controlled'],
     });
-    expectAccessStatus(wrapper, true, true);
+    expectAccessStatus(true, true);
   });
 
   it('Should not show success status when the user is not in the registered tier or controlled tier', async () => {
-    const wrapper = component({ userAccessTiers: [] });
-    expectAccessStatus(wrapper, false, false);
+    component({ userAccessTiers: [] });
+    expectAccessStatus(false, false);
   });
 });

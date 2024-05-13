@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 
 import {
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
 } from 'generated/fetch';
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortReviewStore,

@@ -1,22 +1,12 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 
 import { UserMetricsApi, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { findByText, render, screen, waitFor } from '@testing-library/react';
-import {
-  MODIFIED_DATE_COLUMN_NUMBER,
-  NAME_COLUMN_NUMBER,
-  RESOURCE_TYPE_COLUMN_NUMBER,
-  resourceTableColumns,
-} from 'app/components/resources/resource-list.spec';
+import { screen } from '@testing-library/react';
 import { RecentResources } from 'app/pages/homepage/recent-resources';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 
-import {
-  renderWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import {
   UserMetricsApiStub,
   userMetricsApiStubResources,
