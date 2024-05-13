@@ -40,6 +40,8 @@ export const appMinDiskSize: Record<AppType, number> = {
   [AppType.SAS]: 150,
 };
 
+export const appMaxDiskSize = 1000;
+
 const transitionalAppStatuses: Array<AppStatus> = [
   AppStatus.DELETING,
   AppStatus.PROVISIONING,

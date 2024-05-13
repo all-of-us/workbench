@@ -27,8 +27,7 @@ import {
   expectButtonElementEnabled,
   expectDropdown,
   getDropdownOption,
-  pickSpinButtonSize,
-  spinDiskElement,
+  pickSpinButtonValue,
 } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
@@ -102,6 +101,11 @@ describe(CreateGkeApp.name, () => {
     render(
       <CreateGkeApp {...{ ...defaultProps, appType, ...propOverrides }} />
     );
+
+  const spinDiskElement = (diskName: string): HTMLElement =>
+    screen.getByRole('spinbutton', {
+      name: diskName,
+    });
 
   beforeEach(async () => {
     user = userEvent.setup();
@@ -589,10 +593,13 @@ describe(CreateGkeApp.name, () => {
         };
 
         // Act
-        await pickSpinButtonSize(user, 'gke-app-disk', diskSize);
+        await pickSpinButtonValue(user, 'gke-app-disk', diskSize);
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           diskSize.toString()
         );
+
+        // As disk size is a valid size, there SHOULD NOT be any disk size error message
+        expect(screen.queryByText(/disk size must be between/i)).toBeNull();
 
         const startButton = screen.getByLabelText(startButtonText);
         expectButtonElementEnabled(startButton);
@@ -615,14 +622,14 @@ describe(CreateGkeApp.name, () => {
         const minAppSize = appMinDiskSize[appType];
 
         // Act
-        await pickSpinButtonSize(user, 'gke-app-disk', minAppSize);
+        await pickSpinButtonValue(user, 'gke-app-disk', minAppSize);
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           minAppSize.toString()
         );
         expectButtonElementEnabled(screen.queryByLabelText(startButtonText));
 
         // Set disk size one less than minimum size to trigger warning
-        await pickSpinButtonSize(user, 'gke-app-disk', minAppSize - 1);
+        await pickSpinButtonValue(user, 'gke-app-disk', minAppSize - 1);
 
         // Assert
         // Expect a warning message now and create button should be disabled
@@ -639,7 +646,7 @@ describe(CreateGkeApp.name, () => {
         const createButton = `${appTypeToString[appType]} cloud environment create button`;
 
         // Act
-        await pickSpinButtonSize(user, 'gke-app-disk', MAX_GKE_APP_DISK_SIZE);
+        await pickSpinButtonValue(user, 'gke-app-disk', MAX_GKE_APP_DISK_SIZE);
         let spinDiskInitValue = parseInt(
           spinDiskElement('gke-app-disk')
             .getAttribute('value')
@@ -650,7 +657,7 @@ describe(CreateGkeApp.name, () => {
         expectButtonElementEnabled(screen.queryByLabelText(createButton));
 
         // Set disk size one more than maximum size to trigger warning
-        await pickSpinButtonSize(
+        await pickSpinButtonValue(
           user,
           'gke-app-disk',
           MAX_GKE_APP_DISK_SIZE + 1

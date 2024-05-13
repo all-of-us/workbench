@@ -23,6 +23,7 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
+import { appMinDiskSize } from 'app/utils/user-apps-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
@@ -77,7 +78,7 @@ export const defaultCromwellCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 50,
+    size: appMinDiskSize[AppType.CROMWELL],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
@@ -94,7 +95,7 @@ export const defaultRStudioCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 100,
+    size: appMinDiskSize[AppType.RSTUDIO],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
@@ -111,7 +112,7 @@ export const defaultSASCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 250,
+    size: appMinDiskSize[AppType.SAS],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,

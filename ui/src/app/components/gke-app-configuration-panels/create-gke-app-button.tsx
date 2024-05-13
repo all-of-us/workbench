@@ -16,6 +16,7 @@ import { SUPPORT_EMAIL } from 'app/components/support';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { NotificationStore } from 'app/utils/stores';
 import {
+  appMaxDiskSize,
   appMinDiskSize,
   appTypeToString,
   createUserApp,
@@ -68,7 +69,7 @@ export function CreateGkeAppButton({
     [
       !isDiskSizeValid(createAppRequest),
       () =>
-        `Disk cannot be more than 1000GB or less than ${
+        `Disk cannot be more than ${appMaxDiskSize} or less than ${
           appMinDiskSize[createAppRequest.appType]
         }GB`,
     ],

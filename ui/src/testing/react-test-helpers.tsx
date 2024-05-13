@@ -208,12 +208,7 @@ export const getHTMLInputElementValue = (element: HTMLElement): string => {
   return (element as HTMLInputElement).value;
 };
 
-export const spinDiskElement = (diskName: string): HTMLElement =>
-  screen.getByRole('spinbutton', {
-    name: diskName,
-  });
-
-export const pickSpinButtonSize = async (
+export const pickSpinButtonValue = async (
   user: UserEvent,
   name: string,
   value: number

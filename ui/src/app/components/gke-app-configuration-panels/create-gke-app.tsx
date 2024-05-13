@@ -222,6 +222,18 @@ export const CreateGkeApp = ({
 
   const disableDiskSizeSelector = !!app || unattachedDiskExists(app, disk);
 
+  const disableDiskSizeContent = cond(
+    [
+      !!app,
+      `${toUIAppType[appType]} environment already exists. To Update Disk size please delete and recreate the 
+      ${toUIAppType[appType]} environment.`,
+    ],
+    [
+      unattachedDiskExists(app, disk),
+      `Cannot modify existing disk. To Update Disk size please delete and recreate the ${toUIAppType[appType]} environment.`,
+    ]
+  );
+
   const showErrorBanner =
     createAppRequest && !isDiskSizeValid(createAppRequest);
 
@@ -415,7 +427,7 @@ export const CreateGkeApp = ({
         <FlexRow>
           <TooltipTrigger
             disabled={!disableDiskSizeSelector}
-            content={'Cannot modify Disk size if App or Persistent Disk exist'}
+            content={disableDiskSizeContent}
           >
             <div>
               <DiskSizeSelector
