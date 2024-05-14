@@ -220,7 +220,7 @@ export const CreateGkeApp = ({
   const showDeleteDiskButton = unattachedDiskExists(app, disk);
   const showDeleteAppButton = canDeleteApp(app);
 
-  const disableDiskSizeSelector = !!app || unattachedDiskExists(app, disk);
+  const canModifyDiskSize = !!app || unattachedDiskExists(app, disk);
 
   const disableDiskSizeContent = cond(
     [
@@ -425,7 +425,7 @@ export const CreateGkeApp = ({
       <div style={{ ...styles.controlSection }}>
         <FlexRow>
           <TooltipTrigger
-            disabled={!disableDiskSizeSelector}
+            disabled={!canModifyDiskSize}
             content={disableDiskSizeContent}
           >
             <div>
@@ -439,7 +439,7 @@ export const CreateGkeApp = ({
                     },
                   }))
                 }
-                disabled={disableDiskSizeSelector}
+                disabled={canModifyDiskSize}
                 diskSize={createAppRequest.persistentDiskRequest.size}
                 idPrefix={'gke-app'}
               />

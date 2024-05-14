@@ -593,6 +593,10 @@ describe(CreateGkeApp.name, () => {
         };
 
         // Act
+        // Confirm the disk size is in valid range and set it
+        expect(diskSize).toBeGreaterThan(appMinDiskSize[appType]);
+        expect(diskSize).toBeLessThanOrEqual(MAX_GKE_APP_DISK_SIZE);
+
         await pickSpinButtonValue(user, 'gke-app-disk', diskSize);
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           diskSize.toString()
