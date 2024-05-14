@@ -18,10 +18,9 @@ import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
+import {appMinDiskSize, defaultAppRequest} from 'app/components/apps-panel/utils';
 import {
-  appMinDiskSize,
   appTypeToString,
-  defaultAppRequest,
 } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
