@@ -92,6 +92,13 @@ public class ManageLeonardoRuntimes {
     return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
+  private static final String TABULAR_FORMAT = "%-40.40s %-50.50s %-10s %-15s %-15s %-15s";
+
+  private String tabularHeader() {
+    return String.format(
+        TABULAR_FORMAT, "ID", "Creator", "Status", "Created", "Accessed", "Destroyed");
+  }
+
   private String formatTabular(LeonardoListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
@@ -104,8 +111,13 @@ public class ManageLeonardoRuntimes {
       status = r.getStatus();
     }
     return String.format(
-        "%-40.40s %-50.50s %-10s %-15s",
-        runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
+        TABULAR_FORMAT,
+        runtimeId(r),
+        creator,
+        status,
+        r.getAuditInfo().getCreatedDate(),
+        r.getAuditInfo().getDateAccessed(),
+        r.getAuditInfo().getDestroyedDate());
   }
 
   private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
@@ -124,6 +136,7 @@ public class ManageLeonardoRuntimes {
 
       case TABULAR:
       default:
+        System.out.println(tabularHeader());
         stream.forEachOrdered(
             (c) -> {
               System.out.println(formatTabular(c));
