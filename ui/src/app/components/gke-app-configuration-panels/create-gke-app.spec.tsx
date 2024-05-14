@@ -14,14 +14,15 @@ import {
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
+import {
+  appMinDiskSize,
+  defaultAppRequest,
+} from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
-import {appMinDiskSize, defaultAppRequest} from 'app/components/apps-panel/utils';
-import {
-  appTypeToString,
-} from 'app/utils/user-apps-utils';
+import { appTypeToString } from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
