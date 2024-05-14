@@ -4,8 +4,8 @@ import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { defaultCromwellCreateRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { defaultCromwellCreateRequest } from 'app/utils/user-apps-utils';
 
 import {
   expectButtonElementDisabled,

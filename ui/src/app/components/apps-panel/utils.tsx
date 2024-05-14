@@ -3,8 +3,6 @@ import * as fp from 'lodash/fp';
 import {
   AppStatus,
   AppType,
-  CreateAppRequest,
-  DiskType,
   Runtime,
   RuntimeStatus,
   UserAppEnvironment,
@@ -17,13 +15,8 @@ import {
   sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
-import {
-  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-  DEFAULT_MACHINE_NAME,
-} from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
-import { appMinDiskSize } from 'app/utils/user-apps-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
@@ -68,63 +61,6 @@ export const appAssets: AppAssets[] = [
     icon: sasIcon,
   },
 ];
-
-// TODO replace with better defaults?
-export const defaultCromwellCreateRequest: CreateAppRequest = {
-  appType: AppType.CROMWELL,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize[AppType.CROMWELL],
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-// TODO replace with better defaults?
-export const defaultRStudioCreateRequest: CreateAppRequest = {
-  appType: AppType.RSTUDIO,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize[AppType.RSTUDIO],
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-// TODO replace with better defaults?
-export const defaultSASCreateRequest: CreateAppRequest = {
-  appType: AppType.SAS,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize[AppType.SAS],
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
-  [AppType.CROMWELL]: defaultCromwellCreateRequest,
-  [AppType.RSTUDIO]: defaultRStudioCreateRequest,
-  [AppType.SAS]: defaultSASCreateRequest,
-};
 
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;

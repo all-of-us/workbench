@@ -13,7 +13,6 @@ import {
 import { cond } from '@terra-ui-packages/core-utils';
 import {
   canDeleteApp,
-  defaultAppRequest,
   findApp,
   isAppActive,
   toUIAppType,
@@ -47,6 +46,7 @@ import { oxfordCommaString } from 'app/utils/strings';
 import {
   appMinDiskSize,
   appTypeToString,
+  defaultAppRequest,
   isDiskSizeValid,
   isInteractiveUserApp,
   unattachedDiskExists,
