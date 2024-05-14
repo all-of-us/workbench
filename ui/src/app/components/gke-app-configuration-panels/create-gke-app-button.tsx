@@ -9,15 +9,17 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { isAppActive } from 'app/components/apps-panel/utils';
+import {
+  appMaxDiskSize,
+  appMinDiskSize,
+  isAppActive,
+} from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SUPPORT_EMAIL } from 'app/components/support';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { NotificationStore } from 'app/utils/stores';
 import {
-  appMaxDiskSize,
-  appMinDiskSize,
   appTypeToString,
   createUserApp,
   isDiskSizeValid,
