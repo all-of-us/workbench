@@ -62,6 +62,7 @@ const styles = reactStyles({
   },
   disabled: {
     color: colors.disabled,
+    cursor: 'not-allowed',
   },
 });
 
