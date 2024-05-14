@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dataTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -15,15 +16,18 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { ConceptSearch } from './concept-search';
-
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
+  let user;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,10 +38,11 @@ describe('ConceptSearch', () => {
     currentConceptSetStore.next(undefined);
     serverConfigStore.set({ config: defaultServerConfig });
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
+    user = userEvent.setup();
   });
 
   const component = () => {
-    return mount(
+    return render(
       <MemoryRouter
         initialEntries={[
           `${dataTabPath(
@@ -59,97 +64,75 @@ describe('ConceptSearch', () => {
     );
   };
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('should render', async () => {
+    component();
+    await screen.findByLabelText('Please Wait');
   });
 
   it('should display the participant count and domain name', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="participant-count"]').text()).toContain(
-      conceptSet.participantCount.toString()
-    );
-    expect(
-      wrapper.find('[data-test-id="concept-set-domain"]').text()
-    ).toContain(fp.capitalize(conceptSet.domain.toString()));
+    component();
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
+    });
+    screen.findByText(`Participant count: ${conceptSet.participantCount})`);
+    screen.getByText(`Domain: ${fp.capitalize(conceptSet.domain.toString())}`);
   });
 
   it('should allow validLength edits', async () => {
-    const wrapper = component();
+    component();
     const newName = 'cool new name';
     const newDesc = 'cool new description';
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(
-      conceptSet.name
+    expect(await screen.findByText(conceptSet.name));
+    expect(screen.getByText(conceptSet.description));
+    await user.click(
+      screen.getByRole('button', { name: /edit concept set button/i })
     );
-    expect(
-      wrapper.find('[data-test-id="concept-set-description"]').text()
-    ).toContain(conceptSet.description);
-    wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="edit-name"]')
-      .first()
-      .simulate('change', { target: { value: newName } });
-    const editDescription = wrapper.find('[id="edit-description"]');
-    editDescription
-      .find('textarea#edit-description')
-      .simulate('change', { target: { value: newDesc } });
-    wrapper
-      .find('[data-test-id="save-edit-concept-set"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(
-      newName
-    );
-    expect(
-      wrapper.find('[data-test-id="concept-set-description"]').text()
-    ).toContain(newDesc);
+    const title = screen.getByDisplayValue(conceptSet.name);
+    await user.clear(title);
+    await user.click(title);
+    await user.paste(newName);
+    const description = screen.getByText(conceptSet.description);
+    await user.clear(description);
+    await user.click(description);
+    await user.paste(newDesc);
+    screen.logTestingPlaygroundURL();
+    await user.click(screen.getByRole('button', { name: /save/i }));
+    expect(screen.getByText(newName)).toBeInTheDocument();
+    expect(screen.getByText(newDesc)).toBeInTheDocument();
   });
 
   it('should disallow empty name edit', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="edit-name"]')
-      .first()
-      .simulate('change', { target: { value: '' } });
-    expect(
-      wrapper.find('[data-test-id="save-edit-concept-set"]').first().props()
-        .disabled
-    ).toBeTruthy();
+    component();
+    await user.click(
+      await screen.findByRole('button', { name: /edit concept set button/i })
+    );
+    const title = screen.getByDisplayValue(conceptSet.name);
+    await user.clear(title);
+    await user.click(title);
+    await user.paste('');
+    expectButtonElementDisabled(screen.getByRole('button', { name: /save/i }));
   });
 
   it('should not edit on cancel', async () => {
-    const wrapper = component();
+    component();
     const newName = 'cool new name';
     const newDesc = 'cool new description';
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(
-      conceptSet.name
+    expect(await screen.findByText(conceptSet.name));
+    expect(screen.getByText(conceptSet.description));
+    await user.click(
+      screen.getByRole('button', { name: /edit concept set button/i })
     );
-    wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="edit-name"]')
-      .first()
-      .simulate('change', { target: { value: newName } });
-    const editDescription = wrapper.find('[id="edit-description"]');
-    editDescription
-      .find('textarea#edit-description')
-      .simulate('change', { target: { value: newDesc } });
-    wrapper
-      .find('[data-test-id="cancel-edit-concept-set"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(
-      conceptSet.name
-    );
+    const title = screen.getByDisplayValue(conceptSet.name);
+    await user.clear(title);
+    await user.click(title);
+    await user.paste(newName);
+    const description = screen.getByText(conceptSet.description);
+    await user.clear(description);
+    await user.click(description);
+    await user.paste(newDesc);
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(screen.getByText(conceptSet.name)).toBeInTheDocument();
+    expect(screen.getByText(conceptSet.description)).toBeInTheDocument();
   });
 
   // TODO RW-2625: test edit and delete set from popup trigger menu
