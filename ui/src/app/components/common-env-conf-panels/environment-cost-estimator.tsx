@@ -135,7 +135,9 @@ export const EnvironmentCostEstimator = ({
           </div>
         )}
       </FlexColumn>
-      {!!pdCost && (
+      {/* Jupyter doesn't display the Persistent Disk cost when the disk size is zero. For GKE, Since we only show the
+      Cost when running and PD cost, there's no benefit in hiding this information.*/}
+      {(!!pdCost || isGKEApp) && (
         <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost

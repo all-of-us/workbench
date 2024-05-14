@@ -69,9 +69,9 @@ export function CreateGkeAppButton({
     [
       !isDiskSizeValid(createAppRequest),
       () =>
-        `Disk cannot be more than ${appMaxDiskSize} or less than ${
+        `Disk cannot be more than ${appMaxDiskSize} GB or less than ${
           appMinDiskSize[createAppRequest.appType]
-        }GB`,
+        } GB`,
     ],
     [
       billingStatus !== BillingStatus.ACTIVE,

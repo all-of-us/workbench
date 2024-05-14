@@ -225,12 +225,12 @@ export const CreateGkeApp = ({
   const disableDiskSizeContent = cond(
     [
       !!app,
-      `${toUIAppType[appType]} environment already exists. To Update Disk size please delete and recreate the 
+      `${toUIAppType[appType]} environment already exists. To update disk size please delete disk and recreate the 
       ${toUIAppType[appType]} environment.`,
     ],
     [
       unattachedDiskExists(app, disk),
-      `Cannot modify existing disk. To Update Disk size please delete and recreate the ${toUIAppType[appType]} environment.`,
+      `Cannot modify existing disk. To update disk size please delete the disk and create a new ${toUIAppType[appType]} environment.`,
     ]
   );
 
@@ -342,7 +342,6 @@ export const CreateGkeApp = ({
         ) : (
           <DisabledCloudComputeProfile
             {...{ appType, sharingNote }}
-            persistentDiskRequest={createAppRequest?.persistentDiskRequest}
             machine={toMachine(createAppRequest)}
             disabledText={machineTypeDisabledText}
           />
@@ -441,7 +440,6 @@ export const CreateGkeApp = ({
                   }))
                 }
                 disabled={disableDiskSizeSelector}
-                minSize={0}
                 diskSize={createAppRequest.persistentDiskRequest.size}
                 idPrefix={'gke-app'}
               />
@@ -453,7 +451,7 @@ export const CreateGkeApp = ({
       <FlexRow>
         {showErrorBanner && (
           <ErrorMessage>
-            Disk size must be between {appMinDiskSize[appType]} and{' '}
+            Disk size must be between {appMinDiskSize[appType]} GB and{' '}
             {MAX_GKE_APP_DISK_SIZE} GB
           </ErrorMessage>
         )}
