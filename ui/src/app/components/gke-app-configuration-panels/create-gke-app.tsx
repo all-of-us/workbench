@@ -12,7 +12,9 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import {
+  appMinDiskSize,
   canDeleteApp,
+  defaultAppRequest,
   findApp,
   isAppActive,
   toUIAppType,
@@ -44,9 +46,7 @@ import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { oxfordCommaString } from 'app/utils/strings';
 import {
-  appMinDiskSize,
   appTypeToString,
-  defaultAppRequest,
   isDiskSizeValid,
   isInteractiveUserApp,
   unattachedDiskExists,

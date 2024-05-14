@@ -3,12 +3,12 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
-  DiskType,
   ListAppsResponse,
   UserAppEnvironment,
 } from 'generated/fetch';
 
 import {
+  appMinDiskSize,
   findApp,
   openConfigPanelForUIApp,
   toUIAppType,
@@ -17,10 +17,6 @@ import {
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import {
-  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-  DEFAULT_MACHINE_NAME,
-} from 'app/utils/machines';
 import { userAppsStore } from 'app/utils/stores';
 
 import { MAX_GKE_APP_DISK_SIZE } from './constants';
@@ -37,71 +33,6 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
   [AppType.SAS]: 'SAS',
-};
-
-export const appMinDiskSize: Record<AppType, number> = {
-  ['CROMWELL']: 50,
-  ['RSTUDIO']: 100,
-  ['SAS']: 150,
-};
-
-export const appMaxDiskSize = 1000;
-
-// TODO replace with better defaults?
-export const defaultCromwellCreateRequest: CreateAppRequest = {
-  appType: AppType.CROMWELL,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize.CROMWELL,
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-// TODO replace with better defaults?
-export const defaultRStudioCreateRequest: CreateAppRequest = {
-  appType: AppType.RSTUDIO,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize[AppType.RSTUDIO],
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-// TODO replace with better defaults?
-export const defaultSASCreateRequest: CreateAppRequest = {
-  appType: AppType.SAS,
-  kubernetesRuntimeConfig: {
-    numNodes: 1,
-    machineType: DEFAULT_MACHINE_NAME,
-    autoscalingEnabled: false,
-  },
-  persistentDiskRequest: {
-    size: appMinDiskSize.SAS,
-    diskType: DiskType.STANDARD,
-  },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-};
-
-export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
-  [AppType.CROMWELL]: defaultCromwellCreateRequest,
-  [AppType.RSTUDIO]: defaultRStudioCreateRequest,
-  [AppType.SAS]: defaultSASCreateRequest,
 };
 
 const transitionalAppStatuses: Array<AppStatus> = [

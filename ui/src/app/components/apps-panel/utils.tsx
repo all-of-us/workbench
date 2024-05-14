@@ -3,6 +3,8 @@ import * as fp from 'lodash/fp';
 import {
   AppStatus,
   AppType,
+  CreateAppRequest,
+  DiskType,
   Runtime,
   RuntimeStatus,
   UserAppEnvironment,
@@ -15,6 +17,10 @@ import {
   sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
+import {
+  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+  DEFAULT_MACHINE_NAME,
+} from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
@@ -61,6 +67,72 @@ export const appAssets: AppAssets[] = [
     icon: sasIcon,
   },
 ];
+
+// TODO replace with better defaults?
+export const defaultCromwellCreateRequest: CreateAppRequest = {
+  appType: AppType.CROMWELL,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 50,
+    diskType: DiskType.STANDARD,
+  },
+  autodeleteEnabled: false,
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+};
+
+// TODO replace with better defaults?
+export const defaultRStudioCreateRequest: CreateAppRequest = {
+  appType: AppType.RSTUDIO,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.STANDARD,
+  },
+  autodeleteEnabled: false,
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+};
+
+// TODO replace with better defaults?
+export const defaultSASCreateRequest: CreateAppRequest = {
+  appType: AppType.SAS,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 250,
+    diskType: DiskType.STANDARD,
+  },
+  autodeleteEnabled: false,
+  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
+  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+};
+
+// This is not the best place for this, but it's causing test to pass, we need to rethink utils/user-app-utils
+export const appMinDiskSize: Record<AppType, number> = {
+  ['CROMWELL']: 50,
+  ['RSTUDIO']: 100,
+  ['SAS']: 150,
+};
+
+export const appMaxDiskSize = 1000;
+
+export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
+  [AppType.CROMWELL]: defaultCromwellCreateRequest,
+  [AppType.RSTUDIO]: defaultRStudioCreateRequest,
+  [AppType.SAS]: defaultSASCreateRequest,
+};
 
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
