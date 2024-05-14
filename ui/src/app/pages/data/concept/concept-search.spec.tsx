@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dataTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -16,10 +16,7 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  expectButtonElementDisabled,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { expectButtonElementDisabled } from 'testing/react-test-helpers';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';

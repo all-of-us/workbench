@@ -1,29 +1,17 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 
 import { ProfileApi } from 'generated/fetch';
 
-import { renderWithRouter } from '../../../testing/react-test-helpers';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from 'app/components/buttons';
-import { DemographicSurvey } from 'app/components/demographic-survey-v2';
-import {
-  LATEST_TOS_VERSION,
-  TermsOfService,
-} from 'app/components/terms-of-service';
-import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
-import { MockDate } from 'app/pages/login/account-creation/account-creation.spec';
-import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
-import { AccountCreationSuccess } from 'app/pages/login/account-creation/account-creation-success';
-import LoginReactComponent from 'app/pages/login/login';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
-import { createEmptyProfile, SignIn, SignInImpl, SignInProps } from './sign-in';
+import { SignIn, SignInProps } from './sign-in';
 
 const mockTOSTitle = 'Mock TOS';
 jest.mock('app/components/terms-of-service', () => {

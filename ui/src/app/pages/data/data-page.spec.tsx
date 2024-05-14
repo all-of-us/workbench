@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 
 import {
   CohortReviewApi,
@@ -17,10 +16,7 @@ import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
-import {
-  renderWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import {
   CohortReviewServiceStub,
   cohortReviewStubs,

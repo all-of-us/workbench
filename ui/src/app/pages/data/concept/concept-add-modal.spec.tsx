@@ -49,7 +49,7 @@ describe('ConceptAddModal', () => {
   });
 
   it('finds the correct number of concepts in the selected domain', async () => {
-    const wrapper = component();
+    component();
     const stubConceptsInDomain = stubConcepts.filter(
       (c) => c.domainId === activeDomainTab.domain.toString()
     );
@@ -66,7 +66,7 @@ describe('ConceptAddModal', () => {
   });
 
   it('displays option to add to existing concept set if concept set in domain exists', async () => {
-    const wrapper = component();
+    component();
     const stubSetsInDomain = conceptSetsApi.conceptSets
       .filter((s) => s.domain === activeDomainTab.domain)
       .map((s) => s.name);
