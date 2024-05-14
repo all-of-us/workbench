@@ -1,13 +1,20 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mount } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { analysisTabName } from 'app/routing/utils';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -16,9 +23,10 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 describe('WorkspaceNavBar', () => {
   let props: {};
+  let user;
 
   const component = () => {
-    return mount(
+    return render(
       <MemoryRouter
         initialEntries={[
           `/${workspaceDataStub.namespace}/${workspaceDataStub.id}`,
@@ -27,8 +35,7 @@ describe('WorkspaceNavBar', () => {
         <Route path='/:ns/:wsid'>
           <WorkspaceNavBar {...props} />
         </Route>
-      </MemoryRouter>,
-      { attachTo: document.getElementById('root') }
+      </MemoryRouter>
     );
   };
 
@@ -42,28 +49,26 @@ describe('WorkspaceNavBar', () => {
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
+    user = userEvent.setup();
   });
 
-  it('should render the Data tab by default', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    expect(
-      wrapper.find({ 'data-test-id': 'Data', 'aria-selected': true }).exists()
-    ).toBeTruthy();
+  it('should render the Data tab by default', async () => {
+    component();
+    const dataTab = await screen.findByLabelText('Data');
+    waitFor(() => expect(dataTab).toHaveAttribute('aria-selected', 'true'));
   });
 
-  it('should highlight the active tab', () => {
+  it('should highlight the active tab', async () => {
     props = { tabPath: 'about' };
-    const wrapper = component();
-    expect(
-      wrapper.find({ 'data-test-id': 'About', 'aria-selected': true }).exists()
-    ).toBeTruthy();
+    component();
+    const aboutTab = await screen.findByLabelText('About');
+    waitFor(() => expect(aboutTab).toHaveAttribute('aria-selected', 'true'));
   });
 
-  it('should navigate on tab click', () => {
-    const wrapper = component();
+  it('should navigate on tab click', async () => {
+    component();
 
-    wrapper.find({ 'data-test-id': 'Analysis' }).first().simulate('click');
+    await user.click(await screen.findByLabelText('Analysis'));
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
@@ -71,7 +76,7 @@ describe('WorkspaceNavBar', () => {
       analysisTabName,
     ]);
 
-    wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
+    await user.click(await screen.findByLabelText('Data'));
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
@@ -79,7 +84,7 @@ describe('WorkspaceNavBar', () => {
       'data',
     ]);
 
-    wrapper.find({ 'data-test-id': 'About' }).first().simulate('click');
+    await user.click(await screen.findByLabelText('About'));
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
@@ -92,12 +97,12 @@ describe('WorkspaceNavBar', () => {
     currentWorkspaceStore.next({ ...workspaceDataStub, adminLocked });
   };
 
-  it('should not navigate on tab click if tab is disabled because it is admin-locked', () => {
+  it('should not navigate on tab click if tab is disabled because it is admin-locked', async () => {
     setAdminLocked(true);
 
-    const wrapper = component();
+    component();
 
-    wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
+    await user.click(await screen.findByLabelText('Data'));
     expect(mockNavigate).not.toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
@@ -105,7 +110,7 @@ describe('WorkspaceNavBar', () => {
       'data',
     ]);
 
-    wrapper.find({ 'data-test-id': 'Analysis' }).first().simulate('click');
+    await user.click(await screen.findByLabelText('Analysis'));
     expect(mockNavigate).not.toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
@@ -117,32 +122,23 @@ describe('WorkspaceNavBar', () => {
   it('should disable Data and Analysis tab if the workspace is admin-locked', () => {
     setAdminLocked(true);
 
-    const wrapper = component();
+    component();
 
-    expect(
-      wrapper.find({ 'data-test-id': 'Data' }).first().props().disabled
-    ).toBeTruthy();
-    expect(
-      wrapper.find({ 'data-test-id': 'Analysis' }).first().props().disabled
-    ).toBeTruthy();
-    expect(
-      wrapper.find({ 'data-test-id': 'About' }).first().props().disabled
-    ).toBeFalsy();
+    expectButtonElementDisabled(screen.getByLabelText('Data'));
+    expectButtonElementDisabled(screen.getByLabelText('Analysis'));
+    expectButtonElementEnabled(screen.getByLabelText('About'));
   });
 
   it('should display the default CDR Version with no new version flag or upgrade modal visible', () => {
-    const wrapper = component();
+    component();
 
     expect(
-      wrapper.find({ 'data-test-id': 'cdr-version' }).first().text()
-    ).toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
-
+      screen.getByText(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION)
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('new-version-flag')).not.toBeInTheDocument();
     expect(
-      wrapper.find({ 'data-test-id': 'new-version-flag' }).exists()
-    ).toBeFalsy();
-    expect(
-      wrapper.find({ 'data-test-id': 'cdr-version-upgrade-modal' }).exists()
-    ).toBeFalsy();
+      screen.queryByTestId('cdr-version-upgrade-modal')
+    ).not.toBeInTheDocument();
   });
 
   it('should display an alternative CDR Version with a new version flag', () => {
@@ -151,37 +147,32 @@ describe('WorkspaceNavBar', () => {
       CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID;
     currentWorkspaceStore.next(altWorkspace);
 
-    const wrapper = component();
+    component();
 
     expect(
-      wrapper.find({ 'data-test-id': 'cdr-version' }).first().text()
-    ).toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
+      screen.getByText(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION)
+    ).toBeInTheDocument();
 
+    expect(screen.getByTestId('new-version-flag')).toBeInTheDocument();
     expect(
-      wrapper.find({ 'data-test-id': 'new-version-flag' }).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find({ 'data-test-id': 'cdr-version-upgrade-modal' }).exists()
-    ).toBeFalsy();
+      screen.queryByTestId('cdr-version-upgrade-modal')
+    ).not.toBeInTheDocument();
   });
 
-  it('clicks the new version flag which should pop up the version upgrade modal', () => {
+  it('clicks the new version flag which should pop up the version upgrade modal', async () => {
     const altWorkspace = workspaceDataStub;
     altWorkspace.cdrVersionId =
       CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID;
     currentWorkspaceStore.next(altWorkspace);
 
-    const wrapper = component();
+    component();
 
     expect(
-      wrapper.find({ 'data-test-id': 'cdr-version-upgrade-modal' }).exists()
-    ).toBeFalsy();
+      screen.queryByTestId('cdr-version-upgrade-modal')
+    ).not.toBeInTheDocument();
 
-    const flag = wrapper.find({ 'data-test-id': 'new-version-flag' }).first();
-    flag.simulate('click');
+    await user.click(screen.getByTestId('new-version-flag'));
 
-    expect(
-      wrapper.find({ 'data-test-id': 'cdr-version-upgrade-modal' }).exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('cdr-version-upgrade-modal')).toBeInTheDocument();
   });
 });
