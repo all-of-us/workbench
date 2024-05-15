@@ -129,6 +129,8 @@ describe('ConceptSearch', () => {
     await user.click(screen.getByRole('button', { name: /cancel/i }));
     expect(screen.getByText(conceptSet.name)).toBeInTheDocument();
     expect(screen.getByText(conceptSet.description)).toBeInTheDocument();
+    expect(screen.queryByText(newName)).not.toBeInTheDocument();
+    expect(screen.queryByText(newDesc)).not.toBeInTheDocument();
   });
 
   // TODO RW-2625: test edit and delete set from popup trigger menu
