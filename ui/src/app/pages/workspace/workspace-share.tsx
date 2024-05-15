@@ -564,6 +564,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                 <ClrIcon
                                   shape='plus-circle'
                                   data-test-id={'add-collab-' + user.email}
+                                  aria-label={`Button to add ${user.email} as a collaborator`}
                                   style={{ height: '21px', width: '21px' }}
                                   onClick={() => {
                                     this.addCollaborator(user);
@@ -663,7 +664,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                       data-test-id={
                                         'remove-collab-' + user.email
                                       }
-                                      aria-label={`Remove collaborator button for ${user.email}`}
+                                      aria-label={`Button to remove ${user.email} as a collaborator`}
                                       shape='minus-circle'
                                       style={{ height: '21px', width: '21px' }}
                                       onClick={() =>

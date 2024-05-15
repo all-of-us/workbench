@@ -99,8 +99,11 @@ describe('WorkspaceShare', () => {
     return `Role selector for ${user.email}`;
   };
 
+  const getAddCollaboratorLabel = (user: User) => {
+    return `Button to add ${user.email} as a collaborator`;
+  };
   const getRemoveCollaboratorLabel = (user: User) => {
-    return `Remove collaborator button for ${user.email}`;
+    return `Button to remove ${user.email} as a collaborator`;
   };
 
   const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
@@ -110,6 +113,14 @@ describe('WorkspaceShare', () => {
     clock.tick(401);
     await waitOneTickAndUpdate(wrapper);
     wrapper.update();
+  };
+
+  const searchForUserAlt = async (value: string) => {
+    const searchBar = screen.getByTestId('search');
+    await user.clear(searchBar);
+    await user.click(searchBar);
+    await user.paste(value);
+    await screen.findByTestId('drop-down');
   };
 
   beforeEach(() => {
@@ -210,19 +221,16 @@ describe('WorkspaceShare', () => {
   });
 
   it('adds user correctly', async () => {
-    const clock = FakeTimers.install({ shouldAdvanceTime: true });
-    const wrapper = component();
-    await searchForUser(wrapper, clock, 'luna');
-    clock.uninstall();
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    componentAlt();
+    await searchForUserAlt('luna');
+    await user.click(screen.getByLabelText(getAddCollaboratorLabel(luna)));
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione, ron, luna])
       .map((u) => u.givenName + ' ' + u.familyName);
     expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
+      (await screen.findAllByTestId('collab-user-name')).map(
+        (el) => el.textContent
+      )
     ).toEqual(expectedNames);
   });
 
