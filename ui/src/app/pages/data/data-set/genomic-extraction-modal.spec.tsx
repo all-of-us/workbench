@@ -6,11 +6,15 @@ import { mount } from 'enzyme';
 import { DataSetApi, TerraJobStatus } from 'generated/fetch';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 import { SWRConfig } from 'swr';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
@@ -21,6 +25,7 @@ describe('GenomicExtractionModal', () => {
   let datasetApiStub: DataSetApiStub;
   let testProps;
   let workspace;
+  let user;
 
   const component = async () => {
     const w = mount(
@@ -58,6 +63,7 @@ describe('GenomicExtractionModal', () => {
       closeFunction: () => {},
       title: "Top 10 Egregious Hacks Your Tech Lead Doesn't Want You To Know",
     };
+    user = userEvent.setup();
   });
 
   afterEach(() => {
@@ -187,20 +193,16 @@ describe('GenomicExtractionModal', () => {
         new Response(JSON.stringify({ message }), { status: 412 })
       );
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
+    await componentAlt();
 
-    const extractButton = () =>
-      wrapper.find('[data-test-id="extract-button"]').first();
-    extractButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const error = wrapper.find('[data-test-id="extract-error"]');
-    expect(error.exists()).toBeTruthy();
-    expect(error.text()).toContain(message);
+    const extractButton = await screen.findByRole('button', {
+      name: /extract/i,
+    });
+    await user.click(extractButton);
+    await screen.findByText(`Failed to launch extraction: ${message}.`);
 
     // Client errors will not work on retry, disable the extract button.
-    expect(extractButton().prop('disabled')).toBe(true);
+    expectButtonElementDisabled(extractButton);
   });
 
   it('should show error text on unknown error', async () => {
