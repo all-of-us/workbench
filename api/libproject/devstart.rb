@@ -746,10 +746,32 @@ def create_cdr_indices_tables(cmd_name, *args)
   end
 end
 
+def create_tanagra_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--bq-project [bq-project]",
+      ->(opts, v) { opts.bq_project = v},
+      "BQ Project - Required."
+  )
+  op.add_option(
+      "--bq-dataset [bq-dataset]",
+      ->(opts, v) { opts.bq_dataset = v},
+      "BQ Dataset - Required."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-tanagra-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
+end
+
 Common.register_command({
-  :invocation => "create-cdr-indices-tables",
+  :invocation => "create-tanagra-tables",
   :description => "Create the CDR indices tables.",
-  :fn => ->(*args) { create_cdr_indices_tables("create-cdr-indices-tables", *args) }
+  :fn => ->(*args) { create_tanagra_tables("create-tanagra-tables", *args) }
 })
 
 def build_cdr_indices_tables(cmd_name, *args)
