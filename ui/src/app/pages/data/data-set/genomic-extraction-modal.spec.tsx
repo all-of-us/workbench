@@ -141,12 +141,15 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain(
-      'Last time a VCF extract was attempted for this workflow, it failed.'
-    );
+    await componentAlt();
+
+    screen.logTestingPlaygroundURL();
+
+    expect(
+      screen.getByText(
+        /last time a vcf extract was attempted for this workflow, it failed\. /i
+      )
+    ).toBeInTheDocument();
   });
 
   it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', async () => {
@@ -162,10 +165,18 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
+    await componentAlt();
     expect(
-      wrapper.find('[data-test-id="extract-warning"]').exists()
-    ).toBeFalsy();
+      screen.queryByText(/an extraction is currently running for this dataset/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/vcf file\(s\) already exist for this dataset\. /i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /last time a vcf extract was attempted for this workflow, it failed\. /i
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('should show error text on known failed extract', async () => {
