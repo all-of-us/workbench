@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -218,20 +219,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         getAdminWorkspaceCloudStorageCounts(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient
-            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
-            .stream()
-            .map(leonardoMapper::toApiListRuntimeResponse)
-            .toList();
-
     final AdminWorkspaceResources adminWorkspaceResources =
         new AdminWorkspaceResources()
             .workspaceObjects(getAdminWorkspaceObjects(dbWorkspace.getWorkspaceId()))
-            .cloudStorage(adminWorkspaceCloudStorageCounts)
-            .runtimes(workbenchListRuntimeResponses)
-            .userApps(
-                leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject()));
+            .cloudStorage(adminWorkspaceCloudStorageCounts);
 
     final RawlsWorkspaceDetails firecloudWorkspace =
         fireCloudService
@@ -251,6 +242,22 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
+  }
+
+  @Override
+  public List<ListRuntimeResponse> listRuntimes(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+    return leonardoNotebooksClient
+        .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        .stream()
+        .map(leonardoMapper::toApiListRuntimeResponse)
+        .toList();
+  }
+
+  @Override
+  public List<UserAppEnvironment> listUserApps(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
+    return leonardoNotebooksClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
   }
 
   @Override

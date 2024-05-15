@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
-import { Button } from 'app/components/buttons';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -15,16 +15,18 @@ describe('AdminUserBypassSpec', () => {
   };
 
   const component = () => {
-    return mount(<AdminUserBypass {...defaultProps} />);
+    return render(<AdminUserBypass {...defaultProps} />);
   };
 
+  let user;
   beforeEach(() => {
+    user = userEvent.setup();
     serverConfigStore.set({
       config: defaultServerConfig,
     });
   });
 
-  it('should render bypass toggles for access modules', () => {
+  it('should render bypass toggles for access modules', async () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
@@ -34,8 +36,10 @@ describe('AdminUserBypassSpec', () => {
       },
     });
 
-    const wrapper = component();
-    wrapper.find(Button).simulate('click');
+    component();
+
+    const bypassButton = await screen.findByRole('button', { name: /bypass/i });
+    await user.click(bypassButton);
 
     expect(
       [
@@ -48,12 +52,12 @@ describe('AdminUserBypassSpec', () => {
         'profile-confirmation-toggle',
         'publication-confirmation-toggle',
       ]
-        .filter((id) => !wrapper.find(`[data-test-id="${id}"]`).exists())
+        .filter((id) => !screen.queryByTestId(id))
         .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
     ).toBe(0); // count of not found data-test-ids
   });
 
-  it('should only show bypass toggles for access modules used in this environment', () => {
+  it('should only show bypass toggles for access modules used in this environment', async () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
@@ -63,8 +67,9 @@ describe('AdminUserBypassSpec', () => {
       },
     });
 
-    const wrapper = component();
-    wrapper.find(Button).simulate('click');
+    component();
+    const bypassButton = await screen.findByRole('button', { name: /bypass/i });
+    await user.click(bypassButton);
 
     expect(
       [
@@ -73,7 +78,7 @@ describe('AdminUserBypassSpec', () => {
         'profile-confirmation-toggle',
         'publication-confirmation-toggle',
       ]
-        .filter((id) => !wrapper.find(`[data-test-id="${id}"]`).exists())
+        .filter((id) => !screen.queryByTestId(id))
         .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
     ).toBe(0); // count of not found data-test-ids
 
@@ -84,7 +89,7 @@ describe('AdminUserBypassSpec', () => {
         'era-commons-toggle',
         'identity-toggle',
       ]
-        .filter((id) => wrapper.find(`[data-test-id="${id}"]`).exists())
+        .filter((id) => screen.queryByTestId(id))
         .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
     ).toBe(0); // count of found data-test-ids
   });

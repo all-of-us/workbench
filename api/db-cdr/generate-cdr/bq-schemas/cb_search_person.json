@@ -118,5 +118,10 @@
     "mode": "NULLABLE",
     "name": "state_of_residence",
     "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_wear_consent",
+    "type": "INTEGER"
   }
 ]

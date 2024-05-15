@@ -23,7 +23,7 @@ import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
 import { CreateSAS } from './gke-app-configuration-panels/create-sas';
 
 type InjectedProps =
-  | 'app'
+  | 'userApps'
   | 'disk'
   | 'onClickDeleteGkeApp'
   | 'onClickDeleteUnattachedPersistentDisk';
@@ -122,9 +122,9 @@ export const GKEAppConfigurationPanel = ({
 
   const createAppProps = {
     ...props,
-    app,
-    disk,
     onClose,
+    userApps,
+    disk,
     onClickDeleteGkeApp,
     onClickDeleteUnattachedPersistentDisk,
   };

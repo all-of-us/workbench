@@ -1,7 +1,7 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.function.Function;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 
 /** Action properties relating to a stored high-egress event within the workbench. */

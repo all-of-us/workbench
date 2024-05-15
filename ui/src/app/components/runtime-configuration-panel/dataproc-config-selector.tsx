@@ -3,6 +3,7 @@ import { InputNumber } from 'primereact/inputnumber';
 
 import { DataprocConfig, RuntimeStatus } from 'generated/fetch';
 
+import { MachineSelector } from 'app/components/common-env-conf-panels/machine-selector';
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
@@ -16,7 +17,6 @@ import {
 } from 'app/utils/machines';
 
 import { DiskSizeSelector } from './disk-size-selector';
-import { MachineSelector } from './machine-selector';
 
 const { useState, useEffect } = React;
 

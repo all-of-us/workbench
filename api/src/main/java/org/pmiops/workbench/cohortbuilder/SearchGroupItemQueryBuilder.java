@@ -83,7 +83,8 @@ public final class SearchGroupItemQueryBuilder {
           new AbstractMap.SimpleEntry<>(
               Domain.LR_WHOLE_GENOME_VARIANT, "has_lr_whole_genome_variant"),
           new AbstractMap.SimpleEntry<>(
-              Domain.STRUCTURAL_VARIANT_DATA, "has_structural_variant_data"));
+              Domain.STRUCTURAL_VARIANT_DATA, "has_structural_variant_data"),
+          new AbstractMap.SimpleEntry<>(Domain.WEAR_CONSENT, "has_wear_consent"));
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";

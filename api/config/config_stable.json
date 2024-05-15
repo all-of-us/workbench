@@ -113,6 +113,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
+    "enableGKEAppMachineTypeChoice": false,
     "enableVariantSelectAll": true
   },
   "actionAudit": {

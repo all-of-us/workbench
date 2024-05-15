@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public enum BypassTimeTargetProperty implements SimpleTargetProperty {
   DATA_USER_CODE_OF_CONDUCT("data_use_agreement_bypass_time"),

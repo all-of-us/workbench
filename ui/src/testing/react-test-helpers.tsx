@@ -188,7 +188,6 @@ export const getDropdownOption = (
     (di) => di.textContent === optionText
   );
   expect(option).toBeInTheDocument();
-  expect(option).toHaveTextContent(optionText);
   return option;
 };
 

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.utils.mappers;
 
-import org.jetbrains.annotations.Nullable;
+import jakarta.annotation.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ValueMapping;

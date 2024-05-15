@@ -8,13 +8,13 @@ import static org.mockito.Mockito.verify;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Doubles;
 import jakarta.mail.MessagingException;
+import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -658,6 +658,44 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
     assertSingleWorkspaceTestDbState(anotherWorkspace, BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void handleInitialCreditsExpiry_withMissingUsersInRequest_NoNPE() throws Exception {
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 300.0;
+
+    DbUser user1 = createUser("user1@test.com");
+    DbUser user2 = createUser("user2@test.com");
+    DbUser user3 = createUser("user3@test.com");
+
+    createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
+    createWorkspace(user2, SINGLE_WORKSPACE_TEST_PROJECT);
+    createWorkspace(user3, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    ExpiredInitialCreditsEventRequest request = new ExpiredInitialCreditsEventRequest();
+    request.setUsers(Arrays.asList(user1.getUserId(), user2.getUserId()));
+
+    Map<String, Double> liveCostByCreator = new HashMap<>();
+    liveCostByCreator.put(String.valueOf(user1.getUserId()), 310.0);
+    liveCostByCreator.put(String.valueOf(user2.getUserId()), 250.0);
+    liveCostByCreator.put(String.valueOf(user3.getUserId()), 151.0);
+    request.setLiveCostByCreator(liveCostByCreator);
+
+    request.setDbCostByCreator(
+        Map.of(
+            String.valueOf(user1.getUserId()), 0d,
+            String.valueOf(user2.getUserId()), 0d,
+            String.valueOf(user3.getUserId()), 0d));
+
+    cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(request);
+
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user3), eq(0.5d), eq(151.0d), eq(149.0d));
+    verify(mailService)
+        .alertUserInitialCreditsDollarThreshold(eq(user2), eq(0.75d), eq(250.0d), eq(50.0d));
+    verify(mailService).alertUserInitialCreditsExpiration(eq(user1));
+    verifyNoMoreInteractions(mailService);
   }
 
   private void assertSingleWorkspaceTestDbState(

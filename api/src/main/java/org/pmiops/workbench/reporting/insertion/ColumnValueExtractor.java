@@ -1,10 +1,10 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
 
 /*
  * Implementers of this interface provide details about a particular BigQuery table column

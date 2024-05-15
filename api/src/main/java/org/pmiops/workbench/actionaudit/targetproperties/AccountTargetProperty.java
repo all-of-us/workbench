@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties;
 
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public enum AccountTargetProperty implements SimpleTargetProperty {
   IS_ENABLED("is_enabled"),

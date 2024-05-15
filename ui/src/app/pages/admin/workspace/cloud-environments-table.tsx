@@ -3,11 +3,7 @@ import { useState } from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import {
-  AdminWorkspaceResources,
-  ListRuntimeResponse,
-  UserAppEnvironment,
-} from 'generated/fetch';
+import { ListRuntimeResponse, UserAppEnvironment } from 'generated/fetch';
 
 import {
   fromRuntimeStatus,
@@ -23,6 +19,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
+import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { getCreator } from 'app/utils/runtime-utils';
 
@@ -61,14 +58,16 @@ const userAppToRow = (userApp: UserAppEnvironment): CloudEnvironmentRow => {
 };
 
 interface Props {
-  resources: AdminWorkspaceResources;
   workspaceNamespace: string;
   onDelete: () => void;
+  runtimes?: ListRuntimeResponse[];
+  userApps?: UserAppEnvironment[];
 }
 export const CloudEnvironmentsTable = ({
-  resources: { runtimes, userApps },
   workspaceNamespace,
   onDelete,
+  runtimes,
+  userApps,
 }: Props) => {
   const [runtimeToDelete, setRuntimeToDelete] = useState<string>();
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
@@ -113,12 +112,7 @@ export const CloudEnvironmentsTable = ({
     );
   };
 
-  const cloudEnvironments = [
-    ...runtimes?.map(runtimeToRow),
-    ...userApps?.map(userAppToRow),
-  ];
-
-  return (
+  return runtimes && userApps ? (
     <div>
       {confirmDeleteRuntime && (
         <Modal onRequestClose={cancelDeleteRuntime}>
@@ -141,7 +135,10 @@ export const CloudEnvironmentsTable = ({
         </Modal>
       )}
       <DataTable
-        value={cloudEnvironments}
+        value={[
+          ...(runtimes?.map(runtimeToRow) || []),
+          ...(userApps?.map(userAppToRow) || []),
+        ]}
         emptyMessage='No active cloud environments exist for this workspace.'
       >
         <Column field='appType' header='Environment Type' />
@@ -155,5 +152,7 @@ export const CloudEnvironmentsTable = ({
         />
       </DataTable>
     </div>
+  ) : (
+    <Spinner />
   );
 };

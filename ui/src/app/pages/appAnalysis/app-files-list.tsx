@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
@@ -9,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FileDetail } from 'generated/fetch';
 
 import { AppBanner } from 'app/components/apps-panel/app-banner';
+import { StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -171,9 +171,9 @@ export const AppFilesList = withCurrentWorkspace()(
       const { name } = row;
       const url = `${analysisTabPath(namespace, id)}/preview/${name}`;
       return row.sizeInBytes <= notebookSizeThreshold ? (
-        <RouterLink to={url} data-test-id='notebook-navigation'>
+        <StyledRouterLink path={url} data-test-id='notebook-navigation'>
           {row.name}
-        </RouterLink>
+        </StyledRouterLink>
       ) : (
         <div
           onClick={() => {

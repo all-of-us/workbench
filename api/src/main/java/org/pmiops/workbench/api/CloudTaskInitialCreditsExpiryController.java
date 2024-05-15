@@ -5,11 +5,17 @@ import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDoll
 import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
-import java.util.*;
+import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -128,11 +134,17 @@ public class CloudTaskInitialCreditsExpiryController
             .filter(entry -> !newlyExpiredUsers.contains(usersCache.get(entry.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+    logger.info("Handling cost alerts for users: {}", usersCache.keySet());
+    logger.info(
+        "DB costs by creator: {}, live costs by creator: {}", dbCostByCreator, liveCostByCreator);
+
     filteredLiveCostByCreator.forEach(
         (userId, currentCost) -> {
           final double previousCost = dbCostByCreator.getOrDefault(userId, 0.0);
           maybeAlertOnCostThresholds(
-              usersCache.get(userId),
+              usersCache.containsKey(userId)
+                  ? usersCache.get(userId)
+                  : userDao.findUserByUserId(userId),
               Math.max(currentCost, previousCost),
               previousCost,
               costThresholdsInDescOrder);

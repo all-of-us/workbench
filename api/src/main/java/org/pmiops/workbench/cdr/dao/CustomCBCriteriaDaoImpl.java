@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -8,8 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.model.DbCardCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;

@@ -219,6 +219,7 @@ public final class DbStorageEnums {
           .put(Domain.CONCEPT_SET, (short) 27)
           .put(Domain.CONCEPT_QUICK_ADD, (short) 28)
           .put(Domain.SNP_INDEL_VARIANT, (short) 29)
+          .put(Domain.WEAR_CONSENT, (short) 30)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -254,6 +255,7 @@ public final class DbStorageEnums {
           .put(Domain.CONCEPT_SET, "Concept Set")
           .put(Domain.CONCEPT_QUICK_ADD, "Concept Quick Add")
           .put(Domain.SNP_INDEL_VARIANT, "SNP/Indel Variants")
+          .put(Domain.WEAR_CONSENT, "Wear Consent")
           .build();
 
   public static Domain domainFromStorage(Short domain) {
