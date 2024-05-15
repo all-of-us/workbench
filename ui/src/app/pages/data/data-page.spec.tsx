@@ -8,7 +8,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataComponent } from 'app/pages/data/data-component';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';

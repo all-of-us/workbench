@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dataTabPath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
