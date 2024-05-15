@@ -11,6 +11,7 @@ import {
   RenderOptions,
   RenderResult,
   screen,
+  waitFor,
 } from '@testing-library/react';
 import { setImmediate } from 'timers';
 
@@ -142,6 +143,12 @@ export const expectButtonElementDisabled = (buttonElement: HTMLElement) =>
 // TODO: is there a common way to describe "elements where we disable by setting the cursor to not-allowed" ?
 export const expectMenuItemElementEnabled = expectButtonElementEnabled;
 export const expectMenuItemElementDisabled = expectButtonElementDisabled;
+
+export const expectSpinner = () => expect(screen.getByLabelText('Please Wait'));
+export const waitForNoSpinner = async () =>
+  await waitFor(() =>
+    expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+  );
 
 // When simulate is used with an input element of type checkbox, it will negate its current state.
 export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>

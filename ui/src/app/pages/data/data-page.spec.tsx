@@ -16,7 +16,11 @@ import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
-import { renderWithRouter } from 'testing/react-test-helpers';
+import {
+  expectSpinner,
+  renderWithRouter,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import {
   CohortReviewServiceStub,
   cohortReviewStubs,
@@ -56,7 +60,7 @@ describe('DataPage', () => {
 
   it('should render', async () => {
     component();
-    await screen.findByLabelText('Please Wait');
+    expectSpinner();
   });
 
   it('should show all datasets, cohorts, and concept sets', async () => {
@@ -71,9 +75,7 @@ describe('DataPage', () => {
       ROWS_PER_PAGE_RESOURCE_TABLE
     );
 
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await waitForNoSpinner();
 
     // Since we have pagination only 10 rows at a time should be displayed
     expect(resourceTableRows().length).toBe(ROWS_PER_PAGE_RESOURCE_TABLE);

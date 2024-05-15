@@ -16,7 +16,11 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { expectButtonElementDisabled } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectSpinner,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -63,14 +67,12 @@ describe('ConceptSearch', () => {
 
   it('should render', async () => {
     component();
-    await screen.findByLabelText('Please Wait');
+    expectSpinner();
   });
 
   it('should display the participant count and domain name', async () => {
     component();
-    await waitFor(() => {
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
-    });
+    await waitForNoSpinner();
     screen.findByText(`Participant Count: ${conceptSet.participantCount}`);
     screen.getByText(`Domain: ${fp.capitalize(conceptSet.domain.toString())}`);
   });

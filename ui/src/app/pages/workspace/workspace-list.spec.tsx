@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
-import { renderWithRouter } from 'testing/react-test-helpers';
+import { renderWithRouter, waitForNoSpinner } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
@@ -77,17 +77,13 @@ describe('WorkspaceList', () => {
 
   it('displays the correct number of workspaces', async () => {
     component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await waitForNoSpinner();
     expect(getCardNames()).toEqual(workspaceStubs.map((w) => w.name));
   });
 
   it('has the correct permissions classes', async () => {
     component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await waitForNoSpinner();
 
     const firstWorkspace = screen.getAllByTestId('workspace-card')[0];
     const accessLevel = within(firstWorkspace).getByTestId(
@@ -115,9 +111,7 @@ describe('WorkspaceList', () => {
     ]);
 
     component();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await waitForNoSpinner();
     expect(getCardNames().length).toEqual(3);
 
     await pickAccessLevel('All', 'Reader');
