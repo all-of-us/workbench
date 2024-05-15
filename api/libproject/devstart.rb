@@ -682,7 +682,7 @@ end
 Common.register_command({
   :invocation => "create-tanagra-prep-tables",
   :description => "Create prep tables for tanagra.",
-  :fn => ->(*args) { create_cdr_indices("create-tanagra-prep-tables", *args) }
+  :fn => ->(*args) { create_tanagra_prep_tables("create-tanagra-prep-tables", *args) }
 })
 
 def build_prep_survey(cmd_name, *args)
