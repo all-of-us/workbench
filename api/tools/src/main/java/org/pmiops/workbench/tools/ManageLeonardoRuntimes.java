@@ -92,11 +92,16 @@ public class ManageLeonardoRuntimes {
     return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
-  private static final String TABULAR_FORMAT = "%-40.40s %-50.50s %-10s %-15s %-15s %-15s";
+  private static final String TABULAR_FORMAT = "%-40.40s %-50.50s %-10s %-20s %-20s %-20s";
 
   private String tabularHeader() {
     return String.format(
         TABULAR_FORMAT, "ID", "Creator", "Status", "Created", "Accessed", "Destroyed");
+  }
+
+  private static String toWholeSeconds(String dateTimeString) {
+    Instant instant = Instant.parse(dateTimeString);
+    return instant.minusNanos(instant.getNano()).toString();
   }
 
   private String formatTabular(LeonardoListRuntimeResponse r) {
@@ -115,9 +120,9 @@ public class ManageLeonardoRuntimes {
         runtimeId(r),
         creator,
         status,
-        r.getAuditInfo().getCreatedDate(),
-        r.getAuditInfo().getDateAccessed(),
-        r.getAuditInfo().getDestroyedDate());
+        toWholeSeconds(r.getAuditInfo().getCreatedDate()),
+        toWholeSeconds(r.getAuditInfo().getDateAccessed()),
+        toWholeSeconds(r.getAuditInfo().getDestroyedDate()));
   }
 
   private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
