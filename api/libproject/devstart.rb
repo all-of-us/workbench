@@ -746,6 +746,12 @@ def create_cdr_indices_tables(cmd_name, *args)
   end
 end
 
+Common.register_command({
+  :invocation => "create-cdr-indices-tables",
+  :description => "Create the CDR indices tables.",
+  :fn => ->(*args) { create_cdr_indices_tables("create-cdr-indices-tables", *args) }
+})
+
 def create_tanagra_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
