@@ -13,6 +13,7 @@ import {
 
 import FakeTimers from '@sinonjs/fake-timers';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   registerApiClient,
   workspacesApi,
@@ -32,6 +33,7 @@ import { WorkspaceShare, WorkspaceShareProps } from './workspace-share';
 
 describe('WorkspaceShare', () => {
   let props: WorkspaceShareProps;
+  let user;
 
   const component = () => {
     return mount(<WorkspaceShare {...props} />);
@@ -97,6 +99,10 @@ describe('WorkspaceShare', () => {
     return `Role selector for ${user.email}`;
   };
 
+  const getRemoveCollaboratorLabel = (user: User) => {
+    return `Remove collaborator button for ${user.email}`;
+  };
+
   const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
     wrapper
       .find('[data-test-id="search"]')
@@ -132,6 +138,7 @@ describe('WorkspaceShare', () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     });
+    user = userEvent.setup();
   });
 
   it('display correct users', async () => {
@@ -183,18 +190,22 @@ describe('WorkspaceShare', () => {
   });
 
   it('removes user correctly', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
 
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    const removeButton = screen.getByLabelText(getRemoveCollaboratorLabel(ron));
+
+    await user.click(removeButton);
+
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione])
       .map((u) => u.givenName + ' ' + u.familyName);
     expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
+      (await screen.findAllByTestId('collab-user-name')).map(
+        (el) => el.textContent
+      )
     ).toEqual(expectedNames);
   });
 

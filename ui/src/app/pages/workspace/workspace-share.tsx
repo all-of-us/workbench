@@ -663,6 +663,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                       data-test-id={
                                         'remove-collab-' + user.email
                                       }
+                                      aria-label={`Remove collaborator button for ${user.email}`}
                                       shape='minus-circle'
                                       style={{ height: '21px', width: '21px' }}
                                       onClick={() =>
