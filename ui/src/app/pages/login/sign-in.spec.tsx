@@ -76,7 +76,7 @@ jest.mock('app/pages/login/account-creation/account-creation', () => {
 const mockDemographicSurveyTitle = 'Mock Demographic Survey';
 jest.mock('app/components/demographic-survey-v2', () => {
   return {
-    DemographicSurvey: (props) => (
+    DemographicSurvey: () => (
       <div>
         <div>{mockDemographicSurveyTitle}</div>
       </div>

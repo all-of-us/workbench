@@ -11,11 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
-import {
-  mountWithRouter,
-  renderWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
