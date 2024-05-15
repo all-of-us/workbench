@@ -71,7 +71,7 @@ describe('ConceptSearch', () => {
     await waitFor(() => {
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
     });
-    screen.findByText(`Participant Count: ${conceptSet.participantCount})`);
+    screen.findByText(`Participant Count: ${conceptSet.participantCount}`);
     screen.getByText(`Domain: ${fp.capitalize(conceptSet.domain.toString())}`);
   });
 
@@ -92,7 +92,6 @@ describe('ConceptSearch', () => {
     await user.clear(description);
     await user.click(description);
     await user.paste(newDesc);
-    screen.logTestingPlaygroundURL();
     await user.click(screen.getByRole('button', { name: /save/i }));
     expect(screen.getByText(newName)).toBeInTheDocument();
     expect(screen.getByText(newDesc)).toBeInTheDocument();
