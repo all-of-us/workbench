@@ -21,7 +21,10 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  getSelectComponentValue,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -90,6 +93,10 @@ describe('WorkspaceShare', () => {
     return '.' + user.email.replace(/[@\.]/g, '') + '-user-role__single-value';
   };
 
+  const getSelectStringAlt = (user: UserRole) => {
+    return `Role selector for ${user.email}`;
+  };
+
   const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
     wrapper
       .find('[data-test-id="search"]')
@@ -147,19 +154,32 @@ describe('WorkspaceShare', () => {
   });
 
   it('displays correct role info', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
 
-    expect(wrapper.find(getSelectString(harryRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[harryRole.role])
-    );
-    expect(wrapper.find(getSelectString(hermioneRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[hermioneRole.role])
-    );
-    expect(wrapper.find(getSelectString(ronRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[ronRole.role])
-    );
-    expect(wrapper.find(getSelectString(lunaRole)).length).toBe(0);
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getSelectStringAlt(harryRole))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
+
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getSelectStringAlt(hermioneRole))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
+
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getSelectStringAlt(ronRole))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
+
+    expect(
+      screen.queryByLabelText(getSelectStringAlt(lunaRole))
+    ).not.toBeInTheDocument();
   });
 
   it('removes user correctly', async () => {
