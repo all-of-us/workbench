@@ -116,12 +116,11 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain(
-      'VCF file(s) already exist for this dataset.'
-    );
+    await componentAlt();
+
+    expect(
+      screen.getByText(/vcf file\(s\) already exist for this dataset\. /i)
+    ).toBeInTheDocument();
   });
 
   it('should show a warning message the most recent extract has failed', async () => {
