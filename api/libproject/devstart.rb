@@ -647,6 +647,44 @@ Common.register_command({
   :fn => ->(*args) { create_cdr_indices("create-cdr-indices", *args) }
 })
 
+def create_tanagra_prep_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.branch = "main"
+  op.add_option(
+    "--branch [branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch - Optional - Default is main."
+  )
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project name - Required"
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset - Required."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset}
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+  cdr_source = env.fetch(:source_cdr_project)
+  common = Common.new
+  content_type = "Content-Type: application/json"
+  accept = "Accept: application/json"
+  circle_token = "Circle-Token: "
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_tanagra_prep_tables\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\" }}"
+  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+end
+
+Common.register_command({
+  :invocation => "create-tanagra-prep-tables",
+  :description => "Create prep tables for tanagra.",
+  :fn => ->(*args) { create_cdr_indices("create-tanagra-prep-tables", *args) }
+})
+
 def build_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
