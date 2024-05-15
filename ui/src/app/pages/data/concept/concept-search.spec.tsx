@@ -71,7 +71,7 @@ describe('ConceptSearch', () => {
     await waitFor(() => {
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument();
     });
-    screen.findByText(`Participant count: ${conceptSet.participantCount})`);
+    screen.findByText(`Participant Count: ${conceptSet.participantCount})`);
     screen.getByText(`Domain: ${fp.capitalize(conceptSet.domain.toString())}`);
   });
 
