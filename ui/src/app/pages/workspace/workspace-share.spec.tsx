@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import FakeTimers from '@sinonjs/fake-timers';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   registerApiClient,
   workspacesApi,
@@ -31,6 +32,9 @@ describe('WorkspaceShare', () => {
 
   const component = () => {
     return mount(<WorkspaceShare {...props} />);
+  };
+  const componentAlt = () => {
+    return render(<WorkspaceShare {...props} />);
   };
   const harry: User = {
     givenName: 'Harry',
@@ -124,19 +128,22 @@ describe('WorkspaceShare', () => {
   });
 
   it('display correct users', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
-    expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="collab-user-name"]').length).toBe(3);
-    expect(wrapper.find('[data-test-id="collab-user-email"]').length).toBe(3);
+    let collabUserNames;
+    await waitFor(() => {
+      collabUserNames = screen.getAllByTestId('collab-user-name');
+      expect(collabUserNames.length).toBe(3);
+    });
+    const collabUserEmails = screen.getAllByTestId('collab-user-email');
+    expect(collabUserEmails.length).toBe(3);
     const expectedUsers = fp.sortBy('familyName', [harry, hermione, ron]);
-    expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
-    ).toEqual(expectedUsers.map((u) => u.givenName + ' ' + u.familyName));
-    expect(
-      wrapper.find('[data-test-id="collab-user-email"]').map((el) => el.text())
-    ).toEqual(expectedUsers.map((u) => u.email));
+    expect(collabUserNames.map((el) => el.textContent)).toEqual(
+      expectedUsers.map((u) => u.givenName + ' ' + u.familyName)
+    );
+    expect(collabUserEmails.map((el) => el.textContent)).toEqual(
+      expectedUsers.map((u) => u.email)
+    );
   });
 
   it('displays correct role info', async () => {
