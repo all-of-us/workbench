@@ -80,8 +80,8 @@ describe('ConceptAddModal', () => {
   it('disables option to add to existing if concept set does not exist & defaults to create', async () => {
     props.activeDomainTab = CardCountStubVariables.STUB_CARD_COUNTS[2];
     component();
-    expect(screen.queryByTestId('add-to-existing')).not.toBeInTheDocument();
     expect(await screen.findByTestId('create-new-set')).toBeInTheDocument();
+    expect(screen.queryByTestId('add-to-existing')).not.toBeInTheDocument();
     expect(screen.getByTestId('toggle-existing-set')).toBeDisabled();
   });
 
