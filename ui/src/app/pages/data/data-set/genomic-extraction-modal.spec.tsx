@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { DataSetApi, TerraJobStatus } from 'generated/fetch';
 
@@ -13,7 +12,7 @@ import { SWRConfig } from 'swr';
 
 import {
   expectButtonElementDisabled,
-  waitOneTickAndUpdate,
+  expectButtonElementEnabled,
 } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -28,16 +27,6 @@ describe('GenomicExtractionModal', () => {
   let user;
 
   const component = async () => {
-    const w = mount(
-      <SWRConfig value={{ provider: () => new Map() }}>
-        <GenomicExtractionModal {...testProps} />
-      </SWRConfig>
-    );
-    await waitOneTickAndUpdate(w);
-    return w;
-  };
-
-  const componentAlt = async () => {
     const component = render(
       <SWRConfig value={{ provider: () => new Map() }}>
         <GenomicExtractionModal {...testProps} />
@@ -71,7 +60,7 @@ describe('GenomicExtractionModal', () => {
   });
 
   it('should render', async () => {
-    await componentAlt();
+    await component();
     screen.getByText(
       /top 10 egregious hacks your tech lead doesn't want you to know/i
     );
@@ -97,7 +86,7 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    await componentAlt();
+    await component();
 
     expect(
       screen.getByText(/an extraction is currently running for this dataset/i)
@@ -122,7 +111,7 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    await componentAlt();
+    await component();
 
     expect(
       screen.getByText(/vcf file\(s\) already exist for this dataset\. /i)
@@ -147,9 +136,7 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    await componentAlt();
-
-    screen.logTestingPlaygroundURL();
+    await component();
 
     expect(
       screen.getByText(
@@ -171,7 +158,7 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    await componentAlt();
+    await component();
     expect(
       screen.queryByText(/an extraction is currently running for this dataset/i)
     ).not.toBeInTheDocument();
@@ -193,7 +180,7 @@ describe('GenomicExtractionModal', () => {
         new Response(JSON.stringify({ message }), { status: 412 })
       );
 
-    await componentAlt();
+    await component();
 
     const extractButton = await screen.findByRole('button', {
       name: /extract/i,
@@ -210,18 +197,15 @@ describe('GenomicExtractionModal', () => {
       .spyOn(datasetApiStub, 'extractGenomicData')
       .mockRejectedValueOnce(new Response(null, { status: 500 }));
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
 
-    const extractButton = () =>
-      wrapper.find('[data-test-id="extract-button"]').first();
-    extractButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const error = wrapper.find('[data-test-id="extract-error"]');
-    expect(error.exists()).toBeTruthy();
+    const extractButton = await screen.findByRole('button', {
+      name: /extract/i,
+    });
+    await user.click(extractButton);
+    await screen.findByText(`Failed to launch extraction: unknown error.`);
 
     // Unknown errors may be transient, allow the user to try again.
-    expect(extractButton().prop('disabled')).toBe(false);
+    expectButtonElementEnabled(extractButton);
   });
 });
