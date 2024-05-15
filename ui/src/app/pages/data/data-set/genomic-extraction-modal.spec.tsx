@@ -1,8 +1,11 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { mount } from 'enzyme';
 
 import { DataSetApi, TerraJobStatus } from 'generated/fetch';
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 import { SWRConfig } from 'swr';
@@ -29,6 +32,18 @@ describe('GenomicExtractionModal', () => {
     return w;
   };
 
+  const componentAlt = async () => {
+    const component = render(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <GenomicExtractionModal {...testProps} />
+      </SWRConfig>
+    );
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    return component;
+  };
+
   beforeEach(() => {
     datasetApiStub = new DataSetApiStub();
     registerApiClient(DataSetApi, datasetApiStub);
@@ -50,8 +65,10 @@ describe('GenomicExtractionModal', () => {
   });
 
   it('should render', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
+    await componentAlt();
+    screen.getByText(
+      /top 10 egregious hacks your tech lead doesn't want you to know/i
+    );
   });
 
   it('should show a warning when there is a currently running extract for this dataset', async () => {
@@ -74,10 +91,11 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain('An extraction is currently running');
+    await componentAlt();
+
+    expect(
+      screen.getByText(/an extraction is currently running for this dataset/i)
+    ).toBeInTheDocument();
   });
 
   it('should show a warning message when the most recent extract has succeeded', async () => {
