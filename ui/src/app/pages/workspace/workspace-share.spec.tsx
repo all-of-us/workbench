@@ -234,22 +234,23 @@ describe('WorkspaceShare', () => {
     ).toEqual(expectedNames);
   });
 
-  it('does not allow self-removal', () => {
-    const wrapper = component();
-    const dataString =
-      '[data-test-id="remove-collab-harry.potter@hogwarts.edu"]';
-    expect(wrapper.find(dataString).length).toBe(0);
+  it('does not allow self-removal', async () => {
+    componentAlt();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
+    expect(
+      screen.queryByLabelText(getRemoveCollaboratorLabel(harry))
+    ).not.toBeInTheDocument();
   });
 
   it('does not allow self role change', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
 
-    const roleSelectProps = wrapper
-      .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
-      .first()
-      .props() as { isDisabled: boolean };
-    expect(roleSelectProps.isDisabled).toBe(true);
+    expect(screen.getByLabelText(getSelectStringAlt(harryRole))).toBeDisabled();
   });
 
   it('saves acl correctly after changes made', async () => {
