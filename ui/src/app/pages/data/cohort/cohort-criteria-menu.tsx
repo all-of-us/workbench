@@ -291,7 +291,8 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
 
     const renderSelectIcon = (domain: string, type?: string) =>
       BOOLEAN_CRITERIA_DOMAINS.includes(domain) ||
-      type === CriteriaType.DECEASED.toString() ? (
+      type === CriteriaType.DECEASED.toString() ||
+      type === CriteriaType.HAS_EHR_DATA.toString() ? (
         <ClrIcon
           style={{
             marginLeft: '-1.85rem',
@@ -464,6 +465,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                   }}
                                 >
                                   <span style={{ verticalAlign: 'middle' }}>
+                                    {renderSelectIcon(
+                                      menuItem.domain,
+                                      menuItem.type
+                                    )}
                                     {menuItem.name}
                                   </span>
                                   {domainCounts !== null && (

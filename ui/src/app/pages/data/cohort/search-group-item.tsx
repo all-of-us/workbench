@@ -470,7 +470,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
       return (
         BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
         (searchParameters[0] &&
-          searchParameters[0].type === CriteriaType.DECEASED.toString())
+          (searchParameters[0].type === CriteriaType.DECEASED.toString() ||
+            searchParameters[0].type === CriteriaType.HAS_EHR_DATA.toString()))
       );
     }
 
