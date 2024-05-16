@@ -87,14 +87,14 @@ jest.mock('app/components/demographic-survey-v2', () => {
 describe('SignIn', () => {
   let props: SignInProps;
   let user;
-
+  const defaultWindowWidth = 1700;
   const component = () => renderWithRouter(<SignIn {...props} />);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     window.scrollTo = () => {};
     props = {
-      windowSize: { width: 1700, height: 0 },
+      windowSize: { width: defaultWindowWidth, height: 0 },
       hideSpinner: () => {},
       showSpinner: () => {},
       showProfileErrorModal: () => {},
@@ -106,21 +106,23 @@ describe('SignIn', () => {
     mockCountry = null;
   });
 
-  it('should display login background image and directive by default', () => {
+  test.each([
+    [
+      'login group background image by default',
+      defaultWindowWidth,
+      'login-group.png',
+    ],
+    [
+      'small background image when window width is moderately sized',
+      999,
+      'login-standing.png',
+    ],
+  ])('should display %s', async (_, width, expectedImage) => {
+    props.windowSize.width = width;
     component();
     const backgroundDiv = screen.getByTestId('sign-in-page');
     expect(backgroundDiv).toHaveStyle(
-      'background-image: url(login-group.png);'
-    );
-    expect(screen.getByTestId('login')).toBeInTheDocument();
-  });
-
-  it('should display small background image when window width is moderately sized', () => {
-    props.windowSize.width = 999;
-    component();
-    const backgroundDiv = screen.getByTestId('sign-in-page');
-    expect(backgroundDiv).toHaveStyle(
-      'background-image: url(login-standing.png);'
+      `background-image: url(${expectedImage});`
     );
     expect(screen.getByTestId('login')).toBeInTheDocument();
   });
