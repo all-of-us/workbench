@@ -284,9 +284,9 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: true,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('lock-workspace-msg')).toBeInTheDocument();
   });
 
   it('Should not display locked workspace message if adminLocked is false', async () => {
@@ -294,20 +294,16 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: false,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.queryByTestId('lock-workspace-msg')).not.toBeInTheDocument();
   });
 
   it('Should enable billing report url if user is workspace owner.', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'workspace-billing-report' })
-        .first()
-        .props().disabled
-    ).toBeFalsy();
+    componentAlt();
+    await waitForNoSpinner();
+    const billingReportButton = screen.getByText('View detailed spend report');
+    expectButtonElementEnabled(billingReportButton);
   });
 
   it('Should disable billing report url if user is not workspace owner.', async () => {
@@ -315,14 +311,10 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'workspace-billing-report' })
-        .first()
-        .props().disabled
-    ).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    const billingReportButton = screen.getByText('View detailed spend report');
+    expectButtonElementDisabled(billingReportButton);
   });
 
   it('should display Google project id', async () => {
