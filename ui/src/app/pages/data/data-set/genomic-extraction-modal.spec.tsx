@@ -13,6 +13,7 @@ import { SWRConfig } from 'swr';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -32,9 +33,7 @@ describe('GenomicExtractionModal', () => {
         <GenomicExtractionModal {...testProps} />
       </SWRConfig>
     );
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    await waitForNoSpinner();
     return renderResult;
   };
 
