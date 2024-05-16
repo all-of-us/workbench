@@ -130,7 +130,7 @@ describe('SignIn', () => {
     // that each step of the user registration flow is correctly rendered in order.
     //
     // As this is simply a high-level test of this component's ability to render each sub-component,
-    // we use Enzyme's shallow rendering to avoid needing to deal with the DOM-level details of
+    // we mock the inner components to avoid needing to deal with the DOM-level details of
     // each of the sub-components. Tests within the 'account-creation' folder should cover those
     // details.
     component();
@@ -169,7 +169,7 @@ describe('SignIn', () => {
     // that each step of the user registration flow is correctly rendered in order.
     //
     // As this is simply a high-level test of this component's ability to render each sub-component,
-    // we use Enzyme's shallow rendering to avoid needing to deal with the DOM-level details of
+    // we mock the inner components to avoid needing to deal with the DOM-level details of
     // each of the sub-components. Tests within the 'account-creation' folder should cover those
     // details.
     component();
