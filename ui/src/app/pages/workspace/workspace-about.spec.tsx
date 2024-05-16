@@ -11,6 +11,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
@@ -19,7 +21,13 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  renderWithRouter,
+  waitForNoSpinner,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -38,6 +46,7 @@ import { SpecificPopulationItems } from './workspace-edit-text';
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
+  let user;
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -52,6 +61,12 @@ describe('WorkspaceAbout', () => {
       <MemoryRouter>
         <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
       </MemoryRouter>
+    );
+  };
+
+  const componentAlt = () => {
+    return renderWithRouter(
+      <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
     );
   };
 
@@ -77,69 +92,63 @@ describe('WorkspaceAbout', () => {
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
+    user = userEvent.setup();
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('should render', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    screen.getByText(/primary purpose of project/i);
   });
 
   it('should display research purpose', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="researchPurpose"]')).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByText('Research Purpose')).toBeInTheDocument();
     // Research Purpose: Drug, Population and Ethics
-    expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(
-      3
-    );
+    expect(screen.getAllByTestId('primaryResearchPurpose').length).toBe(3);
     // Primary Purpose: Education
-    expect(wrapper.find('[data-test-id="primaryPurpose"]').length).toBe(1);
+    expect(screen.getByTestId('primaryPurpose')).toBeInTheDocument();
   });
 
   it('should display workspace collaborators', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
     userRolesStub.forEach((role, i) => {
-      const userRoleText = wrapper
-        .find('[data-test-id="workspaceUser-' + i + '"]')
-        .text();
+      const userRoleText = screen.getByTestId('workspaceUser-' + i).textContent;
       expect(userRoleText).toContain(role.email);
       expect(userRoleText).toContain(role.role.toString());
     });
   });
 
   it('should allow the user to open the share modal', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspaceShareButton"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="workspaceShareModal"]')).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    await user.click(
+      screen.getByRole('button', {
+        name: /share/i,
+      })
+    );
+    screen.getByText('Share defaultWorkspace');
   });
 
-  it('should enable the share button if workspace is not adminLocked', async () => {
+  test.each([
+    ['enable the share button if workspace is not adminLocked', false],
+    ['disable the share button if workspace is adminLocked', true],
+  ])('Should %s', async (testName, adminLocked) => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      adminLocked: false,
+      adminLocked,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
-        .disabled
-    ).toBeFalsy();
-  });
+    componentAlt();
+    await waitForNoSpinner();
+    const shareButton = screen.getByRole('button', {
+      name: /share/i,
+    });
 
-  it('should disable the share button if workspace is adminLocked', async () => {
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      adminLocked: true,
-    });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
-        .disabled
-    ).toBeTruthy();
+    adminLocked
+      ? expectButtonElementDisabled(shareButton)
+      : expectButtonElementEnabled(shareButton);
   });
 
   it('should display cdr version', async () => {

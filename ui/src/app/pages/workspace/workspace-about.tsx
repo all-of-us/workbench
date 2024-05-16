@@ -346,7 +346,7 @@ export const WorkspaceAbout = fp.flow(
                 </FlexRow>
               </div>
             )}
-            <ResearchPurpose data-test-id='researchPurpose' />
+            <ResearchPurpose />
             {hasAuthorityForAction(
               profile,
               AuthorityGuardedAction.PUBLISH_WORKSPACE
