@@ -230,7 +230,7 @@ export const getSelectComponentValue = (
   // Searchable Select components have an additional wrapper element
   const valueContainer =
     inputElement.parentElement?.parentElement?.parentElement;
-  const valueElement = valueContainer!.querySelector(
+  const valueElement = valueContainer.querySelector(
     ':scope > div[class*="Value"]'
   );
   return valueElement.textContent ?? '';
