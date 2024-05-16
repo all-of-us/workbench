@@ -58,14 +58,6 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(
-      <MemoryRouter>
-        <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
-      </MemoryRouter>
-    );
-  };
-
-  const componentAlt = () => {
     return renderWithRouter(
       <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
     );
@@ -97,13 +89,13 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should render', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     screen.getByText(/primary purpose of project/i);
   });
 
   it('should display research purpose', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByText('Research Purpose')).toBeInTheDocument();
     // Research Purpose: Drug, Population and Ethics
@@ -113,7 +105,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display workspace collaborators', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     userRolesStub.forEach((role, i) => {
       const userRoleText = screen.getByTestId('workspaceUser-' + i).textContent;
@@ -123,7 +115,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should allow the user to open the share modal', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     await user.click(
       screen.getByRole('button', {
@@ -141,7 +133,7 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked,
     });
-    componentAlt();
+    component();
     await waitForNoSpinner();
     const shareButton = screen.getByRole('button', {
       name: /share/i,
@@ -153,7 +145,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display cdr version', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('cdrVersion').textContent).toContain(
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION
@@ -161,7 +153,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display workspace metadata', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('accessTierShortName').textContent).toContain(
       fp.capitalize(workspace.accessTierShortName)
@@ -177,7 +169,7 @@ describe('WorkspaceAbout', () => {
   it('should not manipulate SpecificPopulationItems object on page load', async () => {
     const raceSubCategoriesBeforePageload =
       SpecificPopulationItems[0].subCategory.length;
-    componentAlt();
+    component();
     await waitForNoSpinner();
     const raceSubCategoriesAfterPageLoad =
       SpecificPopulationItems[0].subCategory.length;
@@ -187,7 +179,7 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(
       screen.queryByRole('button', {
@@ -213,7 +205,7 @@ describe('WorkspaceAbout', () => {
       };
       profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-      componentAlt();
+      component();
       await waitForNoSpinner();
       expect(
         screen.getByRole('button', {
@@ -235,7 +227,7 @@ describe('WorkspaceAbout', () => {
     };
     profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const publishButton = screen.getByRole('button', {
@@ -262,7 +254,7 @@ describe('WorkspaceAbout', () => {
       published: true,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const publishButton = screen.getByRole('button', {
@@ -283,7 +275,7 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: true,
     });
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('lock-workspace-msg')).toBeInTheDocument();
   });
@@ -293,13 +285,13 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: false,
     });
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.queryByTestId('lock-workspace-msg')).not.toBeInTheDocument();
   });
 
   it('Should enable billing report url if user is workspace owner.', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     const billingReportButton = screen.getByText('View detailed spend report');
     expectButtonElementEnabled(billingReportButton);
@@ -310,14 +302,14 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    componentAlt();
+    component();
     await waitForNoSpinner();
     const billingReportButton = screen.getByText('View detailed spend report');
     expectButtonElementDisabled(billingReportButton);
   });
 
   it('should display Google project id', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('googleProject').textContent).toContain(
       workspace.googleProject
@@ -325,14 +317,14 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display bucket name', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('bucketName').textContent).toContain(
       workspace.googleBucketName
     );
   });
   it('should display workspace namespace', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByTestId('workspaceNamespace').textContent).toContain(
       workspace.namespace
