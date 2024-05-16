@@ -220,17 +220,17 @@ export const CreateGkeApp = ({
   const showDeleteDiskButton = unattachedDiskExists(app, disk);
   const showDeleteAppButton = canDeleteApp(app);
 
-  const canModifyDiskSize = !!app || unattachedDiskExists(app, disk);
+  const canModifyDiskSize = !app && !unattachedDiskExists(app, disk);
 
   const disableDiskSizeContent = cond(
     [
       !!app,
-      `${toUIAppType[appType]} environment already exists. To update disk size please delete disk and recreate the 
-      ${toUIAppType[appType]} environment.`,
+      `Disk size cannot be updated because ${toUIAppType[appType]} environment already exists. 
+      To make changes, please delete the disk and recreate the environment.`,
     ],
     [
       unattachedDiskExists(app, disk),
-      `Cannot modify existing disk. To update disk size please delete the disk and create a new ${toUIAppType[appType]} environment.`,
+      `Cannot modify existing disk. To update the disk size please delete the disk and create a new environment.`,
     ]
   );
 
@@ -425,7 +425,7 @@ export const CreateGkeApp = ({
       <div style={{ ...styles.controlSection }}>
         <FlexRow>
           <TooltipTrigger
-            disabled={!canModifyDiskSize}
+            disabled={canModifyDiskSize}
             content={disableDiskSizeContent}
           >
             <div>
@@ -439,7 +439,7 @@ export const CreateGkeApp = ({
                     },
                   }))
                 }
-                disabled={canModifyDiskSize}
+                disabled={!canModifyDiskSize}
                 diskSize={createAppRequest.persistentDiskRequest.size}
                 idPrefix={'gke-app'}
               />

@@ -121,9 +121,9 @@ export const defaultSASCreateRequest: CreateAppRequest = {
 
 // This is not the best place for this, but it's causing test to pass, we need to rethink utils/user-app-utils
 export const appMinDiskSize: Record<AppType, number> = {
-  ['CROMWELL']: 50,
-  ['RSTUDIO']: 100,
-  ['SAS']: 150,
+  [AppType.CROMWELL]: 50,
+  [AppType.RSTUDIO]: 100,
+  [AppType.SAS]: 150,
 };
 
 export const appMaxDiskSize = 1000;
