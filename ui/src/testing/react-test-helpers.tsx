@@ -224,7 +224,6 @@ component's underlying input element as input. This is based on
 a helper function that Terra-UI utilizes:
 https://github.com/DataBiosphere/terra-ui/blob/dev/src/testing/test-utils.ts
 */
-
 export const getSelectComponentValue = (
   inputElement: HTMLInputElement
 ): string => {
