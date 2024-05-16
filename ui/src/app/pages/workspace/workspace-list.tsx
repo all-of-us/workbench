@@ -113,7 +113,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   Filter by
                 </div>
                 <RSelect
-                  data-test-id='access-level-filter'
+                  aria-label='Access level filter selector'
                   options={filters}
                   defaultValue={defaultFilter}
                   onChange={({ value }) =>
