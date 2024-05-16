@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
 
 import {
   Authority,
@@ -318,24 +317,25 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display Google project id', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="googleProject"]').text()).toContain(
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('googleProject').textContent).toContain(
       workspace.googleProject
     );
   });
+
   it('should display bucket name', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="bucketName"]').text()).toContain(
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('bucketName').textContent).toContain(
       workspace.googleBucketName
     );
   });
   it('should display workspace namespace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceNamespace"]').text()
-    ).toContain(workspace.namespace);
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('workspaceNamespace').textContent).toContain(
+      workspace.namespace
+    );
   });
 });
