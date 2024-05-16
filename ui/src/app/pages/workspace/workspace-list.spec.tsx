@@ -42,8 +42,11 @@ describe('WorkspaceList', () => {
     return renderWithRouter(<WorkspaceList {...props} />);
   };
 
-  async function pickAccessLevel(label: string, accessLevelText) {
-    await user.click(screen.getByText(label));
+  async function pickAccessLevel(
+    dropdown: HTMLElement,
+    accessLevelText: string
+  ) {
+    await user.click(dropdown);
     const accessLevelOption = await screen.findByText(accessLevelText);
 
     await user.click(accessLevelOption);
@@ -114,16 +117,20 @@ describe('WorkspaceList', () => {
     await waitForNoSpinner();
     expect(getCardNames().length).toEqual(3);
 
-    await pickAccessLevel('All', 'Reader');
+    const accessLevelDropdown = screen.getByLabelText(
+      'Access level filter selector'
+    );
+
+    await pickAccessLevel(accessLevelDropdown, 'Reader');
     expect(getCardNames()).toEqual([workspaceRead.name]);
 
-    await pickAccessLevel('Reader', 'Owner');
+    await pickAccessLevel(accessLevelDropdown, 'Owner');
     expect(getCardNames()).toEqual([workspaceOwn.name]);
 
-    await pickAccessLevel('Owner', 'Writer');
+    await pickAccessLevel(accessLevelDropdown, 'Writer');
     expect(getCardNames()).toEqual([workspaceWrite.name]);
 
-    await pickAccessLevel('Writer', 'All');
+    await pickAccessLevel(accessLevelDropdown, 'All');
     expect(getCardNames().length).toEqual(3);
   });
 });
