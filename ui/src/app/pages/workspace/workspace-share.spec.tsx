@@ -123,6 +123,21 @@ describe('WorkspaceShare', () => {
     await screen.findByTestId('drop-down');
   };
 
+  const addUser = async (userToAdd: User) => {
+    const searchBar = screen.getByTestId('search');
+    await user.clear(searchBar);
+    await user.click(searchBar);
+    await user.paste(userToAdd.givenName);
+    await screen.findByTestId('drop-down');
+    await user.click(screen.getByLabelText(getAddCollaboratorLabel(userToAdd)));
+  };
+
+  const removeUser = async (userToRemove: User) => {
+    await user.click(
+      screen.getByLabelText(getRemoveCollaboratorLabel(userToRemove))
+    );
+  };
+
   beforeEach(() => {
     registerApiClient(
       UserApi,
@@ -206,9 +221,7 @@ describe('WorkspaceShare', () => {
       expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
     );
 
-    const removeButton = screen.getByLabelText(getRemoveCollaboratorLabel(ron));
-
-    await user.click(removeButton);
+    await removeUser(ron);
 
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione])
@@ -222,8 +235,7 @@ describe('WorkspaceShare', () => {
 
   it('adds user correctly', async () => {
     componentAlt();
-    await searchForUserAlt('luna');
-    await user.click(screen.getByLabelText(getAddCollaboratorLabel(luna)));
+    await addUser(luna);
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione, ron, luna])
       .map((u) => u.givenName + ' ' + u.familyName);
@@ -254,61 +266,36 @@ describe('WorkspaceShare', () => {
   });
 
   it('saves acl correctly after changes made', async () => {
-    const clock = FakeTimers.install({ shouldAdvanceTime: true });
-    const wrapper = component();
-    await searchForUser(wrapper, clock, 'luna');
+    componentAlt();
+    await waitFor(() =>
+      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
+    );
 
     // Luna: add, remove, add again
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    wrapper
-      .find('[data-test-id="remove-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    await searchForUser(wrapper, clock, 'luna');
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    await addUser(luna);
+    await removeUser(luna);
+    await addUser(luna);
 
     // Ron: remove, add, remove again
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    await searchForUser(wrapper, clock, 'ron');
-    wrapper
-      .find('[data-test-id="add-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-
-    clock.uninstall();
+    await removeUser(ron);
+    await addUser(ron);
+    await removeUser(ron);
 
     // change hermione's access to owner
-    const selectComponent = wrapper
-      .find('[data-test-id="hermione.granger@hogwarts.edu-user-role"]')
-      .find(Select);
-    selectComponent.instance().setState({ menuIsOpen: true });
-    wrapper.update();
-    wrapper
-      .find('.hermionegrangerhogwartsedu-user-role__option')
-      .findWhere(
-        (n) =>
-          n.text() ===
-          fp.capitalize(WorkspaceAccessLevel[WorkspaceAccessLevel.OWNER])
-      )
-      .first()
-      .simulate('click');
-    wrapper.update();
+    const hermoineRoleDropdown = screen.getByLabelText(
+      getSelectStringAlt(hermioneRole)
+    );
+    await user.click(hermoineRoleDropdown);
+    await user.click(
+      screen.getByLabelText(`Select Owner role for ${hermione.email}`)
+    );
 
     const spy = jest.spyOn(workspacesApi(), 'shareWorkspacePatch');
-    wrapper.find('[data-test-id="save"]').first().simulate('click');
+    await user.click(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
     expect(spy).toHaveBeenCalledWith(
       tomRiddleDiary.namespace,
       tomRiddleDiary.name,

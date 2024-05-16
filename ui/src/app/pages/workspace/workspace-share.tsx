@@ -651,6 +651,18 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                 data-test-id={user.email + '-user-role'}
                                 onChange={(e) => this.setRole(e, user)}
                                 options={UserRoleOptions}
+                                formatOptionLabel={(
+                                  { label, value },
+                                  { context }
+                                ) => {
+                                  return (
+                                    <div
+                                      aria-label={`Select ${label} role for ${user.email}`}
+                                    >
+                                      {label}
+                                    </div>
+                                  );
+                                }}
                                 aria-label={`Role selector for ${user.email}`}
                               />
                             </div>
