@@ -24,6 +24,8 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectPrimaryButton,
+  expectSecondaryButton,
   renderWithRouter,
   waitForNoSpinner,
   waitOneTickAndUpdate,
@@ -221,7 +223,7 @@ describe('WorkspaceAbout', () => {
       ).toBeInTheDocument();
       expect(
         screen.getByRole('button', {
-          name: 'Publish',
+          name: 'Unpublish',
         })
       ).toBeInTheDocument();
     }
@@ -234,18 +236,20 @@ describe('WorkspaceAbout', () => {
     };
     profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    const publishButton = wrapper.find('[data-test-id="publish-button"]');
-    expect(publishButton.exists()).toBeTruthy();
-    expect(publishButton.prop('disabled')).toBeFalsy();
-    expect(publishButton.prop('type')).toEqual('primary');
+    const publishButton = screen.getByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementEnabled(publishButton);
+    expectPrimaryButton(publishButton);
 
-    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
-    expect(unpublishButton.exists()).toBeTruthy();
-    expect(unpublishButton.prop('disabled')).toBeTruthy();
-    expect(unpublishButton.prop('type')).toEqual('secondary');
+    const unpublishButton = screen.getByRole('button', {
+      name: 'Unpublish',
+    });
+    expectButtonElementDisabled(unpublishButton);
+    expectSecondaryButton(unpublishButton);
   });
 
   it('Publish/Unpublish button styling depends on state - published', async () => {
@@ -259,18 +263,20 @@ describe('WorkspaceAbout', () => {
       published: true,
     });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    const publishButton = wrapper.find('[data-test-id="publish-button"]');
-    expect(publishButton.exists()).toBeTruthy();
-    expect(publishButton.prop('disabled')).toBeTruthy();
-    expect(publishButton.prop('type')).toEqual('secondary');
+    const publishButton = screen.getByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementDisabled(publishButton);
+    expectSecondaryButton(publishButton);
 
-    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
-    expect(unpublishButton.exists()).toBeTruthy();
-    expect(unpublishButton.prop('disabled')).toBeFalsy();
-    expect(unpublishButton.prop('type')).toEqual('primary');
+    const unpublishButton = screen.getByRole('button', {
+      name: 'Unpublish',
+    });
+    expectButtonElementEnabled(unpublishButton);
+    expectPrimaryButton(unpublishButton);
   });
 
   it('Should display locked workspace message if adminLocked is true', async () => {

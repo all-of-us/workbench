@@ -236,3 +236,11 @@ export const getSelectComponentValue = (
   );
   return valueElement.textContent ?? '';
 };
+
+export const expectPrimaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'primary');
+};
+
+export const expectSecondaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'secondary');
+};
