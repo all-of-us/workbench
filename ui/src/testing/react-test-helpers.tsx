@@ -216,3 +216,11 @@ export const getHTMLInputElementValue = (element: HTMLElement): string => {
 
 // by default, screen.debug() cuts off after 7000 chars.  let's output more than that
 export const debugAll = () => screen.debug(undefined, 1_000_000);
+
+export const rgbToHex = (rgb) => {
+  const rgbValues = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+  const hex = (x) => {
+    return ('0' + parseInt(x).toString(16)).slice(-2);
+  };
+  return '#' + hex(rgbValues[1]) + hex(rgbValues[2]) + hex(rgbValues[3]);
+};
