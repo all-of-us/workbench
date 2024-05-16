@@ -15,11 +15,11 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
+  appMaxDiskSize,
   appMinDiskSize,
   defaultAppRequest,
 } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
@@ -598,7 +598,7 @@ describe(CreateGkeApp.name, () => {
         // Act
         // Confirm the disk size is in valid range and set it
         expect(diskSize).toBeGreaterThan(appMinDiskSize[appType]);
-        expect(diskSize).toBeLessThanOrEqual(MAX_GKE_APP_DISK_SIZE);
+        expect(diskSize).toBeLessThanOrEqual(appMaxDiskSize);
 
         await pickSpinButtonValue(user, 'gke-app-disk', diskSize);
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
@@ -653,22 +653,18 @@ describe(CreateGkeApp.name, () => {
         const createButton = `${appTypeToString[appType]} cloud environment create button`;
 
         // Act
-        await pickSpinButtonValue(user, 'gke-app-disk', MAX_GKE_APP_DISK_SIZE);
+        await pickSpinButtonValue(user, 'gke-app-disk', appMaxDiskSize);
         let spinDiskInitValue = parseInt(
           spinDiskElement('gke-app-disk')
             .getAttribute('value')
             .replace(/,/g, ''),
           10
         );
-        expect(spinDiskInitValue).toEqual(MAX_GKE_APP_DISK_SIZE);
+        expect(spinDiskInitValue).toEqual(appMaxDiskSize);
         expectButtonElementEnabled(screen.queryByLabelText(createButton));
 
         // Set disk size one more than maximum size to trigger warning
-        await pickSpinButtonValue(
-          user,
-          'gke-app-disk',
-          MAX_GKE_APP_DISK_SIZE + 1
-        );
+        await pickSpinButtonValue(user, 'gke-app-disk', appMaxDiskSize + 1);
 
         // Assert
         // We do this to remove an comma from numbers
@@ -680,7 +676,7 @@ describe(CreateGkeApp.name, () => {
         );
         // Expect a warning message now and create button should be disabled
         expect(screen.getByText(/disk size must be between/i)).toBeTruthy();
-        expect(spinDiskInitValue).toEqual(MAX_GKE_APP_DISK_SIZE + 1);
+        expect(spinDiskInitValue).toEqual(appMaxDiskSize + 1);
         expectButtonElementDisabled(screen.queryByLabelText(createButton));
       });
 

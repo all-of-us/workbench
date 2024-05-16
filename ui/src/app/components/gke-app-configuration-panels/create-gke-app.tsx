@@ -12,6 +12,7 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import {
+  appMaxDiskSize,
   appMinDiskSize,
   canDeleteApp,
   defaultAppRequest,
@@ -32,7 +33,6 @@ import { ErrorMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { AnalysisConfig } from 'app/utils/analysis-config';
-import { MAX_GKE_APP_DISK_SIZE } from 'app/utils/constants';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
   allMachineTypes,
@@ -452,7 +452,7 @@ export const CreateGkeApp = ({
         {showErrorBanner && (
           <ErrorMessage>
             Disk size must be between {appMinDiskSize[appType]} GB and{' '}
-            {MAX_GKE_APP_DISK_SIZE} GB
+            {appMaxDiskSize} GB
           </ErrorMessage>
         )}
       </FlexRow>

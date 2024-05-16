@@ -347,5 +347,3 @@ export const GKE_APP_PROXY_PATH_SUFFIX = 'app';
 // https://precisionmedicineinitiative.atlassian.net/browse/RW-10698
 // We are restricting the demographic survey for international users only if they sign in after 11-03.x
 export const INTL_USER_SIGN_IN_CHECK = new Date('2023-11-03');
-
-export const MAX_GKE_APP_DISK_SIZE = 1000;

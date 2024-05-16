@@ -8,6 +8,7 @@ import {
 } from 'generated/fetch';
 
 import {
+  appMaxDiskSize,
   appMinDiskSize,
   findApp,
   openConfigPanelForUIApp,
@@ -19,7 +20,6 @@ import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import { userAppsStore } from 'app/utils/stores';
 
-import { MAX_GKE_APP_DISK_SIZE } from './constants';
 import { fetchWithErrorModal } from './errors';
 import { getLastActiveEpochMillis, setLastActive } from './inactivity';
 import { currentWorkspaceStore } from './navigation';
@@ -245,7 +245,7 @@ export const openAppInIframe = (
 };
 
 export const isDiskSizeValid = (appRequest) =>
-  appRequest.persistentDiskRequest.size <= MAX_GKE_APP_DISK_SIZE &&
+  appRequest.persistentDiskRequest.size <= appMaxDiskSize &&
   appRequest.persistentDiskRequest.size >= appMinDiskSize[appRequest.appType];
 
 export const openAppOrConfigPanel = (
