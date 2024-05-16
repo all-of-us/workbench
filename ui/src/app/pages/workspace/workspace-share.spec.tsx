@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Select from 'react-select';
 import * as fp from 'lodash/fp';
 
 import {
@@ -86,15 +85,15 @@ describe('WorkspaceShare', () => {
   } as WorkspaceData;
   const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
-  const getUserRoleDropdownLabel = (user: User) => {
-    return `Role selector for ${user.email}`;
+  const getUserRoleDropdownLabel = (desiredUser: User) => {
+    return `Role selector for ${desiredUser.email}`;
   };
 
-  const getAddCollaboratorLabel = (user: User) => {
-    return `Button to add ${user.email} as a collaborator`;
+  const getAddCollaboratorLabel = (desiredUser: User) => {
+    return `Button to add ${desiredUser.email} as a collaborator`;
   };
-  const getRemoveCollaboratorLabel = (user: User) => {
-    return `Button to remove ${user.email} as a collaborator`;
+  const getRemoveCollaboratorLabel = (desiredUser: User) => {
+    return `Button to remove ${desiredUser.email} as a collaborator`;
   };
 
   const addUser = async (userToAdd: User) => {

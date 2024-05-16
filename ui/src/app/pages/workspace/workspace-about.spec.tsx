@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
@@ -10,7 +9,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -27,7 +26,6 @@ import {
   expectSecondaryButton,
   renderWithRouter,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
