@@ -119,7 +119,6 @@ export const defaultSASCreateRequest: CreateAppRequest = {
   autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
-// This is not the best place for this, but it's causing test to pass, we need to rethink utils/user-app-utils
 export const appMinDiskSize: Record<AppType, number> = {
   [AppType.CROMWELL]: 50,
   [AppType.RSTUDIO]: 100,
