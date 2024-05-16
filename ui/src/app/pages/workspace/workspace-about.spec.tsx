@@ -152,23 +152,23 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should display cdr version', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="cdrVersion"]').text()).toContain(
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('cdrVersion').textContent).toContain(
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION
     );
   });
 
   it('should display workspace metadata', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="accessTierShortName"]').text()
-    ).toContain(fp.capitalize(workspace.accessTierShortName));
-    expect(wrapper.find('[data-test-id="creationDate"]').text()).toContain(
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('accessTierShortName').textContent).toContain(
+      fp.capitalize(workspace.accessTierShortName)
+    );
+    expect(screen.getByTestId('creationDate').textContent).toContain(
       new Date(workspace.creationTime).toDateString()
     );
-    expect(wrapper.find('[data-test-id="lastUpdated"]').text()).toContain(
+    expect(screen.getByTestId('lastUpdated').textContent).toContain(
       new Date(workspace.lastModifiedTime).toDateString()
     );
   });
@@ -176,7 +176,8 @@ describe('WorkspaceAbout', () => {
   it('should not manipulate SpecificPopulationItems object on page load', async () => {
     const raceSubCategoriesBeforePageload =
       SpecificPopulationItems[0].subCategory.length;
-    component();
+    componentAlt();
+    await waitForNoSpinner();
     const raceSubCategoriesAfterPageLoad =
       SpecificPopulationItems[0].subCategory.length;
     expect(raceSubCategoriesBeforePageload).toBe(
@@ -185,37 +186,46 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Publish',
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Publish',
+      })
+    ).not.toBeInTheDocument();
   });
 
-  it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
+  test.each([
+    ['FEATUREDWORKSPACEADMIN', Authority.FEATURED_WORKSPACE_ADMIN],
+    ['DEVELOPER', Authority.DEVELOPER],
+  ])(
+    `should display Publish/Unpublish buttons with %s Authority`,
+    async (_, authority) => {
+      const profileWithAuth = {
+        ...ProfileStubVariables.PROFILE_STUB,
+        authorities: [authority],
+      };
+      profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
-  });
-
-  it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.DEVELOPER],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
-
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
-  });
+      componentAlt();
+      await waitForNoSpinner();
+      expect(
+        screen.getByRole('button', {
+          name: 'Publish',
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: 'Publish',
+        })
+      ).toBeInTheDocument();
+    }
+  );
 
   it('Publish/Unpublish button styling depends on state - unpublished', async () => {
     const profileWithAuth = {
