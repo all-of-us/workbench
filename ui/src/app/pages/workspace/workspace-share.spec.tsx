@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Select from 'react-select';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   User,
@@ -11,7 +10,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import FakeTimers from '@sinonjs/fake-timers';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -24,7 +22,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   getSelectComponentValue,
-  waitOneTickAndUpdate,
+  waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -36,9 +34,6 @@ describe('WorkspaceShare', () => {
   let user;
 
   const component = () => {
-    return mount(<WorkspaceShare {...props} />);
-  };
-  const componentAlt = () => {
     return render(<WorkspaceShare {...props} />);
   };
   const harry: User = {
@@ -91,11 +86,7 @@ describe('WorkspaceShare', () => {
   } as WorkspaceData;
   const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
-  const getSelectString = (user: UserRole) => {
-    return '.' + user.email.replace(/[@\.]/g, '') + '-user-role__single-value';
-  };
-
-  const getSelectStringAlt = (user: UserRole) => {
+  const getUserRoleDropdownLabel = (user: User) => {
     return `Role selector for ${user.email}`;
   };
 
@@ -104,23 +95,6 @@ describe('WorkspaceShare', () => {
   };
   const getRemoveCollaboratorLabel = (user: User) => {
     return `Button to remove ${user.email} as a collaborator`;
-  };
-
-  const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
-    wrapper
-      .find('[data-test-id="search"]')
-      .simulate('change', { target: { value } });
-    clock.tick(401);
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.update();
-  };
-
-  const searchForUserAlt = async (value: string) => {
-    const searchBar = screen.getByTestId('search');
-    await user.clear(searchBar);
-    await user.click(searchBar);
-    await user.paste(value);
-    await screen.findByTestId('drop-down');
   };
 
   const addUser = async (userToAdd: User) => {
@@ -168,7 +142,7 @@ describe('WorkspaceShare', () => {
   });
 
   it('display correct users', async () => {
-    componentAlt();
+    component();
 
     let collabUserNames;
     await waitFor(() => {
@@ -187,39 +161,35 @@ describe('WorkspaceShare', () => {
   });
 
   it('displays correct role info', async () => {
-    componentAlt();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    component();
+    await waitForNoSpinner();
 
     expect(
       getSelectComponentValue(
-        screen.getByLabelText(getSelectStringAlt(harryRole))
+        screen.getByLabelText(getUserRoleDropdownLabel(harry))
       )
     ).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
 
     expect(
       getSelectComponentValue(
-        screen.getByLabelText(getSelectStringAlt(hermioneRole))
+        screen.getByLabelText(getUserRoleDropdownLabel(hermione))
       )
     ).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
 
     expect(
       getSelectComponentValue(
-        screen.getByLabelText(getSelectStringAlt(ronRole))
+        screen.getByLabelText(getUserRoleDropdownLabel(ron))
       )
     ).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
 
     expect(
-      screen.queryByLabelText(getSelectStringAlt(lunaRole))
+      screen.queryByLabelText(getUserRoleDropdownLabel(luna))
     ).not.toBeInTheDocument();
   });
 
   it('removes user correctly', async () => {
-    componentAlt();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    component();
+    await waitForNoSpinner();
 
     await removeUser(ron);
 
@@ -234,7 +204,8 @@ describe('WorkspaceShare', () => {
   });
 
   it('adds user correctly', async () => {
-    componentAlt();
+    component();
+    await waitForNoSpinner();
     await addUser(luna);
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione, ron, luna])
@@ -247,29 +218,25 @@ describe('WorkspaceShare', () => {
   });
 
   it('does not allow self-removal', async () => {
-    componentAlt();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    component();
+    await waitForNoSpinner();
     expect(
       screen.queryByLabelText(getRemoveCollaboratorLabel(harry))
     ).not.toBeInTheDocument();
   });
 
   it('does not allow self role change', async () => {
-    componentAlt();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    component();
+    await waitForNoSpinner();
 
-    expect(screen.getByLabelText(getSelectStringAlt(harryRole))).toBeDisabled();
+    expect(
+      screen.getByLabelText(getUserRoleDropdownLabel(harry))
+    ).toBeDisabled();
   });
 
   it('saves acl correctly after changes made', async () => {
-    componentAlt();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('Please Wait')).not.toBeInTheDocument()
-    );
+    component();
+    await waitForNoSpinner();
 
     // Luna: add, remove, add again
     await addUser(luna);
@@ -283,7 +250,7 @@ describe('WorkspaceShare', () => {
 
     // change hermione's access to owner
     const hermoineRoleDropdown = screen.getByLabelText(
-      getSelectStringAlt(hermioneRole)
+      getUserRoleDropdownLabel(hermione)
     );
     await user.click(hermoineRoleDropdown);
     await user.click(
