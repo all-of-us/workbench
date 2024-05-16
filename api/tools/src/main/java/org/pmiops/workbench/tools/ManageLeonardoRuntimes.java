@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -99,9 +100,17 @@ public class ManageLeonardoRuntimes {
         TABULAR_FORMAT, "ID", "Creator", "Status", "Created", "Accessed", "Destroyed");
   }
 
-  private static String toWholeSeconds(String dateTimeString) {
-    Instant instant = Instant.parse(dateTimeString);
-    return instant.minusNanos(instant.getNano()).toString();
+  private static String toWholeSeconds(@Nullable String dateTimeString) {
+    if (dateTimeString == null) {
+      return "[null]";
+    }
+
+    try {
+      Instant instant = Instant.parse(dateTimeString);
+      return instant.minusNanos(instant.getNano()).toString();
+    } catch (DateTimeParseException e) {
+      return "[invalid datetime: " + dateTimeString + "]";
+    }
   }
 
   private String formatTabular(LeonardoListRuntimeResponse r) {
