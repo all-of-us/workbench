@@ -7,6 +7,7 @@ import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
+import { BOOLEAN_CRITERIA_DOMAINS } from 'app/pages/data/cohort/constant';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
@@ -288,6 +289,19 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
         return acc;
       }, []);
 
+    const renderSelectIcon = (domain: string, type?: string) =>
+      BOOLEAN_CRITERIA_DOMAINS.includes(domain) ||
+      type === CriteriaType.DECEASED.toString() ? (
+        <ClrIcon
+          style={{
+            marginLeft: '-1.85rem',
+            width: '28px',
+            color: colorWithWhiteness(colors.success, -0.5),
+          }}
+          shape='plus-circle'
+        />
+      ) : null;
+
     useEffect(() => {
       // Close menu on outside click
       document.getElementById('root').addEventListener('click', onClickOutside);
@@ -297,6 +311,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
           .removeEventListener('click', onClickOutside);
       };
     });
+
     return (
       <div style={styles.cardBlock}>
         <button
@@ -504,6 +519,10 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                                       );
                                                     }}
                                                   >
+                                                    {renderSelectIcon(
+                                                      subMenuItem.domain,
+                                                      subMenuItem.type
+                                                    )}
                                                     {subMenuItem.name}
                                                   </a>
                                                 </li>
