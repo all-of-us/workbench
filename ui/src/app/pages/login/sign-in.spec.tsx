@@ -125,7 +125,10 @@ describe('SignIn', () => {
     expect(screen.getByTestId('login')).toBeInTheDocument();
   });
 
-  it('should handle sign-up flow', async () => {
+  test.each([
+    ['USA', 'United States'],
+    ['international', 'Canada'],
+  ])('should handle %s account creation flow.', async (country) => {
     // This test is meant to validate the high-level flow through the sign-in component by checking
     // that each step of the user registration flow is correctly rendered in order.
     //
@@ -150,51 +153,18 @@ describe('SignIn', () => {
     await user.click(await screen.findByRole('button', { name: /next/i }));
 
     // ACCOUNT_DETAILS
-    mockCountry = 'United States';
+    mockCountry = country;
     await screen.findByText(mockAccountDetailsTitle);
     await user.click(await screen.findByRole('button', { name: /next/i }));
 
     // DEMOGRAPHIC_SURVEY
-    await screen.findByText(mockDemographicSurveyTitle);
-    await user.click(await screen.findByRole('button', { name: /submit/i }));
+    if (country === 'United States') {
+      await screen.findByText(mockDemographicSurveyTitle);
+      await user.click(await screen.findByRole('button', { name: /submit/i }));
+    }
 
     // SUCCESS_PAGE
     await screen.getByRole('heading', {
-      name: /congratulations!/i,
-    });
-  });
-
-  it('should not show demographic survey of international user', async () => {
-    // This test is meant to validate the high-level flow through the sign-in component by checking
-    // that each step of the user registration flow is correctly rendered in order.
-    //
-    // As this is simply a high-level test of this component's ability to render each sub-component,
-    // we mock the inner components to avoid needing to deal with the DOM-level details of
-    // each of the sub-components. Tests within the 'account-creation' folder should cover those
-    // details.
-    component();
-    // the sign-up flow steps are enumerated by `SignInStep`:
-    // LANDING, TERMS_OF_SERVICE, INSTITUTIONAL_AFFILIATION, ACCOUNT_DETAILS, SUCCESS_PAGE,
-
-    // To start, the LANDING page / login component should be shown.
-    await user.click(
-      await screen.findByRole('button', { name: 'Create Account' })
-    );
-    // TERMS_OF_SERVICE
-    await screen.findByText(mockTOSTitle);
-    await user.click(await screen.findByRole('button', { name: /next/i }));
-
-    // INSTITUTIONAL_AFFILIATION
-    await screen.findByText(mockAccountCreationInstitutionTitle);
-    await user.click(await screen.findByRole('button', { name: /next/i }));
-
-    // ACCOUNT_DETAILS
-    mockCountry = 'Canada';
-    await screen.findByText(mockAccountDetailsTitle);
-    await user.click(await screen.findByRole('button', { name: /submit/i }));
-
-    // SUCCESS_PAGE
-    await screen.findByRole('heading', {
       name: /congratulations!/i,
     });
   });
