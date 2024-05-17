@@ -321,17 +321,19 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    notebookComponentAlt();
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => {
       jest.advanceTimersByTime(2000);
     });
+    jest.runOnlyPendingTimers();
 
-    await waitForFakeTimersAndUpdate(wrapper);
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+    );
 
-    expect(wrapper.find(Iframe).exists()).toBeTruthy();
+    await screen.findByTitle('Notebook Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
@@ -339,7 +341,7 @@ describe('NotebookLauncher', () => {
       ...runtime,
       status: RuntimeStatus.UPDATING,
     }));
-    await waitForFakeTimersAndUpdate(wrapper);
+    jest.runOnlyPendingTimers();
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });
