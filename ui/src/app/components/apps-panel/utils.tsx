@@ -119,6 +119,14 @@ export const defaultSASCreateRequest: CreateAppRequest = {
   autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
 
+export const appMinDiskSize: Record<AppType, number> = {
+  [AppType.CROMWELL]: 50,
+  [AppType.RSTUDIO]: 100,
+  [AppType.SAS]: 150,
+};
+
+export const appMaxDiskSize = 1000;
+
 export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
   [AppType.CROMWELL]: defaultCromwellCreateRequest,
   [AppType.RSTUDIO]: defaultRStudioCreateRequest,

@@ -13,6 +13,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { UserEvent } from '@testing-library/user-event/index';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -214,6 +215,16 @@ export const getHTMLInputElementValue = (element: HTMLElement): string => {
   return (element as HTMLInputElement).value;
 };
 
+export const pickSpinButtonValue = async (
+  user: UserEvent,
+  name: string,
+  value: number
+): Promise<void> => {
+  const spinButton = screen.getByRole('spinbutton', { name });
+  expect(spinButton).toBeInTheDocument();
+  await user.clear(spinButton);
+  await user.type(spinButton, value.toString());
+};
 // by default, screen.debug() cuts off after 7000 chars.  let's output more than that
 export const debugAll = () => screen.debug(undefined, 1_000_000);
 
