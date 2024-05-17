@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
-import { ExclamationTriangle } from 'app/components/icons';
+import { screen } from '@testing-library/react';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { nowPlusDays } from 'app/utils/dates';
