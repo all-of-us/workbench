@@ -453,8 +453,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
       } = this.props;
       if (
         BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
-        searchParameters[0].type === CriteriaType.DECEASED.toString() ||
-        searchParameters[0].type === CriteriaType.HAS_EHR_DATA.toString()
+        searchParameters[0]?.type === CriteriaType.DECEASED.toString() ||
+        searchParameters[0]?.type === CriteriaType.HAS_EHR_DATA.toString()
       ) {
         return !!name ? name : searchParameters[0].name;
       } else {
@@ -473,9 +473,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
       } = this.props;
       return (
         BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
-        (searchParameters[0] &&
-          (searchParameters[0].type === CriteriaType.DECEASED.toString() ||
-            searchParameters[0].type === CriteriaType.HAS_EHR_DATA.toString()))
+        searchParameters[0]?.type === CriteriaType.DECEASED.toString() ||
+        searchParameters[0]?.type === CriteriaType.HAS_EHR_DATA.toString()
       );
     }
 
