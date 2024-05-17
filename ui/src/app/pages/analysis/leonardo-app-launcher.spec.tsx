@@ -385,11 +385,12 @@ describe('NotebookLauncher', () => {
         )
       );
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    notebookComponentAlt();
 
-    expect(wrapper.find(Iframe).exists()).toBeFalsy();
-    expect(wrapper.find(SecuritySuspendedMessage).exists()).toBeTruthy();
+    await screen.findByText(
+      /your analysis environment was temporarily suspended but is now available for use\./i
+    );
+    expect(screen.queryByTitle('Notebook Container')).not.toBeInTheDocument();
   });
 
   it('should show runtime initializer modal if runtime not found', async () => {
