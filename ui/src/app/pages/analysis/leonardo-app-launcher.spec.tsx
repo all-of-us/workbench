@@ -15,6 +15,8 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   genericProgressStrings,
   LeoApplicationType,
@@ -61,8 +63,16 @@ function currentCardText(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="current-progress-card"]').first().text();
 }
 
+function currentCardTextAlt() {
+  return screen.getByTestId('current-progress-card').textContent;
+}
+
 function getCardSpinnerTestId(cardState: ProgressCardState) {
   return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
+}
+
+function getCardSpinnerTestIdAlt(cardState: ProgressCardState) {
+  return 'progress-card-spinner-' + cardState.valueOf();
 }
 
 describe('NotebookLauncher', () => {
@@ -76,6 +86,7 @@ describe('NotebookLauncher', () => {
   const updateCache = jest.fn();
 
   let runtimeStub;
+  let user;
 
   const notebookInitialUrl = `${analysisTabPath('namespace', 'id')}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
@@ -95,6 +106,20 @@ describe('NotebookLauncher', () => {
     return c;
   };
 
+  const notebookComponentAlt = () => {
+    return render(
+      <Router history={history}>
+        <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
+          <LeonardoAppLauncher
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            leoAppType={LeoApplicationType.JupyterNotebook}
+          />
+        </Route>
+      </Router>
+    );
+  };
+
   async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
     await act(() => {
       runtimeStub.runtime = updateFn(runtimeStub.runtime);
@@ -106,6 +131,12 @@ describe('NotebookLauncher', () => {
       return Promise.resolve();
     });
   }
+
+  // Runtime is on
+  const updateRuntimeStatus = (status: RuntimeStatus) => {
+    runtimeStub.runtime.status = status;
+    jest.runOnlyPendingTimers();
+  };
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
@@ -136,37 +167,41 @@ describe('NotebookLauncher', () => {
   });
 
   it('should render', async () => {
-    const wrapper = await notebookComponent();
-    expect(wrapper).toBeTruthy();
+    notebookComponentAlt();
+    expect(
+      screen.getByRole('heading', {
+        name: /loading notebook: wharrgarbl/i,
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show redirect display before showing notebook', async () => {
-    const wrapper = await notebookComponent();
-    expect(wrapper.exists('[data-test-id="leo-app-launcher"]')).toBeTruthy();
+    notebookComponentAlt();
+    expect(screen.getByTestId('leo-app-launcher')).toBeInTheDocument();
   });
 
   it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    notebookComponentAlt();
 
-    expect(
-      wrapper.exists(
-        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-      )
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      notebookProgressStrings.get(Progress.Initializing)
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
-    await waitForFakeTimersAndUpdate(wrapper);
+    await waitFor(() => {
+      expect(currentCardTextAlt()).toContain(
+        notebookProgressStrings.get(Progress.Initializing)
+      );
+    });
 
-    expect(
-      wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
+    updateRuntimeStatus(RuntimeStatus.RUNNING);
+
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+    );
+
+    expect(currentCardTextAlt()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
