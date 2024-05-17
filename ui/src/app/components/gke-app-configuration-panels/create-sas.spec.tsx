@@ -65,10 +65,10 @@ describe(CreateSAS.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('should display a cost of $0.41 per hour when running', async () => {
+  it('should display a cost of $0.40 per hour when running', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
-      '$0.41 per hour'
+      '$0.40 per hour'
     );
   });
 });
