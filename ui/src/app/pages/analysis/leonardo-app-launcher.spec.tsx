@@ -15,7 +15,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   genericProgressStrings,
@@ -159,7 +159,7 @@ describe('NotebookLauncher', () => {
       runtime: undefined,
       runtimeLoaded: false,
     });
-
+    user = userEvent.setup();
     jest.useFakeTimers();
   });
 
@@ -405,23 +405,26 @@ describe('NotebookLauncher', () => {
   test.each(['cancel', 'configure'])(
     'should show retry message on runtime initializer %s',
     async (action) => {
+      jest.useRealTimers();
       history.push(notebookInitialUrl + '?kernelType=R?creating=false');
       runtimeStub.runtime = null;
 
-      const wrapper = await notebookComponent();
-      await waitForFakeTimersAndUpdate(wrapper);
+      notebookComponentAlt();
 
-      wrapper
-        .find({ 'data-test-id': `runtime-initializer-${action}` })
-        .simulate('click');
-      await waitForFakeTimersAndUpdate(wrapper);
+      const dialog = await screen.findByRole('dialog');
+      await user.click(
+        within(dialog).getByRole('button', {
+          name: /cancel/i,
+        })
+      );
+
+      await waitFor(() => {
+        expect(dialog).not.toBeInTheDocument();
+      });
 
       expect(
-        wrapper.exists({ 'data-test-id': `runtime-initializer-${action}` })
-      ).toBeFalsy();
-      expect(wrapper.text()).toContain(
-        'This action requires an analysis environment.'
-      );
+        screen.getByText(/This action requires an analysis environment\./i)
+      ).toBeInTheDocument();
     }
   );
 
