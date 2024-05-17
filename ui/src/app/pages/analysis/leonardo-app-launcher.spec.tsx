@@ -397,12 +397,9 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime = null;
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    notebookComponentAlt();
 
-    expect(
-      wrapper.exists({ 'data-test-id': 'runtime-initializer-create' })
-    ).toBeTruthy();
+    await screen.findByText('Create an Analysis Environment');
   });
 
   test.each(['cancel', 'configure'])(
