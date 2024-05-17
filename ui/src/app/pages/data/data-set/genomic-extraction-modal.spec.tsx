@@ -20,6 +20,13 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { GenomicExtractionModal } from './genomic-extraction-modal';
 
+const extractionWarningRegex =
+  /an extraction is currently running for this dataset/i;
+const existingVcfWarningRegex =
+  /vcf file\(s\) already exist for this dataset\. /i;
+const lastVcfFailedWarningRegex =
+  /last time a vcf extract was attempted for this workflow, it failed\. /i;
+
 describe('GenomicExtractionModal', () => {
   let dataset;
   let datasetApiStub: DataSetApiStub;
@@ -87,9 +94,7 @@ describe('GenomicExtractionModal', () => {
 
     await component();
 
-    expect(
-      screen.getByText(/an extraction is currently running for this dataset/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(extractionWarningRegex)).toBeInTheDocument();
   });
 
   it('should show a warning message when the most recent extract has succeeded', async () => {
@@ -112,9 +117,7 @@ describe('GenomicExtractionModal', () => {
 
     await component();
 
-    expect(
-      screen.getByText(/vcf file\(s\) already exist for this dataset\. /i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(existingVcfWarningRegex)).toBeInTheDocument();
   });
 
   it('should show a warning message the most recent extract has failed', async () => {
@@ -137,11 +140,7 @@ describe('GenomicExtractionModal', () => {
 
     await component();
 
-    expect(
-      screen.getByText(
-        /last time a vcf extract was attempted for this workflow, it failed\. /i
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(lastVcfFailedWarningRegex)).toBeInTheDocument();
   });
 
   it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', async () => {
@@ -158,16 +157,10 @@ describe('GenomicExtractionModal', () => {
     ];
 
     await component();
+    expect(screen.queryByText(extractionWarningRegex)).not.toBeInTheDocument();
+    expect(screen.queryByText(existingVcfWarningRegex)).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/an extraction is currently running for this dataset/i)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/vcf file\(s\) already exist for this dataset\. /i)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(
-        /last time a vcf extract was attempted for this workflow, it failed\. /i
-      )
+      screen.queryByText(lastVcfFailedWarningRegex)
     ).not.toBeInTheDocument();
   });
 

@@ -186,17 +186,14 @@ describe('WorkspaceAbout', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', {
-        name: 'Publish',
+        name: 'Unpublish',
       })
     ).not.toBeInTheDocument();
   });
 
-  test.each([
-    ['FEATUREDWORKSPACEADMIN', Authority.FEATURED_WORKSPACE_ADMIN],
-    ['DEVELOPER', Authority.DEVELOPER],
-  ])(
+  test.each([Authority.FEATURED_WORKSPACE_ADMIN, Authority.DEVELOPER])(
     `should display Publish/Unpublish buttons with %s Authority`,
-    async (_, authority) => {
+    async (authority) => {
       const profileWithAuth = {
         ...ProfileStubVariables.PROFILE_STUB,
         authorities: [authority],
