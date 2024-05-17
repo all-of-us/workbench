@@ -451,7 +451,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {
         item: { name, searchParameters, type },
       } = this.props;
-      if (BOOLEAN_CRITERIA_DOMAINS.includes(type)) {
+      if (
+        BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
+        searchParameters[0].type === CriteriaType.DECEASED.toString() ||
+        searchParameters[0].type === CriteriaType.HAS_EHR_DATA.toString()
+      ) {
         return !!name ? name : searchParameters[0].name;
       } else {
         const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
