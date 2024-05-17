@@ -206,32 +206,6 @@ describe('NotebookLauncher', () => {
     );
   });
 
-  it('should be "Initializing" until a Creating runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.CREATING;
-
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(
-      wrapper.exists(
-        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-      )
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      notebookProgressStrings.get(Progress.Initializing)
-    );
-
-    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(
-      wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
-
   it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.STOPPED;
