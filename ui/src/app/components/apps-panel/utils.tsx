@@ -23,6 +23,7 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
+import { toPascalCase } from 'app/utils/strings';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
@@ -68,6 +69,14 @@ export const appAssets: AppAssets[] = [
   },
 ];
 
+export const appMinDiskSize: Record<AppType, number> = {
+  [AppType.CROMWELL]: 50,
+  [AppType.RSTUDIO]: 100,
+  [AppType.SAS]: 150,
+};
+
+export const appMaxDiskSize = 1000;
+
 // TODO replace with better defaults?
 export const defaultCromwellCreateRequest: CreateAppRequest = {
   appType: AppType.CROMWELL,
@@ -77,7 +86,7 @@ export const defaultCromwellCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 50,
+    size: appMinDiskSize[AppType.CROMWELL],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
@@ -94,7 +103,7 @@ export const defaultRStudioCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 100,
+    size: appMinDiskSize[AppType.RSTUDIO],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
@@ -111,21 +120,13 @@ export const defaultSASCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 250,
+    size: appMinDiskSize[AppType.SAS],
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: false,
   // Okay to have value here because when autodeleteEnabled is false, this value is not used.
   autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
 };
-
-export const appMinDiskSize: Record<AppType, number> = {
-  [AppType.CROMWELL]: 50,
-  [AppType.RSTUDIO]: 100,
-  [AppType.SAS]: 150,
-};
-
-export const appMaxDiskSize = 1000;
 
 export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
   [AppType.CROMWELL]: defaultCromwellCreateRequest,
@@ -229,9 +230,11 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
 // else return the original status
 export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
   const mappedStatus = fromUserAppStatus(status);
-  return mappedStatus === UserEnvironmentStatus.UNKNOWN
-    ? status?.toString()
-    : mappedStatus;
+  const userAppStatusAsStr =
+    mappedStatus === UserEnvironmentStatus.UNKNOWN
+      ? status?.toString()
+      : mappedStatus;
+  return toPascalCase(userAppStatusAsStr);
 };
 
 export const toUserEnvironmentStatusByAppType = (
