@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
-import { mount } from 'enzyme';
+import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
-import { ExclamationTriangle } from 'app/components/icons';
+import { screen } from '@testing-library/react';
 import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { renderWithRouter, rgbToHex } from 'testing/react-test-helpers';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import {
@@ -134,11 +134,7 @@ const updateModules = (modules: AccessModuleStatus[]) => {
 
 describe('Access Renewal Notification', () => {
   const component = (props: AccessRenewalNotificationProps) => {
-    return mount(
-      <MemoryRouter>
-        <AccessRenewalNotificationMaybe {...props} />
-      </MemoryRouter>
-    );
+    return renderWithRouter(<AccessRenewalNotificationMaybe {...props} />);
   };
 
   beforeEach(() => {
@@ -316,18 +312,21 @@ describe('Access Renewal Notification', () => {
     ) => {
       updateModules(moduleStatuses);
 
-      const wrapper = component({ accessTier });
-      expect(wrapper.exists()).toBeTruthy();
+      component({ accessTier });
 
-      const banner = wrapper.find({
-        'data-test-id': 'access-renewal-notification',
-      });
-      expect(banner.exists()).toEqual(expected);
+      const banner = screen.queryByTestId('access-renewal-notification');
       if (expected) {
-        expect(banner.first().props().style.backgroundColor).toBe(bannerColor);
-        expect(wrapper.find(ExclamationTriangle).prop('style').color).toBe(
-          iconColor
+        expect(banner).toBeInTheDocument();
+        expect(banner.style.backgroundColor).toBe(bannerColor);
+        // FontAwesomeIcons hav a role of 'img' and an aria-hidden attribute
+        const exclamationTriangle = screen.getByRole('img', {
+          hidden: true,
+        });
+        expect(fp.capitalize(rgbToHex(exclamationTriangle.style.color))).toBe(
+          fp.capitalize(iconColor)
         );
+      } else {
+        expect(banner).not.toBeInTheDocument();
       }
     }
   );
