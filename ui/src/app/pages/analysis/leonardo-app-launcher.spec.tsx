@@ -361,7 +361,6 @@ describe('NotebookLauncher', () => {
     await screen.findByText(
       /your analysis environment was temporarily suspended but is now available for use\./i
     );
-    screen.logTestingPlaygroundURL();
     expect(screen.queryByTitle('Notebook Container')).not.toBeInTheDocument();
   });
 
