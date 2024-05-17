@@ -220,7 +220,7 @@ export const debugAll = () => screen.debug(undefined, 1_000_000);
 export const rgbToHex = (rgb) => {
   const rgbValues = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
   const hex = (x) => {
-    return ('0' + parseInt(x).toString(16)).slice(-2);
+    return ('0' + parseInt(x, 10).toString(16)).slice(-2);
   };
   return '#' + hex(rgbValues[1]) + hex(rgbValues[2]) + hex(rgbValues[3]);
 };
