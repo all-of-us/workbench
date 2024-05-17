@@ -12,7 +12,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   appMaxDiskSize,
@@ -704,6 +704,13 @@ describe(CreateGkeApp.name, () => {
         expect(
           spinDiskElement('gke-app-disk').attributes.getNamedItem('disabled')
         ).toBeTruthy();
+        fireEvent.mouseOver(spinDiskElement('gke-app-disk'));
+        expect(
+          screen.getByText(
+            'Cannot modify existing disk. To update the disk size please delete the disk and ' +
+              'create a new environment.'
+          )
+        ).toBeInTheDocument();
       });
     }
   );

@@ -17,6 +17,7 @@ import {
   canDeleteApp,
   defaultAppRequest,
   findApp,
+  fromUserAppStatusWithFallback,
   isAppActive,
   toUIAppType,
 } from 'app/components/apps-panel/utils';
@@ -44,7 +45,7 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
-import { oxfordCommaString } from 'app/utils/strings';
+import { oxfordCommaString, toPascalCase } from 'app/utils/strings';
 import {
   appTypeToString,
   isDiskSizeValid,
@@ -225,7 +226,11 @@ export const CreateGkeApp = ({
   const disableDiskSizeContent = cond(
     [
       !!app,
-      `Disk size cannot be updated because ${toUIAppType[appType]} environment already exists. 
+      `Disk size cannot be updated because the ${
+        toUIAppType[appType]
+      } environment is in ${toPascalCase(
+        fromUserAppStatusWithFallback(app?.status)
+      )} state. 
       To make changes, please delete the disk and recreate the environment.`,
     ],
     [
