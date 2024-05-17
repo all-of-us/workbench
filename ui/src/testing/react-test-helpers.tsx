@@ -13,6 +13,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { UserEvent } from '@testing-library/user-event/index';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -214,8 +215,45 @@ export const getHTMLInputElementValue = (element: HTMLElement): string => {
   return (element as HTMLInputElement).value;
 };
 
+export const pickSpinButtonValue = async (
+  user: UserEvent,
+  name: string,
+  value: number
+): Promise<void> => {
+  const spinButton = screen.getByRole('spinbutton', { name });
+  expect(spinButton).toBeInTheDocument();
+  await user.clear(spinButton);
+  await user.type(spinButton, value.toString());
+};
 // by default, screen.debug() cuts off after 7000 chars.  let's output more than that
 export const debugAll = () => screen.debug(undefined, 1_000_000);
+
+/* This function is used to get the value of a Select component.
+This assumes that the Select component is a
+react-select Select component. The function expects the
+component's underlying input element as input. This is based on
+a helper function that Terra-UI utilizes:
+https://github.com/DataBiosphere/terra-ui/blob/dev/src/testing/test-utils.ts
+*/
+export const getSelectComponentValue = (
+  inputElement: HTMLInputElement
+): string => {
+  // Searchable Select components have an additional wrapper element
+  const valueContainer =
+    inputElement.parentElement?.parentElement?.parentElement;
+  const valueElement = valueContainer.querySelector(
+    ':scope > div[class*="Value"]'
+  );
+  return valueElement.textContent ?? '';
+};
+
+export const expectPrimaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'primary');
+};
+
+export const expectSecondaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'secondary');
+};
 
 export const rgbToHex = (rgb) => {
   const rgbValues = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);

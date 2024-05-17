@@ -12,9 +12,12 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import {
+  appMaxDiskSize,
+  appMinDiskSize,
   canDeleteApp,
   defaultAppRequest,
   findApp,
+  fromUserAppStatusWithFallback,
   isAppActive,
   toUIAppType,
 } from 'app/components/apps-panel/utils';
@@ -27,7 +30,9 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { ClrIcon } from 'app/components/icons';
 import { CheckBox } from 'app/components/inputs';
+import { ErrorMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
+import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { AnalysisConfig } from 'app/utils/analysis-config';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
@@ -40,9 +45,10 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
-import { oxfordCommaString } from 'app/utils/strings';
+import { oxfordCommaString, toPascalCase } from 'app/utils/strings';
 import {
   appTypeToString,
+  isDiskSizeValid,
   isInteractiveUserApp,
   unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
@@ -215,6 +221,27 @@ export const CreateGkeApp = ({
   const showDeleteDiskButton = unattachedDiskExists(app, disk);
   const showDeleteAppButton = canDeleteApp(app);
 
+  const canModifyDiskSize = !app && !unattachedDiskExists(app, disk);
+
+  const disableDiskSizeContent = cond(
+    [
+      !!app,
+      `Disk size cannot be updated because the ${
+        toUIAppType[appType]
+      } environment is in ${toPascalCase(
+        fromUserAppStatusWithFallback(app?.status)
+      )} state. 
+      To make changes, please delete the disk and recreate the environment.`,
+    ],
+    [
+      unattachedDiskExists(app, disk),
+      `Cannot modify existing disk. To update the disk size please delete the disk and create a new environment.`,
+    ]
+  );
+
+  const showErrorBanner =
+    createAppRequest && !isDiskSizeValid(createAppRequest);
+
   // when there is a delete button, FlexRow aligns the open/create button to the right
   // for consistency of location when there is no delete button, we shift it to the right with `margin-left: auto`
 
@@ -320,7 +347,6 @@ export const CreateGkeApp = ({
         ) : (
           <DisabledCloudComputeProfile
             {...{ appType, sharingNote }}
-            persistentDiskRequest={createAppRequest?.persistentDiskRequest}
             machine={toMachine(createAppRequest)}
             disabledText={machineTypeDisabledText}
           />
@@ -401,7 +427,40 @@ export const CreateGkeApp = ({
           </FlexColumn>
         </FlexRow>
       </div>
+      <div style={{ ...styles.controlSection }}>
+        <FlexRow>
+          <TooltipTrigger
+            disabled={canModifyDiskSize}
+            content={disableDiskSizeContent}
+          >
+            <div>
+              <DiskSizeSelector
+                onChange={(size: number) =>
+                  setCreateAppRequest((prevState) => ({
+                    ...prevState,
+                    persistentDiskRequest: {
+                      ...prevState.persistentDiskRequest,
+                      size: size,
+                    },
+                  }))
+                }
+                disabled={!canModifyDiskSize}
+                diskSize={createAppRequest.persistentDiskRequest.size}
+                idPrefix={'gke-app'}
+              />
+            </div>
+          </TooltipTrigger>
+        </FlexRow>
+      </div>
       <SupportNote />
+      <FlexRow>
+        {showErrorBanner && (
+          <ErrorMessage>
+            Disk size must be between {appMinDiskSize[appType]} GB and{' '}
+            {appMaxDiskSize} GB
+          </ErrorMessage>
+        )}
+      </FlexRow>
       <FlexRow
         style={{
           alignItems: 'center',

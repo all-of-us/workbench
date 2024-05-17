@@ -29,3 +29,12 @@ export const oxfordCommaString = (
       return `${allButLast}, and ${last}`;
     }
   );
+
+export const toPascalCase = (str: string) => {
+  if (!str) {
+    return str;
+  }
+  const [fst] = str;
+
+  return `${fst.toUpperCase()}${str.toLowerCase().slice(1)}`;
+};

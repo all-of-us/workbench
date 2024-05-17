@@ -1,32 +1,47 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { DataSetApi, TerraJobStatus } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 import { SWRConfig } from 'swr';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { GenomicExtractionModal } from './genomic-extraction-modal';
+
+const extractionWarningRegex =
+  /an extraction is currently running for this dataset/i;
+const existingVcfWarningRegex =
+  /vcf file\(s\) already exist for this dataset\. /i;
+const lastVcfFailedWarningRegex =
+  /last time a vcf extract was attempted for this workflow, it failed\. /i;
 
 describe('GenomicExtractionModal', () => {
   let dataset;
   let datasetApiStub: DataSetApiStub;
   let testProps;
   let workspace;
+  let user;
 
   const component = async () => {
-    const w = mount(
+    const renderResult = render(
       <SWRConfig value={{ provider: () => new Map() }}>
         <GenomicExtractionModal {...testProps} />
       </SWRConfig>
     );
-    await waitOneTickAndUpdate(w);
-    return w;
+    await waitForNoSpinner();
+    return renderResult;
   };
 
   beforeEach(() => {
@@ -43,6 +58,7 @@ describe('GenomicExtractionModal', () => {
       closeFunction: () => {},
       title: "Top 10 Egregious Hacks Your Tech Lead Doesn't Want You To Know",
     };
+    user = userEvent.setup();
   });
 
   afterEach(() => {
@@ -50,8 +66,10 @@ describe('GenomicExtractionModal', () => {
   });
 
   it('should render', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
+    await component();
+    screen.getByText(
+      /top 10 egregious hacks your tech lead doesn't want you to know/i
+    );
   });
 
   it('should show a warning when there is a currently running extract for this dataset', async () => {
@@ -74,10 +92,9 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain('An extraction is currently running');
+    await component();
+
+    expect(screen.getByText(extractionWarningRegex)).toBeInTheDocument();
   });
 
   it('should show a warning message when the most recent extract has succeeded', async () => {
@@ -98,12 +115,9 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain(
-      'VCF file(s) already exist for this dataset.'
-    );
+    await component();
+
+    expect(screen.getByText(existingVcfWarningRegex)).toBeInTheDocument();
   });
 
   it('should show a warning message the most recent extract has failed', async () => {
@@ -124,12 +138,9 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
-    const warning = wrapper.find('[data-test-id="extract-warning"]');
-    expect(warning.exists()).toBeTruthy();
-    expect(warning.text()).toContain(
-      'Last time a VCF extract was attempted for this workflow, it failed.'
-    );
+    await component();
+
+    expect(screen.getByText(lastVcfFailedWarningRegex)).toBeInTheDocument();
   });
 
   it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', async () => {
@@ -145,10 +156,12 @@ describe('GenomicExtractionModal', () => {
       },
     ];
 
-    const wrapper = await component();
+    await component();
+    expect(screen.queryByText(extractionWarningRegex)).not.toBeInTheDocument();
+    expect(screen.queryByText(existingVcfWarningRegex)).not.toBeInTheDocument();
     expect(
-      wrapper.find('[data-test-id="extract-warning"]').exists()
-    ).toBeFalsy();
+      screen.queryByText(lastVcfFailedWarningRegex)
+    ).not.toBeInTheDocument();
   });
 
   it('should show error text on known failed extract', async () => {
@@ -159,20 +172,16 @@ describe('GenomicExtractionModal', () => {
         new Response(JSON.stringify({ message }), { status: 412 })
       );
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
 
-    const extractButton = () =>
-      wrapper.find('[data-test-id="extract-button"]').first();
-    extractButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const error = wrapper.find('[data-test-id="extract-error"]');
-    expect(error.exists()).toBeTruthy();
-    expect(error.text()).toContain(message);
+    const extractButton = await screen.findByRole('button', {
+      name: /extract/i,
+    });
+    await user.click(extractButton);
+    await screen.findByText(`Failed to launch extraction: ${message}.`);
 
     // Client errors will not work on retry, disable the extract button.
-    expect(extractButton().prop('disabled')).toBe(true);
+    expectButtonElementDisabled(extractButton);
   });
 
   it('should show error text on unknown error', async () => {
@@ -180,18 +189,15 @@ describe('GenomicExtractionModal', () => {
       .spyOn(datasetApiStub, 'extractGenomicData')
       .mockRejectedValueOnce(new Response(null, { status: 500 }));
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
+    await component();
 
-    const extractButton = () =>
-      wrapper.find('[data-test-id="extract-button"]').first();
-    extractButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const error = wrapper.find('[data-test-id="extract-error"]');
-    expect(error.exists()).toBeTruthy();
+    const extractButton = await screen.findByRole('button', {
+      name: /extract/i,
+    });
+    await user.click(extractButton);
+    await screen.findByText(`Failed to launch extraction: unknown error.`);
 
     // Unknown errors may be transient, allow the user to try again.
-    expect(extractButton().prop('disabled')).toBe(false);
+    expectButtonElementEnabled(extractButton);
   });
 });
