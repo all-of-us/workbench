@@ -57,8 +57,6 @@ import { ProxyApiStub } from 'testing/stubs/proxy-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { SecuritySuspendedMessage } from './notebook-frame-error';
-
 function currentCardText(wrapper: ReactWrapper) {
   return wrapper.find('[data-test-id="current-progress-card"]').first().text();
 }
@@ -478,6 +476,21 @@ describe('TerminalLauncher', () => {
       </Router>
     );
     await waitOneTickAndUpdate(t);
+    return t;
+  };
+
+  const terminalComponentAlt = async () => {
+    const t = render(
+      <Router history={history}>
+        <Route path='/workspaces/:ns/:wsid/terminals'>
+          <LeonardoAppLauncher
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            leoAppType={LeoApplicationType.JupyterTerminal}
+          />
+        </Route>
+      </Router>
+    );
     return t;
   };
 
