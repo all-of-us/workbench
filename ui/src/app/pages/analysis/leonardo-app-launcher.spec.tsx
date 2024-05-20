@@ -562,17 +562,19 @@ describe('TerminalLauncher', () => {
     history.push(terminalInitialUrl);
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    const wrapper = await terminalComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    await terminalComponentAlt();
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => {
       jest.advanceTimersByTime(2000);
     });
+    jest.runOnlyPendingTimers();
 
-    await waitForFakeTimersAndUpdate(wrapper);
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+    );
 
-    expect(wrapper.find(Iframe).exists()).toBeTruthy();
+    await screen.findByTitle('Notebook Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
@@ -580,14 +582,15 @@ describe('TerminalLauncher', () => {
       ...runtime,
       status: RuntimeStatus.DELETING,
     }));
-    await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(mockNavigate).toHaveBeenCalledWith([
-      'workspaces',
-      'defaultNamespace',
-      '1',
-      analysisTabName,
-    ]);
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith([
+        'workspaces',
+        'defaultNamespace',
+        '1',
+        analysisTabName,
+      ]);
+    });
   });
 });
 
