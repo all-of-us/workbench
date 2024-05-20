@@ -55,7 +55,7 @@ public class LeonardoApiClientFactory {
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.lenientTimeoutInSeconds * 1000);
     return apiClient;
   }
 

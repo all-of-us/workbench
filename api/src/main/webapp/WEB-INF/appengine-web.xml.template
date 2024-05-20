@@ -17,6 +17,7 @@
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="appengine.use.EE10" value="true"/>
+    <property name="appengine.api.urlfetch.defaultDeadline" value="90"/>
   </system-properties>
 
   <static-error-handlers>
