@@ -429,20 +429,23 @@ describe('NotebookLauncher', () => {
   );
 
   it('should create runtime on runtime initializer create', async () => {
+    jest.useRealTimers();
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime = null;
 
-    const wrapper = await notebookComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    notebookComponentAlt();
 
-    wrapper
-      .find({ 'data-test-id': 'runtime-initializer-create' })
-      .simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
+    const dialog = await screen.findByRole('dialog');
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: /create environment/i,
+      })
+    );
 
-    expect(
-      wrapper.exists({ 'data-test-id': 'runtime-initializer-create' })
-    ).toBeFalsy();
+    await waitFor(() => {
+      expect(dialog).not.toBeInTheDocument();
+    });
+
     expect(runtimeStub.runtime).toBeTruthy();
   });
 });
