@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import Iframe from 'react-iframe';
 import { Route, Router } from 'react-router-dom';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory } from 'history';
@@ -100,22 +99,7 @@ describe('NotebookLauncher', () => {
   const notebookInitialUrl = `${analysisTabPath('namespace', 'id')}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
-  const notebookComponent = async () => {
-    const c = mount(
-      <Router history={history}>
-        <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
-          <LeonardoAppLauncher
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            leoAppType={LeoApplicationType.JupyterNotebook}
-          />
-        </Route>
-      </Router>
-    );
-    return c;
-  };
-
-  const notebookComponentAlt = () => {
+  const notebookComponent = () => {
     return render(
       <Router history={history}>
         <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
@@ -170,7 +154,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should render', async () => {
-    notebookComponentAlt();
+    notebookComponent();
     expect(
       screen.getByRole('heading', {
         name: /loading notebook: wharrgarbl/i,
@@ -179,14 +163,14 @@ describe('NotebookLauncher', () => {
   });
 
   it('should show redirect display before showing notebook', async () => {
-    notebookComponentAlt();
+    notebookComponent();
     expect(screen.getByTestId('leo-app-launcher')).toBeInTheDocument();
   });
 
   it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
@@ -213,7 +197,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
@@ -239,7 +223,7 @@ describe('NotebookLauncher', () => {
   it('should be "Resuming" until a Stopped runtime for a new notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
@@ -265,7 +249,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
@@ -278,7 +262,7 @@ describe('NotebookLauncher', () => {
   it('should be "Redirecting" when the runtime is initially Running for a new notebook', async () => {
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
@@ -292,7 +276,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => {
@@ -322,7 +306,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => {
@@ -357,7 +341,7 @@ describe('NotebookLauncher', () => {
       }),
     });
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByText(
       /your analysis environment was temporarily suspended but is now available for use\./i
@@ -386,7 +370,7 @@ describe('NotebookLauncher', () => {
         )
       );
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByText(
       /your analysis environment was temporarily suspended but is now available for use\./i
@@ -398,19 +382,19 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime = null;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     await screen.findByText('Create an Analysis Environment');
   });
 
   test.each(['cancel', 'configure'])(
     'should show retry message on runtime initializer %s',
-    async (action) => {
+    async () => {
       jest.useRealTimers();
       history.push(notebookInitialUrl + '?kernelType=R?creating=false');
       runtimeStub.runtime = null;
 
-      notebookComponentAlt();
+      notebookComponent();
 
       const dialog = await screen.findByRole('dialog');
       await user.click(
@@ -434,7 +418,7 @@ describe('NotebookLauncher', () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime = null;
 
-    notebookComponentAlt();
+    notebookComponent();
 
     const dialog = await screen.findByRole('dialog');
     await user.click(
@@ -467,22 +451,6 @@ describe('TerminalLauncher', () => {
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {
-    const t = mount(
-      <Router history={history}>
-        <Route path='/workspaces/:ns/:wsid/terminals'>
-          <LeonardoAppLauncher
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            leoAppType={LeoApplicationType.JupyterTerminal}
-          />
-        </Route>
-      </Router>
-    );
-    await waitOneTickAndUpdate(t);
-    return t;
-  };
-
-  const terminalComponentAlt = async () => {
     const t = render(
       <Router history={history}>
         <Route path='/workspaces/:ns/:wsid/terminals'>
@@ -538,7 +506,7 @@ describe('TerminalLauncher', () => {
   it('should display terminal state header correctly when RuntimeStatus changes', async () => {
     runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
-    await terminalComponentAlt();
+    await terminalComponent();
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
@@ -562,7 +530,7 @@ describe('TerminalLauncher', () => {
     history.push(terminalInitialUrl);
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    await terminalComponentAlt();
+    await terminalComponent();
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
     act(() => {
