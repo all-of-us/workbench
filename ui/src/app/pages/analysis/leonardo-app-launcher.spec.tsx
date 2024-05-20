@@ -73,6 +73,17 @@ function getCardSpinnerTestIdAlt(cardState: ProgressCardState) {
   return 'progress-card-spinner-' + cardState.valueOf();
 }
 
+// Runtime is on
+const updateRuntimeStatus = (
+  status: RuntimeStatus,
+  runtimeStub: RuntimeApiStub
+) => {
+  act(() => {
+    runtimeStub.runtime.status = status;
+    jest.runOnlyPendingTimers();
+  });
+};
+
 describe('NotebookLauncher', () => {
   const workspace = {
     ...workspaceStubs[0],
@@ -129,14 +140,6 @@ describe('NotebookLauncher', () => {
       return Promise.resolve();
     });
   }
-
-  // Runtime is on
-  const updateRuntimeStatus = (status: RuntimeStatus) => {
-    act(() => {
-      runtimeStub.runtime.status = status;
-      jest.runOnlyPendingTimers();
-    });
-  };
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
@@ -195,7 +198,7 @@ describe('NotebookLauncher', () => {
       );
     });
 
-    updateRuntimeStatus(RuntimeStatus.RUNNING);
+    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
@@ -222,7 +225,7 @@ describe('NotebookLauncher', () => {
       );
     });
 
-    updateRuntimeStatus(RuntimeStatus.RUNNING);
+    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
@@ -248,7 +251,7 @@ describe('NotebookLauncher', () => {
       );
     });
 
-    updateRuntimeStatus(RuntimeStatus.RUNNING);
+    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
       getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
@@ -535,25 +538,22 @@ describe('TerminalLauncher', () => {
   it('should display terminal state header correctly when RuntimeStatus changes', async () => {
     runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
-    const wrapper = await terminalComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    await terminalComponentAlt();
 
-    expect(
-      wrapper.exists(
-        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-      )
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      genericProgressStrings.get(Progress.Initializing)
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
     );
+    await waitFor(() => {
+      expect(currentCardTextAlt()).toContain(
+        genericProgressStrings.get(Progress.Initializing)
+      );
+    });
 
-    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(
-      wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
+    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+    );
+    expect(currentCardTextAlt()).toContain(
       genericProgressStrings.get(Progress.Redirecting)
     );
   });
