@@ -131,16 +131,17 @@ describe(CreateGkeApp.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
+  const startButtonText = (appType: AppType): string =>
+    `${appTypeToString[appType]} cloud environment create button`;
+
   const expectCreation = async (
     appType: AppType
   ): Promise<jest.SpyInstance> => {
-    const startButtonText = `${appTypeToString[appType]} cloud environment create button`;
-
     const spyCreateApp = jest
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
 
-    const startButton = screen.getByLabelText(startButtonText);
+    const startButton = screen.getByLabelText(startButtonText(appType));
     expectButtonElementEnabled(startButton);
     startButton.click();
 
@@ -653,7 +654,7 @@ describe(CreateGkeApp.name, () => {
         // As disk size is a valid size, there SHOULD NOT be any disk size error message
         expect(screen.queryByText(/disk size must be between/i)).toBeNull();
 
-        const startButton = screen.getByLabelText(startButtonText);
+        const startButton = screen.getByLabelText(startButtonText(appType));
         expectButtonElementEnabled(startButton);
         startButton.click();
 
@@ -678,7 +679,9 @@ describe(CreateGkeApp.name, () => {
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           minAppSize.toString()
         );
-        expectButtonElementEnabled(screen.queryByLabelText(startButtonText));
+        expectButtonElementEnabled(
+          screen.queryByLabelText(startButtonText(appType))
+        );
 
         // Set disk size one less than minimum size to trigger warning
         await pickSpinButtonValue(user, 'gke-app-disk', minAppSize - 1);
@@ -689,7 +692,9 @@ describe(CreateGkeApp.name, () => {
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           (minAppSize - 1).toString()
         );
-        expectButtonElementDisabled(screen.queryByLabelText(startButtonText));
+        expectButtonElementDisabled(
+          screen.queryByLabelText(startButtonText(appType))
+        );
       });
 
       it(`Should not not allow disk size more than maximum for ${appType}`, async () => {
