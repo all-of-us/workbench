@@ -44,4 +44,8 @@
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>
   </automatic-scaling>
+  <vpc-access-connector>
+     <name>projects/aou-svpc-dev/locations/us-central1/connectors/dev-4-rw-egress-conn</name>
+     <egress-setting>all-of-us-workbench-test@appspot.gserviceaccount.com</egress-setting>
+  </vpc-access-connector>
 </appengine-web-app>
