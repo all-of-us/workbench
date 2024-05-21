@@ -84,7 +84,11 @@ describe('NotebookLauncher', () => {
   let runtimeStub;
   let user;
 
-  const notebookInitialUrl = `${analysisTabPath('namespace', 'id')}/wharrgarbl`;
+  const notebookName = 'wharrgarbl';
+  const notebookInitialUrl = `${analysisTabPath(
+    'namespace',
+    'id'
+  )}/${notebookName}`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = () => {
@@ -145,7 +149,7 @@ describe('NotebookLauncher', () => {
     notebookComponent();
     expect(
       screen.getByRole('heading', {
-        name: /loading notebook: wharrgarbl/i,
+        name: new RegExp(`loading notebook: ${notebookName}`, 'i'),
       })
     ).toBeInTheDocument();
   });
