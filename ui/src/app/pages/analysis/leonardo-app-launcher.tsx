@@ -790,7 +790,7 @@ export const LeonardoAppLauncher = fp.flow(
                 url={leoUrl}
                 width='100%'
                 height='100%'
-                title='Notebook Container'
+                title='Iframe Container'
               />
             </div>
           )}

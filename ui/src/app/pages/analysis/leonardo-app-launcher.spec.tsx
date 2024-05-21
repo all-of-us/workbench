@@ -280,7 +280,7 @@ describe('NotebookLauncher', () => {
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
-    await screen.findByTitle('Notebook Container');
+    await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
@@ -304,7 +304,7 @@ describe('NotebookLauncher', () => {
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
-    await screen.findByTitle('Notebook Container');
+    await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
@@ -332,7 +332,7 @@ describe('NotebookLauncher', () => {
     await screen.findByText(
       /your analysis environment was temporarily suspended but is now available for use\./i
     );
-    expect(screen.queryByTitle('Notebook Container')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Iframe Container')).not.toBeInTheDocument();
   });
 
   it('should show error on mid-load compute suspension', async () => {
@@ -361,7 +361,7 @@ describe('NotebookLauncher', () => {
     await screen.findByText(
       /your analysis environment was temporarily suspended but is now available for use\./i
     );
-    expect(screen.queryByTitle('Notebook Container')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Iframe Container')).not.toBeInTheDocument();
   });
 
   it('should show runtime initializer modal if runtime not found', async () => {
@@ -528,7 +528,7 @@ describe('TerminalLauncher', () => {
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
-    await screen.findByTitle('Notebook Container');
+    await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
