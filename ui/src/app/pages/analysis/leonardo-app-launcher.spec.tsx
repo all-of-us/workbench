@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route, Router } from 'react-router-dom';
-import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import { mockNavigate } from 'setupTests';
 
@@ -46,10 +45,6 @@ import {
   RuntimesApi as LeoRuntimesApi,
 } from 'notebooks-generated/fetch';
 
-import {
-  waitForFakeTimersAndUpdate,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
@@ -58,19 +53,11 @@ import { ProxyApiStub } from 'testing/stubs/proxy-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-function currentCardText(wrapper: ReactWrapper) {
-  return wrapper.find('[data-test-id="current-progress-card"]').first().text();
-}
-
-function currentCardTextAlt() {
+function currentCardText() {
   return screen.getByTestId('current-progress-card').textContent;
 }
 
 function getCardSpinnerTestId(cardState: ProgressCardState) {
-  return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
-}
-
-function getCardSpinnerTestIdAlt(cardState: ProgressCardState) {
   return 'progress-card-spinner-' + cardState.valueOf();
 }
 
@@ -175,11 +162,11 @@ describe('NotebookLauncher', () => {
     notebookComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
+      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
     );
 
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         notebookProgressStrings.get(Progress.Initializing)
       );
     });
@@ -187,10 +174,10 @@ describe('NotebookLauncher', () => {
     updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -202,11 +189,11 @@ describe('NotebookLauncher', () => {
     notebookComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
+      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
     );
 
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         notebookProgressStrings.get(Progress.Resuming)
       );
     });
@@ -214,10 +201,10 @@ describe('NotebookLauncher', () => {
     updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -228,11 +215,11 @@ describe('NotebookLauncher', () => {
     notebookComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
+      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
     );
 
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         notebookProgressStrings.get(Progress.Resuming)
       );
     });
@@ -240,9 +227,9 @@ describe('NotebookLauncher', () => {
     updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -254,9 +241,9 @@ describe('NotebookLauncher', () => {
     notebookComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -267,9 +254,9 @@ describe('NotebookLauncher', () => {
     notebookComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       notebookProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -287,7 +274,7 @@ describe('NotebookLauncher', () => {
     jest.runOnlyPendingTimers();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
     await screen.findByTitle('Notebook Container');
@@ -317,7 +304,7 @@ describe('NotebookLauncher', () => {
     jest.runOnlyPendingTimers();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
     await screen.findByTitle('Notebook Container');
@@ -511,19 +498,19 @@ describe('TerminalLauncher', () => {
     await terminalComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
+      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
     );
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         genericProgressStrings.get(Progress.Initializing)
       );
     });
 
     updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-    expect(currentCardTextAlt()).toContain(
+    expect(currentCardText()).toContain(
       genericProgressStrings.get(Progress.Redirecting)
     );
   });
@@ -541,7 +528,7 @@ describe('TerminalLauncher', () => {
     jest.runOnlyPendingTimers();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
     await screen.findByTitle('Notebook Container');
@@ -627,10 +614,10 @@ describe('SparkConsoleLauncher', () => {
     await terminalComponent();
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
+      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
     );
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         genericProgressStrings.get(Progress.Initializing)
       );
     });
@@ -640,11 +627,11 @@ describe('SparkConsoleLauncher', () => {
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     await screen.findByTestId(
-      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
+      getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
 
     await waitFor(() => {
-      expect(currentCardTextAlt()).toContain(
+      expect(currentCardText()).toContain(
         genericProgressStrings.get(Progress.Redirecting)
       );
     });
