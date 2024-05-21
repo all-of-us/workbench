@@ -61,7 +61,6 @@ function getCardSpinnerTestId(cardState: ProgressCardState) {
   return 'progress-card-spinner-' + cardState.valueOf();
 }
 
-// Runtime is on
 const updateRuntimeStatus = (
   status: RuntimeStatus,
   runtimeStub: RuntimeApiStub
