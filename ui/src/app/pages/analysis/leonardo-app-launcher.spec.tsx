@@ -156,31 +156,37 @@ describe('NotebookLauncher', () => {
     expect(screen.getByTestId('leo-app-launcher')).toBeInTheDocument();
   });
 
-  it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.CREATING;
+  test.each([
+    ['a new', notebookInitialUrl + '?kernelType=R?creating=false'],
+    ['an existing', notebookInitialUrl],
+  ])(
+    'should be "Initializing" until a Creating runtime for %s notebook is running',
+    async (url) => {
+      history.push(url);
+      runtimeStub.runtime.status = RuntimeStatus.CREATING;
+      notebookComponent();
 
-    notebookComponent();
-
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-    );
-
-    await waitFor(() => {
-      expect(currentCardText()).toContain(
-        notebookProgressStrings.get(Progress.Initializing)
+      await screen.findByTestId(
+        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
       );
-    });
 
-    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
+      await waitFor(() => {
+        expect(currentCardText()).toContain(
+          notebookProgressStrings.get(Progress.Initializing)
+        );
+      });
 
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.Redirecting)
-    );
+      updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
-    expect(currentCardText()).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
+      await screen.findByTestId(
+        getCardSpinnerTestId(ProgressCardState.Redirecting)
+      );
+
+      expect(currentCardText()).toContain(
+        notebookProgressStrings.get(Progress.Redirecting)
+      );
+    }
+  );
 
   it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
@@ -267,12 +273,6 @@ describe('NotebookLauncher', () => {
 
     notebookComponent();
 
-    // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    act(() => {
-      jest.advanceTimersByTime(2000);
-    });
-    jest.runOnlyPendingTimers();
-
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
@@ -296,12 +296,6 @@ describe('NotebookLauncher', () => {
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     notebookComponent();
-
-    // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    act(() => {
-      jest.advanceTimersByTime(2000);
-    });
-    jest.runOnlyPendingTimers();
 
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
