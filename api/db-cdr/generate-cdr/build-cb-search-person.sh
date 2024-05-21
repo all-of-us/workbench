@@ -45,6 +45,10 @@ SELECT
         WHEN e.concept_name is null THEN 'Unknown'
         ELSE regexp_replace(e.concept_name, r'^.+:\s', '')
       END as ethnicity
+    , CASE
+        WHEN srp.concept_name is null THEN 'Unknown'
+        ELSE regexp_replace(srp.concept_name, r'^.+:\s', '')
+      END as self_reported_population
     , date(birth_datetime) as dob
     , CASE
         WHEN d.death_date is null THEN 0
@@ -122,6 +126,10 @@ SELECT
         WHEN e.concept_name is null THEN 'Unknown'
         ELSE regexp_replace(e.concept_name, r'^.+:\s', '')
       END as ethnicity
+    , CASE
+        WHEN srp.concept_name is null THEN 'Unknown'
+        ELSE regexp_replace(srp.concept_name, r'^.+:\s', '')
+      END as self_reported_population
     , date(birth_datetime) as dob
     , CASE
         WHEN d.death_date is null THEN 0
