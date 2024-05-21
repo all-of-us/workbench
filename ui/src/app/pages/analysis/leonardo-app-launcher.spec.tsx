@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Route, Router } from 'react-router-dom';
@@ -326,7 +328,7 @@ describe('NotebookLauncher', () => {
       ...runtime,
       status: RuntimeStatus.UPDATING,
     }));
-    jest.runOnlyPendingTimers();
+    act(() => jest.runOnlyPendingTimers());
 
     expect(mockNavigate).not.toHaveBeenCalled();
   });
@@ -579,7 +581,7 @@ describe('SparkConsoleLauncher', () => {
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
   const terminalComponent = async () => {
-    const t = mount(
+    const t = render(
       <Router history={history}>
         <Route path='/workspaces/:ns/:wsid/spark/:sparkConsolePath'>
           <LeonardoAppLauncher
@@ -590,7 +592,6 @@ describe('SparkConsoleLauncher', () => {
         </Route>
       </Router>
     );
-    await waitOneTickAndUpdate(t);
     return t;
   };
 
@@ -623,26 +624,29 @@ describe('SparkConsoleLauncher', () => {
   it('should display progress correctly when RuntimeStatus changes', async () => {
     runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
-    const wrapper = await terminalComponent();
-    await waitForFakeTimersAndUpdate(wrapper);
+    await terminalComponent();
 
-    expect(
-      wrapper.exists(
-        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-      )
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      genericProgressStrings.get(Progress.Initializing)
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.UnknownInitializingResuming)
     );
+    await waitFor(() => {
+      expect(currentCardTextAlt()).toContain(
+        genericProgressStrings.get(Progress.Initializing)
+      );
+    });
+
+    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
     runtimeStub.runtime.status = RuntimeStatus.RUNNING;
-    await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(
-      wrapper.exists(getCardSpinnerTestId(ProgressCardState.Redirecting))
-    ).toBeTruthy();
-    expect(currentCardText(wrapper)).toContain(
-      genericProgressStrings.get(Progress.Redirecting)
+    await screen.findByTestId(
+      getCardSpinnerTestIdAlt(ProgressCardState.Redirecting)
     );
+
+    await waitFor(() => {
+      expect(currentCardTextAlt()).toContain(
+        genericProgressStrings.get(Progress.Redirecting)
+      );
+    });
   });
 });
