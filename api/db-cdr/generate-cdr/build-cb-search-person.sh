@@ -21,7 +21,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , sex_at_birth
         , race
         , ethnicity
-        , self_reported_population
         , dob
         , is_deceased
         , has_fitbit
@@ -67,7 +66,6 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` srp on (p.self_reported_population_concept_id = srp.concept_id)
 LEFT JOIN
     (
         SELECT person_id, max(death_date) as death_date
@@ -98,7 +96,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , sex_at_birth
         , race
         , ethnicity
-        , self_reported_population
         , dob
         , is_deceased
         , has_fitbit
@@ -164,7 +161,6 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` srp on (p.self_reported_population_concept_id = srp.concept_id)
 LEFT JOIN
     (
         SELECT person_id, max(death_date) as death_date
