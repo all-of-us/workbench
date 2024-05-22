@@ -123,10 +123,5 @@
     "mode": "NULLABLE",
     "name": "has_wear_consent",
     "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "self_reported_population",
-    "type": "STRING"
   }
 ]
