@@ -191,57 +191,37 @@ describe('NotebookLauncher', () => {
     }
   );
 
-  it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
-    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
+  test.each([
+    ['a new', notebookInitialUrl + '?kernelType=R?creating=false'],
+    ['an existing', notebookInitialUrl],
+  ])(
+    'should be "Resuming" until a Stopped runtime for %s is running',
+    async (url) => {
+      history.push(url);
+      runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
-    notebookComponent();
+      notebookComponent();
 
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-    );
-
-    await waitFor(() => {
-      expect(currentCardText()).toContain(
-        notebookProgressStrings.get(Progress.Resuming)
+      await screen.findByTestId(
+        getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
       );
-    });
 
-    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
+      await waitFor(() => {
+        expect(currentCardText()).toContain(
+          notebookProgressStrings.get(Progress.Resuming)
+        );
+      });
 
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.Redirecting)
-    );
+      updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
 
-    expect(currentCardText()).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
-
-  it('should be "Resuming" until a Stopped runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
-
-    notebookComponent();
-
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)
-    );
-
-    await waitFor(() => {
-      expect(currentCardText()).toContain(
-        notebookProgressStrings.get(Progress.Resuming)
+      await screen.findByTestId(
+        getCardSpinnerTestId(ProgressCardState.Redirecting)
       );
-    });
-
-    updateRuntimeStatus(RuntimeStatus.RUNNING, runtimeStub);
-
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.Redirecting)
-    );
-    expect(currentCardText()).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
+      expect(currentCardText()).toContain(
+        notebookProgressStrings.get(Progress.Redirecting)
+      );
+    }
+  );
 
   it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
