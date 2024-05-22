@@ -86,6 +86,7 @@ insertCriteriaMenu "
 ($((++ID)),1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
 ($((++ID)),1,'Program Data','PERSON','RACE','Race',0,5),
 ($((++ID)),1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
+($((++ID)),1,'Program Data','PERSON','SELF_REPORTED_POPULATION','Self Reported Population',0,7),
 ($((++ID)),2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
 
 echo "Adding surveys"

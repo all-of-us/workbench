@@ -17,5 +17,6 @@
   <include file="changelog-schema/db.changelog-v2-7-maria_db_index.xml"/>
   <include file="changelog-schema/db.changelog-v2-8-cb_criteria_index.xml"/>
   <include file="changelog-schema/db.changelog-v2-9-cb_criteria_menu.xml"/>
+  <include file="changelog-schema/db.changelog-v2-10-cb_criteria_modify.xml"/>
 
 </databaseChangeLog>
