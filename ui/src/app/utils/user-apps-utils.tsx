@@ -8,6 +8,8 @@ import {
 } from 'generated/fetch';
 
 import {
+  appMaxDiskSize,
+  appMinDiskSize,
   findApp,
   openConfigPanelForUIApp,
   toUIAppType,
@@ -241,6 +243,10 @@ export const openAppInIframe = (
     ),
   ]);
 };
+
+export const isDiskSizeValid = (appRequest) =>
+  appRequest.persistentDiskRequest.size <= appMaxDiskSize &&
+  appRequest.persistentDiskRequest.size >= appMinDiskSize[appRequest.appType];
 
 export const openAppOrConfigPanel = (
   workspaceNamespace: string,

@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
 
 import {
   Authority,
@@ -11,6 +9,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
@@ -19,7 +19,14 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  expectPrimaryButton,
+  expectSecondaryButton,
+  renderWithRouter,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -38,6 +45,7 @@ import { SpecificPopulationItems } from './workspace-edit-text';
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
+  let user;
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -48,10 +56,8 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(
-      <MemoryRouter>
-        <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
-      </MemoryRouter>
+    return renderWithRouter(
+      <WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />
     );
   };
 
@@ -77,89 +83,83 @@ describe('WorkspaceAbout', () => {
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
+    user = userEvent.setup();
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('should render', async () => {
+    component();
+    await waitForNoSpinner();
+    screen.getByText(/primary purpose of project/i);
   });
 
   it('should display research purpose', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="researchPurpose"]')).toBeTruthy();
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByText('Research Purpose')).toBeInTheDocument();
     // Research Purpose: Drug, Population and Ethics
-    expect(wrapper.find('[data-test-id="primaryResearchPurpose"]').length).toBe(
-      3
-    );
+    expect(screen.getAllByTestId('primaryResearchPurpose').length).toBe(3);
     // Primary Purpose: Education
-    expect(wrapper.find('[data-test-id="primaryPurpose"]').length).toBe(1);
+    expect(screen.getByTestId('primaryPurpose')).toBeInTheDocument();
   });
 
   it('should display workspace collaborators', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
     userRolesStub.forEach((role, i) => {
-      const userRoleText = wrapper
-        .find('[data-test-id="workspaceUser-' + i + '"]')
-        .text();
+      const userRoleText = screen.getByTestId('workspaceUser-' + i).textContent;
       expect(userRoleText).toContain(role.email);
       expect(userRoleText).toContain(role.role.toString());
     });
   });
 
   it('should allow the user to open the share modal', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="workspaceShareButton"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="workspaceShareModal"]')).toBeTruthy();
+    component();
+    await waitForNoSpinner();
+    await user.click(
+      screen.getByRole('button', {
+        name: /share/i,
+      })
+    );
+    screen.getByText('Share defaultWorkspace');
   });
 
-  it('should enable the share button if workspace is not adminLocked', async () => {
+  test.each([
+    ['enable the share button if workspace is not adminLocked', false],
+    ['disable the share button if workspace is adminLocked', true],
+  ])('Should %s', async (testName, adminLocked) => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
-      adminLocked: false,
+      adminLocked,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
-        .disabled
-    ).toBeFalsy();
-  });
+    component();
+    await waitForNoSpinner();
+    const shareButton = screen.getByRole('button', {
+      name: /share/i,
+    });
 
-  it('should disable the share button if workspace is adminLocked', async () => {
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      adminLocked: true,
-    });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceShareButton"]').getElement().props
-        .disabled
-    ).toBeTruthy();
+    adminLocked
+      ? expectButtonElementDisabled(shareButton)
+      : expectButtonElementEnabled(shareButton);
   });
 
   it('should display cdr version', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="cdrVersion"]').text()).toContain(
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('cdrVersion').textContent).toContain(
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION
     );
   });
 
   it('should display workspace metadata', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="accessTierShortName"]').text()
-    ).toContain(fp.capitalize(workspace.accessTierShortName));
-    expect(wrapper.find('[data-test-id="creationDate"]').text()).toContain(
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('accessTierShortName').textContent).toContain(
+      fp.capitalize(workspace.accessTierShortName)
+    );
+    expect(screen.getByTestId('creationDate').textContent).toContain(
       new Date(workspace.creationTime).toDateString()
     );
-    expect(wrapper.find('[data-test-id="lastUpdated"]').text()).toContain(
+    expect(screen.getByTestId('lastUpdated').textContent).toContain(
       new Date(workspace.lastModifiedTime).toDateString()
     );
   });
@@ -168,6 +168,7 @@ describe('WorkspaceAbout', () => {
     const raceSubCategoriesBeforePageload =
       SpecificPopulationItems[0].subCategory.length;
     component();
+    await waitForNoSpinner();
     const raceSubCategoriesAfterPageLoad =
       SpecificPopulationItems[0].subCategory.length;
     expect(raceSubCategoriesBeforePageload).toBe(
@@ -176,37 +177,43 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy();
+    component();
+    await waitForNoSpinner();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Publish',
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Unpublish',
+      })
+    ).not.toBeInTheDocument();
   });
 
-  it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
+  test.each([Authority.FEATURED_WORKSPACE_ADMIN, Authority.DEVELOPER])(
+    `should display Publish/Unpublish buttons with %s Authority`,
+    async (authority) => {
+      const profileWithAuth = {
+        ...ProfileStubVariables.PROFILE_STUB,
+        authorities: [authority],
+      };
+      profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
-  });
-
-  it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.DEVELOPER],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
-
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
-  });
+      component();
+      await waitForNoSpinner();
+      expect(
+        screen.getByRole('button', {
+          name: 'Publish',
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: 'Unpublish',
+        })
+      ).toBeInTheDocument();
+    }
+  );
 
   it('Publish/Unpublish button styling depends on state - unpublished', async () => {
     const profileWithAuth = {
@@ -215,18 +222,20 @@ describe('WorkspaceAbout', () => {
     };
     profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    const publishButton = wrapper.find('[data-test-id="publish-button"]');
-    expect(publishButton.exists()).toBeTruthy();
-    expect(publishButton.prop('disabled')).toBeFalsy();
-    expect(publishButton.prop('type')).toEqual('primary');
+    const publishButton = screen.getByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementEnabled(publishButton);
+    expectPrimaryButton(publishButton);
 
-    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
-    expect(unpublishButton.exists()).toBeTruthy();
-    expect(unpublishButton.prop('disabled')).toBeTruthy();
-    expect(unpublishButton.prop('type')).toEqual('secondary');
+    const unpublishButton = screen.getByRole('button', {
+      name: 'Unpublish',
+    });
+    expectButtonElementDisabled(unpublishButton);
+    expectSecondaryButton(unpublishButton);
   });
 
   it('Publish/Unpublish button styling depends on state - published', async () => {
@@ -240,18 +249,20 @@ describe('WorkspaceAbout', () => {
       published: true,
     });
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    const publishButton = wrapper.find('[data-test-id="publish-button"]');
-    expect(publishButton.exists()).toBeTruthy();
-    expect(publishButton.prop('disabled')).toBeTruthy();
-    expect(publishButton.prop('type')).toEqual('secondary');
+    const publishButton = screen.getByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementDisabled(publishButton);
+    expectSecondaryButton(publishButton);
 
-    const unpublishButton = wrapper.find('[data-test-id="unpublish-button"]');
-    expect(unpublishButton.exists()).toBeTruthy();
-    expect(unpublishButton.prop('disabled')).toBeFalsy();
-    expect(unpublishButton.prop('type')).toEqual('primary');
+    const unpublishButton = screen.getByRole('button', {
+      name: 'Unpublish',
+    });
+    expectButtonElementEnabled(unpublishButton);
+    expectPrimaryButton(unpublishButton);
   });
 
   it('Should display locked workspace message if adminLocked is true', async () => {
@@ -259,9 +270,9 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: true,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeTruthy();
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('lock-workspace-msg')).toBeInTheDocument();
   });
 
   it('Should not display locked workspace message if adminLocked is false', async () => {
@@ -269,20 +280,16 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       adminLocked: false,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="lock-workspace-msg"]')).toBeFalsy();
+    component();
+    await waitForNoSpinner();
+    expect(screen.queryByTestId('lock-workspace-msg')).not.toBeInTheDocument();
   });
 
   it('Should enable billing report url if user is workspace owner.', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'workspace-billing-report' })
-        .first()
-        .props().disabled
-    ).toBeFalsy();
+    component();
+    await waitForNoSpinner();
+    const billingReportButton = screen.getByText('View detailed spend report');
+    expectButtonElementEnabled(billingReportButton);
   });
 
   it('Should disable billing report url if user is not workspace owner.', async () => {
@@ -290,35 +297,32 @@ describe('WorkspaceAbout', () => {
       ...currentWorkspaceStore.getValue(),
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'workspace-billing-report' })
-        .first()
-        .props().disabled
-    ).toBeTruthy();
+    component();
+    await waitForNoSpinner();
+    const billingReportButton = screen.getByText('View detailed spend report');
+    expectButtonElementDisabled(billingReportButton);
   });
 
   it('should display Google project id', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="googleProject"]').text()).toContain(
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('googleProject').textContent).toContain(
       workspace.googleProject
     );
   });
+
   it('should display bucket name', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="bucketName"]').text()).toContain(
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('bucketName').textContent).toContain(
       workspace.googleBucketName
     );
   });
   it('should display workspace namespace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="workspaceNamespace"]').text()
-    ).toContain(workspace.namespace);
+    component();
+    await waitForNoSpinner();
+    expect(screen.getByTestId('workspaceNamespace').textContent).toContain(
+      workspace.namespace
+    );
   });
 });

@@ -26,6 +26,7 @@ export const DiskSizeSelector = ({
       id={`${idPrefix}-disk`}
       name={`${idPrefix}-disk`}
       showButtons
+      allowEmpty={false}
       disabled={disabled}
       decrementButtonClassName='p-button-secondary'
       incrementButtonClassName='p-button-secondary'

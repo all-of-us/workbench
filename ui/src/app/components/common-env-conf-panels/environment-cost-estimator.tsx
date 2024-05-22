@@ -135,7 +135,8 @@ export const EnvironmentCostEstimator = ({
           </div>
         )}
       </FlexColumn>
-      {!!pdCost && (
+      {/* Always show PD Cost for GKE apps; hide it for Jupyter if disk size is zero*/}
+      {(!!pdCost || isGKEApp) && (
         <FlexColumn style={styles.costSection}>
           <div style={{ fontSize: '10px', fontWeight: 600 }}>
             Persistent disk cost

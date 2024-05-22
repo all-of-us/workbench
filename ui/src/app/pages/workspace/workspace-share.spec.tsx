@@ -1,7 +1,5 @@
 import * as React from 'react';
-import Select from 'react-select';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   User,
@@ -11,7 +9,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import FakeTimers from '@sinonjs/fake-timers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   registerApiClient,
   workspacesApi,
@@ -20,7 +19,10 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  getSelectComponentValue,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import { UserApiStub } from 'testing/stubs/user-api-stub';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -28,9 +30,10 @@ import { WorkspaceShare, WorkspaceShareProps } from './workspace-share';
 
 describe('WorkspaceShare', () => {
   let props: WorkspaceShareProps;
+  let user;
 
   const component = () => {
-    return mount(<WorkspaceShare {...props} />);
+    return render(<WorkspaceShare {...props} />);
   };
   const harry: User = {
     givenName: 'Harry',
@@ -82,17 +85,30 @@ describe('WorkspaceShare', () => {
   } as WorkspaceData;
   const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
-  const getSelectString = (user: UserRole) => {
-    return '.' + user.email.replace(/[@\.]/g, '') + '-user-role__single-value';
+  const getUserRoleDropdownLabel = (desiredUser: User) => {
+    return `Role selector for ${desiredUser.email}`;
   };
 
-  const searchForUser = async (wrapper: ReactWrapper, clock, value: string) => {
-    wrapper
-      .find('[data-test-id="search"]')
-      .simulate('change', { target: { value } });
-    clock.tick(401);
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.update();
+  const getAddCollaboratorLabel = (desiredUser: User) => {
+    return `Button to add ${desiredUser.email} as a collaborator`;
+  };
+  const getRemoveCollaboratorLabel = (desiredUser: User) => {
+    return `Button to remove ${desiredUser.email} as a collaborator`;
+  };
+
+  const addUser = async (userToAdd: User) => {
+    const searchBar = screen.getByTestId('search');
+    await user.clear(searchBar);
+    await user.click(searchBar);
+    await user.paste(userToAdd.givenName);
+    await screen.findByTestId('drop-down');
+    await user.click(screen.getByLabelText(getAddCollaboratorLabel(userToAdd)));
+  };
+
+  const removeUser = async (userToRemove: User) => {
+    await user.click(
+      screen.getByLabelText(getRemoveCollaboratorLabel(userToRemove))
+    );
   };
 
   beforeEach(() => {
@@ -121,147 +137,131 @@ describe('WorkspaceShare', () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     });
+    user = userEvent.setup();
   });
 
   it('display correct users', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
 
-    expect(wrapper).toBeTruthy();
-    expect(wrapper.find('[data-test-id="collab-user-name"]').length).toBe(3);
-    expect(wrapper.find('[data-test-id="collab-user-email"]').length).toBe(3);
+    let collabUserNames;
+    await waitFor(() => {
+      collabUserNames = screen.getAllByTestId('collab-user-name');
+      expect(collabUserNames.length).toBe(3);
+    });
+    const collabUserEmails = screen.getAllByTestId('collab-user-email');
+    expect(collabUserEmails.length).toBe(3);
     const expectedUsers = fp.sortBy('familyName', [harry, hermione, ron]);
-    expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
-    ).toEqual(expectedUsers.map((u) => u.givenName + ' ' + u.familyName));
-    expect(
-      wrapper.find('[data-test-id="collab-user-email"]').map((el) => el.text())
-    ).toEqual(expectedUsers.map((u) => u.email));
+    expect(collabUserNames.map((el) => el.textContent)).toEqual(
+      expectedUsers.map((u) => u.givenName + ' ' + u.familyName)
+    );
+    expect(collabUserEmails.map((el) => el.textContent)).toEqual(
+      expectedUsers.map((u) => u.email)
+    );
   });
 
   it('displays correct role info', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(wrapper.find(getSelectString(harryRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[harryRole.role])
-    );
-    expect(wrapper.find(getSelectString(hermioneRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[hermioneRole.role])
-    );
-    expect(wrapper.find(getSelectString(ronRole)).first().text()).toEqual(
-      fp.capitalize(WorkspaceAccessLevel[ronRole.role])
-    );
-    expect(wrapper.find(getSelectString(lunaRole)).length).toBe(0);
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getUserRoleDropdownLabel(harry))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
+
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getUserRoleDropdownLabel(hermione))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
+
+    expect(
+      getSelectComponentValue(
+        screen.getByLabelText(getUserRoleDropdownLabel(ron))
+      )
+    ).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
+
+    expect(
+      screen.queryByLabelText(getUserRoleDropdownLabel(luna))
+    ).not.toBeInTheDocument();
   });
 
   it('removes user correctly', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    await removeUser(ron);
+
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione])
       .map((u) => u.givenName + ' ' + u.familyName);
     expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
+      (await screen.findAllByTestId('collab-user-name')).map(
+        (el) => el.textContent
+      )
     ).toEqual(expectedNames);
   });
 
   it('adds user correctly', async () => {
-    const clock = FakeTimers.install({ shouldAdvanceTime: true });
-    const wrapper = component();
-    await searchForUser(wrapper, clock, 'luna');
-    clock.uninstall();
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    component();
+    await waitForNoSpinner();
+    await addUser(luna);
     const expectedNames = fp
       .sortBy('familyName', [harry, hermione, ron, luna])
       .map((u) => u.givenName + ' ' + u.familyName);
     expect(
-      wrapper.find('[data-test-id="collab-user-name"]').map((el) => el.text())
+      (await screen.findAllByTestId('collab-user-name')).map(
+        (el) => el.textContent
+      )
     ).toEqual(expectedNames);
   });
 
-  it('does not allow self-removal', () => {
-    const wrapper = component();
-    const dataString =
-      '[data-test-id="remove-collab-harry.potter@hogwarts.edu"]';
-    expect(wrapper.find(dataString).length).toBe(0);
+  it('does not allow self-removal', async () => {
+    component();
+    await waitForNoSpinner();
+    expect(
+      screen.queryByLabelText(getRemoveCollaboratorLabel(harry))
+    ).not.toBeInTheDocument();
   });
 
   it('does not allow self role change', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    const roleSelectProps = wrapper
-      .find('[data-test-id="harry.potter@hogwarts.edu-user-role"]')
-      .first()
-      .props() as { isDisabled: boolean };
-    expect(roleSelectProps.isDisabled).toBe(true);
+    expect(
+      screen.getByLabelText(getUserRoleDropdownLabel(harry))
+    ).toBeDisabled();
   });
 
   it('saves acl correctly after changes made', async () => {
-    const clock = FakeTimers.install({ shouldAdvanceTime: true });
-    const wrapper = component();
-    await searchForUser(wrapper, clock, 'luna');
+    component();
+    await waitForNoSpinner();
 
     // Luna: add, remove, add again
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    wrapper
-      .find('[data-test-id="remove-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    await searchForUser(wrapper, clock, 'luna');
-    wrapper
-      .find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]')
-      .first()
-      .simulate('click');
+    await addUser(luna);
+    await removeUser(luna);
+    await addUser(luna);
 
     // Ron: remove, add, remove again
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    await searchForUser(wrapper, clock, 'ron');
-    wrapper
-      .find('[data-test-id="add-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-    wrapper
-      .find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]')
-      .first()
-      .simulate('click');
-
-    clock.uninstall();
+    await removeUser(ron);
+    await addUser(ron);
+    await removeUser(ron);
 
     // change hermione's access to owner
-    const selectComponent = wrapper
-      .find('[data-test-id="hermione.granger@hogwarts.edu-user-role"]')
-      .find(Select);
-    selectComponent.instance().setState({ menuIsOpen: true });
-    wrapper.update();
-    wrapper
-      .find('.hermionegrangerhogwartsedu-user-role__option')
-      .findWhere(
-        (n) =>
-          n.text() ===
-          fp.capitalize(WorkspaceAccessLevel[WorkspaceAccessLevel.OWNER])
-      )
-      .first()
-      .simulate('click');
-    wrapper.update();
+    const hermoineRoleDropdown = screen.getByLabelText(
+      getUserRoleDropdownLabel(hermione)
+    );
+    await user.click(hermoineRoleDropdown);
+    await user.click(
+      screen.getByLabelText(`Select Owner role for ${hermione.email}`)
+    );
 
     const spy = jest.spyOn(workspacesApi(), 'shareWorkspacePatch');
-    wrapper.find('[data-test-id="save"]').first().simulate('click');
+    await user.click(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
     expect(spy).toHaveBeenCalledWith(
       tomRiddleDiary.namespace,
       tomRiddleDiary.name,

@@ -131,6 +131,11 @@ const styles = reactStyles({
     opacity: 0.4,
     cursor: 'not-allowed',
   },
+  exclusionText: {
+    color: colors.primary,
+    cursor: 'pointer',
+    marginLeft: '1rem',
+  },
 });
 
 const pageSize = 25;
@@ -556,11 +561,7 @@ export const VariantSearch = fp.flow(
                 <>
                   <Clickable
                     style={withDisabledStyle(
-                      {
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        marginLeft: '1rem',
-                      },
+                      styles.exclusionText,
                       disableSelectAllSave
                     )}
                     onClick={() => handleSelectAllEdit()}
@@ -582,11 +583,7 @@ export const VariantSearch = fp.flow(
                     )
                   </Clickable>
                   <Clickable
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      marginLeft: '1rem',
-                    }}
+                    style={styles.exclusionText}
                     onClick={() => clearSearch()}
                   >
                     <ClrIcon

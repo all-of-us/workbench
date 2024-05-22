@@ -556,6 +556,7 @@ export const ConceptSearch = fp.flow(
                                   style={{ marginLeft: '.75rem' }}
                                   data-test-id='edit-concept-set'
                                   onClick={() => this.onEditOpen()}
+                                  aria-label='Edit Concept Set Button'
                                 >
                                   <EditComponentReact
                                     enableHoverEffect={true}
