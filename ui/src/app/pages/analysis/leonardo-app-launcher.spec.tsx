@@ -223,32 +223,25 @@ describe('NotebookLauncher', () => {
     }
   );
 
-  it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async () => {
-    history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
+  test.each([
+    ['a new', notebookInitialUrl + '?kernelType=R?creating=false'],
+    ['an existing', notebookInitialUrl],
+  ])(
+    'should be "Redirecting" when the runtime is initially Running for %s notebook',
+    async (url) => {
+      history.push(url);
+      runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
-    notebookComponent();
+      notebookComponent();
 
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.Redirecting)
-    );
-    expect(currentCardText()).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
-
-  it('should be "Redirecting" when the runtime is initially Running for a new notebook', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
-
-    notebookComponent();
-
-    await screen.findByTestId(
-      getCardSpinnerTestId(ProgressCardState.Redirecting)
-    );
-    expect(currentCardText()).toContain(
-      notebookProgressStrings.get(Progress.Redirecting)
-    );
-  });
+      await screen.findByTestId(
+        getCardSpinnerTestId(ProgressCardState.Redirecting)
+      );
+      expect(currentCardText()).toContain(
+        notebookProgressStrings.get(Progress.Redirecting)
+      );
+    }
+  );
 
   it('should navigate away after runtime transitions to deleting', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
