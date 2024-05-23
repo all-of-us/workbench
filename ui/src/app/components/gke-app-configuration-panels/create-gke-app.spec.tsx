@@ -164,8 +164,7 @@ describe(CreateGkeApp.name, () => {
       it('Should create an app and close the panel when the create button is clicked', async () => {
         await component(appType);
 
-        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
-
+        const spyCreateApp = await expectCreation(appType);
         await waitFor(() => {
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -179,7 +178,7 @@ describe(CreateGkeApp.name, () => {
         const disk = stubDisk();
         await component(appType, { disk });
 
-        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+        const spyCreateApp = await expectCreation(appType);
         await waitFor(() => {
           expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(
             disk
@@ -259,7 +258,7 @@ describe(CreateGkeApp.name, () => {
         autodeleteCheckbox.click();
         expect(autodeleteCheckbox).not.toBeChecked();
 
-        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+        const spyCreateApp = await expectCreation(appType);
         await waitFor(() => {
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -289,7 +288,7 @@ describe(CreateGkeApp.name, () => {
         );
         await userEvent.click(autodeleteOption);
 
-        const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+        const spyCreateApp = await expectCreation(appType);
         await waitFor(() => {
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -414,7 +413,7 @@ describe(CreateGkeApp.name, () => {
           );
           await userEvent.click(differentRamOption);
 
-          const spyCreateApp: jest.SpyInstance = await expectCreation(appType);
+          const spyCreateApp = await expectCreation(appType);
           await waitFor(() => {
             expect(spyCreateApp).toHaveBeenCalledWith(
               WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
