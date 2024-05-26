@@ -38,7 +38,7 @@
     "@types/color": "^3.0.5",
     "@types/enzyme": "^3.10.18",
     "@types/js-cookie": "^2.2.2",
-    "@types/lodash": "^4.17.0",
+    "@types/lodash": "^4.17.1",
     "@types/node": "^10.12.11",
     "@types/react": "^17.0.80",
     "@types/react-modal": "^3.16.3",
