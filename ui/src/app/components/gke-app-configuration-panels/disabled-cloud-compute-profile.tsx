@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppType, Disk, PersistentDiskRequest } from 'generated/fetch';
+import { AppType } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -10,14 +10,12 @@ import { appTypeToString } from 'app/utils/user-apps-utils';
 
 interface Props {
   machine: Machine;
-  persistentDiskRequest: Disk | PersistentDiskRequest;
   appType: AppType;
   sharingNote: string;
   disabledText?: string;
 }
 export const DisabledCloudComputeProfile = ({
   machine: { cpu, memory },
-  persistentDiskRequest: { size },
   appType,
   sharingNote,
   disabledText = `The cloud compute profile for ${appTypeToString[appType]} beta is non-configurable.`,
@@ -29,7 +27,7 @@ export const DisabledCloudComputeProfile = ({
       </div>
       <TooltipTrigger content={disabledText} side={'right'}>
         <div style={styles.disabledCloudProfile}>
-          {`${cpu} CPUS, ${memory}GB RAM, ${size}GB disk`}
+          {`${cpu} CPUS, ${memory}GB RAM`}
         </div>
       </TooltipTrigger>
     </FlexRow>

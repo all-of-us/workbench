@@ -18,7 +18,11 @@ import { Button, Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
 import { RenameModal } from 'app/components/rename-modal';
-import { MODIFIERS_MAP, VARIANT_DISPLAY } from 'app/pages/data/cohort/constant';
+import {
+  BOOLEAN_CRITERIA_DOMAINS,
+  MODIFIERS_MAP,
+  VARIANT_DISPLAY,
+} from 'app/pages/data/cohort/constant';
 import {
   encountersStore,
   searchRequestStore,
@@ -198,21 +202,6 @@ class SearchGroupItemParameter extends React.Component<
     );
   }
 }
-
-const SKIP_DOMAIN_SEARCH = [
-  Domain.FITBIT.toString(),
-  Domain.FITBIT_SLEEP_LEVEL.toString(),
-  Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
-  Domain.FITBIT_HEART_RATE_LEVEL.toString(),
-  Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
-  Domain.FITBIT_ACTIVITY.toString(),
-  Domain.FITBIT_INTRADAY_STEPS.toString(),
-  Domain.WHOLE_GENOME_VARIANT.toString(),
-  Domain.LR_WHOLE_GENOME_VARIANT.toString(),
-  Domain.ARRAY_DATA.toString(),
-  Domain.STRUCTURAL_VARIANT_DATA.toString(),
-  Domain.WEAR_CONSENT.toString(),
-];
 
 interface ItemProp extends Item {
   count: number;
@@ -462,7 +451,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {
         item: { name, searchParameters, type },
       } = this.props;
-      if (SKIP_DOMAIN_SEARCH.includes(type)) {
+      if (
+        BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
+        searchParameters[0]?.type === CriteriaType.DECEASED.toString() ||
+        searchParameters[0]?.type === CriteriaType.HAS_EHR_DATA.toString()
+      ) {
         return !!name ? name : searchParameters[0].name;
       } else {
         const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
@@ -479,9 +472,9 @@ export const SearchGroupItem = withCurrentWorkspace()(
         item: { searchParameters, type },
       } = this.props;
       return (
-        SKIP_DOMAIN_SEARCH.includes(type) ||
-        (searchParameters[0] &&
-          searchParameters[0].type === CriteriaType.DECEASED.toString())
+        BOOLEAN_CRITERIA_DOMAINS.includes(type) ||
+        searchParameters[0]?.type === CriteriaType.DECEASED.toString() ||
+        searchParameters[0]?.type === CriteriaType.HAS_EHR_DATA.toString()
       );
     }
 

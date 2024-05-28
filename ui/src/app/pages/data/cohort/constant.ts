@@ -1,4 +1,4 @@
-import { AttrName, ModifierType, Operator } from 'generated/fetch';
+import { AttrName, Domain, ModifierType, Operator } from 'generated/fetch';
 
 export const PM_UNITS = {
   HEIGHT: 'cm',
@@ -144,3 +144,18 @@ export const VARIANT_DISPLAY = {
   overHundredThousand: '> 100,000 Participants',
   overTwoHundredThousand: '> 200,000 Participants',
 };
+
+export const BOOLEAN_CRITERIA_DOMAINS = [
+  Domain.FITBIT.toString(),
+  Domain.FITBIT_SLEEP_LEVEL.toString(),
+  Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
+  Domain.FITBIT_HEART_RATE_LEVEL.toString(),
+  Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
+  Domain.FITBIT_ACTIVITY.toString(),
+  Domain.FITBIT_INTRADAY_STEPS.toString(),
+  Domain.WHOLE_GENOME_VARIANT.toString(),
+  Domain.LR_WHOLE_GENOME_VARIANT.toString(),
+  Domain.ARRAY_DATA.toString(),
+  Domain.STRUCTURAL_VARIANT_DATA.toString(),
+  Domain.WEAR_CONSENT.toString(),
+];

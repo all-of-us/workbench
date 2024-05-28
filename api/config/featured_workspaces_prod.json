@@ -317,6 +317,12 @@
       "namespace": "aou-rw-5fbc818d",
       "id": "sasdemonstrationsociodemographicdifferencesintreatmentofmentaldisorders",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Pharmacogenomics (PGx) variant frequency and medication exposures",
+      "namespace": "aou-rw-87ca7327",
+      "id": "demopharmacogenomicspgxvariantfrequencyandmedicationexposures",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

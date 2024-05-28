@@ -9,13 +9,21 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { isAppActive } from 'app/components/apps-panel/utils';
+import {
+  appMaxDiskSize,
+  appMinDiskSize,
+  isAppActive,
+} from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SUPPORT_EMAIL } from 'app/components/support';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { NotificationStore } from 'app/utils/stores';
-import { appTypeToString, createUserApp } from 'app/utils/user-apps-utils';
+import {
+  appTypeToString,
+  createUserApp,
+  isDiskSizeValid,
+} from 'app/utils/user-apps-utils';
 
 export interface CreateGKEAppButtonProps {
   createAppRequest: CreateAppRequest;
@@ -40,7 +48,8 @@ export function CreateGkeAppButton({
   const createEnabled =
     !creatingApp &&
     !isAppActive(existingApp) &&
-    billingStatus === BillingStatus.ACTIVE;
+    billingStatus === BillingStatus.ACTIVE &&
+    isDiskSizeValid(createAppRequest);
 
   const appTypeString = appTypeToString[createAppRequest.appType];
 
@@ -59,6 +68,13 @@ export function CreateGkeAppButton({
   };
 
   const tooltip = cond(
+    [
+      !isDiskSizeValid(createAppRequest),
+      () =>
+        `Disk cannot be more than ${appMaxDiskSize} GB or less than ${
+          appMinDiskSize[createAppRequest.appType]
+        } GB`,
+    ],
     [
       billingStatus !== BillingStatus.ACTIVE,
       () =>

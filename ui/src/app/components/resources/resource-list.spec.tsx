@@ -12,10 +12,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ResourceList } from './resource-list';
 
-export const resourceTable = (wrapper) =>
-  wrapper.find('[data-test-id="resource-list"]').find('tbody');
-export const resourceTableRows = (wrapper) => resourceTable(wrapper).find('tr');
-
 const COHORT_NAME = 'My Cohort';
 const COHORT: WorkspaceResource = {
   ...stubResource,

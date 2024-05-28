@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -92,6 +93,26 @@ public class ManageLeonardoRuntimes {
     return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
+  private static final String TABULAR_FORMAT = "%-40.40s %-50.50s %-10s %-20s %-20s %-20s";
+
+  private String tabularHeader() {
+    return String.format(
+        TABULAR_FORMAT, "ID", "Creator", "Status", "Created", "Accessed", "Destroyed");
+  }
+
+  private static String toWholeSeconds(@Nullable String dateTimeString) {
+    if (dateTimeString == null) {
+      return "[null]";
+    }
+
+    try {
+      Instant instant = Instant.parse(dateTimeString);
+      return instant.minusNanos(instant.getNano()).toString();
+    } catch (DateTimeParseException e) {
+      return "[invalid datetime: " + dateTimeString + "]";
+    }
+  }
+
   private String formatTabular(LeonardoListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
@@ -104,8 +125,13 @@ public class ManageLeonardoRuntimes {
       status = r.getStatus();
     }
     return String.format(
-        "%-40.40s %-50.50s %-10s %-15s",
-        runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
+        TABULAR_FORMAT,
+        runtimeId(r),
+        creator,
+        status,
+        toWholeSeconds(r.getAuditInfo().getCreatedDate()),
+        toWholeSeconds(r.getAuditInfo().getDateAccessed()),
+        toWholeSeconds(r.getAuditInfo().getDestroyedDate()));
   }
 
   private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
@@ -124,6 +150,7 @@ public class ManageLeonardoRuntimes {
 
       case TABULAR:
       default:
+        System.out.println(tabularHeader());
         stream.forEachOrdered(
             (c) -> {
               System.out.println(formatTabular(c));

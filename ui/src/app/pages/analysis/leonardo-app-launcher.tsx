@@ -785,7 +785,13 @@ export const LeonardoAppLauncher = fp.flow(
               <div
                 style={{ borderBottom: '5px solid #2691D0', width: '100%' }}
               />
-              <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%' />
+              <Iframe
+                frameBorder={0}
+                url={leoUrl}
+                width='100%'
+                height='100%'
+                title='Iframe Container'
+              />
             </div>
           )}
           {resolveRuntimeInitializer && (
