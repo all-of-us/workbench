@@ -2278,7 +2278,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Customize');
     await pickComputeType(container, ComputeType.Standard);
 
-    const enableGpu = screen.getByRole('checkbox', {
+    const enableGpu: HTMLInputElement = screen.getByRole('checkbox', {
       name: /enable gpus/i,
     });
 
