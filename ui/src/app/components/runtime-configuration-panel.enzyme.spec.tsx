@@ -12,7 +12,6 @@ import {
 import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { RadioButton } from 'app/components/inputs';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
@@ -22,11 +21,6 @@ import {
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
-import {
-  ComputeType,
-  DATAPROC_MIN_DISK_SIZE_GB,
-  MIN_DISK_SIZE_GB,
-} from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
@@ -49,11 +43,7 @@ import {
 } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import {
-  defaultDataprocConfig,
-  defaultGceConfig,
-  RuntimeApiStub,
-} from 'testing/stubs/runtime-api-stub';
+import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -220,9 +210,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickMainCpu = (wrapper, cpu) =>
     pickDropdownOption(wrapper, '#runtime-cpu', cpu);
 
-  const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(wrapper, '#standard-disk', diskSize);
-
   const pickDetachableType = (wrapper, diskType: DiskType) =>
     pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
 
@@ -231,28 +218,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickDetachableDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
-  const pickGpuType = (wrapper, gpuType) =>
-    pickDropdownOption(wrapper, '#gpu-type', gpuType);
-
-  const pickGpuNum = (wrapper, gpuNum) =>
-    pickDropdownOption(wrapper, '#gpu-num', gpuNum);
-
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
-
-  const pickComputeType = (wrapper, computeType) =>
-    pickDropdownOption(wrapper, '#runtime-compute', computeType);
-
-  const pickNumWorkers = (wrapper, n) =>
-    enterNumberInput(wrapper, '#num-workers', n);
-
-  const mustClickButton = async (wrapper, label) => {
-    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
-    expect(btn.exists()).toBeTruthy();
-    expect(btn.prop('disabled')).toBeFalsy();
-
-    btn.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-  };
 
   const clickButtonIfVisible = async (wrapper, label) => {
     const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
@@ -491,11 +457,8 @@ describe(RuntimeConfigurationPanel.name, () => {
       await clickButtonIfVisible(wrapper, 'Delete');
     }
 
-    console.log('update disk' + setters);
     expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
-    console.log('update runtime');
     expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
-    console.log('delete disk');
     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
 
     if (wantDeleteRuntime) {
@@ -580,252 +543,59 @@ describe(RuntimeConfigurationPanel.name, () => {
     }
   );
 
-  test.each([
-    ['disk type', [pickSsdType], { wantDeleteDisk: true }],
-    ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
-    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
-  ] as DetachableDiskCase[])(
-    'should allow runtime creates with existing disk: %s',
-    async (desc, setters, expectations) => {
-      setCurrentRuntime(null);
-
-      const disk = existingDisk();
-      setCurrentDisk(disk);
-
-      const wrapper = await component();
-      await mustClickButton(wrapper, 'Customize');
-      await runDetachableDiskCase(
-        wrapper,
-        [desc, setters, expectations],
-        disk.name
-      );
-    }
-  );
+  // test.each([
+  //   ['disk type', [pickSsdType], { wantDeleteDisk: true }],
+  //   ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
+  //   ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+  // ] as DetachableDiskCase[])(
+  //   'should allow runtime creates with existing disk: %s',
+  //   async (desc, setters, expectations) => {
+  //     // Moved to RTL
+  //   }
+  // );
 
   it('should allow Dataproc -> PD transition', async () => {
     // migrated to RTL
   });
 
   it('should allow disk deletion when detaching', async () => {
-    setCurrentRuntime(detachableDiskRuntime());
-    setCurrentDisk(existingDisk());
-
-    const wrapper = await component();
-    pickComputeType(wrapper, ComputeType.Dataproc);
-
-    await mustClickButton(wrapper, 'Next');
-    expect(wrapper.text()).toContain(
-      'will be unused after you apply this update'
-    );
-
-    // Click the "delete" radio button.
-    wrapper
-      .find({ 'data-test-id': 'delete-pd' })
-      .find(RadioButton)
-      .first()
-      .simulate('change');
-
-    await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
-
-    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-    expect(disksApiStub.disk).toBeNull();
+    // Moved to RTL
   });
 
   it('should allow skipping disk deletion when detaching', async () => {
-    setCurrentRuntime(detachableDiskRuntime());
-    const disk = existingDisk();
-    setCurrentDisk(disk);
-
-    const wrapper = await component();
-    pickComputeType(wrapper, ComputeType.Dataproc);
-
-    await mustClickButton(wrapper, 'Next');
-
-    expect(wrapper.text()).toContain(
-      'will be unused after you apply this update'
-    );
-
-    // Default option should be NOT to delete.
-    await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
-    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-
-    await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-    expect(disksApiStub.disk?.name).toEqual(disk.name);
+    // Moved to RTL
   });
 
   it('should prevent runtime creation when running cost is too high for free tier', async () => {
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-    const getCreateButton = () =>
-      wrapper.find({ 'aria-label': 'Create' }).first();
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, 150);
-    // This should make the cost about $50 per hour.
-    await pickNumWorkers(wrapper, 200);
-    expect(getCreateButton().prop('disabled')).toBeTruthy();
-
-    await pickNumWorkers(wrapper, 2);
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
+    // Moved to RTL
   });
 
   it('should prevent runtime creation when worker count is invalid', async () => {
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-    const getCreateButton = () =>
-      wrapper.find({ 'aria-label': 'Create' }).first();
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
-
-    await pickNumWorkers(wrapper, 0);
-    expect(getCreateButton().prop('disabled')).toBeTruthy();
-
-    await pickNumWorkers(wrapper, 1);
-    expect(getCreateButton().prop('disabled')).toBeTruthy();
-
-    await pickNumWorkers(wrapper, 2);
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
+    // Moved to RTL
   });
 
   it('should allow runtime creation when running cost is too high for user provided billing', async () => {
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.OWNER,
-      billingAccountName: 'user provided billing',
-    });
-
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-    const getCreateButton = () =>
-      wrapper.find({ 'aria-label': 'Create' }).first();
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
-    // This should make the cost about $50 per hour.
-    await pickNumWorkers(wrapper, 20000);
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
+    // Moved to RTL
   });
 
   it('should prevent runtime creation when running cost is too high for paid tier', async () => {
-    setCurrentRuntime(null);
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    });
-    const wrapper = await component();
-
-    await mustClickButton(wrapper, 'Customize');
-    const getCreateButton = () =>
-      wrapper.find({ 'aria-label': 'Create' }).first();
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-
-    await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
-    // This should make the cost about $140 per hour.
-    await pickNumWorkers(wrapper, 600);
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
-
-    // This should make the cost around $160 per hour.
-    await pickNumWorkers(wrapper, 700);
-    // We don't want to disable for user provided billing. Just put a warning.
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="runtime-warning-messages"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="runtime-error-messages"]').exists()
-    ).toBeFalsy();
-
-    await pickNumWorkers(wrapper, 2);
-    expect(getCreateButton().prop('disabled')).toBeFalsy();
+    // Moved to RTL
   });
 
   it('should allow creating gcePD with GPU', async () => {
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-    await pickComputeType(wrapper, ComputeType.Standard);
-    await clickEnableGpu(wrapper);
-    await pickGpuType(wrapper, 'NVIDIA Tesla T4');
-    await pickGpuNum(wrapper, 2);
-    await pickMainCpu(wrapper, 8);
-    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
-
-    await mustClickButton(wrapper, 'Create');
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
-      'stub-disk'
-    );
-    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
-      2
-    );
+    // Moved to RTL
   });
 
   it('should allow creating gce without GPU', async () => {
-    setCurrentRuntime(null);
-    const wrapper = await component();
-    await mustClickButton(wrapper, 'Customize');
-    await pickComputeType(wrapper, ComputeType.Standard);
-    await pickMainCpu(wrapper, 8);
-    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
-    await mustClickButton(wrapper, 'Create');
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
+    // Moved to RTL
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-      gceConfig: null,
-      gceWithPdConfig: null,
-      dataprocConfig: defaultDataprocConfig(),
-    });
-
-    const wrapper = await component();
-
-    const workerCountInput = wrapper.find('#num-workers').first();
-    expect(workerCountInput.prop('disabled')).toBeTruthy();
-    expect(workerCountInput.prop('tooltip')).toBeTruthy();
-
-    const preemptibleCountInput = wrapper.find('#num-preemptible').first();
-    expect(preemptibleCountInput.prop('disabled')).toBeTruthy();
-    expect(preemptibleCountInput.prop('tooltip')).toBeTruthy();
+    // Moved to RTL
   });
 
   it('should allow worker configuration for stopped GCE runtime', async () => {
-    setCurrentRuntime({
-      ...runtimeApiStub.runtime,
-      status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
-      gceConfig: defaultGceConfig(),
-      dataprocConfig: null,
-    });
-
-    const wrapper = await component();
-    await pickComputeType(wrapper, ComputeType.Dataproc);
-
-    const workerCountInput = wrapper.find('#num-workers').first();
-    expect(workerCountInput.prop('disabled')).toBeFalsy();
-    expect(workerCountInput.prop('tooltip')).toBeFalsy();
-
-    const preemptibleCountInput = wrapper.find('#num-preemptible').first();
-    expect(preemptibleCountInput.prop('disabled')).toBeFalsy();
-    expect(preemptibleCountInput.prop('tooltip')).toBeFalsy();
+    // migrated to RTL
   });
 
   it('should disable Spark console for non-running cluster', async () => {

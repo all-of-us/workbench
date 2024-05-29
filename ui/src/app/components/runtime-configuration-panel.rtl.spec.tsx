@@ -17,9 +17,10 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
+  disksApi,
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
@@ -688,6 +689,17 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: null,
     };
   };
+
+  type DetachableDiskCase = [
+    string,
+    ((container: HTMLElement) => Promise<void>)[],
+    {
+      wantUpdateDisk?: boolean;
+      wantDeleteDisk?: boolean;
+      wantDeleteRuntime?: boolean;
+    }
+  ];
+
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -726,6 +738,9 @@ describe(RuntimeConfigurationPanel.name, () => {
       'disk-type',
       diskTypeLabels[diskType]
     );
+
+  const pickSsdType = (container: HTMLElement): Promise<void> =>
+    pickDetachableType(container, DiskType.SSD);
 
   const getMainCpu = (container: HTMLElement): string =>
     getDropdownSelection(container, 'runtime-cpu');
@@ -767,6 +782,20 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickDetachableDiskSize = async (size: number): Promise<void> =>
     pickSpinButtonSize('detachable-disk', size);
 
+  const changeMainCpu_To8 = async (container: HTMLElement) =>
+    pickMainCpu(container, 8);
+
+  const clickEnableGpu = async (container) => {
+    console.log(container);
+    const enableGpu = screen.getByRole('checkbox', {
+      name: /enable gpus/i,
+    });
+    expect(enableGpu).toBeInTheDocument();
+    expect(enableGpu).not.toBeChecked();
+    fireEvent.click(enableGpu);
+    expect(enableGpu).toBeChecked();
+  };
+
   const pickStandardDiskSize = async (size: number): Promise<void> =>
     pickSpinButtonSize('standard-disk', size);
 
@@ -785,6 +814,12 @@ describe(RuntimeConfigurationPanel.name, () => {
       'runtime-presets-menu',
       option.toString()
     );
+
+  const pickGpuType = (container: HTMLElement, option: string): Promise<void> =>
+    pickDropdownOptionAndClick(container, 'gpu-type', option);
+
+  const pickGpuNum = (container: HTMLElement, option: number): Promise<void> =>
+    pickDropdownOptionAndClick(container, 'gpu-num', option.toString());
 
   const spinDiskElement = (diskName: string): HTMLElement =>
     screen.getByRole('spinbutton', {
@@ -805,6 +840,36 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const getNumOfPreemptibleWorkersValue = () =>
     spinDiskElement('num-preemptible').getAttribute('value');
+
+  const decrementDetachableDiskSize = async (container): Promise<void> => {
+    console.log(container);
+    const diskValueAsInt =
+      parseInt(getDetachableDiskValue().replace(/,/g, '')) - 1;
+    await pickDetachableDiskSize(diskValueAsInt);
+  };
+
+  const incrementDetachableDiskSize = async (container): Promise<void> => {
+    console.log(container);
+    const diskValueAsInt =
+      parseInt(getDetachableDiskValue().replace(/,/g, '')) + 1;
+    await pickDetachableDiskSize(diskValueAsInt);
+  };
+
+  const getDeletePDRadio = () =>
+    screen.queryByRole('radio', {
+      name: 'delete-pd',
+    });
+
+  const togglePDRadioButton = () => {
+    getDeletePDRadio().click();
+  };
+
+  const clickButtonIfVisible = (name) => {
+    const button = screen.queryByRole('button', { name });
+    if (button) {
+      button.click();
+    }
+  };
 
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
@@ -828,6 +893,86 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const getPausedCost = () =>
     screen.getByLabelText('cost while paused').textContent;
+
+  const waitForFakeTimersAndUpdate = async (maxRetries = 10) => {
+    const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
+
+    for (let i = 0; i < maxRetries; i++) {
+      if (runtimeApiStub.runtime.status === RuntimeStatus.DELETED) {
+        // Wait for the updates to complete
+        await act(async () => {
+          await waitFor(
+            async () => {
+              console.log(runtimeApiStub.runtime.status);
+              await new Promise((r) => setTimeout(r, 2000));
+              expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+              return;
+            },
+            { timeout: 10000 }
+          );
+        });
+      }
+    }
+  };
+
+  async function runDetachableDiskCase(
+    container,
+    [
+      _,
+      setters,
+      {
+        wantUpdateDisk = false,
+        wantDeleteDisk = false,
+        wantDeleteRuntime = false,
+      },
+    ]: DetachableDiskCase,
+    existingDiskName: string
+  ) {
+    const deleteDiskSpy = jest.spyOn(disksApi(), 'deleteDisk');
+    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
+
+    for (const f of setters) {
+      await f(container);
+    }
+
+    clickButtonIfVisible('Next');
+    clickButtonIfVisible('Update');
+    clickButtonIfVisible('Create');
+    const deleteRadio = screen.queryAllByTestId('delete-unattached-pd-radio');
+    if (deleteRadio && deleteRadio.length > 0) {
+      expect(deleteRadio[0]).not.toBeChecked();
+      fireEvent.click(deleteRadio[0]);
+      expect(deleteRadio[0]).toBeChecked();
+      clickExpectedButton('Delete');
+    }
+
+    await act(async () => {
+      await waitFor(() => {
+        expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+        expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
+      });
+    });
+
+    if (wantDeleteRuntime) {
+      await act(async () => {
+        await waitFor(() => {
+          expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
+          runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+        });
+      });
+      expect(runtimeApiStub.runtime.status).toBe(RuntimeStatus.DELETED);
+      // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
+      await waitForFakeTimersAndUpdate(/* maxRetries*/ 20);
+    }
+
+    await waitFor(() => {
+      if (wantDeleteDisk) {
+        expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
+      } else {
+        expect(disksApiStub.disk.name).toEqual(existingDiskName);
+      }
+    });
+  }
 
   beforeEach(async () => {
     user = userEvent.setup();
@@ -865,6 +1010,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   afterEach(() => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
+    jest.clearAllTimers();
     act(() => clearCompoundRuntimeOperations());
   });
 
@@ -1452,6 +1598,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const numberFormatter = new Intl.NumberFormat('en-US');
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
+
   it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
 
@@ -1527,6 +1674,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       );
     });
   });
+
   it('should restrict memory options by cpu', async () => {
     const { container } = await component();
 
@@ -1566,12 +1714,11 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getMainCpu(container)).toBe('2');
     expect(getMainRam(container)).toBe('7.5');
   });
+
   it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
     await component();
 
-    const detachableDiskElement = screen.getByRole('spinbutton', {
-      name: /detachable\-disk/i,
-    });
+    const detachableDiskElement = spinDiskElement('detachable-disk');
     const detachableDisk = detachableDiskElement.getAttribute('value');
     await pickDetachableDiskSize(parseInt(detachableDisk) + 10);
     clickExpectedButton('Next');
@@ -1679,6 +1826,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       )
     ).toBeInTheDocument();
   });
+
   it('should warn user about reboot if there are updates that require one - Memory', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
@@ -2060,6 +2208,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableType(container, DiskType.STANDARD);
     expectButtonElementDisabled(getNextButton());
   });
+
   it('should prevent runtime creation when disk size is invalid', async () => {
     setCurrentRuntime(null);
 
@@ -2088,4 +2237,339 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickWorkerDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
     expectButtonElementEnabled(getCreateButton());
   });
+
+  it('should allow worker configuration for stopped GCE runtime', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
+      gceConfig: defaultGceConfig(),
+      dataprocConfig: null,
+    });
+
+    const { container } = await component();
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    const workerCountInput = spinDiskElement('num-workers');
+    expect(workerCountInput.attributes.getNamedItem('disabled')).toBeNull();
+    const preemptibleCountInput = spinDiskElement('num-preemptible');
+    expect(
+      preemptibleCountInput.attributes.getNamedItem('disabled')
+    ).toBeNull();
+  });
+
+  it('should allow creating gce without GPU', async () => {
+    setCurrentRuntime(null);
+    const { container } = await component();
+    await clickExpectedButton('Customize');
+    await pickComputeType(container, ComputeType.Standard);
+    await pickMainCpu(container, 8);
+    await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
+    await clickExpectedButton('Create');
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
+    });
+  });
+
+  it('should allow creating gcePD with GPU', async () => {
+    setCurrentRuntime(null);
+    const { container } = await component();
+    await clickExpectedButton('Customize');
+    await pickComputeType(container, ComputeType.Standard);
+
+    const enableGpu = screen.getByRole('checkbox', {
+      name: /enable gpus/i,
+    });
+
+    expect(enableGpu.checked).toEqual(false);
+    enableGpu.click();
+    expect(enableGpu.checked).toEqual(true);
+    await pickGpuType(container, 'NVIDIA Tesla T4');
+    await pickGpuNum(container, 2);
+    await pickMainCpu(container, 8);
+    await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
+
+    await clickExpectedButton('Create');
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+      expect(
+        runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name
+      ).toEqual('stub-disk');
+      expect(
+        runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus
+      ).toEqual(2);
+    });
+  });
+
+  it('should allow disk deletion when detaching', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    setCurrentDisk(existingDisk());
+
+    const { container } = await component();
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    clickExpectedButton('Next');
+    expect(
+      screen.getByText(
+        /your environment currently has a reattachable disk, which will be unused after you apply this update\. /i
+      )
+    ).toBeTruthy();
+
+    togglePDRadioButton();
+
+    clickExpectedButton('Next');
+    clickExpectedButton('Update');
+    await waitFor(async () => {
+      runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+      expect(runtimeApiStub.runtime.gceWithPdConfig).not.toBeNull();
+    });
+    await waitFor(() => {}, { interval: 1000 });
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+      expect(runtimeApiStub.runtime.gceWithPdConfig).toBeUndefined();
+      // expect(runtimeApiStub.runtime.gceWithPdConfig).toBeNull();
+    });
+  });
+
+  it('should allow skipping disk deletion when detaching', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+
+    const { container } = await component();
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /your environment currently has a reattachable disk, which will be unused after you apply this update\./i
+      )
+    ).toBeTruthy();
+
+    // Default option should be NOT to delete.
+    clickExpectedButton('Next');
+    clickExpectedButton('Update');
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
+      expect(disksApiStub.disk?.name).toEqual(disk.name);
+    });
+  });
+
+  it('should prevent runtime creation when running cost is too high for free tier', async () => {
+    setCurrentRuntime(null);
+    const { container } = await component();
+    clickExpectedButton('Customize');
+    const createButton = screen.getByRole('button', { name: 'Create' });
+
+    await pickComputeType(container, ComputeType.Dataproc);
+    await pickStandardDiskSize(150);
+    // This should make the cost about $50 per hour.
+    await pickNumWorkers(200);
+    expectButtonElementDisabled(createButton);
+
+    await pickNumWorkers(2);
+    expectButtonElementEnabled(createButton);
+  });
+
+  it('should prevent runtime creation when worker count is invalid', async () => {
+    setCurrentRuntime(null);
+    const { container } = await component();
+    clickExpectedButton('Customize');
+
+    await pickComputeType(container, ComputeType.Dataproc);
+    await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    await pickNumWorkers(0);
+    expectButtonElementDisabled(createButton);
+
+    await pickNumWorkers(1);
+    expectButtonElementDisabled(createButton);
+
+    await pickNumWorkers(2);
+    expectButtonElementEnabled(createButton);
+  });
+
+  it('should allow runtime creation when running cost is too high for user provided billing', async () => {
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.OWNER,
+      billingAccountName: 'user provided billing',
+    });
+
+    setCurrentRuntime(null);
+    const { container } = await component();
+    clickExpectedButton('Customize');
+
+    await pickComputeType(container, ComputeType.Dataproc);
+    await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
+    // This should make the cost about $50 per hour.
+    await pickNumWorkers(20000);
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    expectButtonElementEnabled(createButton);
+  });
+
+  it('should prevent runtime creation when running cost is too high for paid tier', async () => {
+    setCurrentRuntime(null);
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    });
+    const { container } = await component();
+
+    clickExpectedButton('Customize');
+
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
+    // This should make the cost about $140 per hour.
+    await pickNumWorkers(600);
+    let createButton = screen.getByRole('button', { name: 'Create' });
+    expectButtonElementEnabled(createButton);
+
+    // This should make the cost around $160 per hour.
+    await pickNumWorkers(700);
+    createButton = screen.getByRole('button', { name: 'Create' });
+    // We don't want to disable for user provided billing. Just put a warning.
+    expectButtonElementEnabled(createButton);
+    expect(
+      screen.findByText(
+        'Your runtime is expensive. Are you sure you wish to proceed?'
+      )
+    ).toBeTruthy();
+
+    await pickNumWorkers(2);
+    createButton = screen.getByRole('button', { name: 'Create' });
+    // We don't want to disable for user provided billing. Just put a warning.
+    expectButtonElementEnabled(createButton);
+  });
+
+  it('should disable worker count updates for stopped dataproc cluster', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    await component();
+
+    const workerCountInput = spinDiskElement('num-workers');
+    expect(workerCountInput.disabled).toBeTruthy();
+
+    const preemptibleCountInput = spinDiskElement('num-preemptible');
+    expect(preemptibleCountInput.disabled).toBeTruthy();
+  });
+
+  jest.setTimeout(50000);
+  test.each([
+    [
+      'disk type',
+      [pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'disk decrease',
+      [decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    // [
+    //   'in-place + disk type',
+    //   [changeMainCpu_To8, pickSsdType],
+    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
+    // ],
+    // [
+    //   'in-place + disk decrease',
+    //   [changeMainCpu_To8, decrementDetachableDiskSize],
+    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
+    // ],
+    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+    // [
+    //   'recreate + disk type',
+    //   [clickEnableGpu, pickSsdType],
+    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
+    // ],
+    // [
+    //   'recreate + disk decrease',
+    //   [clickEnableGpu, decrementDetachableDiskSize],
+    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
+    // ],
+  ] as DetachableDiskCase[])(
+    'should allow runtime to recreate to attached PD: %s',
+    async (desc: string, setters, expectations) => {
+      setCurrentRuntime(detachableDiskRuntime());
+
+      const disk = existingDisk();
+      setCurrentDisk(disk);
+
+      const { container } = await component();
+      await runDetachableDiskCase(
+        container,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
+
+  test.each([
+    ['disk increase', [incrementDetachableDiskSize]],
+    ['in-place', [changeMainCpu_To8]],
+    [
+      'in-place + disk increase',
+      [changeMainCpu_To8, incrementDetachableDiskSize],
+    ],
+    ['recreate + disk increase', [clickEnableGpu, incrementDetachableDiskSize]],
+  ])(
+    'should allow runtime updates to attached PD: %s',
+    async (desc: string, setters) => {
+      setCurrentRuntime(detachableDiskRuntime());
+
+      const disk = existingDisk();
+      setCurrentDisk(disk);
+
+      const { container } = await component();
+      const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+
+      for (const action of setters) {
+        await action(container);
+      }
+
+      clickButtonIfVisible('Next');
+      clickButtonIfVisible('Update');
+      await waitFor(() => {
+        expect(updateRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(disksApiStub.disk.name).toEqual(disk.name);
+      });
+    }
+  );
+
+  test.each([
+    ['disk type', [pickSsdType], { wantDeleteDisk: true }],
+    ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
+    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+  ] as DetachableDiskCase[])(
+    'should allow runtime creates with existing disk: %s',
+    async (desc, setters, expectations) => {
+      setCurrentRuntime(null);
+
+      const disk = existingDisk();
+      setCurrentDisk(disk);
+
+      const { container } = await component();
+      clickExpectedButton('Customize');
+
+      runDetachableDiskCase(
+        container,
+        [desc, setters, expectations],
+        disk.name
+      );
+    }
+  );
 });
