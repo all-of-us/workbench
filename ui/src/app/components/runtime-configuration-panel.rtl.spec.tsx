@@ -1478,16 +1478,19 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
 
     clickExpectedButton('Create');
-    await waitFor(() => {
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-      );
-      expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-      );
-      expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
-    }, {interval: 750});
+    await waitFor(
+      () => {
+        expect(runtimeApiStub.runtime.status).toEqual('Creating');
+        expect(runtimeApiStub.runtime.configurationType).toEqual(
+          RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
+        );
+        expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
+          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+        );
+        expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+      },
+      { interval: 750 }
+    );
   });
 
   it(
