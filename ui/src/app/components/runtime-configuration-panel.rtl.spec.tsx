@@ -1487,7 +1487,7 @@ describe(RuntimeConfigurationPanel.name, () => {
         runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
       );
       expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
-    });
+    }, {interval: 750});
   });
 
   it(
