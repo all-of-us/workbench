@@ -8,10 +8,12 @@ import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
+import JSpreadsheetComponent from 'app/pages/analysis/jspreadsheet';
 import {
   LeoApplicationType,
   LeonardoAppLauncher,
 } from 'app/pages/analysis/leonardo-app-launcher';
+import SSpreadsheetComponent from 'app/pages/analysis/sspreadsheet';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortPage } from 'app/pages/data/cohort/cohort-page';
@@ -100,6 +102,8 @@ const GKEAppRedirectPage = fp.flow(
 )(GKEAppLauncher);
 const AppsListPage = fp.flow(withRouteData)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
+const JSpreadsheetPage = fp.flow(withRouteData)(JSpreadsheetComponent);
+const SSpreadsheetPage = fp.flow(withRouteData)(SSpreadsheetComponent);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
@@ -154,6 +158,32 @@ export const WorkspaceRoutes = () => {
             pageKey: analysisTabName,
             workspaceNavBarTab: analysisTabName,
             breadcrumb: BreadcrumbType.Workspace,
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${analysisTabName}/jspreadsheet/preview/:nbName`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <JSpreadsheetPage
+          routeData={{
+            title: 'Spreadsheet Page',
+            breadcrumb: 'Spreadsheet Preview',
+            pageKey: 'spreadsheet',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/${analysisTabName}/sspreadsheet/preview/:nbName`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <SSpreadsheetPage
+          routeData={{
+            title: 'Spreadsheet Page',
+            breadcrumb: 'Spreadsheet Preview',
+            pageKey: 'spreadsheet',
           }}
         />
       </AppRoute>

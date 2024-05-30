@@ -157,12 +157,12 @@ export const AppFilesList = withCurrentWorkspace()(
       );
     };
 
-    const displayAppLogo = (row: FileDetail) => {
-      // Find App Type on the basis of file name extension
-      const { name } = row;
-      const appType = getAppInfoFromFileName(name).appType;
-      return <AppBanner appType={appType} style={{ marginRight: '1em' }} />;
-    };
+    // const displayAppLogo = (row: FileDetail) => {
+    //   // Find App Type on the basis of file name extension
+    //   const { name } = row;
+    //   const appType = getAppInfoFromFileName(name)?.appType;
+    //   return <AppBanner appType={appType} style={{ marginRight: '1em' }} />;
+    // };
 
     const displayName = (row: FileDetail) => {
       const {
@@ -229,13 +229,13 @@ export const AppFilesList = withCurrentWorkspace()(
                   body={displayMenu}
                   bodyStyle={styles.rows}
                 />
-                <Column
-                  headerStyle={styles.tableHeader}
-                  header='Application'
-                  body={displayAppLogo}
-                  style={styles.columns}
-                  bodyStyle={styles.rows}
-                />
+                {/* <Column*/}
+                {/*  headerStyle={styles.tableHeader}*/}
+                {/*  header='Application'*/}
+                {/*  body={displayAppLogo}*/}
+                {/*  style={styles.columns}*/}
+                {/*  bodyStyle={styles.rows}*/}
+                {/* />*/}
                 <Column
                   style={styles.columns}
                   headerStyle={styles.tableHeader}

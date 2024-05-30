@@ -121,7 +121,6 @@ public class NotebooksServiceImpl implements NotebooksService {
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
-        .filter(this::isManagedNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
