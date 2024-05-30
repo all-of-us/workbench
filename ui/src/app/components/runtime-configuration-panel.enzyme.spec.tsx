@@ -21,7 +21,9 @@ import {
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
+import { ComputeType, MIN_DISK_SIZE_GB } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
@@ -210,6 +212,9 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickMainCpu = (wrapper, cpu) =>
     pickDropdownOption(wrapper, '#runtime-cpu', cpu);
 
+  const pickMainRam = (wrapper, ram) =>
+    pickDropdownOption(wrapper, '#runtime-ram', ram);
+
   const pickDetachableType = (wrapper, diskType: DiskType) =>
     pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
 
@@ -219,6 +224,36 @@ describe(RuntimeConfigurationPanel.name, () => {
     enterNumberInput(wrapper, '#detachable-disk', diskSize);
 
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
+
+  const pickComputeType = (wrapper, computeType) =>
+    pickDropdownOption(wrapper, '#runtime-compute', computeType);
+
+  const pickWorkerCpu = (wrapper, cpu) =>
+    pickDropdownOption(wrapper, '#worker-cpu', cpu);
+
+  const pickWorkerRam = (wrapper, ram) =>
+    pickDropdownOption(wrapper, '#worker-ram', ram);
+
+  const pickWorkerDiskSize = (wrapper, diskSize) =>
+    enterNumberInput(wrapper, '#worker-disk', diskSize);
+
+  const pickNumWorkers = (wrapper, n) =>
+    enterNumberInput(wrapper, '#num-workers', n);
+
+  const pickNumPreemptibleWorkers = (wrapper, n) =>
+    enterNumberInput(wrapper, '#num-preemptible', n);
+
+  const pickPreset = (wrapper, { displayName }) =>
+    pickDropdownOption(wrapper, '#runtime-presets-menu', displayName);
+
+  const mustClickButton = async (wrapper, label) => {
+    const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
+    expect(btn.exists()).toBeTruthy();
+    expect(btn.prop('disabled')).toBeFalsy();
+
+    btn.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+  };
 
   const clickButtonIfVisible = async (wrapper, label) => {
     const btn = wrapper.find(Button).find({ 'aria-label': label }).first();
