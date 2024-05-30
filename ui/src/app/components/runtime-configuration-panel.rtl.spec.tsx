@@ -262,7 +262,7 @@ describe(deriveCurrentRuntime.name, () => {
     }
   );
 
-  it.skip('converts the Dataproc runtime from the hook to the preset if it is DELETED and config type HAIL_GENOMIC_ANALYSIS', () => {
+  it('converts the Dataproc runtime from the hook to the preset if it is DELETED and config type HAIL_GENOMIC_ANALYSIS', () => {
     const runtime = {
       ...defaultDataProcRuntime(),
       status: RuntimeStatus.DELETED,

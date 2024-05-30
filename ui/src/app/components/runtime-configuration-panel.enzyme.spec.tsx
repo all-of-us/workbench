@@ -260,7 +260,37 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow configuration via dataproc preset from modified form', async () => {
-    // moved to rtl
+    setCurrentRuntime(null);
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    // Configure the form - we expect all of the changes to be overwritten by
+    // the Hail preset selection.
+    await pickMainCpu(wrapper, 2);
+    await pickMainRam(wrapper, 7.5);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    await pickWorkerCpu(wrapper, 8);
+    await pickWorkerRam(wrapper, 30);
+    await pickWorkerDiskSize(wrapper, 300);
+    await pickNumWorkers(wrapper, 10);
+    await pickNumPreemptibleWorkers(wrapper, 20);
+
+    await pickPreset(wrapper, runtimePresets.hailAnalysis);
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
+    );
+    expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+    );
+    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it('should tag as user override after preset modification', async () => {
