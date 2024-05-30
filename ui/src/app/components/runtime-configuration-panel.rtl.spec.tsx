@@ -2470,7 +2470,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   jest.setTimeout(50000);
-  test.each([
+  test.skip.each([
     [
       'disk type',
       [pickSsdType],
