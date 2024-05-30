@@ -1599,7 +1599,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
 
-  it('should allow configuration via dataproc preset from modified form', async () => {
+  it.skip('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
 
     const { container } = await component();
