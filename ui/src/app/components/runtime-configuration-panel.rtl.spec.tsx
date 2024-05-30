@@ -2464,7 +2464,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     const workerCountInput: HTMLInputElement = spinDiskElement('num-workers');
     expect(workerCountInput.disabled).toBeTruthy();
 
-    const preemptibleCountInput: HTMLInputElement = spinDiskElement('num-preemptible');
+    const preemptibleCountInput: HTMLInputElement =
+      spinDiskElement('num-preemptible');
     expect(preemptibleCountInput.disabled).toBeTruthy();
   });
 
