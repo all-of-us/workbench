@@ -1649,15 +1649,17 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumPreemptibleWorkers(20);
 
     clickExpectedButton('Create');
-    await waitFor(
-      () => {
-        expect(runtimeApiStub.runtime.status).toEqual('Creating');
-        expect(runtimeApiStub.runtime.configurationType).toEqual(
-          RuntimeConfigurationType.USER_OVERRIDE
-        );
-      },
-      { interval: 750 }
-    );
+    await act(async () => {
+      await waitFor(
+        () => {
+          expect(runtimeApiStub.runtime.status).toEqual('Creating');
+          expect(runtimeApiStub.runtime.configurationType).toEqual(
+            RuntimeConfigurationType.USER_OVERRIDE
+          );
+        },
+        { interval: 750 }
+      );
+    });
   });
 
   it('should tag as preset if configuration matches', async () => {
