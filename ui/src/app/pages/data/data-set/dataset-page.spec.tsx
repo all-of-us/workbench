@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { mount } from 'enzyme';
@@ -15,6 +17,15 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Button, Clickable } from 'app/components/buttons';
 import {
   COMPARE_DOMAINS_FOR_DISPLAY,
@@ -47,6 +58,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSetPage', () => {
   let datasetApiStub;
+  let user;
 
   const previewLinkWrapper = (wrapper) =>
     wrapper.find(Clickable).find(`[data-test-id="preview-button"]`).first();
@@ -73,6 +85,7 @@ describe('DataSetPage', () => {
     });
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
+    user = userEvent.setup();
   });
 
   const component = () => {
@@ -102,63 +115,76 @@ describe('DataSetPage', () => {
     );
   };
 
+  const componentAlt = () => {
+    return render(
+      <MemoryRouter
+        initialEntries={[
+          `${dataTabPath(
+            workspaceDataStub.namespace,
+            workspaceDataStub.id
+          )}/data-sets/${stubDataSet().id}`,
+        ]}
+      >
+        <Route exact path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'>
+          <DatasetPage
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            match={{
+              params: {
+                ns: workspaceDataStub.namespace,
+                wsid: workspaceDataStub.id,
+                dataSetId: stubDataSet().id,
+              },
+            }}
+          />
+        </Route>
+      </MemoryRouter>
+    );
+  };
+
   it('should render', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
+    componentAlt();
+    await screen.findByRole('heading', { name: /datasets/i });
   });
 
   it('should display all concepts sets in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-list-item"]').length).toBe(
+    componentAlt();
+    expect((await screen.findAllByTestId('concept-set-list-item')).length).toBe(
       ConceptSetsApiStub.stubConceptSets().length
     );
   });
 
   it('should display all cohorts in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="cohort-list-item"]').length).toBe(
+    componentAlt();
+    expect((await screen.findAllByTestId('cohort-list-item')).length).toBe(
       exampleCohortStubs.length
     );
   });
 
   it('should display values based on Domain of Concept selected in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // First Concept set in concept set list has domain "Condition"
-    const conditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first();
-    conditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    expect(valueListItems.length).toBe(2);
-    let checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
+    const conceptSets = await screen.findAllByTestId('concept-set-list-item');
+    const conditionConceptSet = within(conceptSets[0]).getByRole('checkbox');
 
+    await user.click(conditionConceptSet);
+    let valueListItems = await screen.findAllByTestId('value-list-items');
+    expect(valueListItems.length).toBe(2);
+    let checkedValuesList = valueListItems.filter(
+      (value) =>
+        (within(value).getByRole('checkbox') as HTMLInputElement).checked
+    );
     // All values should be selected by default
     expect(checkedValuesList.length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
-    const measurementConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(1)
-      .find('input')
-      .first();
-    measurementConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
+    const measurementConceptSet = within(conceptSets[1]).getByRole('checkbox');
+    await user.click(measurementConceptSet);
+    valueListItems = await screen.findAllByTestId('value-list-items');
+    checkedValuesList = valueListItems.filter(
+      (value) =>
+        (within(value).getByRole('checkbox') as HTMLInputElement).checked
     );
     expect(valueListItems.length).toBe(5);
     expect(checkedValuesList.length).toBe(5);
