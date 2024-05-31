@@ -946,20 +946,17 @@ describe(RuntimeConfigurationPanel.name, () => {
       clickExpectedButton('Delete');
     }
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
-        expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
-      });
+    await waitFor(() => {
+      expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+      expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
     });
 
     if (wantDeleteRuntime) {
-      await act(async () => {
-        await waitFor(() => {
-          expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
-          runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-        });
+      await waitFor(() => {
+        expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
+        runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
       });
+
       expect(runtimeApiStub.runtime.status).toBe(RuntimeStatus.DELETED);
       // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
       await waitForFakeTimersAndUpdate(/* maxRetries*/ 20);
@@ -1649,17 +1646,15 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumPreemptibleWorkers(20);
 
     clickExpectedButton('Create');
-    await act(async () => {
-      await waitFor(
-        () => {
-          expect(runtimeApiStub.runtime.status).toEqual('Creating');
-          expect(runtimeApiStub.runtime.configurationType).toEqual(
-            RuntimeConfigurationType.USER_OVERRIDE
-          );
-        },
-        { interval: 750 }
-      );
-    });
+    await waitFor(
+      () => {
+        expect(runtimeApiStub.runtime.status).toEqual('Creating');
+        expect(runtimeApiStub.runtime.configurationType).toEqual(
+          RuntimeConfigurationType.USER_OVERRIDE
+        );
+      },
+      { interval: 750 }
+    );
   });
 
   it('should tag as preset if configuration matches', async () => {
