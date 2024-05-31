@@ -31,7 +31,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-regular-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
-    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@openapitools/openapi-generator-cli": "^2.13.4",
     "@terra-ui-packages/components": "0.0.4",
     "@terra-ui-packages/core-utils": "0.0.6",
