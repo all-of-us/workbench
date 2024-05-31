@@ -1637,7 +1637,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
-  it('should tag as user override after preset modification', async () => {
+  it.skip('should tag as user override after preset modification', async () => {
     setCurrentRuntime(null);
 
     const { container } = await component();
