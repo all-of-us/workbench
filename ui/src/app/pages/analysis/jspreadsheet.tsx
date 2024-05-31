@@ -1,14 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import * as fp from 'lodash/fp';
 
 import parser from '@jspreadsheet/parser';
 import { jspreadsheet, Spreadsheet, Worksheet } from '@jspreadsheet/react';
-import { withCurrentWorkspace } from 'app/utils';
-import { withRuntimeStore } from 'app/utils/runtime-hooks';
-import { withUserAppsStore } from 'app/utils/runtime-utils';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { parse } from 'url';
 
 import '/node_modules/jspreadsheet/dist/jspreadsheet.css';
 import '/node_modules/jsuites/dist/jsuites.css';
@@ -22,43 +15,56 @@ jspreadsheet.setLicense(
 jspreadsheet.setExtensions({ parser });
 
 // Create the spreadsheet from a local file
-const load = function (e, spreadsheet) {
-  // Parse XLSX file and create a new spreadsheet
-  jspreadsheet.parser({
-    file: e.target.files[0],
-    // It would be used to updated the formats only
-    locale: 'en-GB',
-    onload: function (config) {
-      jspreadsheet(spreadsheet.current, {
-        ...config,
-        filters: true,
-        toolbar: true,
-      });
-    },
-    onerror: function (error) {
-      alert(error);
-    },
-  });
-};
 const JSpreadsheetComponent = () => {
+  const [message, setMessage] = useState('');
+  const [blob, setBlob] = useState(null);
+  // setMessage('JSpreadsheetComponent');
   // Spreadsheet array of worksheets
   const spreadsheet = useRef();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      setMessage('FileReader onload called'); // Added console.log
+      setBlob(event.target.result);
+    };
+
+    reader.onerror = function (error) {
+      setMessage(`FileReader onerror called, ${error}`); // Added console.log
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  useEffect(() => {
+    if (blob) {
+      setMessage('blob is set'); // Added console.log
+      jspreadsheet.parser({
+        file: blob,
+        onload: function (config) {
+          setMessage('jspreadsheet.parser onload called'); // Added console.log
+          jspreadsheet(spreadsheet.current, {
+            ...config,
+            filters: true,
+            toolbar: true,
+          });
+        },
+        onerror: function (error) {
+          setMessage(`jspreadsheet.parser onerror called, ${error}`); // Added console.log
+          console.error(error);
+        },
+      });
+    }
+  }, [blob]);
+
   // Render component
   return (
     <div>
       <div ref={spreadsheet}></div>
-      <input
-        type={'file'}
-        name={'file'}
-        id={'file'}
-        onChange={(e) => load(e, spreadsheet)}
-        style={{ display: 'none' }}
-      />
-      <input
-        type={'button'}
-        value={'Load a XLSX file from my local computer'}
-        onClick={() => document.getElementById('file').click()}
-      />
+      <div>{message}</div>
+      <input type='file' onChange={handleFileChange} />
     </div>
   );
 };
