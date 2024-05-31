@@ -17,7 +17,13 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   disksApi,
@@ -1008,7 +1014,11 @@ describe(RuntimeConfigurationPanel.name, () => {
   afterEach(() => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     jest.clearAllTimers();
+    if (!!runtimeApiStub.runtime) {
+      runtimeApiStub.runtime.status = RuntimeStatus.DELETING;
+    }
     act(() => clearCompoundRuntimeOperations());
+    cleanup();
   });
 
   it('should show loading spinner while loading', async () => {
@@ -1646,15 +1656,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumPreemptibleWorkers(20);
 
     clickExpectedButton('Create');
-    await waitFor(
-      () => {
-        expect(runtimeApiStub.runtime.status).toEqual('Creating');
-        expect(runtimeApiStub.runtime.configurationType).toEqual(
-          RuntimeConfigurationType.USER_OVERRIDE
-        );
-      },
-      { interval: 750 }
-    );
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.USER_OVERRIDE
+      );
+    });
   });
 
   it('should tag as preset if configuration matches', async () => {
