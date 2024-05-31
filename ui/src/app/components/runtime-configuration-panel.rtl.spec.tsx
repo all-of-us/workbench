@@ -1602,7 +1602,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
 
-  it.skip('should allow configuration via dataproc preset from modified form', async () => {
+  it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
 
     const { container } = await component();
@@ -1637,7 +1637,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
-  it.skip('should tag as user override after preset modification', async () => {
+  it('should tag as user override after preset modification', async () => {
     setCurrentRuntime(null);
 
     const { container } = await component();
@@ -2489,27 +2489,27 @@ describe(RuntimeConfigurationPanel.name, () => {
       [decrementDetachableDiskSize],
       { wantDeleteDisk: true, wantDeleteRuntime: true },
     ],
-    // [
-    //   'in-place + disk type',
-    //   [changeMainCpu_To8, pickSsdType],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'in-place + disk decrease',
-    //   [changeMainCpu_To8, decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
+    [
+      'in-place + disk type',
+      [changeMainCpu_To8, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk decrease',
+      [changeMainCpu_To8, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
     ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
-    // [
-    //   'recreate + disk type',
-    //   [clickEnableGpu, pickSsdType],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'recreate + disk decrease',
-    //   [clickEnableGpu, decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
+    [
+      'recreate + disk type',
+      [clickEnableGpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk decrease',
+      [clickEnableGpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
   ] as DetachableDiskCase[])(
     'should allow runtime to recreate to attached PD: %s',
     async (desc: string, setters, expectations) => {
