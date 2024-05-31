@@ -1009,6 +1009,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
     jest.clearAllTimers();
+    jest.clearAllMocks();
     jest.useRealTimers();
   });
 
@@ -1604,7 +1605,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(null);
 
     const { container } = await component();
-
     clickExpectedButton('Customize');
 
     // Configure the form - we expect all of the changes to be overwritten by
@@ -1620,19 +1620,20 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumWorkers(10);
     await pickNumPreemptibleWorkers(20);
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
-
+    jest.useFakeTimers();
     clickExpectedButton('Create');
 
+    act(() => jest.runOnlyPendingTimers());
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-      );
-      expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-      );
-      expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
     });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
+    );
+    expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+    );
+    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it('should tag as user override after preset modification', async () => {
