@@ -1008,9 +1008,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   afterEach(async () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
-    jest.clearAllTimers();
-    jest.clearAllMocks();
     jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   it('should show loading spinner while loading', async () => {
@@ -1627,6 +1626,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
     });
+    jest.useRealTimers();
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
