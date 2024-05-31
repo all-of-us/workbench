@@ -145,16 +145,24 @@ describe('DataSetPage', () => {
   const getConceptSets = async () => {
     return await screen.findAllByTestId('concept-set-list-item');
   };
+
+  const getConceptSetCheckbox = async (index: number) => {
+    const conceptSets = await getConceptSets();
+    return within(conceptSets[index]).getByRole('checkbox');
+  };
+
   const getConditionConceptSetCheckbox = async () => {
     // First Concept set in concept set list has domain "Condition"
-    const conceptSets = await getConceptSets();
-    return within(conceptSets[0]).getByRole('checkbox');
+    return await getConceptSetCheckbox(0);
   };
 
   const getMeasurementConceptSetCheckbox = async () => {
     // Second Concept set in concept set list has domain "Measurement"
-    const conceptSets = await getConceptSets();
-    return within(conceptSets[1]).getByRole('checkbox');
+    return await getConceptSetCheckbox(1);
+  };
+
+  const clickConceptSetCheckboxAtIndex = async (index: number) => {
+    await user.click(await getConceptSetCheckbox(index));
   };
 
   const clickConditionConceptSetCheckbox = async () => {
@@ -171,6 +179,9 @@ describe('DataSetPage', () => {
       (value) =>
         (within(value).getByRole('checkbox') as HTMLInputElement).checked
     );
+  };
+  const clickValueCheckboxAtIndex = async (index: number) => {
+    await user.click(within(getAllValueOptions()[index]).getByRole('checkbox'));
   };
 
   it('should render', async () => {
@@ -207,68 +218,31 @@ describe('DataSetPage', () => {
   });
 
   it('should select all values by default on selection on concept set only if the new domain is unique', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // Select Condition Concept set
-    const conditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first();
-    conditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    expect(valueListItems.length).toBe(2);
-    let checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
+    await clickConditionConceptSetCheckbox();
 
+    expect(getAllValueOptions().length).toBe(2);
     // All values should be selected by default
-    expect(checkedValuesList.length).toBe(2);
+    expect(getCheckedValueOptions().length).toBe(2);
 
     // Select second concept set which is Measurement domain
-    const measurementConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(1)
-      .find('input')
-      .first();
-    measurementConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    // All values condition + measurement will be selected
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    await clickMeasurementConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
 
     // Unselect first Condition value
-    valueListItems.first().find('input').first().simulate('change');
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    expect(checkedValuesList.length).toBe(4);
+    await clickValueCheckboxAtIndex(0);
+    expect(getCheckedValueOptions().length).toBe(4);
 
     // Select another condition concept set
-    const secondConditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(2)
-      .find('input')
-      .first();
-    secondConditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-
+    await clickConceptSetCheckboxAtIndex(2);
     // No change in value list since we already had selected condition concept set
-    expect(valueListItems.length).toBe(5);
+    expect(getAllValueOptions().length).toBe(5);
 
     // Should be no change in selected values
-    expect(checkedValuesList.length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should display correct values on rapid selection of multiple domains', async () => {
