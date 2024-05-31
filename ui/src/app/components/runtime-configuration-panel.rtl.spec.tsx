@@ -17,13 +17,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   disksApi,
@@ -1011,14 +1005,11 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
-    jest.clearAllTimers();
-    if (!!runtimeApiStub.runtime) {
-      runtimeApiStub.runtime.status = RuntimeStatus.DELETING;
-    }
     act(() => clearCompoundRuntimeOperations());
-    cleanup();
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   it('should show loading spinner while loading', async () => {
