@@ -142,6 +142,37 @@ describe('DataSetPage', () => {
     );
   };
 
+  const getConceptSets = async () => {
+    return await screen.findAllByTestId('concept-set-list-item');
+  };
+  const getConditionConceptSetCheckbox = async () => {
+    // First Concept set in concept set list has domain "Condition"
+    const conceptSets = await getConceptSets();
+    return within(conceptSets[0]).getByRole('checkbox');
+  };
+
+  const getMeasurementConceptSetCheckbox = async () => {
+    // Second Concept set in concept set list has domain "Measurement"
+    const conceptSets = await getConceptSets();
+    return within(conceptSets[1]).getByRole('checkbox');
+  };
+
+  const clickConditionConceptSetCheckbox = async () => {
+    await user.click(await getConditionConceptSetCheckbox());
+  };
+
+  const clickMeasurementConceptSetCheckbox = async () => {
+    await user.click(await getMeasurementConceptSetCheckbox());
+  };
+
+  const getAllValueOptions = () => screen.getAllByTestId('value-list-items');
+  const getCheckedValueOptions = () => {
+    return getAllValueOptions().filter(
+      (value) =>
+        (within(value).getByRole('checkbox') as HTMLInputElement).checked
+    );
+  };
+
   it('should render', async () => {
     componentAlt();
     await screen.findByRole('heading', { name: /datasets/i });
@@ -164,30 +195,15 @@ describe('DataSetPage', () => {
   it('should display values based on Domain of Concept selected in workspace', async () => {
     componentAlt();
 
-    // First Concept set in concept set list has domain "Condition"
-    const conceptSets = await screen.findAllByTestId('concept-set-list-item');
-    const conditionConceptSet = within(conceptSets[0]).getByRole('checkbox');
-
-    await user.click(conditionConceptSet);
-    let valueListItems = await screen.findAllByTestId('value-list-items');
-    expect(valueListItems.length).toBe(2);
-    let checkedValuesList = valueListItems.filter(
-      (value) =>
-        (within(value).getByRole('checkbox') as HTMLInputElement).checked
-    );
+    await clickConditionConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(2);
     // All values should be selected by default
-    expect(checkedValuesList.length).toBe(2);
+    expect(getCheckedValueOptions().length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
-    const measurementConceptSet = within(conceptSets[1]).getByRole('checkbox');
-    await user.click(measurementConceptSet);
-    valueListItems = await screen.findAllByTestId('value-list-items');
-    checkedValuesList = valueListItems.filter(
-      (value) =>
-        (within(value).getByRole('checkbox') as HTMLInputElement).checked
-    );
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    await clickMeasurementConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should select all values by default on selection on concept set only if the new domain is unique', async () => {
