@@ -651,8 +651,8 @@ export const VariantSearch = fp.flow(
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
               rows={pageSize}
               scrollable
-              scrollHeight='26rem'
-              style={{ fontSize: '12px', minHeight: '22rem' }}
+              scrollHeight='80%'
+              style={{ fontSize: '12px', height: '100%', minHeight: '22rem' }}
               totalRecords={totalCount}
               value={displayResults}
             >
