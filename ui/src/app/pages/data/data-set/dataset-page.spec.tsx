@@ -345,39 +345,25 @@ describe('DataSetPage', () => {
 
   it('should display preview data for current domains only', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // Select a cohort.
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
 
     // Select "Condition" and "Measurement" concept sets.
-    let conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    conceptSetEls.at(1).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
+    await clickMeasurementConceptSetCheckbox();
 
     // Deselect "Condition".
-    conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
 
     // Click preview button to load preview
-    wrapper
-      .find({ 'data-test-id': 'preview-button' })
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(getPreviewButton());
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    await user.click(getPreviewButton());
+    waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async () => {
