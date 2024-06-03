@@ -215,6 +215,9 @@ describe('DataSetPage', () => {
     await user.click(within(getAllValueOptions()[index]).getByRole('checkbox'));
   };
 
+  const getAllPrePackagedConceptSets = () =>
+    screen.getAllByTestId('prePackage-concept-set-item');
+
   it('should render', async () => {
     componentAlt();
     await screen.findByRole('heading', { name: /datasets/i });
@@ -508,44 +511,33 @@ describe('DataSetPage', () => {
     // Let's save the original so we can restore it later.
     const originalCdrVersion = cdrVersionTiersResponse.tiers[0].versions[0];
 
-    let wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    componentAlt();
+    await waitForNoSpinner();
+    expect(getAllPrePackagedConceptSets().length).toBe(15);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasWgsData: false,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
-
+    waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(14);
+    });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasFitbitData: false,
       hasWgsData: true,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(11);
-
+    waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(11);
+    });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasFitbitData: false,
       hasWgsData: false,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(10);
-
+    waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(10);
+    });
     // restore original CDR Version for other tests
     cdrVersionTiersResponse.tiers[0].versions[0] = originalCdrVersion;
   });
