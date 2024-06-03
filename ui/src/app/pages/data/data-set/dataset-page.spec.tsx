@@ -44,6 +44,7 @@ import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  waitForNoSpinner,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
@@ -398,17 +399,16 @@ describe('DataSetPage', () => {
       accessLevel: WorkspaceAccessLevel.READER,
     };
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = component();
-    const isTooltipDisable = wrapper
-      .find({ 'data-test-id': 'save-tooltip' })
-      .first()
-      .props().disabled;
-    const isSaveButtonDisable = wrapper
-      .find({ 'data-test-id': 'save-button' })
-      .first()
-      .props().disabled;
-    expect(isTooltipDisable).toBeFalsy();
-    expect(isSaveButtonDisable).toBeTruthy();
+    componentAlt();
+
+    await waitForNoSpinner();
+
+    await user.hover(getSaveButton());
+    expect(
+      screen.getByText('Requires Owner or Writer permission')
+    ).toBeInTheDocument();
+
+    expectButtonElementDisabled(getSaveButton());
   });
 
   it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async () => {
