@@ -589,31 +589,13 @@ describe('DataSetPage', () => {
       cohorts: [{ id: 1 }],
       domainValuePairs: [{ domain: Domain.PERSON, value: 'person' }],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     // Save button is disabled since no changes have been made
-    expect(
-      wrapper
-        .find(Button)
-        .find('[data-test-id="save-button"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    expectButtonElementDisabled(getSaveButton());
+    await user.click(getAllParticipantCheckbox());
     // Save button should enable after selection
-    expect(
-      wrapper
-        .find(Button)
-        .find('[data-test-id="save-button"]')
-        .first()
-        .prop('disabled')
-    ).toBeFalsy();
+    expectButtonElementEnabled(getSaveButton());
   });
 });
