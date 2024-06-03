@@ -1880,7 +1880,7 @@ export const DatasetPage = fp.flow(
                         lineHeight: '17px',
                       }}
                     >
-                      {allValuesSelected ? 'Deselect All' : 'Select All'}
+                      {allValuesSelected() ? 'Deselect All' : 'Select All'}
                     </div>
                   </div>
                 </BoxHeader>
