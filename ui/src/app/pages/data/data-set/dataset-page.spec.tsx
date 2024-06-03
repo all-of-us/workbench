@@ -466,7 +466,7 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect any workspace Cohort if PrePackaged is selected', async () => {
-    const wrapper = componentAlt();
+    componentAlt();
     await waitForNoSpinner();
 
     // Select one cohort
@@ -483,37 +483,22 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    const allParticipantCheckbox = getAllParticipantCheckbox();
+    const firstCohortCheckbox = getCohortCheckboxAtIndex(0);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeTruthy();
+    await user.click(allParticipantCheckbox);
+
+    expect(firstCohortCheckbox.checked).toBeFalsy();
+    expect(allParticipantCheckbox.checked).toBeTruthy();
 
     // Select one cohort
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    await user.click(firstCohortCheckbox);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeFalsy();
+    expect(firstCohortCheckbox.checked).toBeTruthy();
+    expect(allParticipantCheckbox.checked).toBeFalsy();
   });
 
   // TODO: rewrite this so it's not dependent on modifying global test state!
