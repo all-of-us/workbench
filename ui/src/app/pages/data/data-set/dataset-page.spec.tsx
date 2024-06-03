@@ -417,17 +417,17 @@ describe('DataSetPage', () => {
       accessLevel: WorkspaceAccessLevel.READER,
     };
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = component();
-    const plusIconTooltip = wrapper.find({
-      'data-test-id': 'plus-icon-tooltip',
-    });
-    const cohortplusIcon = wrapper.find({ 'data-test-id': 'cohorts-link' });
-    const conceptSetplusIcon = wrapper.find({
-      'data-test-id': 'concept-sets-link',
-    });
-    expect(plusIconTooltip.first().props().disabled).toBeFalsy();
-    expect(cohortplusIcon.first().props().disabled).toBeTruthy();
-    expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+
+    const cohortplusIcon = screen.getByTestId('cohorts-link');
+    const conceptSetplusIcon = screen.getByTestId('concept-sets-link');
+
+    await user.hover(cohortplusIcon);
+
+    screen.getByText('Requires Owner or Writer permission');
+    expectButtonElementDisabled(cohortplusIcon);
+    expectButtonElementDisabled(conceptSetplusIcon);
   });
 
   it('should call load data dictionary when caret is expanded', async () => {
