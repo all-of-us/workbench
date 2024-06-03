@@ -607,6 +607,7 @@ const PlusLink = ({
             event: e,
           });
         }}
+        propagateDataTestId
       >
         <ClrIcon
           shape='plus-circle'

@@ -367,14 +367,14 @@ describe('DataSetPage', () => {
   });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async () => {
-    const wrapper = component();
+    componentAlt();
     const pathPrefix = dataTabPath(
       workspaceDataStub.namespace,
       workspaceDataStub.id
     );
 
     // Check Cohorts "+" link
-    wrapper.find({ 'data-test-id': 'cohorts-link' }).first().simulate('click');
+    await user.click(await screen.findByTestId('cohorts-link'));
 
     expect(mockNavigateByUrl).toHaveBeenCalledWith(
       pathPrefix + '/cohorts/build',
@@ -385,10 +385,7 @@ describe('DataSetPage', () => {
     );
 
     // Check Concept Sets "+" link
-    wrapper
-      .find({ 'data-test-id': 'concept-sets-link' })
-      .first()
-      .simulate('click');
+    await user.click(await screen.findByTestId('concept-sets-link'));
     expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/concepts', {
       preventDefaultIfNoKeysPressed: true,
       event: expect.anything(),
