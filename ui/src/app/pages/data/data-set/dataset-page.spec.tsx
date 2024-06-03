@@ -292,6 +292,7 @@ describe('DataSetPage', () => {
 
   it('should enable buttons and links once cohorts, concepts and values are selected', async () => {
     componentAlt();
+    await waitForNoSpinner();
 
     // Wait until
     await screen.findByText('Workspace Cohorts');
@@ -302,11 +303,7 @@ describe('DataSetPage', () => {
     expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a cohort
-    await user.click(
-      within((await screen.findAllByTestId('cohort-list-item'))[0]).getByRole(
-        'checkbox'
-      )
-    );
+    await clickCohortCheckboxAtIndex(0);
 
     // All buttons and links should still be disabled
     expectButtonElementDisabled(getSaveButton());
@@ -315,7 +312,7 @@ describe('DataSetPage', () => {
     expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a concept set
-    await clickCohortCheckboxAtIndex(0);
+    await clickConceptSetCheckboxAtIndex(0);
 
     // All Buttons except analyze button should be enabled as selecting concept set selects all values
     expectButtonElementEnabled(getSaveButton());
@@ -335,6 +332,7 @@ describe('DataSetPage', () => {
   it('should display preview data table once preview button is clicked', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
     componentAlt();
+    await waitForNoSpinner();
 
     // Select one cohort , concept and value
     await clickCohortCheckboxAtIndex(0);
@@ -354,6 +352,7 @@ describe('DataSetPage', () => {
   it('should display preview data for current domains only', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
     componentAlt();
+    await waitForNoSpinner();
 
     // Select a cohort.
     await clickCohortCheckboxAtIndex(0);
