@@ -17,22 +17,13 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button, Clickable } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import {
   COMPARE_DOMAINS_FOR_DISPLAY,
   DatasetPage,
 } from 'app/pages/data/data-set/dataset-page';
-import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
-import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataTabPath } from 'app/routing/utils';
 import {
   dataSetApi,
@@ -45,7 +36,6 @@ import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
@@ -65,19 +55,11 @@ describe('DataSetPage', () => {
   let datasetApiStub;
   let user;
 
-  const previewLinkWrapper = (wrapper) =>
-    wrapper.find(Clickable).find(`[data-test-id="preview-button"]`).first();
-
   const btnWrapper = (wrapper, btnId) =>
     wrapper.find(Button).find(`[data-test-id="${btnId}"]`).first();
 
-  const analyzeBtnWrapper = (wrapper) => btnWrapper(wrapper, 'analyze-button');
-  const saveBtnWrapper = (wrapper) => btnWrapper(wrapper, 'save-button');
   const getAnalyzeButton = () => {
     return screen.getByRole('button', { name: /analyze/i });
-  };
-  const getCreateButton = () => {
-    return screen.getByRole('button', { name: /create dataset/i });
   };
   const getSaveButton = () => {
     return screen.getByRole('button', { name: /save dataset/i });
@@ -103,6 +85,10 @@ describe('DataSetPage', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
     user = userEvent.setup();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   const component = () => {
