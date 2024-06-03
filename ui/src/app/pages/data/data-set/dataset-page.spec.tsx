@@ -190,14 +190,18 @@ describe('DataSetPage', () => {
     await user.click(await getMeasurementConceptSetCheckbox());
   };
 
-  const clickCohortCheckboxAtIndex = async (index: number) => {
-    await user.click(
-      within(
-        (
-          await screen.findAllByTestId('cohort-list-item')
-        )[index]
-      ).getByRole('checkbox')
+  const getCohortCheckboxAtIndex = (index: number): HTMLInputElement => {
+    return within(screen.getAllByTestId('cohort-list-item')[index]).getByRole(
+      'checkbox'
     );
+  };
+
+  const clickCohortCheckboxAtIndex = async (index: number) => {
+    await user.click(getCohortCheckboxAtIndex(index));
+  };
+
+  const getAllParticipantCheckbox = (): HTMLInputElement => {
+    return within(screen.getByTestId('all-participant')).getByRole('checkbox');
   };
 
   const getAllValueOptions = () => screen.getAllByTestId('value-list-items');
@@ -462,36 +466,22 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect any workspace Cohort if PrePackaged is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    const wrapper = componentAlt();
+    await waitForNoSpinner();
+
     // Select one cohort
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    await clickCohortCheckboxAtIndex(0);
 
     expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
+      (getCohortCheckboxAtIndex(0) as HTMLInputElement).checked
     ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeFalsy();
 
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    const allParticipantCheckbox = getAllParticipantCheckbox();
+    expect(allParticipantCheckbox.checked).toBeFalsy();
+    await user.click(allParticipantCheckbox);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeTruthy();
+    expect(getCohortCheckboxAtIndex(0).checked).toBeFalsy();
+    expect(allParticipantCheckbox.checked).toBeTruthy();
   });
 
   it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async () => {
