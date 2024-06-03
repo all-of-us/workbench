@@ -323,6 +323,12 @@
       "namespace": "aou-rw-87ca7327",
       "id": "demopharmacogenomicspgxvariantfrequencyandmedicationexposures",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Assessment of pathogenic variants across the All of Us Research Program",
+      "namespace": "aou-rw-57880973",
+      "id": "demoassessmentofpathogenicvariantsacrosstheallofusresearchprogram",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
