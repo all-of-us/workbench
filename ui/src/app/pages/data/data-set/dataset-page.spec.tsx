@@ -550,15 +550,12 @@ describe('DataSetPage', () => {
       domainValuePairs: [{ domain: Domain.PERSON, value: 'person' }],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
-    expect(wrapper.find(ExportDatasetModal).exists()).toBeTruthy();
-    wrapper
-      .find(ExportDatasetModal)
-      .find('[data-test-id="export-dataset-modal-cancel-button"]')
-      .simulate('click');
+    await user.click(getAnalyzeButton());
+    screen.getByText('Export Dataset');
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
   });
 
   it('should open Extract modal if Analyze is clicked and WGS concept is selected', async () => {
