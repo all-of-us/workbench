@@ -573,11 +573,13 @@ describe('DataSetPage', () => {
       domainValuePairs: [{ domain: Domain.WHOLE_GENOME_VARIANT, value: 'wgs' }],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLE_GENOME],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
-    expect(wrapper.find(GenomicExtractionModal).exists()).toBeTruthy();
+    await user.click(getAnalyzeButton());
+    screen.getByText(
+      'Would you like to extract genomic variant data as VCF files?'
+    );
   });
 
   it('should enable Save Dataset button when selecting All Participants prepackaged cohort', async () => {
