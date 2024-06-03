@@ -472,9 +472,7 @@ describe('DataSetPage', () => {
     // Select one cohort
     await clickCohortCheckboxAtIndex(0);
 
-    expect(
-      (getCohortCheckboxAtIndex(0) as HTMLInputElement).checked
-    ).toBeTruthy();
+    expect(getCohortCheckboxAtIndex(0).checked).toBeTruthy();
 
     const allParticipantCheckbox = getAllParticipantCheckbox();
     expect(allParticipantCheckbox.checked).toBeFalsy();
