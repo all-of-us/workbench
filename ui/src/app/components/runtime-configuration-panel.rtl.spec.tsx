@@ -972,6 +972,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   }
 
   beforeEach(async () => {
+    jest.useRealTimers();
     user = userEvent.setup();
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -1008,8 +1009,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   afterEach(async () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
-    jest.useRealTimers();
     jest.clearAllMocks();
+    jest.clearAllTimers();
   });
 
   it('should show loading spinner while loading', async () => {
@@ -1199,6 +1200,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainCpu(container, 8);
     clickExpectedButton('Try Again');
 
+    jest.advanceTimersByTime(1000);
     await waitFor(() =>
       // Kicks off a deletion to first clear the error status runtime.
       expect(runtimeApiStub.runtime.status).toEqual('Deleting')
@@ -1216,7 +1218,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB + 10);
 
     clickExpectedButton('Create');
-
+    jest.advanceTimersByTime(1000);
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
       expect(runtimeApiStub.runtime.configurationType).toEqual(
@@ -1619,14 +1621,15 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumWorkers(10);
     await pickNumPreemptibleWorkers(20);
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
-    jest.useFakeTimers();
     clickExpectedButton('Create');
 
-    act(() => jest.runOnlyPendingTimers());
-    await waitFor(() => {
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    });
-    jest.useRealTimers();
+    await waitFor(
+      () => {
+        expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      },
+      { timeout: 4000 }
+    );
+
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
