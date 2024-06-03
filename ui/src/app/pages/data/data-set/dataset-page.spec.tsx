@@ -41,7 +41,11 @@ import {
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
@@ -68,10 +72,22 @@ describe('DataSetPage', () => {
 
   const analyzeBtnWrapper = (wrapper) => btnWrapper(wrapper, 'analyze-button');
   const saveBtnWrapper = (wrapper) => btnWrapper(wrapper, 'save-button');
+  const getAnalyzeButton = () => {
+    return screen.getByRole('button', { name: /analyze/i });
+  };
+  const getCreateButton = () => {
+    return screen.getByRole('button', { name: /create dataset/i });
+  };
+  const getSaveButton = () => {
+    return screen.getByRole('button', { name: /save dataset/i });
+  };
+  const getPreviewButton = () => {
+    return screen.getByRole('button', { name: /view preview table/i });
+  };
 
-  const selectAllValue = (wrapper) =>
-    wrapper.find('[data-test-id="select-all"]').find('input').first();
-
+  const getSelectAllCheckbox = (): HTMLInputElement => {
+    return screen.getByTestId('select-all');
+  };
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
@@ -246,87 +262,60 @@ describe('DataSetPage', () => {
   });
 
   it('should display correct values on rapid selection of multiple domains', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // Select "Condition" and "Measurement" concept sets.
-    const conceptSetEls = wrapper.find(
-      '[data-test-id="concept-set-list-item"]'
-    );
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
+    await clickMeasurementConceptSetCheckbox();
 
-    conceptSetEls.at(1).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-
-    const valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    const checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should enable buttons and links once cohorts, concepts and values are selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
+    // Wait until
+    await screen.findByText('Workspace Cohorts');
     // By default all buttons and select Value checkbox should be disabled
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a cohort
-
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await user.click(
+      within((await screen.findAllByTestId('cohort-list-item'))[0]).getByRole(
+        'checkbox'
+      )
+    );
 
     // All buttons and links should still be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a concept set
-    wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(
+      within(screen.getAllByTestId('concept-set-list-item')[0]).getByRole(
+        'checkbox'
+      )
+    );
 
     // All Buttons except analyze button should be enabled as selecting concept set selects all values
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeFalsy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeFalsy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeFalsy();
+    expectButtonElementEnabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementEnabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeFalsy();
 
     // Unselect 'Select All' checkbox so that no values are selected for DataSet
-    selectAllValue(wrapper).simulate('change');
+    await user.click(getSelectAllCheckbox());
 
     // All buttons and links should now be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
   });
 
   it('should display preview data table once preview button is clicked', async () => {
