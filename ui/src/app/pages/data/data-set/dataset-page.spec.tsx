@@ -432,33 +432,17 @@ describe('DataSetPage', () => {
 
   it('should call load data dictionary when caret is expanded', async () => {
     const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     // Select one cohort , concept and value
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
+    await clickConceptSetCheckboxAtIndex(0);
+    await clickValueCheckboxAtIndex(0);
 
-    wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="value-list-expander"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(spy).toHaveBeenCalledTimes(1);
+    waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should sort domains for display only', () => {
