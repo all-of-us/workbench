@@ -17,7 +17,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Button } from 'app/components/buttons';
 import {
@@ -33,9 +33,11 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import {
+  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   waitForNoSpinner,
+  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
@@ -54,9 +56,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 describe('DataSetPage', () => {
   let datasetApiStub;
   let user;
-
-  const btnWrapper = (wrapper, btnId) =>
-    wrapper.find(Button).find(`[data-test-id="${btnId}"]`).first();
 
   const getAnalyzeButton = () => {
     return screen.getByRole('button', { name: /analyze/i });
@@ -88,9 +87,8 @@ describe('DataSetPage', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    // jest.restoreAllMocks();
   });
-
   const component = () => {
     return mount(
       <MemoryRouter
@@ -315,24 +313,111 @@ describe('DataSetPage', () => {
     expectButtonElementDisabled(getPreviewButton());
   });
 
-  it('should display preview data table once preview button is clicked', async () => {
+  it('should disable display preview data table when no values are selected', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
     componentAlt();
     await waitForNoSpinner();
 
-    // Select one cohort , concept and value
     await clickCohortCheckboxAtIndex(0);
     await clickConceptSetCheckboxAtIndex(0);
-    await clickValueCheckboxAtIndex(0);
 
-    // Select another value preview data api should not be called now
+    // Unselect both values
+    await clickValueCheckboxAtIndex(0);
     await clickValueCheckboxAtIndex(1);
 
-    // Click preview button to load preview
-    await user.click(getPreviewButton());
-    waitFor(() => {
-      expect(spy).toHaveBeenCalledTimes(1);
+    const previewButton = getPreviewButton();
+    expectButtonElementDisabled(previewButton);
+
+    await user.click(previewButton);
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(0);
     });
+  });
+
+  it('OLD should display preview data table once preview button is clicked', async () => {
+    const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select one cohort , concept and value
+    wrapper
+      .find('[data-test-id="cohort-list-item"]')
+      .first()
+      .find('input')
+      .first()
+      .simulate('change');
+    wrapper.update();
+
+    wrapper
+      .find('[data-test-id="concept-set-list-item"]')
+      .first()
+      .find('input')
+      .first()
+      .simulate('change');
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(
+      wrapper.find({ 'data-test-id': 'preview-button' }).first().props()
+        .disabled
+    ).toBeFalsy();
+
+    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    expect(valueListItems.length).toBe(2);
+    let checkedValuesList = valueListItems.filterWhere(
+      (value) => value.first().find('input').first().props().checked
+    );
+    // All values should be selected by default
+    expect(checkedValuesList.length).toBe(2);
+
+    wrapper
+      .find('[data-test-id="value-list-items"]')
+      .find('input')
+      .first()
+      .simulate('change');
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(
+      wrapper.find({ 'data-test-id': 'preview-button' }).first().props()
+        .disabled
+    ).toBeFalsy();
+    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    expect(valueListItems.length).toBe(2);
+    checkedValuesList = valueListItems.filterWhere(
+      (value) => value.first().find('input').first().props().checked
+    );
+    // All values should be selected by default
+    expect(checkedValuesList.length).toBe(1);
+
+    // Select another value preview data api should not be called now
+    wrapper
+      .find('[data-test-id="value-list-items"]')
+      .at(1)
+      .find('input')
+      .first()
+      .simulate('click');
+
+    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    expect(valueListItems.length).toBe(2);
+    checkedValuesList = valueListItems.filterWhere(
+      (value) => value.first().find('input').first().props().checked
+    );
+    // All values should be selected by default
+    expect(checkedValuesList.length).toBe(0);
+    expect(
+      wrapper.find({ 'data-test-id': 'preview-button' }).first().props()
+        .disabled
+    ).toBeTruthy();
+
+    // Click preview button to load preview
+    wrapper
+      .find({ 'data-test-id': 'preview-button' })
+      .first()
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('should display preview data for current domains only', async () => {
@@ -354,7 +439,7 @@ describe('DataSetPage', () => {
     await user.click(getPreviewButton());
 
     await user.click(getPreviewButton());
-    waitFor(() => {
+    await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
@@ -432,7 +517,7 @@ describe('DataSetPage', () => {
     await clickConceptSetCheckboxAtIndex(0);
     await clickValueCheckboxAtIndex(0);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });
@@ -504,7 +589,7 @@ describe('DataSetPage', () => {
       ...originalCdrVersion,
       hasWgsData: false,
     };
-    waitFor(() => {
+    await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(14);
     });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
@@ -512,7 +597,7 @@ describe('DataSetPage', () => {
       hasFitbitData: false,
       hasWgsData: true,
     };
-    waitFor(() => {
+    await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(11);
     });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
@@ -520,7 +605,7 @@ describe('DataSetPage', () => {
       hasFitbitData: false,
       hasWgsData: false,
     };
-    waitFor(() => {
+    await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(10);
     });
     // restore original CDR Version for other tests
