@@ -17,9 +17,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from 'app/components/buttons';
 import {
   COMPARE_DOMAINS_FOR_DISPLAY,
   DatasetPage,
@@ -33,11 +32,9 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import {
-  debugAll,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
@@ -85,36 +82,6 @@ describe('DataSetPage', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     user = userEvent.setup();
   });
-
-  afterEach(() => {
-    // jest.restoreAllMocks();
-  });
-  const component = () => {
-    return mount(
-      <MemoryRouter
-        initialEntries={[
-          `${dataTabPath(
-            workspaceDataStub.namespace,
-            workspaceDataStub.id
-          )}/data-sets/${stubDataSet().id}`,
-        ]}
-      >
-        <Route exact path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'>
-          <DatasetPage
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            match={{
-              params: {
-                ns: workspaceDataStub.namespace,
-                wsid: workspaceDataStub.id,
-                dataSetId: stubDataSet().id,
-              },
-            }}
-          />
-        </Route>
-      </MemoryRouter>
-    );
-  };
 
   const componentAlt = () => {
     return render(
