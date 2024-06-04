@@ -495,7 +495,7 @@ describe('DataSetPage', () => {
     // Let's save the original so we can restore it later.
     const originalCdrVersion = cdrVersionTiersResponse.tiers[0].versions[0];
 
-    componentAlt();
+    let { unmount } = componentAlt();
     await waitForNoSpinner();
     expect(getAllPrePackagedConceptSets().length).toBe(15);
 
@@ -503,6 +503,11 @@ describe('DataSetPage', () => {
       ...originalCdrVersion,
       hasWgsData: false,
     };
+
+    unmount();
+    ({ unmount } = componentAlt());
+
+    await waitForNoSpinner();
     await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(14);
     });
@@ -511,6 +516,8 @@ describe('DataSetPage', () => {
       hasFitbitData: false,
       hasWgsData: true,
     };
+    unmount();
+    ({ unmount } = componentAlt());
     await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(11);
     });
@@ -519,6 +526,8 @@ describe('DataSetPage', () => {
       hasFitbitData: false,
       hasWgsData: false,
     };
+    unmount();
+    ({ unmount } = componentAlt());
     await waitFor(() => {
       expect(getAllPrePackagedConceptSets().length).toBe(10);
     });
