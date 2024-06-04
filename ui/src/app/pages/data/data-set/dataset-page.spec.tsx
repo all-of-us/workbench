@@ -2,7 +2,6 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mount } from 'enzyme';
 import { mockNavigateByUrl } from 'setupTests';
 
 import {
