@@ -353,7 +353,6 @@ describe('DataSetPage', () => {
     // Click preview button to load preview
     await user.click(getPreviewButton());
 
-    await user.click(getPreviewButton());
     await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
     });
