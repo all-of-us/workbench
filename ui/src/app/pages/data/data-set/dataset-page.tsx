@@ -551,6 +551,7 @@ export class ValueListItem extends React.Component<
               <Clickable
                 onClick={() => this.toggleDataDictionaryEntry()}
                 data-test-id='value-list-expander'
+                propagateDataTestId
               >
                 <ClrIcon
                   shape='angle'

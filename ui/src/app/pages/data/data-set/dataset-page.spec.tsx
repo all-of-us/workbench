@@ -426,10 +426,10 @@ describe('DataSetPage', () => {
     componentAlt();
     await waitForNoSpinner();
 
-    // Select one cohort , concept and value
     await clickCohortCheckboxAtIndex(0);
     await clickConceptSetCheckboxAtIndex(0);
-    await clickValueCheckboxAtIndex(0);
+
+    await user.click(screen.getAllByTestId('value-list-expander')[0]);
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
