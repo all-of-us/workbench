@@ -179,8 +179,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       if (age.toMillis() > maxAge.toMillis()) {
         log.info(
             String.format(
-                "deleting runtime '%s', exceeded max lifetime @ %s (>%s)",
-                runtimeId, formatDuration(age), formatDuration(maxAge)));
+                "deleting runtime '%s', exceeded max lifetime @ %s (>%s). latest accessed time: %s",
+                runtimeId, formatDuration(age), formatDuration(maxAge), runtime.getAuditInfo().getDateAccessed()));
         activeDeletes++;
       } else if (isIdle && age.toMillis() > idleMaxAge.toMillis()) {
         log.info(
