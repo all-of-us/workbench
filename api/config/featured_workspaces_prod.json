@@ -61,6 +61,30 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "NPH Microbiome Tutorial",
+      "namespace": "aou-rw-73d26510",
+      "id": "nphmicrobiometutorial",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "All of Us Research Program Workshop_Du",
+      "namespace": "aou-rw-ee304e4d",
+      "id": "allofusresearchprogramworkshopdu",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "NPH AI Summit Workshop 2024",
+      "namespace": "aou-rw-2b70e482",
+      "id": "nphaisummitworkshop2024",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "TANDAM Breakout",
+      "namespace": "aou-rw-ce3e035c",
+      "id": "tandambreakout",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "This property is not used",
       "namespace": "aou-rw-6d5ab903",
       "id": "aourecoverlongcovidv6",
