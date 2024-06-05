@@ -9,6 +9,7 @@ orbs:
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
   pact: trustedshops-public/pact@3.0.1
+  gcp-cli: circleci/gcp-cli@3.2.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -131,6 +132,58 @@ executors:
 # Refers to https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
 # -------------------------
 commands:
+  gcp-oidc-generate-cred-config-file:
+    description: "Authenticate with GCP using a CircleCI OIDC token."
+    parameters:
+      project_id: 
+        type: string # env_var_name
+        default: "602460048110" # all-of-us-workbench-test" # GCP_PROJECT_ID
+      workload_identity_pool_id: 
+        type: string # env_var_name
+        default: "local-2-oidc-pool" # GCP_WIP_ID
+      workload_identity_pool_provider_id: 
+        type: string # env_var_name
+        default: "local-2-oidc-prv" # GCP_WIP_PROVIDER_ID
+      service_account_email: 
+        type: string # env_var_name
+        default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com" # GCP_SERVICE_ACCOUNT_EMAIL
+      gcp_cred_config_file_path: 
+        type: string
+        default: /home/circleci/gcp_cred_config.json
+      oidc_token_file_path: 
+        type: string
+        default: /home/circleci/oidc_token.json
+    steps:
+      - run:
+          command: |
+            # Store OIDC token in temp file
+            echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
+            # Create a credential configuration for the generated OIDC ID Token
+            gcloud iam workload-identity-pools create-cred-config \
+                "projects/<< parameters.project_id >>/locations/global/workloadIdentityPools/<< parameters.workload_identity_pool_id >>/providers/<< parameters.workload_identity_pool_provider_id >>"\
+                --output-file="<< parameters.gcp_cred_config_file_path >>" \
+                --service-account="<< parameters.service_account_email >>" \
+                --credential-source-file=<< parameters.oidc_token_file_path >>
+# env vars version 
+           # gcloud iam workload-identity-pools create-cred-config \
+           #      "projects/${<< parameters.project_id >>}/locations/global/workloadIdentityPools/${<< parameters.workload_identity_pool_id >>}/providers/${<< parameters.workload_identity_pool_provider_id >>}"\
+           #      --output-file="<< parameters.gcp_cred_config_file_path >>" \
+           #      --service-account="${<< parameters.service_account_email >>}" \
+           #      --credential-source-file=<< parameters.oidc_token_file_path >>
+  gcp-oidc-authenticate:
+    description: "Authenticate with GCP using a GCP credentials file."
+    parameters:
+      gcp_cred_config_file_path: 
+        type: string
+        default: /home/circleci/gcp_cred_config.json
+    steps:
+      - run:
+          command: |
+            # Configure gcloud to leverage the generated credential configuration
+            gcloud auth login --brief --cred-file "<< parameters.gcp_cred_config_file_path >>"
+            # Configure ADC
+            echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp_cred_config_file_path >>'" | tee -a $BASH_ENV
+
   checkout-code:
     description: "git checkout and update submodules"
     steps:
@@ -372,6 +425,20 @@ commands:
 #        JOBS
 # -------------------------
 jobs:
+  gcp-oidc-defaults:
+    executor: gcp-cli/default
+    steps:
+      - gcp-cli/install
+      - gcp-oidc-generate-cred-config-file
+      - gcp-oidc-authenticate
+      - run:
+          name: Verify that gcloud is authenticated
+          command: gcloud iam service-accounts get-iam-policy << pipeline.parameters.circle-service-account >>
+      - run:
+          name: Verify that ADC works
+          command: |
+              ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+              curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
   api-unit-test:
     parallelism: 4
     executor: api-unit-test-executor
@@ -917,6 +984,10 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
+      - gcp-oidc-defaults:
+          name: Generate Creds File and Authenticate
+          context: 
+          - gcp-oidc-dev
       # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
       - api-lint
