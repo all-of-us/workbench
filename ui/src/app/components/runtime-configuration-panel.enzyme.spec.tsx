@@ -267,11 +267,54 @@ describe(RuntimeConfigurationPanel.name, () => {
   };
 
   it('should allow configuration via GCE preset', async () => {
-    // Moved to RTL
+    setCurrentRuntime(null);
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    // Ensure set the form to something non-standard to start
+    await pickMainCpu(wrapper, 8);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
+
+    await pickPreset(wrapper, runtimePresets.generalAnalysis);
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.GENERAL_ANALYSIS
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: 'stub-disk',
+      size: MIN_DISK_SIZE_GB,
+    });
+    expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
   it('should allow configuration via dataproc preset', async () => {
-    // Moved to RTL
+    setCurrentRuntime(null);
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    await pickPreset(wrapper, runtimePresets.hailAnalysis);
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
+    );
+    expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+    );
+    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it(
@@ -329,11 +372,42 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should tag as user override after preset modification', async () => {
-    // Moved to rtl
+    setCurrentRuntime(null);
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    // Take the preset but make a solitary modification.
+    await pickPreset(wrapper, runtimePresets.hailAnalysis);
+    await pickNumPreemptibleWorkers(wrapper, 20);
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.USER_OVERRIDE
+    );
   });
 
   it('should tag as preset if configuration matches', async () => {
-    // Moved to rtl
+    setCurrentRuntime(null);
+
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+
+    // Take the preset, make a change, then revert.
+    await pickPreset(wrapper, runtimePresets.generalAnalysis);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickWorkerCpu(wrapper, 2);
+    await pickComputeType(wrapper, ComputeType.Standard);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.GENERAL_ANALYSIS
+    );
   });
 
   it('should restrict memory options by cpu', async () => {
@@ -648,11 +722,37 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creating gcePD with GPU', async () => {
-    // Moved to RTL
+    setCurrentRuntime(null);
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    await pickComputeType(wrapper, ComputeType.Standard);
+    await clickEnableGpu(wrapper);
+    await pickGpuType(wrapper, 'NVIDIA Tesla T4');
+    await pickGpuNum(wrapper, 2);
+    await pickMainCpu(wrapper, 8);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
+
+    await mustClickButton(wrapper, 'Create');
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
+      'stub-disk'
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
+      2
+    );
   });
 
   it('should allow creating gce without GPU', async () => {
-    // Moved to RTL
+    setCurrentRuntime(null);
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    await pickComputeType(wrapper, ComputeType.Standard);
+    await pickMainCpu(wrapper, 8);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await mustClickButton(wrapper, 'Create');
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {
