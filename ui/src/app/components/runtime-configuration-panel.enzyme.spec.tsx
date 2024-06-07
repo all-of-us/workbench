@@ -215,6 +215,9 @@ describe(RuntimeConfigurationPanel.name, () => {
   const pickMainRam = (wrapper, ram) =>
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
+  const pickMainDiskSize = (wrapper, diskSize) =>
+    enterNumberInput(wrapper, '#standard-disk', diskSize);
+
   const pickDetachableType = (wrapper, diskType: DiskType) =>
     pickDropdownOption(wrapper, '#disk-type', diskTypeLabels[diskType]);
 
@@ -222,6 +225,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     getInputValue(wrapper, '#detachable-disk');
   const pickDetachableDiskSize = (wrapper, diskSize) =>
     enterNumberInput(wrapper, '#detachable-disk', diskSize);
+
+  const pickGpuType = (wrapper, gpuType) =>
+    pickDropdownOption(wrapper, '#gpu-type', gpuType);
+
+  const pickGpuNum = (wrapper, gpuNum) =>
+    pickDropdownOption(wrapper, '#gpu-num', gpuNum);
 
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
 
