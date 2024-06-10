@@ -149,7 +149,8 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
 
 let aborter = new AbortController();
 
-// For test
+// This function is being used by test ONLY to abort the runtime polling so that the tests do not interfere with each
+// other
 export const getAborter = () => aborter;
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
