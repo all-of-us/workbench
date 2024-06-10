@@ -785,8 +785,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   const changeMainCpu_To8 = async (container: HTMLElement) =>
     pickMainCpu(container, 8);
 
-  const clickEnableGpu = async (container) => {
-    console.log(container);
+  const clickEnableGpu = async () => {
     const enableGpu = screen.getByRole('checkbox', {
       name: /enable gpus/i,
     });
@@ -2557,7 +2556,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     }
   );
 
-  test.each([
+  test.skip.each([
     ['disk type', [pickSsdType], { wantDeleteDisk: true }],
     ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
     ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],

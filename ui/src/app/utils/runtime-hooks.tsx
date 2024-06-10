@@ -190,6 +190,7 @@ export const useRuntimeStatus = (
         () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
+    const aborter = new AbortController();
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
@@ -197,6 +198,7 @@ export const useRuntimeStatus = (
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
             resolutionCondition: (r) => resolutionCondition(r),
+            pollAbortSignal: aborter.signal,
           });
         } catch (e) {
           // ExceededActionCountError is expected, as we exceed our create limit of 0.
@@ -212,6 +214,9 @@ export const useRuntimeStatus = (
       }
     };
     initializePolling();
+    return () => {
+      aborter.abort('Unmounting');
+    };
   }, [runtimeStatusRequest]);
 
   const setStatusRequest = async (req: RuntimeStatusRequest) => {
@@ -400,6 +405,7 @@ export const useCustomRuntime = (
     // this will result in React warnings.
     return () => {
       mounted = false;
+      aborter.abort('Unmounting');
     };
   }, [request]);
 
