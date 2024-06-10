@@ -33,6 +33,7 @@ import {
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { getAborter } from 'app/utils/runtime-hooks';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
@@ -1008,6 +1009,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
     jest.clearAllMocks();
+    getAborter().abort('Unmounting for testing');
   });
 
   it('should show loading spinner while loading', async () => {

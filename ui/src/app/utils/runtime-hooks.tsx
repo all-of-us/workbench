@@ -147,6 +147,10 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
   }, [currentWorkspaceNamespace]);
 };
 
+let aborter = new AbortController();
+
+// For test
+export const getAborter = () => aborter;
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
@@ -190,7 +194,7 @@ export const useRuntimeStatus = (
         () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
-    const aborter = new AbortController();
+    aborter = new AbortController();
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
@@ -214,9 +218,6 @@ export const useRuntimeStatus = (
       }
     };
     initializePolling();
-    return () => {
-      aborter.abort('Unmounting');
-    };
   }, [runtimeStatusRequest]);
 
   const setStatusRequest = async (req: RuntimeStatusRequest) => {
@@ -297,7 +298,7 @@ export const useCustomRuntime = (
 
   useEffect(() => {
     let mounted = true;
-    const aborter = new AbortController();
+    aborter = new AbortController();
     const existingDisk = runtimeDiskStore.get().gcePersistentDisk;
     const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
@@ -405,7 +406,6 @@ export const useCustomRuntime = (
     // this will result in React warnings.
     return () => {
       mounted = false;
-      aborter.abort('Unmounting');
     };
   }, [request]);
 
