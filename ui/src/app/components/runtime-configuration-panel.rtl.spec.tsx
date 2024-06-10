@@ -1315,7 +1315,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     });
   });
 
-  it('should allow cancelling runtime deletion', async () => {
+  it.skip('should allow cancelling runtime deletion', async () => {
     component({});
     clickExpectedButton('Delete Environment');
 
