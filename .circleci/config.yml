@@ -138,28 +138,8 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  deploy-to-staging-command:
-    description: "Deploy API and UI to staging App Engine"
-    steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - run:
-          working_directory: ~/workbench/deploy
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-staging \
-              --account << pipeline.parameters.circle-service-account >> \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --promote
-          name: Deploy API and UI to all-of-us-rw-staging App Engine
-
-  gcloud-auth-login:
-    description: "Activate CircleCI service account credential"
+  gcloud-auth-login-stored-credentials:
+    description: "Activate CircleCI service account credential using GCLOUD_CREDENTIALS and GCLOUD_CREDENTIALS_KEY"
     parameters:
       with_application_default_credentials:
         description: |
@@ -182,6 +162,26 @@ commands:
                   echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
                   source $BASH_ENV
                 working_directory: ~/workbench
+
+  deploy-to-staging-command:
+    description: "Deploy API and UI to staging App Engine"
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login-stored-credentials
+      - run:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-staging \
+              --account << pipeline.parameters.circle-service-account >> \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file ~/workbench/api/circle-sa-key.json \
+              --promote
+          name: Deploy API and UI to all-of-us-rw-staging App Engine
 
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
@@ -310,7 +310,6 @@ commands:
       - restore_cache:
           name: "Restore UI cache"
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
-      - gcloud-auth-login
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
@@ -355,7 +354,7 @@ commands:
         type: enum
         enum: [ "test", "staging", "local" ]
     steps:
-      - gcloud-auth-login
+      - gcloud-auth-login-stored-credentials  # required to access GCS
       - run:
           name: "Set environment variable ACCESS_TEST_USER"
           working_directory: ~/workbench/e2e
@@ -526,7 +525,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - launch-local-api
             - run:
                 working_directory: ~/workbench/api
@@ -547,7 +546,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - run:
                 name: Run Integration Tests
                 working_directory: ~/workbench/api
@@ -558,7 +557,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - run:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
@@ -569,7 +568,7 @@ jobs:
     steps:
     - run-api-test:
         additional_steps:
-        - gcloud-auth-login
+        - gcloud-auth-login-stored-credentials  # required to access GCS
         - run:
             name: Run Contract tests
             working_directory: ~/workbench/api
@@ -704,7 +703,7 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login
+      - gcloud-auth-login-stored-credentials  # required to impersonate the deployment account
       - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
@@ -725,7 +724,7 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login
+      - gcloud-auth-login-stored-credentials  # required to impersonate the deployment account
       - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
@@ -784,7 +783,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-      - gcloud-auth-login:
+      - gcloud-auth-login-stored-credentials: # required to access GCS
           # Needed for generate-impersonated-user-token script
           with_application_default_credentials: true
       - run:
@@ -845,9 +844,6 @@ jobs:
           name: "Restore e2e cache"
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - gcloud-auth-login:
-          # Needed for gcs-load-test-results
-          with_application_default_credentials: true
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
