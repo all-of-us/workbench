@@ -324,7 +324,7 @@ commands:
     description: "Load Puppeteer test results JSON to Google Storage bucket"
     steps:
       - gcloud-auth-login:  # required to access GCS
-        with_application_default_credentials: true
+          with_application_default_credentials: true
       - run:
           name: Upload test results json to storage bucket
           working_directory: ~/workbench/e2e/logs
