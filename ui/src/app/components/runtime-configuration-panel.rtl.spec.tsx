@@ -1010,7 +1010,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
     jest.clearAllMocks();
-    jest.clearAllTimers();
+    // jest.clearAllTimers();
   });
 
   it('should show loading spinner while loading', async () => {
