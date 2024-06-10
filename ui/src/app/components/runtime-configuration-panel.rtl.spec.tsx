@@ -972,7 +972,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   }
 
   beforeEach(async () => {
-    jest.useRealTimers();
     user = userEvent.setup();
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -1010,7 +1009,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
     jest.clearAllMocks();
-    // jest.clearAllTimers();
   });
 
   it('should show loading spinner while loading', async () => {
@@ -1204,7 +1202,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickMainCpu(container, 8);
     clickExpectedButton('Try Again');
 
-    jest.advanceTimersByTime(1000);
     await waitFor(() =>
       // Kicks off a deletion to first clear the error status runtime.
       expect(runtimeApiStub.runtime.status).toEqual('Deleting')
