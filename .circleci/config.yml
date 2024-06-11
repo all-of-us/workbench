@@ -219,7 +219,10 @@ commands:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-stored-credentials
+      - gcloud-auth-login-oidc:
+          project_id: "657299777109"  # all-of-us-rw-staging
+          wip_id: "circleci-wip-staging"
+          wip_provider_id: "circleci-oidc-prv-staging"
       - run:
           working_directory: ~/workbench/deploy
           command: |
