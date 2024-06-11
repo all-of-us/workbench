@@ -187,7 +187,7 @@ commands:
       - gcp-cli/install
       - run:
           command: |
-            # Store OIDC token in temp file
+            # Store the CircleCI-generated OIDC token in temp file
             echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
             # Create a credential configuration for the generated OIDC ID Token
             gcloud iam workload-identity-pools create-cred-config \
