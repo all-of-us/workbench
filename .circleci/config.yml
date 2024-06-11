@@ -756,9 +756,9 @@ jobs:
       - attach_workspace:
           at: .
       - gcloud-auth-login-oidc:
-          project_id: "602460048110"
-          wip_id: "local-2-oidc-pool"
-          wip_provider_id: "local-2-oidc-prv"
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
@@ -780,9 +780,9 @@ jobs:
       - attach_workspace:
           at: .
       - gcloud-auth-login-oidc:
-          project_id: "602460048110"
-          wip_id: "local-2-oidc-pool"
-          wip_provider_id: "local-2-oidc-prv"
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
