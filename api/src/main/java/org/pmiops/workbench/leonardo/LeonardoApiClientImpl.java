@@ -47,7 +47,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
@@ -203,6 +205,30 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
+  // UpdateRuntimeRequest:runtimeConfig can be of one of the parameter
+  // LeonardoUpdateGceConfig/LeonardoUpdateDataprocConfig
+  private Object buildUpdateConfig(Runtime runtime) {
+    if (runtime == null) {
+      return null;
+    }
+
+    if (runtime.getGceConfig() != null) {
+      return leonardoMapper
+          .toUpdateGceConfig(runtime.getGceConfig())
+          .cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
+    }
+
+    if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper
+          .toUpdatePDGceConfig(runtime.getGceWithPdConfig())
+          .cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
+    }
+
+    return leonardoMapper
+        .toUpdateDataprocConfig(runtime.getDataprocConfig())
+        .cloudService(LeonardoUpdateDataprocConfig.CloudServiceEnum.DATAPROC);
+  }
+
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper
@@ -266,7 +292,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildRuntimeConfig(runtime))
+                      .runtimeConfig(buildUpdateConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
