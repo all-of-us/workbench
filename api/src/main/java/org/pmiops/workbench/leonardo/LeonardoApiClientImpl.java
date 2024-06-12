@@ -205,13 +205,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
-  // UpdateRuntimeRequest:runtimeConfig can be of one of the parameter
-  // LeonardoUpdateGceConfig/LeonardoUpdateDataprocConfig
-  private Object buildUpdateConfig(Runtime runtime) {
-    if (runtime == null) {
-      return null;
-    }
-
+  private LeonardoUpdateGceConfig buildUpdateGCEConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper
           .toUpdateGceConfig(runtime.getGceConfig())
@@ -222,6 +216,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       return leonardoMapper
           .toUpdatePDGceConfig(runtime.getGceWithPdConfig())
           .cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
+    }
+    return null;
+  }
+
+  private LeonardoUpdateDataprocConfig buildUpdateDataProcConfig(Runtime runtime) {
+    if (runtime == null) {
+      return null;
     }
 
     return leonardoMapper
@@ -278,6 +279,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         });
   }
 
+  private boolean isDataProcRequest(Runtime runtime) {
+    return runtime.getDataprocConfig() != null;
+  }
+
   @Override
   public void updateRuntime(Runtime runtime) {
     Map<String, String> runtimeLabels =
@@ -292,7 +297,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildUpdateConfig(runtime))
+                      .runtimeConfig(
+                          isDataProcRequest(runtime)
+                              ? buildUpdateDataProcConfig(runtime)
+                              : buildUpdateGCEConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
