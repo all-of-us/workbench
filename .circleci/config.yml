@@ -9,6 +9,7 @@ orbs:
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
   pact: trustedshops-public/pact@3.0.1
+  gcp-cli: circleci/gcp-cli@3.2.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -17,6 +18,9 @@ parameters:
   circle-service-account:
     type: string
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
+  circle-service-account-key:
+    type: string
+    default: "/home/circleci/circle-sa-key.json"
   workbench-image:
     type: string
     default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.28"
@@ -152,16 +156,62 @@ commands:
     steps:
       - run:
           working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
+          command: ci/activate_creds.sh << pipeline.parameters.circle-service-account-key >>
       - when:
           condition: << parameters.with_application_default_credentials >>
           steps:
             - run:
                 name: Export application default credentials
                 command: |
-                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
+                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=<< pipeline.parameters.circle-service-account-key >>' >> $BASH_ENV
                   source $BASH_ENV
                 working_directory: ~/workbench
+
+  # adapted from https://circleci.com/blog/openid-connect-identity-tokens/
+  gcloud-auth-login-oidc:
+    description: "Activate CircleCI service account credential using OIDC"
+    parameters:
+      project_id: 
+        type: string # env_var_name
+        default: "602460048110" # Project ID for all-of-us-workbench-test
+      wip_id: 
+        type: string
+        default: "REPLACE WITH WORKLOAD IDENTITY POOL ID"
+      wip_provider_id: 
+        type: string
+        default: "REPLACE WITH WORKLOAD IDENTITY POOL PROVIDER ID"
+      oidc_token_file_path: 
+        type: string
+        default: /home/circleci/oidc_token.json
+    steps:
+      - gcp-cli/install
+      - run:
+          command: |
+            # Store the CircleCI-generated OIDC token in temp file
+            echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
+            # Create a credential configuration for the generated OIDC ID Token
+            gcloud iam workload-identity-pools create-cred-config \
+                "projects/<< parameters.project_id >>/locations/global/workloadIdentityPools/<< parameters.wip_id >>/providers/<< parameters.wip_provider_id >>"\
+                --output-file="<< pipeline.parameters.circle-service-account-key >>" \
+                --service-account="<< pipeline.parameters.circle-service-account >>" \
+                --credential-source-file=<< parameters.oidc_token_file_path >>
+          name: Store OIDC credential configuration in temp file
+      - run:
+          command: |
+            # Configure gcloud to leverage the generated credential configuration
+            gcloud auth login --brief --cred-file "<< pipeline.parameters.circle-service-account-key >>"
+            # Configure ADC
+            echo "export GOOGLE_APPLICATION_CREDENTIALS='<< pipeline.parameters.circle-service-account-key >>'" >> $BASH_ENV
+            source $BASH_ENV
+          name: Configure gcloud to use the OIDC credential configuration
+      - run:
+          name: Verify that gcloud is authenticated
+          command: gcloud iam service-accounts get-iam-policy << pipeline.parameters.circle-service-account >>
+      - run:
+          name: Verify that ADC works
+          command: |
+              ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+              curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
 
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
@@ -169,7 +219,10 @@ commands:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-stored-credentials
+      - gcloud-auth-login-oidc:
+          project_id: "657299777109"  # all-of-us-rw-staging
+          wip_id: "circleci-wip-staging"
+          wip_provider_id: "circleci-oidc-prv-staging"
       - run:
           working_directory: ~/workbench/deploy
           command: |
@@ -179,7 +232,7 @@ commands:
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
           name: Deploy API and UI to all-of-us-rw-staging App Engine
 
@@ -705,7 +758,10 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-stored-credentials  # required to impersonate the deployment account
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
@@ -714,7 +770,7 @@ jobs:
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
-              --key-file circle-sa-key.json \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote --quiet
 
   api-deploy-to-test:
@@ -726,7 +782,10 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-stored-credentials  # required to impersonate the deployment account
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
@@ -735,7 +794,7 @@ jobs:
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
-              --key-file circle-sa-key.json \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
 
   # In staging, we deploy all at once in order to track and control the
