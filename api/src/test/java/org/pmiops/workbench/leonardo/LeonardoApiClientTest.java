@@ -32,6 +32,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
@@ -116,7 +117,7 @@ public class LeonardoApiClientTest {
 
   @Qualifier("userRuntimesApi")
   @MockBean
-  org.pmiops.workbench.leonardo.api.RuntimesApi userRuntimesApi;
+  RuntimesApi userRuntimesApi;
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
