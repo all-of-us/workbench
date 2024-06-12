@@ -16,6 +16,7 @@ import {
 } from 'generated/fetch';
 
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
@@ -30,6 +31,7 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementEnabled,
   findNodesContainingText,
   simulateComponentChange,
   simulateTextInputChange,
@@ -89,6 +91,7 @@ const findTextInput = (wrapper: ReactWrapper, dataTestId: string) =>
   wrapper.find(`[data-test-id="${dataTestId}"]`).first();
 
 describe('AdminUserProfile', () => {
+  let user;
   const component = (
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
   ) => {
@@ -128,6 +131,7 @@ describe('AdminUserProfile', () => {
     registerApiClient(EgressEventsAdminApi, new EgressEventsAdminApiStub());
     registerApiClient(UserAdminApi, new UserAdminApiStub());
     registerApiClient(InstitutionApi, new InstitutionApiStub());
+    user = userEvent.setup();
   });
 
   it('should render', () => {
@@ -202,26 +206,30 @@ describe('AdminUserProfile', () => {
   it('should allow updating contactEmail within an institution', async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
 
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      BROAD_ADDR_2
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_2
-    );
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(BROAD_ADDR_2);
+    await user.tab();
+
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_2);
+
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
+
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementEnabled(saveButton);
   });
 
   it("should prohibit updating contactEmail if it doesn't match institution ADDRESSES", async () => {
