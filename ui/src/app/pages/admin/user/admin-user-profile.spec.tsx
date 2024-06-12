@@ -31,6 +31,7 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementDisabled,
   expectButtonElementEnabled,
   findNodesContainingText,
   simulateComponentChange,
@@ -209,10 +210,6 @@ describe('AdminUserProfile', () => {
     componentAlt();
     await waitForNoSpinner();
 
-    screen.getByRole('textbox', {
-      name: /contact email/i,
-    });
-
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
       name: /contact email/i,
     });
@@ -235,32 +232,33 @@ describe('AdminUserProfile', () => {
   it("should prohibit updating contactEmail if it doesn't match institution ADDRESSES", async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
+
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
 
     const nonBroadAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      nonBroadAddr
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      nonBroadAddr
+
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(nonBroadAddr);
+    await user.tab();
+
+    expect(contactEmailInput).toHaveValue(nonBroadAddr);
+
+    const invalidEmail = await screen.findByTestId('email-invalid');
+    within(invalidEmail).getByText(
+      /The institution has authorized access only to select members./i
     );
 
-    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
-    expect(invalidEmail.exists()).toBeTruthy();
-    expect(invalidEmail.text()).toContain(
-      'The institution has authorized access only to select members.'
-    );
-
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementDisabled(saveButton);
   });
 
   it("should prohibit updating contactEmail if it doesn't match institution DOMAINS", async () => {
