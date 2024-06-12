@@ -15,6 +15,7 @@ import {
   UserTierEligibility,
 } from 'generated/fetch';
 
+import { render, screen, within } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
@@ -32,6 +33,7 @@ import {
   findNodesContainingText,
   simulateComponentChange,
   simulateTextInputChange,
+  waitForNoSpinner,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
@@ -99,6 +101,18 @@ describe('AdminUserProfile', () => {
     );
   };
 
+  const componentAlt = (
+    usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
+  ) => {
+    return render(
+      <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
+        <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
+          <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
+        </Route>
+      </MemoryRouter>
+    );
+  };
+
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
 
@@ -117,8 +131,8 @@ describe('AdminUserProfile', () => {
   });
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    screen.findByText('User Profile Information');
   });
 
   it("should display the user's name, username, and initial credits usage", async () => {
@@ -140,15 +154,19 @@ describe('AdminUserProfile', () => {
       freeTierDollarQuota,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(getUneditableFieldText(wrapper, 'name')).toEqual(expectedFullName);
-    expect(getUneditableFieldText(wrapper, 'user-name')).toEqual(username);
-    expect(getUneditableFieldText(wrapper, 'initial-credits-used')).toEqual(
-      expectedCreditsText
-    );
+    componentAlt();
+    await waitForNoSpinner();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('initial-credits-used')).getByText(
+        expectedCreditsText
+      )
+    ).toBeInTheDocument();
   });
 
   test.each([
@@ -173,13 +191,11 @@ describe('AdminUserProfile', () => {
     async (_, accessTierShortNames, expectedText) => {
       updateTargetProfile({ accessTierShortNames });
 
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
-
-      expect(getUneditableFieldText(wrapper, 'data-access-tiers')).toEqual(
-        expectedText
-      );
+      componentAlt();
+      await waitForNoSpinner();
+      expect(
+        within(screen.getByTestId('data-access-tiers')).getByText(expectedText)
+      ).toBeInTheDocument();
     }
   );
 
