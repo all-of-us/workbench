@@ -66,24 +66,16 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant = "DATAPROC")
   @Mapping(target = "properties", ignore = true)
-  @Mapping(target = "componentGatewayEnabled", ignore = true)
+  @Mapping(target = "componentGatewayEnabled", constant = "true")
   @Mapping(target = "workerPrivateAccess", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
-
-  @AfterMapping
-  default void addMachineConfigDefaults(
-      @MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
-    leonardoMachineConfig
-        .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
-        .componentGatewayEnabled(true);
-  }
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "zone", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
@@ -113,20 +105,9 @@ public interface LeonardoMapper {
       PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "zone", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
-
-  @AfterMapping
-  default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {
-    leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
-  }
-
-  @AfterMapping
-  default void addPdCloudServiceEnum(
-      @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
-    leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
-  }
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
