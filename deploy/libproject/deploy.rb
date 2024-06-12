@@ -231,8 +231,6 @@ def deploy(cmd_name, args)
     raise ArgumentError.new("--git-version is required when running within docker")
   end
   common = Common.new
-  common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
-
   jira_client = nil
   create_ticket = false
   from_version = nil
