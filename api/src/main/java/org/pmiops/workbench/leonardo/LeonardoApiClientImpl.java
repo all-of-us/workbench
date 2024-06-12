@@ -206,25 +206,20 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private LeonardoUpdateGceConfig buildUpdateGCEConfig(Runtime runtime) {
+    LeonardoUpdateGceConfig updateGceConfig;
+
     if (runtime.getGceConfig() != null) {
-      return leonardoMapper
-          .toUpdateGceConfig(runtime.getGceConfig())
-          .cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
+      updateGceConfig = leonardoMapper.toUpdateGceConfig(runtime.getGceConfig());
+    } else {
+      updateGceConfig = leonardoMapper.toUpdatePDGceConfig(runtime.getGceWithPdConfig());
     }
 
-    if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper
-          .toUpdatePDGceConfig(runtime.getGceWithPdConfig())
-          .cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
-    }
-    return null;
+    updateGceConfig.cloudService(LeonardoUpdateGceConfig.CloudServiceEnum.GCE);
+
+    return updateGceConfig;
   }
 
   private LeonardoUpdateDataprocConfig buildUpdateDataProcConfig(Runtime runtime) {
-    if (runtime == null) {
-      return null;
-    }
-
     return leonardoMapper
         .toUpdateDataprocConfig(runtime.getDataprocConfig())
         .cloudService(LeonardoUpdateDataprocConfig.CloudServiceEnum.DATAPROC);
@@ -279,7 +274,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         });
   }
 
-  private boolean isDataProcRequest(Runtime runtime) {
+  private boolean isDataProcRuntime(Runtime runtime) {
     return runtime.getDataprocConfig() != null;
   }
 
@@ -298,7 +293,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(
-                          isDataProcRequest(runtime)
+                          isDataProcRuntime(runtime)
                               ? buildUpdateDataProcConfig(runtime)
                               : buildUpdateGCEConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
