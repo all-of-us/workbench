@@ -271,32 +271,31 @@ describe('AdminUserProfile', () => {
       contactEmail: originalAddress,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      originalAddress
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
+
+    expect(contactEmailInput).toHaveValue(originalAddress);
 
     const nonVerilyAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      nonVerilyAddr
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      nonVerilyAddr
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(nonVerilyAddr);
+    await user.tab();
+    expect(contactEmailInput).toHaveValue(nonVerilyAddr);
+
+    const invalidEmail = await screen.findByTestId('email-invalid');
+    within(invalidEmail).getByText(
+      /Your email does not match your institution/i
     );
 
-    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
-    expect(invalidEmail.exists()).toBeTruthy();
-    expect(invalidEmail.text()).toContain(
-      'Your email does not match your institution'
-    );
-
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementDisabled(saveButton);
   });
 
   it('should allow updating institution if the email continues to match', async () => {
