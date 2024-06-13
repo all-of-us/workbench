@@ -643,13 +643,13 @@ describe('AdminUserProfile', () => {
     componentAlt();
     await waitForNoSpinner();
 
-    const tableRows = wrapper
-      .find('[data-test-id="access-module-table"]')
-      .find('tbody tr[role="row"]');
-    expect(tableRows.length).toEqual(expectedModules.length);
+    const table = screen.getByTestId('access-module-table');
+    const rows = within(table).getAllByRole('row');
+    rows.shift(); // remove the header row
+    expect(rows).toHaveLength(expectedModules.length);
 
     // confirm that the expectedModules are listed in order with expected title text
-    expectModuleTitlesInOrder(expectedModules, tableRows);
+    expectModuleTitlesInOrder(expectedModules, rows);
   });
 
   test.each([
