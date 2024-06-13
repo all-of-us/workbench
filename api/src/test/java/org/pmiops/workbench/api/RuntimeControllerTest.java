@@ -88,6 +88,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
@@ -1290,8 +1291,8 @@ public class RuntimeControllerTest {
         .updateRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), updateRuntimeRequestCaptor.capture());
 
-    LeonardoMachineConfig actualRuntimeConfig =
-        (LeonardoMachineConfig) updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
+    LeonardoUpdateDataprocConfig actualRuntimeConfig =
+        (LeonardoUpdateDataprocConfig) updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
     assertThat(actualRuntimeConfig.getCloudService().getValue()).isEqualTo("DATAPROC");
     assertThat(actualRuntimeConfig.getNumberOfWorkers())
         .isEqualTo(dataprocConfig.getNumberOfWorkers());

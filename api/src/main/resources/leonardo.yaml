@@ -2154,7 +2154,12 @@ components:
       properties:
         runtimeConfig:
           type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
+          description: oneOf UpdateGceConfig, UpdateDataprocConfig
+          discriminator:
+            propertyName: cloudService
+            mapping:
+              gce: "#/components/schemas/UpdateGceConfig"
+              dataproc: "#/components/schemas/UpdateDataprocConfig"
         allowStop:
           type: boolean
           description: Whether leo should stop the runtime if it is necessary for the

@@ -47,7 +47,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
@@ -203,6 +205,16 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
+  private LeonardoUpdateGceConfig buildUpdateGCEConfig(Runtime runtime) {
+    return runtime.getGceConfig() != null
+        ? leonardoMapper.toUpdateGceConfig(runtime.getGceConfig())
+        : leonardoMapper.toUpdateGceConfig(runtime.getGceWithPdConfig());
+  }
+
+  private LeonardoUpdateDataprocConfig buildUpdateDataProcConfig(Runtime runtime) {
+    return leonardoMapper.toUpdateDataprocConfig(runtime.getDataprocConfig());
+  }
+
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper
@@ -252,6 +264,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         });
   }
 
+  private boolean isDataProcRuntime(Runtime runtime) {
+    return runtime.getDataprocConfig() != null;
+  }
+
   @Override
   public void updateRuntime(Runtime runtime) {
     Map<String, String> runtimeLabels =
@@ -266,7 +282,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildRuntimeConfig(runtime))
+                      .runtimeConfig(
+                          isDataProcRuntime(runtime)
+                              ? buildUpdateDataProcConfig(runtime)
+                              : buildUpdateGCEConfig(runtime))
                       .autopause(runtime.getAutopauseThreshold() != null)
                       .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
