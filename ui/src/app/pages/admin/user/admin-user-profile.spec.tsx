@@ -75,17 +75,6 @@ const updateTargetProfile = (update: Partial<Profile>) => {
   );
 };
 
-const getUneditableFieldText = (
-  wrapper: ReactWrapper,
-  dataTestId: string
-): string => {
-  const divs = wrapper.find(`[data-test-id="${dataTestId}"]`).find('div');
-
-  // sanity check: divs should contain [parent, label, value]
-  expect(divs.length).toEqual(3);
-  return divs.at(2).text();
-};
-
 const findDropdown = (wrapper: ReactWrapper, dataTestId: string) =>
   wrapper.find(`[data-test-id="${dataTestId}"]`).find(Dropdown).first();
 
@@ -405,47 +394,47 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
-      BROAD.shortName
-    );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      BROAD.shortName
-    );
+    await user.click(verifiedInstitutionDropdown);
+    await user.click(screen.getByText(BROAD.displayName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
 
     // also need to set the Institutional Role
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    await user.click(institutionalRoleDropdown);
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
 
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      BROAD_ADDR_1
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
 
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(BROAD_ADDR_1);
+    await user.tab();
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
+
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should prohibit updating institutional role to Other without adding other-text', async () => {
