@@ -34,11 +34,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  findNodesContainingText,
-  simulateComponentChange,
-  simulateTextInputChange,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import {
@@ -88,17 +84,6 @@ const getDropdown = (containerTestId: string): HTMLSelectElement => {
 
 describe('AdminUserProfile', () => {
   let user;
-  const component = (
-    usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
-  ) => {
-    return mount(
-      <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
-        <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
-          <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
-      </MemoryRouter>
-    );
-  };
 
   const componentAlt = (
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
@@ -710,34 +695,42 @@ describe('AdminUserProfile', () => {
         tierEligibilities,
       });
 
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
+      componentAlt();
+      await waitForNoSpinner();
 
-      const moduleTable = wrapper.find('[data-test-id="access-module-table"]');
-      expect(
-        findNodesContainingText(
-          moduleTable,
-          `requires eRA Commons for ${tiers} access`
-        ).exists()
-      ).toBeTruthy();
+      const table = screen.getByTestId('access-module-table');
+      within(table).getByText(`requires eRA Commons for ${tiers} access`, {
+        exact: false,
+      });
 
-      const tableRows = moduleTable.find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(orderedAccessModules.length);
+      const rows = within(table).getAllByRole('row');
+      rows.shift(); // remove the header row
+      expect(rows).toHaveLength(orderedAccessModules.length);
 
       // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
-      const eraRow = tableRows.at(
-        orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)
-      );
-      const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
+      const eraRow =
+        rows[orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)];
 
-      expect(
-        findNodesContainingText(eraBadges, 'registered-tier-badge.svg').exists()
-      ).toBe(rtBadgeExpected);
-      expect(
-        findNodesContainingText(eraBadges, 'controlled-tier-badge.svg').exists()
-      ).toBe(ctBadgeExpected);
+      if (rtBadgeExpected) {
+        expect(
+          within(eraRow).getByText('registered-tier-badge.svg')
+        ).toBeInTheDocument();
+      } else {
+        expect(
+          within(eraRow).queryByText('registered-tier-badge.svg')
+        ).not.toBeInTheDocument();
+      }
+
+      if (ctBadgeExpected) {
+        expect(
+          within(eraRow).getByText('controlled-tier-badge.svg')
+        ).toBeInTheDocument();
+      } else {
+        expect(
+          within(eraRow).queryByText('controlled-tier-badge.svg')
+        ).not.toBeInTheDocument();
+      }
     }
   );
 });
