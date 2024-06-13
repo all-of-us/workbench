@@ -486,29 +486,29 @@ describe('AdminUserProfile', () => {
   });
 
   it('should allow updating initial credit limit', async () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props().value
-    ).toEqual(TARGET_USER_PROFILE.freeTierDollarQuota);
+    const initialCreditsDropdown = getDropdown('initial-credits-dropdown');
+
+    expect(initialCreditsDropdown.value).toEqual(
+      TARGET_USER_PROFILE.freeTierDollarQuota.toString()
+    );
 
     const newLimit = 800.0;
     expect(newLimit).not.toEqual(TARGET_USER_PROFILE.freeTierDollarQuota); // sanity check
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'initial-credits-dropdown'),
-      newLimit
-    );
-    expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props().value
-    ).toEqual(newLimit);
+    await user.click(initialCreditsDropdown);
+    screen.logTestingPlaygroundURL();
+    await user.click(screen.getByText(`\$${newLimit.toFixed(2)}`));
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(initialCreditsDropdown.value).toEqual(newLimit.toString());
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   function expectModuleTitlesInOrder(
@@ -525,9 +525,8 @@ describe('AdminUserProfile', () => {
   }
 
   it('should render the titles of all expected access modules', async () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     const table = wrapper.find('[data-test-id="access-module-table"]');
     expect(table.exists()).toBeTruthy();
@@ -651,9 +650,8 @@ describe('AdminUserProfile', () => {
       (moduleName) => !excludedModules.includes(moduleName)
     );
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     const tableRows = wrapper
       .find('[data-test-id="access-module-table"]')
