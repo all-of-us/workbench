@@ -66,17 +66,17 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
-  @Mapping(target = "cloudService", constant = "DATAPROC")
   @Mapping(target = "properties", ignore = true)
-  @Mapping(target = "componentGatewayEnabled", constant = "true")
   @Mapping(target = "workerPrivateAccess", ignore = true)
+  @Mapping(target = "cloudService", constant = "DATAPROC")
+  @Mapping(target = "componentGatewayEnabled", constant = "true")
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "zone", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
   @Mapping(target = "cloudService", constant = "GCE")
@@ -105,8 +105,8 @@ public interface LeonardoMapper {
       PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "zone", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
 
   @Mapping(target = "creator", source = "auditInfo.creator")
