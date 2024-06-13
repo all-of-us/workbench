@@ -499,7 +499,6 @@ describe('AdminUserProfile', () => {
     expect(newLimit).not.toEqual(TARGET_USER_PROFILE.freeTierDollarQuota); // sanity check
 
     await user.click(initialCreditsDropdown);
-    screen.logTestingPlaygroundURL();
     await user.click(screen.getByText(`\$${newLimit.toFixed(2)}`));
 
     expect(initialCreditsDropdown.value).toEqual(newLimit.toString());
