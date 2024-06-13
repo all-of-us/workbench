@@ -357,7 +357,6 @@ describe('AdminUserProfile', () => {
     expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
 
     await user.click(verifiedInstitutionDropdown);
-    screen.logTestingPlaygroundURL();
     await user.click(screen.getByText(BROAD.displayName));
 
     expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
@@ -447,40 +446,43 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.OTHER
-    );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.OTHER
-    );
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    let saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    await user.click(institutionalRoleDropdown);
+    const otherLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.OTHER
+    )[0].label;
+    await user.click(screen.getByText(otherLabel));
+    expect(institutionalRoleDropdown.value).toEqual(InstitutionalRole.OTHER);
+
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
 
     // now update other-text
+    const institutionalRoleDescriptionInput: HTMLInputElement =
+      screen.getByRole('textbox', {
+        name: /institutional role description/i,
+      });
 
-    expect(
-      findTextInput(wrapper, 'institutionalRoleOtherText').exists()
-    ).toBeTruthy();
     const roleDetails = 'I do a science';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'institutionalRoleOtherText'),
-      roleDetails
-    );
-    expect(
-      findTextInput(wrapper, 'institutionalRoleOtherText').props().value
-    ).toEqual(roleDetails);
+    await user.clear(institutionalRoleDescriptionInput);
+    await user.click(institutionalRoleDescriptionInput);
+    await user.paste(roleDetails);
+    await user.tab();
 
-    saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(institutionalRoleDescriptionInput).toHaveValue(roleDetails);
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should allow updating initial credit limit', async () => {
