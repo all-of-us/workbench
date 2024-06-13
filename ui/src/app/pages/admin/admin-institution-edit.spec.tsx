@@ -45,11 +45,12 @@ const getCTEnabled = (): HTMLInputElement =>
 const getRTAddress = () => screen.getByTestId('registered-email-address');
 const getRTDomain = () => screen.getByTestId('registered-email-domain');
 const getCTAddress = () => screen.getByTestId('controlled-email-address');
+const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
 const findCTDomain = () => screen.getByTestId('controlled-email-domain');
 
 const getRTAddressInput = () =>
   screen.getByTestId('registered-email-address-input');
-const getRTDomainInput = () =>
+const getRTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-domain-input');
 const getCTAddressInput = () =>
   screen.getByTestId('controlled-email-address-input');
@@ -153,35 +154,29 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(getCTDetails()).toBeInTheDocument();
     expect(getCTAddressInput()).toHaveValue('foo@verily.com');
   });
-  //
-  //   it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
-  //     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-  //     await waitForNoSpinner();
-  //     expect(getCTDetails()).not.toBeInTheDocument();
-  //
-  //     // update RT domains
-  //
-  //     const testDomains = 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com';
-  //     getRTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value: testDomains,
-  //         },
-  //       });
-  //     expect(getCTEnabled().props().checked).toBeFalsy();
-  //     await user.click(getCTEnabled());
-  //     expect(getCTEnabled().props().checked).toBeTruthy();
-  //     expect(getCTDetails()).toBeInTheDocument();
-  //
-  //     // CT copies RT's requirements: domain, ERA = true, domain list is equal
-  //
-  //     expect(findCTDomain()).toBeInTheDocument();
-  //     expect(getCTAddress()).not.toBeInTheDocument();
-  //
-  //     expect(getCTDomainInput())).toHaveValue(testDomains);
-  //   });
-  //
+
+  it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
+    componentAlt(VERILY_WITHOUT_CT.shortName);
+    await waitForNoSpinner();
+    expect(queryCTDetails()).not.toBeInTheDocument();
+
+    // update RT domains
+
+    const testDomains = 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com';
+    await changeInputValue(getRTDomainInput(), testDomains, user);
+    expect(getCTEnabled().checked).toBeFalsy();
+    await user.click(getCTEnabled());
+    expect(getCTEnabled().checked).toBeTruthy();
+    expect(getCTDetails()).toBeInTheDocument();
+
+    // CT copies RT's requirements: domain, ERA = true, domain list is equal
+
+    expect(findCTDomain()).toBeInTheDocument();
+    expect(queryCTAddress()).not.toBeInTheDocument();
+
+    expect(getCTDomainInput()).toHaveValue(testDomains);
+  });
+
   //   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
   //     const wrapper = component(VERILY_WITHOUT_CT.shortName);
   //     await waitForNoSpinner();
@@ -212,9 +207,9 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //         },
   //       });
   //
-  //     expect(getCTEnabled().props().checked).toBeFalsy();
+  //     expect(getCTEnabled().checked).toBeFalsy();
   //     await user.click(getCTEnabled());
-  //     expect(getCTEnabled().props().checked).toBeTruthy();
+  //     expect(getCTEnabled().checked).toBeTruthy();
   //     expect(getCTDetails()).toBeInTheDocument();
   //
   //     // CT copies RT's requirements: address, ERA = true
@@ -692,13 +687,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //     componentAlt();
   //     await waitForNoSpinner();
   //     expect(getCTDetails()).not.toBeInTheDocument();
-  //     expect(getCTEnabled().props().checked).toBeFalsy();
+  //     expect(getCTEnabled().checked).toBeFalsy();
   //     toggleCheckbox(getCTEnabled());
-  //     expect(getCTEnabled().props().checked).toBeTruthy();
+  //     expect(getCTEnabled().checked).toBeTruthy();
   //     expect(getCTDetails()).toBeInTheDocument();
   //
   //     toggleCheckbox(getCTEnabled());
-  //     expect(getCTEnabled().props().checked).toBeFalsy();
+  //     expect(getCTEnabled().checked).toBeFalsy();
   //     expect(getCTDetails()).not.toBeInTheDocument();
   //
   //     // both RT and CT are uninitialized
@@ -797,9 +792,9 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //     componentAlt();
   //     await waitForNoSpinner();
   //
-  //     expect(getCTEnabled().props().checked).toBeFalsy();
+  //     expect(getCTEnabled().checked).toBeFalsy();
   //     await user.click(getCTEnabled());
-  //     expect(getCTEnabled().props().checked).toBeTruthy();
+  //     expect(getCTEnabled().checked).toBeTruthy();
   //
   //     await waitOneTickAndUpdate();
   //
