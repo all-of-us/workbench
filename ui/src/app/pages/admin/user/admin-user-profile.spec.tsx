@@ -298,10 +298,11 @@ describe('AdminUserProfile', () => {
       /Your email does not match your institution/i
     );
 
-    const saveButton = screen.getByRole('button', {
-      name: /save/i,
-    });
-    expectButtonElementDisabled(saveButton);
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should allow updating institution if the email continues to match', async () => {
@@ -359,40 +360,38 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
-      BROAD.shortName
-    );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      BROAD.shortName
-    );
-    expect(
-      wrapper.find('[data-test-id="email-invalid"]').exists()
-    ).toBeTruthy();
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
+
+    await user.click(verifiedInstitutionDropdown);
+    await user.click(screen.getByText(BROAD.shortName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
+
+    screen.getByTestId('email-invalid');
 
     // also need to set the Institutional Role
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    await user.click(institutionalRoleDropdown);
+
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should not allow updating both email and institution if they match each other', async () => {
