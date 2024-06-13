@@ -262,3 +262,13 @@ export const rgbToHex = (rgb) => {
   };
   return '#' + hex(rgbValues[1]) + hex(rgbValues[2]) + hex(rgbValues[3]);
 };
+
+export const changeInputValue = async (
+  inputElement: HTMLInputElement,
+  newValue: string,
+  user: UserEvent
+) => {
+  await user.clear(inputElement);
+  await user.paste(newValue);
+  await user.tab();
+};
