@@ -368,7 +368,8 @@ describe('AdminUserProfile', () => {
     expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
 
     await user.click(verifiedInstitutionDropdown);
-    await user.click(screen.getByText(BROAD.shortName));
+    screen.logTestingPlaygroundURL();
+    await user.click(screen.getByText(BROAD.displayName));
 
     expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
 
