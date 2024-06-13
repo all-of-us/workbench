@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -71,12 +71,6 @@ const updateTargetProfile = (update: Partial<Profile>) => {
   );
 };
 
-const findDropdown = (wrapper: ReactWrapper, dataTestId: string) =>
-  wrapper.find(`[data-test-id="${dataTestId}"]`).find(Dropdown).first();
-
-const findTextInput = (wrapper: ReactWrapper, dataTestId: string) =>
-  wrapper.find(`[data-test-id="${dataTestId}"]`).first();
-
 const getDropdown = (containerTestId: string): HTMLSelectElement => {
   const container = screen.getByTestId(containerTestId);
   return within(container).getByRole('combobox', { hidden: true });
@@ -85,7 +79,7 @@ const getDropdown = (containerTestId: string): HTMLSelectElement => {
 describe('AdminUserProfile', () => {
   let user;
 
-  const componentAlt = (
+  const component = (
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
   ) => {
     return render(
@@ -115,9 +109,9 @@ describe('AdminUserProfile', () => {
     user = userEvent.setup();
   });
 
-  it('should render', () => {
-    componentAlt();
-    screen.findByText('User Profile Information');
+  it('should render', async () => {
+    component();
+    await screen.findByText('User Profile Information');
   });
 
   it("should display the user's name, username, and initial credits usage", async () => {
@@ -139,7 +133,7 @@ describe('AdminUserProfile', () => {
       freeTierDollarQuota,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(
       within(screen.getByTestId('name')).getByText(expectedFullName)
@@ -176,7 +170,7 @@ describe('AdminUserProfile', () => {
     async (_, accessTierShortNames, expectedText) => {
       updateTargetProfile({ accessTierShortNames });
 
-      componentAlt();
+      component();
       await waitForNoSpinner();
       expect(
         within(screen.getByTestId('data-access-tiers')).getByText(expectedText)
@@ -187,7 +181,7 @@ describe('AdminUserProfile', () => {
   it('should allow updating contactEmail within an institution', async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
@@ -212,7 +206,7 @@ describe('AdminUserProfile', () => {
   it("should prohibit updating contactEmail if it doesn't match institution ADDRESSES", async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
@@ -251,7 +245,7 @@ describe('AdminUserProfile', () => {
       contactEmail: originalAddress,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
@@ -289,7 +283,7 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
@@ -334,7 +328,7 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
@@ -378,7 +372,7 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
@@ -431,7 +425,7 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const institutionalRoleDropdown = getDropdown('institutionalRole');
@@ -471,7 +465,7 @@ describe('AdminUserProfile', () => {
   });
 
   it('should allow updating initial credit limit', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const initialCreditsDropdown = getDropdown('initial-credits-dropdown');
@@ -507,7 +501,7 @@ describe('AdminUserProfile', () => {
   }
 
   it('should render the titles of all expected access modules', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const table = screen.getByTestId('access-module-table');
@@ -587,7 +581,7 @@ describe('AdminUserProfile', () => {
           modules: [...statusesExceptThisOne, moduleStatus],
         },
       });
-      componentAlt();
+      component();
       await waitForNoSpinner();
 
       const table = screen.getByTestId('access-module-table');
@@ -625,7 +619,7 @@ describe('AdminUserProfile', () => {
       (moduleName) => !excludedModules.includes(moduleName)
     );
 
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const table = screen.getByTestId('access-module-table');
@@ -695,7 +689,7 @@ describe('AdminUserProfile', () => {
         tierEligibilities,
       });
 
-      componentAlt();
+      component();
       await waitForNoSpinner();
 
       const table = screen.getByTestId('access-module-table');
