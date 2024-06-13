@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
-import { ReactWrapper } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
 import {
   AccessModule,
@@ -15,9 +13,9 @@ import {
   UserTierEligibility,
 } from 'generated/fetch';
 
-import { AccountCreationOptions } from '../../login/account-creation/account-creation-options';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
