@@ -34,7 +34,6 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
 
@@ -557,78 +556,74 @@ export const VariantSearch = fp.flow(
                 }}
               />
             )}
-            {serverConfigStore.get().config.enableVariantSelectAll &&
-              (!!cohortContext.editSelectAll ? (
-                <>
-                  <Clickable
-                    style={withDisabledStyle(
-                      styles.exclusionText,
-                      disableSelectAllSave
-                    )}
-                    onClick={() => handleSelectAllEdit()}
-                    disabled={disableSelectAllSave}
-                  >
-                    <ClrIcon
-                      shape='check'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                        color: colors.select,
-                      }}
-                    />
-                    Save Select All Exclusions (
-                    {excludeFromSelectAll.length -
-                      (cohortContext.editSelectAll.variantFilter.exclusionList
-                        ?.length || 0)}
-                    )
-                  </Clickable>
-                  <Clickable
-                    style={styles.exclusionText}
-                    onClick={() => clearSearch()}
-                  >
-                    <ClrIcon
-                      shape='times'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                        color: colors.danger,
-                      }}
-                    />
-                    Cancel Edit
-                  </Clickable>
-                </>
-              ) : (
-                <TooltipTrigger
-                  side='top'
-                  content={
-                    totalCount < pageSize || totalCount > 10000
-                      ? resultsTooltip
-                      : duplicateFilterTooltip
-                  }
-                  disabled={!disableSelectAll}
+            {!!cohortContext.editSelectAll ? (
+              <>
+                <Clickable
+                  style={withDisabledStyle(
+                    styles.exclusionText,
+                    disableSelectAllSave
+                  )}
+                  onClick={() => handleSelectAllEdit()}
+                  disabled={disableSelectAllSave}
                 >
-                  <Clickable
-                    style={withDisabledStyle(
-                      styles.selectAll,
-                      disableSelectAll
-                    )}
-                    onClick={() => handleSelectAllResults()}
-                    disabled={disableSelectAll}
-                  >
-                    <ClrIcon
-                      shape='plus-circle'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                      }}
-                    />
-                    Select All Results
-                  </Clickable>
-                </TooltipTrigger>
-              ))}
+                  <ClrIcon
+                    shape='check'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                      color: colors.select,
+                    }}
+                  />
+                  Save Select All Exclusions (
+                  {excludeFromSelectAll.length -
+                    (cohortContext.editSelectAll.variantFilter.exclusionList
+                      ?.length || 0)}
+                  )
+                </Clickable>
+                <Clickable
+                  style={styles.exclusionText}
+                  onClick={() => clearSearch()}
+                >
+                  <ClrIcon
+                    shape='times'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                      color: colors.danger,
+                    }}
+                  />
+                  Cancel Edit
+                </Clickable>
+              </>
+            ) : (
+              <TooltipTrigger
+                side='top'
+                content={
+                  totalCount < pageSize || totalCount > 10000
+                    ? resultsTooltip
+                    : duplicateFilterTooltip
+                }
+                disabled={!disableSelectAll}
+              >
+                <Clickable
+                  style={withDisabledStyle(styles.selectAll, disableSelectAll)}
+                  onClick={() => handleSelectAllResults()}
+                  disabled={disableSelectAll}
+                >
+                  <ClrIcon
+                    shape='plus-circle'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                    }}
+                  />
+                  Select All Results
+                </Clickable>
+              </TooltipTrigger>
+            )}
           </div>
         )}
         {loading ? (
