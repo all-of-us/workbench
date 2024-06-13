@@ -602,27 +602,21 @@ describe('AdminUserProfile', () => {
           modules: [...statusesExceptThisOne, moduleStatus],
         },
       });
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
+      componentAlt();
+      await waitForNoSpinner();
 
-      const tableRows = wrapper
-        .find('[data-test-id="access-module-table"]')
-        .find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(orderedAccessModules.length);
+      const table = screen.getByTestId('access-module-table');
+      const rows = within(table).getAllByRole('row');
+      rows.shift(); // remove the header row
+      expect(rows).toHaveLength(orderedAccessModules.length);
 
       // the previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      const moduleRow = tableRows.at(orderedAccessModules.indexOf(moduleName));
+      const moduleRow = rows[orderedAccessModules.indexOf(moduleName)];
       // sanity check - this is actually the right row for this module
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
-
-      expect(
-        findNodesContainingText(moduleRow, expectedStatus).exists()
-      ).toBeTruthy();
+      expect(within(moduleRow).getByText(adminPageTitle)).toBeInTheDocument();
+      expect(within(moduleRow).getByText(expectedStatus)).toBeInTheDocument();
     }
   );
 
