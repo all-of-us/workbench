@@ -43,12 +43,13 @@ const getCTEnabled = (): HTMLInputElement =>
   screen.getByTestId('controlled-enabled-switch');
 
 const getRTAddress = () => screen.getByTestId('registered-email-address');
+const queryRTAddress = () => screen.getByTestId('registered-email-address');
 const getRTDomain = () => screen.getByTestId('registered-email-domain');
 const getCTAddress = () => screen.getByTestId('controlled-email-address');
 const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
 const findCTDomain = () => screen.getByTestId('controlled-email-domain');
 
-const getRTAddressInput = () =>
+const getRTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-address-input');
 const getRTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-domain-input');
@@ -177,50 +178,46 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(getCTDomainInput()).toHaveValue(testDomains);
   });
 
-  //   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
-  //     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-  //     await waitForNoSpinner();
-  //     expect(getCTDetails()).not.toBeInTheDocument();
-  //
-  //     // change Registered from DOMAIN to ADDRESS
-  //
-  //     expect(getRTDomain()).toBeInTheDocument();
-  //     expect(getRTAddress()).not.toBeInTheDocument();
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       findRTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //
-  //     expect(getRTAddress()).toBeInTheDocument();
-  //     expect(getRTDomain()).not.toBeInTheDocument();
-  //
-  //     // update RT addresses
-  //
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value:
-  //             'test1@domain.com,\n' + 'test2@domain.com,\n' + 'test3@domain.com',
-  //         },
-  //       });
-  //
-  //     expect(getCTEnabled().checked).toBeFalsy();
-  //     await user.click(getCTEnabled());
-  //     expect(getCTEnabled().checked).toBeTruthy();
-  //     expect(getCTDetails()).toBeInTheDocument();
-  //
-  //     // CT copies RT's requirements: address, ERA = true
-  //     // but the CT address list is empty
-  //
-  //     expect(getCTAddress()).toBeInTheDocument();
-  //     expect(findCTDomain()).not.toBeInTheDocument();
-  //
-  //     expect(getCTAddressInput())).toHaveValue('');
-  //   });
-  //
+  it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
+    const wrapper = component(VERILY_WITHOUT_CT.shortName);
+    await waitForNoSpinner();
+    expect(queryCTDetails()).not.toBeInTheDocument();
+
+    // change Registered from DOMAIN to ADDRESS
+
+    expect(getRTDomain()).toBeInTheDocument();
+    expect(queryRTAddress()).not.toBeInTheDocument();
+
+    await simulateComponentChange(
+      wrapper,
+      findRTDropdown(),
+      InstitutionMembershipRequirement.ADDRESSES
+    );
+
+    expect(getRTAddress()).toBeInTheDocument();
+    expect(getRTDomain()).not.toBeInTheDocument();
+
+    // update RT addresses
+    await changeInputValue(
+      getRTAddressInput(),
+      'test1@domain.com,\n' + 'test2@domain.com,\n' + 'test3@domain.com',
+      user
+    );
+
+    expect(getCTEnabled().checked).toBeFalsy();
+    await user.click(getCTEnabled());
+    expect(getCTEnabled().checked).toBeTruthy();
+    expect(getCTDetails()).toBeInTheDocument();
+
+    // CT copies RT's requirements: address, ERA = true
+    // but the CT address list is empty
+
+    expect(getCTAddress()).toBeInTheDocument();
+    expect(findCTDomain()).not.toBeInTheDocument();
+
+    expect(getCTAddressInput()).toHaveValue('');
+  });
+
   //   it('should update institution tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
