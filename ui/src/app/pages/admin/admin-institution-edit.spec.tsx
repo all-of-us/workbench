@@ -8,14 +8,18 @@ import {
   InstitutionMembershipRequirement,
 } from 'generated/fetch';
 
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  changeInputValue,
   simulateComponentChange,
   toggleCheckbox,
+  waitForNoSpinner,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
@@ -26,56 +30,66 @@ import {
 
 import { AdminInstitutionEdit } from './admin-institution-edit';
 
-const findRTDetails = (wrapper) =>
+const findRTDetails = () =>
   wrapper.find('[data-test-id="registered-card-details"]');
-const findRTDropdown = (wrapper) =>
+const findRTDropdown = () =>
   wrapper.find('[data-test-id="registered-agreement-dropdown"]').first();
 
-const findCTDetails = (wrapper) =>
+const findCTDetails = () =>
   wrapper.find('[data-test-id="controlled-card-details"]');
-const findCTDropdown = (wrapper) =>
+const findCTDropdown = () =>
   wrapper.find('[data-test-id="controlled-agreement-dropdown"]').first();
 
-const findCTEnabled = (wrapper) =>
+const findCTEnabled = () =>
   wrapper.find('input[data-test-id="controlled-enabled-switch"]').first();
 
-const findRTAddress = (wrapper) =>
+const findRTAddress = () =>
   wrapper.find('[data-test-id="registered-email-address"]');
-const findRTDomain = (wrapper) =>
+const findRTDomain = () =>
   wrapper.find('[data-test-id="registered-email-domain"]');
-const findCTAddress = (wrapper) =>
+const findCTAddress = () =>
   wrapper.find('[data-test-id="controlled-email-address"]');
-const findCTDomain = (wrapper) =>
+const findCTDomain = () =>
   wrapper.find('[data-test-id="controlled-email-domain"]');
 
-const findRTAddressInput = (wrapper) =>
+const findRTAddressInput = () =>
   wrapper.find('[data-test-id="registered-email-address-input"]');
-const findRTDomainInput = (wrapper) =>
+const findRTDomainInput = () =>
   wrapper.find('[data-test-id="registered-email-domain-input"]');
-const findCTAddressInput = (wrapper) =>
+const findCTAddressInput = () =>
   wrapper.find('[data-test-id="controlled-email-address-input"]');
-const findCTDomainInput = (wrapper) =>
+const findCTDomainInput = () =>
   wrapper.find('[data-test-id="controlled-email-domain-input"]');
 
-const textInputValue = (wrapper) => wrapper.first().prop('value');
+const textInputValue = () => wrapper.first().prop('value');
 
-const findSaveButton = (wrapper) =>
+const findSaveButton = () =>
   wrapper.find('[data-test-id="save-institution-button"]');
-const findSaveButtonDisabled = (wrapper) =>
-  findSaveButton(wrapper).first().props().disabled;
+const findSaveButtonDisabled = () => findSaveButton().first().props().disabled;
 
-const findRTAddressError = (wrapper) =>
-  findSaveButtonDisabled(wrapper).registeredTierEmailAddresses;
-const findRTDomainError = (wrapper) =>
-  findSaveButtonDisabled(wrapper).registeredTierEmailDomains;
-const findCTAddressError = (wrapper) =>
-  findSaveButtonDisabled(wrapper).controlledTierEmailAddresses;
-const findCTDomainError = (wrapper) =>
-  findSaveButtonDisabled(wrapper).controlledTierEmailDomains;
+const findRTAddressError = () =>
+  findSaveButtonDisabled().registeredTierEmailAddresses;
+const findRTDomainError = () =>
+  findSaveButtonDisabled().registeredTierEmailDomains;
+const findCTAddressError = () =>
+  findSaveButtonDisabled().controlledTierEmailAddresses;
+const findCTDomainError = () =>
+  findSaveButtonDisabled().controlledTierEmailDomains;
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
+  let user;
   const component = (institutionShortName = VERILY.shortName) => {
     return mount(
+      <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
+        <Route path='/admin/institution/edit/:institutionId'>
+          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
+        </Route>
+      </MemoryRouter>
+    );
+  };
+
+  const componentAlt = (institutionShortName = VERILY.shortName) => {
+    return render(
       <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
         <Route path='/admin/institution/edit/:institutionId'>
           <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
@@ -87,121 +101,116 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(InstitutionApi, new InstitutionApiStub());
+    user = userEvent.setup();
   });
 
   it('should render', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByText('Institution Name')).toBeInTheDocument();
   });
 
   it('should throw an error for existing Institution if the display name is more than 80 characters', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
     const testInput = fp.repeat(83, 'a');
-    const displayNameText = wrapper.find('[id="displayName"]').first();
-    displayNameText.simulate('change', { target: { value: testInput } });
-    displayNameText.simulate('blur');
+    const displayNameText: HTMLInputElement = screen.getByRole('textbox', {
+      name: /institution name/i,
+    });
+    await changeInputValue(displayNameText, testInput, user);
     expect(
-      wrapper.find('[data-test-id="displayNameError"]').first().prop('children')
-    ).toContain('Display name must be 80 characters or less');
+      screen.getByText('Display name must be 80 characters or less')
+    ).toBeInTheDocument();
   });
 
   it('should always show RT card details', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findRTDetails(wrapper).exists()).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findRTDetails().exists()).toBeTruthy();
   });
 
   it('should show CT card details when institution has controlled tier access enabled', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeTruthy();
   });
 
   it('should hide CT card details when institution has controlled tier access disabled', async () => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeFalsy();
   });
 
   it('should hide/show CT card details when controlled tier disabled/enabled', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
-    expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-    await toggleCheckbox(findCTEnabled(wrapper));
+    expect(findCTDetails().exists()).toBeTruthy();
+    expect(textInputValue(findCTAddressInput())).toBe('foo@verily.com');
+    expect(findCTEnabled().props().checked).toBeTruthy();
+    await toggleCheckbox(findCTEnabled());
 
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
-    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    expect(findCTDetails().exists()).toBeFalsy();
+    expect(findCTAddressInput().exists()).toBeFalsy();
 
-    await toggleCheckbox(findCTEnabled(wrapper));
+    await toggleCheckbox(findCTEnabled());
 
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
-    expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
+    expect(findCTEnabled().props().checked).toBeTruthy();
+    expect(findCTDetails().exists()).toBeTruthy();
+    expect(textInputValue(findCTAddressInput())).toBe('foo@verily.com');
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeFalsy();
 
     // update RT domains
 
     const testDomains = 'domain1.com,\n' + 'domain2.com,\n' + 'domain3.com';
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', {
         target: {
           value: testDomains,
         },
       });
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    await toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled());
+    expect(findCTEnabled().props().checked).toBeTruthy();
+    expect(findCTDetails().exists()).toBeTruthy();
 
     // CT copies RT's requirements: domain, ERA = true, domain list is equal
 
-    expect(findCTDomain(wrapper).exists()).toBeTruthy();
-    expect(findCTAddress(wrapper).exists()).toBeFalsy();
+    expect(findCTDomain().exists()).toBeTruthy();
+    expect(findCTAddress().exists()).toBeFalsy();
 
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe(testDomains);
+    expect(textInputValue(findCTDomainInput())).toBe(testDomains);
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeFalsy();
 
     // change Registered from DOMAIN to ADDRESS
 
-    expect(findRTDomain(wrapper).exists()).toBeTruthy();
-    expect(findRTAddress(wrapper).exists()).toBeFalsy();
+    expect(findRTDomain().exists()).toBeTruthy();
+    expect(findRTAddress().exists()).toBeFalsy();
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findRTAddress(wrapper).exists()).toBeTruthy();
-    expect(findRTDomain(wrapper).exists()).toBeFalsy();
+    expect(findRTAddress().exists()).toBeTruthy();
+    expect(findRTDomain().exists()).toBeFalsy();
 
     // update RT addresses
 
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', {
         target: {
@@ -210,38 +219,35 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    await toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled());
+    expect(findCTEnabled().props().checked).toBeTruthy();
+    expect(findCTDetails().exists()).toBeTruthy();
 
     // CT copies RT's requirements: address, ERA = true
     // but the CT address list is empty
 
-    expect(findCTAddress(wrapper).exists()).toBeTruthy();
-    expect(findCTDomain(wrapper).exists()).toBeFalsy();
+    expect(findCTAddress().exists()).toBeTruthy();
+    expect(findCTDomain().exists()).toBeFalsy();
 
-    expect(textInputValue(findCTAddressInput(wrapper))).toBe('');
+    expect(textInputValue(findCTAddressInput())).toBe('');
   });
 
   it('should update institution tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // Value before test.
-    expect(textInputValue(findRTDomainInput(wrapper))).toBe(
-      'verily.com,\ngoogle.com'
-    );
-    expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
+    expect(textInputValue(findRTDomainInput())).toBe('verily.com,\ngoogle.com');
+    expect(textInputValue(findCTAddressInput())).toBe('foo@verily.com');
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', { target: { value: 'domain.com' } });
 
@@ -250,146 +256,138 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       .first()
       .simulate('click');
     // RT no change
-    expect(textInputValue(findRTDomainInput(wrapper))).toBe(
+    expect(textInputValue(findRTDomainInput())).toBe(
       'verily.com,\n' + 'google.com'
     );
     // CT changed to email domains
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe('domain.com');
+    expect(textInputValue(findCTDomainInput())).toBe('domain.com');
     // CT email addresses become empty
-    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
+    expect(findCTAddressInput().exists()).toBeFalsy();
   });
 
   it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT = DOMAINS
 
-    expect(findRTAddress(wrapper).exists()).toBeFalsy();
-    expect(findRTDomain(wrapper).exists()).toBeTruthy();
+    expect(findRTAddress().exists()).toBeFalsy();
+    expect(findRTDomain().exists()).toBeTruthy();
 
-    const rtEmailDomainLabel = findRTDomain(wrapper).first().props()
-      .children[0];
+    const rtEmailDomainLabel = findRTDomain().first().props().children[0];
     expect(rtEmailDomainLabel.props.children).toBe('Accepted Email Domains');
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findRTAddress(wrapper).exists()).toBeTruthy();
-    expect(findRTDomain(wrapper).exists()).toBeFalsy();
+    expect(findRTAddress().exists()).toBeTruthy();
+    expect(findRTDomain().exists()).toBeFalsy();
 
-    const rtEmailAddressLabel = findRTAddress(wrapper).first().props()
-      .children[0];
+    const rtEmailAddressLabel = findRTAddress().first().props().children[0];
     expect(rtEmailAddressLabel.props.children).toBe('Accepted Email Addresses');
   });
 
   it('should update RT and CT requirements simultaneously when both changed', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS and CT ADDRS
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findRTAddressInput(wrapper))).toBe(
+    findRTAddressInput().first().simulate('blur');
+    expect(textInputValue(findRTAddressInput())).toBe(
       'correctEmail@domain.com'
     );
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', {
         target: { value: 'someDomain.com,\njustSomeRandom.domain,\n,' },
       });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(textInputValue(findCTDomainInput())).toBe(
       'someDomain.com,\njustSomeRandom.domain'
     );
   });
 
   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
-    expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findCTDomain(wrapper).exists()).toBeTruthy();
+    expect(findCTAddress().exists()).toBeFalsy();
+    expect(findCTDomain().exists()).toBeTruthy();
 
-    const ctEmailDomainLabel = findCTDomain(wrapper).first().props()
-      .children[0];
+    const ctEmailDomainLabel = findCTDomain().first().props().children[0];
     expect(ctEmailDomainLabel.props.children).toBe('Accepted Email Domains');
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findCTAddress(wrapper).exists()).toBeTruthy();
-    expect(findCTDomain(wrapper).exists()).toBeFalsy();
+    expect(findCTAddress().exists()).toBeTruthy();
+    expect(findCTDomain().exists()).toBeFalsy();
 
-    const ctEmailAddressLabel = findCTAddress(wrapper).first().props()
-      .children[0];
+    const ctEmailAddressLabel = findCTAddress().first().props().children[0];
     expect(ctEmailAddressLabel.props.children).toBe('Accepted Email Addresses');
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findRTAddressError(wrapper)).toBeTruthy();
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    expect(findRTAddressError()).toBeTruthy();
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses should not be empty'
     );
 
     // In case of a single entry which is not in the correct format
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'rtInvalidEmail@domain' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
+    findRTAddressInput().first().simulate('blur');
 
-    expect(findRTAddressError(wrapper)).toBeTruthy();
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    expect(findRTAddressError()).toBeTruthy();
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses are not valid: rtInvalidEmail@domain'
     );
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', {
         target: {
@@ -403,40 +401,39 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'nope@just#plain#wrong',
         },
       });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    findRTAddressInput().first().simulate('blur');
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
         'justDomain.org, nope@just#plain#wrong'
     );
 
     // Single correct format Email Address entries
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper)).toBeFalsy();
+    findRTAddressInput().first().simulate('blur');
+    expect(findRTAddressError()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
 
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    expect(findCTDetails().exists()).toBeTruthy();
 
     // In case of a single entry which is not in the correct format
-    findCTAddressInput(wrapper)
+    findCTAddressInput()
       .first()
       .simulate('change', { target: { value: 'ctInvalidEmail@domain' } });
-    findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper)[0]).toBe(
+    findCTAddressInput().first().simulate('blur');
+    expect(findCTAddressError()[0]).toBe(
       'Controlled tier email addresses are not valid: ctInvalidEmail@domain'
     );
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-    findCTAddressInput(wrapper)
+    findCTAddressInput()
       .first()
       .simulate('change', {
         target: {
@@ -450,40 +447,39 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'nope@just#plain#wrong',
         },
       });
-    findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper)[0]).toBe(
+    findCTAddressInput().first().simulate('blur');
+    expect(findCTAddressError()[0]).toBe(
       'Controlled tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
         'justDomain.org, nope@just#plain#wrong'
     );
 
     // Single correct format Email Address entries
-    findCTAddressInput(wrapper)
+    findCTAddressInput()
       .first()
       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-    findCTAddressInput(wrapper).first().simulate('blur');
-    expect(findCTAddressError(wrapper)).toBeFalsy();
+    findCTAddressInput().first().simulate('blur');
+    expect(findCTAddressError()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
 
-    expect(findRTDomainError(wrapper)).toBeFalsy();
+    expect(findRTDomainError()).toBeFalsy();
 
     // Single Entry with incorrect Email Domain format
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', { target: { value: 'invalidEmail@domain' } });
-    findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper)[0]).toBe(
+    findRTDomainInput().first().simulate('blur');
+    expect(findRTDomainError()[0]).toBe(
       'Registered tier email domains are not valid: invalidEmail@domain'
     );
 
     // Multiple Entries with correct and incorrect Email Domain format
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', {
         target: {
@@ -495,48 +491,47 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'broadinstitute.org#wrongTest',
         },
       });
-    findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper)[0]).toBe(
+    findRTDomainInput().first().simulate('blur');
+    expect(findRTDomainError()[0]).toBe(
       'Registered tier email domains are not valid: someEmailAddress@domain@org, ' +
         'justSomeText, broadinstitute.org#wrongTest'
     );
 
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', { target: { value: 'domain.com' } });
-    findRTDomainInput(wrapper).first().simulate('blur');
-    expect(findRTDomainError(wrapper)).toBeFalsy();
+    findRTDomainInput().first().simulate('blur');
+    expect(findRTDomainError()).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
-    expect(findCTDomainError(wrapper)).toBeTruthy();
-    expect(findCTDomainError(wrapper)[0]).toBe(
+    expect(findCTDomainError()).toBeTruthy();
+    expect(findCTDomainError()[0]).toBe(
       'Controlled tier email domains should not be empty'
     );
 
     // Single Entry with incorrect Email Domain format
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', { target: { value: 'invalidEmail@domain' } });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper)[0]).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(findCTDomainError()[0]).toBe(
       'Controlled tier email domains are not valid: invalidEmail@domain'
     );
 
     // Multiple Entries with correct and incorrect Email Domain format
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', {
         target: {
@@ -548,113 +543,109 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
             'broadinstitute.org#wrongTest',
         },
       });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper)[0]).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(findCTDomainError()[0]).toBe(
       'Controlled tier email domains are not valid: someEmailAddress@domain@org, ' +
         'justSomeText, broadinstitute.org#wrongTest'
     );
 
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', { target: { value: 'domain.com' } });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(findCTDomainError(wrapper)).toBeFalsy();
+    findCTDomainInput().first().simulate('blur');
+    expect(findCTDomainError()).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', {
         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
       });
-    findRTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findRTDomainInput(wrapper))).toBe(
+    findRTDomainInput().first().simulate('blur');
+    expect(textInputValue(findRTDomainInput())).toBe(
       'validEmail.com,\njustSomeRandom.domain'
     );
 
-    expect(findRTDomainError(wrapper)).toBeFalsy();
+    expect(findRTDomainError()).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', {
         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
       });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(textInputValue(findCTDomainInput())).toBe(
       'validEmail.com,\njustSomeRandom.domain'
     );
 
-    expect(findCTDomainError(wrapper)).toBeFalsy();
+    expect(findCTDomainError()).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findRTDomainInput(wrapper)
+    findRTDomainInput()
       .first()
       .simulate('change', {
         target: { value: '  someDomain.com,\njustSomeRandom.domain   ,\n,' },
       });
-    findRTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findRTDomainInput(wrapper))).toBe(
+    findRTDomainInput().first().simulate('blur');
+    expect(textInputValue(findRTDomainInput())).toBe(
       'someDomain.com,\njustSomeRandom.domain'
     );
 
-    expect(findRTDomainError(wrapper)).toBeFalsy();
+    expect(findRTDomainError()).toBeFalsy();
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', {
         target: { value: '  someDomain.com,\njustSomeRandom.domain   ,\n,' },
       });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(textInputValue(findCTDomainInput())).toBe(
       'someDomain.com,\njustSomeRandom.domain'
     );
 
-    expect(findCTDomainError(wrapper)).toBeFalsy();
+    expect(findCTDomainError()).toBeFalsy();
   });
 });
 
@@ -675,15 +666,13 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('should render', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
   });
 
   it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     const testInput = fp.repeat(83, 'a');
     const displayNameText = wrapper.find('[id="displayName"]').first();
@@ -695,100 +684,95 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('should always show RT card details', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findRTDetails(wrapper).exists()).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findRTDetails().exists()).toBeTruthy();
   });
 
   it('should not initially show CT card details', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeFalsy();
   });
 
   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
-    expect(findCTDetails(wrapper).exists()).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findCTDetails().exists()).toBeFalsy();
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    toggleCheckbox(findCTEnabled());
+    expect(findCTEnabled().props().checked).toBeTruthy();
+    expect(findCTDetails().exists()).toBeTruthy();
 
-    toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    expect(findCTDetails(wrapper).exists()).toBeFalsy();
+    toggleCheckbox(findCTEnabled());
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    expect(findCTDetails().exists()).toBeFalsy();
 
     // both RT and CT are uninitialized
-    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
-    expect(findRTAddressInput(wrapper).exists()).toBeFalsy();
-    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
-    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainInput().exists()).toBeFalsy();
+    expect(findRTAddressInput().exists()).toBeFalsy();
+    expect(findCTAddressInput().exists()).toBeFalsy();
+    expect(findCTDomainInput().exists()).toBeFalsy();
   });
 
   it('should update institution tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     // uninitialized
-    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
-    expect(findRTAddressInput(wrapper).exists()).toBeFalsy();
-    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
-    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainInput().exists()).toBeFalsy();
+    expect(findRTAddressInput().exists()).toBeFalsy();
+    expect(findCTAddressInput().exists()).toBeFalsy();
+    expect(findCTDomainInput().exists()).toBeFalsy();
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findRTAddressInput(wrapper).exists()).toBeTruthy();
-    expect(textInputValue(findRTAddressInput(wrapper))).toBe('');
+    expect(findRTAddressInput().exists()).toBeTruthy();
+    expect(textInputValue(findRTAddressInput())).toBe('');
 
-    expect(findRTDomainInput(wrapper).exists()).toBeFalsy();
-    expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
-    expect(findCTDomainInput(wrapper).exists()).toBeFalsy();
+    expect(findRTDomainInput().exists()).toBeFalsy();
+    expect(findCTAddressInput().exists()).toBeFalsy();
+    expect(findCTDomainInput().exists()).toBeFalsy();
 
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'user@domain.com' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
+    findRTAddressInput().first().simulate('blur');
 
     // RT no change
-    expect(textInputValue(findRTAddressInput(wrapper))).toBe('user@domain.com');
+    expect(textInputValue(findRTAddressInput())).toBe('user@domain.com');
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
     await simulateComponentChange(
       wrapper,
-      findRTDropdown(wrapper),
+      findRTDropdown(),
       InstitutionMembershipRequirement.ADDRESSES
     );
 
-    expect(findRTAddressError(wrapper)).toBeTruthy();
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    expect(findRTAddressError()).toBeTruthy();
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses should not be empty'
     );
 
     // In case of a single entry which is not in the correct format
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'rtInvalidEmail@domain' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    findRTAddressInput().first().simulate('blur');
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses are not valid: rtInvalidEmail@domain'
     );
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', {
         target: {
@@ -802,48 +786,47 @@ describe('AdminInstitutionEditSpec - add mode', () => {
             'nope@just#plain#wrong',
         },
       });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper)[0]).toBe(
+    findRTAddressInput().first().simulate('blur');
+    expect(findRTAddressError()[0]).toBe(
       'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
         'justDomain.org, nope@just#plain#wrong'
     );
 
     // Single correct format Email Address entries
-    findRTAddressInput(wrapper)
+    findRTAddressInput()
       .first()
       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-    findRTAddressInput(wrapper).first().simulate('blur');
-    expect(findRTAddressError(wrapper)).toBeFalsy();
+    findRTAddressInput().first().simulate('blur');
+    expect(findRTAddressError()).toBeFalsy();
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
-    await toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
+    expect(findCTEnabled().props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled());
+    expect(findCTEnabled().props().checked).toBeTruthy();
 
-    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate();
 
     await simulateComponentChange(
       wrapper,
-      findCTDropdown(wrapper),
+      findCTDropdown(),
       InstitutionMembershipRequirement.DOMAINS
     );
 
     // one entry has an incorrect Email Domain format (whitespace)
-    findCTDomainInput(wrapper)
+    findCTDomainInput()
       .first()
       .simulate('change', {
         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
       });
-    findCTDomainInput(wrapper).first().simulate('blur');
-    expect(textInputValue(findCTDomainInput(wrapper))).toBe(
+    findCTDomainInput().first().simulate('blur');
+    expect(textInputValue(findCTDomainInput())).toBe(
       'validEmail.com,\njustSomeRandom.domain'
     );
 
-    expect(findCTDomainError(wrapper)).toBeFalsy();
+    expect(findCTDomainError()).toBeFalsy();
   });
 });
