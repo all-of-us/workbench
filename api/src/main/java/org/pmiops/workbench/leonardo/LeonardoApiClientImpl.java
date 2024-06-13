@@ -206,14 +206,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private LeonardoUpdateGceConfig buildUpdateGCEConfig(Runtime runtime) {
-    return runtime.getGceConfig() != null ?
-      leonardoMapper.toUpdateGceConfig(runtime.getGceConfig()):
-      leonardoMapper.toUpdateGceConfig(runtime.getGceWithPdConfig());
+    return runtime.getGceConfig() != null
+        ? leonardoMapper.toUpdateGceConfig(runtime.getGceConfig())
+        : leonardoMapper.toUpdateGceConfig(runtime.getGceWithPdConfig());
   }
 
   private LeonardoUpdateDataprocConfig buildUpdateDataProcConfig(Runtime runtime) {
-    return leonardoMapper
-        .toUpdateDataprocConfig(runtime.getDataprocConfig());
+    return leonardoMapper.toUpdateDataprocConfig(runtime.getDataprocConfig());
   }
 
   private Object buildRuntimeConfig(Runtime runtime) {
