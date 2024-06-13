@@ -1,6 +1,7 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mount } from 'enzyme';
 import { mockNavigateByUrl } from 'setupTests';
 
 import {
@@ -15,13 +16,12 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { Button, Clickable } from 'app/components/buttons';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   COMPARE_DOMAINS_FOR_DISPLAY,
   DatasetPage,
 } from 'app/pages/data/data-set/dataset-page';
-import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
-import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
 import { dataTabPath } from 'app/routing/utils';
 import {
   dataSetApi,
@@ -30,7 +30,11 @@ import {
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  waitForNoSpinner,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
@@ -47,19 +51,21 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSetPage', () => {
   let datasetApiStub;
+  let user;
 
-  const previewLinkWrapper = (wrapper) =>
-    wrapper.find(Clickable).find(`[data-test-id="preview-button"]`).first();
+  const getAnalyzeButton = () => {
+    return screen.getByRole('button', { name: /analyze/i });
+  };
+  const getSaveButton = () => {
+    return screen.getByRole('button', { name: /save dataset/i });
+  };
+  const getPreviewButton = () => {
+    return screen.getByRole('button', { name: /view preview table/i });
+  };
 
-  const btnWrapper = (wrapper, btnId) =>
-    wrapper.find(Button).find(`[data-test-id="${btnId}"]`).first();
-
-  const analyzeBtnWrapper = (wrapper) => btnWrapper(wrapper, 'analyze-button');
-  const saveBtnWrapper = (wrapper) => btnWrapper(wrapper, 'save-button');
-
-  const selectAllValue = (wrapper) =>
-    wrapper.find('[data-test-id="select-all"]').find('input').first();
-
+  const getSelectAllCheckbox = (): HTMLInputElement => {
+    return screen.getByTestId('select-all');
+  };
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
@@ -73,10 +79,11 @@ describe('DataSetPage', () => {
     });
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
+    user = userEvent.setup();
   });
 
-  const component = () => {
-    return mount(
+  const componentAlt = () => {
+    return render(
       <MemoryRouter
         initialEntries={[
           `${dataTabPath(
@@ -102,311 +109,230 @@ describe('DataSetPage', () => {
     );
   };
 
+  const getConceptSets = async () => {
+    return await screen.findAllByTestId('concept-set-list-item');
+  };
+
+  const getConceptSetCheckbox = async (index: number) => {
+    const conceptSets = await getConceptSets();
+    return within(conceptSets[index]).getByRole('checkbox');
+  };
+
+  const getConditionConceptSetCheckbox = async () => {
+    // First Concept set in concept set list has domain "Condition"
+    return await getConceptSetCheckbox(0);
+  };
+
+  const getMeasurementConceptSetCheckbox = async () => {
+    // Second Concept set in concept set list has domain "Measurement"
+    return await getConceptSetCheckbox(1);
+  };
+
+  const clickConceptSetCheckboxAtIndex = async (index: number) => {
+    await user.click(await getConceptSetCheckbox(index));
+  };
+
+  const clickConditionConceptSetCheckbox = async () => {
+    await user.click(await getConditionConceptSetCheckbox());
+  };
+
+  const clickMeasurementConceptSetCheckbox = async () => {
+    await user.click(await getMeasurementConceptSetCheckbox());
+  };
+
+  const getCohortCheckboxAtIndex = (index: number): HTMLInputElement => {
+    return within(screen.getAllByTestId('cohort-list-item')[index]).getByRole(
+      'checkbox'
+    );
+  };
+
+  const clickCohortCheckboxAtIndex = async (index: number) => {
+    await user.click(getCohortCheckboxAtIndex(index));
+  };
+
+  const getAllParticipantCheckbox = (): HTMLInputElement => {
+    return within(screen.getByTestId('all-participant')).getByRole('checkbox');
+  };
+
+  const getAllValueOptions = () => screen.getAllByTestId('value-list-items');
+  const getCheckedValueOptions = () => {
+    return getAllValueOptions().filter(
+      (value) =>
+        (within(value).getByRole('checkbox') as HTMLInputElement).checked
+    );
+  };
+  const clickValueCheckboxAtIndex = async (index: number) => {
+    await user.click(within(getAllValueOptions()[index]).getByRole('checkbox'));
+  };
+
+  const getAllPrePackagedConceptSets = () =>
+    screen.getAllByTestId('prePackage-concept-set-item');
+
   it('should render', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists()).toBeTruthy();
+    componentAlt();
+    await screen.findByRole('heading', { name: /datasets/i });
   });
 
   it('should display all concepts sets in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-list-item"]').length).toBe(
+    componentAlt();
+    expect((await screen.findAllByTestId('concept-set-list-item')).length).toBe(
       ConceptSetsApiStub.stubConceptSets().length
     );
   });
 
   it('should display all cohorts in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="cohort-list-item"]').length).toBe(
+    componentAlt();
+    expect((await screen.findAllByTestId('cohort-list-item')).length).toBe(
       exampleCohortStubs.length
     );
   });
 
   it('should display values based on Domain of Concept selected in workspace', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
-    // First Concept set in concept set list has domain "Condition"
-    const conditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first();
-    conditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    expect(valueListItems.length).toBe(2);
-    let checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-
+    await clickConditionConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(2);
     // All values should be selected by default
-    expect(checkedValuesList.length).toBe(2);
+    expect(getCheckedValueOptions().length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
-    const measurementConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(1)
-      .find('input')
-      .first();
-    measurementConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    await clickMeasurementConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should select all values by default on selection on concept set only if the new domain is unique', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // Select Condition Concept set
-    const conditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first();
-    conditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    expect(valueListItems.length).toBe(2);
-    let checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
+    await clickConditionConceptSetCheckbox();
 
+    expect(getAllValueOptions().length).toBe(2);
     // All values should be selected by default
-    expect(checkedValuesList.length).toBe(2);
+    expect(getCheckedValueOptions().length).toBe(2);
 
     // Select second concept set which is Measurement domain
-    const measurementConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(1)
-      .find('input')
-      .first();
-    measurementConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    // All values condition + measurement will be selected
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    await clickMeasurementConceptSetCheckbox();
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
 
     // Unselect first Condition value
-    valueListItems.first().find('input').first().simulate('change');
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    expect(checkedValuesList.length).toBe(4);
+    await clickValueCheckboxAtIndex(0);
+    expect(getCheckedValueOptions().length).toBe(4);
 
     // Select another condition concept set
-    const secondConditionConceptSet = wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .at(2)
-      .find('input')
-      .first();
-    secondConditionConceptSet.simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-
+    await clickConceptSetCheckboxAtIndex(2);
     // No change in value list since we already had selected condition concept set
-    expect(valueListItems.length).toBe(5);
+    expect(getAllValueOptions().length).toBe(5);
 
     // Should be no change in selected values
-    expect(checkedValuesList.length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should display correct values on rapid selection of multiple domains', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
 
     // Select "Condition" and "Measurement" concept sets.
-    const conceptSetEls = wrapper.find(
-      '[data-test-id="concept-set-list-item"]'
-    );
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
+    await clickMeasurementConceptSetCheckbox();
 
-    conceptSetEls.at(1).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-
-    const valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    const checkedValuesList = valueListItems.filterWhere(
-      (value) => value.props().checked
-    );
-    expect(valueListItems.length).toBe(5);
-    expect(checkedValuesList.length).toBe(5);
+    expect(getAllValueOptions().length).toBe(5);
+    expect(getCheckedValueOptions().length).toBe(5);
   });
 
   it('should enable buttons and links once cohorts, concepts and values are selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
+    // Wait until
+    await screen.findByText('Workspace Cohorts');
     // By default all buttons and select Value checkbox should be disabled
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a cohort
-
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
 
     // All buttons and links should still be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeTruthy();
 
     // Select a concept set
-    wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-
-    await waitOneTickAndUpdate(wrapper);
+    await clickConceptSetCheckboxAtIndex(0);
 
     // All Buttons except analyze button should be enabled as selecting concept set selects all values
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeFalsy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeFalsy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeFalsy();
+    expectButtonElementEnabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementEnabled(getPreviewButton());
+    expect(getSelectAllCheckbox().disabled).toBeFalsy();
 
     // Unselect 'Select All' checkbox so that no values are selected for DataSet
-    selectAllValue(wrapper).simulate('change');
+    await user.click(getSelectAllCheckbox());
 
     // All buttons and links should now be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
+    expectButtonElementDisabled(getSaveButton());
+    expectButtonElementDisabled(getAnalyzeButton());
+    expectButtonElementDisabled(getPreviewButton());
   });
 
-  it('should display preview data table once preview button is clicked', async () => {
+  it('should disable display preview data table when no values are selected', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    // Select one cohort , concept and value
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
+    await clickConceptSetCheckboxAtIndex(0);
 
-    wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    // Unselect both values
+    await clickValueCheckboxAtIndex(0);
+    await clickValueCheckboxAtIndex(1);
 
-    await waitOneTickAndUpdate(wrapper);
+    const previewButton = getPreviewButton();
+    expectButtonElementDisabled(previewButton);
 
-    wrapper
-      .find('[data-test-id="value-list-items"]')
-      .find('input')
-      .first()
-      .simulate('change');
+    await user.click(previewButton);
 
-    await waitOneTickAndUpdate(wrapper);
-
-    // Select another value preview data api should not be called now
-    wrapper
-      .find('[data-test-id="value-list-items"]')
-      .at(1)
-      .find('input')
-      .first()
-      .simulate('click');
-
-    // Click preview button to load preview
-    wrapper
-      .find({ 'data-test-id': 'preview-button' })
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(spy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(0);
+    });
   });
 
   it('should display preview data for current domains only', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     // Select a cohort.
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
 
     // Select "Condition" and "Measurement" concept sets.
-    let conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
-    conceptSetEls.at(1).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
+    await clickMeasurementConceptSetCheckbox();
 
     // Deselect "Condition".
-    conceptSetEls = wrapper.find('[data-test-id="concept-set-list-item"]');
-    conceptSetEls.at(0).find('input').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
+    await clickConditionConceptSetCheckbox();
 
     // Click preview button to load preview
-    wrapper
-      .find({ 'data-test-id': 'preview-button' })
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(getPreviewButton());
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async () => {
-    const wrapper = component();
+    componentAlt();
     const pathPrefix = dataTabPath(
       workspaceDataStub.namespace,
       workspaceDataStub.id
     );
 
     // Check Cohorts "+" link
-    wrapper.find({ 'data-test-id': 'cohorts-link' }).first().simulate('click');
+    await user.click(await screen.findByTestId('cohorts-link'));
 
     expect(mockNavigateByUrl).toHaveBeenCalledWith(
       pathPrefix + '/cohorts/build',
@@ -417,10 +343,7 @@ describe('DataSetPage', () => {
     );
 
     // Check Concept Sets "+" link
-    wrapper
-      .find({ 'data-test-id': 'concept-sets-link' })
-      .first()
-      .simulate('click');
+    await user.click(await screen.findByTestId('concept-sets-link'));
     expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/concepts', {
       preventDefaultIfNoKeysPressed: true,
       event: expect.anything(),
@@ -433,17 +356,16 @@ describe('DataSetPage', () => {
       accessLevel: WorkspaceAccessLevel.READER,
     };
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = component();
-    const isTooltipDisable = wrapper
-      .find({ 'data-test-id': 'save-tooltip' })
-      .first()
-      .props().disabled;
-    const isSaveButtonDisable = wrapper
-      .find({ 'data-test-id': 'save-button' })
-      .first()
-      .props().disabled;
-    expect(isTooltipDisable).toBeFalsy();
-    expect(isSaveButtonDisable).toBeTruthy();
+    componentAlt();
+
+    await waitForNoSpinner();
+
+    await user.hover(getSaveButton());
+    expect(
+      screen.getByText('Requires Owner or Writer permission')
+    ).toBeInTheDocument();
+
+    expectButtonElementDisabled(getSaveButton());
   });
 
   it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async () => {
@@ -452,48 +374,32 @@ describe('DataSetPage', () => {
       accessLevel: WorkspaceAccessLevel.READER,
     };
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = component();
-    const plusIconTooltip = wrapper.find({
-      'data-test-id': 'plus-icon-tooltip',
-    });
-    const cohortplusIcon = wrapper.find({ 'data-test-id': 'cohorts-link' });
-    const conceptSetplusIcon = wrapper.find({
-      'data-test-id': 'concept-sets-link',
-    });
-    expect(plusIconTooltip.first().props().disabled).toBeFalsy();
-    expect(cohortplusIcon.first().props().disabled).toBeTruthy();
-    expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
+    componentAlt();
+    await waitForNoSpinner();
+
+    const cohortplusIcon = screen.getByTestId('cohorts-link');
+    const conceptSetplusIcon = screen.getByTestId('concept-sets-link');
+
+    await user.hover(cohortplusIcon);
+
+    screen.getByText('Requires Owner or Writer permission');
+    expectButtonElementDisabled(cohortplusIcon);
+    expectButtonElementDisabled(conceptSetplusIcon);
   });
 
   it('should call load data dictionary when caret is expanded', async () => {
     const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    // Select one cohort , concept and value
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
-    wrapper.update();
+    await clickCohortCheckboxAtIndex(0);
+    await clickConceptSetCheckboxAtIndex(0);
 
-    wrapper
-      .find('[data-test-id="concept-set-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    await user.click(screen.getAllByTestId('value-list-expander')[0]);
 
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="value-list-expander"]')
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(spy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should sort domains for display only', () => {
@@ -513,70 +419,39 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect any workspace Cohort if PrePackaged is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
+
     // Select one cohort
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    await clickCohortCheckboxAtIndex(0);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeFalsy();
+    expect(getCohortCheckboxAtIndex(0).checked).toBeTruthy();
 
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    const allParticipantCheckbox = getAllParticipantCheckbox();
+    expect(allParticipantCheckbox.checked).toBeFalsy();
+    await user.click(allParticipantCheckbox);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeTruthy();
+    expect(getCohortCheckboxAtIndex(0).checked).toBeFalsy();
+    expect(allParticipantCheckbox.checked).toBeTruthy();
   });
 
   it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    const allParticipantCheckbox = getAllParticipantCheckbox();
+    const firstCohortCheckbox = getCohortCheckboxAtIndex(0);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeTruthy();
+    await user.click(allParticipantCheckbox);
+
+    expect(firstCohortCheckbox.checked).toBeFalsy();
+    expect(allParticipantCheckbox.checked).toBeTruthy();
 
     // Select one cohort
-    wrapper
-      .find('[data-test-id="cohort-list-item"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    await user.click(firstCohortCheckbox);
 
-    expect(
-      wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-id="all-participant"]').props().checked
-    ).toBeFalsy();
+    expect(firstCohortCheckbox.checked).toBeTruthy();
+    expect(allParticipantCheckbox.checked).toBeFalsy();
   });
 
   // TODO: rewrite this so it's not dependent on modifying global test state!
@@ -586,44 +461,42 @@ describe('DataSetPage', () => {
     // Let's save the original so we can restore it later.
     const originalCdrVersion = cdrVersionTiersResponse.tiers[0].versions[0];
 
-    let wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    let { unmount } = componentAlt();
+    await waitForNoSpinner();
+    expect(getAllPrePackagedConceptSets().length).toBe(15);
 
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasWgsData: false,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
 
+    unmount();
+    ({ unmount } = componentAlt());
+
+    await waitForNoSpinner();
+    await waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(14);
+    });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasFitbitData: false,
       hasWgsData: true,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(11);
-
+    unmount();
+    ({ unmount } = componentAlt());
+    await waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(11);
+    });
     cdrVersionTiersResponse.tiers[0].versions[0] = {
       ...originalCdrVersion,
       hasFitbitData: false,
       hasWgsData: false,
     };
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(10);
-
+    unmount();
+    ({ unmount } = componentAlt());
+    await waitFor(() => {
+      expect(getAllPrePackagedConceptSets().length).toBe(10);
+    });
     // restore original CDR Version for other tests
     cdrVersionTiersResponse.tiers[0].versions[0] = originalCdrVersion;
   });
@@ -636,15 +509,12 @@ describe('DataSetPage', () => {
       domainValuePairs: [{ domain: Domain.PERSON, value: 'person' }],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
-    expect(wrapper.find(ExportDatasetModal).exists()).toBeTruthy();
-    wrapper
-      .find(ExportDatasetModal)
-      .find('[data-test-id="export-dataset-modal-cancel-button"]')
-      .simulate('click');
+    await user.click(getAnalyzeButton());
+    screen.getByText('Export Dataset');
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
   });
 
   it('should open Extract modal if Analyze is clicked and WGS concept is selected', async () => {
@@ -662,11 +532,13 @@ describe('DataSetPage', () => {
       domainValuePairs: [{ domain: Domain.WHOLE_GENOME_VARIANT, value: 'wgs' }],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLE_GENOME],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
-    expect(wrapper.find(GenomicExtractionModal).exists()).toBeTruthy();
+    await user.click(getAnalyzeButton());
+    screen.getByText(
+      'Would you like to extract genomic variant data as VCF files?'
+    );
   });
 
   it('should enable Save Dataset button when selecting All Participants prepackaged cohort', async () => {
@@ -676,31 +548,13 @@ describe('DataSetPage', () => {
       cohorts: [{ id: 1 }],
       domainValuePairs: [{ domain: Domain.PERSON, value: 'person' }],
     };
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
     // Save button is disabled since no changes have been made
-    expect(
-      wrapper
-        .find(Button)
-        .find('[data-test-id="save-button"]')
-        .first()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    wrapper
-      .find('[data-test-id="all-participant"]')
-      .first()
-      .find('input')
-      .first()
-      .simulate('change');
+    expectButtonElementDisabled(getSaveButton());
+    await user.click(getAllParticipantCheckbox());
     // Save button should enable after selection
-    expect(
-      wrapper
-        .find(Button)
-        .find('[data-test-id="save-button"]')
-        .first()
-        .prop('disabled')
-    ).toBeFalsy();
+    expectButtonElementEnabled(getSaveButton());
   });
 });

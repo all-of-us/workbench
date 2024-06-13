@@ -275,7 +275,13 @@ export const Clickable = ({
   return (
     <Interactive
       as={as}
-      {...childProps}
+      {...{
+        ...childProps,
+        style: {
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          ...childProps.style,
+        },
+      }}
       onClick={(...args) => onClick && !disabled && onClick(...args)}
     />
   );

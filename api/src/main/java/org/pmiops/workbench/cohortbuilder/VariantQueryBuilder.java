@@ -100,7 +100,7 @@ public final class VariantQueryBuilder {
             WHERE vid IN (
               SELECT vid
               FROM `${projectId}.${dataSetId}.cb_variant_attribute_genes`
-              WHERE gene_symbol = @singleGene
+              WHERE UPPER(gene_symbol) = @singleGene
             )
             """;
 

@@ -31,9 +31,6 @@ export const AutodeleteDaysThresholds = [1, 3, 7, 8, 15, 30];
 
 export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
 
-// 7 days
-export const DEFAULT_AUTODELETE_THRESHOLD_MINUTES = 7 * 24 * 60;
-
 export interface Machine {
   name: string;
   cpu: number;

@@ -161,7 +161,8 @@ const searchTooltip = (
 );
 const resultsTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
-    Number of results must be between 100 and 10,000 to Select All Results
+    Number of results must be between {pageSize} and 10,000 to Select All
+    Results. For results less than {pageSize}, selections must be made manually.
   </div>
 );
 const duplicateFilterTooltip = (
@@ -481,7 +482,7 @@ export const VariantSearch = fp.flow(
     };
 
     const disableSelectAll =
-      totalCount < 100 ||
+      totalCount < pageSize ||
       totalCount > 10000 ||
       criteria.some((crit) => crit.parameterId === getFilterParamId());
     const disableSelectAllSave =
@@ -602,7 +603,7 @@ export const VariantSearch = fp.flow(
                 <TooltipTrigger
                   side='top'
                   content={
-                    totalCount < 100 || totalCount > 10000
+                    totalCount < pageSize || totalCount > 10000
                       ? resultsTooltip
                       : duplicateFilterTooltip
                   }
@@ -650,8 +651,8 @@ export const VariantSearch = fp.flow(
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
               rows={pageSize}
               scrollable
-              scrollHeight='26rem'
-              style={{ fontSize: '12px', minHeight: '22rem' }}
+              scrollHeight='80%'
+              style={{ fontSize: '12px', height: '100%', minHeight: '22rem' }}
               totalRecords={totalCount}
               value={displayResults}
             >
