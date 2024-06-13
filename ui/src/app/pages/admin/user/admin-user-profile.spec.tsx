@@ -15,6 +15,7 @@ import {
   UserTierEligibility,
 } from 'generated/fetch';
 
+import { AccountCreationOptions } from '../../login/account-creation/account-creation-options';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -90,6 +91,11 @@ const findDropdown = (wrapper: ReactWrapper, dataTestId: string) =>
 
 const findTextInput = (wrapper: ReactWrapper, dataTestId: string) =>
   wrapper.find(`[data-test-id="${dataTestId}"]`).first();
+
+const getDropdown = (containerTestId: string): HTMLSelectElement => {
+  const container = screen.getByTestId(containerTestId);
+  return within(container).getByRole('combobox', { hidden: true });
+};
 
 describe('AdminUserProfile', () => {
   let user;
@@ -308,42 +314,39 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    componentAlt();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
+
+    await user.click(verifiedInstitutionDropdown);
+
+    await user.click(screen.getByText(VERILY_WITHOUT_CT.shortName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(
       VERILY_WITHOUT_CT.shortName
     );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY_WITHOUT_CT.shortName
-    );
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
 
     // can't save yet - still need to set the role
 
-    let saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementDisabled(saveButton);
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
+    await user.click(institutionalRoleDropdown);
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
-
-    saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expectButtonElementEnabled(saveButton);
   });
 
   it('should not allow updating institution if the email no longer matches', async () => {
