@@ -512,14 +512,12 @@ describe('AdminUserProfile', () => {
 
   function expectModuleTitlesInOrder(
     accessModules: AccessModule[],
-    tableRows: ReactWrapper
+    tableRows: HTMLElement[]
   ) {
     accessModules.forEach((moduleName, index) => {
-      const moduleRow = tableRows.at(index);
+      const moduleRow = tableRows[index];
       const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
+      expect(within(moduleRow).getByText(adminPageTitle)).toBeInTheDocument();
     });
   }
 
@@ -527,14 +525,13 @@ describe('AdminUserProfile', () => {
     componentAlt();
     await waitForNoSpinner();
 
-    const table = wrapper.find('[data-test-id="access-module-table"]');
-    expect(table.exists()).toBeTruthy();
-
-    const tableRows = table.find('tbody tr[role="row"]');
-    expect(tableRows.length).toEqual(orderedAccessModules.length);
+    const table = screen.getByTestId('access-module-table');
+    const rows = within(table).getAllByRole('row');
+    rows.shift(); // remove the header row
+    expect(rows).toHaveLength(orderedAccessModules.length);
 
     // confirm that the orderedAccessModules are listed in order with expected title text
-    expectModuleTitlesInOrder(orderedAccessModules, tableRows);
+    expectModuleTitlesInOrder(orderedAccessModules, rows);
   });
 
   test.each([
