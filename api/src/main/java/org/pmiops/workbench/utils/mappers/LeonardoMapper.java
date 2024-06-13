@@ -87,14 +87,14 @@ public interface LeonardoMapper {
   @Mapping(target = "zone", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant="GCE")
   LeonardoUpdateGceConfig toUpdateGceConfig(GceConfig gceConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant="GCE")
   @Mapping(target = "diskSize", source = "gceWithPdConfig.persistentDisk.size")
-  LeonardoUpdateGceConfig toUpdatePDGceConfig(GceWithPdConfig gceWithPdConfig);
+  LeonardoUpdateGceConfig toUpdateGceConfig(GceWithPdConfig gceWithPdConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant="DATAPROC")
   LeonardoUpdateDataprocConfig toUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
   @Mapping(target = "persistentDisk", source = "leonardoDiskConfig")

@@ -389,7 +389,7 @@ public class LeonardoApiClientTest {
     leonardoApiClient.updateRuntime(mockRuntime);
 
     // Assert
-    verify(leonardoMapper).toUpdatePDGceConfig(gceWithPdConfig);
+    verify(leonardoMapper).toUpdateGceConfig(gceWithPdConfig);
     verify(userRuntimesApi).updateRuntime(any(), any(), any());
   }
 
