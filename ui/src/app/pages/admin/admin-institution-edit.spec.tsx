@@ -122,12 +122,12 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(getRTDetails()).toBeInTheDocument();
   });
 
-  //   it('should show CT card details when institution has controlled tier access enabled', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //     expect(findCTDetails()).toBeInTheDocument();
-  //   });
-  //
+  it('should show CT card details when institution has controlled tier access enabled', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    expect(findCTDetails()).toBeInTheDocument();
+  });
+
   //   it('should hide CT card details when institution has controlled tier access disabled', async () => {
   //     const wrapper = component(VERILY_WITHOUT_CT.shortName);
   //     await waitForNoSpinner();
