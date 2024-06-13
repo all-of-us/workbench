@@ -35,6 +35,7 @@ const findRTDropdown = () =>
   screen.getByTestId('registered-agreement-dropdown').first();
 
 const findCTDetails = () => screen.getByTestId('controlled-card-details');
+const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
 const findCTDropdown = () =>
   screen.getByTestId('controlled-agreement-dropdown').first();
 
@@ -128,12 +129,12 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findCTDetails()).toBeInTheDocument();
   });
 
-  //   it('should hide CT card details when institution has controlled tier access disabled', async () => {
-  //     const wrapper = component(VERILY_WITHOUT_CT.shortName);
-  //     await waitForNoSpinner();
-  //     expect(findCTDetails()).not.toBeInTheDocument();
-  //   });
-  //
+  it('should hide CT card details when institution has controlled tier access disabled', async () => {
+    componentAlt(VERILY_WITHOUT_CT.shortName);
+    await waitForNoSpinner();
+    expect(queryCTDetails()).not.toBeInTheDocument();
+  });
+
   //   it('should hide/show CT card details when controlled tier disabled/enabled', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
