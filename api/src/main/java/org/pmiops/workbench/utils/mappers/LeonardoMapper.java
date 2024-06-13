@@ -87,11 +87,6 @@ public interface LeonardoMapper {
   @Mapping(target = "zone", ignore = true)
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
-  @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
-  @Mapping(target = "zone", ignore = true)
-  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
-
   @Mapping(target = "cloudService", constant = "GCE")
   LeonardoUpdateGceConfig toUpdateGceConfig(GceConfig gceConfig);
 
@@ -118,10 +113,9 @@ public interface LeonardoMapper {
       PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "diskSize", source = "gceWithPdConfig.persistentDisk.size")
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
-  LeonardoGceConfig toLeonardoGceConfig(GceWithPdConfig gceWithPdConfig);
+  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
 
   @AfterMapping
   default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {

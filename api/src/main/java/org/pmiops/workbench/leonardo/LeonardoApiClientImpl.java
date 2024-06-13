@@ -272,6 +272,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void updateRuntime(Runtime runtime) {
     Map<String, String> runtimeLabels =
         buildRuntimeConfigurationLabels(runtime.getConfigurationType());
+
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApiProvider
