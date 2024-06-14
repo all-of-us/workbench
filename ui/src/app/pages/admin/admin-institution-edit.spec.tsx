@@ -563,26 +563,25 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await expectTooltipAbsence(getSaveButton(), user);
   });
 
-  //   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with RT DOMAINS
-  //
-  //     // one entry has an incorrect Email Domain format (whitespace)
-  //     getRTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: { value: '  someDomain.com,\njustSomeRandom.domain   ,\n,' },
-  //       });
-  //     getRTDomainInput().first().simulate('blur');
-  //     expect(getRTDomainInput())).toHaveValue(
-  //       'someDomain.com,\njustSomeRandom.domain'
-  //     );
-  //
-  //     expect(getRTDomainError()).toBeFalsy();
-  //   });
-  //
+  it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with RT DOMAINS
+
+    // one entry has an incorrect Email Domain format (whitespace)
+    await changeInputValue(
+      getRTDomainInput(),
+      '  someDomain.com,\njustSomeRandom.domain   ,\n,',
+      user
+    );
+    expect(getRTDomainInput()).toHaveValue(
+      'someDomain.com,\njustSomeRandom.domain'
+    );
+
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
   //   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
