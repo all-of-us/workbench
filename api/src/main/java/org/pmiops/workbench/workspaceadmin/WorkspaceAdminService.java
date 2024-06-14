@@ -4,8 +4,18 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.*;
-
+import org.pmiops.workbench.model.AccessReason;
+import org.pmiops.workbench.model.AdminLockingRequest;
+import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
+import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
+import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.UserAppEnvironment;
+import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 public interface WorkspaceAdminService {
   Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace);
 
