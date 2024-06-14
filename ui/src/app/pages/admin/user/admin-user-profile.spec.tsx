@@ -362,7 +362,7 @@ describe('AdminUserProfile', () => {
     );
   });
 
-  it('should not allow updating both email and institution if they match each other', async () => {
+  it('should allow updating both email and institution if they match each other', async () => {
     const contactEmail = 'user1@google.com';
     updateTargetProfile({
       verifiedInstitutionalAffiliation: {
