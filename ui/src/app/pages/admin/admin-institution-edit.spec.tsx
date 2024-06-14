@@ -481,58 +481,49 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await expectTooltipAbsence(getSaveButton(), user);
   });
 
-  //   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with CT ADDRS
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     expect(getCTDomainError()).toBeTruthy();
-  //     expect(getCTDomainError()[0]).toHaveValue(
-  //       'Controlled tier email domains should not be empty'
-  //     );
-  //
-  //     // Single Entry with incorrect Email Domain format
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'invalidEmail@domain' } });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainError()[0]).toHaveValue(
-  //       'Controlled tier email domains are not valid: invalidEmail@domain'
-  //     );
-  //
-  //     // Multiple Entries with correct and incorrect Email Domain format
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value:
-  //             'someEmailAddress@domain@org,\n' +
-  //             'someDomain123.org.com        ,\n' +
-  //             ' justSomeText,\n' +
-  //             ' justDomain.org,\n' +
-  //             'broadinstitute.org#wrongTest',
-  //         },
-  //       });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainError()[0]).toHaveValue(
-  //       'Controlled tier email domains are not valid: someEmailAddress@domain@org, ' +
-  //         'justSomeText, broadinstitute.org#wrongTest'
-  //     );
-  //
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'domain.com' } });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainError()).toBeFalsy();
-  //   });
-  //
+  it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with CT ADDRS
+
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+
+    await expectTooltip(
+      getSaveButton(),
+      'Controlled tier email domains should not be empty',
+      user
+    );
+
+    // Single Entry with incorrect Email Domain format
+    await changeInputValue(getCTDomainInput(), 'invalidEmail@domain', user);
+    await expectTooltip(
+      getSaveButton(),
+      'Controlled tier email domains are not valid: invalidEmail@domain',
+      user
+    );
+
+    // Multiple Entries with correct and incorrect Email Domain format
+    await changeInputValue(
+      getCTDomainInput(),
+      'someEmailAddress@domain@org,\n' +
+        'someDomain123.org.com        ,\n' +
+        ' justSomeText,\n' +
+        ' justDomain.org,\n' +
+        'broadinstitute.org#wrongTest',
+      user
+    );
+    await expectTooltip(
+      getSaveButton(),
+      'Controlled tier email domains are not valid: someEmailAddress@domain@org, ' +
+        'justSomeText, broadinstitute.org#wrongTest',
+      user
+    );
+
+    await changeInputValue(getCTDomainInput(), 'domain.com', user);
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
   //   it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
