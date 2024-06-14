@@ -543,32 +543,26 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await expectTooltipAbsence(getSaveButton(), user);
   });
 
-  //   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with CT ADDRS
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     // one entry has an incorrect Email Domain format (whitespace)
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
-  //       });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainInput())).toHaveValue(
-  //       'validEmail.com,\njustSomeRandom.domain'
-  //     );
-  //
-  //     expect(getCTDomainError()).toBeFalsy();
-  //   });
-  //
+  it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with CT ADDRS
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+
+    // one entry has an incorrect Email Domain format (whitespace)
+    await changeInputValue(
+      getCTDomainInput(),
+      'validEmail.com,\n     ,\njustSomeRandom.domain,\n,',
+      user
+    );
+    expect(getCTDomainInput()).toHaveValue(
+      'validEmail.com,\njustSomeRandom.domain'
+    );
+
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
   //   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
