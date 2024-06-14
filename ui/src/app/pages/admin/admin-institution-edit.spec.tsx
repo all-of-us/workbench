@@ -634,19 +634,21 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(screen.getByText('Institution Name')).toBeInTheDocument();
   });
 
-  //   it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     const testInput = fp.repeat(83, 'a');
-  //     const displayNameText = wrapper.find('[id="displayName"]').first();
-  //     displayNameText.simulate('change', { target: { value: testInput } });
-  //     displayNameText.simulate('blur');
-  //     expect(
-  //       screen.getByTestId("displayNameError"]').first().prop('children')
-  //     ).toContain('Display name must be 80 characters or less');
-  //   });
-  //
+  it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    const testInput = fp.repeat(83, 'a');
+
+    const displayNameText: HTMLInputElement = screen.getByRole('textbox', {
+      name: /institution name/i,
+    });
+    await changeInputValue(displayNameText, testInput, user);
+    expect(
+      screen.getByText('Display name must be 80 characters or less')
+    ).toBeInTheDocument();
+  });
+
   //   it('should always show RT card details', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
