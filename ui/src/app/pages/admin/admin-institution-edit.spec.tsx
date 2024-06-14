@@ -57,7 +57,7 @@ const getRTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-address-input');
 const getRTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-domain-input');
-const getCTAddressInput = () =>
+const getCTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-address-input');
 const queryCTAddressInput = () =>
   screen.queryByTestId('controlled-email-address-input');
@@ -394,52 +394,52 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await expectTooltipAbsence(getSaveButton(), user);
   });
 
-  //   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with CT ADDRS
-  //
-  //     expect(getCTDetails()).toBeInTheDocument();
-  //
-  //     // In case of a single entry which is not in the correct format
-  //     getCTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'ctInvalidEmail@domain' } });
-  //     getCTAddressInput().first().simulate('blur');
-  //     expect(getCTAddressError()[0]).toHaveValue(
-  //       'Controlled tier email addresses are not valid: ctInvalidEmail@domain'
-  //     );
-  //
-  //     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-  //     getCTAddressInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value:
-  //             'invalidEmail@domain@org,\n' +
-  //             'correctEmail@someDomain.org,\n' +
-  //             ' correctEmail.123.hello@someDomain567.org.com   \n' +
-  //             ' invalidEmail   ,\n' +
-  //             ' justDomain.org,\n' +
-  //             'someEmail@broadinstitute.org\n' +
-  //             'nope@just#plain#wrong',
-  //         },
-  //       });
-  //     getCTAddressInput().first().simulate('blur');
-  //     expect(getCTAddressError()[0]).toHaveValue(
-  //       'Controlled tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
-  //         'justDomain.org, nope@just#plain#wrong'
-  //     );
-  //
-  //     // Single correct format Email Address entries
-  //     getCTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-  //     getCTAddressInput().first().simulate('blur');
-  //     expect(getCTAddressError()).toBeFalsy();
-  //   });
-  //
+  it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with CT ADDRS
+
+    expect(getCTDetails()).toBeInTheDocument();
+
+    // In case of a single entry which is not in the correct format
+    await changeInputValue(getCTAddressInput(), 'ctInvalidEmail@domain', user);
+
+    await expectTooltip(
+      getSaveButton(),
+      'Controlled tier email addresses are not valid: ctInvalidEmail@domain',
+      user
+    );
+
+    // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
+    await changeInputValue(
+      getCTAddressInput(),
+      'invalidEmail@domain@org,\n' +
+        'correctEmail@someDomain.org,\n' +
+        ' correctEmail.123.hello@someDomain567.org.com   \n' +
+        ' invalidEmail   ,\n' +
+        ' justDomain.org,\n' +
+        'someEmail@broadinstitute.org\n' +
+        'nope@just#plain#wrong',
+      user
+    );
+
+    await expectTooltip(
+      getSaveButton(),
+      'Controlled tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+        'justDomain.org, nope@just#plain#wrong',
+      user
+    );
+
+    // Single correct format Email Address entries
+    await changeInputValue(
+      getCTAddressInput(),
+      'correctEmail@domain.com',
+      user
+    );
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
   //   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
