@@ -3,12 +3,14 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
   CloudStorageTraffic,
+  FeaturedWorkspaceCategory,
   ListRuntimeResponse,
   UserAppEnvironment,
   WorkspaceActiveStatus,
   WorkspaceAdminView,
 } from 'generated/fetch';
 
+import { Button } from 'app/components/buttons';
 import { Error as ErrorDiv } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -16,7 +18,7 @@ import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { hasNewValidProps } from 'app/utils';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { BasicInformation } from './basic-information';
@@ -100,6 +102,16 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       .finally(() => this.setState({ loadingWorkspace: false }));
   }
 
+  async callToPublish() {
+    await workspaceAdminApi().publishWorkspaceByAdmin(
+      this.props.match.params.ns,
+      {
+        category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
+        description: 'hey',
+      }
+    );
+  }
+
   render() {
     const {
       cloudStorageTraffic,
@@ -156,6 +168,21 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 />
                 <h2>Disks</h2>
                 <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
+
+                {serverConfigStore.get().config
+                  .enableAdminPublishedWorkspaces && (
+                  <div>
+                    <h2>This is temp just to verify api</h2>
+                    <Button
+                      data-test-id='publishButton'
+                      type='secondary'
+                      style={{ border: '2px solid' }}
+                      onClick={() => this.callToPublish()}
+                    >
+                      Publish Workspace
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>

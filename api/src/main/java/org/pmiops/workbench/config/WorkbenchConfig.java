@@ -318,6 +318,8 @@ public class WorkbenchConfig {
     public boolean enableGKEAppMachineTypeChoice;
     // If true, enable variant select all
     public boolean enableVariantSelectAll;
+    // If True, use featuredWorksapce Database to get data
+    public boolean enableAdminPublishedWorkspaces;
   }
 
   public static class ActionAuditConfig {

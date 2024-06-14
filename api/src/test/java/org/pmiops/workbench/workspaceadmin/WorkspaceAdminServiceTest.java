@@ -39,13 +39,7 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
-import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -61,26 +55,13 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
-import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
-import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAdminView;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
-import org.pmiops.workbench.utils.mappers.UserMapper;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.*;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +98,8 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -508,6 +491,19 @@ public class WorkspaceAdminServiceTest {
 
     workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), false);
     assertThat(mustGetDbWorkspace(w).getPublished()).isFalse();
+  }
+
+  @Test
+  public void testPublishWorkspaceByAdmin() {
+    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest publishWorkspaceRequest =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+    workspaceAdminService.setPublishWorkspaceByAdmin(
+        w.getWorkspaceNamespace(), publishWorkspaceRequest);
+    verify(mockFeaturedWorkspaceDao).save(any());
+    verify(mockAdminAuditor).firePublishWorkspaceAction(w.getWorkspaceId());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

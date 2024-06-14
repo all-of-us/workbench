@@ -49,6 +49,9 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
   @Mapping(
+      target = "enableAdminPublishedWorkspaces",
+      source = "config.featureFlags.enableAdminPublishedWorkspaces")
+  @Mapping(
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
   @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")

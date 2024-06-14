@@ -6,17 +6,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.AdminLockingRequest;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -137,6 +138,14 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
     workspaceAdminService.setPublished(workspaceNamespace, workspaceId, true);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<EmptyResponse> publishWorkspaceByAdmin(
+      String workspaceNamespace, PublishWorkspaceRequest body) {
+    workspaceAdminService.setPublishWorkspaceByAdmin(workspaceNamespace, body);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

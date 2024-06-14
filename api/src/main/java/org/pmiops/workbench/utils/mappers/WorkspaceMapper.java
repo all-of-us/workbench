@@ -102,6 +102,27 @@ public interface WorkspaceMapper {
         .collect(Collectors.toList());
   }
 
+  default List<WorkspaceResponse> toApiPublishedWorkspaceResponses(
+      List<DbWorkspace> dbWorkspaces, List<RawlsWorkspaceListResponse> workspaces) {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
+        workspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                    fcWorkspace -> fcWorkspace));
+
+    //    List<DbWorkspace> dbWorkspaces =
+    //            workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
+    return dbWorkspaces.stream()
+        .map(
+            dbWorkspace ->
+                toApiWorkspaceListResponse(
+                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
+        .collect(Collectors.toList());
+  }
+
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")

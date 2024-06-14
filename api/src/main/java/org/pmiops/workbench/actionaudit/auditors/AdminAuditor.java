@@ -13,4 +13,6 @@ public interface AdminAuditor {
   void fireLockWorkspaceAction(long workspaceId, AdminLockingRequest adminLockingRequest);
 
   void fireUnlockWorkspaceAction(long workspaceId);
+
+  void firePublishWorkspaceAction(long workspaceId);
 }

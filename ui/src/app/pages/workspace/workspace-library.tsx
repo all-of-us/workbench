@@ -16,6 +16,7 @@ import { AoU } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
 import {
+  featuredWorkspacesApi,
   featuredWorkspacesConfigApi,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
@@ -23,6 +24,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withUserProfile } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
 import { convertAPIError } from 'app/utils/errors';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import demonstration from 'assets/icons/demonstration.svg';
 import phenotypeLibrary from 'assets/icons/phenotype-library.svg';
@@ -287,9 +289,9 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
       }));
 
       try {
+        // This is temp just for verifying API. The UI will be worked by ticket
         const resp =
           await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
-
         this.setState((previousState) => ({
           featuredWorkspaces: resp.featuredWorkspacesList,
           pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1,

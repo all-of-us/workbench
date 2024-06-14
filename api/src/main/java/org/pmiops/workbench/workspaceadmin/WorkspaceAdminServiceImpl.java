@@ -23,11 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.*;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -40,24 +37,10 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessReason;
-import org.pmiops.workbench.model.AdminLockingRequest;
-import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
-import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.AdminWorkspaceResources;
-import org.pmiops.workbench.model.CloudStorageTraffic;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.model.TimeSeriesPoint;
-import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceAdminView;
-import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
-import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -78,6 +61,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
+  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService fireCloudService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoNotebooksClient;
@@ -101,6 +86,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
+      FeaturedWorkspaceMapper featuredWorkspaceMapper,
+      FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoNotebooksClient,
@@ -121,6 +108,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
+    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
+    this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -415,6 +404,23 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
+  }
+
+  @Override
+  public void setPublishWorkspaceByAdmin(
+      String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
+    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
+    final WorkspaceAccessLevel accessLevel = WorkspaceAccessLevel.READER;
+    var aclUpdate =
+        FirecloudTransforms.buildAclUpdate(
+            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
+
+    fireCloudService.updateWorkspaceACL(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+    DbFeaturedWorkspace featuredWorkspace =
+        featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
+    featuredWorkspaceDao.save(featuredWorkspace);
+    adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
