@@ -55,14 +55,20 @@ const queryCTDomain = () => screen.queryByTestId('controlled-email-domain');
 
 const getRTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-address-input');
+const queryRTAddressInput = (): HTMLInputElement =>
+  screen.queryByTestId('registered-email-address-input');
 const getRTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-domain-input');
+const queryRTDomainInput = (): HTMLInputElement =>
+  screen.queryByTestId('registered-email-domain-input');
 const getCTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-address-input');
 const queryCTAddressInput = () =>
   screen.queryByTestId('controlled-email-address-input');
 const getCTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-domain-input');
+const queryCTDomainInput = (): HTMLInputElement =>
+  screen.queryByTestId('controlled-email-domain-input');
 
 const getSaveButton = () =>
   screen.getByRole('button', {
@@ -661,26 +667,25 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(getCTDetails()).not.toBeInTheDocument();
   });
 
-  //   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //     expect(getCTDetails()).not.toBeInTheDocument();
-  //     expect(getCTEnabled().checked).toBeFalsy();
-  //     toggleCheckbox(getCTEnabled());
-  //     expect(getCTEnabled().checked).toBeTruthy();
-  //     expect(getCTDetails()).toBeInTheDocument();
-  //
-  //     toggleCheckbox(getCTEnabled());
-  //     expect(getCTEnabled().checked).toBeFalsy();
-  //     expect(getCTDetails()).not.toBeInTheDocument();
-  //
-  //     // both RT and CT are uninitialized
-  //     expect(getRTDomainInput()).not.toBeInTheDocument();
-  //     expect(getRTAddressInput()).not.toBeInTheDocument();
-  //     expect(getCTAddressInput()).not.toBeInTheDocument();
-  //     expect(getCTDomainInput()).not.toBeInTheDocument();
-  //   });
-  //
+  it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    expect(queryCTDetails()).not.toBeInTheDocument();
+    expect(getCTEnabled().checked).toBeFalsy();
+    await user.click(getCTEnabled());
+    expect(getCTEnabled().checked).toBeTruthy();
+    expect(getCTDetails()).toBeInTheDocument();
+    await user.click(getCTEnabled());
+    expect(getCTEnabled().checked).toBeFalsy();
+    expect(queryCTDetails()).not.toBeInTheDocument();
+
+    // both RT and CT are uninitialized
+    expect(queryRTDomainInput()).not.toBeInTheDocument();
+    expect(queryRTAddressInput()).not.toBeInTheDocument();
+    expect(queryCTAddressInput()).not.toBeInTheDocument();
+    expect(queryCTDomainInput()).not.toBeInTheDocument();
+  });
+
   //   it('should update institution tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
