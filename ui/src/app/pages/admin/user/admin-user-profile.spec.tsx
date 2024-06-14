@@ -186,6 +186,8 @@ describe('AdminUserProfile', () => {
       name: /contact email/i,
     });
 
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
+
     await user.clear(contactEmailInput);
     await user.click(contactEmailInput);
     await user.paste(BROAD_ADDR_2);
