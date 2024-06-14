@@ -280,6 +280,5 @@ export const expectTooltip = async (
   user: UserEvent
 ) => {
   await user.hover(element);
-
   expect(screen.getByText(message)).toBeInTheDocument();
 };

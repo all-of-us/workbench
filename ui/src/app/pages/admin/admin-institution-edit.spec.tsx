@@ -100,7 +100,10 @@ export const expectTooltipAbsence = async (
   user: UserEvent
 ) => {
   await user.hover(element);
-  expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(/Please correct the following errors/i)
+  ).not.toBeInTheDocument();
+  await user.unhover(element);
 };
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
@@ -440,49 +443,44 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await expectTooltipAbsence(getSaveButton(), user);
   });
 
-  //   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with RT DOMAINS
-  //
-  //     expect(getRTDomainError()).toBeFalsy();
-  //
-  //     // Single Entry with incorrect Email Domain format
-  //     getRTDomainInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'invalidEmail@domain' } });
-  //     getRTDomainInput().first().simulate('blur');
-  //     expect(getRTDomainError()[0]).toHaveValue(
-  //       'Registered tier email domains are not valid: invalidEmail@domain'
-  //     );
-  //
-  //     // Multiple Entries with correct and incorrect Email Domain format
-  //     getRTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value:
-  //             'someEmailAddress@domain@org,\n' +
-  //             'someDomain123.org.com        ,\n' +
-  //             ' justSomeText,\n' +
-  //             ' justDomain.org,\n' +
-  //             'broadinstitute.org#wrongTest',
-  //         },
-  //       });
-  //     getRTDomainInput().first().simulate('blur');
-  //     expect(getRTDomainError()[0]).toHaveValue(
-  //       'Registered tier email domains are not valid: someEmailAddress@domain@org, ' +
-  //         'justSomeText, broadinstitute.org#wrongTest'
-  //     );
-  //
-  //     getRTDomainInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'domain.com' } });
-  //     getRTDomainInput().first().simulate('blur');
-  //     expect(getRTDomainError()).toBeFalsy();
-  //   });
-  //
+  it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with RT DOMAINS
+
+    await expectTooltipAbsence(getSaveButton(), user);
+
+    // Single Entry with incorrect Email Domain format
+    await changeInputValue(getRTDomainInput(), 'invalidEmail@domain', user);
+
+    await expectTooltip(
+      getSaveButton(),
+      'Registered tier email domains are not valid: invalidEmail@domain',
+      user
+    );
+
+    // Multiple Entries with correct and incorrect Email Domain format
+    await changeInputValue(
+      getRTDomainInput(),
+      'someEmailAddress@domain@org,\n' +
+        'someDomain123.org.com        ,\n' +
+        ' justSomeText,\n' +
+        ' justDomain.org,\n' +
+        'broadinstitute.org#wrongTest',
+      user
+    );
+    await expectTooltip(
+      getSaveButton(),
+      'Registered tier email domains are not valid: someEmailAddress@domain@org, ' +
+        'justSomeText, broadinstitute.org#wrongTest',
+      user
+    );
+
+    await changeInputValue(getRTDomainInput(), 'domain.com', user);
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
   //   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
