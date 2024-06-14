@@ -214,7 +214,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
-    const wrapper = component(VERILY_WITHOUT_CT.shortName);
+    const wrapper = componentAlt(VERILY_WITHOUT_CT.shortName);
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
 
@@ -223,14 +223,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(getRTDomain()).toBeInTheDocument();
     expect(queryRTAddress()).not.toBeInTheDocument();
 
-    await simulateComponentChange(
-      wrapper,
-      findRTDropdown(),
-      InstitutionMembershipRequirement.ADDRESSES
-    );
+    await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
 
     expect(getRTAddress()).toBeInTheDocument();
-    expect(getRTDomain()).not.toBeInTheDocument();
+    expect(queryRTDomain()).not.toBeInTheDocument();
 
     // update RT addresses
     await changeInputValue(
@@ -248,7 +244,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     // but the CT address list is empty
 
     expect(getCTAddress()).toBeInTheDocument();
-    expect(getCTDomain()).not.toBeInTheDocument();
+    expect(queryCTDomain()).not.toBeInTheDocument();
 
     expect(getCTAddressInput()).toHaveValue('');
   });
