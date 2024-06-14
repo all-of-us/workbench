@@ -655,12 +655,12 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(getRTDetails()).toBeInTheDocument();
   });
 
-  //   it('should not initially show CT card details', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //     expect(getCTDetails()).not.toBeInTheDocument();
-  //   });
-  //
+  it('should not initially show CT card details', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    expect(getCTDetails()).not.toBeInTheDocument();
+  });
+
   //   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
