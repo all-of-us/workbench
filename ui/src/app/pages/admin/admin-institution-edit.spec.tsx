@@ -49,7 +49,8 @@ const getRTDomain = () => screen.getByTestId('registered-email-domain');
 const queryRTDomain = () => screen.queryByTestId('registered-email-domain');
 const getCTAddress = () => screen.getByTestId('controlled-email-address');
 const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
-const findCTDomain = () => screen.getByTestId('controlled-email-domain');
+const getCTDomain = () => screen.getByTestId('controlled-email-domain');
+const queryCTDomain = () => screen.queryByTestId('controlled-email-domain');
 
 const getRTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-address-input');
@@ -81,7 +82,7 @@ const getRTDomainError = () =>
   getSaveButtonDisabled().registeredTierEmailDomains;
 const getCTAddressError = () =>
   getSaveButtonDisabled().controlledTierEmailAddresses;
-const findCTDomainError = () =>
+const getCTDomainError = () =>
   getSaveButtonDisabled().controlledTierEmailDomains;*/
 
 const selectDropdownOption = async (
@@ -194,7 +195,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // CT copies RT's requirements: domain, ERA = true, domain list is equal
 
-    expect(findCTDomain()).toBeInTheDocument();
+    expect(getCTDomain()).toBeInTheDocument();
     expect(queryCTAddress()).not.toBeInTheDocument();
 
     expect(getCTDomainInput()).toHaveValue(testDomains);
@@ -235,7 +236,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     // but the CT address list is empty
 
     expect(getCTAddress()).toBeInTheDocument();
-    expect(findCTDomain()).not.toBeInTheDocument();
+    expect(getCTDomain()).not.toBeInTheDocument();
 
     expect(getCTAddressInput()).toHaveValue('');
   });
@@ -312,38 +313,31 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'someDomain.com,\njustSomeRandom.domain'
     );
   });
-  //
-  //   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with CT ADDRS
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     expect(getCTAddress()).not.toBeInTheDocument();
-  //     expect(findCTDomain()).toBeInTheDocument();
-  //
-  //     const ctEmailDomainLabel = findCTDomain().first().props().children[0];
-  //     expect(ctEmailDomainLabel.props.children).toHaveValue('Accepted Email Domains');
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //
-  //     expect(getCTAddress()).toBeInTheDocument();
-  //     expect(findCTDomain()).not.toBeInTheDocument();
-  //
-  //     const ctEmailAddressLabel = getCTAddress().first().props().children[0];
-  //     expect(ctEmailAddressLabel.props.children).toHaveValue('Accepted Email Addresses');
-  //   });
-  //
+
+  it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with CT ADDRS
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+
+    expect(queryCTAddress()).not.toBeInTheDocument();
+    expect(getCTDomain()).toBeInTheDocument();
+
+    expect(
+      within(getCTDetails()).getByText('Accepted Email Domains')
+    ).toBeInTheDocument();
+
+    await selectDropdownOption(getCTDropdown(), addressesRequirementLabel);
+
+    expect(getCTAddress()).toBeInTheDocument();
+    expect(queryCTDomain()).not.toBeInTheDocument();
+
+    expect(
+      within(getCTDetails()).getByText('Accepted Email Addresses')
+    ).toBeInTheDocument();
+  });
+
   //   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
@@ -502,8 +496,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       InstitutionMembershipRequirement.DOMAINS
   //     );
   //
-  //     expect(findCTDomainError()).toBeTruthy();
-  //     expect(findCTDomainError()[0]).toHaveValue(
+  //     expect(getCTDomainError()).toBeTruthy();
+  //     expect(getCTDomainError()[0]).toHaveValue(
   //       'Controlled tier email domains should not be empty'
   //     );
   //
@@ -512,7 +506,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       .first()
   //       .simulate('change', { target: { value: 'invalidEmail@domain' } });
   //     getCTDomainInput().first().simulate('blur');
-  //     expect(findCTDomainError()[0]).toHaveValue(
+  //     expect(getCTDomainError()[0]).toHaveValue(
   //       'Controlled tier email domains are not valid: invalidEmail@domain'
   //     );
   //
@@ -530,7 +524,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //         },
   //       });
   //     getCTDomainInput().first().simulate('blur');
-  //     expect(findCTDomainError()[0]).toHaveValue(
+  //     expect(getCTDomainError()[0]).toHaveValue(
   //       'Controlled tier email domains are not valid: someEmailAddress@domain@org, ' +
   //         'justSomeText, broadinstitute.org#wrongTest'
   //     );
@@ -539,7 +533,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       .first()
   //       .simulate('change', { target: { value: 'domain.com' } });
   //     getCTDomainInput().first().simulate('blur');
-  //     expect(findCTDomainError()).toBeFalsy();
+  //     expect(getCTDomainError()).toBeFalsy();
   //   });
   //
   //   it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
@@ -585,7 +579,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       'validEmail.com,\njustSomeRandom.domain'
   //     );
   //
-  //     expect(findCTDomainError()).toBeFalsy();
+  //     expect(getCTDomainError()).toBeFalsy();
   //   });
   //
   //   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
@@ -631,7 +625,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       'someDomain.com,\njustSomeRandom.domain'
   //     );
   //
-  //     expect(findCTDomainError()).toBeFalsy();
+  //     expect(getCTDomainError()).toBeFalsy();
   //   });
   // });
   //
@@ -813,6 +807,6 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   //       'validEmail.com,\njustSomeRandom.domain'
   //     );
   //
-  //     expect(findCTDomainError()).toBeFalsy();
+  //     expect(getCTDomainError()).toBeFalsy();
   //   });
 });
