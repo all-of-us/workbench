@@ -693,9 +693,11 @@ describe('AdminUserProfile', () => {
       await waitForNoSpinner();
 
       const table = screen.getByTestId('access-module-table');
-      within(table).getByText(`requires eRA Commons for ${tiers} access`, {
-        exact: false,
-      });
+      expect(
+        within(table).getByText(`requires eRA Commons for ${tiers} access`, {
+          exact: false,
+        })
+      ).toBeInTheDocument();
 
       const rows = within(table).getAllByRole('row');
       rows.shift(); // remove the header row
