@@ -107,7 +107,7 @@ export const expectTooltipAbsence = async (
 };
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
-  let user;
+  let user: UserEvent;
   const component = (institutionShortName = VERILY.shortName) => {
     return mount(
       <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
@@ -600,184 +600,197 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 });
 
-// describe('AdminInstitutionEditSpec - add mode', () => {
-//   const component = () => {
-//     return mount(
-//       <MemoryRouter initialEntries={['/admin/institution/add']}>
-//         <Route path='/admin/institution/add'>
-//           <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
-//         </Route>
-//       </MemoryRouter>
-//     );
-//   };
-//
-//   beforeEach(() => {
-//     serverConfigStore.set({ config: defaultServerConfig });
-//     registerApiClient(InstitutionApi, new InstitutionApiStub());
-//   });
-//
-//   it('should render', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//   });
-//
-//   it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//
-//     const testInput = fp.repeat(83, 'a');
-//     const displayNameText = wrapper.find('[id="displayName"]').first();
-//     displayNameText.simulate('change', { target: { value: testInput } });
-//     displayNameText.simulate('blur');
-//     expect(
-//       screen.getByTestId("displayNameError"]').first().prop('children')
-//     ).toContain('Display name must be 80 characters or less');
-//   });
-//
-//   it('should always show RT card details', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//     expect(getRTDetails()).toBeInTheDocument();
-//   });
-//
-//   it('should not initially show CT card details', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//     expect(getCTDetails()).not.toBeInTheDocument();
-//   });
-//
-//   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//     expect(getCTDetails()).not.toBeInTheDocument();
-//     expect(getCTEnabled().checked).toBeFalsy();
-//     toggleCheckbox(getCTEnabled());
-//     expect(getCTEnabled().checked).toBeTruthy();
-//     expect(getCTDetails()).toBeInTheDocument();
-//
-//     toggleCheckbox(getCTEnabled());
-//     expect(getCTEnabled().checked).toBeFalsy();
-//     expect(getCTDetails()).not.toBeInTheDocument();
-//
-//     // both RT and CT are uninitialized
-//     expect(getRTDomainInput()).not.toBeInTheDocument();
-//     expect(getRTAddressInput()).not.toBeInTheDocument();
-//     expect(getCTAddressInput()).not.toBeInTheDocument();
-//     expect(getCTDomainInput()).not.toBeInTheDocument();
-//   });
-//
-//   it('should update institution tier requirement', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//
-//     // uninitialized
-//     expect(getRTDomainInput()).not.toBeInTheDocument();
-//     expect(getRTAddressInput()).not.toBeInTheDocument();
-//     expect(getCTAddressInput()).not.toBeInTheDocument();
-//     expect(getCTDomainInput()).not.toBeInTheDocument();
-//
-//     await simulateComponentChange(
-//       wrapper,
-//       findRTDropdown(),
-//       InstitutionMembershipRequirement.ADDRESSES
-//     );
-//
-//     expect(getRTAddressInput()).toBeInTheDocument();
-//     expect(getRTAddressInput())).toHaveValue('');
-//
-//     expect(getRTDomainInput()).not.toBeInTheDocument();
-//     expect(getCTAddressInput()).not.toBeInTheDocument();
-//     expect(getCTDomainInput()).not.toBeInTheDocument();
-//
-//     getRTAddressInput()
-//       .first()
-//       .simulate('change', { target: { value: 'user@domain.com' } });
-//     getRTAddressInput().first().simulate('blur');
-//
-//     // RT no change
-//     expect(getRTAddressInput())).toHaveValue('user@domain.com');
-//   });
-//
-//   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//
-//     await simulateComponentChange(
-//       wrapper,
-//       findRTDropdown(),
-//       InstitutionMembershipRequirement.ADDRESSES
-//     );
-//
-//     expect(getRTAddressError()).toBeTruthy();
-//     expect(getRTAddressError()[0]).toHaveValue(
-//       'Registered tier email addresses should not be empty'
-//     );
-//
-//     // In case of a single entry which is not in the correct format
-//     getRTAddressInput()
-//       .first()
-//       .simulate('change', { target: { value: 'rtInvalidEmail@domain' } });
-//     getRTAddressInput().first().simulate('blur');
-//     expect(getRTAddressError()[0]).toHaveValue(
-//       'Registered tier email addresses are not valid: rtInvalidEmail@domain'
-//     );
-//
-//     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-//     getRTAddressInput()
-//       .first()
-//       .simulate('change', {
-//         target: {
-//           value:
-//             'invalidEmail@domain@org,\n' +
-//             'correctEmail@someDomain.org,\n' +
-//             ' correctEmail.123.hello@someDomain567.org.com   \n' +
-//             ' invalidEmail   ,\n' +
-//             ' justDomain.org,\n' +
-//             'someEmail@broadinstitute.org\n' +
-//             'nope@just#plain#wrong',
-//         },
-//       });
-//     getRTAddressInput().first().simulate('blur');
-//     expect(getRTAddressError()[0]).toHaveValue(
-//       'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
-//         'justDomain.org, nope@just#plain#wrong'
-//     );
-//
-//     // Single correct format Email Address entries
-//     getRTAddressInput()
-//       .first()
-//       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-//     getRTAddressInput().first().simulate('blur');
-//     expect(getRTAddressError()).toBeFalsy();
-//   });
-//
-//   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-//     componentAlt();
-//     await waitForNoSpinner();
-//
-//     expect(getCTEnabled().checked).toBeFalsy();
-//     await user.click(getCTEnabled());
-//     expect(getCTEnabled().checked).toBeTruthy();
-//
-//     await waitOneTickAndUpdate();
-//
-//     await simulateComponentChange(
-//       wrapper,
-//       getCTDropdown(),
-//       InstitutionMembershipRequirement.DOMAINS
-//     );
-//
-//     // one entry has an incorrect Email Domain format (whitespace)
-//     getCTDomainInput()
-//       .first()
-//       .simulate('change', {
-//         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
-//       });
-//     getCTDomainInput().first().simulate('blur');
-//     expect(getCTDomainInput())).toHaveValue(
-//       'validEmail.com,\njustSomeRandom.domain'
-//     );
-//
-//     expect(getCTDomainError()).toBeFalsy();
-//   });
-// });
+describe('AdminInstitutionEditSpec - add mode', () => {
+  let user: UserEvent;
+  const component = () => {
+    return mount(
+      <MemoryRouter initialEntries={['/admin/institution/add']}>
+        <Route path='/admin/institution/add'>
+          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
+        </Route>
+      </MemoryRouter>
+    );
+  };
+
+  const componentAlt = () => {
+    return render(
+      <MemoryRouter initialEntries={['/admin/institution/add']}>
+        <Route path='/admin/institution/add'>
+          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
+        </Route>
+      </MemoryRouter>
+    );
+  };
+
+  beforeEach(() => {
+    serverConfigStore.set({ config: defaultServerConfig });
+    registerApiClient(InstitutionApi, new InstitutionApiStub());
+    user = userEvent.setup();
+  });
+
+  it('should render', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    expect(screen.getByText('Institution Name')).toBeInTheDocument();
+  });
+
+  //   it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //
+  //     const testInput = fp.repeat(83, 'a');
+  //     const displayNameText = wrapper.find('[id="displayName"]').first();
+  //     displayNameText.simulate('change', { target: { value: testInput } });
+  //     displayNameText.simulate('blur');
+  //     expect(
+  //       screen.getByTestId("displayNameError"]').first().prop('children')
+  //     ).toContain('Display name must be 80 characters or less');
+  //   });
+  //
+  //   it('should always show RT card details', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //     expect(getRTDetails()).toBeInTheDocument();
+  //   });
+  //
+  //   it('should not initially show CT card details', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //     expect(getCTDetails()).not.toBeInTheDocument();
+  //   });
+  //
+  //   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //     expect(getCTDetails()).not.toBeInTheDocument();
+  //     expect(getCTEnabled().checked).toBeFalsy();
+  //     toggleCheckbox(getCTEnabled());
+  //     expect(getCTEnabled().checked).toBeTruthy();
+  //     expect(getCTDetails()).toBeInTheDocument();
+  //
+  //     toggleCheckbox(getCTEnabled());
+  //     expect(getCTEnabled().checked).toBeFalsy();
+  //     expect(getCTDetails()).not.toBeInTheDocument();
+  //
+  //     // both RT and CT are uninitialized
+  //     expect(getRTDomainInput()).not.toBeInTheDocument();
+  //     expect(getRTAddressInput()).not.toBeInTheDocument();
+  //     expect(getCTAddressInput()).not.toBeInTheDocument();
+  //     expect(getCTDomainInput()).not.toBeInTheDocument();
+  //   });
+  //
+  //   it('should update institution tier requirement', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //
+  //     // uninitialized
+  //     expect(getRTDomainInput()).not.toBeInTheDocument();
+  //     expect(getRTAddressInput()).not.toBeInTheDocument();
+  //     expect(getCTAddressInput()).not.toBeInTheDocument();
+  //     expect(getCTDomainInput()).not.toBeInTheDocument();
+  //
+  //     await simulateComponentChange(
+  //       wrapper,
+  //       findRTDropdown(),
+  //       InstitutionMembershipRequirement.ADDRESSES
+  //     );
+  //
+  //     expect(getRTAddressInput()).toBeInTheDocument();
+  //     expect(getRTAddressInput())).toHaveValue('');
+  //
+  //     expect(getRTDomainInput()).not.toBeInTheDocument();
+  //     expect(getCTAddressInput()).not.toBeInTheDocument();
+  //     expect(getCTDomainInput()).not.toBeInTheDocument();
+  //
+  //     getRTAddressInput()
+  //       .first()
+  //       .simulate('change', { target: { value: 'user@domain.com' } });
+  //     getRTAddressInput().first().simulate('blur');
+  //
+  //     // RT no change
+  //     expect(getRTAddressInput())).toHaveValue('user@domain.com');
+  //   });
+  //
+  //   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //
+  //     await simulateComponentChange(
+  //       wrapper,
+  //       findRTDropdown(),
+  //       InstitutionMembershipRequirement.ADDRESSES
+  //     );
+  //
+  //     expect(getRTAddressError()).toBeTruthy();
+  //     expect(getRTAddressError()[0]).toHaveValue(
+  //       'Registered tier email addresses should not be empty'
+  //     );
+  //
+  //     // In case of a single entry which is not in the correct format
+  //     getRTAddressInput()
+  //       .first()
+  //       .simulate('change', { target: { value: 'rtInvalidEmail@domain' } });
+  //     getRTAddressInput().first().simulate('blur');
+  //     expect(getRTAddressError()[0]).toHaveValue(
+  //       'Registered tier email addresses are not valid: rtInvalidEmail@domain'
+  //     );
+  //
+  //     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
+  //     getRTAddressInput()
+  //       .first()
+  //       .simulate('change', {
+  //         target: {
+  //           value:
+  //             'invalidEmail@domain@org,\n' +
+  //             'correctEmail@someDomain.org,\n' +
+  //             ' correctEmail.123.hello@someDomain567.org.com   \n' +
+  //             ' invalidEmail   ,\n' +
+  //             ' justDomain.org,\n' +
+  //             'someEmail@broadinstitute.org\n' +
+  //             'nope@just#plain#wrong',
+  //         },
+  //       });
+  //     getRTAddressInput().first().simulate('blur');
+  //     expect(getRTAddressError()[0]).toHaveValue(
+  //       'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+  //         'justDomain.org, nope@just#plain#wrong'
+  //     );
+  //
+  //     // Single correct format Email Address entries
+  //     getRTAddressInput()
+  //       .first()
+  //       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
+  //     getRTAddressInput().first().simulate('blur');
+  //     expect(getRTAddressError()).toBeFalsy();
+  //   });
+  //
+  //   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
+  //     componentAlt();
+  //     await waitForNoSpinner();
+  //
+  //     expect(getCTEnabled().checked).toBeFalsy();
+  //     await user.click(getCTEnabled());
+  //     expect(getCTEnabled().checked).toBeTruthy();
+  //
+  //     await waitOneTickAndUpdate();
+  //
+  //     await simulateComponentChange(
+  //       wrapper,
+  //       getCTDropdown(),
+  //       InstitutionMembershipRequirement.DOMAINS
+  //     );
+  //
+  //     // one entry has an incorrect Email Domain format (whitespace)
+  //     getCTDomainInput()
+  //       .first()
+  //       .simulate('change', {
+  //         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
+  //       });
+  //     getCTDomainInput().first().simulate('blur');
+  //     expect(getCTDomainInput())).toHaveValue(
+  //       'validEmail.com,\njustSomeRandom.domain'
+  //     );
+  //
+  //     expect(getCTDomainError()).toBeFalsy();
+  //   });
+});
