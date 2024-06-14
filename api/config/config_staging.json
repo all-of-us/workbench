@@ -92,7 +92,7 @@
     "samlServiceProviderId": "133137951028"
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
