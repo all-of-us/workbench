@@ -857,7 +857,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const getDeletePDRadio = () =>
     screen.queryByRole('radio', {
-      name: 'delete-pd',
+      name: 'Delete Persistent Disk',
     });
 
   const togglePDRadioButton = () => {
