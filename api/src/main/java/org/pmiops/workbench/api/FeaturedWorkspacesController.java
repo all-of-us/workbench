@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class FeaturedWorkspacesController implements FeaturedWorkspacesConfigApiDelegate {
-  private Provider<FeaturedWorkspacesConfig> configProvider;
+  private final Provider<FeaturedWorkspacesConfig> configProvider;
 
   @Autowired
-  public void FeaturedWorkspacesController(Provider<FeaturedWorkspacesConfig> configProvider) {
+  FeaturedWorkspacesController(Provider<FeaturedWorkspacesConfig> configProvider) {
     this.configProvider = configProvider;
   }
 
