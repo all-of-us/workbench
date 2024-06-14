@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router';
-import { mount, ReactWrapper } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
 import {
   AccessModule,
@@ -15,6 +13,9 @@ import {
   UserTierEligibility,
 } from 'generated/fetch';
 
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AccessTierDisplayNames,
@@ -29,10 +30,9 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  findNodesContainingText,
-  simulateComponentChange,
-  simulateTextInputChange,
-  waitOneTickAndUpdate,
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import { EgressEventsAdminApiStub } from 'testing/stubs/egress-events-admin-api-stub';
 import {
@@ -69,28 +69,18 @@ const updateTargetProfile = (update: Partial<Profile>) => {
   );
 };
 
-const getUneditableFieldText = (
-  wrapper: ReactWrapper,
-  dataTestId: string
-): string => {
-  const divs = wrapper.find(`[data-test-id="${dataTestId}"]`).find('div');
-
-  // sanity check: divs should contain [parent, label, value]
-  expect(divs.length).toEqual(3);
-  return divs.at(2).text();
+const getDropdown = (containerTestId: string): HTMLSelectElement => {
+  const container = screen.getByTestId(containerTestId);
+  return within(container).getByRole('combobox', { hidden: true });
 };
 
-const findDropdown = (wrapper: ReactWrapper, dataTestId: string) =>
-  wrapper.find(`[data-test-id="${dataTestId}"]`).find(Dropdown).first();
-
-const findTextInput = (wrapper: ReactWrapper, dataTestId: string) =>
-  wrapper.find(`[data-test-id="${dataTestId}"]`).first();
-
 describe('AdminUserProfile', () => {
+  let user;
+
   const component = (
     usernameWithoutGsuite: string = ProfileStubVariables.PROFILE_STUB.username
   ) => {
-    return mount(
+    return render(
       <MemoryRouter initialEntries={[`/admin/users/${usernameWithoutGsuite}`]}>
         <Route path='/admin/users/:usernameWithoutGsuiteDomain'>
           <AdminUserProfile hideSpinner={() => {}} showSpinner={() => {}} />
@@ -114,11 +104,12 @@ describe('AdminUserProfile', () => {
     registerApiClient(EgressEventsAdminApi, new EgressEventsAdminApiStub());
     registerApiClient(UserAdminApi, new UserAdminApiStub());
     registerApiClient(InstitutionApi, new InstitutionApiStub());
+    user = userEvent.setup();
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('should render', async () => {
+    component();
+    await screen.findByText('User Profile Information');
   });
 
   it("should display the user's name, username, and initial credits usage", async () => {
@@ -140,15 +131,19 @@ describe('AdminUserProfile', () => {
       freeTierDollarQuota,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(getUneditableFieldText(wrapper, 'name')).toEqual(expectedFullName);
-    expect(getUneditableFieldText(wrapper, 'user-name')).toEqual(username);
-    expect(getUneditableFieldText(wrapper, 'initial-credits-used')).toEqual(
-      expectedCreditsText
-    );
+    component();
+    await waitForNoSpinner();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('initial-credits-used')).getByText(
+        expectedCreditsText
+      )
+    ).toBeInTheDocument();
   });
 
   test.each([
@@ -173,70 +168,71 @@ describe('AdminUserProfile', () => {
     async (_, accessTierShortNames, expectedText) => {
       updateTargetProfile({ accessTierShortNames });
 
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
-
-      expect(getUneditableFieldText(wrapper, 'data-access-tiers')).toEqual(
-        expectedText
-      );
+      component();
+      await waitForNoSpinner();
+      expect(
+        within(screen.getByTestId('data-access-tiers')).getByText(expectedText)
+      ).toBeInTheDocument();
     }
   );
 
   it('should allow updating contactEmail within an institution', async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
 
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      BROAD_ADDR_2
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_2
-    );
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(BROAD_ADDR_2);
+    await user.tab();
+
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_2);
+
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
+
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementEnabled(saveButton);
   });
 
   it("should prohibit updating contactEmail if it doesn't match institution ADDRESSES", async () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
+
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
 
     const nonBroadAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      nonBroadAddr
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      nonBroadAddr
+
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(nonBroadAddr);
+    await user.tab();
+
+    expect(contactEmailInput).toHaveValue(nonBroadAddr);
+
+    const invalidEmail = await screen.findByTestId('email-invalid');
+    within(invalidEmail).getByText(
+      /The institution has authorized access only to select members./i
     );
 
-    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
-    expect(invalidEmail.exists()).toBeTruthy();
-    expect(invalidEmail.text()).toContain(
-      'The institution has authorized access only to select members.'
-    );
-
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementDisabled(saveButton);
   });
 
   it("should prohibit updating contactEmail if it doesn't match institution DOMAINS", async () => {
@@ -249,32 +245,32 @@ describe('AdminUserProfile', () => {
       contactEmail: originalAddress,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      originalAddress
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
+
+    expect(contactEmailInput).toHaveValue(originalAddress);
 
     const nonVerilyAddr = 'PI@rival-institute.net';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      nonVerilyAddr
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      nonVerilyAddr
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(nonVerilyAddr);
+    await user.tab();
+    expect(contactEmailInput).toHaveValue(nonVerilyAddr);
+
+    const invalidEmail = await screen.findByTestId('email-invalid');
+    within(invalidEmail).getByText(
+      /Your email does not match your institution/i
     );
 
-    const invalidEmail = wrapper.find('[data-test-id="email-invalid"]');
-    expect(invalidEmail.exists()).toBeTruthy();
-    expect(invalidEmail.text()).toContain(
-      'Your email does not match your institution'
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
     );
-
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
   });
 
   it('should allow updating institution if the email continues to match', async () => {
@@ -287,42 +283,39 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
+
+    await user.click(verifiedInstitutionDropdown);
+
+    await user.click(screen.getByText(VERILY_WITHOUT_CT.shortName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(
       VERILY_WITHOUT_CT.shortName
     );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY_WITHOUT_CT.shortName
-    );
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
 
     // can't save yet - still need to set the role
 
-    let saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    const saveButton = screen.getByRole('button', {
+      name: /save/i,
+    });
+    expectButtonElementDisabled(saveButton);
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
+    await user.click(institutionalRoleDropdown);
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
-
-    saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expectButtonElementEnabled(saveButton);
   });
 
   it('should not allow updating institution if the email no longer matches', async () => {
@@ -335,43 +328,41 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
-      BROAD.shortName
-    );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      BROAD.shortName
-    );
-    expect(
-      wrapper.find('[data-test-id="email-invalid"]').exists()
-    ).toBeTruthy();
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
+
+    await user.click(verifiedInstitutionDropdown);
+    await user.click(screen.getByText(BROAD.displayName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
+
+    screen.getByTestId('email-invalid');
 
     // also need to set the Institutional Role
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    await user.click(institutionalRoleDropdown);
+
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
-  it('should not allow updating both email and institution if they match each other', async () => {
+  it('should allow updating both email and institution if they match each other', async () => {
     const contactEmail = 'user1@google.com';
     updateTargetProfile({
       verifiedInstitutionalAffiliation: {
@@ -381,47 +372,47 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      VERILY.shortName
-    );
+    const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
+    expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'verifiedInstitution'),
-      BROAD.shortName
-    );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
-      BROAD.shortName
-    );
+    await user.click(verifiedInstitutionDropdown);
+    await user.click(screen.getByText(BROAD.displayName));
+
+    expect(verifiedInstitutionDropdown.value).toEqual(BROAD.shortName);
 
     // also need to set the Institutional Role
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
+    await user.click(institutionalRoleDropdown);
+    const postDocLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.POST_DOCTORAL
+    )[0].label;
+    await user.click(screen.getByText(postDocLabel));
+    expect(institutionalRoleDropdown.value).toEqual(
       InstitutionalRole.POST_DOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POST_DOCTORAL
-    );
 
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'contactEmail'),
-      BROAD_ADDR_1
-    );
-    expect(findTextInput(wrapper, 'contactEmail').props().value).toEqual(
-      BROAD_ADDR_1
-    );
+    const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
+      name: /contact email/i,
+    });
 
-    expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
+    await user.clear(contactEmailInput);
+    await user.click(contactEmailInput);
+    await user.paste(BROAD_ADDR_1);
+    await user.tab();
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(contactEmailInput).toHaveValue(BROAD_ADDR_1);
+
+    expect(screen.queryByTestId('email-invalid')).not.toBeInTheDocument();
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should prohibit updating institutional role to Other without adding other-text', async () => {
@@ -434,94 +425,92 @@ describe('AdminUserProfile', () => {
       contactEmail,
     });
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.OTHER
-    );
-    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.OTHER
-    );
+    const institutionalRoleDropdown = getDropdown('institutionalRole');
 
-    let saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeTruthy();
+    await user.click(institutionalRoleDropdown);
+    const otherLabel = AccountCreationOptions.institutionalRoleOptions.filter(
+      (option) => option.value === InstitutionalRole.OTHER
+    )[0].label;
+    await user.click(screen.getByText(otherLabel));
+    expect(institutionalRoleDropdown.value).toEqual(InstitutionalRole.OTHER);
+
+    expectButtonElementDisabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
 
     // now update other-text
+    const institutionalRoleDescriptionInput: HTMLInputElement =
+      screen.getByRole('textbox', {
+        name: /institutional role description/i,
+      });
 
-    expect(
-      findTextInput(wrapper, 'institutionalRoleOtherText').exists()
-    ).toBeTruthy();
     const roleDetails = 'I do a science';
-    await simulateTextInputChange(
-      findTextInput(wrapper, 'institutionalRoleOtherText'),
-      roleDetails
-    );
-    expect(
-      findTextInput(wrapper, 'institutionalRoleOtherText').props().value
-    ).toEqual(roleDetails);
+    await user.clear(institutionalRoleDescriptionInput);
+    await user.click(institutionalRoleDescriptionInput);
+    await user.paste(roleDetails);
+    await user.tab();
 
-    saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(institutionalRoleDescriptionInput).toHaveValue(roleDetails);
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   it('should allow updating initial credit limit', async () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props().value
-    ).toEqual(TARGET_USER_PROFILE.freeTierDollarQuota);
+    const initialCreditsDropdown = getDropdown('initial-credits-dropdown');
+
+    expect(initialCreditsDropdown.value).toEqual(
+      TARGET_USER_PROFILE.freeTierDollarQuota.toString()
+    );
 
     const newLimit = 800.0;
     expect(newLimit).not.toEqual(TARGET_USER_PROFILE.freeTierDollarQuota); // sanity check
 
-    await simulateComponentChange(
-      wrapper,
-      findDropdown(wrapper, 'initial-credits-dropdown'),
-      newLimit
-    );
-    expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props().value
-    ).toEqual(newLimit);
+    await user.click(initialCreditsDropdown);
+    await user.click(screen.getByText(`\$${newLimit.toFixed(2)}`));
 
-    const saveButton = wrapper.find('[data-test-id="update-profile"]');
-    expect(saveButton.exists()).toBeTruthy();
-    expect(saveButton.props().disabled).toBeFalsy();
+    expect(initialCreditsDropdown.value).toEqual(newLimit.toString());
+
+    expectButtonElementEnabled(
+      screen.getByRole('button', {
+        name: /save/i,
+      })
+    );
   });
 
   function expectModuleTitlesInOrder(
     accessModules: AccessModule[],
-    tableRows: ReactWrapper
+    tableRows: HTMLElement[]
   ) {
     accessModules.forEach((moduleName, index) => {
-      const moduleRow = tableRows.at(index);
+      const moduleRow = tableRows[index];
       const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
+      expect(within(moduleRow).getByText(adminPageTitle)).toBeInTheDocument();
     });
   }
 
   it('should render the titles of all expected access modules', async () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    const table = wrapper.find('[data-test-id="access-module-table"]');
-    expect(table.exists()).toBeTruthy();
-
-    const tableRows = table.find('tbody tr[role="row"]');
-    expect(tableRows.length).toEqual(orderedAccessModules.length);
+    const table = screen.getByTestId('access-module-table');
+    const rows = within(table).getAllByRole('row');
+    rows.shift(); // remove the header row
+    expect(rows).toHaveLength(orderedAccessModules.length);
 
     // confirm that the orderedAccessModules are listed in order with expected title text
-    expectModuleTitlesInOrder(orderedAccessModules, tableRows);
+    expectModuleTitlesInOrder(orderedAccessModules, rows);
   });
 
   test.each([
@@ -592,27 +581,21 @@ describe('AdminUserProfile', () => {
           modules: [...statusesExceptThisOne, moduleStatus],
         },
       });
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
+      component();
+      await waitForNoSpinner();
 
-      const tableRows = wrapper
-        .find('[data-test-id="access-module-table"]')
-        .find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(orderedAccessModules.length);
+      const table = screen.getByTestId('access-module-table');
+      const rows = within(table).getAllByRole('row');
+      rows.shift(); // remove the header row
+      expect(rows).toHaveLength(orderedAccessModules.length);
 
       // the previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      const moduleRow = tableRows.at(orderedAccessModules.indexOf(moduleName));
+      const moduleRow = rows[orderedAccessModules.indexOf(moduleName)];
       // sanity check - this is actually the right row for this module
-      expect(
-        findNodesContainingText(moduleRow, adminPageTitle).exists()
-      ).toBeTruthy();
-
-      expect(
-        findNodesContainingText(moduleRow, expectedStatus).exists()
-      ).toBeTruthy();
+      expect(within(moduleRow).getByText(adminPageTitle)).toBeInTheDocument();
+      expect(within(moduleRow).getByText(expectedStatus)).toBeInTheDocument();
     }
   );
 
@@ -636,17 +619,16 @@ describe('AdminUserProfile', () => {
       (moduleName) => !excludedModules.includes(moduleName)
     );
 
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    const tableRows = wrapper
-      .find('[data-test-id="access-module-table"]')
-      .find('tbody tr[role="row"]');
-    expect(tableRows.length).toEqual(expectedModules.length);
+    const table = screen.getByTestId('access-module-table');
+    const rows = within(table).getAllByRole('row');
+    rows.shift(); // remove the header row
+    expect(rows).toHaveLength(expectedModules.length);
 
     // confirm that the expectedModules are listed in order with expected title text
-    expectModuleTitlesInOrder(expectedModules, tableRows);
+    expectModuleTitlesInOrder(expectedModules, rows);
   });
 
   test.each([
@@ -707,34 +689,44 @@ describe('AdminUserProfile', () => {
         tierEligibilities,
       });
 
-      const wrapper = component();
-      expect(wrapper).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
+      component();
+      await waitForNoSpinner();
 
-      const moduleTable = wrapper.find('[data-test-id="access-module-table"]');
+      const table = screen.getByTestId('access-module-table');
       expect(
-        findNodesContainingText(
-          moduleTable,
-          `requires eRA Commons for ${tiers} access`
-        ).exists()
-      ).toBeTruthy();
+        within(table).getByText(`requires eRA Commons for ${tiers} access`, {
+          exact: false,
+        })
+      ).toBeInTheDocument();
 
-      const tableRows = moduleTable.find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(orderedAccessModules.length);
+      const rows = within(table).getAllByRole('row');
+      rows.shift(); // remove the header row
+      expect(rows).toHaveLength(orderedAccessModules.length);
 
       // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
-      const eraRow = tableRows.at(
-        orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)
-      );
-      const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
+      const eraRow =
+        rows[orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)];
 
-      expect(
-        findNodesContainingText(eraBadges, 'registered-tier-badge.svg').exists()
-      ).toBe(rtBadgeExpected);
-      expect(
-        findNodesContainingText(eraBadges, 'controlled-tier-badge.svg').exists()
-      ).toBe(ctBadgeExpected);
+      if (rtBadgeExpected) {
+        expect(
+          within(eraRow).getByText('registered-tier-badge.svg')
+        ).toBeInTheDocument();
+      } else {
+        expect(
+          within(eraRow).queryByText('registered-tier-badge.svg')
+        ).not.toBeInTheDocument();
+      }
+
+      if (ctBadgeExpected) {
+        expect(
+          within(eraRow).getByText('controlled-tier-badge.svg')
+        ).toBeInTheDocument();
+      } else {
+        expect(
+          within(eraRow).queryByText('controlled-tier-badge.svg')
+        ).not.toBeInTheDocument();
+      }
     }
   );
 });
