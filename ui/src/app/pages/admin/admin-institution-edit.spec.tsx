@@ -29,15 +29,15 @@ import {
 } from 'testing/stubs/institution-api-stub';
 
 import { AdminInstitutionEdit } from './admin-institution-edit';
+import { MembershipRequirements } from './admin-institution-options';
 
 const getRTDetails = () => screen.getByTestId('registered-card-details');
 const findRTDropdown = () =>
-  screen.getByTestId('registered-agreement-dropdown').first();
+  screen.getByTestId('registered-agreement-dropdown');
 
 const getCTDetails = () => screen.getByTestId('controlled-card-details');
 const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
-const getCTDropdown = () =>
-  screen.getByTestId('controlled-agreement-dropdown').first();
+const getCTDropdown = () => screen.getByTestId('controlled-agreement-dropdown');
 
 const getCTEnabled = (): HTMLInputElement =>
   screen.getByTestId('controlled-enabled-switch');
@@ -57,11 +57,22 @@ const getCTAddressInput = () =>
   screen.getByTestId('controlled-email-address-input');
 const queryCTAddressInput = () =>
   screen.queryByTestId('controlled-email-address-input');
-const getCTDomainInput = () =>
+const getCTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-domain-input');
 
-const getSaveButton = () => screen.getByTestId('save-institution-button');
+const getSaveButton = () =>
+  screen.getByRole('button', {
+    name: /save/i,
+  });
 
+const addressesRequirementLabel = MembershipRequirements.filter(
+  (requirment) =>
+    requirment.value === InstitutionMembershipRequirement.ADDRESSES
+)[0].label;
+
+const domainsRequirementLabel = MembershipRequirements.filter(
+  (requirment) => requirment.value === InstitutionMembershipRequirement.DOMAINS
+)[0].label;
 /* const getRTAddressError = () =>
   getSaveButtonDisabled().registeredTierEmailAddresses;
 const getRTDomainError = () =>
@@ -70,6 +81,15 @@ const getCTAddressError = () =>
   getSaveButtonDisabled().controlledTierEmailAddresses;
 const findCTDomainError = () =>
   getSaveButtonDisabled().controlledTierEmailDomains;*/
+
+const selectDropdownOption = async (
+  dropdown: HTMLElement,
+  optionText: string
+) => {
+  await userEvent.click(dropdown);
+  const optionElement = within(dropdown).getByText(optionText);
+  await userEvent.click(optionElement);
+};
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
   let user;
@@ -218,38 +238,28 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(getCTAddressInput()).toHaveValue('');
   });
 
-  //   it('should update institution tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // Value before test.
-  //     expect(getRTDomainInput())).toHaveValue('verily.com,\ngoogle.com');
-  //     expect(getCTAddressInput())).toHaveValue('foo@verily.com');
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'domain.com' } });
-  //
-  //     wrapper
-  //       .find('[data-test-id="save-institution-button"]')
-  //       .first()
-  //       .simulate('click');
-  //     // RT no change
-  //     expect(getRTDomainInput())).toHaveValue(
-  //       'verily.com,\n' + 'google.com'
-  //     );
-  //     // CT changed to email domains
-  //     expect(getCTDomainInput())).toHaveValue('domain.com');
-  //     // CT email addresses become empty
-  //     expect(getCTAddressInput()).not.toBeInTheDocument();
-  //   });
-  //
+  it('should update institution tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // Value before test.
+    expect(getRTDomainInput()).toHaveValue('verily.com,\ngoogle.com');
+    expect(getCTAddressInput()).toHaveValue('foo@verily.com');
+
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+
+    await changeInputValue(getCTDomainInput(), 'domain.com', user);
+
+    await user.click(getSaveButton());
+
+    // RT no change
+    expect(getRTDomainInput()).toHaveValue('verily.com,\n' + 'google.com');
+    // CT changed to email domains
+    expect(getCTDomainInput()).toHaveValue('domain.com');
+    // CT email addresses become empty
+    expect(queryCTAddressInput()).not.toBeInTheDocument();
+  });
+
   //   it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
