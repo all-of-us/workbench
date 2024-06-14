@@ -152,6 +152,7 @@ let aborter = new AbortController();
 // This function is being used by test ONLY to abort the runtime polling so that the tests do not interfere with each
 // other
 export const getAborter = () => aborter;
+
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
@@ -195,7 +196,7 @@ export const useRuntimeStatus = (
         () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
-    aborter = new AbortController();
+
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
