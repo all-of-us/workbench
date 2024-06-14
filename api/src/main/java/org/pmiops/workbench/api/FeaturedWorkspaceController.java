@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class FeaturedWorkspaceController implements FeaturedWorkspacesApiDelegate {
+public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate {
 
   private final FeaturedWorkspaceService featuredWorkspaceService;
 

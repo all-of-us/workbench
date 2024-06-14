@@ -35,7 +35,6 @@ import {
   DiskAdminApi,
   DisksApi,
   EgressEventsAdminApi,
-  FeaturedWorkspacesApi,
   FeaturedWorkspacesConfigApi,
   InstitutionApi,
   NotebooksApi,
@@ -116,7 +115,6 @@ export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspacesConfigApi = bindCtor(
   FeaturedWorkspacesConfigApi
 );
-export const featuredWorkspacesApi = bindCtor(FeaturedWorkspacesApi);
 export const institutionApi = bindCtor(InstitutionApi);
 export const notebooksApi = bindCtor(NotebooksApi);
 export const profileApi = bindCtor(ProfileApi);
