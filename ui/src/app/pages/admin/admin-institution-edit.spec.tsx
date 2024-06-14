@@ -649,12 +649,12 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     ).toBeInTheDocument();
   });
 
-  //   it('should always show RT card details', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //     expect(getRTDetails()).toBeInTheDocument();
-  //   });
-  //
+  it('should always show RT card details', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+    expect(getRTDetails()).toBeInTheDocument();
+  });
+
   //   it('should not initially show CT card details', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
