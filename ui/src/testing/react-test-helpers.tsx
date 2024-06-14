@@ -7,6 +7,7 @@ import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 import {
+  Matcher,
   render,
   RenderOptions,
   RenderResult,
@@ -271,4 +272,14 @@ export const changeInputValue = async (
   await user.clear(inputElement);
   await user.paste(newValue);
   await user.tab();
+};
+
+export const expectTooltip = async (
+  element: HTMLElement,
+  message: Matcher,
+  user: UserEvent
+) => {
+  await user.hover(element);
+
+  expect(screen.getByText(message)).toBeInTheDocument();
 };
