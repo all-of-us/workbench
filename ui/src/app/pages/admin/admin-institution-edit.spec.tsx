@@ -38,13 +38,15 @@ const findRTDropdown = () =>
 const getCTDetails = () => screen.getByTestId('controlled-card-details');
 const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
 const getCTDropdown = () => screen.getByTestId('controlled-agreement-dropdown');
+const getRTDropdown = () => screen.getByTestId('registered-agreement-dropdown');
 
 const getCTEnabled = (): HTMLInputElement =>
   screen.getByTestId('controlled-enabled-switch');
 
 const getRTAddress = () => screen.getByTestId('registered-email-address');
-const queryRTAddress = () => screen.getByTestId('registered-email-address');
+const queryRTAddress = () => screen.queryByTestId('registered-email-address');
 const getRTDomain = () => screen.getByTestId('registered-email-domain');
+const queryRTDomain = () => screen.queryByTestId('registered-email-domain');
 const getCTAddress = () => screen.getByTestId('controlled-email-address');
 const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
 const findCTDomain = () => screen.getByTestId('controlled-email-domain');
@@ -260,31 +262,29 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(queryCTAddressInput()).not.toBeInTheDocument();
   });
 
-  //   it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with RT = DOMAINS
-  //
-  //     expect(getRTAddress()).not.toBeInTheDocument();
-  //     expect(getRTDomain()).toBeInTheDocument();
-  //
-  //     const rtEmailDomainLabel = getRTDomain().first().props().children[0];
-  //     expect(rtEmailDomainLabel.props.children).toHaveValue('Accepted Email Domains');
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       findRTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //
-  //     expect(getRTAddress()).toBeInTheDocument();
-  //     expect(getRTDomain()).not.toBeInTheDocument();
-  //
-  //     const rtEmailAddressLabel = getRTAddress().first().props().children[0];
-  //     expect(rtEmailAddressLabel.props.children).toHaveValue('Accepted Email Addresses');
-  //   });
-  //
+  it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with RT = DOMAINS
+
+    expect(queryRTAddress()).not.toBeInTheDocument();
+    expect(getRTDomain()).toBeInTheDocument();
+
+    expect(
+      within(getRTDetails()).getByText('Accepted Email Domains')
+    ).toBeInTheDocument();
+
+    await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
+
+    expect(getRTAddress()).toBeInTheDocument();
+    expect(queryRTDomain()).not.toBeInTheDocument();
+
+    expect(
+      within(getRTDetails()).getByText('Accepted Email Addresses')
+    ).toBeInTheDocument();
+  });
+
   //   it('should update RT and CT requirements simultaneously when both changed', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
