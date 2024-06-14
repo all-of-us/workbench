@@ -285,42 +285,33 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     ).toBeInTheDocument();
   });
 
-  //   it('should update RT and CT requirements simultaneously when both changed', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // VERILY inst starts with RT DOMAINS and CT ADDRS
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       findRTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-  //     getRTAddressInput().first().simulate('blur');
-  //     expect(getRTAddressInput())).toHaveValue(
-  //       'correctEmail@domain.com'
-  //     );
-  //
-  //     // one entry has an incorrect Email Domain format (whitespace)
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: { value: 'someDomain.com,\njustSomeRandom.domain,\n,' },
-  //       });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainInput())).toHaveValue(
-  //       'someDomain.com,\njustSomeRandom.domain'
-  //     );
-  //   });
+  it('should update RT and CT requirements simultaneously when both changed', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with RT DOMAINS and CT ADDRS
+
+    await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+
+    await changeInputValue(
+      getRTAddressInput(),
+      'correctEmail@domain.com',
+      user
+    );
+
+    expect(getRTAddressInput()).toHaveValue('correctEmail@domain.com');
+
+    // one entry has an incorrect Email Domain format (whitespace)
+    await changeInputValue(
+      getCTDomainInput(),
+      'someDomain.com,\njustSomeRandom.domain,\n,',
+      user
+    );
+    expect(getCTDomainInput()).toHaveValue(
+      'someDomain.com,\njustSomeRandom.domain'
+    );
+  });
   //
   //   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
   //     componentAlt();
