@@ -73,8 +73,8 @@ const getSaveButton = () =>
   });
 
 const addressesRequirementLabel = MembershipRequirements.filter(
-  (requirment) =>
-    requirment.value === InstitutionMembershipRequirement.ADDRESSES
+  (requirement) =>
+    requirement.value === InstitutionMembershipRequirement.ADDRESSES
 )[0].label;
 
 const domainsRequirementLabel = MembershipRequirements.filter(
