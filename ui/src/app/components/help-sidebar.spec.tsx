@@ -236,7 +236,7 @@ describe('HelpSidebar', () => {
     props = { pageKey: 'notebookStorage' };
     component();
     expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
-    screen.logTestingPlaygroundURL();
+
     await setActiveIcon('notebooksHelp');
 
     expect(
@@ -247,18 +247,16 @@ describe('HelpSidebar', () => {
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async () => {
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'help');
+    await component();
+    await setActiveIcon('help');
     expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe('calc(21rem + 70px)');
+      (await screen.findByTestId('sidebar-content')).parentNode
+    ).toHaveStyle({ width: 'calc(21rem + 70px)' });
 
-    await setActiveIcon(wrapper, null);
+    await setActiveIcon(null);
     expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe(0);
+      (await screen.findByTestId('sidebar-content')).parentNode
+    ).toHaveStyle({ width: 0 });
   });
 
   it('should show delete workspace modal on clicking delete workspace', async () => {
