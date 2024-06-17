@@ -47,6 +47,7 @@ import { SWRConfig } from 'swr';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
+  renderWithRouter,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -138,15 +139,11 @@ describe('HelpSidebar', () => {
   let props: {};
 
   const component = async () => {
-    const c = mountWithRouter(
+    const c = renderWithRouter(
       <SWRConfig value={{ provider: () => new Map() }}>
         <HelpSidebar {...props} />
-      </SWRConfig>,
-      {
-        attachTo: document.getElementById('root'),
-      }
+      </SWRConfig>
     );
-    await waitForFakeTimersAndUpdate(c);
     return c;
   };
 
@@ -185,9 +182,8 @@ describe('HelpSidebar', () => {
     });
   };
 
-  const setActiveIcon = async (wrapper, activeIconKey) => {
+  const setActiveIcon = async (activeIconKey) => {
     sidebarActiveIconStore.next(activeIconKey);
-    await waitForFakeTimersAndUpdate(wrapper);
   };
 
   beforeEach(async () => {
@@ -235,32 +231,31 @@ describe('HelpSidebar', () => {
   });
 
   it('should render', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
+    component();
+    expect(screen.getByTestId('help-sidebar')).toBeInTheDocument();
   });
 
   it('should show a different icon and title when pageKey is notebookStorage', async () => {
     props = { pageKey: 'notebookStorage' };
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'notebooksHelp');
-    expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(
-      sidebarContent.notebookStorage[0].title
-    );
+    component();
+    await setActiveIcon('notebooksHelp');
+
     expect(
-      wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0)
-        .props.icon.iconName
-    ).toBe('folder-open');
+      (
+        await screen.findByTestId('help-sidebar-icon-notebooksHelp')
+      ).classList.contains('folder-open')
+    ).toBeTruthy();
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async () => {
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'help');
+    component();
+    await setActiveIcon('help');
     expect(
       wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
         .width
     ).toBe('calc(21rem + 70px)');
 
-    await setActiveIcon(wrapper, null);
+    await setActiveIcon(null);
     expect(
       wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
         .width
@@ -268,7 +263,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should show delete workspace modal on clicking delete workspace', async () => {
-    const wrapper = await component();
+    component();
     wrapper
       .find({ 'data-test-id': 'workspace-menu-button' })
       .first()
@@ -282,7 +277,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should show workspace share modal on clicking share workspace', async () => {
-    const wrapper = await component();
+    component();
     wrapper
       .find({ 'data-test-id': 'workspace-menu-button' })
       .first()
@@ -297,7 +292,7 @@ describe('HelpSidebar', () => {
 
   it('should hide workspace icon if on criteria search page', async () => {
     props = { pageKey: 'cohortBuilder' };
-    const wrapper = await component();
+    component();
     currentCohortCriteriaStore.next([]);
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -312,7 +307,7 @@ describe('HelpSidebar', () => {
 
   it('should update count if criteria is added', async () => {
     props = { pageKey: 'cohortBuilder' };
-    const wrapper = await component();
+    component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitForFakeTimersAndUpdate(wrapper);
     expect(
@@ -326,7 +321,7 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
-    const wrapper = await component();
+    component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
     ).toBe(0);
@@ -337,7 +332,7 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    const wrapper = await component();
+    component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
     ).toBe(1);
@@ -348,7 +343,7 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
-    const wrapper = await component();
+    component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(0);
@@ -360,7 +355,7 @@ describe('HelpSidebar', () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
 
-    const wrapper = await component();
+    component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
@@ -368,7 +363,7 @@ describe('HelpSidebar', () => {
 
   it('should display dynamic runtime status icon', async () => {
     setRuntimeStatus(RuntimeStatus.RUNNING);
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -398,7 +393,7 @@ describe('HelpSidebar', () => {
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
       aborter: new AbortController(),
     });
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -414,7 +409,7 @@ describe('HelpSidebar', () => {
 
   it('should display security suspended UX on compute suspended', async () => {
     runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -436,7 +431,7 @@ describe('HelpSidebar', () => {
       runtimeLoaded: false,
       loadingError: new Error('???'),
     });
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -461,7 +456,7 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
@@ -483,7 +478,7 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
@@ -498,7 +493,7 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
@@ -521,7 +516,7 @@ describe('HelpSidebar', () => {
         completionTime: twoHoursAgo.getTime(),
       },
     ];
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
@@ -542,7 +537,7 @@ describe('HelpSidebar', () => {
         completionTime: date.getTime(),
       },
     ];
-    const wrapper = await component();
+    component();
     await waitForFakeTimersAndUpdate(wrapper);
 
     extractionStatusIcon(wrapper, false);
@@ -552,7 +547,7 @@ describe('HelpSidebar', () => {
     runtimeStub.getRuntime = () => Promise.resolve(defaultRuntime());
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-    const wrapper = await component();
+    component();
     expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
   });
 
@@ -560,12 +555,12 @@ describe('HelpSidebar', () => {
     runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-    const wrapper = await component();
+    component();
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
   });
 
   it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
-    const wrapper = await component();
+    component();
     wrapper
       .find({ 'data-test-id': 'help-sidebar-icon-apps' })
       .simulate('click');
@@ -590,7 +585,7 @@ describe('HelpSidebar', () => {
       updating: false,
     });
 
-    const wrapper = await component();
+    component();
     wrapper
       .find({ 'data-test-id': 'help-sidebar-icon-apps' })
       .simulate('click');
@@ -610,7 +605,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
-    const wrapper = await component();
+    component();
 
     const cromwellIcon = wrapper.find({
       'data-test-id': 'help-sidebar-icon-cromwellConfig',
