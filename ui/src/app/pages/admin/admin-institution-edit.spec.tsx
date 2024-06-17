@@ -28,47 +28,45 @@ import {
 import { AdminInstitutionEdit } from './admin-institution-edit';
 import { MembershipRequirements } from './admin-institution-options';
 
-const getRTDetails = () => screen.getByTestId('registered-card-details');
-
+const getCTAddress = () => screen.getByTestId('controlled-email-address');
+const getCTAddressInput = (): HTMLInputElement =>
+  screen.getByTestId('controlled-email-address-input');
 const getCTDetails = () => screen.getByTestId('controlled-card-details');
-const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
+const getCTDomain = () => screen.getByTestId('controlled-email-domain');
+const getCTDomainInput = (): HTMLInputElement =>
+  screen.getByTestId('controlled-email-domain-input');
 const getCTDropdown = () => screen.getByTestId('controlled-agreement-dropdown');
-const getRTDropdown = () => screen.getByTestId('registered-agreement-dropdown');
-
 const getCTEnabled = (): HTMLInputElement =>
   screen.getByTestId('controlled-enabled-switch');
 
 const getRTAddress = () => screen.getByTestId('registered-email-address');
-const queryRTAddress = () => screen.queryByTestId('registered-email-address');
-const getRTDomain = () => screen.getByTestId('registered-email-domain');
-const queryRTDomain = () => screen.queryByTestId('registered-email-domain');
-const getCTAddress = () => screen.getByTestId('controlled-email-address');
-const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
-const getCTDomain = () => screen.getByTestId('controlled-email-domain');
-const queryCTDomain = () => screen.queryByTestId('controlled-email-domain');
-
 const getRTAddressInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-address-input');
-const queryRTAddressInput = (): HTMLInputElement =>
-  screen.queryByTestId('registered-email-address-input');
+const getRTDetails = () => screen.getByTestId('registered-card-details');
+const getRTDomain = () => screen.getByTestId('registered-email-domain');
 const getRTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('registered-email-domain-input');
-const queryRTDomainInput = (): HTMLInputElement =>
-  screen.queryByTestId('registered-email-domain-input');
-const getCTAddressInput = (): HTMLInputElement =>
-  screen.getByTestId('controlled-email-address-input');
+const getRTDropdown = () => screen.getByTestId('registered-agreement-dropdown');
+
+const queryCTAddress = () => screen.queryByTestId('controlled-email-address');
 const queryCTAddressInput = () =>
   screen.queryByTestId('controlled-email-address-input');
-const getCTDomainInput = (): HTMLInputElement =>
-  screen.getByTestId('controlled-email-domain-input');
+const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
+const queryCTDomain = () => screen.queryByTestId('controlled-email-domain');
 const queryCTDomainInput = (): HTMLInputElement =>
   screen.queryByTestId('controlled-email-domain-input');
+
+const queryRTAddress = () => screen.queryByTestId('registered-email-address');
+const queryRTAddressInput = (): HTMLInputElement =>
+  screen.queryByTestId('registered-email-address-input');
+const queryRTDomain = () => screen.queryByTestId('registered-email-domain');
+const queryRTDomainInput = (): HTMLInputElement =>
+  screen.queryByTestId('registered-email-domain-input');
 
 const getAddButton = () =>
   screen.getByRole('button', {
     name: /add/i,
   });
-
 const getSaveButton = () =>
   screen.getByRole('button', {
     name: /save/i,
@@ -82,14 +80,6 @@ const addressesRequirementLabel = MembershipRequirements.filter(
 const domainsRequirementLabel = MembershipRequirements.filter(
   (requirment) => requirment.value === InstitutionMembershipRequirement.DOMAINS
 )[0].label;
-/* const getRTAddressError = () =>
-  getSaveButtonDisabled().registeredTierEmailAddresses;
-const getRTDomainError = () =>
-  getSaveButtonDisabled().registeredTierEmailDomains;
-const getCTAddressError = () =>
-  getSaveButtonDisabled().controlledTierEmailAddresses;
-const getCTDomainError = () =>
-  getSaveButtonDisabled().controlledTierEmailDomains;*/
 
 const selectDropdownOption = async (
   dropdown: HTMLElement,
