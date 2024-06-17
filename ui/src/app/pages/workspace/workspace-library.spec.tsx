@@ -18,8 +18,11 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
   mountWithRouter,
   renderWithRouter,
+  waitForNoSpinner,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
@@ -115,10 +118,10 @@ describe('WorkspaceLibrary', () => {
 
   it('should not display unpublished workspaces', async () => {
     component();
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    await waitForNoSpinner();
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList.length).toBe(0);
   });
 
@@ -128,10 +131,10 @@ describe('WorkspaceLibrary', () => {
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
     component();
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    await waitForNoSpinner();
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
@@ -144,22 +147,18 @@ describe('WorkspaceLibrary', () => {
     );
 
     component();
-    await waitOneTickAndUpdate(wrapper);
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(await screen.findByText('Phenotype Library'));
 
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList.length).toEqual(1);
 
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('a')
-      .map((c) => c.prop('style').cursor);
-    expect(styleCursor).toEqual(['not-allowed']);
+    expectButtonElementDisabled(
+      screen.getByText(PHENOTYPE_LIBRARY_WORKSPACES.name)
+    );
   });
 
   it('controlled tier workspace is clickable for ct user', async () => {
@@ -182,16 +181,10 @@ describe('WorkspaceLibrary', () => {
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
     component();
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(await screen.findByText('Phenotype Library'));
 
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('a')
-      .map((c) => c.prop('style').color);
-    expect(styleCursor).not.toEqual(colors.disabled);
+    expectButtonElementEnabled(
+      screen.getByText(PHENOTYPE_LIBRARY_WORKSPACES.name)
+    );
   });
 });
