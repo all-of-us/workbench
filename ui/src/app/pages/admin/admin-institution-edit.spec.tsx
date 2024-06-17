@@ -200,7 +200,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
-    const wrapper = component(VERILY_WITHOUT_CT.shortName);
+    component(VERILY_WITHOUT_CT.shortName);
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
 
