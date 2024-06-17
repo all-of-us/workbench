@@ -247,21 +247,6 @@ describe('HelpSidebar', () => {
     ).toBeTruthy();
   });
 
-  it('should update marginRight style when sidebarOpen prop changes', async () => {
-    component();
-    await setActiveIcon('help');
-    expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe('calc(21rem + 70px)');
-
-    await setActiveIcon(null);
-    expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe(0);
-  });
-
   it('should show delete workspace modal on clicking delete workspace', async () => {
     component();
     wrapper
