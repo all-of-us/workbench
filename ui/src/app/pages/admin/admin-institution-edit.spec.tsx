@@ -768,33 +768,30 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await user.unhover(getAddButton());
   });
 
-  //   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     expect(getCTEnabled().checked).toBeFalsy();
-  //     await user.click(getCTEnabled());
-  //     expect(getCTEnabled().checked).toBeTruthy();
-  //
-  //     await waitOneTickAndUpdate();
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       getCTDropdown(),
-  //       InstitutionMembershipRequirement.DOMAINS
-  //     );
-  //
-  //     // one entry has an incorrect Email Domain format (whitespace)
-  //     getCTDomainInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: { value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,' },
-  //       });
-  //     getCTDomainInput().first().simulate('blur');
-  //     expect(getCTDomainInput())).toHaveValue(
-  //       'validEmail.com,\njustSomeRandom.domain'
-  //     );
-  //
-  //     expect(getCTDomainError()).toBeFalsy();
-  //   });
+  it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    expect(getCTEnabled().checked).toBeFalsy();
+    await user.click(getCTEnabled());
+    expect(getCTEnabled().checked).toBeTruthy();
+    expect(getCTDetails()).toBeInTheDocument();
+    await selectDropdownOption(getCTDropdown(), domainsRequirementLabel);
+    // one entry has an incorrect Email Domain format (whitespace)
+    await changeInputValue(
+      getCTDomainInput(),
+      'validEmail.com,\n     ,\njustSomeRandom.domain,\n,',
+      user
+    );
+
+    expect(getCTDomainInput()).toHaveValue(
+      'validEmail.com,\njustSomeRandom.domain'
+    );
+
+    await user.hover(getAddButton());
+    expect(
+      screen.queryByText(/Controlled tier email domains/i)
+    ).not.toBeInTheDocument();
+    await user.unhover(getAddButton());
+  });
 });
