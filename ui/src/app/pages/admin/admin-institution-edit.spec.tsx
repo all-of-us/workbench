@@ -686,38 +686,31 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(queryCTDomainInput()).not.toBeInTheDocument();
   });
 
-  //   it('should update institution tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     // uninitialized
-  //     expect(getRTDomainInput()).not.toBeInTheDocument();
-  //     expect(getRTAddressInput()).not.toBeInTheDocument();
-  //     expect(getCTAddressInput()).not.toBeInTheDocument();
-  //     expect(getCTDomainInput()).not.toBeInTheDocument();
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       findRTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //
-  //     expect(getRTAddressInput()).toBeInTheDocument();
-  //     expect(getRTAddressInput())).toHaveValue('');
-  //
-  //     expect(getRTDomainInput()).not.toBeInTheDocument();
-  //     expect(getCTAddressInput()).not.toBeInTheDocument();
-  //     expect(getCTDomainInput()).not.toBeInTheDocument();
-  //
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'user@domain.com' } });
-  //     getRTAddressInput().first().simulate('blur');
-  //
-  //     // RT no change
-  //     expect(getRTAddressInput())).toHaveValue('user@domain.com');
-  //   });
-  //
+  it('should update institution tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    // uninitialized
+    expect(queryRTDomainInput()).not.toBeInTheDocument();
+    expect(queryRTAddressInput()).not.toBeInTheDocument();
+    expect(queryCTAddressInput()).not.toBeInTheDocument();
+    expect(queryCTDomainInput()).not.toBeInTheDocument();
+
+    await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
+
+    expect(getRTAddressInput()).toBeInTheDocument();
+    expect(getRTAddressInput()).toHaveValue('');
+
+    expect(queryRTDomainInput()).not.toBeInTheDocument();
+    expect(queryCTAddressInput()).not.toBeInTheDocument();
+    expect(queryCTDomainInput()).not.toBeInTheDocument();
+
+    await changeInputValue(getRTAddressInput(), 'user@domain.com', user);
+
+    // RT no change
+    expect(getRTAddressInput()).toHaveValue('user@domain.com');
+  });
+
   //   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
