@@ -6,6 +6,8 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   profileApi,
   registerApiClient,
@@ -17,6 +19,7 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
+  renderWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
@@ -30,6 +33,7 @@ describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
   let PHENOTYPE_LIBRARY_WORKSPACES;
   let TUTORIAL_WORKSPACE;
+  let user;
 
   const suffixes = [' Phenotype Library', ' Tutorial Workspace'];
 
@@ -39,7 +43,7 @@ describe('WorkspaceLibrary', () => {
   };
 
   const component = () => {
-    return mountWithRouter(<WorkspaceLibrary {...props} />);
+    return renderWithRouter(<WorkspaceLibrary {...props} />);
   };
 
   beforeEach(async () => {
@@ -67,11 +71,14 @@ describe('WorkspaceLibrary', () => {
 
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
+    user = userEvent.setup();
   });
 
-  it('renders', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('renders', async () => {
+    component();
+    expect(
+      await screen.findByText('Researcher Workbench Workspace Library')
+    ).toBeInTheDocument();
   });
 
   it('should display phenotype library workspaces', async () => {
@@ -79,13 +86,12 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await user.click(await screen.findByText('Phenotype Library'));
+
+    const cardNameList = screen
+      .getAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([PHENOTYPE_LIBRARY_WORKSPACES.name]);
   });
 
@@ -94,18 +100,21 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Tutorial Workspaces"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Tutorial Workspaces',
+      })
+    );
+
+    const cardNameList = screen
+      .getAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
   it('should not display unpublished workspaces', async () => {
-    const wrapper = component();
+    component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper
       .find('[data-test-id="workspace-card-name"]')
@@ -118,7 +127,7 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
+    component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper
       .find('[data-test-id="workspace-card-name"]')
@@ -134,7 +143,7 @@ describe('WorkspaceLibrary', () => {
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
 
-    const wrapper = component();
+    component();
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
@@ -172,7 +181,7 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
+    component();
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
