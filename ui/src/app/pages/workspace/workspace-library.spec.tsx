@@ -12,7 +12,6 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
@@ -20,10 +19,8 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  mountWithRouter,
   renderWithRouter,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
