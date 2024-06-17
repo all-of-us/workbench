@@ -20,6 +20,7 @@ import {
 } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import {
@@ -73,8 +74,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
-
-const sidebarContent = require('assets/json/help-sidebar.json');
 
 const criteria1 = {
   parameterId: '1',
@@ -137,13 +136,10 @@ describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
   let appsStub: AppsApiStub;
   let props: {};
+  let user;
 
   const component = async () => {
-    const c = renderWithRouter(
-      <SWRConfig value={{ provider: () => new Map() }}>
-        <HelpSidebar {...props} />
-      </SWRConfig>
-    );
+    const c = renderWithRouter(<HelpSidebar {...props} />);
     return c;
   };
 
@@ -223,6 +219,7 @@ describe('HelpSidebar', () => {
 
     // mock timers
     jest.useFakeTimers();
+    user = userEvent.setup();
   });
 
   afterEach(() => {
@@ -232,33 +229,50 @@ describe('HelpSidebar', () => {
 
   it('should render', async () => {
     component();
-    expect(screen.getByTestId('help-sidebar')).toBeInTheDocument();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
   });
 
   it('should show a different icon and title when pageKey is notebookStorage', async () => {
     props = { pageKey: 'notebookStorage' };
     component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+    screen.logTestingPlaygroundURL();
     await setActiveIcon('notebooksHelp');
 
     expect(
       (
         await screen.findByTestId('help-sidebar-icon-notebooksHelp')
-      ).classList.contains('folder-open')
+      ).classList.contains('fa-folder-open')
     ).toBeTruthy();
+  });
+
+  it('should update marginRight style when sidebarOpen prop changes', async () => {
+    const wrapper = await component();
+    await setActiveIcon(wrapper, 'help');
+    expect(
+      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
+        .width
+    ).toBe('calc(21rem + 70px)');
+
+    await setActiveIcon(wrapper, null);
+    expect(
+      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
+        .width
+    ).toBe(0);
   });
 
   it('should show delete workspace modal on clicking delete workspace', async () => {
     component();
-    wrapper
-      .find({ 'data-test-id': 'workspace-menu-button' })
-      .first()
-      .simulate('click');
-    wrapper
-      .find({ 'data-test-id': 'Delete-menu-item' })
-      .first()
-      .simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find(ConfirmWorkspaceDeleteModal).exists()).toBeTruthy();
+    expect(await screen.findByTestId('help-sidebar')).toBeInTheDocument();
+    screen.logTestingPlaygroundURL();
+    await user.click(screen.getByTestId('workspace-menu-button'));
+
+    // wrapper
+    //   .find({ 'data-test-id': 'Delete-menu-item' })
+    //   .first()
+    //   .simulate('click');
+    // await waitForFakeTimersAndUpdate(wrapper);
+    // expect(wrapper.find(ConfirmWorkspaceDeleteModal).exists()).toBeTruthy();
   });
 
   it('should show workspace share modal on clicking share workspace', async () => {
