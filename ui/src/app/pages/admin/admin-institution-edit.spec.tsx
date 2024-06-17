@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { mount } from 'enzyme';
 
 import {
   InstitutionApi,
@@ -18,10 +17,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   changeInputValue,
   expectTooltip,
-  simulateComponentChange,
-  toggleCheckbox,
   waitForNoSpinner,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
   InstitutionApiStub,
@@ -33,8 +29,6 @@ import { AdminInstitutionEdit } from './admin-institution-edit';
 import { MembershipRequirements } from './admin-institution-options';
 
 const getRTDetails = () => screen.getByTestId('registered-card-details');
-const findRTDropdown = () =>
-  screen.getByTestId('registered-agreement-dropdown');
 
 const getCTDetails = () => screen.getByTestId('controlled-card-details');
 const queryCTDetails = () => screen.queryByTestId('controlled-card-details');
@@ -119,17 +113,8 @@ export const expectTooltipAbsence = async (
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
   let user: UserEvent;
-  const component = (institutionShortName = VERILY.shortName) => {
-    return mount(
-      <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
-        <Route path='/admin/institution/edit/:institutionId'>
-          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
-      </MemoryRouter>
-    );
-  };
 
-  const componentAlt = (institutionShortName = VERILY.shortName) => {
+  const component = (institutionShortName = VERILY.shortName) => {
     return render(
       <MemoryRouter initialEntries={[getAdminUrl(institutionShortName)]}>
         <Route path='/admin/institution/edit/:institutionId'>
@@ -146,13 +131,13 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should render', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByText('Institution Name')).toBeInTheDocument();
   });
 
   it('should throw an error for existing Institution if the display name is more than 80 characters', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     const testInput = fp.repeat(83, 'a');
     const displayNameText: HTMLInputElement = screen.getByRole('textbox', {
@@ -165,25 +150,25 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should always show RT card details', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(getRTDetails()).toBeInTheDocument();
   });
 
   it('should show CT card details when institution has controlled tier access enabled', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(getCTDetails()).toBeInTheDocument();
   });
 
   it('should hide CT card details when institution has controlled tier access disabled', async () => {
-    componentAlt(VERILY_WITHOUT_CT.shortName);
+    component(VERILY_WITHOUT_CT.shortName);
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
   });
 
   it('should hide/show CT card details when controlled tier disabled/enabled', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     expect(getCTDetails()).toBeInTheDocument();
@@ -203,7 +188,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on DOMAIN', async () => {
-    componentAlt(VERILY_WITHOUT_CT.shortName);
+    component(VERILY_WITHOUT_CT.shortName);
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
 
@@ -225,7 +210,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should populate CT requirements from RT when enabling CT if RT matches on ADDRESS', async () => {
-    const wrapper = componentAlt(VERILY_WITHOUT_CT.shortName);
+    const wrapper = component(VERILY_WITHOUT_CT.shortName);
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
 
@@ -261,7 +246,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should update institution tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // Value before test.
@@ -283,7 +268,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT = DOMAINS
@@ -306,7 +291,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should update RT and CT requirements simultaneously when both changed', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS and CT ADDRS
@@ -334,7 +319,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
@@ -358,7 +343,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
@@ -405,7 +390,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
@@ -451,7 +436,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
@@ -489,7 +474,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
@@ -532,7 +517,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
@@ -551,7 +536,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
@@ -571,7 +556,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with RT DOMAINS
@@ -590,7 +575,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // VERILY inst starts with CT ADDRS
@@ -613,17 +598,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
 describe('AdminInstitutionEditSpec - add mode', () => {
   let user: UserEvent;
-  const component = () => {
-    return mount(
-      <MemoryRouter initialEntries={['/admin/institution/add']}>
-        <Route path='/admin/institution/add'>
-          <AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />
-        </Route>
-      </MemoryRouter>
-    );
-  };
 
-  const componentAlt = () => {
+  const component = () => {
     return render(
       <MemoryRouter initialEntries={['/admin/institution/add']}>
         <Route path='/admin/institution/add'>
@@ -640,13 +616,13 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('should render', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(screen.getByText('Institution Name')).toBeInTheDocument();
   });
 
   it('should throw error for a new Institution if the display name is more than 80 characters', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     const testInput = fp.repeat(83, 'a');
@@ -661,19 +637,19 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('should always show RT card details', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(getRTDetails()).toBeInTheDocument();
   });
 
   it('should not initially show CT card details', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
   });
 
   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
     expect(queryCTDetails()).not.toBeInTheDocument();
     expect(getCTEnabled().checked).toBeFalsy();
@@ -692,7 +668,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('should update institution tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     // uninitialized
@@ -717,7 +693,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
@@ -769,7 +745,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
-    componentAlt();
+    component();
     await waitForNoSpinner();
 
     expect(getCTEnabled().checked).toBeFalsy();
