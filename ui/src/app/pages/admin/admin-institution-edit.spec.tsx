@@ -70,6 +70,11 @@ const getCTDomainInput = (): HTMLInputElement =>
 const queryCTDomainInput = (): HTMLInputElement =>
   screen.queryByTestId('controlled-email-domain-input');
 
+const getAddButton = () =>
+  screen.getByRole('button', {
+    name: /add/i,
+  });
+
 const getSaveButton = () =>
   screen.getByRole('button', {
     name: /save/i,
@@ -664,7 +669,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
   it('should not initially show CT card details', async () => {
     componentAlt();
     await waitForNoSpinner();
-    expect(getCTDetails()).not.toBeInTheDocument();
+    expect(queryCTDetails()).not.toBeInTheDocument();
   });
 
   it('should hide/show CT card details when controlled tier enabled/disabled', async () => {
@@ -711,59 +716,58 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(getRTAddressInput()).toHaveValue('user@domain.com');
   });
 
-  //   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
-  //     componentAlt();
-  //     await waitForNoSpinner();
-  //
-  //     await simulateComponentChange(
-  //       wrapper,
-  //       findRTDropdown(),
-  //       InstitutionMembershipRequirement.ADDRESSES
-  //     );
-  //
-  //     expect(getRTAddressError()).toBeTruthy();
-  //     expect(getRTAddressError()[0]).toHaveValue(
-  //       'Registered tier email addresses should not be empty'
-  //     );
-  //
-  //     // In case of a single entry which is not in the correct format
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'rtInvalidEmail@domain' } });
-  //     getRTAddressInput().first().simulate('blur');
-  //     expect(getRTAddressError()[0]).toHaveValue(
-  //       'Registered tier email addresses are not valid: rtInvalidEmail@domain'
-  //     );
-  //
-  //     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', {
-  //         target: {
-  //           value:
-  //             'invalidEmail@domain@org,\n' +
-  //             'correctEmail@someDomain.org,\n' +
-  //             ' correctEmail.123.hello@someDomain567.org.com   \n' +
-  //             ' invalidEmail   ,\n' +
-  //             ' justDomain.org,\n' +
-  //             'someEmail@broadinstitute.org\n' +
-  //             'nope@just#plain#wrong',
-  //         },
-  //       });
-  //     getRTAddressInput().first().simulate('blur');
-  //     expect(getRTAddressError()[0]).toHaveValue(
-  //       'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
-  //         'justDomain.org, nope@just#plain#wrong'
-  //     );
-  //
-  //     // Single correct format Email Address entries
-  //     getRTAddressInput()
-  //       .first()
-  //       .simulate('change', { target: { value: 'correctEmail@domain.com' } });
-  //     getRTAddressInput().first().simulate('blur');
-  //     expect(getRTAddressError()).toBeFalsy();
-  //   });
-  //
+  it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
+    componentAlt();
+    await waitForNoSpinner();
+
+    await selectDropdownOption(getRTDropdown(), addressesRequirementLabel);
+    await expectTooltip(
+      getAddButton(),
+      'Registered tier email addresses should not be empty',
+      user
+    );
+
+    // In case of a single entry which is not in the correct format
+    await changeInputValue(getRTAddressInput(), 'rtInvalidEmail@domain', user);
+    await expectTooltip(
+      getAddButton(),
+      'Registered tier email addresses are not valid: rtInvalidEmail@domain',
+      user
+    );
+
+    // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
+    await changeInputValue(
+      getRTAddressInput(),
+      'invalidEmail@domain@org,\n' +
+        'correctEmail@someDomain.org,\n' +
+        ' correctEmail.123.hello@someDomain567.org.com   \n' +
+        ' invalidEmail   ,\n' +
+        ' justDomain.org,\n' +
+        'someEmail@broadinstitute.org\n' +
+        'nope@just#plain#wrong',
+      user
+    );
+    await expectTooltip(
+      getAddButton(),
+      'Registered tier email addresses are not valid: invalidEmail@domain@org, invalidEmail, ' +
+        'justDomain.org, nope@just#plain#wrong',
+      user
+    );
+
+    // Single correct format Email Address entries
+    await changeInputValue(
+      getRTAddressInput(),
+      'correctEmail@domain.com',
+      user
+    );
+
+    await user.hover(getAddButton());
+    expect(
+      screen.queryByText(/Registered tier email addresses/i)
+    ).not.toBeInTheDocument();
+    await user.unhover(getAddButton());
+  });
+
   //   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
   //     componentAlt();
   //     await waitForNoSpinner();
