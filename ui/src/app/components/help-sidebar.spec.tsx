@@ -174,6 +174,9 @@ describe('HelpSidebar', () => {
       case TerraJobStatus.FAILED:
         label = /Icon indicating extraction has failed/i;
         break;
+      case TerraJobStatus.SUCCEEDED:
+        label = /Icon indicating extraction has succeeded/i;
+        break;
     }
     return await within(
       await screen.findByTestId('extraction-status-icon-container')
@@ -198,6 +201,16 @@ describe('HelpSidebar', () => {
       .find('svg');
     expect(icon.exists()).toEqual(exists);
     return icon;
+  };
+
+  const waitForExtractionStatusIconAbsence = async () => {
+    return await waitFor(() =>
+      expect(
+        within(
+          screen.queryByTestId('extraction-status-icon-container')
+        ).queryByRole('img')
+      ).not.toBeInTheDocument()
+    );
   };
 
   const setRuntimeStatus = (status) => {
@@ -518,48 +531,44 @@ describe('HelpSidebar', () => {
     await findExtractionStatusIcon(TerraJobStatus.FAILED);
   });
 
-  // it('should display icon corresponding to most recent completed job within 24h', async () => {
-  //   const oneHourAgo = new Date();
-  //   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-  //   const twoHoursAgo = new Date();
-  //   twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
-  //   dataSetStub.extractionJobs = [
-  //     {
-  //       status: TerraJobStatus.SUCCEEDED,
-  //       completionTime: oneHourAgo.getTime(),
-  //     },
-  //     {
-  //       status: TerraJobStatus.FAILED,
-  //       completionTime: twoHoursAgo.getTime(),
-  //     },
-  //   ];
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.succeeded
-  //   );
-  // });
-  //
-  // it('should display no extract icons with old failed/succeeded jobs', async () => {
-  //   const date = new Date();
-  //   date.setMonth(date.getMonth() - 1);
-  //   dataSetStub.extractionJobs = [
-  //     {
-  //       status: TerraJobStatus.FAILED,
-  //       completionTime: date.getTime(),
-  //     },
-  //     {
-  //       status: TerraJobStatus.SUCCEEDED,
-  //       completionTime: date.getTime(),
-  //     },
-  //   ];
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   extractionStatusIcon(wrapper, false);
-  // });
-  //
+  it('should display icon corresponding to most recent completed job within 24h', async () => {
+    const oneHourAgo = new Date();
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+    const twoHoursAgo = new Date();
+    twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: oneHourAgo.getTime(),
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: twoHoursAgo.getTime(),
+      },
+    ];
+    component();
+
+    await findExtractionStatusIcon(TerraJobStatus.SUCCEEDED);
+  });
+
+  it('should display no extract icons with old failed/succeeded jobs', async () => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: date.getTime(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: date.getTime(),
+      },
+    ];
+    component();
+
+    await waitForExtractionStatusIconAbsence();
+  });
+
   // it('should automatically open previously open panel on load', async () => {
   //   runtimeStub.getRuntime = () => Promise.resolve(defaultRuntime());
   //   const activeIcon = 'apps';
