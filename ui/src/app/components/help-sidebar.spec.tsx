@@ -634,31 +634,28 @@ describe('HelpSidebar', () => {
     expectAppsPanelAbsence();
   });
 
-  // it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
-  //   userAppsStore.set({
-  //     userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
-  //     updating: false,
-  //   });
-  //
-  //   component();
-  //   wrapper
-  //     .find({ 'data-test-id': 'help-sidebar-icon-apps' })
-  //     .simulate('click');
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-  //   expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
-  //
-  //   wrapper
-  //     .find({ 'data-test-id': `Cromwell-expanded` })
-  //     .find('div[data-test-id="apps-panel-button-Settings"]')
-  //     .simulate('click');
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-  //   expect(wrapper.text()).toContain('Cromwell Cloud Environment');
-  // });
-  //
+  it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
+    userAppsStore.set({
+      userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
+      updating: false,
+    });
+
+    component();
+    await user.click(await screen.findByTestId('help-sidebar-icon-apps'));
+
+    await expectAppsPanel();
+    expectCromwellPanelAbsence();
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /cromwell/i,
+      })
+    );
+
+    await expectCromwellPanel();
+    expectAppsPanelAbsence();
+  });
+
   // it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
   //   component();
   //
