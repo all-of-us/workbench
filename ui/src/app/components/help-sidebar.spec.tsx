@@ -19,7 +19,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
@@ -144,12 +144,33 @@ describe('HelpSidebar', () => {
     return c;
   };
 
-  const runtimeStatusIcon = (wrapper, exists = true) => {
-    const icon = wrapper
-      .find({ 'data-test-id': 'runtime-status-icon-container' })
-      .find('svg');
-    expect(icon.exists()).toEqual(exists);
-    return icon;
+  const findRuntimeStatusIcon = async (status: RuntimeStatus) => {
+    let label: RegExp;
+    switch (status) {
+      case RuntimeStatus.RUNNING:
+        label = /icon indicating environment is running/i;
+        break;
+      case RuntimeStatus.DELETING:
+      case RuntimeStatus.STOPPING:
+        label = /icon indicating environment is stopping/i;
+        break;
+      case RuntimeStatus.CREATING:
+        label = /icon indicating environment is updating/i;
+        break;
+    }
+    return await screen.findByRole('img', {
+      name: label,
+    });
+  };
+
+  const waitForRuntimeStatusIconAbsence = async () => {
+    return await waitFor(() =>
+      expect(
+        within(
+          screen.queryByTestId('runtime-status-icon-container')
+        ).queryByRole('img')
+      ).not.toBeInTheDocument()
+    );
   };
 
   const extractionStatusIcon = (wrapper, exists = true) => {
@@ -353,52 +374,46 @@ describe('HelpSidebar', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should display dynamic runtime status icon', async () => {
-  //   setRuntimeStatus(RuntimeStatus.RUNNING);
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.running
-  //   );
-  //
-  //   act(() => setRuntimeStatus(RuntimeStatus.DELETING));
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.stopping
-  //   );
-  //
-  //   act(() => clearRuntime());
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //   runtimeStatusIcon(wrapper, /* exists */ false);
-  //
-  //   act(() => setRuntimeStatus(RuntimeStatus.CREATING));
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.starting
-  //   );
-  // });
-  //
-  // it('should display "starting" UX during compound runtime op with no runtime', async () => {
-  //   setRuntimeStatus(RuntimeStatus.DELETING);
-  //   registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
-  //     aborter: new AbortController(),
-  //   });
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.stopping
-  //   );
-  //
-  //   act(() => clearRuntime());
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.starting
-  //   );
-  // });
-  //
+  it('should display dynamic runtime status icon', async () => {
+    setRuntimeStatus(RuntimeStatus.RUNNING);
+    component();
+
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.RUNNING)
+    ).toBeInTheDocument();
+    act(() => setRuntimeStatus(RuntimeStatus.DELETING));
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.DELETING)
+    ).toBeInTheDocument();
+
+    act(() => clearRuntime());
+
+    await waitForRuntimeStatusIconAbsence();
+
+    act(() => setRuntimeStatus(RuntimeStatus.CREATING));
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.CREATING)
+    ).toBeInTheDocument();
+  });
+
+  it('should display "starting" UX during compound runtime op with no runtime', async () => {
+    setRuntimeStatus(RuntimeStatus.DELETING);
+    registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
+      aborter: new AbortController(),
+    });
+    component();
+
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.STOPPING)
+    ).toBeInTheDocument();
+
+    act(() => clearRuntime());
+
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.CREATING)
+    ).toBeInTheDocument();
+  });
+
   // it('should display security suspended UX on compute suspended', async () => {
   //   runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
   //   component();
