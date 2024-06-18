@@ -656,20 +656,16 @@ describe('HelpSidebar', () => {
     expectAppsPanelAbsence();
   });
 
-  // it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
-  //   component();
-  //
-  //   const cromwellIcon = wrapper.find({
-  //     'data-test-id': 'help-sidebar-icon-cromwellConfig',
-  //   });
-  //   expect(cromwellIcon.exists()).toBeTruthy();
-  //
-  //   cromwellIcon.simulate('click');
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   expect(wrapper.text()).toContain('Cromwell Cloud Environment');
-  // });
-  //
+  it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
+    component();
+
+    await user.click(
+      await screen.findByTestId('help-sidebar-icon-cromwellConfig')
+    );
+
+    await expectCromwellPanel();
+  });
+
   // it('should open the RStudio config panel after clicking the RStudio icon', async () => {
   //   await component();
   //
