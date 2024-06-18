@@ -165,6 +165,20 @@ describe('HelpSidebar', () => {
     });
   };
 
+  const findExtractionStatusIcon = async (status: TerraJobStatus) => {
+    let label: RegExp;
+    switch (status) {
+      case TerraJobStatus.ABORTING:
+        label = /Icon indicating extraction is stopping/i;
+        break;
+    }
+    return await within(
+      await screen.findByTestId('extraction-status-icon-container')
+    ).findByRole('img', {
+      name: label,
+    });
+  };
+
   const waitForRuntimeStatusIconAbsence = async () => {
     return await waitFor(() =>
       expect(
@@ -470,28 +484,25 @@ describe('HelpSidebar', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
-  //   dataSetStub.extractionJobs = [
-  //     {
-  //       status: TerraJobStatus.ABORTING,
-  //     },
-  //     {
-  //       status: TerraJobStatus.FAILED,
-  //       completionTime: Date.now(),
-  //     },
-  //     {
-  //       status: TerraJobStatus.SUCCEEDED,
-  //       completionTime: Date.now(),
-  //     },
-  //   ];
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.stopping
-  //   );
-  // });
-  //
+  it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.ABORTING,
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now(),
+      },
+    ];
+    component();
+
+    await findExtractionStatusIcon(TerraJobStatus.ABORTING);
+  });
+
   // it('should display "FAILED" icon with recent failed jobs', async () => {
   //   dataSetStub.extractionJobs = [
   //     {
