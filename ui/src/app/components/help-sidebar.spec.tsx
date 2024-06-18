@@ -423,27 +423,26 @@ describe('HelpSidebar', () => {
     ).getByTitle('Icon indicating environment is suspended');
   });
 
-  // it('should display error on unknown error', async () => {
-  //   runtimeStub.runtime = null;
-  //   runtimeStub.getRuntime = () =>
-  //     Promise.reject(
-  //       new Response('', {
-  //         status: 500,
-  //       })
-  //     );
-  //   runtimeStore.set({
-  //     workspaceNamespace: workspaceDataStub.namespace,
-  //     runtime: undefined,
-  //     runtimeLoaded: false,
-  //     loadingError: new Error('???'),
-  //   });
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.error
-  //   );
-  // });
+  it('should display error on unknown error', async () => {
+    runtimeStub.runtime = null;
+    runtimeStub.getRuntime = () =>
+      Promise.reject(
+        new Response('', {
+          status: 500,
+        })
+      );
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: undefined,
+      runtimeLoaded: false,
+      loadingError: new Error('???'),
+    });
+    component();
+
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment has encountered an error');
+  });
   //
   // it('should display "running" icon when extract currently running', async () => {
   //   dataSetStub.extractionJobs = [
