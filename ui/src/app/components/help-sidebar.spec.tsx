@@ -581,14 +581,21 @@ describe('HelpSidebar', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should not automatically open previously open panel on load if user is suspended', async () => {
-  //   runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
-  //   const activeIcon = 'apps';
-  //   localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-  //   component();
-  //   expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-  // });
-  //
+  it('should not automatically open previously open panel on load if user is suspended', async () => {
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
+    const activeIcon = 'apps';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    component();
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment is suspended');
+    expect(
+      screen.queryByRole('heading', {
+        name: /active applications/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
   // it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
   //   component();
   //   wrapper
