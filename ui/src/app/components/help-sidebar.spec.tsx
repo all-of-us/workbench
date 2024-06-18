@@ -685,16 +685,22 @@ describe('HelpSidebar', () => {
     ).toBeInTheDocument;
   });
 
-  // it('should open the SAS config panel after clicking the SAS icon', async () => {
-  //   await component();
-  //
-  //   const sasIcon = screen.queryByLabelText('SAS Icon');
-  //   expect(sasIcon).toBeInTheDocument();
-  //   expect(screen.queryByText('SAS Cloud Environment')).not.toBeInTheDocument();
-  //
-  //   sasIcon.click();
-  //   await waitFor(() =>
-  //     expect(screen.queryByText('SAS Cloud Environment')).toBeInTheDocument()
-  //   );
-  // });
+  it('should open the SAS config panel after clicking the SAS icon', async () => {
+    const sasPanelTitle = /SAS Cloud Environment/i;
+    await component();
+
+    expect(screen.queryByText(sasPanelTitle)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('img', {
+        name: /sas icon/i,
+      })
+    );
+
+    expect(
+      await screen.findByRole('heading', {
+        name: sasPanelTitle,
+      })
+    ).toBeInTheDocument;
+  });
 });
