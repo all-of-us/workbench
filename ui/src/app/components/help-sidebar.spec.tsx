@@ -666,23 +666,25 @@ describe('HelpSidebar', () => {
     await expectCromwellPanel();
   });
 
-  // it('should open the RStudio config panel after clicking the RStudio icon', async () => {
-  //   await component();
-  //
-  //   const rstudioIcon = screen.queryByLabelText('RStudio Icon');
-  //   expect(rstudioIcon).toBeInTheDocument();
-  //   expect(
-  //     screen.queryByText('RStudio Cloud Environment')
-  //   ).not.toBeInTheDocument();
-  //
-  //   rstudioIcon.click();
-  //   await waitFor(() =>
-  //     expect(
-  //       screen.queryByText('RStudio Cloud Environment')
-  //     ).toBeInTheDocument()
-  //   );
-  // });
-  //
+  it('should open the RStudio config panel after clicking the RStudio icon', async () => {
+    const rStudioPanelTitle = /RStudio Cloud Environment/i;
+    await component();
+
+    expect(screen.queryByText(rStudioPanelTitle)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('img', {
+        name: /rstudio icon/i,
+      })
+    );
+
+    expect(
+      await screen.findByRole('heading', {
+        name: rStudioPanelTitle,
+      })
+    ).toBeInTheDocument;
+  });
+
   // it('should open the SAS config panel after clicking the SAS icon', async () => {
   //   await component();
   //
