@@ -305,51 +305,54 @@ describe('HelpSidebar', () => {
     expect(await screen.findByText('2')).toBeInTheDocument();
   });
 
-  // it('should not display runtime config icon for read-only workspaces', async () => {
-  //   currentWorkspaceStore.next({
-  //     ...currentWorkspaceStore.value,
-  //     accessLevel: WorkspaceAccessLevel.READER,
-  //   });
-  //   component();
-  //   expect(
-  //     wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
-  //   ).toBe(0);
-  // });
-  //
-  // it('should display runtime config icon for writable workspaces', async () => {
-  //   currentWorkspaceStore.next({
-  //     ...currentWorkspaceStore.value,
-  //     accessLevel: WorkspaceAccessLevel.WRITER,
-  //   });
-  //   component();
-  //   expect(
-  //     wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
-  //   ).toBe(1);
-  // });
-  //
-  // it('should not display apps icon for read-only workspaces', async () => {
-  //   currentWorkspaceStore.next({
-  //     ...currentWorkspaceStore.value,
-  //     accessLevel: WorkspaceAccessLevel.READER,
-  //   });
-  //   component();
-  //   expect(
-  //     wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-  //   ).toBe(0);
-  // });
-  //
-  // it('should display apps icon for writable workspaces', async () => {
-  //   currentWorkspaceStore.next({
-  //     ...currentWorkspaceStore.value,
-  //     accessLevel: WorkspaceAccessLevel.WRITER,
-  //   });
-  //
-  //   component();
-  //   expect(
-  //     wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-  //   ).toBe(1);
-  // });
-  //
+  it('should not display runtime config icon for read-only workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.READER,
+    });
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('help-sidebar-icon-runtimeConfig')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should display runtime config icon for writable workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    component();
+    expect(
+      await screen.findByTestId('help-sidebar-icon-runtimeConfig')
+    ).toBeInTheDocument();
+  });
+
+  it('should not display apps icon for read-only workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.READER,
+    });
+
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('help-sidebar-icon-apps')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should display apps icon for writable workspaces', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+
+    component();
+    expect(
+      await screen.findByTestId('help-sidebar-icon-apps')
+    ).toBeInTheDocument();
+  });
+
   // it('should display dynamic runtime status icon', async () => {
   //   setRuntimeStatus(RuntimeStatus.RUNNING);
   //   component();
