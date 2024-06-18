@@ -6,18 +6,21 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  mountWithRouter,
-  waitOneTickAndUpdate,
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  renderWithRouter,
+  waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesConfigApiStub } from 'testing/stubs/featured-workspaces-config-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -30,6 +33,7 @@ describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
   let PHENOTYPE_LIBRARY_WORKSPACES;
   let TUTORIAL_WORKSPACE;
+  let user;
 
   const suffixes = [' Phenotype Library', ' Tutorial Workspace'];
 
@@ -39,7 +43,7 @@ describe('WorkspaceLibrary', () => {
   };
 
   const component = () => {
-    return mountWithRouter(<WorkspaceLibrary {...props} />);
+    return renderWithRouter(<WorkspaceLibrary {...props} />);
   };
 
   beforeEach(async () => {
@@ -67,11 +71,14 @@ describe('WorkspaceLibrary', () => {
 
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
+    user = userEvent.setup();
   });
 
-  it('renders', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+  it('renders', async () => {
+    component();
+    expect(
+      await screen.findByText('Researcher Workbench Workspace Library')
+    ).toBeInTheDocument();
   });
 
   it('should display phenotype library workspaces', async () => {
@@ -79,13 +86,12 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await user.click(await screen.findByText('Phenotype Library'));
+
+    const cardNameList = screen
+      .getAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([PHENOTYPE_LIBRARY_WORKSPACES.name]);
   });
 
@@ -94,22 +100,25 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Tutorial Workspaces"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Tutorial Workspaces',
+      })
+    );
+
+    const cardNameList = screen
+      .getAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
   it('should not display unpublished workspaces', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await waitForNoSpinner();
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList.length).toBe(0);
   });
 
@@ -118,11 +127,11 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    component();
+    await waitForNoSpinner();
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList).toEqual([TUTORIAL_WORKSPACE.name]);
   });
 
@@ -134,23 +143,19 @@ describe('WorkspaceLibrary', () => {
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
 
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await waitForNoSpinner();
 
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(await screen.findByText('Phenotype Library'));
 
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
+    const cardNameList = screen
+      .queryAllByTestId('workspace-card-name')
+      .map((c) => c.textContent);
     expect(cardNameList.length).toEqual(1);
 
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('a')
-      .map((c) => c.prop('style').cursor);
-    expect(styleCursor).toEqual(['not-allowed']);
+    expectButtonElementDisabled(
+      screen.getByText(PHENOTYPE_LIBRARY_WORKSPACES.name)
+    );
   });
 
   it('controlled tier workspace is clickable for ct user', async () => {
@@ -172,17 +177,11 @@ describe('WorkspaceLibrary', () => {
       WorkspacesApi,
       new WorkspacesApiStub(publishedWorkspaceStubs)
     );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await user.click(await screen.findByText('Phenotype Library'));
 
-    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    const styleCursor = wrapper
-      .find('[data-test-id="workspace-card"]')
-      .first()
-      .find('a')
-      .map((c) => c.prop('style').color);
-    expect(styleCursor).not.toEqual(colors.disabled);
+    expectButtonElementEnabled(
+      screen.getByText(PHENOTYPE_LIBRARY_WORKSPACES.name)
+    );
   });
 });

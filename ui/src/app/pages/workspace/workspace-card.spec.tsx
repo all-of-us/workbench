@@ -2,13 +2,11 @@ import * as React from 'react';
 
 import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
-import {
-  mountWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
@@ -18,13 +16,12 @@ describe('WorkspaceCard', () => {
   const reload = jest.fn();
 
   const component = (accessLevel: WorkspaceAccessLevel) => {
-    return mountWithRouter(
+    return renderWithRouter(
       <WorkspaceCard
         accessLevel={accessLevel}
         reload={reload}
         workspace={workspaceStubs[0]}
-      />,
-      { attachTo: document.getElementById('root') }
+      />
     );
   };
 
@@ -35,17 +32,14 @@ describe('WorkspaceCard', () => {
   });
 
   it('should not show locked status for workspace that has adminLocked false', async () => {
-    const wrapper = component(WorkspaceAccessLevel.OWNER);
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.exists('[data-test-id="workspace-lock"]')).toBeFalsy();
+    component(WorkspaceAccessLevel.OWNER);
+    expect(await screen.findByTestId('workspace-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('workspace-lock')).not.toBeInTheDocument();
   });
 
   it('show locked status for workspace that has adminLocked true', async () => {
     workspaceStubs[0].adminLocked = true;
-    const wrapper = component(WorkspaceAccessLevel.OWNER);
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.exists('[data-test-id="workspace-lock"]')).toBeTruthy();
+    component(WorkspaceAccessLevel.OWNER);
+    expect(await screen.findByTestId('workspace-lock')).toBeInTheDocument();
   });
 });
