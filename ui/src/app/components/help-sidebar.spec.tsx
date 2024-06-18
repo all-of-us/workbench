@@ -414,16 +414,15 @@ describe('HelpSidebar', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should display security suspended UX on compute suspended', async () => {
-  //   runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.stopped
-  //   );
-  // });
-  //
+  it('should display security suspended UX on compute suspended', async () => {
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
+    component();
+
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment is suspended');
+  });
+
   // it('should display error on unknown error', async () => {
   //   runtimeStub.runtime = null;
   //   runtimeStub.getRuntime = () =>
