@@ -74,6 +74,7 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
+import runOnlyPendingTimers = jest.runOnlyPendingTimers;
 
 const criteria1 = {
   parameterId: '1',
@@ -260,31 +261,31 @@ describe('HelpSidebar', () => {
   });
 
   it('should show delete workspace modal on clicking delete workspace', async () => {
+    jest.useRealTimers();
     component();
-    expect(await screen.findByTestId('help-sidebar')).toBeInTheDocument();
-    screen.logTestingPlaygroundURL();
-    await user.click(screen.getByTestId('workspace-menu-button'));
+    await user.click(await screen.findByLabelText('Open Actions Menu'));
 
-    // wrapper
-    //   .find({ 'data-test-id': 'Delete-menu-item' })
-    //   .first()
-    //   .simulate('click');
-    // await waitForFakeTimersAndUpdate(wrapper);
-    // expect(wrapper.find(ConfirmWorkspaceDeleteModal).exists()).toBeTruthy();
+    await user.click(
+      screen.getByRole('button', {
+        name: /delete/i,
+      })
+    );
+    expect(
+      screen.getByText(/warning — all work in this workspace will be lost\./i)
+    ).toBeInTheDocument();
   });
 
   it('should show workspace share modal on clicking share workspace', async () => {
+    jest.useRealTimers();
     component();
-    wrapper
-      .find({ 'data-test-id': 'workspace-menu-button' })
-      .first()
-      .simulate('click');
-    wrapper
-      .find({ 'data-test-id': 'Share-menu-item' })
-      .first()
-      .simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
+    await user.click(await screen.findByLabelText('Open Actions Menu'));
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /share/i,
+      })
+    );
+    expect(screen.getByText(/mock workspace share/i)).toBeInTheDocument();
   });
 
   it('should hide workspace icon if on criteria search page', async () => {
