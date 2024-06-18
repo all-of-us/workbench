@@ -171,6 +171,9 @@ describe('HelpSidebar', () => {
       case TerraJobStatus.ABORTING:
         label = /Icon indicating extraction is stopping/i;
         break;
+      case TerraJobStatus.FAILED:
+        label = /Icon indicating extraction has failed/i;
+        break;
     }
     return await within(
       await screen.findByTestId('extraction-status-icon-container')
@@ -503,21 +506,18 @@ describe('HelpSidebar', () => {
     await findExtractionStatusIcon(TerraJobStatus.ABORTING);
   });
 
-  // it('should display "FAILED" icon with recent failed jobs', async () => {
-  //   dataSetStub.extractionJobs = [
-  //     {
-  //       status: TerraJobStatus.FAILED,
-  //       completionTime: Date.now(),
-  //     },
-  //   ];
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.error
-  //   );
-  // });
-  //
+  it('should display "FAILED" icon with recent failed jobs', async () => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+    ];
+    component();
+
+    await findExtractionStatusIcon(TerraJobStatus.FAILED);
+  });
+
   // it('should display icon corresponding to most recent completed job within 24h', async () => {
   //   const oneHourAgo = new Date();
   //   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
