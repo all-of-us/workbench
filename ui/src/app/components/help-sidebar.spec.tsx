@@ -158,7 +158,9 @@ describe('HelpSidebar', () => {
         label = /icon indicating environment is updating/i;
         break;
     }
-    return await screen.findByRole('img', {
+    return await within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).findByRole('img', {
       name: label,
     });
   };
@@ -444,31 +446,30 @@ describe('HelpSidebar', () => {
     ).getByTitle('Icon indicating environment has encountered an error');
   });
   //
-  // it('should display "running" icon when extract currently running', async () => {
-  //   dataSetStub.extractionJobs = [
-  //     {
-  //       status: TerraJobStatus.RUNNING,
-  //     },
-  //     {
-  //       status: TerraJobStatus.ABORTING,
-  //     },
-  //     {
-  //       status: TerraJobStatus.FAILED,
-  //       completionTime: Date.now(),
-  //     },
-  //     {
-  //       status: TerraJobStatus.SUCCEEDED,
-  //       completionTime: Date.now(),
-  //     },
-  //   ];
-  //   component();
-  //   await waitForFakeTimersAndUpdate(wrapper);
-  //
-  //   expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-  //     colors.asyncOperationStatus.starting
-  //   );
-  // });
-  //
+  it('should display "running" icon when extract currently running', async () => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.RUNNING,
+      },
+      {
+        status: TerraJobStatus.ABORTING,
+      },
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now(),
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now(),
+      },
+    ];
+    component();
+
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.RUNNING)
+    ).toBeInTheDocument();
+  });
+
   // it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
   //   dataSetStub.extractionJobs = [
   //     {
