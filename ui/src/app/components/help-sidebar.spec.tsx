@@ -236,6 +236,42 @@ describe('HelpSidebar', () => {
     sidebarActiveIconStore.next(activeIconKey);
   };
 
+  const appsPanelTitle = /active applications/i;
+
+  const expectAppsPanel = async () => {
+    expect(
+      await screen.findByRole('heading', {
+        name: appsPanelTitle,
+      })
+    ).toBeInTheDocument;
+  };
+
+  const expectAppsPanelAbsence = () => {
+    expect(
+      screen.queryByRole('heading', {
+        name: appsPanelTitle,
+      })
+    ).not.toBeInTheDocument;
+  };
+
+  const cromwellPanelTitle = /Cromwell Cloud Environment/i;
+
+  const expectCromwellPanel = async () => {
+    expect(
+      await screen.findByRole('heading', {
+        name: cromwellPanelTitle,
+      })
+    ).toBeInTheDocument;
+  };
+
+  const expectCromwellPanelAbsence = () => {
+    expect(
+      screen.queryByRole('heading', {
+        name: cromwellPanelTitle,
+      })
+    ).not.toBeInTheDocument;
+  };
+
   beforeEach(async () => {
     props = {};
     dataSetStub = new DataSetApiStub();
@@ -574,11 +610,7 @@ describe('HelpSidebar', () => {
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
     component();
-    expect(
-      await screen.findByRole('heading', {
-        name: /active applications/i,
-      })
-    ).toBeInTheDocument();
+    await expectAppsPanel();
   });
 
   it('should not automatically open previously open panel on load if user is suspended', async () => {
@@ -589,33 +621,19 @@ describe('HelpSidebar', () => {
     within(
       await screen.findByTestId('runtime-status-icon-container')
     ).getByTitle('Icon indicating environment is suspended');
-    expect(
-      screen.queryByRole('heading', {
-        name: /active applications/i,
-      })
-    ).not.toBeInTheDocument();
+    expectAppsPanelAbsence();
   });
 
-  // it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
-  //   component();
-  //   wrapper
-  //     .find({ 'data-test-id': 'help-sidebar-icon-apps' })
-  //     .simulate('click');
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-  //   expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
-  //
-  //   wrapper
-  //     .find({ 'data-test-id': `Cromwell-unexpanded` })
-  //     .first()
-  //     .simulate('click');
-  //   await waitOneTickAndUpdate(wrapper);
-  //
-  //   expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-  //   expect(wrapper.text()).toContain('Cromwell Cloud Environment');
-  // });
-  //
+  it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
+    component();
+    await user.click(await screen.findByTestId('help-sidebar-icon-apps'));
+    await expectAppsPanel();
+    expectCromwellPanelAbsence();
+    await user.click(await screen.findByTestId('Cromwell-unexpanded'));
+    await expectCromwellPanel();
+    expectAppsPanelAbsence();
+  });
+
   // it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
   //   userAppsStore.set({
   //     userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
