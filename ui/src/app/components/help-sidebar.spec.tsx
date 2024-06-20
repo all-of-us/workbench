@@ -509,7 +509,7 @@ describe('HelpSidebar', () => {
       await screen.findByTestId('runtime-status-icon-container')
     ).getByTitle('Icon indicating environment has encountered an error');
   });
-  //
+
   it('should display "running" icon when extract currently running', async () => {
     dataSetStub.extractionJobs = [
       {
