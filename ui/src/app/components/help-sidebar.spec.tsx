@@ -147,8 +147,7 @@ describe('HelpSidebar', () => {
   };
 
   const findRuntimeStatusIcon = async (status: RuntimeStatus) => {
-    let label: RegExp;
-    label = switchCase(
+    const label: RegExp = switchCase(
       status,
       [RuntimeStatus.RUNNING, () => /icon indicating environment is running/i],
       [
