@@ -470,7 +470,7 @@ describe('HelpSidebar', () => {
     component();
 
     expect(
-      await findRuntimeStatusIcon(RuntimeStatus.STOPPING)
+      await findRuntimeStatusIcon(RuntimeStatus.DELETING)
     ).toBeInTheDocument();
 
     act(() => clearRuntime());
