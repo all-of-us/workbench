@@ -43,7 +43,6 @@ import {
   serverConfigStore,
   userAppsStore,
 } from 'app/utils/stores';
-import { SWRConfig } from 'swr';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -75,6 +74,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
 import runOnlyPendingTimers = jest.runOnlyPendingTimers;
+import { SWRConfig } from 'swr';
 
 const criteria1 = {
   parameterId: '1',
@@ -140,7 +140,17 @@ describe('HelpSidebar', () => {
   let user;
 
   const component = async () => {
-    const c = renderWithRouter(<HelpSidebar {...props} />);
+    /*
+    The useSWR hook in useGenomicExtractionJobs is causing
+    extractionJobs to carryover between tests. More details can be
+    found here:
+    https://github.com/vercel/swr/issues/781#issuecomment-952738214
+     */
+    const c = renderWithRouter(
+      <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+        <HelpSidebar {...props} />
+      </SWRConfig>
+    );
     return c;
   };
 
@@ -551,7 +561,7 @@ describe('HelpSidebar', () => {
       },
     ];
     component();
-
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     await findExtractionStatusIcon(TerraJobStatus.ABORTING);
   });
 
