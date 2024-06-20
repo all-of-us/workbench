@@ -636,9 +636,7 @@ describe(useIsUserDisabled.name, () => {
     await simulateSignIn(true);
 
     await expectDisabled(undefined);
-    await waitFor(() => {
-      expect(load).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(load).toHaveBeenCalled());
   });
 
   it('is not disabled on profile load', async () => {
