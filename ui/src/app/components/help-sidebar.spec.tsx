@@ -21,13 +21,10 @@ import {
 
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppsPanel } from 'app/components/apps-panel';
-import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
   currentCohortReviewStore,
@@ -43,14 +40,10 @@ import {
   serverConfigStore,
   userAppsStore,
 } from 'app/utils/stores';
+import { SWRConfig } from 'swr';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  mountWithRouter,
-  renderWithRouter,
-  waitForFakeTimersAndUpdate,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
@@ -73,8 +66,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
-import runOnlyPendingTimers = jest.runOnlyPendingTimers;
-import { SWRConfig } from 'swr';
 
 const criteria1 = {
   parameterId: '1',
@@ -203,14 +194,6 @@ describe('HelpSidebar', () => {
         ).queryByRole('img')
       ).not.toBeInTheDocument()
     );
-  };
-
-  const extractionStatusIcon = (wrapper, exists = true) => {
-    const icon = wrapper
-      .find({ 'data-test-id': 'extraction-status-icon-container' })
-      .find('svg');
-    expect(icon.exists()).toEqual(exists);
-    return icon;
   };
 
   const waitForExtractionStatusIconAbsence = async () => {
