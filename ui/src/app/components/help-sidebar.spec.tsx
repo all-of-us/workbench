@@ -19,6 +19,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -147,18 +148,20 @@ describe('HelpSidebar', () => {
 
   const findRuntimeStatusIcon = async (status: RuntimeStatus) => {
     let label: RegExp;
-    switch (status) {
-      case RuntimeStatus.RUNNING:
-        label = /icon indicating environment is running/i;
-        break;
-      case RuntimeStatus.DELETING:
-      case RuntimeStatus.STOPPING:
-        label = /icon indicating environment is stopping/i;
-        break;
-      case RuntimeStatus.CREATING:
-        label = /icon indicating environment is updating/i;
-        break;
-    }
+    label = switchCase(
+      status,
+      [RuntimeStatus.RUNNING, () => /icon indicating environment is running/i],
+      [
+        RuntimeStatus.DELETING,
+        () => /icon indicating environment is stopping/i,
+      ],
+      [
+        RuntimeStatus.STOPPING,
+        () => /icon indicating environment is stopping/i,
+      ],
+      [RuntimeStatus.CREATING, () => /icon indicating environment is updating/i]
+    );
+
     return await within(
       await screen.findByTestId('runtime-status-icon-container')
     ).findByRole('img', {
