@@ -673,7 +673,7 @@ describe(useIsUserDisabled.name, () => {
     // profile load fails with an unknown error
     load.mockImplementation(() => Promise.reject({}));
 
-    const wrapper = await component();
+    component();
     await simulateSignIn(true);
 
     await expectDisabled(undefined);
