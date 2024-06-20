@@ -169,18 +169,18 @@ describe('HelpSidebar', () => {
   };
 
   const findExtractionStatusIcon = async (status: TerraJobStatus) => {
-    let label: RegExp;
-    switch (status) {
-      case TerraJobStatus.ABORTING:
-        label = /Icon indicating extraction is stopping/i;
-        break;
-      case TerraJobStatus.FAILED:
-        label = /Icon indicating extraction has failed/i;
-        break;
-      case TerraJobStatus.SUCCEEDED:
-        label = /Icon indicating extraction has succeeded/i;
-        break;
-    }
+    const label: RegExp = switchCase(
+      status,
+      [
+        TerraJobStatus.ABORTING,
+        () => /Icon indicating extraction is stopping/i,
+      ],
+      [TerraJobStatus.FAILED, () => /Icon indicating extraction has failed/i],
+      [
+        TerraJobStatus.SUCCEEDED,
+        () => /Icon indicating extraction has succeeded/i,
+      ]
+    );
     return await within(
       await screen.findByTestId('extraction-status-icon-container')
     ).findByRole('img', {
