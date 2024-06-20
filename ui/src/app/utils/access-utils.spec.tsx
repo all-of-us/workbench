@@ -618,7 +618,6 @@ describe(useIsUserDisabled.name, () => {
 
   it('is undefined while loading', async () => {
     component();
-    screen.logTestingPlaygroundURL();
     await expectDisabled(undefined);
   });
 
