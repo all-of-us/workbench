@@ -185,6 +185,12 @@
       "namespace": "aou-rw-0e2ce67a",
       "id": "phenotypetype2diabetesv6",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "How to query All by All results and analysis details",
+      "namespace": "aou-rw-d9c8d06c",
+      "id": "copyofhowtoqueryallbyallresultsandanalysisdetailsdraft",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }
