@@ -387,7 +387,9 @@ describe('HelpSidebar', () => {
     props = { pageKey: 'cohortBuilder' };
     component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
-    expect(await screen.findByText('2')).toBeInTheDocument();
+    expect(
+      await within(await screen.findByTestId('criteria-count')).findByText('2')
+    ).toBeInTheDocument();
   });
 
   it('should not display runtime config icon for read-only workspaces', async () => {
