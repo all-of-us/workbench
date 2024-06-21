@@ -352,24 +352,24 @@ def deploy_tanagra(cmd_name, args)
   op.parse.validate
 
   common = Common.new
-  common.status "Token: #{op.opts.auth_token}"
-#   common.run_inline %W{
-#     ../api/project.rb deploy-tanagra
-#       --project #{op.opts.project}
-#       --account #{op.opts.account}
-#       #{op.opts.promote ? "--promote" : "--no-promote"}
-#       --quiet
-#       #{op.opts.dry_run ? "--dry-run" : ""}
-#   }
-#
-#   common.run_inline %W{
-#     ../ui/project.rb deploy-tanagra-ui
-#       --project #{op.opts.project}
-#       --account #{op.opts.account}
-#       #{op.opts.promote ? "--promote" : "--no-promote"}
-#       --quiet
-#       #{op.opts.dry_run ? "--dry-run" : ""}
-#   }
+  common.run_inline %W{
+    ../api/project.rb deploy-tanagra
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+      #{op.opts.dry_run ? "--dry-run" : ""}
+      --auth-token #{op.opts.auth_token}
+  }
+
+  common.run_inline %W{
+    ../ui/project.rb deploy-tanagra-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+      #{op.opts.dry_run ? "--dry-run" : ""}
+  }
 end
 
 Common.register_command({
