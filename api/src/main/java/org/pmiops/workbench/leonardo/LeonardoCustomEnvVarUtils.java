@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
@@ -177,12 +175,10 @@ public class LeonardoCustomEnvVarUtils {
 
   /** The general environment variables that can be used in all Apps. */
   public static Map<String, String> getBaseEnvironmentVariables(
-      DbWorkspace workspace, FireCloudService fireCloudService, WorkbenchConfig workbenchConfig) {
+      DbWorkspace workspace,
+      RawlsWorkspaceResponse fcWorkspaceResponse,
+      WorkbenchConfig workbenchConfig) {
     Map<String, String> customEnvironmentVariables = new HashMap<>();
-    RawlsWorkspaceResponse fcWorkspaceResponse =
-        fireCloudService
-            .getWorkspace(workspace)
-            .orElseThrow(() -> new NotFoundException("workspace not found"));
     customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspace.getWorkspaceNamespace());
     // This variable is already made available by Leonardo, but it's only exported in certain
     // notebooks contexts; this ensures it is always exported. See RW-7096.

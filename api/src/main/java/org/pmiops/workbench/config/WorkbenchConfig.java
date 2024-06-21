@@ -318,6 +318,8 @@ public class WorkbenchConfig {
     public boolean enableGKEAppMachineTypeChoice;
     // If true, enable variant select all
     public boolean enableVariantSelectAll;
+    // If true, enable mounting GCS buckets on GKE apps
+    public boolean enableGcsFuseOnGke;
   }
 
   public static class ActionAuditConfig {
