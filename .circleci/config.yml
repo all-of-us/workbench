@@ -692,7 +692,7 @@ jobs:
           command: |
             echo Hello Circle!
 
-  e2etests-deploy-ui:
+  e2ev2-deploy-ui:
     machine:
       image: default # latest stable version
     environment:
@@ -723,7 +723,7 @@ jobs:
             export PR_SITE_NUM
 
             ./src/circle-deploy.sh
-  e2etests-run:
+  e2ev2-run:
     machine:
       image: default # latest stable version
     environment:
@@ -1042,13 +1042,13 @@ workflows:
     jobs:
       - playground:
           <<: *filter-pr-branch
-  e2etests:
+  e2ev2:
     jobs:
-      - e2etests-deploy-ui:
+      - e2ev2-deploy-ui:
           <<: *filter-pr-branch
-      - e2etests-run:
+      - e2ev2-run:
           requires:
-            - e2etests-deploy-ui
+            - e2ev2-deploy-ui
 
   deploy-staging:
     jobs:

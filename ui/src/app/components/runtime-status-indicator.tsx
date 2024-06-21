@@ -14,6 +14,7 @@ import {
 } from 'app/utils/stores';
 
 import {
+  DeletingIcon,
   ErrorIcon,
   RunningIcon,
   StoppedIcon,
@@ -72,8 +73,9 @@ export const RuntimeStatusIndicator = fp.flow(
               return <StoppedIcon />;
             case RuntimeStatus.RUNNING:
               return <RunningIcon />;
-            case RuntimeStatus.STOPPING:
             case RuntimeStatus.DELETING:
+              return <DeletingIcon />;
+            case RuntimeStatus.STOPPING:
               return <StoppingIcon />;
             case RuntimeStatus.ERROR:
               return <ErrorIcon />;

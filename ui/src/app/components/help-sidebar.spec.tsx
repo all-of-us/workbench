@@ -19,14 +19,13 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { screen, waitFor } from '@testing-library/react';
-import { AppsPanel } from 'app/components/apps-panel';
-import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
+import { switchCase } from '@terra-ui-packages/core-utils';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
   currentCohortReviewStore,
@@ -45,11 +44,7 @@ import {
 import { SWRConfig } from 'swr';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  mountWithRouter,
-  waitForFakeTimersAndUpdate,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { renderWithRouter } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
@@ -72,8 +67,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
-
-const sidebarContent = require('assets/json/help-sidebar.json');
 
 const criteria1 = {
   parameterId: '1',
@@ -136,34 +129,83 @@ describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
   let appsStub: AppsApiStub;
   let props: {};
+  let user;
 
   const component = async () => {
-    const c = mountWithRouter(
-      <SWRConfig value={{ provider: () => new Map() }}>
+    /*
+    The useSWR hook in useGenomicExtractionJobs is causing
+    extractionJobs to carryover between tests. More details can be
+    found here:
+    https://github.com/vercel/swr/issues/781#issuecomment-952738214
+     */
+    const c = renderWithRouter(
+      <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
         <HelpSidebar {...props} />
-      </SWRConfig>,
-      {
-        attachTo: document.getElementById('root'),
-      }
+      </SWRConfig>
     );
-    await waitForFakeTimersAndUpdate(c);
     return c;
   };
 
-  const runtimeStatusIcon = (wrapper, exists = true) => {
-    const icon = wrapper
-      .find({ 'data-test-id': 'runtime-status-icon-container' })
-      .find('svg');
-    expect(icon.exists()).toEqual(exists);
-    return icon;
+  const findRuntimeStatusIcon = async (status: RuntimeStatus) => {
+    const label: RegExp = switchCase(
+      status,
+      [RuntimeStatus.RUNNING, () => /icon indicating environment is running/i],
+      [
+        RuntimeStatus.DELETING,
+        () => /icon indicating environment is deleting/i,
+      ],
+      [
+        RuntimeStatus.STOPPING,
+        () => /icon indicating environment is stopping/i,
+      ],
+      [RuntimeStatus.CREATING, () => /icon indicating environment is updating/i]
+    );
+
+    return await within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).findByRole('img', {
+      name: label,
+    });
   };
 
-  const extractionStatusIcon = (wrapper, exists = true) => {
-    const icon = wrapper
-      .find({ 'data-test-id': 'extraction-status-icon-container' })
-      .find('svg');
-    expect(icon.exists()).toEqual(exists);
-    return icon;
+  const findExtractionStatusIcon = async (status: TerraJobStatus) => {
+    const label: RegExp = switchCase(
+      status,
+      [
+        TerraJobStatus.ABORTING,
+        () => /Icon indicating extraction is stopping/i,
+      ],
+      [TerraJobStatus.FAILED, () => /Icon indicating extraction has failed/i],
+      [
+        TerraJobStatus.SUCCEEDED,
+        () => /Icon indicating extraction has succeeded/i,
+      ]
+    );
+    return await within(
+      await screen.findByTestId('extraction-status-icon-container')
+    ).findByRole('img', {
+      name: label,
+    });
+  };
+
+  const waitForRuntimeStatusIconAbsence = async () => {
+    return await waitFor(() =>
+      expect(
+        within(
+          screen.queryByTestId('runtime-status-icon-container')
+        ).queryByRole('img')
+      ).not.toBeInTheDocument()
+    );
+  };
+
+  const waitForExtractionStatusIconAbsence = async () => {
+    return await waitFor(() =>
+      expect(
+        within(
+          screen.queryByTestId('extraction-status-icon-container')
+        ).queryByRole('img')
+      ).not.toBeInTheDocument()
+    );
   };
 
   const setRuntimeStatus = (status) => {
@@ -185,9 +227,44 @@ describe('HelpSidebar', () => {
     });
   };
 
-  const setActiveIcon = async (wrapper, activeIconKey) => {
+  const setActiveIcon = async (activeIconKey) => {
     sidebarActiveIconStore.next(activeIconKey);
-    await waitForFakeTimersAndUpdate(wrapper);
+  };
+
+  const appsPanelTitle = /active applications/i;
+
+  const expectAppsPanel = async () => {
+    expect(
+      await screen.findByRole('heading', {
+        name: appsPanelTitle,
+      })
+    ).toBeInTheDocument;
+  };
+
+  const expectAppsPanelAbsence = () => {
+    expect(
+      screen.queryByRole('heading', {
+        name: appsPanelTitle,
+      })
+    ).not.toBeInTheDocument;
+  };
+
+  const cromwellPanelTitle = /Cromwell Cloud Environment/i;
+
+  const expectCromwellPanel = async () => {
+    expect(
+      await screen.findByRole('heading', {
+        name: cromwellPanelTitle,
+      })
+    ).toBeInTheDocument;
+  };
+
+  const expectCromwellPanelAbsence = () => {
+    expect(
+      screen.queryByRole('heading', {
+        name: cromwellPanelTitle,
+      })
+    ).not.toBeInTheDocument;
   };
 
   beforeEach(async () => {
@@ -225,100 +302,93 @@ describe('HelpSidebar', () => {
       updateCache: jest.fn(),
     });
 
-    // mock timers
-    jest.useFakeTimers();
+    user = userEvent.setup();
   });
 
   afterEach(() => {
     act(() => clearCompoundRuntimeOperations());
-    jest.useRealTimers();
   });
 
   it('should render', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
   });
 
   it('should show a different icon and title when pageKey is notebookStorage', async () => {
     props = { pageKey: 'notebookStorage' };
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'notebooksHelp');
-    expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(
-      sidebarContent.notebookStorage[0].title
-    );
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+
+    await setActiveIcon('notebooksHelp');
+
     expect(
-      wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0)
-        .props.icon.iconName
-    ).toBe('folder-open');
+      (
+        await screen.findByTestId('help-sidebar-icon-notebooksHelp')
+      ).classList.contains('fa-folder-open')
+    ).toBeTruthy();
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async () => {
-    const wrapper = await component();
-    await setActiveIcon(wrapper, 'help');
+    await component();
+    await setActiveIcon('help');
     expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe('calc(21rem + 70px)');
+      (await screen.findByTestId('sidebar-content')).parentNode
+    ).toHaveStyle({ width: 'calc(21rem + 70px)' });
 
-    await setActiveIcon(wrapper, null);
+    await setActiveIcon(null);
     expect(
-      wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
-        .width
-    ).toBe(0);
+      (await screen.findByTestId('sidebar-content')).parentNode
+    ).toHaveStyle({ width: 0 });
   });
 
   it('should show delete workspace modal on clicking delete workspace', async () => {
-    const wrapper = await component();
-    wrapper
-      .find({ 'data-test-id': 'workspace-menu-button' })
-      .first()
-      .simulate('click');
-    wrapper
-      .find({ 'data-test-id': 'Delete-menu-item' })
-      .first()
-      .simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find(ConfirmWorkspaceDeleteModal).exists()).toBeTruthy();
+    component();
+    await user.click(await screen.findByLabelText('Open Actions Menu'));
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /delete/i,
+      })
+    );
+    expect(
+      screen.getByText(/warning — all work in this workspace will be lost\./i)
+    ).toBeInTheDocument();
   });
 
   it('should show workspace share modal on clicking share workspace', async () => {
-    const wrapper = await component();
-    wrapper
-      .find({ 'data-test-id': 'workspace-menu-button' })
-      .first()
-      .simulate('click');
-    wrapper
-      .find({ 'data-test-id': 'Share-menu-item' })
-      .first()
-      .simulate('click');
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
+    component();
+    await user.click(await screen.findByLabelText('Open Actions Menu'));
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /share/i,
+      })
+    );
+    expect(screen.getByText(/mock workspace share/i)).toBeInTheDocument();
   });
 
   it('should hide workspace icon if on criteria search page', async () => {
     props = { pageKey: 'cohortBuilder' };
-    const wrapper = await component();
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     currentCohortCriteriaStore.next([]);
-    await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
-      wrapper.find({ 'data-test-id': 'workspace-menu-button' }).length
-    ).toBe(0);
-    expect(wrapper.find({ 'data-test-id': 'criteria-count' }).length).toBe(0);
+      screen.queryByLabelText('Open Actions Menu')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('criteria-count')).not.toBeInTheDocument();
+
     currentCohortCriteriaStore.next([criteria1]);
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find({ 'data-test-id': 'criteria-count' }).length).toBe(1);
+    expect(await screen.findByTestId('criteria-count')).toBeInTheDocument();
   });
 
   it('should update count if criteria is added', async () => {
     props = { pageKey: 'cohortBuilder' };
-    const wrapper = await component();
+    component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
-    await waitForFakeTimersAndUpdate(wrapper);
     expect(
-      wrapper.find({ 'data-test-id': 'criteria-count' }).first().props()
-        .children
-    ).toBe(2);
+      await within(await screen.findByTestId('criteria-count')).findByText('2')
+    ).toBeInTheDocument();
   });
 
   it('should not display runtime config icon for read-only workspaces', async () => {
@@ -326,10 +396,11 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
-    const wrapper = await component();
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
-    ).toBe(0);
+      screen.queryByTestId('help-sidebar-icon-runtimeConfig')
+    ).not.toBeInTheDocument();
   });
 
   it('should display runtime config icon for writable workspaces', async () => {
@@ -337,10 +408,10 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    const wrapper = await component();
+    component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-runtimeConfig' }).length
-    ).toBe(1);
+      await screen.findByTestId('help-sidebar-icon-runtimeConfig')
+    ).toBeInTheDocument();
   });
 
   it('should not display apps icon for read-only workspaces', async () => {
@@ -348,10 +419,12 @@ describe('HelpSidebar', () => {
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER,
     });
-    const wrapper = await component();
+
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-    ).toBe(0);
+      screen.queryByTestId('help-sidebar-icon-apps')
+    ).not.toBeInTheDocument();
   });
 
   it('should display apps icon for writable workspaces', async () => {
@@ -360,37 +433,32 @@ describe('HelpSidebar', () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
 
-    const wrapper = await component();
+    component();
     expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-    ).toBe(1);
+      await screen.findByTestId('help-sidebar-icon-apps')
+    ).toBeInTheDocument();
   });
 
   it('should display dynamic runtime status icon', async () => {
     setRuntimeStatus(RuntimeStatus.RUNNING);
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.running
-    );
-
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.RUNNING)
+    ).toBeInTheDocument();
     act(() => setRuntimeStatus(RuntimeStatus.DELETING));
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.stopping
-    );
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.DELETING)
+    ).toBeInTheDocument();
 
     act(() => clearRuntime());
-    await waitForFakeTimersAndUpdate(wrapper);
-    runtimeStatusIcon(wrapper, /* exists */ false);
+
+    await waitForRuntimeStatusIconAbsence();
 
     act(() => setRuntimeStatus(RuntimeStatus.CREATING));
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.starting
-    );
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.CREATING)
+    ).toBeInTheDocument();
   });
 
   it('should display "starting" UX during compound runtime op with no runtime', async () => {
@@ -398,28 +466,26 @@ describe('HelpSidebar', () => {
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
       aborter: new AbortController(),
     });
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.stopping
-    );
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.DELETING)
+    ).toBeInTheDocument();
 
     act(() => clearRuntime());
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.starting
-    );
+
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.CREATING)
+    ).toBeInTheDocument();
   });
 
   it('should display security suspended UX on compute suspended', async () => {
     runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.stopped
-    );
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment is suspended');
   });
 
   it('should display error on unknown error', async () => {
@@ -436,12 +502,11 @@ describe('HelpSidebar', () => {
       runtimeLoaded: false,
       loadingError: new Error('???'),
     });
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.error
-    );
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment has encountered an error');
   });
 
   it('should display "running" icon when extract currently running', async () => {
@@ -461,12 +526,11 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.starting
-    );
+    expect(
+      await findRuntimeStatusIcon(RuntimeStatus.RUNNING)
+    ).toBeInTheDocument();
   });
 
   it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
@@ -483,12 +547,9 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
-
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.stopping
-    );
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+    await findExtractionStatusIcon(TerraJobStatus.ABORTING);
   });
 
   it('should display "FAILED" icon with recent failed jobs', async () => {
@@ -498,12 +559,9 @@ describe('HelpSidebar', () => {
         completionTime: Date.now(),
       },
     ];
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.error
-    );
+    await findExtractionStatusIcon(TerraJobStatus.FAILED);
   });
 
   it('should display icon corresponding to most recent completed job within 24h', async () => {
@@ -521,12 +579,9 @@ describe('HelpSidebar', () => {
         completionTime: twoHoursAgo.getTime(),
       },
     ];
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(
-      colors.asyncOperationStatus.succeeded
-    );
+    await findExtractionStatusIcon(TerraJobStatus.SUCCEEDED);
   });
 
   it('should display no extract icons with old failed/succeeded jobs', async () => {
@@ -542,46 +597,38 @@ describe('HelpSidebar', () => {
         completionTime: date.getTime(),
       },
     ];
-    const wrapper = await component();
-    await waitForFakeTimersAndUpdate(wrapper);
+    component();
 
-    extractionStatusIcon(wrapper, false);
+    await waitForExtractionStatusIconAbsence();
   });
 
   it('should automatically open previously open panel on load', async () => {
     runtimeStub.getRuntime = () => Promise.resolve(defaultRuntime());
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-    const wrapper = await component();
-    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
+    component();
+    await expectAppsPanel();
   });
 
   it('should not automatically open previously open panel on load if user is suspended', async () => {
     runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-    const wrapper = await component();
-    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
+    component();
+    within(
+      await screen.findByTestId('runtime-status-icon-container')
+    ).getByTitle('Icon indicating environment is suspended');
+    expectAppsPanelAbsence();
   });
 
   it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
-    const wrapper = await component();
-    wrapper
-      .find({ 'data-test-id': 'help-sidebar-icon-apps' })
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-    expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
-
-    wrapper
-      .find({ 'data-test-id': `Cromwell-unexpanded` })
-      .first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
+    component();
+    await user.click(await screen.findByTestId('help-sidebar-icon-apps'));
+    await expectAppsPanel();
+    expectCromwellPanelAbsence();
+    await user.click(await screen.findByTestId('Cromwell-unexpanded'));
+    await expectCromwellPanel();
+    expectAppsPanelAbsence();
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
@@ -590,66 +637,67 @@ describe('HelpSidebar', () => {
       updating: false,
     });
 
-    const wrapper = await component();
-    wrapper
-      .find({ 'data-test-id': 'help-sidebar-icon-apps' })
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    component();
+    await user.click(await screen.findByTestId('help-sidebar-icon-apps'));
 
-    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-    expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
+    await expectAppsPanel();
+    expectCromwellPanelAbsence();
 
-    wrapper
-      .find({ 'data-test-id': `Cromwell-expanded` })
-      .find('div[data-test-id="apps-panel-button-Settings"]')
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    await user.click(
+      screen.getByRole('button', {
+        name: /cromwell/i,
+      })
+    );
 
-    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
+    await expectCromwellPanel();
+    expectAppsPanelAbsence();
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
-    const wrapper = await component();
+    component();
 
-    const cromwellIcon = wrapper.find({
-      'data-test-id': 'help-sidebar-icon-cromwellConfig',
-    });
-    expect(cromwellIcon.exists()).toBeTruthy();
+    await user.click(
+      await screen.findByTestId('help-sidebar-icon-cromwellConfig')
+    );
 
-    cromwellIcon.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
+    await expectCromwellPanel();
   });
 
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
+    const rStudioPanelTitle = /RStudio Cloud Environment/i;
     await component();
 
-    const rstudioIcon = screen.queryByLabelText('RStudio Icon');
-    expect(rstudioIcon).toBeInTheDocument();
-    expect(
-      screen.queryByText('RStudio Cloud Environment')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(rStudioPanelTitle)).not.toBeInTheDocument();
 
-    rstudioIcon.click();
-    await waitFor(() =>
-      expect(
-        screen.queryByText('RStudio Cloud Environment')
-      ).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('img', {
+        name: /rstudio icon/i,
+      })
     );
+
+    expect(
+      await screen.findByRole('heading', {
+        name: rStudioPanelTitle,
+      })
+    ).toBeInTheDocument;
   });
 
   it('should open the SAS config panel after clicking the SAS icon', async () => {
+    const sasPanelTitle = /SAS Cloud Environment/i;
     await component();
 
-    const sasIcon = screen.queryByLabelText('SAS Icon');
-    expect(sasIcon).toBeInTheDocument();
-    expect(screen.queryByText('SAS Cloud Environment')).not.toBeInTheDocument();
+    expect(screen.queryByText(sasPanelTitle)).not.toBeInTheDocument();
 
-    sasIcon.click();
-    await waitFor(() =>
-      expect(screen.queryByText('SAS Cloud Environment')).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('img', {
+        name: /sas icon/i,
+      })
     );
+
+    expect(
+      await screen.findByRole('heading', {
+        name: sasPanelTitle,
+      })
+    ).toBeInTheDocument;
   });
 });
