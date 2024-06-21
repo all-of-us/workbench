@@ -792,7 +792,10 @@ jobs:
     executor: tanagra-executor
     steps:
       - checkout-code
-      - gcloud-auth-login
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
 #      - add_ssh_keys:
 #          fingerprints:
 #            - "SHA256:V9ffgjQ0LUc2zI1W6NdusFDlDERSygYSEG86hhvDZeY"
