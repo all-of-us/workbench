@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -65,6 +66,7 @@ import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -242,9 +244,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
 
+    RawlsWorkspaceResponse fcWorkspaceResponse =
+        fireCloudService
+            .getWorkspace(workspace)
+            .orElseThrow(() -> new NotFoundException("workspace not found"));
     Map<String, String> customEnvironmentVariables =
         LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
-            workspace, fireCloudService, workbenchConfigProvider.get());
+            workspace, fcWorkspaceResponse, workbenchConfigProvider.get());
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
@@ -610,9 +616,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 
+    RawlsWorkspaceResponse fcWorkspaceResponse =
+        fireCloudService
+            .getWorkspace(dbWorkspace)
+            .orElseThrow(() -> new NotFoundException("workspace not found"));
+
     Map<String, String> appCustomEnvVars =
         LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
-            dbWorkspace, fireCloudService, workbenchConfigProvider.get());
+            dbWorkspace, fcWorkspaceResponse, workbenchConfigProvider.get());
     // Required by Leo to validate one App per user per workspace (namespace with workspace name)
     appCustomEnvVars.put(WORKSPACE_NAME_ENV_KEY, dbWorkspace.getFirecloudName());
 
@@ -631,6 +642,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .labels(appLabels)
         .autodeleteEnabled(createAppRequest.isAutodeleteEnabled())
         .autodeleteThreshold(createAppRequest.getAutodeleteThreshold());
+
+    if (workbenchConfigProvider.get().featureFlags.enableGcsFuseOnGke
+        && (appType.equals(AppType.RSTUDIO) || appType.equals(AppType.SAS))) {
+      leonardoCreateAppRequest.bucketNameToMount(
+          fcWorkspaceResponse.getWorkspace().getBucketName());
+    }
 
     leonardoRetryHandler.run(
         (context) -> {
