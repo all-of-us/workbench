@@ -111,6 +111,6 @@ export_({denseDateTime})
 // Currently, we don't mock Leo requests so the setCookie request always fails. This hack dismisses the error modal
 // and should be removed when we mock Leo requests.
 const dismissLeoAuthErrorModal = (page) => {
-  return page.waitForXPath("//div[@role='dialog']//div[@role='button'][contains(., 'OK')]").then(b => b.click());
+  return page.waitForSelector("div[role='dialog'] div[role='button']:contains('OK')").then(b => b.click());
 }
 export_({dismissLeoAuthErrorModal})
