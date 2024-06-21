@@ -802,7 +802,8 @@ jobs:
           command: |
             deploy/project.rb deploy-tanagra \
               --project all-of-us-workbench-test \
-              --promote
+              --promote \
+              --auth-token $TANAGRA_DEPLOY_TOKEN
 
   # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
