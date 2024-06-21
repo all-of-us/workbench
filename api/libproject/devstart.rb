@@ -2608,6 +2608,11 @@ def deploy_tanagra(cmd_name, args)
     ->(opts, _) { opts.quiet = true},
     "Don't display a confirmation prompt when deploying"
   )
+  op.add_option(
+    "--auth-token [auth-token]",
+    ->(opts, v) { opts.auth_token = v},
+    "Github token"
+  )
   op.add_validator ->(opts) { raise ArgumentError.new("promote option required") if opts.promote.nil?}
 
   gcc = GcloudContextV2.new(op)
@@ -2636,8 +2641,9 @@ def deploy_tanagra(cmd_name, args)
   common.run_inline("../ui/project.rb tanagra-dep --env #{env}")
 
   Dir.chdir('../tanagra-aou-utils/tanagra') do
+    common.status "Token: #{op.opts.auth_token}"
     common.status "Building Tanagra API..."
-    common.run_inline("./gradlew -x test -PisMySQL clean service:build")
+    common.run_inline("./gradlew -Dgradle.wrapperUser=dolbeew -Dgradle.wrapperPassword=#{op.opts.auth_token} -x test -PisMySQL clean service:build")
 
     common.status "Copying jar into appengine folder..."
     common.run_inline("mkdir -p ../appengine && cp ./service/build/libs/*SNAPSHOT.jar ../appengine/tanagraapi.jar")
