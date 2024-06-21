@@ -4,6 +4,7 @@ import { CSSProperties } from 'react';
 import { AppStatus } from 'generated/fetch';
 
 import {
+  DeletingIcon,
   ErrorIcon,
   RunningIcon,
   StoppedIcon,
@@ -34,8 +35,9 @@ export const AppStatusIndicator = (props: {
             return <StoppedIcon />;
           case AppStatus.RUNNING:
             return <RunningIcon />;
-          case AppStatus.STOPPING:
           case AppStatus.DELETING:
+            return <DeletingIcon />;
+          case AppStatus.STOPPING:
             return <StoppingIcon />;
           case AppStatus.ERROR:
             return <ErrorIcon />;

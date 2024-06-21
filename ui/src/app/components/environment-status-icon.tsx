@@ -90,3 +90,15 @@ export const StoppingIcon = () => (
     title='Icon indicating environment is stopping'
   />
 );
+
+export const DeletingIcon = () => (
+  <FontAwesomeIcon
+    icon={faSyncAlt}
+    style={{
+      ...styles.asyncOperationStatusIcon,
+      ...styles.rotate,
+      color: colors.asyncOperationStatus.stopping,
+    }}
+    title='Icon indicating environment is deleting'
+  />
+);
