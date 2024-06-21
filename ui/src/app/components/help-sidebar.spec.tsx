@@ -152,7 +152,7 @@ describe('HelpSidebar', () => {
       [RuntimeStatus.RUNNING, () => /icon indicating environment is running/i],
       [
         RuntimeStatus.DELETING,
-        () => /icon indicating environment is stopping/i,
+        () => /icon indicating environment is deleting/i,
       ],
       [
         RuntimeStatus.STOPPING,
