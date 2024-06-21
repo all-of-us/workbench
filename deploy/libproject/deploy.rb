@@ -342,7 +342,7 @@ def deploy_tanagra(cmd_name, args)
     "are still applied"
   )
   op.add_option(
-    "--auth-token",
+    "--auth-token [auth-token]",
     ->(opts, v) { opts.auth_token = v},
     "Github token"
   )
@@ -352,7 +352,7 @@ def deploy_tanagra(cmd_name, args)
   op.parse.validate
 
   common = Common.new
-  common.status "Token: #{op.opts.project}"
+  common.status "Token: #{op.opts.auth_token}"
 #   common.run_inline %W{
 #     ../api/project.rb deploy-tanagra
 #       --project #{op.opts.project}
