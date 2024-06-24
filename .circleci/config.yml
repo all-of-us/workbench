@@ -142,31 +142,6 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  gcloud-auth-login-stored-credentials:
-    description: "Activate CircleCI service account credential using GCLOUD_CREDENTIALS and GCLOUD_CREDENTIALS_KEY"
-    parameters:
-      with_application_default_credentials:
-        description: |
-          Whether to apply these credentials for Application Default Credentials (ADC).
-          This may be necessary to simulate certain local or server-side auth flows.
-          This is applied in addition to the normal behavior of this command, which activates
-          credentials e.g. for gcloud or gsutil commands.
-        type: boolean
-        default: false
-    steps:
-      - run:
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh << pipeline.parameters.circle-service-account-key >>
-      - when:
-          condition: << parameters.with_application_default_credentials >>
-          steps:
-            - run:
-                name: Export application default credentials
-                command: |
-                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=<< pipeline.parameters.circle-service-account-key >>' >> $BASH_ENV
-                  source $BASH_ENV
-                working_directory: ~/workbench
-
   # adapted from https://circleci.com/blog/openid-connect-identity-tokens/
   gcloud-auth-login-oidc:
     description: "Activate CircleCI service account credential using OIDC"
@@ -221,16 +196,21 @@ commands:
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
 
+  gcloud-auth-login-oidc-staging:
+    description: "Activate CircleCI service account credential for the Staging environment"
+    steps:
+      - gcloud-auth-login-oidc:
+          project_id: "657299777109"  # all-of-us-rw-staging
+          wip_id: "circleci-wip-staging"
+          wip_provider_id: "circleci-oidc-prv-staging"
+
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
     steps:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-oidc:
-          project_id: "657299777109"  # all-of-us-rw-staging
-          wip_id: "circleci-wip-staging"
-          wip_provider_id: "circleci-oidc-prv-staging"
+      - gcloud-auth-login-staging
       - run:
           working_directory: ~/workbench/deploy
           command: |
@@ -845,9 +825,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-      - gcloud-auth-login-stored-credentials: # required to access GCS
-          # Needed for generate-impersonated-user-token script
-          with_application_default_credentials: true
+      - gcloud-auth-login-oidc-test
       - run:
           name: "Run script: api/project.rb generate-impersonated-user-tokens"
           working_directory: ~/workbench/e2e
@@ -924,7 +902,7 @@ jobs:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
           command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
-      - gcloud-auth-login-stored-credentials  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
+      - gcloud-auth-login-oidc-test  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
       - run:
           name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
