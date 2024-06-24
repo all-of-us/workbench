@@ -600,3 +600,127 @@ Common.register_command({
                           :description => "Create datasets with TTL tables for WGS cohort extraction",
                           :fn => ->(*args) { create_wgs_extraction_datasets("create-wgs-extraction-datasets", args) }
                         })
+
+
+
+
+def publish_other_preprod_datasets(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_option(
+    "--bq-dataset [dataset]",
+    ->(opts, v) { opts.bq_dataset = v },
+    "BigQuery dataset name (project not included), e.g. " +
+      "test_apple_healthkit_ingest. Required."
+  )
+  op.opts.project = "all-of-us-rw-preprod"
+
+  op.opts.tier = "registered"
+
+  op.add_option(
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v },
+    "Optional comma-delimited list of table prefixes to filter the publish " +
+      "by, e.g. cb_,ds_. This should only be used in special situations e.g. " +
+      "when the auxilliary cb_ or ds_ tables need to be updated, or if there " +
+      "was an issue with the publish. In general, datasets should be treated as " +
+      "immutable after the initial publish."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
+  op.parse.validate
+
+  # This is a grep filter. It matches all tables, by default.
+  table_match_filter = ""
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_match_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
+
+  # This is a grep -v filter. It skips cohort builder build-only tables, which
+  # follow the convention of having the prefix prep_. See RW-4863.
+  table_skip_filter = "^prep_"
+
+  common = Common.new
+  env = ENVIRONMENTS[op.opts.project]
+  tier = env.fetch(:accessTiers)[op.opts.tier]
+  source_project = env.fetch(:source_other_datasets_project)
+  dest_fq_dataset = "#{tier.fetch(:dest_other_datasets_project)}:#{op.opts.bq_dataset}"
+
+  service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
+    bq_ingest_other_projects(tier, op.opts.tier, source_project, op.opts.bq_dataset, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+
+    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
+      auth_domain_group_emails = [tier.fetch(:auth_domain_other_datasets_email)]
+
+      for group in auth_domain_group_emails do
+        if existing_groups.include?(group)
+          common.status "#{group} already in ACL, skipping..."
+        else
+          common.status "Adding #{group} as a READER..."
+          acl_json["access"].push({
+                                    "groupByEmail" => group,
+                                    "role" => "READER"
+                                  })
+        end
+      end
+
+      app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
+      if existing_users.include?(app_sa)
+        common.status "#{app_sa} already in ACL, skipping..."
+      else
+        common.status "Adding #{app_sa} as a READER..."
+        acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER" })
+      end
+
+      acl_json
+    end
+  end
+end
+
+Common.register_command({
+                          :invocation => "publish_other_preprod_datasets",
+                          :description => "Publishes a dataset by copying it into a Firecloud project and making it readable by registered users in the corresponding environment",
+                          :fn => ->(*args) { publish_other_preprod_datasets("publish_other_preprod_datasets", args) }
+                        })
+
+
+def bq_ingest_other_projects(tier, tier_name, source_project, source_dataset_name, dest_dataset_name, table_match_filter = "", table_skip_filter = "^$")
+  common = Common.new
+  source_fq_dataset = "#{source_project}:#{source_dataset_name}"
+  ingest_fq_dataset = "#{tier.fetch(:ingest_other_datasets_project)}:#{dest_dataset_name}"
+  dest_fq_dataset = "#{tier.fetch(:dest_other_datasets_project)}:#{dest_dataset_name}"
+  common.status "Copying from '#{source_fq_dataset}' -> '#{ingest_fq_dataset}' -> '#{dest_fq_dataset}'"
+
+  # If you receive an error from "bq" like "Invalid JWT Signature", you may
+  # need to delete cached BigQuery creds on your local machine. Try running
+  # bq init --delete_credentials as recommended in the output.
+
+  # Copy through an intermediate project and delete after (include TTL in case later steps fail).
+  # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+  common.run_inline %W{bq mk -f --default_table_expiration 86400 --dataset #{ingest_fq_dataset}}
+  ingest_args = %W{./copy-bq-dataset.sh
+      #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
+  #{table_match_filter} #{table_skip_filter}}
+  ingest_dry_stdout = common.capture_stdout(ingest_args + %W{--dry-run}, nil)
+  common.run_inline ingest_args
+
+  common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
+  publish_args = %W{./copy-bq-dataset.sh
+      #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_other_datasets_project)}
+  #{table_match_filter} #{table_skip_filter}}
+  publish_dry_stdout = common.capture_stdout(publish_args + %W{--dry-run}, nil)
+
+  unless ingest_dry_stdout.lines.length == publish_dry_stdout.lines.length
+    raise RuntimeError.new(
+      "mismatched line count between ingest and publish:\n" +
+        "ingest:\n#{ingest_dry_stdout}\n" +
+        "publish:\n#{publish_dry_stdout}")
+  end
+
+  common.run_inline publish_args
+
+  # Delete the intermediate dataset.
+  common.run_inline %W{bq rm -r -f --dataset #{ingest_fq_dataset}}
+end

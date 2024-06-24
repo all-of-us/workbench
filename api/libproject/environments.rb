@@ -119,6 +119,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
+    :source_other_datasets_project => "aou-res-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
     :tanagra_tag => "0.0.504",
     :accessTiers => {
@@ -126,6 +127,9 @@ ENVIRONMENTS = {
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
         :dest_cdr_project => "fc-aou-cdr-preprod",
         :auth_domain_group_email => "all-of-us-registered-preprod@firecloud.org",
+        :ingest_other_datasets_project => "fc-aou-vpc-ingest-preprod-prev",
+        :dest_other_datasets_project => "fc-aou-cdr-preprod-preview",
+        :auth_domain_other_datasets_email => "aou-prev-data@firecloud.org",
       },
       "controlled" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod-ct",
