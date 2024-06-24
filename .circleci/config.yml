@@ -210,7 +210,7 @@ commands:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-staging
+      - gcloud-auth-login-oidc-staging
       - run:
           working_directory: ~/workbench/deploy
           command: |
