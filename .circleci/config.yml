@@ -688,13 +688,13 @@ jobs:
       - checkout-code
       - halt-test-check:
           dir_names: "ui"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Build
           working_directory: ui
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
@@ -705,7 +705,6 @@ jobs:
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
@@ -719,13 +718,13 @@ jobs:
       - checkout-code
       - halt-test-check:
           dir_names: "ui"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Run tests
           working_directory: e2ev2
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
