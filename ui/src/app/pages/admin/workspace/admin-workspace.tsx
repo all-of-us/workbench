@@ -114,7 +114,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   async callToUnPublish() {
     await workspaceAdminApi().unPublishWorkspaceByAdmin(
-        this.props.match.params.ns);
+      this.props.match.params.ns
+    );
   }
 
   render() {
@@ -177,7 +178,9 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 {serverConfigStore.get().config
                   .enableAdminPublishedWorkspaces && (
                   <div>
-                    <h2>This is temp just to verify api This is not a final UI</h2>
+                    <h2>
+                      This is temp just to verify api This is not a final UI
+                    </h2>
                     <Button
                       data-test-id='publishButton'
                       type='secondary'
@@ -188,10 +191,10 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                     </Button>
 
                     <Button
-                        data-test-id='unPublishButton'
-                        type='secondary'
-                        style={{ border: '2px solid' }}
-                        onClick={() => this.callToUnPublish()}
+                      data-test-id='unPublishButton'
+                      type='secondary'
+                      style={{ border: '2px solid' }}
+                      onClick={() => this.callToUnPublish()}
                     >
                       UnPublish Workspace
                     </Button>
