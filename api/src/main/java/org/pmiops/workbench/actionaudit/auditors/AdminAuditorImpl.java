@@ -156,4 +156,26 @@ public class AdminAuditorImpl implements AdminAuditor {
 
     actionAuditService.send(event);
   }
+
+  public void fireUnPublishWorkspaceAction(long workspaceId) {
+    DbUser dbUser = userProvider.get();
+    String actionId = actionIdProvider.get();
+    long timestamp = clock.millis();
+
+    ActionAuditEvent event =
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.EDIT)
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Published")
+            .newValueMaybe("false")
+            .timestamp(timestamp)
+            .build();
+
+    actionAuditService.send(event);
+  }
 }

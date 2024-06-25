@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -527,6 +529,22 @@ public class WorkspaceAdminServiceTest {
         w.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor).firePublishWorkspaceAction(w.getWorkspaceId());
+  }
+
+  @Test
+  public void testUnPublishWorkspaceByAdmin() {
+    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    DbFeaturedWorkspace mockFeaturedworkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .setDescription("test");
+    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
+        .thenReturn(Optional.of(mockFeaturedworkspace));
+
+    workspaceAdminService.setUnPublishWorkspaceByAdmin(w.getWorkspaceNamespace());
+    verify(mockFeaturedWorkspaceDao).delete(any());
+    verify(mockAdminAuditor).fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

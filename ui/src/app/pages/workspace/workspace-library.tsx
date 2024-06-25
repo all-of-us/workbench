@@ -289,6 +289,7 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
       try {
         const resp =
           await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
+
         this.setState((previousState) => ({
           featuredWorkspaces: resp.featuredWorkspacesList,
           pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1,

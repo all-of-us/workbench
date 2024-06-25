@@ -55,4 +55,6 @@ public interface WorkspaceAdminService {
 
   void setPublishWorkspaceByAdmin(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
+
+  void setUnPublishWorkspaceByAdmin(String workspaceNamespace);
 }

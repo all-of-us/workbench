@@ -431,17 +431,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public void setPublishWorkspaceByAdmin(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
-    final WorkspaceAccessLevel accessLevel = WorkspaceAccessLevel.READER;
-    var aclUpdate =
-        FirecloudTransforms.buildAclUpdate(
-            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
-
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
     DbFeaturedWorkspace featuredWorkspace =
         featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     featuredWorkspaceDao.save(featuredWorkspace);
     adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId());
+  }
+
+  @Override
+  public void setUnPublishWorkspaceByAdmin(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
+    featuredWorkspaceDao.findByWorkspace(dbWorkspace).ifPresent(featuredWorkspaceDao::delete);
+    adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
