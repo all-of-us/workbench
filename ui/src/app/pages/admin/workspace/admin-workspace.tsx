@@ -103,7 +103,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   async callToPublish() {
-    await workspaceAdminApi().publishWorkspaceByAdmin(
+    await workspaceAdminApi().publishWorkspaceviaDB(
       this.props.match.params.ns,
       {
         category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
@@ -113,7 +113,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   async callToUnPublish() {
-    await workspaceAdminApi().unPublishWorkspaceByAdmin(
+    await workspaceAdminApi().unPublishWorkspaceviaDB(
       this.props.match.params.ns
     );
   }

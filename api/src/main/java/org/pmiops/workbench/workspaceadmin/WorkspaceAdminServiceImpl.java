@@ -428,20 +428,32 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void setPublishWorkspaceByAdmin(
+  public void setPublishWorkspaceByDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
+    if (featuredWorkspaceDao.findByWorkspace(dbWorkspace).isPresent()) {
+      log.warning(String.format("Workspace %s is already published", workspaceNamespace));
+      return;
+    }
     DbFeaturedWorkspace featuredWorkspace =
         featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     featuredWorkspaceDao.save(featuredWorkspace);
+    log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
     adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId());
   }
 
   @Override
-  public void setUnPublishWorkspaceByAdmin(String workspaceNamespace) {
+  public void setUnPublishWorkspaceviaDB(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
-    featuredWorkspaceDao.findByWorkspace(dbWorkspace).ifPresent(featuredWorkspaceDao::delete);
+    Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
+        featuredWorkspaceDao.findByWorkspace(dbWorkspace);
+    if (!dbFeaturedWorkspace.isPresent()) {
+      log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
+      return;
+    }
+    featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
     adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
+    log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

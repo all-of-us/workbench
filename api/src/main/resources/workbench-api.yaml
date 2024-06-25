@@ -1777,7 +1777,7 @@ paths:
         - workspaceAdmin
       description: Makes a workspace public to all AoU registered users. Requires
         FEATURED_WORKSPACE_ADMIN authority.
-      operationId: publishWorkspaceByAdmin
+      operationId: publishWorkspaceviaDB
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1803,7 +1803,7 @@ paths:
       tags:
         - workspaceAdmin
       description: Removes a workspace public to all AoU registered users.
-      operationId: unPublishWorkspaceByAdmin
+      operationId: unPublishWorkspaceviaDB
       parameters:
         - name: workspaceNamespace
           in: path

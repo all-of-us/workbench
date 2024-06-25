@@ -525,14 +525,14 @@ public class WorkspaceAdminServiceTest {
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
-    workspaceAdminService.setPublishWorkspaceByAdmin(
+    workspaceAdminService.setPublishWorkspaceByDB(
         w.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor).firePublishWorkspaceAction(w.getWorkspaceId());
   }
 
   @Test
-  public void testUnPublishWorkspaceByAdmin() {
+  public void testUnPublishWorkspaceviaDb() {
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     DbFeaturedWorkspace mockFeaturedworkspace =
         new DbFeaturedWorkspace()
@@ -542,7 +542,7 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
-    workspaceAdminService.setUnPublishWorkspaceByAdmin(mockDbWorkspace.getWorkspaceNamespace());
+    workspaceAdminService.setUnPublishWorkspaceviaDB(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor).fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId());
   }
