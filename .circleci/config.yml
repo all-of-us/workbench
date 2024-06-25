@@ -133,7 +133,7 @@ executors:
     - image: << pipeline.parameters.pact-image >>
     working_directory: ~
 
-  # Docker image for Tanagra deploys that require Java 11
+  # Use Docker image for Tanagra deploys that require Java 11
   tanagra-executor:
     environment:
       <<: *env-default
@@ -796,9 +796,6 @@ jobs:
           project_id: "602460048110"  # all-of-us-workbench-test
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
-#      - add_ssh_keys:
-#          fingerprints:
-#            - "SHA256:V9ffgjQ0LUc2zI1W6NdusFDlDERSygYSEG86hhvDZeY"
       - run:
           name: Deploy Tanagra API and UI to "test" App Engine
           working_directory: ~/workbench
@@ -986,68 +983,68 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
-#      - api-lint
-#      - api-local-test
-#      - api-unit-test
-#      - ui-lint
-#      - ui-unit-test
-#      - api-bigquery-test
-#      - api-contract-test
-#      - api-integration-test
-#      Temp addition to test Tanagra job before merging
-      - tanagra-deploy-to-test
-#      - api-test-coverage:
-#          requires:
-#          - api-unit-test
-#      - ui-test-coverage:
-#          requires:
-#          - ui-unit-test
-#      - api-contract-upload:
-#          requires:
-#          - api-contract-test
+      - api-lint
+      - api-local-test
+      - api-unit-test
+      - ui-lint
+      - ui-unit-test
+      - api-bigquery-test
+      - api-contract-test
+      - api-integration-test
+      - api-test-coverage:
+          requires:
+          - api-unit-test
+      - ui-test-coverage:
+          requires:
+          - ui-unit-test
+      - api-contract-upload:
+          requires:
+          - api-contract-test
 #      - api-contract-can-i-deploy:
 #          requires:
 #          - api-contract-upload
       # Deploy to "test" on main branch merges
-#      - api-deploy-to-test:
-#          <<: *filter-main-branch
-#          requires:
-#            - api-unit-test
-#            - api-contract-upload
-#      - ui-deploy-to-test:
-#          <<: *filter-main-branch
-#          requires:
-#            - ui-unit-test
+      - api-deploy-to-test:
+          <<: *filter-main-branch
+          requires:
+            - api-unit-test
+            - api-contract-upload
+      - ui-deploy-to-test:
+          <<: *filter-main-branch
+          requires:
+            - ui-unit-test
+      - tanagra-deploy-to-test:
+          <<: *filter-main-branch
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-#      - puppeteer-env-setup
-#      - puppeteer-generate-access-tokens:
-#          env_name: "local"
-#      - puppeteer-test:
-#          <<: *filter-pr-branch
-#          env_name: "local"
-#          parallel_num: 5
-#          optional_steps:
-#            - halt-puppeteer-check
-#          requires:
-#            - puppeteer-env-setup
-#            - puppeteer-generate-access-tokens
+      - puppeteer-env-setup
+      - puppeteer-generate-access-tokens:
+          env_name: "local"
+      - puppeteer-test:
+          <<: *filter-pr-branch
+          env_name: "local"
+          parallel_num: 5
+          optional_steps:
+            - halt-puppeteer-check
+          requires:
+            - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
       # On main branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
-#      - puppeteer-test:
-#          parallel_num: 5
-#          env_name: "test"
-#          <<: *filter-main-branch
-#          requires:
-#            - puppeteer-env-setup
-#            - puppeteer-generate-access-tokens
-#            - api-deploy-to-test
-#            - ui-deploy-to-test
-#          post-steps:
-#            - gcs-load-test-results
+      - puppeteer-test:
+          parallel_num: 5
+          env_name: "test"
+          <<: *filter-main-branch
+          requires:
+            - puppeteer-env-setup
+            - puppeteer-generate-access-tokens
+            - api-deploy-to-test
+            - ui-deploy-to-test
+          post-steps:
+            - gcs-load-test-results
     # On main branch merges, update Pact Broker with the version of the Workbench repo
-#      - api-contract-update-test:
-#          <<: *filter-main-branch
-#          requires:
-#            - api-deploy-to-test
+      - api-contract-update-test:
+          <<: *filter-main-branch
+          requires:
+            - api-deploy-to-test
 
   playground:
     jobs:
