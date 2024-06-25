@@ -2641,7 +2641,6 @@ def deploy_tanagra(cmd_name, args)
   common.run_inline("../ui/project.rb tanagra-dep --env #{env}")
 
   Dir.chdir('../tanagra-aou-utils/tanagra') do
-    common.status "Token: #{op.opts.auth_token}"
     common.status "Building Tanagra API..."
     common.run_inline("GITHUB_ACTOR='dolbeew' GITHUB_TOKEN='#{op.opts.auth_token}' ./gradlew -x test -PisMySQL clean service:build")
 
