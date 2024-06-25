@@ -55,6 +55,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -472,6 +473,11 @@ public class DataSetServiceImpl implements DataSetService {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }
     return buildQueriesByDomain(dbDataset);
+  }
+
+  public Map<String, QueryJobConfiguration> tanagraDomainToBigQueryConfig(
+      DataSetRequest dataSetRequest) {
+    return null;
   }
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
@@ -892,11 +898,15 @@ public class DataSetServiceImpl implements DataSetService {
     // workspace ID.
     dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
 
+    DbCdrVersion dbCdrVersion = dbWorkspace.getCdrVersion();
+
     validateDataSetRequestResources(
-        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest(), dbCdrVersion);
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+        dbWorkspace.getCdrVersion().getTanagraEnabled()
+            ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest())
+            : domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
 
@@ -1344,13 +1354,33 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   /** Validate that the requested resources are contained by the given workspace. */
-  private void validateDataSetRequestResources(long workspaceId, DataSetRequest request) {
-    if (request.getDataSetId() != null) {
-      mustGetDbDataset(workspaceId, request.getDataSetId());
+  private void validateDataSetRequestResources(
+      long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
+    if (dbCdrVersion.getTanagraEnabled()) {
+      tanagraValidateCohortsInWorkspace(workspaceId, request.getCohortIds());
+      tanagraValidateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
     } else {
-      validateCohortsInWorkspace(workspaceId, request.getCohortIds());
-      validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+      if (request.getDataSetId() == null) {
+        throw new BadRequestException("DataSetRequest.dataSetId can not be null.");
+      } else {
+        mustGetDbDataset(workspaceId, request.getDataSetId());
+      }
     }
+  }
+
+  private void tanagraValidateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
+    if (CollectionUtils.isEmpty(cohortIds)) {
+      throw new BadRequestException("DataSetRequest.cohortIds can not be null.");
+    }
+    validateCohortsInWorkspace(workspaceId, cohortIds);
+  }
+
+  private void tanagraValidateConceptSetsInWorkspace(
+      long workspaceId, @Nullable List<Long> conceptSetIds) {
+    if (CollectionUtils.isEmpty(conceptSetIds)) {
+      throw new BadRequestException("DataSetRequest.conceptSetIds can not be null.");
+    }
+    validateConceptSetsInWorkspace(workspaceId, conceptSetIds);
   }
 
   private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
