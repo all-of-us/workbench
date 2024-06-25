@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
+
 public interface WorkspaceAdminService {
   Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace);
 
