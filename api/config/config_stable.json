@@ -115,7 +115,7 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
     "enableVariantSelectAll": true,
-    "enableGcsFuseOnGke": false
+    "enableGcsFuseOnGke": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
