@@ -281,6 +281,7 @@ interface ImmutableListItemProps {
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
+  dataTestId?: string;
 }
 const ImmutableListItem = ({
   name,
@@ -288,10 +289,11 @@ const ImmutableListItem = ({
   onChange,
   checked,
   showSourceConceptIcon,
+  dataTestId,
 }: ImmutableListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
-    <div style={styles.listItem}>
+    <div style={styles.listItem} data-test-id={dataTestId}>
       <input
         type='checkbox'
         value={name}
@@ -331,6 +333,7 @@ interface ImmutableWorkspaceCohortListItemProps {
   cohortId: number;
   namespace: string;
   wid: string;
+  dataTestId?: string;
 }
 const ImmutableWorkspaceCohortListItem = ({
   name,
@@ -339,10 +342,11 @@ const ImmutableWorkspaceCohortListItem = ({
   cohortId,
   namespace,
   wid,
+  dataTestId,
 }: ImmutableWorkspaceCohortListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
-    <div style={styles.listItem}>
+    <div style={styles.listItem} data-test-id={dataTestId}>
       <input
         type='checkbox'
         value={name}
@@ -442,6 +446,7 @@ interface ValueListItemProps {
   domain: Domain;
   domainValue: DomainValue;
   onChange: Function;
+  dataTestId?: string;
 }
 
 interface ValueListItemState {
@@ -493,7 +498,7 @@ export class ValueListItem extends React.Component<
   }
 
   render() {
-    const { checked, domainValue, onChange } = this.props;
+    const { checked, domainValue, onChange, dataTestId } = this.props;
     const {
       dataDictionaryEntry,
       dataDictionaryEntryError,
@@ -510,6 +515,7 @@ export class ValueListItem extends React.Component<
           paddingLeft: '10px',
           paddingRight: '10px',
         }}
+        data-test-id={dataTestId}
       >
         <FlexRow style={{ width: '100%' }}>
           <input
@@ -545,6 +551,7 @@ export class ValueListItem extends React.Component<
               <Clickable
                 onClick={() => this.toggleDataDictionaryEntry()}
                 data-test-id='value-list-expander'
+                propagateDataTestId
               >
                 <ClrIcon
                   shape='angle'
@@ -601,6 +608,7 @@ const PlusLink = ({
             event: e,
           });
         }}
+        propagateDataTestId
       >
         <ClrIcon
           shape='plus-circle'
@@ -1725,7 +1733,7 @@ export const DatasetPage = fp.flow(
                   <ImmutableListItem
                     name='All Participants'
                     isSubitem={false}
-                    data-test-id='all-participant'
+                    dataTestId='all-participant'
                     checked={includesAllParticipants}
                     onChange={() => selectPrePackagedCohort()}
                   />
@@ -1735,7 +1743,7 @@ export const DatasetPage = fp.flow(
                       <ImmutableWorkspaceCohortListItem
                         key={cohort.id}
                         name={cohort.name}
-                        data-test-id='cohort-list-item'
+                        dataTestId='cohort-list-item'
                         checked={selectedCohortIds.includes(cohort.id)}
                         cohortId={cohort.id}
                         namespace={namespace}
@@ -1799,7 +1807,7 @@ export const DatasetPage = fp.flow(
                         isSubitem={Object.keys(
                           PREPACKAGED_SURVEY_DOMAINS
                         ).includes(p)}
-                        data-test-id='prePackage-concept-set-item'
+                        dataTestId='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
                         onChange={() =>
@@ -1818,7 +1826,7 @@ export const DatasetPage = fp.flow(
                         key={conceptSet.id}
                         name={conceptSet.name}
                         isSubitem={false}
-                        data-test-id='concept-set-list-item'
+                        dataTestId='concept-set-list-item'
                         checked={selectedConceptSetIds.includes(conceptSet.id)}
                         onChange={() =>
                           selectConceptSet(
@@ -1874,7 +1882,7 @@ export const DatasetPage = fp.flow(
                         lineHeight: '17px',
                       }}
                     >
-                      {allValuesSelected ? 'Deselect All' : 'Select All'}
+                      {allValuesSelected() ? 'Deselect All' : 'Select All'}
                     </div>
                   </div>
                 </BoxHeader>
@@ -1906,7 +1914,7 @@ export const DatasetPage = fp.flow(
                               .get(domain)
                               .values.map((domainValue) => (
                                 <ValueListItem
-                                  data-test-id='value-list-items'
+                                  dataTestId='value-list-items'
                                   key={domainValue.value}
                                   domain={domain}
                                   domainValue={domainValue}

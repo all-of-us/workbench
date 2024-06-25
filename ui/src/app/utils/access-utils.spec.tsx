@@ -1,5 +1,6 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
@@ -9,6 +10,7 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
@@ -37,7 +39,6 @@ import {
 import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOnTimersAndUpdate } from 'testing/react-test-helpers';
 import {
   ProfileApiStub,
   ProfileStubVariables,
@@ -585,22 +586,29 @@ describe(useIsUserDisabled.name, () => {
 
   const HookConsumer = () => {
     const isUserDisabled = useIsUserDisabled();
-    return <div data-disabled={isUserDisabled} />;
+    return <div data-test-id='hookConsumer' data-disabled={isUserDisabled} />;
   };
 
   const component = async () => {
-    const wrapper = mount(<HookConsumer />);
-    await waitOnTimersAndUpdate(wrapper);
-    return wrapper;
+    return render(<HookConsumer />);
   };
 
-  const simulateSignIn = async (wrapper: ReactWrapper, isSignedIn: boolean) => {
+  const simulateSignIn = async (isSignedIn: boolean) => {
     authStore.set({ authLoaded: true, isSignedIn });
-    await waitOnTimersAndUpdate(wrapper);
   };
 
-  const getDisabled = (wrapper: ReactWrapper) => {
-    return wrapper.childAt(0).prop('data-disabled');
+  const expectDisabled = async (expectedValue: boolean | undefined) => {
+    await waitFor(() => {
+      const element = screen.getByTestId('hookConsumer');
+      if (expectedValue === undefined) {
+        expect(element).not.toHaveAttribute('data-disabled');
+      } else {
+        expect(element).toHaveAttribute(
+          'data-disabled',
+          expectedValue.toString()
+        );
+      }
+    });
   };
 
   beforeEach(() => {
@@ -609,37 +617,36 @@ describe(useIsUserDisabled.name, () => {
   });
 
   it('is undefined while loading', async () => {
-    const wrapper = await component();
-
-    expect(getDisabled(wrapper)).toBe(undefined);
+    component();
+    await expectDisabled(undefined);
   });
 
   it('is not disabled for unauthenticated user', async () => {
-    const wrapper = await component();
+    component();
 
-    await simulateSignIn(wrapper, false);
-    expect(getDisabled(wrapper)).toBe(false);
+    await simulateSignIn(false);
+    await expectDisabled(false);
   });
 
   it('is undefined during profile load', async () => {
     // profile load blocks forever
     load.mockImplementation(() => new Promise(() => {}));
 
-    const wrapper = await component();
-    await simulateSignIn(wrapper, true);
+    component();
+    await simulateSignIn(true);
 
-    expect(getDisabled(wrapper)).toBe(undefined);
-    expect(load).toHaveBeenCalled();
+    await expectDisabled(undefined);
+    await waitFor(() => expect(load).toHaveBeenCalled());
   });
 
   it('is not disabled on profile load', async () => {
     // profile load finishes immediately
     load.mockImplementation(() => Promise.resolve({}));
 
-    const wrapper = await component();
-    await simulateSignIn(wrapper, true);
+    component();
+    await simulateSignIn(true);
 
-    expect(getDisabled(wrapper)).toBe(false);
+    await expectDisabled(false);
   });
 
   it('is disabled on profile disabled error', async () => {
@@ -654,20 +661,20 @@ describe(useIsUserDisabled.name, () => {
       )
     );
 
-    const wrapper = await component();
-    await simulateSignIn(wrapper, true);
+    component();
+    await simulateSignIn(true);
 
-    expect(getDisabled(wrapper)).toBe(true);
+    await expectDisabled(true);
   });
 
   it('is undefined on other profile errors', async () => {
     // profile load fails with an unknown error
     load.mockImplementation(() => Promise.reject({}));
 
-    const wrapper = await component();
-    await simulateSignIn(wrapper, true);
+    component();
+    await simulateSignIn(true);
 
-    expect(getDisabled(wrapper)).toBe(undefined);
+    await expectDisabled(undefined);
   });
 });
 

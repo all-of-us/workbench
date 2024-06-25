@@ -2154,7 +2154,12 @@ components:
       properties:
         runtimeConfig:
           type: object
-          description: oneOf GceConfig, GceWithPdConfig, MachineConfig
+          description: oneOf UpdateGceConfig, UpdateDataprocConfig
+          discriminator:
+            propertyName: cloudService
+            mapping:
+              gce: "#/components/schemas/UpdateGceConfig"
+              dataproc: "#/components/schemas/UpdateDataprocConfig"
         allowStop:
           type: boolean
           description: Whether leo should stop the runtime if it is necessary for the
@@ -2537,6 +2542,12 @@ components:
         autodeleteEnabled:
           type: boolean
           description: Whether to turn on autodelete
+        autopilot:
+          $ref: '#/components/schemas/Autopilot'
+        bucketNameToMount:
+          type: string
+          description: >
+            The GCS bucket name (without gs://) that will be mounted in the app if present. 
 
     GetAppResponse:
       description: the configuration of an app
@@ -2639,6 +2650,20 @@ components:
         cloudResource:
           type: string
           description: Cloud resource name. Google project if cloud provider is GCP OR Azure's tenantId/subscriptionId/managedResourceGroupId if in Azure
+
+    Autopilot:
+      description: Defines app's Autopilot configuration
+      type: object
+      properties:
+        cpuInMillicores:
+          type: integer
+          description: Number of CPUs in autopilot mode measured in millicores. For example, 500m refers to half a core of computing processing time. 2000m is 2 cores.
+        memoryInGb:
+          type: integer
+          description: memory in GB.
+        ephemeralStorageInGb:
+          type: integer
+          description: ephemeral storage size in GB.
 
     KubernetesRuntimeConfig:
       description: configuration for a kubernetes app runtime

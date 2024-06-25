@@ -320,6 +320,8 @@ public class WorkbenchConfig {
     public boolean enableVariantSelectAll;
     // If True, use featuredWorksapce Database to get data
     public boolean enableAdminPublishedWorkspaces;
+    // If true, enable mounting GCS buckets on GKE apps
+    public boolean enableGcsFuseOnGke;
   }
 
   public static class ActionAuditConfig {

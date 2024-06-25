@@ -115,7 +115,8 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
     "enableVariantSelectAll": true,
-    "enableAdminPublishedWorkspaces": false
+    "enableAdminPublishedWorkspaces": false,
+    "enableGcsFuseOnGke": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

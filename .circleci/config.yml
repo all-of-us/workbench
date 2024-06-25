@@ -9,6 +9,7 @@ orbs:
   queue: eddiewebb/queue@2.2.1
   coverage-reporter: codacy/coverage-reporter@13.13.7
   pact: trustedshops-public/pact@3.0.1
+  gcp-cli: circleci/gcp-cli@3.2.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -17,6 +18,9 @@ parameters:
   circle-service-account:
     type: string
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
+  circle-service-account-key:
+    type: string
+    default: "/home/circleci/circle-sa-key.json"
   workbench-image:
     type: string
     default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.28"
@@ -138,28 +142,8 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  deploy-to-staging-command:
-    description: "Deploy API and UI to staging App Engine"
-    steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - run:
-          working_directory: ~/workbench/deploy
-          command: |
-            ./project.rb deploy \
-              --project all-of-us-rw-staging \
-              --account << pipeline.parameters.circle-service-account >> \
-              --git-version "${CIRCLE_TAG}" \
-              --app-version "${CIRCLE_TAG}" \
-              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
-              --key-file ~/workbench/api/circle-sa-key.json \
-              --promote
-          name: Deploy API and UI to all-of-us-rw-staging App Engine
-
-  gcloud-auth-login:
-    description: "Activate CircleCI service account credential"
+  gcloud-auth-login-stored-credentials:
+    description: "Activate CircleCI service account credential using GCLOUD_CREDENTIALS and GCLOUD_CREDENTIALS_KEY"
     parameters:
       with_application_default_credentials:
         description: |
@@ -172,16 +156,85 @@ commands:
     steps:
       - run:
           working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
+          command: ci/activate_creds.sh << pipeline.parameters.circle-service-account-key >>
       - when:
           condition: << parameters.with_application_default_credentials >>
           steps:
             - run:
                 name: Export application default credentials
                 command: |
-                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
+                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=<< pipeline.parameters.circle-service-account-key >>' >> $BASH_ENV
                   source $BASH_ENV
                 working_directory: ~/workbench
+
+  # adapted from https://circleci.com/blog/openid-connect-identity-tokens/
+  gcloud-auth-login-oidc:
+    description: "Activate CircleCI service account credential using OIDC"
+    parameters:
+      project_id: 
+        type: string # env_var_name
+        default: "602460048110" # Project ID for all-of-us-workbench-test
+      wip_id: 
+        type: string
+        default: "REPLACE WITH WORKLOAD IDENTITY POOL ID"
+      wip_provider_id: 
+        type: string
+        default: "REPLACE WITH WORKLOAD IDENTITY POOL PROVIDER ID"
+      oidc_token_file_path: 
+        type: string
+        default: /home/circleci/oidc_token.json
+    steps:
+      - gcp-cli/install
+      - run:
+          command: |
+            # Store the CircleCI-generated OIDC token in temp file
+            echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
+            # Create a credential configuration for the generated OIDC ID Token
+            gcloud iam workload-identity-pools create-cred-config \
+                "projects/<< parameters.project_id >>/locations/global/workloadIdentityPools/<< parameters.wip_id >>/providers/<< parameters.wip_provider_id >>"\
+                --output-file="<< pipeline.parameters.circle-service-account-key >>" \
+                --service-account="<< pipeline.parameters.circle-service-account >>" \
+                --credential-source-file=<< parameters.oidc_token_file_path >>
+          name: Store OIDC credential configuration in temp file
+      - run:
+          command: |
+            # Configure gcloud to leverage the generated credential configuration
+            gcloud auth login --brief --cred-file "<< pipeline.parameters.circle-service-account-key >>"
+            # Configure ADC
+            echo "export GOOGLE_APPLICATION_CREDENTIALS='<< pipeline.parameters.circle-service-account-key >>'" >> $BASH_ENV
+            source $BASH_ENV
+          name: Configure gcloud to use the OIDC credential configuration
+      - run:
+          name: Verify that gcloud is authenticated
+          command: gcloud iam service-accounts get-iam-policy << pipeline.parameters.circle-service-account >>
+      - run:
+          name: Verify that ADC works
+          command: |
+              ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+              curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
+
+  deploy-to-staging-command:
+    description: "Deploy API and UI to staging App Engine"
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login-oidc:
+          project_id: "657299777109"  # all-of-us-rw-staging
+          wip_id: "circleci-wip-staging"
+          wip_provider_id: "circleci-oidc-prv-staging"
+      - run:
+          working_directory: ~/workbench/deploy
+          command: |
+            ./project.rb deploy \
+              --project all-of-us-rw-staging \
+              --account << pipeline.parameters.circle-service-account >> \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
+              --promote
+          name: Deploy API and UI to all-of-us-rw-staging App Engine
 
   halt-test-check:
     description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
@@ -310,7 +363,6 @@ commands:
       - restore_cache:
           name: "Restore UI cache"
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
-      - gcloud-auth-login
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
@@ -324,6 +376,8 @@ commands:
   gcs-load-test-results:
     description: "Load Puppeteer test results JSON to Google Storage bucket"
     steps:
+      - gcloud-auth-login-stored-credentials:  # required to access GCS
+          with_application_default_credentials: true
       - run:
           name: Upload test results json to storage bucket
           working_directory: ~/workbench/e2e/logs
@@ -355,7 +409,7 @@ commands:
         type: enum
         enum: [ "test", "staging", "local" ]
     steps:
-      - gcloud-auth-login
+      - gcloud-auth-login-stored-credentials  # required to access GCS
       - run:
           name: "Set environment variable ACCESS_TEST_USER"
           working_directory: ~/workbench/e2e
@@ -526,7 +580,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - launch-local-api
             - run:
                 working_directory: ~/workbench/api
@@ -547,7 +601,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - run:
                 name: Run Integration Tests
                 working_directory: ~/workbench/api
@@ -558,7 +612,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login
+            - gcloud-auth-login-stored-credentials  # required to access GCS
             - run:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
@@ -569,7 +623,7 @@ jobs:
     steps:
     - run-api-test:
         additional_steps:
-        - gcloud-auth-login
+        - gcloud-auth-login-stored-credentials  # required to access GCS
         - run:
             name: Run Contract tests
             working_directory: ~/workbench/api
@@ -638,7 +692,7 @@ jobs:
           command: |
             echo Hello Circle!
 
-  e2etests-deploy-ui:
+  e2ev2-deploy-ui:
     machine:
       image: default # latest stable version
     environment:
@@ -669,7 +723,7 @@ jobs:
             export PR_SITE_NUM
 
             ./src/circle-deploy.sh
-  e2etests-run:
+  e2ev2-run:
     machine:
       image: default # latest stable version
     environment:
@@ -704,7 +758,10 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
@@ -713,7 +770,7 @@ jobs:
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
-              --key-file circle-sa-key.json \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote --quiet
 
   api-deploy-to-test:
@@ -725,7 +782,10 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
       - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
@@ -734,7 +794,7 @@ jobs:
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
-              --key-file circle-sa-key.json \
+              --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
 
   # In staging, we deploy all at once in order to track and control the
@@ -784,7 +844,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-      - gcloud-auth-login:
+      - gcloud-auth-login-stored-credentials: # required to access GCS
           # Needed for generate-impersonated-user-token script
           with_application_default_credentials: true
       - run:
@@ -845,9 +905,6 @@ jobs:
           name: "Restore e2e cache"
           keys:
             - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - gcloud-auth-login:
-          # Needed for gcs-load-test-results
-          with_application_default_credentials: true
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
@@ -866,6 +923,7 @@ jobs:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
           command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
+      - gcloud-auth-login-stored-credentials  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
       - run:
           name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
@@ -984,13 +1042,13 @@ workflows:
     jobs:
       - playground:
           <<: *filter-pr-branch
-  e2etests:
+  e2ev2:
     jobs:
-      - e2etests-deploy-ui:
+      - e2ev2-deploy-ui:
           <<: *filter-pr-branch
-      - e2etests-run:
+      - e2ev2-run:
           requires:
-            - e2etests-deploy-ui
+            - e2ev2-deploy-ui
 
   deploy-staging:
     jobs:

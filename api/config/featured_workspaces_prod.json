@@ -61,6 +61,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "NPH AI Summit Workshop 2024",
+      "namespace": "aou-rw-2b70e482",
+      "id": "nphaisummitworkshop2024",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "This property is not used",
       "namespace": "aou-rw-6d5ab903",
       "id": "aourecoverlongcovidv6",
@@ -323,6 +329,18 @@
       "namespace": "aou-rw-87ca7327",
       "id": "demopharmacogenomicspgxvariantfrequencyandmedicationexposures",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Assessment of pathogenic variants across the All of Us Research Program",
+      "namespace": "aou-rw-57880973",
+      "id": "demoassessmentofpathogenicvariantsacrosstheallofusresearchprogram",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "How to query All by All results and analysis details",
+      "namespace": "aou-rw-d9c8d06c",
+      "id": "copyofhowtoqueryallbyallresultsandanalysisdetailsdraft",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }

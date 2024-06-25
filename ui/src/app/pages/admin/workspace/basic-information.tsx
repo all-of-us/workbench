@@ -24,6 +24,9 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => (
       <WorkspaceInfoField labelText='Workspace Name'>
         {workspace.name}
       </WorkspaceInfoField>
+      <WorkspaceInfoField labelText='Terra Name (often incorrectly called "id")'>
+        {workspace.id}
+      </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Workspace Namespace'>
         {workspace.namespace}
       </WorkspaceInfoField>
