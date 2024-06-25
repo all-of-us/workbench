@@ -542,7 +542,7 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
-    workspaceAdminService.setUnPublishWorkspaceByAdmin(w.getWorkspaceNamespace());
+    workspaceAdminService.setUnPublishWorkspaceByAdmin(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor).fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId());
   }
