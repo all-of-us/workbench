@@ -1775,8 +1775,7 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
+      description: Makes a workspace public to all AoU registered users.
       operationId: publishWorkspaceviaDB
       parameters:
         - name: workspaceNamespace

@@ -519,7 +519,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishWorkspaceByAdmin() {
+  public void testPublishWorkspaceviaDB() {
     DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
     PublishWorkspaceRequest publishWorkspaceRequest =
         new PublishWorkspaceRequest()
