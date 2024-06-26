@@ -68,4 +68,11 @@ public interface MailService {
 
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
+
+  void sendPublishWorkspaceByAdminEmail(
+      final DbWorkspace workspace, List<DbUser> owners, String publishCategory)
+      throws MessagingException;
+
+  void sendUnPublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException;
 }

@@ -6,7 +6,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.FeaturedWorkspace;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 
 @Mapper(config = MapStructConfig.class)

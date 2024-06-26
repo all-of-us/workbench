@@ -22,6 +22,7 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
+import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -124,7 +125,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private MailService mailService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -146,7 +147,6 @@ public class WorkspaceAdminServiceTest {
   @MockBean({
     ActionAuditQueryService.class,
     AdminAuditor.class,
-    MailService.class,
     CohortDao.class,
     CohortReviewMapper.class,
     CommonMappers.class,
@@ -154,6 +154,7 @@ public class WorkspaceAdminServiceTest {
     ConceptSetMapper.class,
     DataSetDao.class,
     DataSetMapper.class,
+    FeaturedWorkspaceMapper.class,
     FirecloudMapper.class,
     LeonardoApiClient.class,
     UserMapper.class,
@@ -519,20 +520,21 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishWorkspaceviaDB() {
-    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
+  public void testPublishWorkspaceviaDB() throws MessagingException {
+    DbWorkspace mockdbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     PublishWorkspaceRequest publishWorkspaceRequest =
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
     workspaceAdminService.publishWorkspaceviaDB(
-        w.getWorkspaceNamespace(), publishWorkspaceRequest);
+        mockdbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockAdminAuditor).firePublishWorkspaceAction(w.getWorkspaceId());
+    verify(mockAdminAuditor).firePublishWorkspaceAction(mockdbWorkspace.getWorkspaceId());
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
   }
 
   @Test
-  public void testUnPublishWorkspaceviaDb() {
+  public void testUnPublishWorkspaceviaDb() throws MessagingException {
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     DbFeaturedWorkspace mockFeaturedworkspace =
         new DbFeaturedWorkspace()
@@ -545,6 +547,7 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.unPublishWorkspaceviaDB(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor).fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId());
+    verify(mailService).sendUnPublishWorkspaceByAdminEmail(any(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

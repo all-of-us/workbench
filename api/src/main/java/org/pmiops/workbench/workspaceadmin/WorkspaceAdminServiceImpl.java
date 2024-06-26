@@ -383,17 +383,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     dbWorkspace = workspaceDao.save(dbWorkspace);
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
-    final List<DbUser> owners =
-        workspaceService
-            .getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
-            .stream()
-            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-            .map(UserRole::getEmail)
-            .map(userService::getByUsernameOrThrow)
-            .collect(Collectors.toList());
     try {
       mailService.sendWorkspaceAdminLockingEmail(
-          dbWorkspace, adminLockingRequest.getRequestReason(), owners);
+          dbWorkspace, adminLockingRequest.getRequestReason(), getWorkspaceOwnerList(dbWorkspace));
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
@@ -430,16 +422,27 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public void publishWorkspaceviaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
+
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
     if (featuredWorkspaceDao.findByWorkspace(dbWorkspace).isPresent()) {
       log.warning(String.format("Workspace %s is already published", workspaceNamespace));
       return;
     }
+
     DbFeaturedWorkspace featuredWorkspace =
         featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     featuredWorkspaceDao.save(featuredWorkspace);
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
     adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId());
+
+    // Send Email to all Owners of the workspace to notify that workspace has been published
+    final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+    try {
+      mailService.sendPublishWorkspaceByAdminEmail(
+          dbWorkspace, owners, publishWorkspaceRequest.getCategory().toString());
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
+    }
   }
 
   @Override
@@ -454,6 +457,24 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
     adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
     log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+
+    // Send Email to all Owners of the workspace to notify that workspace has been unpublished
+    final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+    try {
+      mailService.sendUnPublishWorkspaceByAdminEmail(dbWorkspace, owners);
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
+    }
+  }
+
+  private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
+    return workspaceService
+        .getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+        .stream()
+        .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+        .map(UserRole::getEmail)
+        .map(userService::getByUsernameOrThrow)
+        .collect(Collectors.toList());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

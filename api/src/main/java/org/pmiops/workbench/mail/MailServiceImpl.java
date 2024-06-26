@@ -94,6 +94,12 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
+  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
+      "emails/publish_workspace_by_admin/content.html";
+
+  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
+      "emails/unpublish_workspace_by_admin/content.html";
+
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String UNUSED_DISK_DELETE_HELP =
@@ -381,6 +387,42 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendPublishWorkspaceByAdminEmail(
+      DbWorkspace workspace, List<DbUser> owners, String publishCategory)
+      throws MessagingException {
+    final String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.emptyList(),
+        "AoU Researcher Workbench Workspace has been Published",
+        String.format(
+            "Publish Workspace Email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+        buildHtml(
+            PUBLISH_WORKSPACE_ADMIN_RESOURCE,
+            publishWorkspaceSubstitutionMap(workspace, publishCategory)));
+  }
+
+  @Override
+  public void sendUnPublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    final String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.emptyList(),
+        "AoU Researcher Workbench Workspace has been Unpublished",
+        String.format(
+            "Unpublish Workspace Email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+        buildHtml(
+            UNPUBLISH_WORKSPACE_ADMIN_RESOURCE, unpublishWorkspaceSubstitutionMap(workspace)));
+  }
+
+  @Override
   public void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
       throws MessagingException {
     String htmlMessage =
@@ -596,6 +638,29 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
+        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> publishWorkspaceSubstitutionMap(
+      DbWorkspace workspace, String publishCategory) {
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
+        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> unpublishWorkspaceSubstitutionMap(
+      DbWorkspace workspace) {
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
         .build();
   }
