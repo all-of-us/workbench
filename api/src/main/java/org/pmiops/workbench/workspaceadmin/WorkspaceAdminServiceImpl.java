@@ -422,27 +422,32 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public void publishWorkspaceviaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
-
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
-    if (featuredWorkspaceDao.findByWorkspace(dbWorkspace).isPresent()) {
-      log.warning(String.format("Workspace %s is already published", workspaceNamespace));
-      return;
+    DbFeaturedWorkspace featuredWorkspace =
+        featuredWorkspaceDao.findByWorkspace(dbWorkspace).orElse(null);
+
+    if (featuredWorkspace != null) {
+      if (featuredWorkspace.getCategory() == publishWorkspaceRequest.getCategory()) {
+        log.warning(
+            String.format(
+                "Workspace %s is already published in the same category", workspaceNamespace));
+        return;
+      }
+      featuredWorkspace.setCategory(publishWorkspaceRequest.getCategory());
+    } else {
+      var aclUpdate =
+          FirecloudTransforms.buildAclUpdate(
+              workspaceService.getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
+      fireCloudService.updateWorkspaceACL(
+          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+      featuredWorkspace =
+          featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     }
 
-    DbFeaturedWorkspace featuredWorkspace =
-        featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     featuredWorkspaceDao.save(featuredWorkspace);
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
     adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId());
-
-    // Send Email to all Owners of the workspace to notify that workspace has been published
-    final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
-    try {
-      mailService.sendPublishWorkspaceByAdminEmail(
-          dbWorkspace, owners, publishWorkspaceRequest.getCategory().toString());
-    } catch (final MessagingException e) {
-      log.log(Level.WARNING, e.getMessage());
-    }
+    sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory().toString());
   }
 
   @Override
@@ -450,18 +455,32 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
+
     if (!dbFeaturedWorkspace.isPresent()) {
       log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
       return;
     }
+
+    var aclUpdate =
+        FirecloudTransforms.buildAclUpdate(
+            workspaceService.getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.NO_ACCESS);
+    fireCloudService.updateWorkspaceACL(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
     featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
     adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
     log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+    sendEmailToWorkspaceOwners(dbWorkspace, false, null);
+  }
 
-    // Send Email to all Owners of the workspace to notify that workspace has been unpublished
+  private void sendEmailToWorkspaceOwners(
+      DbWorkspace dbWorkspace, boolean published, String category) {
     final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
     try {
-      mailService.sendUnPublishWorkspaceByAdminEmail(dbWorkspace, owners);
+      if (published) {
+        mailService.sendPublishWorkspaceByAdminEmail(dbWorkspace, owners, category);
+      } else {
+        mailService.sendUnPublishWorkspaceByAdminEmail(dbWorkspace, owners);
+      }
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
