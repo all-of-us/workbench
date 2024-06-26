@@ -1594,7 +1594,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: null,
     });
 
-    await component();
+    component();
     const numberFormatter = new Intl.NumberFormat('en-US');
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
@@ -1602,7 +1602,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should allow configuration via dataproc preset from modified form', async () => {
     setCurrentRuntime(null);
 
-    const { container } = await component();
+    const { container } = component();
     clickExpectedButton('Customize');
 
     // Configure the form - we expect all of the changes to be overwritten by
@@ -1636,7 +1636,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should tag as user override after preset modification', async () => {
     setCurrentRuntime(null);
 
-    const { container } = await component();
+    const { container } = component();
 
     clickExpectedButton('Customize');
 
@@ -1656,7 +1656,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should tag as preset if configuration matches', async () => {
     setCurrentRuntime(null);
 
-    const { container } = await component();
+    const { container } = component();
     clickExpectedButton('Customize');
 
     // Take the preset, make a change, then revert.
@@ -1675,7 +1675,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should restrict memory options by cpu', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickMainCpu(container, 8);
     const dropdown: HTMLElement = expectDropdown(container, 'runtime-ram');
@@ -1689,7 +1689,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should respect divergent sets of valid machine types across compute types', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickMainCpu(container, 1);
     await pickMainRam(container, 3.75);
@@ -1702,7 +1702,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should carry over valid main machine type across compute types', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickMainCpu(container, 2);
     await pickMainRam(container, 7.5);
@@ -1715,7 +1715,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
-    await component();
+    component();
 
     const detachableDiskElement = spinDiskElement('detachable-disk');
     const detachableDisk = detachableDiskElement.getAttribute('value');
@@ -1743,7 +1743,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
-    await component();
+    component();
     const masterDiskSize = screen
       .getByRole('spinbutton', {
         name: /standard\-disk/i,
@@ -1773,7 +1773,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
 
-    await component();
+    component();
     const numWorkers = screen
       .getByRole('spinbutton', {
         name: /num\-workers/i,
@@ -1793,7 +1793,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    await component();
+    component();
     const numWorkers = screen
       .getByRole('spinbutton', {
         name: /num\-workers/i,
@@ -1814,7 +1814,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     const mainCpuSize = parseInt(getMainCpu(container)) + 4;
     await pickMainCpu(container, mainCpuSize);
@@ -1834,7 +1834,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     expect(getMainRam(container)).toEqual('15');
     // 15 GB -> 26 GB
@@ -1849,7 +1849,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should warn user about re-creation if there are updates that require one - CPU', async () => {
-    const { container } = await component();
+    const { container } = component();
     await pickMainCpu(container, parseInt(getMainCpu(container)) + 4);
     clickExpectedButton('Next');
     expect(
@@ -1860,7 +1860,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should warn user about re-creation if there are updates that require one - Memory', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     expect(getMainRam(container)).toEqual('15');
     // 15 GB -> 26 GB
@@ -1875,7 +1875,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickComputeType(container, ComputeType.Dataproc);
     clickExpectedButton('Next');
@@ -1888,7 +1888,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
     setCurrentRuntime(detachableDiskRuntime());
-    await component();
+    component();
     const diskValueAsInt = parseInt(getDetachableDiskValue().replace(/,/g, ''));
     const newDiskValue = diskValueAsInt - 10;
     await pickDetachableDiskSize(newDiskValue);
@@ -1908,7 +1908,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     expect(getWorkerCpu(container)).toEqual('4');
     // 4 -> 8
@@ -1930,7 +1930,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     expect(getWorkerRam(container)).toEqual('15');
     // 15 -> 26
@@ -1951,7 +1951,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
-    await component();
+    component();
 
     await pickWorkerDiskSize(parseInt(getWorkerDiskValue()) + 10);
     clickExpectedButton('Next');
@@ -1971,7 +1971,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB + 10);
     await pickMainCpu(container, 8);
@@ -2006,7 +2006,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       status: RuntimeStatus.CREATING,
     });
 
-    await component();
+    component();
 
     const nextButton = screen.getByRole('button', { name: 'Next' });
     expectButtonElementDisabled(nextButton);
@@ -2029,7 +2029,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       },
     });
 
-    await component();
+    component();
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
@@ -2049,7 +2049,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should send an updateDisk API call if disk changes do not require a delete', async () => {
     setCurrentRuntime(detachableDiskRuntime());
     setCurrentDisk(existingDisk());
-    await component();
+    component();
 
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
@@ -2066,7 +2066,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should send a delete call if an update requires delete', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickComputeType(container, ComputeType.Dataproc);
 
@@ -2079,7 +2079,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should add additional options when the compute type changes', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     await pickComputeType(container, ComputeType.Dataproc);
 
@@ -2091,7 +2091,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should update the cost estimator when the compute profile changes', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     expect(screen.getByText('Cost when running')).toBeTruthy();
     expect(screen.getByText('Cost when paused')).toBeTruthy();
@@ -2142,7 +2142,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       },
     });
 
-    const { container } = await component();
+    const { container } = component();
 
     // with Master disk size: 1000
     expect(screen.getByText('Cost when running')).toBeTruthy();
@@ -2167,17 +2167,10 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should prevent runtime update when disk size is invalid', async () => {
-    const { container } = await component();
+    const { container } = component();
 
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
 
-    await pickDetachableDiskSize(49);
-    expectButtonElementDisabled(getNextButton());
-
-    await pickDetachableDiskSize(4900);
-    expectButtonElementDisabled(getNextButton());
-
-    await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
     await pickComputeType(container, ComputeType.Dataproc);
     await pickWorkerDiskSize(49);
     expectButtonElementDisabled(getNextButton());
@@ -2190,8 +2183,21 @@ describe(RuntimeConfigurationPanel.name, () => {
     expectButtonElementEnabled(getNextButton());
   });
 
+  it('should prevent runtime update when disk size of Standard disk type is invalid', async () => {
+    component();
+    const getNextButton = () => screen.getByRole('button', { name: 'Next' });
+
+    await pickDetachableDiskSize(49);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableDiskSize(4900);
+    expectButtonElementDisabled(getNextButton());
+
+    await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
+  });
+
   it('should prevent runtime update when PD disk size is invalid', async () => {
-    const { container } = await component();
+    const { container } = component();
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
 
     await pickDetachableType(container, DiskType.SSD);
@@ -2212,7 +2218,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const getCreateButton = () =>
       screen.getByRole('button', { name: 'Create' });
 
-    const { container } = await component();
+    const { container } = component();
     clickExpectedButton('Customize');
 
     await pickComputeType(container, ComputeType.Dataproc);
@@ -2244,7 +2250,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: null,
     });
 
-    const { container } = await component();
+    const { container } = component();
     await pickComputeType(container, ComputeType.Dataproc);
 
     const workerCountInput = spinDiskElement('num-workers');
@@ -2257,7 +2263,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should allow creating gce without GPU', async () => {
     setCurrentRuntime(null);
-    const { container } = await component();
+    const { container } = component();
     await clickExpectedButton('Customize');
     await pickComputeType(container, ComputeType.Standard);
     await pickMainCpu(container, 8);
@@ -2271,7 +2277,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should allow creating gcePD with GPU', async () => {
     setCurrentRuntime(null);
-    const { container } = await component();
+    const { container } = component();
     await clickExpectedButton('Customize');
     await pickComputeType(container, ComputeType.Standard);
 
@@ -2304,7 +2310,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     setCurrentRuntime(detachableDiskRuntime());
     setCurrentDisk(existingDisk());
 
-    const { container } = await component();
+    const { container } = component();
     await pickComputeType(container, ComputeType.Dataproc);
 
     clickExpectedButton('Next');
@@ -2331,7 +2337,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     const disk = existingDisk();
     setCurrentDisk(disk);
 
-    const { container } = await component();
+    const { container } = component();
     await pickComputeType(container, ComputeType.Dataproc);
 
     clickExpectedButton('Next');
@@ -2355,7 +2361,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when running cost is too high for initial credits', async () => {
     setCurrentRuntime(null);
-    const { container } = await component();
+    const { container } = component();
     clickExpectedButton('Customize');
     const createButton = screen.getByRole('button', { name: 'Create' });
 
@@ -2371,7 +2377,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when worker count is invalid', async () => {
     setCurrentRuntime(null);
-    const { container } = await component();
+    const { container } = component();
     clickExpectedButton('Customize');
 
     await pickComputeType(container, ComputeType.Dataproc);
@@ -2394,7 +2400,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     });
-    const { container } = await component();
+    const { container } = component();
 
     clickExpectedButton('Customize');
 
@@ -2417,9 +2423,14 @@ describe(RuntimeConfigurationPanel.name, () => {
       )
     ).toBeTruthy();
 
+    // Picking the number of workers within range should remove the banner
     await pickNumWorkers(2);
     createButton = screen.getByRole('button', { name: 'Create' });
-    // We don't want to disable for user provided billing. Just put a warning.
+    expect(
+      screen.queryByText(
+        'Your runtime is expensive. Are you sure you wish to proceed?'
+      )
+    ).toBeNull();
     expectButtonElementEnabled(createButton);
   });
 
@@ -2433,7 +2444,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
-    await component();
+    component();
 
     const workerCountInput: HTMLInputElement = spinDiskElement('num-workers');
     expect(workerCountInput.disabled).toBeTruthy();
@@ -2485,7 +2496,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       const disk = existingDisk();
       setCurrentDisk(disk);
 
-      const { container } = await component();
+      const { container } = component();
       await runDetachableDiskCase(
         container,
         [desc, setters, expectations],
@@ -2510,7 +2521,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       const disk = existingDisk();
       setCurrentDisk(disk);
 
-      const { container } = await component();
+      const { container } = component();
       const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
 
       for (const action of setters) {
@@ -2538,7 +2549,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       const disk = existingDisk();
       setCurrentDisk(disk);
 
-      const { container } = await component();
+      const { container } = component();
       clickExpectedButton('Customize');
 
       runDetachableDiskCase(
