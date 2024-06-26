@@ -1856,7 +1856,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /these changes require deletion and re\-creation of your cloud environment to take effect\./i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
   });
 
   it('should warn user about re-creation if there are updates that require one - Memory', async () => {
@@ -1871,7 +1871,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /these changes require deletion and re\-creation of your cloud environment to take effect\./i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
@@ -1883,7 +1883,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /these changes require deletion and re\-creation of your cloud environment to take effect\./i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
   });
 
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
@@ -1897,7 +1897,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /these changes require deletion and re\-creation of your persistent disk and cloud environment to take effect\./i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker CPU', async () => {
@@ -2093,8 +2093,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should update the cost estimator when the compute profile changes', async () => {
     const { container } = component();
 
-    expect(screen.getByText('Cost when running')).toBeTruthy();
-    expect(screen.getByText('Cost when paused')).toBeTruthy();
+    expect(screen.getByText('Cost when running')).toBeInTheDocument();
+    expect(screen.getByText('Cost when paused')).toBeInTheDocument();
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
     expect(getRunningCost()).toEqual('$0.20 per hour');
@@ -2145,8 +2145,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     const { container } = component();
 
     // with Master disk size: 1000
-    expect(screen.getByText('Cost when running')).toBeTruthy();
-    expect(screen.getByText('Cost when paused')).toBeTruthy();
+    expect(screen.getByText('Cost when running')).toBeInTheDocument();
+    expect(screen.getByText('Cost when paused')).toBeInTheDocument();
 
     expect(getRunningCost()).toEqual('$0.77 per hour');
     expect(getPausedCost()).toEqual('$0.07 per hour');
@@ -2154,8 +2154,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     // Change the Master disk size or master size to 150
     await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
 
-    expect(screen.getByText('Cost when running')).toBeTruthy();
-    expect(screen.getByText('Cost when paused')).toBeTruthy();
+    expect(screen.getByText('Cost when running')).toBeInTheDocument();
+    expect(screen.getByText('Cost when paused')).toBeInTheDocument();
 
     expect(getRunningCost()).toEqual('$0.73 per hour');
     expect(getPausedCost()).toEqual('$0.02 per hour');
@@ -2318,7 +2318,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /your environment currently has a reattachable disk, which will be unused after you apply this update\. /i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
 
     togglePDRadioButton();
 
@@ -2346,7 +2346,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       screen.getByText(
         /your environment currently has a reattachable disk, which will be unused after you apply this update\./i
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
 
     // Default option should be NOT to delete.
     clickExpectedButton('Next');
@@ -2418,10 +2418,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     // We don't want to disable for user provided billing. Just put a warning.
     expectButtonElementEnabled(createButton);
     expect(
-      screen.findByText(
+      screen.getByText(
         'Your runtime is expensive. Are you sure you wish to proceed?'
       )
-    ).toBeTruthy();
+    ).toBeInTheDocument();
 
     // Picking the number of workers within range should remove the banner
     await pickNumWorkers(2);
