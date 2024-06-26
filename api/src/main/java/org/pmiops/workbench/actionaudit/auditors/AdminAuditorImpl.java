@@ -150,7 +150,7 @@ public class AdminAuditorImpl implements AdminAuditor {
             .targetType(TargetType.WORKSPACE)
             .targetIdMaybe(workspaceId)
             .targetPropertyMaybe("Published")
-            .newValueMaybe("true: as "+ category)
+            .newValueMaybe("true: as " + category)
             .timestamp(timestamp)
             .build();
 

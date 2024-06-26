@@ -446,7 +446,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     featuredWorkspace = featuredWorkspaceDao.save(featuredWorkspace);
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
-    adminAuditor.firePublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredWorkspace.getCategory().toString());
+    adminAuditor.firePublishWorkspaceAction(
+        dbWorkspace.getWorkspaceId(), featuredWorkspace.getCategory().toString());
     sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory().toString());
   }
 
