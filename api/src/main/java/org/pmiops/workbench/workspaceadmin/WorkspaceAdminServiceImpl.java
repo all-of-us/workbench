@@ -427,6 +427,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         featuredWorkspaceDao.findByWorkspace(dbWorkspace).orElse(null);
 
     if (featuredWorkspace != null) {
+      // If featuredWorkspace is Present check if category is same as requested or not
+      // If yes: do nothing and return
+      // If no: update featuredWorkspace with new category
       if (featuredWorkspace.getCategory() == publishWorkspaceRequest.getCategory()) {
         log.warning(
             String.format(
@@ -435,6 +438,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       }
       featuredWorkspace.setCategory(publishWorkspaceRequest.getCategory());
     } else {
+      // Update Acl in firecloud so that everyone can view the workspace
       var aclUpdate =
           FirecloudTransforms.buildAclUpdate(
               workspaceService.getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
@@ -448,6 +452,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
     adminAuditor.firePublishWorkspaceAction(
         dbWorkspace.getWorkspaceId(), featuredWorkspace.getCategory().toString());
+
+    // Send Email to all workspace owners to let them know Workspace has been published
     sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory().toString());
   }
 
@@ -457,6 +463,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
 
+    // If there is no entry in featuredWorkspace table i.e workspce has been unpublished do nothing
+    // and return
     if (!dbFeaturedWorkspace.isPresent()) {
       log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
       return;
@@ -470,6 +478,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
     adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
     log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+
+    // Send email to all workspace owners to let them know workspace has been unpublished
     sendEmailToWorkspaceOwners(dbWorkspace, false, null);
   }
 
