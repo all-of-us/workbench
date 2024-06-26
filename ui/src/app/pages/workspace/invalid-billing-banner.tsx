@@ -26,8 +26,8 @@ export const InvalidBillingBanner = fp.flow(
 )(({ onClose, navigate, workspace }: Props) => {
   const message = (
     <div>
-      'The initial credits for the creator of this workspace have run out.
-      Please provide a valid billing account.'
+      The initial credits for the creator of this workspace have run out. Please
+      provide a valid billing account.
       <LinkButton
         onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
       >
