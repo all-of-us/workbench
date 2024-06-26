@@ -6938,7 +6938,7 @@ components:
           type: boolean
           default: false
           description: Enable variant select all
-        enableAdminPublishedWorkspaces:
+        enablePublishedWorkspacesViaDb:
           type: boolean
           default: false
           description: Enable admin to publish workspace

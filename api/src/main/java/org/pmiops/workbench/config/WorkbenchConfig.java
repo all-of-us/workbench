@@ -319,7 +319,7 @@ public class WorkbenchConfig {
     // If true, enable variant select all
     public boolean enableVariantSelectAll;
     // If True, use featuredWorksapce Database to get data
-    public boolean enableAdminPublishedWorkspaces;
+    public boolean enablePublishedWorkspacesViaDb;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
   }

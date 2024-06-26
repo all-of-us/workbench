@@ -428,7 +428,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void setPublishWorkspaceByDB(
+  public void publishWorkspaceviaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
     if (featuredWorkspaceDao.findByWorkspace(dbWorkspace).isPresent()) {
@@ -443,7 +443,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void setUnPublishWorkspaceviaDB(String workspaceNamespace) {
+  public void unPublishWorkspaceviaDB(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);

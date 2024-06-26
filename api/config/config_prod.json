@@ -115,7 +115,7 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
     "enableVariantSelectAll": true,
-    "enableAdminPublishedWorkspaces": false,
+    "enablePublishedWorkspacesViaDb": false,
     "enableGcsFuseOnGke": false
   },
   "actionAudit": {

@@ -21,9 +21,4 @@ public interface FeaturedWorkspaceMapper {
   default void setWorkspace(DbWorkspace dbWorkspace, @MappingTarget DbFeaturedWorkspace target) {
     target.setWorkspace(dbWorkspace);
   }
-
-  @Mapping(target = "name", source = "workspace.name")
-  @Mapping(target = "namespace", source = "workspace.workspaceNamespace")
-  @Mapping(target = "id", source = "workspace.workspaceId")
-  FeaturedWorkspace toFeaturedWorkspace(DbFeaturedWorkspace dbFeaturedWorkspace);
 }

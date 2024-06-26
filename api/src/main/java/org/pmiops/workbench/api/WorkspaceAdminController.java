@@ -145,7 +145,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.SECURITY_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspaceviaDB(
       String workspaceNamespace, PublishWorkspaceRequest body) {
-    workspaceAdminService.setPublishWorkspaceByDB(workspaceNamespace, body);
+    workspaceAdminService.publishWorkspaceviaDB(workspaceNamespace, body);
     // TODO: Send email to workspace owner once we get content
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -153,7 +153,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.SECURITY_ADMIN})
   public ResponseEntity<EmptyResponse> unPublishWorkspaceviaDB(String workspaceNamespace) {
-    workspaceAdminService.setUnPublishWorkspaceviaDB(workspaceNamespace);
+    workspaceAdminService.unPublishWorkspaceviaDB(workspaceNamespace);
     // TODO: Send email to workspace owner once we get content
     return ResponseEntity.ok(new EmptyResponse());
   }

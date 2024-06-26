@@ -176,7 +176,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
 
                 {serverConfigStore.get().config
-                  .enableAdminPublishedWorkspaces && (
+                  .enablePublishedWorkspacesViaDb && (
                   <div>
                     <h2>
                       This is temp just to verify api This is not a final UI

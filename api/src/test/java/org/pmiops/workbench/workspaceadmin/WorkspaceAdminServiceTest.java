@@ -525,7 +525,7 @@ public class WorkspaceAdminServiceTest {
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
-    workspaceAdminService.setPublishWorkspaceByDB(
+    workspaceAdminService.publishWorkspaceviaDB(
         w.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor).firePublishWorkspaceAction(w.getWorkspaceId());
@@ -542,7 +542,7 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
-    workspaceAdminService.setUnPublishWorkspaceviaDB(mockDbWorkspace.getWorkspaceNamespace());
+    workspaceAdminService.unPublishWorkspaceviaDB(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor).fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId());
   }
