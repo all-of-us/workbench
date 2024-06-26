@@ -38,9 +38,14 @@ export const InvalidBillingBanner = fp.flow(
   const footer = (
     <Button
       style={{ height: '38px', width: '70%', fontWeight: 400 }}
-      onClick={() =>
-        navigate(['workspaces', workspace.namespace, workspace.id, 'edit'])
-      }
+      onClick={() => {
+        onClose();
+        navigate(['workspaces', workspace.namespace, workspace.id, 'edit'], {
+          queryParams: {
+            highlightBilling: true,
+          },
+        });
+      }}
     >
       Edit Workspace
     </Button>
