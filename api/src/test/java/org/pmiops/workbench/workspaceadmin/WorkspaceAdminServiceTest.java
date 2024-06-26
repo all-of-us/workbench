@@ -529,7 +529,7 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.publishWorkspaceviaDB(
         mockdbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockAdminAuditor).firePublishWorkspaceAction(mockdbWorkspace.getWorkspaceId());
+    verify(mockAdminAuditor).firePublishWorkspaceAction(mockdbWorkspace.getWorkspaceId(), FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
   }
 

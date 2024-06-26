@@ -135,7 +135,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void firePublishWorkspaceAction(long workspaceId) {
+  public void firePublishWorkspaceAction(long workspaceId, String category) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
@@ -150,7 +150,7 @@ public class AdminAuditorImpl implements AdminAuditor {
             .targetType(TargetType.WORKSPACE)
             .targetIdMaybe(workspaceId)
             .targetPropertyMaybe("Published")
-            .newValueMaybe("true")
+            .newValueMaybe("true: as "+ category)
             .timestamp(timestamp)
             .build();
 
