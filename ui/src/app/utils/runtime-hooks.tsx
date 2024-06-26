@@ -298,6 +298,22 @@ export const useCustomRuntime = (
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
+  const updateRuntimeAndInitializeLeoRuntime = async () => {
+    await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+      runtime: request.runtime,
+    });
+    // Calling updateRuntime will not immediately set the Runtime status to not Running so the
+    // default initializer will resolve on its first call. The polling below first checks for the
+    // non Running status before initializing the default one that checks for Running status
+    await LeoRuntimeInitializer.initialize({
+      workspaceNamespace,
+      targetRuntime: request.runtime,
+      resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
+      pollAbortSignal: aborter.signal,
+      overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
+    });
+  };
+
   useEffect(() => {
     let mounted = true;
     aborter = new AbortController();
@@ -320,19 +336,7 @@ export const useCustomRuntime = (
         );
 
         if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
-          await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-            runtime: request.runtime,
-          });
-          // Calling updateRuntime will not immediately set the Runtime status to not Running so the
-          // default initializer will resolve on its first call. The polling below first checks for the
-          // non Running status before initializing the default one that checks for Running status
-          await LeoRuntimeInitializer.initialize({
-            workspaceNamespace,
-            targetRuntime: request.runtime,
-            resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
-            pollAbortSignal: aborter.signal,
-            overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
-          });
+          await updateRuntimeAndInitializeLeoRuntime();
         }
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
           const deleteAttachedDisk =
@@ -354,19 +358,7 @@ export const useCustomRuntime = (
             runtime.status === RuntimeStatus.RUNNING ||
             runtime.status === RuntimeStatus.STOPPED
           ) {
-            await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-              runtime: request.runtime,
-            });
-            // Calling updateRuntime will not immediately set the Runtime status to not Running so the
-            // default initializer will resolve on its first call. The polling below first checks for the
-            // non Running status before initializing the default one that checks for Running status
-            await LeoRuntimeInitializer.initialize({
-              workspaceNamespace,
-              targetRuntime: request.runtime,
-              resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
-              pollAbortSignal: aborter.signal,
-              overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
-            });
+            await updateRuntimeAndInitializeLeoRuntime();
           }
         }
       };

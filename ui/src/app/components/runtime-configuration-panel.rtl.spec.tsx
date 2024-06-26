@@ -1997,7 +1997,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getWorkerDiskValue()).toBe(DATAPROC_MIN_DISK_SIZE_GB.toString());
   });
 
-  it('should disable Next button if Runtime is in between states', async () => {
+  it('should disable Next button if Runtime is in Creating State', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
