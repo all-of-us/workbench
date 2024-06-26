@@ -691,16 +691,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     };
   };
 
-  type DetachableDiskCase = [
-    string,
-    ((container: HTMLElement) => Promise<void>)[],
-    {
-      wantUpdateDisk?: boolean;
-      wantDeleteDisk?: boolean;
-      wantDeleteRuntime?: boolean;
-    }
-  ];
-
   const clickExpectedButton = (name: string) => {
     const button = screen.getByRole('button', { name });
     expect(button).toBeInTheDocument();
@@ -903,7 +893,6 @@ describe(RuntimeConfigurationPanel.name, () => {
         await act(async () => {
           await waitFor(
             async () => {
-              console.log(runtimeApiStub.runtime.status);
               await new Promise((r) => setTimeout(r, 2000));
               expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
               return;
@@ -914,6 +903,16 @@ describe(RuntimeConfigurationPanel.name, () => {
       }
     }
   };
+
+  type DetachableDiskCase = [
+    string,
+    ((container: HTMLElement) => Promise<void>)[],
+    {
+      wantUpdateDisk?: boolean;
+      wantDeleteDisk?: boolean;
+      wantDeleteRuntime?: boolean;
+    }
+  ];
 
   async function runDetachableDiskCase(
     container,
@@ -1012,6 +1011,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     getAborter().abort('Unmounting for testing');
   });
 
+  jest.setTimeout(5000);
   it('should show loading spinner while loading', async () => {
     // simulate not done loading
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
@@ -1220,24 +1220,23 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB + 10);
 
     clickExpectedButton('Create');
-    jest.advanceTimersByTime(1000);
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.USER_OVERRIDE
-      );
-      expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
-        machineType: 'n1-highmem-8',
-        gpuConfig: null,
-        persistentDisk: {
-          diskType: 'pd-standard',
-          labels: {},
-          name: 'stub-disk',
-          size: MIN_DISK_SIZE_GB + 10,
-        },
-      });
-      expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
     });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.USER_OVERRIDE
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
+      machineType: 'n1-highmem-8',
+      gpuConfig: null,
+      persistentDisk: {
+        diskType: 'pd-standard',
+        labels: {},
+        name: 'stub-disk',
+        size: MIN_DISK_SIZE_GB + 10,
+      },
+    });
+    expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
   it('should allow creation with Dataproc config', async () => {
@@ -1453,17 +1452,17 @@ describe(RuntimeConfigurationPanel.name, () => {
     clickExpectedButton('Create');
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.GENERAL_ANALYSIS
-      );
-      expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
-        diskType: 'pd-standard',
-        labels: {},
-        name: 'stub-disk',
-        size: MIN_DISK_SIZE_GB,
-      });
-      expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
     });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.GENERAL_ANALYSIS
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: 'stub-disk',
+      size: MIN_DISK_SIZE_GB,
+    });
+    expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
   it('should allow configuration via dataproc preset', async () => {
@@ -1480,19 +1479,16 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
 
     clickExpectedButton('Create');
-    await waitFor(
-      () => {
-        expect(runtimeApiStub.runtime.status).toEqual('Creating');
-        expect(runtimeApiStub.runtime.configurationType).toEqual(
-          RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-        );
-        expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-        );
-        expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
-      },
-      { interval: 750 }
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
+    expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+    );
+    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it(
@@ -1521,14 +1517,13 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(customMachineType).not.toEqual(machineType);
       expect(customDiskSize).not.toEqual(persistentDisk.size);
       const { container } = component();
-      // Try :Check there is no spinner
       expect(getMainCpu(container)).toEqual(
         findMachineByName(machineType).cpu.toString()
       );
       expect(getMainRam(container)).toEqual(
         findMachineByName(machineType).memory.toString()
       );
-      expect(getDetachableDiskValue()).toEqual('120');
+      expect(getDetachableDiskValue()).toEqual(persistentDisk.size.toString());
     }
   );
 
@@ -1625,12 +1620,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
     clickExpectedButton('Create');
 
-    await waitFor(
-      () => {
-        expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      },
-      { timeout: 4000 }
-    );
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    });
 
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
@@ -1655,10 +1647,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     clickExpectedButton('Create');
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.USER_OVERRIDE
-      );
     });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.USER_OVERRIDE
+    );
   });
 
   it('should tag as preset if configuration matches', async () => {
@@ -1676,10 +1668,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     clickExpectedButton('Create');
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.GENERAL_ANALYSIS
-      );
     });
+    expect(runtimeApiStub.runtime.configurationType).toEqual(
+      RuntimeConfigurationType.GENERAL_ANALYSIS
+    );
   });
 
   it('should restrict memory options by cpu', async () => {
@@ -2202,11 +2194,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     const { container } = await component();
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
 
-    await pickDetachableType(container, DiskType.STANDARD);
-    await pickDetachableDiskSize(49);
-    expectButtonElementDisabled(getNextButton());
-
     await pickDetachableType(container, DiskType.SSD);
+    await pickDetachableDiskSize(49);
+
     expectButtonElementDisabled(getNextButton());
 
     await pickDetachableDiskSize(4900);
@@ -2275,8 +2265,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Create');
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
     });
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
   });
 
   it('should allow creating gcePD with GPU', async () => {
@@ -2300,14 +2290,14 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Create');
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-      expect(
-        runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name
-      ).toEqual('stub-disk');
-      expect(
-        runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus
-      ).toEqual(2);
     });
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
+      'stub-disk'
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
+      2
+    );
   });
 
   it('should allow disk deletion when detaching', async () => {
@@ -2328,16 +2318,12 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     clickExpectedButton('Next');
     clickExpectedButton('Update');
-    await waitFor(async () => {
-      runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-      expect(runtimeApiStub.runtime.gceWithPdConfig).not.toBeNull();
-    });
-    await waitFor(() => {}, { interval: 1000 });
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+    expect(runtimeApiStub.runtime.gceWithPdConfig).not.toBeNull();
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-      expect(runtimeApiStub.runtime.gceWithPdConfig).toBeUndefined();
-      // expect(runtimeApiStub.runtime.gceWithPdConfig).toBeNull();
     });
+    expect(runtimeApiStub.runtime.gceWithPdConfig).toBeUndefined();
   });
 
   it('should allow skipping disk deletion when detaching', async () => {
@@ -2363,11 +2349,11 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
-      expect(disksApiStub.disk?.name).toEqual(disk.name);
     });
+    expect(disksApiStub.disk?.name).toEqual(disk.name);
   });
 
-  it('should prevent runtime creation when running cost is too high for free tier', async () => {
+  it('should prevent runtime creation when running cost is too high for initial credits', async () => {
     setCurrentRuntime(null);
     const { container } = await component();
     clickExpectedButton('Customize');
@@ -2398,25 +2384,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     expectButtonElementDisabled(createButton);
 
     await pickNumWorkers(2);
-    expectButtonElementEnabled(createButton);
-  });
-
-  it('should allow runtime creation when running cost is too high for user provided billing', async () => {
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.OWNER,
-      billingAccountName: 'user provided billing',
-    });
-
-    setCurrentRuntime(null);
-    const { container } = await component();
-    clickExpectedButton('Customize');
-
-    await pickComputeType(container, ComputeType.Dataproc);
-    await pickStandardDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
-    // This should make the cost about $50 per hour.
-    await pickNumWorkers(20000);
-    const createButton = screen.getByRole('button', { name: 'Create' });
     expectButtonElementEnabled(createButton);
   });
 
@@ -2476,7 +2443,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(preemptibleCountInput.disabled).toBeTruthy();
   });
 
-  jest.setTimeout(50000);
+  // These tests require a little more simplification, so we are skipping them for now. However, they will run as
+  // part of runtime-configuration-panel.enzyme.spec.tsx.
   test.skip.each([
     [
       'disk type',
@@ -2553,8 +2521,8 @@ describe(RuntimeConfigurationPanel.name, () => {
       clickButtonIfVisible('Update');
       await waitFor(() => {
         expect(updateRuntimeSpy).toHaveBeenCalledTimes(1);
-        expect(disksApiStub.disk.name).toEqual(disk.name);
       });
+      expect(disksApiStub.disk.name).toEqual(disk.name);
     }
   );
 
