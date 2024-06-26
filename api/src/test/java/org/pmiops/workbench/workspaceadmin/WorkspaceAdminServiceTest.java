@@ -526,6 +526,13 @@ public class WorkspaceAdminServiceTest {
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
+    when(mockFeaturedWorkspaceDao.save(any()))
+        .thenReturn(
+            new DbFeaturedWorkspace()
+                .setWorkspace(mockdbWorkspace)
+                .setCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+                .setDescription("test"));
+
     workspaceAdminService.publishWorkspaceviaDB(
         mockdbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao).save(any());
@@ -534,6 +541,46 @@ public class WorkspaceAdminServiceTest {
             mockdbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+  }
+
+  @Test
+  public void testPublishWorkspaceviaDB_updateWithDifferentcategory() throws MessagingException {
+    DbWorkspace mockdbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest publishWorkspaceRequest =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+    when(mockFeaturedWorkspaceDao.save(any()))
+        .thenReturn(
+            new DbFeaturedWorkspace()
+                .setWorkspace(mockdbWorkspace)
+                .setCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+                .setDescription("test"));
+
+    workspaceAdminService.publishWorkspaceviaDB(
+        mockdbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    verify(mockAdminAuditor)
+        .firePublishWorkspaceAction(
+            mockdbWorkspace.getWorkspaceId(),
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+
+    publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+
+    when(mockFeaturedWorkspaceDao.save(any()))
+        .thenReturn(
+            new DbFeaturedWorkspace()
+                .setWorkspace(mockdbWorkspace)
+                .setCategory(FeaturedWorkspaceCategory.DEMO_PROJECTS)
+                .setDescription("test"));
+
+    workspaceAdminService.publishWorkspaceviaDB(
+        mockdbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    verify(mockFeaturedWorkspaceDao, times(2)).save(any());
+    verify(mockAdminAuditor, times(1))
+        .firePublishWorkspaceAction(
+            mockdbWorkspace.getWorkspaceId(), FeaturedWorkspaceCategory.DEMO_PROJECTS.toString());
+    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
   }
 
   @Test
