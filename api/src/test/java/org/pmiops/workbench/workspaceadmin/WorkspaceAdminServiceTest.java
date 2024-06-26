@@ -584,6 +584,37 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
+  public void testPublishWorkspaceviaDB_updateWithSameCategory() throws MessagingException {
+    DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest request =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+
+    DbFeaturedWorkspace mockFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(workspace)
+            .setCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
+        .thenReturn(Optional.of(mockFeaturedWorkspace));
+    when(mockFeaturedWorkspaceDao.save(any()))
+        .thenReturn(
+            new DbFeaturedWorkspace()
+                .setWorkspace(workspace)
+                .setCategory(request.getCategory())
+                .setDescription(request.getDescription()));
+
+    workspaceAdminService.publishWorkspaceviaDB(workspace.getWorkspaceNamespace(), request);
+
+    // Since the category is the same, we should not save the workspace again or send emails
+    verify(mockFeaturedWorkspaceDao, never()).save(any());
+    verify(mockAdminAuditor, never())
+        .firePublishWorkspaceAction(workspace.getWorkspaceId(), request.getCategory().toString());
+    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+  }
+
+  @Test
   public void testUnPublishWorkspaceviaDb() throws MessagingException {
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     DbFeaturedWorkspace mockFeaturedworkspace =
