@@ -36,7 +36,6 @@ export const styles = reactStyles({
     textOverflow: 'ellipsis',
     userSelect: 'none',
     margin: 0,
-    padding: '0 22px',
     borderRadius: 5,
     boxSizing: 'border-box',
   },
