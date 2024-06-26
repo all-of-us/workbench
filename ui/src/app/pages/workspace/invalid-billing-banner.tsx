@@ -3,13 +3,13 @@ import * as fp from 'lodash';
 
 import { Profile } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
+import { Button, LinkButton } from 'app/components/buttons';
 import { ToastBanner, ToastType } from 'app/components/toast-banner';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import { openZendeskWidget } from 'app/utils/zendesk';
+import { supportUrls } from 'app/utils/zendesk';
 
 interface Props extends NavigationProps {
   workspace: WorkspaceData;
@@ -23,51 +23,34 @@ export const InvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
   withUserProfile(),
   withNavigation
-)((props: Props) => {
-  const userAction =
-    'Please provide a valid billing account or contact support to extend initial credits.';
-  const footer = (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <Button
-        style={{ height: '38px', width: '70%', fontWeight: 400 }}
-        onClick={() => {
-          openZendeskWidget(
-            props.profileState.profile.givenName,
-            props.profileState.profile.familyName,
-            props.profileState.profile.username,
-            props.profileState.profile.contactEmail
-          );
-        }}
+)(({ onClose, navigate, workspace }: Props) => {
+  const message = (
+    <div>
+      'The initial credits for the creator of this workspace have run out.
+      Please provide a valid billing account.'
+      <LinkButton
+        onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}
       >
-        Request Extension
-      </Button>
-      <a
-        style={{ marginTop: '.75rem', marginLeft: '.3rem' }}
-        onClick={() => {
-          props.navigate([
-            'workspaces',
-            props.workspace.namespace,
-            props.workspace.id,
-            'edit',
-          ]);
-        }}
-      >
-        Provide billing account
-      </a>
+        Learn how to link a billing account.
+      </LinkButton>
     </div>
   );
-
+  const footer = (
+    <Button
+      style={{ height: '38px', width: '70%', fontWeight: 400 }}
+      onClick={() =>
+        navigate(['workspaces', workspace.namespace, workspace.id, 'edit'])
+      }
+    >
+      Edit Workspace
+    </Button>
+  );
   return (
     <ToastBanner
-      title={'This workspace has run out of initial credits'}
-      message={
-        'The initial credits for the creator of this workspace have run out. ' +
-        userAction
-      }
-      onClose={() => props.onClose()}
+      {...{ message, footer, onClose }}
+      title='This workspace has run out of initial credits'
       toastType={ToastType.WARNING}
       zIndex={500}
-      footer={footer}
     />
   );
 });
