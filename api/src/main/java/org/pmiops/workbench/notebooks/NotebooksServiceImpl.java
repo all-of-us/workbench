@@ -319,6 +319,7 @@ public class NotebooksServiceImpl implements NotebooksService {
           String.format(
               "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
     }
+
     cloudStorageClient.writeFile(
         bucketName,
         NotebookUtils.withNotebookPath(
