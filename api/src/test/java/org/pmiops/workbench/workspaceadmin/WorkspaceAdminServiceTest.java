@@ -628,11 +628,11 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
-    workspaceAdminService.unPublishWorkspaceviaDB(mockDbWorkspace.getWorkspaceNamespace());
+    workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
         .fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    verify(mailService).sendUnPublishWorkspaceByAdminEmail(any(), any());
+    verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

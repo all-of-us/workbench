@@ -152,7 +152,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
-    workspaceAdminService.unPublishWorkspaceviaDB(workspaceNamespace);
+    workspaceAdminService.unpublishWorkspaceViaDB(workspaceNamespace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

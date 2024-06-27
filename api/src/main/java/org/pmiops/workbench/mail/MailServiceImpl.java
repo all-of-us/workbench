@@ -406,7 +406,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendUnPublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     final String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));

@@ -1775,7 +1775,8 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Publish the workspace so it features in the Feature workspace tab under requested category
+      description: Publish the workspace so it features in the Featured Workspaces tab under requested category.Requires
+        RESEARCHER_DATA_VIEW authority.
       operationId: publishWorkspaceViaDB
       parameters:
         - name: workspaceNamespace
@@ -1801,7 +1802,8 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Unpublish a workspace removing it from FEATURE WORKSPACE tab.
+      description: Unpublish a workspace removing it from Featured Workspaces tab. Requires
+        RESEARCHER_DATA_VIEW authority.
       operationId: unpublishWorkspaceViaDB
       parameters:
         - name: workspaceNamespace

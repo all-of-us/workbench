@@ -73,6 +73,6 @@ public interface MailService {
       final DbWorkspace workspace, List<DbUser> owners, String publishCategory)
       throws MessagingException;
 
-  void sendUnPublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
+  void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 }

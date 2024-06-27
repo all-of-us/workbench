@@ -463,7 +463,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void unPublishWorkspaceviaDB(String workspaceNamespace) {
+  public void unpublishWorkspaceViaDB(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
@@ -493,7 +493,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       if (published) {
         mailService.sendPublishWorkspaceByAdminEmail(dbWorkspace, owners, category);
       } else {
-        mailService.sendUnPublishWorkspaceByAdminEmail(dbWorkspace, owners);
+        mailService.sendUnpublishWorkspaceByAdminEmail(dbWorkspace, owners);
       }
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());

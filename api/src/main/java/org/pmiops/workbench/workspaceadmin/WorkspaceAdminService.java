@@ -56,5 +56,5 @@ public interface WorkspaceAdminService {
   void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
 
-  void unPublishWorkspaceviaDB(String workspaceNamespace);
+  void unpublishWorkspaceViaDB(String workspaceNamespace);
 }
