@@ -290,6 +290,7 @@ const displayExtractionIcon = (
                   ...styles.rotate,
                   color: colors.asyncOperationStatus.starting,
                 }}
+                title='Icon indicating extraction is running'
               />
             ),
           ],
@@ -303,6 +304,7 @@ const displayExtractionIcon = (
                   ...styles.rotate,
                   color: colors.asyncOperationStatus.stopping,
                 }}
+                title='Icon indicating extraction is stopping'
               />
             ),
           ],
@@ -315,6 +317,7 @@ const displayExtractionIcon = (
                   ...styles.asyncOperationStatusIcon,
                   color: colors.asyncOperationStatus.error,
                 }}
+                title='Icon indicating extraction has failed'
               />
             ),
           ],
@@ -327,6 +330,7 @@ const displayExtractionIcon = (
                   ...styles.asyncOperationStatusIcon,
                   color: colors.asyncOperationStatus.succeeded,
                 }}
+                title='Icon indicating extraction has succeeded'
               />
             ),
           ],
@@ -339,6 +343,7 @@ const displayExtractionIcon = (
                   ...styles.asyncOperationStatusIcon,
                   color: colors.asyncOperationStatus.stopped,
                 }}
+                title='Icon indicating extraction has aborted'
               />
             ),
           ]

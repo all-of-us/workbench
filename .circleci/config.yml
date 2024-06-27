@@ -142,31 +142,6 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  gcloud-auth-login-stored-credentials:
-    description: "Activate CircleCI service account credential using GCLOUD_CREDENTIALS and GCLOUD_CREDENTIALS_KEY"
-    parameters:
-      with_application_default_credentials:
-        description: |
-          Whether to apply these credentials for Application Default Credentials (ADC).
-          This may be necessary to simulate certain local or server-side auth flows.
-          This is applied in addition to the normal behavior of this command, which activates
-          credentials e.g. for gcloud or gsutil commands.
-        type: boolean
-        default: false
-    steps:
-      - run:
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh << pipeline.parameters.circle-service-account-key >>
-      - when:
-          condition: << parameters.with_application_default_credentials >>
-          steps:
-            - run:
-                name: Export application default credentials
-                command: |
-                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=<< pipeline.parameters.circle-service-account-key >>' >> $BASH_ENV
-                  source $BASH_ENV
-                working_directory: ~/workbench
-
   # adapted from https://circleci.com/blog/openid-connect-identity-tokens/
   gcloud-auth-login-oidc:
     description: "Activate CircleCI service account credential using OIDC"
@@ -213,16 +188,29 @@ commands:
               ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
               curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
 
+  gcloud-auth-login-oidc-test:
+    description: "Activate CircleCI service account credential for the Test environment"
+    steps:
+      - gcloud-auth-login-oidc:
+          project_id: "602460048110"  # all-of-us-workbench-test
+          wip_id: "circleci-wip-test"
+          wip_provider_id: "circleci-oidc-prv-test"
+
+  gcloud-auth-login-oidc-staging:
+    description: "Activate CircleCI service account credential for the Staging environment"
+    steps:
+      - gcloud-auth-login-oidc:
+          project_id: "657299777109"  # all-of-us-rw-staging
+          wip_id: "circleci-wip-staging"
+          wip_provider_id: "circleci-oidc-prv-staging"
+
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
     steps:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-oidc:
-          project_id: "657299777109"  # all-of-us-rw-staging
-          wip_id: "circleci-wip-staging"
-          wip_provider_id: "circleci-oidc-prv-staging"
+      - gcloud-auth-login-oidc-staging
       - run:
           working_directory: ~/workbench/deploy
           command: |
@@ -376,8 +364,7 @@ commands:
   gcs-load-test-results:
     description: "Load Puppeteer test results JSON to Google Storage bucket"
     steps:
-      - gcloud-auth-login-stored-credentials:  # required to access GCS
-          with_application_default_credentials: true
+      - gcloud-auth-login-oidc-test  # required to access GCS
       - run:
           name: Upload test results json to storage bucket
           working_directory: ~/workbench/e2e/logs
@@ -409,7 +396,7 @@ commands:
         type: enum
         enum: [ "test", "staging", "local" ]
     steps:
-      - gcloud-auth-login-stored-credentials  # required to access GCS
+      - gcloud-auth-login-oidc-test  # required to access GCS
       - run:
           name: "Set environment variable ACCESS_TEST_USER"
           working_directory: ~/workbench/e2e
@@ -580,7 +567,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-stored-credentials  # required to access GCS
+            - gcloud-auth-login-oidc-test  # required to access GCS
             - launch-local-api
             - run:
                 working_directory: ~/workbench/api
@@ -601,7 +588,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-stored-credentials  # required to access GCS
+            - gcloud-auth-login-oidc-test  # required to access GCS
             - run:
                 name: Run Integration Tests
                 working_directory: ~/workbench/api
@@ -612,7 +599,7 @@ jobs:
     steps:
       - run-api-test:
           additional_steps:
-            - gcloud-auth-login-stored-credentials  # required to access GCS
+            - gcloud-auth-login-oidc-test  # required to access GCS
             - run:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
@@ -623,7 +610,7 @@ jobs:
     steps:
     - run-api-test:
         additional_steps:
-        - gcloud-auth-login-stored-credentials  # required to access GCS
+        - gcloud-auth-login-oidc-test  # required to access GCS
         - run:
             name: Run Contract tests
             working_directory: ~/workbench/api
@@ -692,7 +679,7 @@ jobs:
           command: |
             echo Hello Circle!
 
-  e2etests-deploy-ui:
+  e2ev2-deploy-ui:
     machine:
       image: default # latest stable version
     environment:
@@ -701,13 +688,13 @@ jobs:
       - checkout-code
       - halt-test-check:
           dir_names: "ui"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Build
           working_directory: ui
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
@@ -718,12 +705,11 @@ jobs:
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
             ./src/circle-deploy.sh
-  e2etests-run:
+  e2ev2-run:
     machine:
       image: default # latest stable version
     environment:
@@ -732,13 +718,13 @@ jobs:
       - checkout-code
       - halt-test-check:
           dir_names: "ui"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Run tests
           working_directory: e2ev2
           command: |
             set +e
             set -v
-            ../.circleci/activate-service-account.sh
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
 
@@ -758,10 +744,7 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-oidc:
-          project_id: "602460048110"  # all-of-us-workbench-test
-          wip_id: "circleci-wip-test"
-          wip_provider_id: "circleci-oidc-prv-test"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Deploy UI to "test" App Engine
           working_directory: ~/workbench/ui
@@ -782,10 +765,7 @@ jobs:
       - checkout-code
       - attach_workspace:
           at: .
-      - gcloud-auth-login-oidc:
-          project_id: "602460048110"  # all-of-us-workbench-test
-          wip_id: "circleci-wip-test"
-          wip_provider_id: "circleci-oidc-prv-test"
+      - gcloud-auth-login-oidc-test
       - run:
           name: Deploy API to "test" App Engine
           working_directory: ~/workbench/api
@@ -844,9 +824,7 @@ jobs:
           working_directory: ~/workbench/e2e
           command: |
             cp .env.circleci.<< parameters.env_name >> .env
-      - gcloud-auth-login-stored-credentials: # required to access GCS
-          # Needed for generate-impersonated-user-token script
-          with_application_default_credentials: true
+      - gcloud-auth-login-oidc-test
       - run:
           name: "Run script: api/project.rb generate-impersonated-user-tokens"
           working_directory: ~/workbench/e2e
@@ -923,7 +901,7 @@ jobs:
           name: "Create a file contains test names"
           working_directory: ~/workbench/e2e
           command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
-      - gcloud-auth-login-stored-credentials  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
+      - gcloud-auth-login-oidc-test  # needed to run project.rb generate-impersonated-user-tokens as part of "yarn test:ci"
       - run:
           name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
@@ -1042,13 +1020,13 @@ workflows:
     jobs:
       - playground:
           <<: *filter-pr-branch
-  e2etests:
+  e2ev2:
     jobs:
-      - e2etests-deploy-ui:
+      - e2ev2-deploy-ui:
           <<: *filter-pr-branch
-      - e2etests-run:
+      - e2ev2-run:
           requires:
-            - e2etests-deploy-ui
+            - e2ev2-deploy-ui
 
   deploy-staging:
     jobs:
