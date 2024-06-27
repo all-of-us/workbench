@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
@@ -11,7 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { render, RenderResult, screen, waitFor } from '@testing-library/react';
+import { RenderResult, screen, waitFor } from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
@@ -34,6 +33,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  renderWithRouterAndPath,
   waitAndExecute,
 } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
@@ -65,18 +65,9 @@ describe(DataAccessRequirements.name, () => {
     const path = pageMode
       ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
       : DATA_ACCESS_REQUIREMENTS_PATH;
-    delete window.location;
-    // @ts-ignore
-    window.location = Object.assign(new URL('https://example.org' + path), {
-      ancestorOrigins: '',
-      assign: jest.fn(),
-      reload: jest.fn(),
-      replace: jest.fn(),
-    });
-    return render(
-      <MemoryRouter initialEntries={[path]}>
-        <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
-      </MemoryRouter>
+    return renderWithRouterAndPath(
+      path,
+      <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
     );
   };
 

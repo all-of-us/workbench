@@ -1,11 +1,10 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 
 import { CohortBuilderApi, CohortsApi } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
@@ -15,6 +14,7 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { renderWithRouterAndPath } from 'testing/react-test-helpers';
 import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import { CohortBuilderServiceStub } from 'testing/stubs/cohort-builder-service-stub';
 import { CohortsApiStub } from 'testing/stubs/cohorts-api-stub';
@@ -36,24 +36,15 @@ describe(CohortPage.name, () => {
       dataTabPath('foo', 'bar') +
       'cohorts/build' +
       (search ? `?${search}` : '');
-    delete window.location;
-    // @ts-ignore
-    window.location = Object.assign(new URL('https://example.org' + path), {
-      ancestorOrigins: '',
-      assign: jest.fn(),
-      reload: jest.fn(),
-      replace: jest.fn(),
-    });
-    return render(
-      <MemoryRouter initialEntries={[path]}>
-        <CohortPage
-          setCohortChanged={() => {}}
-          setShowWarningModal={() => {}}
-          setUpdatingCohort={() => {}}
-          hideSpinner={() => {}}
-          showSpinner={() => {}}
-        />
-      </MemoryRouter>
+    return renderWithRouterAndPath(
+      path,
+      <CohortPage
+        setCohortChanged={() => {}}
+        setShowWarningModal={() => {}}
+        setUpdatingCohort={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+      />
     );
   };
 

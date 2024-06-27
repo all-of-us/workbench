@@ -91,6 +91,27 @@ export function renderWithRouter(
   return render(<MemoryRouter>{children}</MemoryRouter>, options);
 }
 
+export function renderWithRouterAndPath(
+  path: string,
+  children: string | React.ReactNode,
+  options?
+) {
+  // reassign window.location to the desired path
+  delete window.location;
+  // @ts-ignore
+  window.location = Object.assign(new URL('https://example.org' + path), {
+    ancestorOrigins: '',
+    assign: jest.fn(),
+    reload: jest.fn(),
+    replace: jest.fn(),
+  });
+
+  return render(
+    <MemoryRouter initialEntries={[path]}>{children}</MemoryRouter>,
+    options
+  );
+}
+
 // We only want to check against the actual text node
 // Capturing other nodes in this search will return the parent nodes as well as the text,
 // The "nodes" that exclusively have text do not have a node name and return null
