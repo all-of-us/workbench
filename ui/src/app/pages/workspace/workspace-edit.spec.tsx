@@ -1115,16 +1115,16 @@ describe(WorkspaceEdit.name, () => {
 
   it('should not highlight the billing dropdown by default', async () => {
     renderComponent();
-    const billingDropdown = screen.getByTestId('billing-dropdown');
-    expect(billingDropdown).not.toHaveStyle(
+
+    expect(screen.getByTestId('billing-dropdown')).not.toHaveStyle(
       `background-color: ${colors.highlight}`
     );
   });
 
   it('should highlight the billing dropdown when specified by query param', async () => {
     renderComponent('highlightBilling=anyvalue');
-    const billingDropdown = screen.getByTestId('billing-dropdown');
-    expect(billingDropdown).toHaveStyle(
+
+    expect(screen.getByTestId('billing-dropdown')).toHaveStyle(
       `background-color: ${colors.highlight}`
     );
   });
