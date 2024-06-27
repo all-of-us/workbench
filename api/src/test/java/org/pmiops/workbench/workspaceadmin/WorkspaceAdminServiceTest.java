@@ -558,10 +558,10 @@ public class WorkspaceAdminServiceTest {
                 .setDescription("test"));
 
     workspaceAdminService.publishWorkspaceViaDB(
-            mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
-                mockDbWorkspace.getWorkspaceId(),
+            mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
 
@@ -575,11 +575,11 @@ public class WorkspaceAdminServiceTest {
                 .setDescription("test"));
 
     workspaceAdminService.publishWorkspaceViaDB(
-            mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
     verify(mockAdminAuditor, times(1))
         .firePublishWorkspaceAction(
-                mockDbWorkspace.getWorkspaceId(), FeaturedWorkspaceCategory.DEMO_PROJECTS.toString());
+            mockDbWorkspace.getWorkspaceId(), FeaturedWorkspaceCategory.DEMO_PROJECTS.toString());
     verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
   }
 
