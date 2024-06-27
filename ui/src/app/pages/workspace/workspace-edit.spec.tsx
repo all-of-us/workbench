@@ -86,12 +86,10 @@ describe(WorkspaceEdit.name, () => {
   let workspaceEditMode: WorkspaceEditMode;
   let user: UserEvent;
 
-  const renderComponent = (queryParam?: string) => {
+  const renderComponent = (search?: string) => {
     return render(
       <MemoryRouter
-        initialEntries={[
-          workspacePath('foo', 'bar') + queryParam ? `?${queryParam}` : '',
-        ]}
+        initialEntries={[{ pathname: workspacePath('foo', 'bar'), search }]}
       >
         <WorkspaceEdit
           cancel={() => {}}
