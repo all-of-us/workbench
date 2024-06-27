@@ -57,27 +57,28 @@ describe(CohortPage.name, () => {
     const mockGetCohort = jest.spyOn(cohortsApi(), 'getCohort');
     const { id, namespace } = workspaceDataStub;
 
-    let { unmount } = component();
+    let renderedComponent = component();
     await waitFor(() => expect(mockGetCohort).toHaveBeenCalledTimes(0));
     expect(screen.queryAllByTestId('includes-search-group').length).toBe(0);
     expect(screen.queryAllByTestId('excludes-search-group').length).toBe(0);
-    unmount();
+    renderedComponent.unmount();
 
     // Call cohort with 2 includes groups
-    unmount = component('cohortId=1').unmount;
+    renderedComponent = component('cohortId=1');
     await waitFor(() =>
       expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 1)
     );
     expect(screen.getAllByTestId('includes-search-group').length).toBe(2);
     expect(screen.queryAllByTestId('excludes-search-group').length).toBe(0);
-    unmount();
+    renderedComponent.unmount();
 
     // Call cohort with 2 includes groups and one excludes group
-    component('cohortId=2');
+    renderedComponent = component('cohortId=2');
     await waitFor(() =>
       expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 2)
     );
     expect(screen.getAllByTestId('includes-search-group').length).toBe(2);
     expect(screen.getAllByTestId('excludes-search-group').length).toBe(1);
+    renderedComponent.unmount();
   });
 });
