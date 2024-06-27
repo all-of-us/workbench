@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import {
   AppRoute,
+  useQuery,
   withFullHeight,
   withRouteData,
 } from 'app/components/app-router';
@@ -139,8 +140,7 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
+  const query = useQuery();
 
   return (
     <Switch>
