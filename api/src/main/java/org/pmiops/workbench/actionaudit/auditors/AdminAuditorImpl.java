@@ -136,28 +136,14 @@ public class AdminAuditorImpl implements AdminAuditor {
   }
 
   public void firePublishWorkspaceAction(long workspaceId, String category) {
-    DbUser dbUser = userProvider.get();
-    String actionId = actionIdProvider.get();
-    long timestamp = clock.millis();
-
-    ActionAuditEvent event =
-        ActionAuditEvent.builder()
-            .actionId(actionId)
-            .actionType(ActionType.EDIT)
-            .agentType(AgentType.ADMINISTRATOR)
-            .agentEmailMaybe(dbUser.getUsername())
-            .agentIdMaybe(dbUser.getUserId())
-            .targetType(TargetType.WORKSPACE)
-            .targetIdMaybe(workspaceId)
-            .targetPropertyMaybe("Published")
-            .newValueMaybe("true: as " + category)
-            .timestamp(timestamp)
-            .build();
-
-    actionAuditService.send(event);
+    auditPublishOrUnpublishAction(workspaceId, category, ActionType.PUBLISH);
   }
 
-  public void fireUnPublishWorkspaceAction(long workspaceId) {
+  public void fireUnPublishWorkspaceAction(long workspaceId, String category) {
+    auditPublishOrUnpublishAction(workspaceId, category, ActionType.UNPUBLISH);
+  }
+
+  void auditPublishOrUnpublishAction(long workspaceId, String category, ActionType action) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
@@ -165,14 +151,14 @@ public class AdminAuditorImpl implements AdminAuditor {
     ActionAuditEvent event =
         ActionAuditEvent.builder()
             .actionId(actionId)
-            .actionType(ActionType.EDIT)
+            .actionType(action)
             .agentType(AgentType.ADMINISTRATOR)
             .agentEmailMaybe(dbUser.getUsername())
             .agentIdMaybe(dbUser.getUserId())
             .targetType(TargetType.WORKSPACE)
             .targetIdMaybe(workspaceId)
-            .targetPropertyMaybe("Published")
-            .newValueMaybe("false")
+            .targetPropertyMaybe("Category")
+            .newValueMaybe(category)
             .timestamp(timestamp)
             .build();
 

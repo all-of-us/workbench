@@ -142,7 +142,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<EmptyResponse> publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest body) {
     workspaceAdminService.publishWorkspaceViaDB(workspaceNamespace, body);
@@ -150,7 +150,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
     workspaceAdminService.unPublishWorkspaceviaDB(workspaceNamespace);
     return ResponseEntity.ok(new EmptyResponse());
