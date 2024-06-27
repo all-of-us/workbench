@@ -479,7 +479,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     updateWorkspaceACL(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
     featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
-    adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
+    adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
     log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
 
     // Send email to all workspace owners to let them know workspace has been unpublished

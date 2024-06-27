@@ -631,7 +631,7 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
-        .fireUnPublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
+        .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
     verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
   }
 

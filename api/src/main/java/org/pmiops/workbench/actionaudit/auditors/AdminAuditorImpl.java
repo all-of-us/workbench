@@ -139,7 +139,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     auditPublishOrUnpublishAction(workspaceId, category, ActionType.PUBLISH);
   }
 
-  public void fireUnPublishWorkspaceAction(long workspaceId, String category) {
+  public void fireUnpublishWorkspaceAction(long workspaceId, String category) {
     auditPublishOrUnpublishAction(workspaceId, category, ActionType.UNPUBLISH);
   }
 

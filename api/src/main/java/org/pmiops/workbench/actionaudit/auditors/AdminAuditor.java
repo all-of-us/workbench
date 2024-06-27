@@ -16,5 +16,5 @@ public interface AdminAuditor {
 
   void firePublishWorkspaceAction(long workspaceId, String category);
 
-  void fireUnPublishWorkspaceAction(long workspaceId, String category);
+  void fireUnpublishWorkspaceAction(long workspaceId, String category);
 }
