@@ -47,6 +47,18 @@ export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
 };
 
+export const parseQueryParamsL = (location: Location) => {
+  return parseQueryParams(location.search);
+};
+
+export const parseQueryParamsW = (window: Window) => {
+  return parseQueryParamsL(window.location);
+};
+
+export const parseQueryParamsX = () => {
+  return parseQueryParamsW(window);
+};
+
 /**
  * Retrieve query parameters from the React Router, as a hook suitable for functional components.
  *
