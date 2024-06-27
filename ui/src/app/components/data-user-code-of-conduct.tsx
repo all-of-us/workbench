@@ -441,7 +441,7 @@ export const DataUserCodeOfConduct = fp.flow(
         title: 'Your agreement failed to update',
         message: 'Please try submitting the agreement again.',
       })
-    )(async (initials) => {
+    )(async (initials: string) => {
       const profile = await profileApi().submitDUCC(
         getLiveDUCCVersion(),
         initials
@@ -449,7 +449,7 @@ export const DataUserCodeOfConduct = fp.flow(
       this.props.profileState.updateCache(profile);
     });
 
-    submitDataUserCodeOfConduct(initials) {
+    submitDataUserCodeOfConduct(initials: string) {
       profileApi()
         .submitDUCC(getLiveDUCCVersion(), initials)
         .then((profile) => {
@@ -557,7 +557,7 @@ export const DataUserCodeOfConduct = fp.flow(
                 // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                 // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                 AnalyticsTracker.Registration.AcceptDUCC();
-                wasReferredFromRenewal(this.props.location.search)
+                wasReferredFromRenewal()
                   ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                   : this.submitDataUserCodeOfConduct(initialMonitoring);
                 this.setState({ submitting: false });

@@ -50,7 +50,7 @@ const setUpWorkspace = () => {
 };
 const currentWorkspace = workspaceStubs[0];
 
-const createRoute = (appType: string) => (
+const createRoute = (appType: UIAppType) => (
   <MemoryRouter
     initialEntries={[
       appDisplayPath(currentWorkspace.namespace, currentWorkspace.id, appType),
@@ -67,14 +67,17 @@ const pathToCurrentWSAnalysisTab = analysisTabPath(
   currentWorkspace.id
 );
 
-const setup = (queryParam, userApps: UserAppEnvironment[] = defaultApps()) => {
+const setup = (
+  appType: UIAppType,
+  userApps: UserAppEnvironment[] = defaultApps()
+) => {
   userAppsStore.set({
     updating: false,
     userApps: userApps,
   });
   setUpWorkspace();
   return {
-    container: render(createRoute(queryParam)).container,
+    container: render(createRoute(appType)).container,
     user: userEvent.setup(),
   };
 };
@@ -86,7 +89,7 @@ const setupEmptyUserStore = () => {
   });
 
   return {
-    container: render(createRoute('RStudio')).container,
+    container: render(createRoute(UIAppType.RSTUDIO)).container,
     user: userEvent.setup(),
   };
 };
@@ -150,7 +153,7 @@ it('Should display error message if valid User App is not in userAppStore', asyn
       proxyUrls: { app: RSTUDIO_FAKE_URL },
     },
   ];
-  setup('RStudio', cromwellUserApp);
+  setup(UIAppType.RSTUDIO, cromwellUserApp);
 
   expect(
     screen.getByText(

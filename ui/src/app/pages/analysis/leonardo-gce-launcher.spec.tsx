@@ -20,11 +20,11 @@ import userEvent from '@testing-library/user-event';
 import {
   genericProgressStrings,
   LeoApplicationType,
-  LeonardoAppLauncher,
+  LeonardoGCELauncher,
   notebookProgressStrings,
   Progress,
   ProgressCardState,
-} from 'app/pages/analysis/leonardo-app-launcher';
+} from 'app/pages/analysis/leonardo-gce-launcher';
 import {
   analysisTabName,
   analysisTabPath,
@@ -95,7 +95,7 @@ describe('NotebookLauncher', () => {
     return render(
       <Router history={history}>
         <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
-          <LeonardoAppLauncher
+          <LeonardoGCELauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
             leoAppType={LeoApplicationType.JupyterNotebook}
@@ -413,7 +413,7 @@ describe('TerminalLauncher', () => {
     const t = render(
       <Router history={history}>
         <Route path='/workspaces/:ns/:wsid/terminals'>
-          <LeonardoAppLauncher
+          <LeonardoGCELauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
             leoAppType={LeoApplicationType.JupyterTerminal}
@@ -541,7 +541,7 @@ describe('SparkConsoleLauncher', () => {
     const t = render(
       <Router history={history}>
         <Route path='/workspaces/:ns/:wsid/spark/:sparkConsolePath'>
-          <LeonardoAppLauncher
+          <LeonardoGCELauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
             leoAppType={LeoApplicationType.SparkConsole}

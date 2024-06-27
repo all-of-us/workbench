@@ -1406,7 +1406,7 @@ export const WorkspaceEdit = fp.flow(
     }
 
     render() {
-      const params = parseQueryParams(this.props.location.search);
+      const params = parseQueryParams();
       const highlightBilling = !!params.get('highlightBilling');
 
       const {

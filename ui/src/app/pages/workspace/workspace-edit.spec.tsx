@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
 
@@ -15,7 +14,6 @@ import {
 
 import {
   getDefaultNormalizer,
-  render,
   screen,
   waitFor,
   within,
@@ -42,6 +40,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  renderWithRouterAndPath,
 } from 'testing/react-test-helpers';
 import {
   altCdrVersion,
@@ -86,18 +85,17 @@ describe(WorkspaceEdit.name, () => {
   let workspaceEditMode: WorkspaceEditMode;
   let user: UserEvent;
 
-  const renderComponent = (search?: string) => {
-    return render(
-      <MemoryRouter
-        initialEntries={[{ pathname: workspacePath('foo', 'bar'), search }]}
-      >
-        <WorkspaceEdit
-          cancel={() => {}}
-          hideSpinner={() => {}}
-          showSpinner={() => {}}
-          workspaceEditMode={workspaceEditMode}
-        />
-      </MemoryRouter>
+  const renderComponent = (queryParams?: string) => {
+    const path =
+      workspacePath('foo', 'bar') + (queryParams ? `?${queryParams}` : '');
+    return renderWithRouterAndPath(
+      path,
+      <WorkspaceEdit
+        cancel={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+        workspaceEditMode={workspaceEditMode}
+      />
     );
   };
 

@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
   AppRoute,
+  useQueryParams,
   withFullHeight,
   withRouteData,
 } from 'app/components/app-router';
@@ -139,8 +140,7 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
+  const queryParams = useQueryParams();
 
   return (
     <Switch>
@@ -300,7 +300,7 @@ export const SignedInRoutes = () => {
         <DataAccessRequirementsPage
           routeData={{
             title:
-              query.get('pageMode') === DARPageMode.ANNUAL_RENEWAL
+              queryParams.get('pageMode') === DARPageMode.ANNUAL_RENEWAL
                 ? 'Access Renewal'
                 : 'Data Access Requirements',
           }}

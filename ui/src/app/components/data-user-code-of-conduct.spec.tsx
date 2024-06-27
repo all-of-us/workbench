@@ -22,7 +22,7 @@ import {
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 
-describe('DataUserCodeOfConduct', () => {
+describe(DataUserCodeOfConduct.name, () => {
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();

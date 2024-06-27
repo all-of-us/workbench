@@ -170,7 +170,7 @@ export const CohortPage = fp.flow(
       const {
         workspace: { id, namespace },
       } = this.props;
-      const cid = parseQueryParams(this.props.location.search).get('cohortId');
+      const cid = parseQueryParams().get('cohortId');
       const existingCohort = JSON.parse(
         localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST)
       );

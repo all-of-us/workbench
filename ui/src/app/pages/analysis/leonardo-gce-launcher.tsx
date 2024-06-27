@@ -348,7 +348,7 @@ const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const LeonardoAppLauncher = fp.flow(
+export const LeonardoGCELauncher = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
@@ -380,9 +380,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private isCreatingNewNotebook() {
-      const creating = parseQueryParams(this.props.location.search).get(
-        'creating'
-      );
+      const creating = parseQueryParams().get('creating');
       return !!creating;
     }
 
@@ -391,9 +389,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private isPlaygroundMode() {
-      const playgroundMode = parseQueryParams(this.props.location.search).get(
-        'playgroundMode'
-      );
+      const playgroundMode = parseQueryParams().get('playgroundMode');
       return playgroundMode === 'true';
     }
 
@@ -622,9 +618,7 @@ export const LeonardoAppLauncher = fp.flow(
 
     private async createNotebookAndLocalize(runtime: Runtime) {
       const fileContent = commonNotebookFormat;
-      const kernelType = parseQueryParams(this.props.location.search).get(
-        'kernelType'
-      );
+      const kernelType = parseQueryParams().get('kernelType');
       if (kernelType === Kernels.R.toString()) {
         fileContent.metadata = rNotebookMetadata;
       } else {
