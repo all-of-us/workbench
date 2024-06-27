@@ -405,53 +405,58 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    var aclUpdate =
-        FirecloudTransforms.buildAclUpdate(
-            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
-
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+    updateWorkspaceACL(
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), publish);
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
   }
 
   @Override
-  public void publishWorkspaceviaDB(
+  public void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
-    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
-    DbFeaturedWorkspace featuredWorkspace =
-        featuredWorkspaceDao.findByWorkspace(dbWorkspace).orElse(null);
+    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
 
-    if (featuredWorkspace != null) {
+    Optional<DbFeaturedWorkspace> featuredWorkspace =
+        featuredWorkspaceDao.findByWorkspace(dbWorkspace);
+
+    DbFeaturedWorkspace dbFeaturedWorkspace;
+    if (featuredWorkspace.isPresent()) {
       // If featuredWorkspace is Present check if category is same as requested or not
       // If yes: do nothing and return
       // If no: update featuredWorkspace with new category
-      if (featuredWorkspace.getCategory() == publishWorkspaceRequest.getCategory()) {
+      dbFeaturedWorkspace = featuredWorkspace.get();
+      if (dbFeaturedWorkspace
+          .getCategory()
+          .toString()
+          .equals(publishWorkspaceRequest.getCategory().toString())) {
         log.warning(
             String.format(
                 "Workspace %s is already published in the same category", workspaceNamespace));
         return;
       }
-      featuredWorkspace.setCategory(publishWorkspaceRequest.getCategory());
+      DbFeaturedWorkspace.DbFeaturedCategory dbFeaturedCategory =
+          DbFeaturedWorkspace.DbFeaturedCategory.valueOf(
+              publishWorkspaceRequest.getCategory().toString());
+
+      log.info(
+          String.format(
+              "Workspace %s will published by Admin under new category %s from %s",
+              workspaceNamespace,
+              publishWorkspaceRequest.getCategory().toString(),
+              dbFeaturedWorkspace.getCategory().toString()));
+      dbFeaturedWorkspace.setCategory(dbFeaturedCategory);
     } else {
       // Update Acl in firecloud so that everyone can view the workspace
-      var aclUpdate =
-          FirecloudTransforms.buildAclUpdate(
-              workspaceService.getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
-      fireCloudService.updateWorkspaceACL(
-          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
-      featuredWorkspace =
+      updateWorkspaceACL(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
+      dbFeaturedWorkspace =
           featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace);
     }
 
-    featuredWorkspace = featuredWorkspaceDao.save(featuredWorkspace);
+    dbFeaturedWorkspace = featuredWorkspaceDao.save(dbFeaturedWorkspace);
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
     adminAuditor.firePublishWorkspaceAction(
-        dbWorkspace.getWorkspaceId(), featuredWorkspace.getCategory().toString());
+        dbWorkspace.getWorkspaceId(), dbFeaturedWorkspace.getCategory().toString());
 
     // Send Email to all workspace owners to let them know Workspace has been published
     sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory().toString());
@@ -459,7 +464,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public void unPublishWorkspaceviaDB(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).get();
+    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspace =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
 
@@ -470,11 +475,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       return;
     }
 
-    var aclUpdate =
-        FirecloudTransforms.buildAclUpdate(
-            workspaceService.getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.NO_ACCESS);
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+    updateWorkspaceACL(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
     featuredWorkspaceDao.delete(dbFeaturedWorkspace.get());
     adminAuditor.fireUnPublishWorkspaceAction(dbWorkspace.getWorkspaceId());
     log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
@@ -497,6 +498,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     }
   }
 
+  private void updateWorkspaceACL(
+      String workspaceNamespace, String firecloudName, boolean publish) {
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
+
+    var aclUpdate =
+        FirecloudTransforms.buildAclUpdate(
+            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
+    fireCloudService.updateWorkspaceACL(workspaceNamespace, firecloudName, List.of(aclUpdate));
+  }
+
   private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
     return workspaceService
         .getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
@@ -504,7 +516,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
         .map(UserRole::getEmail)
         .map(userService::getByUsernameOrThrow)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

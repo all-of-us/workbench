@@ -1,22 +1,20 @@
 package org.pmiops.workbench.db.model;
 
 import jakarta.persistence.*;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 
 @Entity
 @Table(name = "featured_workspace")
 public class DbFeaturedWorkspace {
 
   private long id;
-  private long workspaceId;
   private DbWorkspace workspace;
-  private FeaturedWorkspaceCategory category;
+  private DbFeaturedCategory category;
   private String description;
 
   public DbFeaturedWorkspace() {}
 
   public DbFeaturedWorkspace(
-      DbWorkspace workspace, FeaturedWorkspaceCategory category, String description) {
+      DbWorkspace workspace, DbFeaturedCategory category, String description) {
     this.workspace = workspace;
     this.category = category;
     this.description = description;
@@ -47,11 +45,11 @@ public class DbFeaturedWorkspace {
 
   @Column(name = "category")
   @Enumerated(EnumType.STRING)
-  public FeaturedWorkspaceCategory getCategory() {
+  public DbFeaturedCategory getCategory() {
     return category;
   }
 
-  public DbFeaturedWorkspace setCategory(FeaturedWorkspaceCategory category) {
+  public DbFeaturedWorkspace setCategory(DbFeaturedCategory category) {
     this.category = category;
     return this;
   }

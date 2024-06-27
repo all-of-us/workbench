@@ -53,7 +53,7 @@ public interface WorkspaceAdminService {
 
   DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
 
-  void publishWorkspaceviaDB(
+  void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
 
   void unPublishWorkspaceviaDB(String workspaceNamespace);

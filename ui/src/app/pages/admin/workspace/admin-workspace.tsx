@@ -103,17 +103,17 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   async callToPublish() {
-    await workspaceAdminApi().publishWorkspaceviaDB(
+    await workspaceAdminApi().publishWorkspaceViaDB(
       this.props.match.params.ns,
       {
-        category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
+        category: FeaturedWorkspaceCategory.DEMO_PROJECTS,
         description: 'This is just a test',
       }
     );
   }
 
   async callToUnPublish() {
-    await workspaceAdminApi().unPublishWorkspaceviaDB(
+    await workspaceAdminApi().unpublishWorkspaceViaDB(
       this.props.match.params.ns
     );
   }

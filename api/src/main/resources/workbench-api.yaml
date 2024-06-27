@@ -1775,8 +1775,8 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Makes a workspace public to all AoU registered users.
-      operationId: publishWorkspaceviaDB
+      description: Publish the workspace so it features in the Feature workspace tab under requested category
+      operationId: publishWorkspaceViaDB
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1797,12 +1797,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/admin/workspaces/{workspaceNamespace}/unPublish:
+  /v1/admin/workspaces/{workspaceNamespace}/unpublish:
     post:
       tags:
         - workspaceAdmin
-      description: Removes a workspace public to all AoU registered users.
-      operationId: unPublishWorkspaceviaDB
+      description: Unpublish a workspace removing it from FEATURE WORKSPACE tab.
+      operationId: unpublishWorkspaceViaDB
       parameters:
         - name: workspaceNamespace
           in: path
