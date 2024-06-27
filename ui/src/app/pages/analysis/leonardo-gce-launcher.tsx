@@ -348,7 +348,7 @@ const runtimeApiRetryTimeoutMillis = 10000;
 const runtimeApiRetryAttempts = 5;
 const redirectMillis = 1000;
 
-export const LeonardoAppLauncher = fp.flow(
+export const LeonardoGCELauncher = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),

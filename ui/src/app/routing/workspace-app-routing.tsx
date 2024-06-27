@@ -10,8 +10,8 @@ import { GKEAppLauncher } from 'app/pages/analysis/gke-app-launcher';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import {
   LeoApplicationType,
-  LeonardoAppLauncher,
-} from 'app/pages/analysis/leonardo-app-launcher';
+  LeonardoGCELauncher,
+} from 'app/pages/analysis/leonardo-gce-launcher';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortPage } from 'app/pages/data/cohort/cohort-page';
@@ -78,13 +78,13 @@ const InteractiveNotebookPage = fp.flow(
 const LeonardoAppRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner
-)(LeonardoAppLauncher);
+)(LeonardoGCELauncher);
 const LeonardoSparkConsoleRedirectPage = fp.flow(
   withRouteData,
   withRoutingSpinner,
   // Force remounting on parameter change.
   withParamsKey('sparkConsolePath')
-)(LeonardoAppLauncher);
+)(LeonardoGCELauncher);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(
   withRouteData,
