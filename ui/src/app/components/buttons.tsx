@@ -275,7 +275,13 @@ export const Clickable = ({
   return (
     <Interactive
       as={as}
-      {...childProps}
+      {...{
+        ...childProps,
+        style: {
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          ...childProps.style,
+        },
+      }}
       onClick={(...args) => onClick && !disabled && onClick(...args)}
     />
   );
@@ -294,6 +300,7 @@ export const Button = ({
   const childProps = propagateDataTestId
     ? props
     : fp.omit(['data-test-id'], props);
+  childProps['data-button-type'] = type;
   const computedStyle = fp.merge(
     computeStyle(buttonVariants[type], { disabled }),
     { style }

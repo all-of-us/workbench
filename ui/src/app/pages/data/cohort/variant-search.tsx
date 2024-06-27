@@ -34,7 +34,6 @@ import {
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useState } = React;
 
@@ -161,7 +160,8 @@ const searchTooltip = (
 );
 const resultsTooltip = (
   <div style={{ marginLeft: '0.5rem' }}>
-    Number of results must be between 100 and 10,000 to Select All Results
+    Number of results must be between {pageSize} and 10,000 to Select All
+    Results. For results less than {pageSize}, selections must be made manually.
   </div>
 );
 const duplicateFilterTooltip = (
@@ -481,7 +481,7 @@ export const VariantSearch = fp.flow(
     };
 
     const disableSelectAll =
-      totalCount < 100 ||
+      totalCount < pageSize ||
       totalCount > 10000 ||
       criteria.some((crit) => crit.parameterId === getFilterParamId());
     const disableSelectAllSave =
@@ -556,78 +556,74 @@ export const VariantSearch = fp.flow(
                 }}
               />
             )}
-            {serverConfigStore.get().config.enableVariantSelectAll &&
-              (!!cohortContext.editSelectAll ? (
-                <>
-                  <Clickable
-                    style={withDisabledStyle(
-                      styles.exclusionText,
-                      disableSelectAllSave
-                    )}
-                    onClick={() => handleSelectAllEdit()}
-                    disabled={disableSelectAllSave}
-                  >
-                    <ClrIcon
-                      shape='check'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                        color: colors.select,
-                      }}
-                    />
-                    Save Select All Exclusions (
-                    {excludeFromSelectAll.length -
-                      (cohortContext.editSelectAll.variantFilter.exclusionList
-                        ?.length || 0)}
-                    )
-                  </Clickable>
-                  <Clickable
-                    style={styles.exclusionText}
-                    onClick={() => clearSearch()}
-                  >
-                    <ClrIcon
-                      shape='times'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                        color: colors.danger,
-                      }}
-                    />
-                    Cancel Edit
-                  </Clickable>
-                </>
-              ) : (
-                <TooltipTrigger
-                  side='top'
-                  content={
-                    totalCount < 100 || totalCount > 10000
-                      ? resultsTooltip
-                      : duplicateFilterTooltip
-                  }
-                  disabled={!disableSelectAll}
+            {!!cohortContext.editSelectAll ? (
+              <>
+                <Clickable
+                  style={withDisabledStyle(
+                    styles.exclusionText,
+                    disableSelectAllSave
+                  )}
+                  onClick={() => handleSelectAllEdit()}
+                  disabled={disableSelectAllSave}
                 >
-                  <Clickable
-                    style={withDisabledStyle(
-                      styles.selectAll,
-                      disableSelectAll
-                    )}
-                    onClick={() => handleSelectAllResults()}
-                    disabled={disableSelectAll}
-                  >
-                    <ClrIcon
-                      shape='plus-circle'
-                      class='is-solid'
-                      size={18}
-                      style={{
-                        marginRight: '0.25rem',
-                      }}
-                    />
-                    Select All Results
-                  </Clickable>
-                </TooltipTrigger>
-              ))}
+                  <ClrIcon
+                    shape='check'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                      color: colors.select,
+                    }}
+                  />
+                  Save Select All Exclusions (
+                  {excludeFromSelectAll.length -
+                    (cohortContext.editSelectAll.variantFilter.exclusionList
+                      ?.length || 0)}
+                  )
+                </Clickable>
+                <Clickable
+                  style={styles.exclusionText}
+                  onClick={() => clearSearch()}
+                >
+                  <ClrIcon
+                    shape='times'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                      color: colors.danger,
+                    }}
+                  />
+                  Cancel Edit
+                </Clickable>
+              </>
+            ) : (
+              <TooltipTrigger
+                side='top'
+                content={
+                  totalCount < pageSize || totalCount > 10000
+                    ? resultsTooltip
+                    : duplicateFilterTooltip
+                }
+                disabled={!disableSelectAll}
+              >
+                <Clickable
+                  style={withDisabledStyle(styles.selectAll, disableSelectAll)}
+                  onClick={() => handleSelectAllResults()}
+                  disabled={disableSelectAll}
+                >
+                  <ClrIcon
+                    shape='plus-circle'
+                    class='is-solid'
+                    size={18}
+                    style={{
+                      marginRight: '0.25rem',
+                    }}
+                  />
+                  Select All Results
+                </Clickable>
+              </TooltipTrigger>
+            )}
           </div>
         )}
         {loading ? (
@@ -650,8 +646,8 @@ export const VariantSearch = fp.flow(
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
               rows={pageSize}
               scrollable
-              scrollHeight='26rem'
-              style={{ fontSize: '12px', minHeight: '22rem' }}
+              scrollHeight='80%'
+              style={{ fontSize: '12px', height: '100%', minHeight: '22rem' }}
               totalRecords={totalCount}
               value={displayResults}
             >

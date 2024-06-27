@@ -564,6 +564,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                 <ClrIcon
                                   shape='plus-circle'
                                   data-test-id={'add-collab-' + user.email}
+                                  aria-label={`Button to add ${user.email} as a collaborator`}
                                   style={{ height: '21px', width: '21px' }}
                                   onClick={() => {
                                     this.addCollaborator(user);
@@ -650,6 +651,16 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                 data-test-id={user.email + '-user-role'}
                                 onChange={(e) => this.setRole(e, user)}
                                 options={UserRoleOptions}
+                                formatOptionLabel={({ label }, {}) => {
+                                  return (
+                                    <div
+                                      aria-label={`Select ${label} role for ${user.email}`}
+                                    >
+                                      {label}
+                                    </div>
+                                  );
+                                }}
+                                aria-label={`Role selector for ${user.email}`}
                               />
                             </div>
                             <div style={styles.box}>
@@ -662,6 +673,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                                       data-test-id={
                                         'remove-collab-' + user.email
                                       }
+                                      aria-label={`Button to remove ${user.email} as a collaborator`}
                                       shape='minus-circle'
                                       style={{ height: '21px', width: '21px' }}
                                       onClick={() =>

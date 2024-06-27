@@ -32,6 +32,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
+import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
@@ -44,9 +45,13 @@ import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
+import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.GceConfig;
+import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -63,6 +68,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -109,10 +115,14 @@ public class LeonardoApiClientTest {
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
   @MockBean FireCloudService mockFireCloudService;
 
+  @Qualifier("userRuntimesApi")
+  @MockBean
+  RuntimesApi userRuntimesApi;
+
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired UserDao userDao;
-  @Autowired LeonardoMapper leonardoMapper;
+  @SpyBean LeonardoMapper leonardoMapper;
   @Autowired LeonardoApiClient leonardoApiClient;
   @Autowired FirecloudMapper firecloudMapper;
 
@@ -146,6 +156,7 @@ public class LeonardoApiClientTest {
   public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_BASE_URL;
+    config.featureFlags.enableGcsFuseOnGke = true;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
@@ -239,6 +250,7 @@ public class LeonardoApiClientTest {
             .allowedChartName(LeonardoAllowedChartName.RSTUDIO)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
+            .bucketNameToMount(WORKSPACE_BUCKET)
             .customEnvironmentVariables(customEnvironmentVariables);
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);
@@ -264,6 +276,22 @@ public class LeonardoApiClientTest {
 
     assertThat(createAppRequest.isAutodeleteEnabled()).isTrue();
     assertThat(createAppRequest.getAutodeleteThreshold()).isEqualTo(10);
+  }
+
+  @Test
+  public void testCreateApp_mountGcsFuseDisabled() throws Exception {
+    config.featureFlags.enableGcsFuseOnGke = false;
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    leonardoApiClient.createApp(createAppRequest, testWorkspace);
+    verify(userAppsApi)
+        .createApp(
+            eq(GOOGLE_PROJECT_ID),
+            startsWith(getAppName(AppType.RSTUDIO)),
+            createAppRequestArgumentCaptor.capture());
+
+    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+
+    assertThat(createAppRequest.getBucketNameToMount()).isNull();
   }
 
   @Test
@@ -351,6 +379,52 @@ public class LeonardoApiClientTest {
     boolean deleteDisk = true;
     leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
     verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+  }
+
+  @Test
+  public void testUpdateRuntimeMapper_GCEConfig() throws Exception {
+    // Arrange
+    Runtime mockRuntime = new Runtime();
+    GceConfig gceConfig = new GceConfig().diskSize(120).machineType("n1-standard-4");
+    mockRuntime.setGceConfig(gceConfig);
+
+    // Act
+    leonardoApiClient.updateRuntime(mockRuntime);
+
+    // Assert
+    verify(leonardoMapper).toUpdateGceConfig(gceConfig);
+    verify(userRuntimesApi).updateRuntime(any(), any(), any());
+  }
+
+  @Test
+  public void testUpdateRuntimeMapper_GCEWithPdConfig() throws Exception {
+    // Arrange
+    Runtime mockRuntime = new Runtime();
+    GceWithPdConfig gceWithPdConfig = new GceWithPdConfig().machineType("n1-standard-4");
+    mockRuntime.setGceWithPdConfig(gceWithPdConfig);
+
+    // Act
+    leonardoApiClient.updateRuntime(mockRuntime);
+
+    // Assert
+    verify(leonardoMapper).toUpdateGceConfig(gceWithPdConfig);
+    verify(userRuntimesApi).updateRuntime(any(), any(), any());
+  }
+
+  @Test
+  public void testUpdateRuntimeMapper_withDataProcConfig() throws Exception {
+    // Arrange
+    Runtime mockRuntime = new Runtime();
+    DataprocConfig dataprocConfig =
+        new DataprocConfig().masterDiskSize(120).masterMachineType("n1-standard-4");
+    mockRuntime.setDataprocConfig(dataprocConfig);
+
+    // Act
+    leonardoApiClient.updateRuntime(mockRuntime);
+
+    // Assert
+    verify(leonardoMapper).toUpdateDataprocConfig(dataprocConfig);
+    verify(userRuntimesApi).updateRuntime(any(), any(), any());
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {

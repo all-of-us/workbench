@@ -346,7 +346,7 @@ export const WorkspaceAbout = fp.flow(
                 </FlexRow>
               </div>
             )}
-            <ResearchPurpose data-test-id='researchPurpose' />
+            <ResearchPurpose />
             {hasAuthorityForAction(
               profile,
               AuthorityGuardedAction.PUBLISH_WORKSPACE
@@ -497,7 +497,6 @@ export const WorkspaceAbout = fp.flow(
               <div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Billing</h3>
                 <StyledExternalLink
-                  data-test-id='workspace-billing-report'
                   href={this.workspaceGcpBillingSpendUrl}
                   target='_blank'
                   disabled={

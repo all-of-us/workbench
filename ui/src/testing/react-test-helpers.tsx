@@ -7,6 +7,7 @@ import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 import {
+  Matcher,
   render,
   RenderOptions,
   RenderResult,
@@ -211,6 +212,13 @@ export const expectDropdownDisabled = (
   ).not.toBeInTheDocument();
 };
 
+export const getDropdownSelection = (
+  container: HTMLElement,
+  dropDownName: string
+): string => {
+  return container.querySelector(`select[name='${dropDownName}']`).textContent;
+};
+
 export const getHTMLInputElementValue = (element: HTMLElement): string => {
   return (element as HTMLInputElement).value;
 };
@@ -228,10 +236,57 @@ export const pickSpinButtonValue = async (
 // by default, screen.debug() cuts off after 7000 chars.  let's output more than that
 export const debugAll = () => screen.debug(undefined, 1_000_000);
 
+/* This function is used to get the value of a Select component.
+This assumes that the Select component is a
+react-select Select component. The function expects the
+component's underlying input element as input. This is based on
+a helper function that Terra-UI utilizes:
+https://github.com/DataBiosphere/terra-ui/blob/dev/src/testing/test-utils.ts
+*/
+export const getSelectComponentValue = (
+  inputElement: HTMLInputElement
+): string => {
+  // Searchable Select components have an additional wrapper element
+  const valueContainer =
+    inputElement.parentElement?.parentElement?.parentElement;
+  const valueElement = valueContainer.querySelector(
+    ':scope > div[class*="Value"]'
+  );
+  return valueElement.textContent ?? '';
+};
+
+export const expectPrimaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'primary');
+};
+
+export const expectSecondaryButton = (element: HTMLElement) => {
+  expect(element).toHaveAttribute('data-button-type', 'secondary');
+};
+
 export const rgbToHex = (rgb) => {
   const rgbValues = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
   const hex = (x) => {
     return ('0' + parseInt(x, 10).toString(16)).slice(-2);
   };
   return '#' + hex(rgbValues[1]) + hex(rgbValues[2]) + hex(rgbValues[3]);
+};
+
+export const changeInputValue = async (
+  inputElement: HTMLInputElement,
+  newValue: string,
+  user: UserEvent
+) => {
+  await user.clear(inputElement);
+  await user.paste(newValue);
+  await user.tab();
+};
+
+export const expectTooltip = async (
+  element: HTMLElement,
+  message: Matcher,
+  user: UserEvent
+) => {
+  await user.hover(element);
+  expect(screen.getByText(message)).toBeInTheDocument();
+  await user.unhover(element);
 };

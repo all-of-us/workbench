@@ -39,7 +39,6 @@ import {
   allMachineTypes,
   AutodeleteDaysThresholds,
   ComputeType,
-  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
   findMachineByName,
   Machine,
 } from 'app/utils/machines';
@@ -357,12 +356,10 @@ export const CreateGkeApp = ({
           }}
         >
           <CheckBox
-            aria-label={`gke-autodelete-checkbox`}
+            aria-label='Auto-deletion toggle'
             disabled={isAppActive(app)}
-            checked={
-              createAppRequest.autodeleteEnabled || app?.autodeleteEnabled
-            }
-            onChange={(autodeleteEnabled) => {
+            checked={createAppRequest.autodeleteEnabled}
+            onChange={(autodeleteEnabled: boolean) => {
               setCreateAppRequest((prevState) => ({
                 ...prevState,
                 autodeleteEnabled,
@@ -371,7 +368,7 @@ export const CreateGkeApp = ({
             style={{ marginRight: '1rem', zoom: 1.5 }}
           />
           <FlexColumn>
-            <label style={styles.label} htmlFor='gke-autodelete-label'>
+            <label style={styles.label}>
               Automatically delete application after
             </label>
             <p style={{ marginTop: '0' }}>
@@ -393,17 +390,15 @@ export const CreateGkeApp = ({
           </TooltipTrigger>
           <FlexColumn>
             <Dropdown
-              aria-label={`Auto-deletion time limit`}
+              aria-label='Auto-deletion time limit'
+              id={`${appTypeToString[appType]}-autodelete-threshold-dropdown`}
               appendTo='self'
               disabled={isAppActive(app) || !createAppRequest.autodeleteEnabled}
               options={AutodeleteDaysThresholds.map((days) => ({
                 value: days * 24 * 60,
                 label: `Idle for ${days} days`,
               }))}
-              value={
-                createAppRequest.autodeleteThreshold ||
-                DEFAULT_AUTODELETE_THRESHOLD_MINUTES
-              }
+              value={createAppRequest.autodeleteThreshold}
               onChange={(e) => {
                 setCreateAppRequest((prevState) => ({
                   ...prevState,
@@ -414,7 +409,7 @@ export const CreateGkeApp = ({
             />
             {autodeleteRemainingDays !== null && (
               <p
-                aria-label={`Autodelete remaining days`}
+                aria-label='Autodelete remaining days'
                 style={{ marginTop: '0', marginLeft: '1rem' }}
               >
                 {autodeleteRemainingDays > 0

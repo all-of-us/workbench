@@ -85,15 +85,10 @@ export const RuntimeInitializerModal = ({
         )}
       </ModalBody>
       <ModalFooter style={{ justifyContent: 'space-between' }}>
-        <Button
-          data-test-id='runtime-initializer-cancel'
-          type='secondary'
-          onClick={() => cancel()}
-        >
+        <Button type='secondary' onClick={() => cancel()}>
           Cancel
         </Button>
         <Button
-          data-test-id='runtime-initializer-configure'
           type='secondary'
           onClick={() => {
             sidebarActiveIconStore.next('runtimeConfig');

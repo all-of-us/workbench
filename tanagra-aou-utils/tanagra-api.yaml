@@ -4,8 +4,11 @@ service: 'tanagra-api'
 service_account: $TANAGRA_SERVICE_ACCOUNT@appspot.gserviceaccount.com
 instance_class: F4
 automatic_scaling:
-  min_idle_instances: 0
-  max_instances: 10
+  min_instances: 2
+  min_idle_instances: automatic
+  max_idle_instances: automatic
+  min_pending_latency: 100ms
+  max_pending_latency: 5s
 inbound_services:
   - warmup
 handlers:

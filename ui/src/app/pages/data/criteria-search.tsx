@@ -413,7 +413,7 @@ export const CriteriaSearch = fp.flow(
         toastVisible,
       } = this.state;
       return (
-        <div id='criteria-search-container'>
+        <div id='criteria-search-container' style={{ height: '100%' }}>
           {loadingSubtree && <SpinnerOverlay />}
           <Toast
             ref={(el) => (this.toast = el)}

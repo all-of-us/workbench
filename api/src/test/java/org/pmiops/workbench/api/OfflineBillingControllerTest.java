@@ -42,15 +42,9 @@ public class OfflineBillingControllerTest {
 
   @Test
   public void testCheckFreeTierBillingUsage() {
-    offlineBillingController.checkFreeTierBillingUsage();
-    verify(mockFreeTierBillingUpdateService).checkFreeTierBillingUsage();
-  }
-
-  @Test
-  public void testCheckFreeTierBillingUsageCloudTask() {
     mockUserId();
     mockFreeTierCostForGP();
-    offlineBillingController.checkFreeTierBillingUsageCloudTask();
+    offlineBillingController.checkFreeTierBillingUsage();
 
     // Confirm the database is cleared and saved with new value
     verify(mockGoogleProjectPerCostDao).deleteAll();

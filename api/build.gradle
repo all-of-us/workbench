@@ -39,6 +39,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '6.23.3'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.8.0'
+    id 'com.google.cloud.tools.jib' version '3.4.2'
 
     // required even though we have removed our own Kotlin code - transitive dependency?
     id 'org.jetbrains.kotlin.jvm' version '1.9.23'

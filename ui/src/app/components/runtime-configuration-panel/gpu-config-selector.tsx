@@ -93,6 +93,8 @@ export const GpuConfigSelector = ({
               }}
               disabled={disabled}
               value={gpuTypeToDisplayName(selectedGpuType)}
+              name={`gpu-type`}
+              appendTo={'self'}
             />
           </FlexRow>
           <FlexRow style={styles.labelAndInput}>
@@ -108,6 +110,8 @@ export const GpuConfigSelector = ({
               onChange={({ value }) => setSelectedNumOfGpus(value)}
               disabled={disabled}
               value={selectedNumOfGpus}
+              name={'gpu-num'}
+              appendTo={'self'}
             />
           </FlexRow>
         </FlexRow>

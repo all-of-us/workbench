@@ -17,10 +17,7 @@ import {
   sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
-import {
-  DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
-  DEFAULT_MACHINE_NAME,
-} from 'app/utils/machines';
+import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import { toPascalCase } from 'app/utils/strings';
@@ -89,9 +86,8 @@ export const defaultCromwellCreateRequest: CreateAppRequest = {
     size: appMinDiskSize[AppType.CROMWELL],
     diskType: DiskType.STANDARD,
   },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+  autodeleteEnabled: true,
+  autodeleteThreshold: 7 * 24 * 60, // in minutes, so this is 7 days
 };
 
 // TODO replace with better defaults?
@@ -106,9 +102,8 @@ export const defaultRStudioCreateRequest: CreateAppRequest = {
     size: appMinDiskSize[AppType.RSTUDIO],
     diskType: DiskType.STANDARD,
   },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+  autodeleteEnabled: true,
+  autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
 };
 
 // TODO replace with better defaults?
@@ -123,9 +118,8 @@ export const defaultSASCreateRequest: CreateAppRequest = {
     size: appMinDiskSize[AppType.SAS],
     diskType: DiskType.STANDARD,
   },
-  autodeleteEnabled: false,
-  // Okay to have value here because when autodeleteEnabled is false, this value is not used.
-  autodeleteThreshold: DEFAULT_AUTODELETE_THRESHOLD_MINUTES,
+  autodeleteEnabled: true,
+  autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
 };
 
 export const defaultAppRequest: Record<AppType, CreateAppRequest> = {

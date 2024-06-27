@@ -35,12 +35,6 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
-    freeTierBillingService.checkFreeTierBillingUsage();
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> checkFreeTierBillingUsageCloudTask() {
     // Get cost for all workspace from BQ
     Map<String, Double> freeTierForAllWorkspace =
         freeTierBillingService.getFreeTierWorkspaceCostsFromBQ();

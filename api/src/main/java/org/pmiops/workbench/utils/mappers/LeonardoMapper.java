@@ -38,6 +38,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -64,26 +66,28 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
-  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
-  @Mapping(target = "componentGatewayEnabled", ignore = true)
   @Mapping(target = "workerPrivateAccess", ignore = true)
+  @Mapping(target = "cloudService", constant = "DATAPROC")
+  @Mapping(target = "componentGatewayEnabled", constant = "true")
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
-
-  @AfterMapping
-  default void addMachineConfigDefaults(
-      @MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
-    leonardoMachineConfig
-        .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
-        .componentGatewayEnabled(true);
-  }
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
+
+  @Mapping(target = "cloudService", constant = "GCE")
+  LeonardoUpdateGceConfig toUpdateGceConfig(GceConfig gceConfig);
+
+  @Mapping(target = "cloudService", constant = "GCE")
+  @Mapping(target = "diskSize", source = "gceWithPdConfig.persistentDisk.size")
+  LeonardoUpdateGceConfig toUpdateGceConfig(GceWithPdConfig gceWithPdConfig);
+
+  @Mapping(target = "cloudService", constant = "DATAPROC")
+  LeonardoUpdateDataprocConfig toUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
   @Mapping(target = "persistentDisk", source = "leonardoDiskConfig")
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
@@ -101,20 +105,9 @@ public interface LeonardoMapper {
       PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
-
-  @AfterMapping
-  default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {
-    leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
-  }
-
-  @AfterMapping
-  default void addPdCloudServiceEnum(
-      @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
-    leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
-  }
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
