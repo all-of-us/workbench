@@ -1,8 +1,15 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Workspace, WorkspaceActiveStatus } from 'generated/fetch';
+import {
+  AnnotationType,
+  Workspace,
+  WorkspaceActiveStatus,
+} from 'generated/fetch';
 
+import { Button } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
+import { Select } from 'app/components/inputs';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
@@ -48,7 +55,20 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => (
         {new Date(workspace.lastModifiedTime).toDateString()}
       </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Workspace Published'>
-        {workspace.published ? 'Yes' : 'No'}
+        <Select
+          value={null}
+          options={[
+            { value: 'COMMUNITY', label: 'Community' },
+            { value: 'DEMO_PROJECTS', label: 'Demo Projects' },
+            { value: 'PHENOTYPE_LIBRAY', label: 'Phenotype Library' },
+            { value: 'TUTORIAL_WORKSPACES', label: 'Tutorial Workspaces' },
+          ]}
+          onChange={(v) => console.log(v)}
+        />
+        <Button type='primary' disabled>
+          Publish
+        </Button>
+        <Button type='secondaryOutline'>Unpublish</Button>
       </WorkspaceInfoField>
       <WorkspaceInfoField labelText='Audit'>
         {
