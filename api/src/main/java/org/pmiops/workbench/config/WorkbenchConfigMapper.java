@@ -51,6 +51,5 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
-  @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

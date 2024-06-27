@@ -114,7 +114,6 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
-    "enableVariantSelectAll": true,
     "enableGcsFuseOnGke": true
   },
   "actionAudit": {

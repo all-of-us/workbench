@@ -316,8 +316,6 @@ public class WorkbenchConfig {
     public boolean enableGKEAppPausing;
     // If true, allows users to set machine type for their GKE apps
     public boolean enableGKEAppMachineTypeChoice;
-    // If true, enable variant select all
-    public boolean enableVariantSelectAll;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
   }

@@ -6887,10 +6887,6 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to choose machine type when creating GKE applications.
-        enableVariantSelectAll:
-          type: boolean
-          default: false
-          description: Enable variant select all
     AccessModuleConfig:
       required:
       - expirable
