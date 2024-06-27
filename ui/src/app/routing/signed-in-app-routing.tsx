@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import {
   AppRoute,
-  useQuery,
+  useQueryParams,
   withFullHeight,
   withRouteData,
 } from 'app/components/app-router';
@@ -140,7 +140,7 @@ const WorkspaceSearchAdminPage = fp.flow(
 )(AdminWorkspaceSearch);
 
 export const SignedInRoutes = () => {
-  const query = useQuery();
+  const queryParams = useQueryParams();
 
   return (
     <Switch>
@@ -300,7 +300,7 @@ export const SignedInRoutes = () => {
         <DataAccessRequirementsPage
           routeData={{
             title:
-              query.get('pageMode') === DARPageMode.ANNUAL_RENEWAL
+              queryParams.get('pageMode') === DARPageMode.ANNUAL_RENEWAL
                 ? 'Access Renewal'
                 : 'Data Access Requirements',
           }}

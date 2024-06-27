@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { useQuery } from 'app/components/app-router';
+import { useQueryParams } from 'app/components/app-router';
 import { StyledRouterLink } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -134,7 +134,7 @@ const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
   const { ns, nbName } = useParams<MatchParams>();
-  const accessReason = useQuery().get('accessReason');
+  const accessReason = useQueryParams().get('accessReason');
 
   // react-router does not handle decoding of URL parameters, they must be decoded here.
   return (

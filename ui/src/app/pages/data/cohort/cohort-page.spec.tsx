@@ -31,11 +31,11 @@ describe(CohortPage.name, () => {
     registerApiClient(CohortsApi, new CohortsApiStub());
   });
 
-  const component = (search?: string) => {
+  const component = (queryParams?: string) => {
     const path =
       dataTabPath('foo', 'bar') +
       'cohorts/build' +
-      (search ? `?${search}` : '');
+      (queryParams ? `?${queryParams}` : '');
     return renderWithRouterAndPath(
       path,
       <CohortPage

@@ -85,8 +85,9 @@ describe(WorkspaceEdit.name, () => {
   let workspaceEditMode: WorkspaceEditMode;
   let user: UserEvent;
 
-  const renderComponent = (search?: string) => {
-    const path = workspacePath('foo', 'bar') + (search ? `?${search}` : '');
+  const renderComponent = (queryParams?: string) => {
+    const path =
+      workspacePath('foo', 'bar') + (queryParams ? `?${queryParams}` : '');
     return renderWithRouterAndPath(
       path,
       <WorkspaceEdit

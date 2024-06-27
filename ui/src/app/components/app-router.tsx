@@ -47,9 +47,9 @@ export const parseQueryParams = () => {
  *
  * Example:
  *  my/query/page?user=alice123
- *  useQuery().get('user') -> value is 'alice123'
+ *  useQueryParams().get('user') -> value is 'alice123'
  */
-export const useQuery = (): URLSearchParams => {
+export const useQueryParams = (): URLSearchParams => {
   const location = useLocation();
   return new URLSearchParams(location.search);
 };
