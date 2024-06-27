@@ -59,10 +59,9 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => (
           value={null}
           options={[
             { value: 'COMMUNITY', label: 'Community' },
-            { value: AnnotationType.ENUM, label: 'Dropdown List' },
-            { value: AnnotationType.DATE, label: 'Date' },
-            { value: AnnotationType.BOOLEAN, label: 'True/False Checkbox' },
-            { value: AnnotationType.INTEGER, label: 'Numeric Field' },
+            { value: 'DEMO_PROJECTS', label: 'Demo Projects' },
+            { value: 'PHENOTYPE_LIBRAY', label: 'Phenotype Library' },
+            { value: 'TUTORIAL_WORKSPACES', label: 'Tutorial Workspaces' },
           ]}
           onChange={(v) => console.log(v)}
         />
