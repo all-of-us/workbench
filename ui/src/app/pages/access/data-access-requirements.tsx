@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { switchCase } from '@terra-ui-packages/core-utils';
-import { parseQueryParamsX } from 'app/components/app-router';
+import { parseQueryParams } from 'app/components/app-router';
 import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -629,11 +629,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
-    const urlParams = parseQueryParamsX();
+    const urlParams = parseQueryParams();
     const code = urlParams.get('code');
     const token = urlParams.get('token');
-
     const pageModeParam = urlParams.get('pageMode');
+
     const pageMode =
       pageModeParam &&
       Object.values(DARPageMode).includes(DARPageMode[pageModeParam])

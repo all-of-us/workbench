@@ -274,8 +274,8 @@ export const rtAccessRenewalModules = [
   AccessModule.DATA_USER_CODE_OF_CONDUCT,
 ];
 
-export const wasReferredFromRenewal = (queryParams: string): boolean => {
-  const renewal = parseQueryParams(queryParams).get('renewal');
+export const wasReferredFromRenewal = (): boolean => {
+  const renewal = parseQueryParams().get('renewal');
   return renewal === '1';
 };
 

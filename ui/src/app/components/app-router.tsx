@@ -34,29 +34,12 @@ export const usePath = () => {
 /**
  * Retrieve query parameters from the React Router.  Suitable for class components.
  *
- * To use:
- *  1. extend RouteComponentProps in the component's props
- *  2. wrap the class with `withRouter`
- *  3. call `parseQueryParams(this.props.location.search)`.
- *
  * Example:
  *  my/query/page?user=alice123
- *  parseQueryParams(...).get('user') -> value is 'alice123'
+ *  parseQueryParams().get('user') -> value is 'alice123'
  */
-export const parseQueryParams = (search: string) => {
-  return new URLSearchParams(search);
-};
-
-export const parseQueryParamsL = (location: Location) => {
-  return parseQueryParams(location.search);
-};
-
-export const parseQueryParamsW = (window: Window) => {
-  return parseQueryParamsL(window.location);
-};
-
-export const parseQueryParamsX = () => {
-  return parseQueryParamsW(window);
+export const parseQueryParams = () => {
+  return new URLSearchParams(window.location.search);
 };
 
 /**
@@ -68,7 +51,7 @@ export const parseQueryParamsX = () => {
  */
 export const useQuery = (): URLSearchParams => {
   const location = useLocation();
-  return parseQueryParams(location.search);
+  return new URLSearchParams(location.search);
 };
 
 export const withRouteData =

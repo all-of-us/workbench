@@ -237,7 +237,7 @@ export const ProfileComponent = fp.flow(
         profileConfirmationAccessModule.expirationEpochMillis < Date.now();
       const showRenewalBox =
         (hasExpired && !isBypassed(profileConfirmationAccessModule)) ||
-        wasReferredFromRenewal(this.props.location.search);
+        wasReferredFromRenewal();
 
       // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
       // forking their website regex, just ensure a scheme ahead of validation.
@@ -595,7 +595,7 @@ export const ProfileComponent = fp.flow(
                     type='purplePrimary'
                     style={{ marginLeft: 40 }}
                     onClick={() =>
-                      wasReferredFromRenewal(this.props.location.search)
+                      wasReferredFromRenewal()
                         ? this.saveProfileWithRenewal(currentProfile)
                         : this.saveProfile(currentProfile)
                     }

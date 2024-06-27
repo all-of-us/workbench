@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import {
