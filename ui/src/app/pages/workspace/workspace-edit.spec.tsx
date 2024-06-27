@@ -87,10 +87,17 @@ describe(WorkspaceEdit.name, () => {
   let user: UserEvent;
 
   const renderComponent = (search?: string) => {
+    const path = workspacePath('foo', 'bar') + (search ? `?${search}` : '');
+    delete window.location;
+    // @ts-ignore
+    window.location = Object.assign(new URL('https://example.org' + path), {
+      ancestorOrigins: '',
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn(),
+    });
     return render(
-      <MemoryRouter
-        initialEntries={[{ pathname: workspacePath('foo', 'bar'), search }]}
-      >
+      <MemoryRouter initialEntries={[path]}>
         <WorkspaceEdit
           cancel={() => {}}
           hideSpinner={() => {}}

@@ -1,12 +1,12 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { Router } from 'react-router';
-import { createMemoryHistory } from 'history';
+import { MemoryRouter } from 'react-router';
 
 import { CohortBuilderApi, CohortsApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
   registerApiClient,
@@ -22,21 +22,30 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { CohortPage } from './cohort-page';
 
-describe('CohortPage', () => {
-  let history;
-
+describe(CohortPage.name, () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
-    history = createMemoryHistory();
   });
 
-  const component = () => {
+  const component = (search?: string) => {
+    const path =
+      dataTabPath('foo', 'bar') +
+      'cohorts/build' +
+      (search ? `?${search}` : '');
+    delete window.location;
+    // @ts-ignore
+    window.location = Object.assign(new URL('https://example.org' + path), {
+      ancestorOrigins: '',
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn(),
+    });
     return render(
-      <Router history={history}>
+      <MemoryRouter initialEntries={[path]}>
         <CohortPage
           setCohortChanged={() => {}}
           setShowWarningModal={() => {}}
@@ -44,7 +53,7 @@ describe('CohortPage', () => {
           hideSpinner={() => {}}
           showSpinner={() => {}}
         />
-      </Router>
+      </MemoryRouter>
     );
   };
 
@@ -56,21 +65,24 @@ describe('CohortPage', () => {
   it('should render one search group for each includes/excludes item', async () => {
     const mockGetCohort = jest.spyOn(cohortsApi(), 'getCohort');
     const { id, namespace } = workspaceDataStub;
-    component();
+
+    let { unmount } = component();
     await waitFor(() => expect(mockGetCohort).toHaveBeenCalledTimes(0));
     expect(screen.queryAllByTestId('includes-search-group').length).toBe(0);
     expect(screen.queryAllByTestId('excludes-search-group').length).toBe(0);
+    unmount();
 
     // Call cohort with 2 includes groups
-    history.push('?cohortId=1');
+    unmount = component('cohortId=1').unmount;
     await waitFor(() =>
       expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 1)
     );
     expect(screen.getAllByTestId('includes-search-group').length).toBe(2);
     expect(screen.queryAllByTestId('excludes-search-group').length).toBe(0);
+    unmount();
 
     // Call cohort with 2 includes groups and one excludes group
-    history.push('?cohortId=2');
+    component('cohortId=2');
     await waitFor(() =>
       expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 2)
     );

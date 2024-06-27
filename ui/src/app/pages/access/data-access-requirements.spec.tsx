@@ -60,7 +60,7 @@ const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
-describe('DataAccessRequirements', () => {
+describe(DataAccessRequirements.name, () => {
   const component = (pageMode?: string): RenderResult => {
     const path = pageMode
       ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
