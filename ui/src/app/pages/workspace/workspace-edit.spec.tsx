@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mockNavigate } from 'setupTests';
 
@@ -14,6 +15,7 @@ import {
 
 import {
   getDefaultNormalizer,
+  render,
   screen,
   waitFor,
   within,
@@ -23,7 +25,9 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
+import { workspacePath } from 'app/routing/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import * as Authentication from 'app/utils/authentication';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -38,7 +42,6 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  renderWithRouter,
 } from 'testing/react-test-helpers';
 import {
   altCdrVersion,
@@ -76,21 +79,27 @@ const OTHER_DISSEMINATION_REGEX = new RegExp(
   'i'
 );
 
-describe('WorkspaceEdit', () => {
+describe(WorkspaceEdit.name, () => {
   let workspacesApi: WorkspacesApiStub;
   let userApi: UserApiStub;
   let workspace: WorkspaceData;
   let workspaceEditMode: WorkspaceEditMode;
   let user: UserEvent;
 
-  const renderComponent = () => {
-    return renderWithRouter(
-      <WorkspaceEdit
-        cancel={() => {}}
-        hideSpinner={() => {}}
-        showSpinner={() => {}}
-        workspaceEditMode={workspaceEditMode}
-      />
+  const renderComponent = (queryParam?: string) => {
+    return render(
+      <MemoryRouter
+        initialEntries={[
+          workspacePath('foo', 'bar') + queryParam ? `?${queryParam}` : '',
+        ]}
+      >
+        <WorkspaceEdit
+          cancel={() => {}}
+          hideSpinner={() => {}}
+          showSpinner={() => {}}
+          workspaceEditMode={workspaceEditMode}
+        />
+      </MemoryRouter>
     );
   };
 
@@ -1104,5 +1113,21 @@ describe('WorkspaceEdit', () => {
         normalizer: getDefaultNormalizer({ trim: false }),
       })
     ).toBeInTheDocument();
+  });
+
+  it('should not highlight the billing dropdown by default', async () => {
+    renderComponent();
+    const billingDropdown = screen.getByTestId('billing-dropdown');
+    expect(billingDropdown).not.toHaveStyle(
+      `background-color: ${colors.highlight}`
+    );
+  });
+
+  it('should highlight the billing dropdown when specified by query param', async () => {
+    renderComponent('highlightBilling=anyvalue');
+    const billingDropdown = screen.getByTestId('billing-dropdown');
+    expect(billingDropdown).toHaveStyle(
+      `background-color: ${colors.highlight}`
+    );
   });
 });
