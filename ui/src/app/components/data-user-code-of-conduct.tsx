@@ -441,7 +441,7 @@ export const DataUserCodeOfConduct = fp.flow(
         title: 'Your agreement failed to update',
         message: 'Please try submitting the agreement again.',
       })
-    )(async (initials) => {
+    )(async (initials: string) => {
       const profile = await profileApi().submitDUCC(
         getLiveDUCCVersion(),
         initials
@@ -449,7 +449,7 @@ export const DataUserCodeOfConduct = fp.flow(
       this.props.profileState.updateCache(profile);
     });
 
-    submitDataUserCodeOfConduct(initials) {
+    submitDataUserCodeOfConduct(initials: string) {
       profileApi()
         .submitDUCC(getLiveDUCCVersion(), initials)
         .then((profile) => {
