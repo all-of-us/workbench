@@ -7084,6 +7084,13 @@ components:
             a changed resource.
         name:
           type: string
+          description: DEPRECATED. A workspace has both an AoU UI name (displayName) and a
+            terraName.  Use one of these to be explicit about which is desired.
+        displayName:
+          type: string
+          description: The name of the workspace as displayed in the UI.  This name is not known to
+            Terra, so it's necessary to use `terraName` and/or `namespace` for Terra calls.
+            Formerly known simply as "name".
         namespace:
           type: string
         terraName:

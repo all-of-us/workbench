@@ -37,10 +37,13 @@ public interface WorkspaceMapper {
 
   // DEPRECATED and subject to deletion.  Use terraName instead.
   @Mapping(target = "id", source = "fcWorkspace.name")
+  // DEPRECATED and subject to deletion.
+  // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
+  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
-  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
+  @Mapping(target = "displayName", source = "dbWorkspace.name")
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "dbWorkspace.creator.username")
@@ -58,6 +61,7 @@ public interface WorkspaceMapper {
       target = "googleBucketName",
       ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
   // fcWorkspace)
+  @Mapping(target = "displayName", source = "name")
   @Mapping(target = "terraName", source = "firecloudName")
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
