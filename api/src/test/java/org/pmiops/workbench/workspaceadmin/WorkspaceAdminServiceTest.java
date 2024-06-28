@@ -538,7 +538,8 @@ public class WorkspaceAdminServiceTest {
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES))
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
@@ -575,7 +576,8 @@ public class WorkspaceAdminServiceTest {
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(dbFeaturedWorkspace);
 
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES))
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
