@@ -10,7 +10,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
@@ -21,6 +21,7 @@ import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import * as runtimeUtils from 'app/utils/runtime-utils';
 import { toPascalCase } from 'app/utils/strings';
+import { appMinDiskSize } from 'app/utils/user-apps-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
@@ -66,16 +67,8 @@ export const appAssets: AppAssets[] = [
   },
 ];
 
-export const appMinDiskSize: Record<AppType, number> = {
-  [AppType.CROMWELL]: 50,
-  [AppType.RSTUDIO]: 100,
-  [AppType.SAS]: 150,
-};
-
-export const appMaxDiskSize = 1000;
-
 // TODO replace with better defaults?
-export const defaultCromwellCreateRequest: CreateAppRequest = {
+const defaultCromwellCreateRequest = (): CreateAppRequest => ({
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
     numNodes: 1,
@@ -83,15 +76,15 @@ export const defaultCromwellCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: appMinDiskSize[AppType.CROMWELL],
+    size: appMinDiskSize(AppType.CROMWELL),
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 7 * 24 * 60, // in minutes, so this is 7 days
-};
+});
 
 // TODO replace with better defaults?
-export const defaultRStudioCreateRequest: CreateAppRequest = {
+const defaultRStudioCreateRequest = (): CreateAppRequest => ({
   appType: AppType.RSTUDIO,
   kubernetesRuntimeConfig: {
     numNodes: 1,
@@ -99,15 +92,15 @@ export const defaultRStudioCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: appMinDiskSize[AppType.RSTUDIO],
+    size: appMinDiskSize(AppType.RSTUDIO),
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
-};
+});
 
 // TODO replace with better defaults?
-export const defaultSASCreateRequest: CreateAppRequest = {
+const defaultSASCreateRequest = (): CreateAppRequest => ({
   appType: AppType.SAS,
   kubernetesRuntimeConfig: {
     numNodes: 1,
@@ -115,18 +108,20 @@ export const defaultSASCreateRequest: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: appMinDiskSize[AppType.SAS],
+    size: appMinDiskSize(AppType.SAS),
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
-};
+});
 
-export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
-  [AppType.CROMWELL]: defaultCromwellCreateRequest,
-  [AppType.RSTUDIO]: defaultRStudioCreateRequest,
-  [AppType.SAS]: defaultSASCreateRequest,
-};
+export const defaultAppRequest = (appType: AppType): CreateAppRequest =>
+  switchCase(
+    appType,
+    [AppType.CROMWELL, defaultCromwellCreateRequest],
+    [AppType.RSTUDIO, defaultRStudioCreateRequest],
+    [AppType.SAS, defaultSASCreateRequest]
+  );
 
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;

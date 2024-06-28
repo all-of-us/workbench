@@ -14,18 +14,18 @@ import {
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
-import {
-  appMaxDiskSize,
-  appMinDiskSize,
-  defaultAppRequest,
-} from 'app/components/apps-panel/utils';
+import { defaultAppRequest } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AutodeleteDaysThresholds,
   findMachineByName,
 } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
-import { appTypeToString } from 'app/utils/user-apps-utils';
+import {
+  appMaxDiskSize,
+  appMinDiskSize,
+  appTypeToString,
+} from 'app/utils/user-apps-utils';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -168,7 +168,7 @@ describe(CreateGkeApp.name, () => {
         await waitFor(() => {
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-            defaultAppRequest[appType]
+            defaultAppRequest(appType)
           );
           expect(onClose).toHaveBeenCalledTimes(1);
         });
@@ -456,7 +456,7 @@ describe(CreateGkeApp.name, () => {
 
       it(`should use the default machine type for ${appType} when there are no running apps`, async () => {
         const { cpu, memory } = findMachineByName(
-          defaultAppRequest[appType].kubernetesRuntimeConfig.machineType
+          defaultAppRequest(appType).kubernetesRuntimeConfig.machineType
         );
 
         serverConfigStore.set({
@@ -616,7 +616,7 @@ describe(CreateGkeApp.name, () => {
       it(`Display default disk Size for ${appType}`, async () => {
         await component(appType);
         const defaultDiskSize =
-          defaultAppRequest[appType].persistentDiskRequest.size;
+          defaultAppRequest(appType).persistentDiskRequest.size;
 
         expect(spinDiskElement('gke-app-disk').getAttribute('value')).toEqual(
           defaultDiskSize.toString()
@@ -633,16 +633,16 @@ describe(CreateGkeApp.name, () => {
         const diskSize = 750;
 
         const appRequest = {
-          ...defaultAppRequest[appType],
+          ...defaultAppRequest(appType),
           persistentDiskRequest: {
-            ...defaultAppRequest[appType].persistentDiskRequest,
+            ...defaultAppRequest(appType).persistentDiskRequest,
             size: diskSize,
           },
         };
 
         // Act
         // Confirm the disk size is in valid range and set it
-        expect(diskSize).toBeGreaterThan(appMinDiskSize[appType]);
+        expect(diskSize).toBeGreaterThan(appMinDiskSize(appType));
         expect(diskSize).toBeLessThanOrEqual(appMaxDiskSize);
 
         await pickSpinButtonValue(user, 'gke-app-disk', diskSize);
@@ -671,7 +671,7 @@ describe(CreateGkeApp.name, () => {
       it(`Should not not allow disk size less than minimum for ${appType}`, async () => {
         // Arrange
         await component(appType);
-        const minAppSize = appMinDiskSize[appType];
+        const minAppSize = appMinDiskSize(appType);
 
         // Act
         await pickSpinButtonValue(user, 'gke-app-disk', minAppSize);
