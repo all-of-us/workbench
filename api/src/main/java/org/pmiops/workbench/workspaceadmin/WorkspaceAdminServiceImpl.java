@@ -425,8 +425,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             (dbFeaturedWorkspace) -> {
               // Check if category in database is same as requested: If true do nothing, else update
               // database
-              String initialCategory = dbFeaturedWorkspace.getCategory().toString();
-              if (initialCategory.equals(requestedCategory)) {
+              String existingCategory = dbFeaturedWorkspace.getCategory().toString();
+              if (existingCategory.equals(requestedCategory)) {
                 log.warning(
                     String.format(
                         "Workspace %s is already published in the same category",
@@ -437,35 +437,42 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               log.info(
                   String.format(
                       "Featured Workspace %s under category %s will be re-published by Admin under new category %s ",
-                      workspaceNamespace, initialCategory, requestedCategory));
-              featuredWorkspaceDao.save(
-                  featuredWorkspaceMapper.toDBFeaturedWorkspace(
-                      dbFeaturedWorkspace, publishWorkspaceRequest));
-              adminAuditor.firePublishWorkspaceAction(
-                  dbWorkspace.getWorkspaceId(), requestedCategory, initialCategory);
-              log.info(
-                  String.format("Workspace %s has been published by Admin", workspaceNamespace));
-
-              // Send Email to all workspace owners to let them know Workspace has been published
-              sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
+                      workspaceNamespace, existingCategory, requestedCategory));
+              DbFeaturedWorkspace dbFeaturedWorkspaceToUpdate =
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      dbFeaturedWorkspace, publishWorkspaceRequest);
+              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory);
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
               updateACLForFeaturedWorkspace(
                   dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
-              featuredWorkspaceDao.save(
+              DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      publishWorkspaceRequest, dbWorkspace));
-              adminAuditor.firePublishWorkspaceAction(
-                  dbWorkspace.getWorkspaceId(),
-                  publishWorkspaceRequest.getCategory().toString(),
-                  "");
-              log.info(
-                  String.format("Workspace %s has been published by Admin", workspaceNamespace));
-
-              // Send Email to all workspace owners to let them know Workspace has been published
-              sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
+                      publishWorkspaceRequest, dbWorkspace);
+              publishWorkspace(dbFeaturedWorkspaceToSave, "");
             });
+  }
+
+  private void publishWorkspace(DbFeaturedWorkspace featuredWorkspace, String prevCategoryIfAny) {
+    DbWorkspace dbWorkspace = featuredWorkspace.getWorkspace();
+    FeaturedWorkspaceCategory requestedCategory =
+        FeaturedWorkspaceCategory.valueOf(featuredWorkspace.getCategory().toString());
+
+    // Save in database
+    featuredWorkspaceDao.save(featuredWorkspace);
+
+    // Fire Publish action type Audit action
+    adminAuditor.firePublishWorkspaceAction(
+        featuredWorkspace.getWorkspace().getWorkspaceId(),
+        requestedCategory.toString(),
+        prevCategoryIfAny);
+    log.info(
+        String.format(
+            "Workspace %s has been published by Admin", dbWorkspace.getWorkspaceNamespace()));
+
+    // Send Email to all workspace owners to let them know Workspace has been published
+    sendEmailToWorkspaceOwners(dbWorkspace, true, requestedCategory);
   }
 
   @Override
