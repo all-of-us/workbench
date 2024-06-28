@@ -135,15 +135,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void firePublishWorkspaceAction(long workspaceId, String category) {
-    auditPublishOrUnpublishAction(workspaceId, category, ActionType.PUBLISH);
-  }
-
-  public void fireUnpublishWorkspaceAction(long workspaceId, String category) {
-    auditPublishOrUnpublishAction(workspaceId, category, ActionType.UNPUBLISH);
-  }
-
-  void auditPublishOrUnpublishAction(long workspaceId, String category, ActionType action) {
+  public void firePublishWorkspaceAction(long workspaceId, String updatedCategory, String prevCategoryIfAny) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
@@ -151,14 +143,37 @@ public class AdminAuditorImpl implements AdminAuditor {
     ActionAuditEvent event =
         ActionAuditEvent.builder()
             .actionId(actionId)
-            .actionType(action)
+            .actionType(ActionType.PUBLISH)
             .agentType(AgentType.ADMINISTRATOR)
             .agentEmailMaybe(dbUser.getUsername())
             .agentIdMaybe(dbUser.getUserId())
             .targetType(TargetType.WORKSPACE)
             .targetIdMaybe(workspaceId)
             .targetPropertyMaybe("Category")
-            .newValueMaybe(category)
+            .previousValueMaybe(prevCategoryIfAny)
+            .newValueMaybe(updatedCategory)
+            .timestamp(timestamp)
+            .build();
+
+    actionAuditService.send(event);
+  }
+
+  public void fireUnpublishWorkspaceAction(long workspaceId, String category) {
+    DbUser dbUser = userProvider.get();
+    String actionId = actionIdProvider.get();
+    long timestamp = clock.millis();
+
+    ActionAuditEvent event =
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.UNPUBLISH)
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Category")
+            .previousValueMaybe(category)
             .timestamp(timestamp)
             .build();
 

@@ -393,16 +393,17 @@ public class MailServiceImpl implements MailService {
     final String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
 
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
         Collections.emptyList(),
-        "AoU Researcher Workbench Workspace has been Published",
+        "Your AoU Researcher Workbench workspace has been published",
         String.format(
             "Publish Workspace Email for workspace '%s' (%s) sent to owners %s",
             workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
             PUBLISH_WORKSPACE_ADMIN_RESOURCE,
-            publishWorkspaceSubstitutionMap(workspace, publishCategory)));
+            publishWorkspaceSubstitutionMap(workspace, publishCategory.replace('_', ' '), supportEmail)));
   }
 
   @Override
@@ -411,15 +412,18 @@ public class MailServiceImpl implements MailService {
     final String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
 
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
         Collections.emptyList(),
-        "AoU Researcher Workbench Workspace has been Unpublished",
+        "Your AoU Researcher Workbench workspace has been unpublished",
         String.format(
             "Unpublish Workspace Email for workspace '%s' (%s) sent to owners %s",
             workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
-            UNPUBLISH_WORKSPACE_ADMIN_RESOURCE, unpublishWorkspaceSubstitutionMap(workspace)));
+            UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
+            unpublishWorkspaceSubstitutionMap(workspace, supportEmail)));
   }
 
   @Override
@@ -643,25 +647,25 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> publishWorkspaceSubstitutionMap(
-      DbWorkspace workspace, String publishCategory) {
+      DbWorkspace workspace, String publishCategory, String supportEmail) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
-        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
         .build();
   }
 
   private Map<EmailSubstitutionField, String> unpublishWorkspaceSubstitutionMap(
-      DbWorkspace workspace) {
+      DbWorkspace workspace, String supportEmail) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
-        .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
         .build();
   }
 
