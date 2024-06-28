@@ -1,5 +1,7 @@
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
+import { toPascalCase } from 'app/utils/strings';
+
 import {
   fromRuntimeStatus,
   fromUserAppStatus,
@@ -67,7 +69,10 @@ describe('AppsPanel utils', () => {
   ])(
     'Should convert AppStatus %s to the correct UserEnvironmentStatus with fallback',
     (userAppStatus: AppStatus, expected: string) => {
-      expect(fromUserAppStatusWithFallback(userAppStatus)).toBe(expected);
+      const expectedInPascalCase = toPascalCase(expected);
+      expect(fromUserAppStatusWithFallback(userAppStatus)).toBe(
+        expectedInPascalCase
+      );
     }
   );
 });

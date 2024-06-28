@@ -147,6 +147,12 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
   }, [currentWorkspaceNamespace]);
 };
 
+let aborter = new AbortController();
+
+// This function is being used by test ONLY to abort the runtime polling so that the tests do not interfere with each
+// other
+export const getAborter = () => aborter;
+
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
@@ -190,6 +196,7 @@ export const useRuntimeStatus = (
         () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
+
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
@@ -197,6 +204,7 @@ export const useRuntimeStatus = (
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
             resolutionCondition: (r) => resolutionCondition(r),
+            pollAbortSignal: aborter.signal,
           });
         } catch (e) {
           // ExceededActionCountError is expected, as we exceed our create limit of 0.
@@ -290,9 +298,25 @@ export const useCustomRuntime = (
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
 
+  const updateRuntimeAndInitializeLeoRuntime = async () => {
+    await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
+      runtime: request.runtime,
+    });
+    // Calling updateRuntime will not immediately set the Runtime status to not Running so the
+    // default initializer will resolve on its first call. The polling below first checks for the
+    // non Running status before initializing the default one that checks for Running status
+    await LeoRuntimeInitializer.initialize({
+      workspaceNamespace,
+      targetRuntime: request.runtime,
+      resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
+      pollAbortSignal: aborter.signal,
+      overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
+    });
+  };
+
   useEffect(() => {
     let mounted = true;
-    const aborter = new AbortController();
+    aborter = new AbortController();
     const existingDisk = runtimeDiskStore.get().gcePersistentDisk;
     const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
@@ -311,15 +335,9 @@ export const useCustomRuntime = (
           )
         );
 
-        // A disk update may be need in combination with a runtime update.
         if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
-          await disksApi().updateDisk(
-            currentWorkspaceNamespace,
-            existingDisk.name,
-            requestedDisk.size
-          );
+          await updateRuntimeAndInitializeLeoRuntime();
         }
-
         if (mostSevereDiff === AnalysisDiffState.NEEDS_DELETE) {
           const deleteAttachedDisk =
             mostSevereDiskDiff === AnalysisDiffState.NEEDS_DELETE;
@@ -340,19 +358,7 @@ export const useCustomRuntime = (
             runtime.status === RuntimeStatus.RUNNING ||
             runtime.status === RuntimeStatus.STOPPED
           ) {
-            await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
-              runtime: request.runtime,
-            });
-            // Calling updateRuntime will not immediately set the Runtime status to not Running so the
-            // default initializer will resolve on its first call. The polling below first checks for the
-            // non Running status before initializing the default one that checks for Running status
-            await LeoRuntimeInitializer.initialize({
-              workspaceNamespace,
-              targetRuntime: request.runtime,
-              resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
-              pollAbortSignal: aborter.signal,
-              overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
-            });
+            await updateRuntimeAndInitializeLeoRuntime();
           }
         }
       };

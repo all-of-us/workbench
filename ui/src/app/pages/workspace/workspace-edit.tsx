@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
@@ -19,6 +20,7 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { parseQueryParams } from 'app/components/app-router';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -297,7 +299,8 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
 
 export interface WorkspaceEditProps
   extends WithSpinnerOverlayProps,
-    NavigationProps {
+    NavigationProps,
+    RouteComponentProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -334,7 +337,8 @@ export const WorkspaceEdit = fp.flow(
   withCurrentWorkspace(),
   withCdrVersions(),
   withUserProfile(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class WorkspaceEditCmp extends React.Component<
     WorkspaceEditProps,
@@ -1402,6 +1406,9 @@ export const WorkspaceEdit = fp.flow(
     }
 
     render() {
+      const params = parseQueryParams(this.props.location.search);
+      const highlightBilling = !!params.get('highlightBilling');
+
       const {
         workspace: {
           name,
@@ -1644,7 +1651,14 @@ export const WorkspaceEdit = fp.flow(
                           <Dropdown
                             data-test-id='billing-dropdown'
                             disabled={this.state.fetchBillingAccountError}
-                            style={{ width: '30rem' }}
+                            style={
+                              highlightBilling
+                                ? {
+                                    backgroundColor: colors.highlight,
+                                    width: '30rem',
+                                  }
+                                : { width: '30rem' }
+                            }
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
                             onChange={(e) => {
