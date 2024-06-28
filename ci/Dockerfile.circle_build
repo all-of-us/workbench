@@ -18,12 +18,16 @@
 # We use OpenJDK, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
 # and https://discuss.circleci.com/t/legacy-convenience-image-deprecation
-FROM cimg/openjdk:17.0-browsers
+FROM cimg/openjdk:21.0-browsers
 
 USER circleci
 
 # keep in sync with deploy/Dockerfile and api/gradle.build
 ENV CLOUD_SDK_VERSION 471.0.0
+ENV GRADLE_VERSION 7.6.3
+
+# It never makes sense for Gradle to run a daemon within a docker container.
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
 RUN cd && \
   wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \

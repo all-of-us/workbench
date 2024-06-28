@@ -62,11 +62,11 @@ plugins {
 // in this file:
 // * sourceCompatibility
 // * targetCompatibility
-if (JavaVersion.current() != JavaVersion.VERSION_17) {
+if (JavaVersion.current() != JavaVersion.VERSION_21) {
      throw new GradleException(
-            "This build must be run with Java 17. " +
+            "This build must be run with Java 21. " +
                     "See developer-system-initialization.md. " +
-                    "The java version used was ${JavaVersion.current()}.")
+                    "The Java version used was ${JavaVersion.current()}.")
 }
 
 if (System.getenv("ADD_XLINT_DEPRECATION")) {
@@ -127,8 +127,10 @@ ext.SWAGGER_3_RAW_OPTS = [
 def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
     return {
         inputFile = file("src/main/resources/${yaml}")
+        dependencies {
+            swaggerCodegen  "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
+        }
         code {
-            configuration = configurations.__swaggerCodegenV3__
             language = 'java'
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
@@ -199,8 +201,10 @@ swaggerSources {
     // bindings in this case.
     workbench {
         inputFile = file('src/main/resources/workbench-api.yaml')
+        dependencies {
+            swaggerCodegen  "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
+        }
         code {
-            configuration = configurations.__swaggerCodegenV3__
             language = 'spring'
             outputDir = file(SWAGGER_3_CODEGEN_DIR)
             templateDir = file("$projectDir/src/main/resources/swagger3codegen")
@@ -268,7 +272,7 @@ jacoco {
 jacocoTestReport {
     getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
-        xml.enabled = true
+        xml.required = true
     }
 }
 
@@ -724,10 +728,10 @@ version = '0.1.0'          // Version in generated output
 
 // This restricts the language features that may be used to those at or below the given Java
 // version.
-sourceCompatibility = 17
+sourceCompatibility = 21
 
 // This restricts the runtime environment to be at or above the given Java version.
-targetCompatibility = 17
+targetCompatibility = 21
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
