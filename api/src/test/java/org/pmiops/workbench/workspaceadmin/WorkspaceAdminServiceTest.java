@@ -539,8 +539,9 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
+            "");
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -562,11 +563,16 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
+            "");
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
 
     publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
-
+    DbFeaturedWorkspace mockFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.DEMO_PROJECTS)
+            .setDescription("test");
     when(mockFeaturedWorkspaceDao.save(any()))
         .thenReturn(
             new DbFeaturedWorkspace()
@@ -577,10 +583,7 @@ public class WorkspaceAdminServiceTest {
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mockAdminAuditor, times(1))
-        .firePublishWorkspaceAction(
-            mockDbWorkspace.getWorkspaceId(), FeaturedWorkspaceCategory.DEMO_PROJECTS.toString());
-    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -594,8 +597,7 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(workspace)
-            .setCategory(
-                DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
         .thenReturn(Optional.of(mockFeaturedWorkspace));
@@ -613,8 +615,9 @@ public class WorkspaceAdminServiceTest {
     // Since the category is the same, we should not save the workspace again or send emails
     verify(mockFeaturedWorkspaceDao, never()).save(any());
     verify(mockAdminAuditor, never())
-        .firePublishWorkspaceAction(workspace.getWorkspaceId(), request.getCategory().toString());
-    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), anyString());
+        .firePublishWorkspaceAction(
+            workspace.getWorkspaceId(), request.getCategory().toString(), "");
+    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test

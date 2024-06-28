@@ -392,7 +392,7 @@ public class MailServiceImpl implements MailService {
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
     sendPublishUnpublishWorkspaceByAdminEmail(
-        workspace, owners, featuredWorkspaceCategory(publishCategory), true);
+        workspace, owners, featuredWorkspaceCategoryAsDisplayString(publishCategory), true);
   }
 
   @Override
@@ -423,7 +423,8 @@ public class MailServiceImpl implements MailService {
             publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
   }
 
-  private String featuredWorkspaceCategory(FeaturedWorkspaceCategory publishCategory) {
+  private String featuredWorkspaceCategoryAsDisplayString(
+      FeaturedWorkspaceCategory publishCategory) {
     switch (publishCategory) {
       case TUTORIAL_WORKSPACES -> {
         return "Tutorial Workspaces";
@@ -669,17 +670,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
-        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
-        .build();
-  }
-
-  private Map<EmailSubstitutionField, String> unpublishWorkspaceSubstitutionMap(
-      DbWorkspace workspace, String supportEmail) {
-    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
-        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
         .build();
   }

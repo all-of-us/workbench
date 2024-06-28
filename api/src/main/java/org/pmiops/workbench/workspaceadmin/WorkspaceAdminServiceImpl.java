@@ -443,6 +443,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                       dbFeaturedWorkspace, publishWorkspaceRequest));
               adminAuditor.firePublishWorkspaceAction(
                   dbWorkspace.getWorkspaceId(), requestedCategory, initialCategory);
+              log.info(
+                  String.format("Workspace %s has been published by Admin", workspaceNamespace));
+
+              // Send Email to all workspace owners to let them know Workspace has been published
+              sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
@@ -455,11 +460,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                   dbWorkspace.getWorkspaceId(),
                   publishWorkspaceRequest.getCategory().toString(),
                   "");
-            });
-    log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
+              log.info(
+                  String.format("Workspace %s has been published by Admin", workspaceNamespace));
 
-    // Send Email to all workspace owners to let them know Workspace has been published
-    sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
+              // Send Email to all workspace owners to let them know Workspace has been published
+              sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
+            });
   }
 
   @Override
