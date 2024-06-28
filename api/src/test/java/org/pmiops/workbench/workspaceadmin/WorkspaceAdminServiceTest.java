@@ -51,6 +51,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -527,7 +528,7 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
 
     PublishWorkspaceRequest publishWorkspaceRequest =
@@ -536,6 +537,9 @@ public class WorkspaceAdminServiceTest {
             .description("test");
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
             any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
@@ -566,9 +570,16 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
+
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(dbFeaturedWorkspace);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedCategory(DbFeaturedCategory.DEMO_PROJECTS))
+        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
             any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
@@ -588,7 +599,7 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.DEMO_PROJECTS)
+            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
             .setDescription("test");
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
@@ -614,18 +625,11 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(workspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
         .thenReturn(Optional.of(mockFeaturedWorkspace));
-    when(mockFeaturedWorkspaceDao.save(any()))
-        .thenReturn(
-            new DbFeaturedWorkspace()
-                .setWorkspace(workspace)
-                .setCategory(
-                    DbFeaturedWorkspace.DbFeaturedCategory.valueOf(
-                        request.getCategory().toString()))
-                .setDescription(request.getDescription()));
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     // Act
     workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
@@ -647,7 +651,7 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedworkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
