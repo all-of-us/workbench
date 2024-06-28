@@ -21,7 +21,6 @@ public interface FeaturedWorkspaceMapper {
     target.setWorkspace(dbWorkspace);
   }
 
-  @Mapping(target = "id", source = "dbFeaturedWorkspace.id")
   @Mapping(target = "description", source = "featuredWorkspace.description")
   @Mapping(target = "category", source = "featuredWorkspace.category")
   DbFeaturedWorkspace toDbFeaturedWorkspace(

@@ -424,8 +424,8 @@ public class MailServiceImpl implements MailService {
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
-      FeaturedWorkspaceCategory publishCategory) {
-    switch (publishCategory) {
+      FeaturedWorkspaceCategory featuredWorkspaceCategory) {
+    switch (featuredWorkspaceCategory) {
       case TUTORIAL_WORKSPACES -> {
         return "Tutorial Workspaces";
       }
@@ -438,8 +438,10 @@ public class MailServiceImpl implements MailService {
       case COMMUNITY -> {
         return "Community";
       }
+      default -> {
+        return "";
+      }
     }
-    return "";
   }
 
   @Override

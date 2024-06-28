@@ -454,19 +454,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             });
   }
 
-  private void publishWorkspace(DbFeaturedWorkspace featuredWorkspace, String prevCategoryIfAny) {
-    DbWorkspace dbWorkspace = featuredWorkspace.getWorkspace();
+  private void publishWorkspace(DbFeaturedWorkspace dbFeaturedWorkspace, String prevCategoryIfAny) {
+    DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
     FeaturedWorkspaceCategory requestedCategory =
-        FeaturedWorkspaceCategory.valueOf(featuredWorkspace.getCategory().toString());
+        FeaturedWorkspaceCategory.valueOf(dbFeaturedWorkspace.getCategory().toString());
 
     // Save in database
-    featuredWorkspaceDao.save(featuredWorkspace);
+    featuredWorkspaceDao.save(dbFeaturedWorkspace);
 
     // Fire Publish action type Audit action
     adminAuditor.firePublishWorkspaceAction(
-        featuredWorkspace.getWorkspace().getWorkspaceId(),
-        requestedCategory.toString(),
-        prevCategoryIfAny);
+        dbWorkspace.getWorkspaceId(), requestedCategory.toString(), prevCategoryIfAny);
     log.info(
         String.format(
             "Workspace %s has been published by Admin", dbWorkspace.getWorkspaceNamespace()));
