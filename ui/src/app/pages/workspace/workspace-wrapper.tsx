@@ -19,6 +19,7 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { LeoRuntimeInitializer } from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
+  NavigateFn,
   nextWorkspaceWarmupStore,
   useNavigation,
 } from 'app/utils/navigation';
@@ -178,7 +179,7 @@ const updateRuntimeStores = async ({
 interface GetWorkspaceProps {
   wsid: string;
   setWorkspace: (w: Workspace) => void;
-  navigate: (path: string[]) => void;
+  navigate: NavigateFn;
 }
 const getWorkspaceAndUpdateStores = async ({
   workspaceNamespace,
