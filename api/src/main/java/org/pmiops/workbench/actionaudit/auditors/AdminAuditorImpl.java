@@ -159,7 +159,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void fireUnpublishWorkspaceAction(long workspaceId, String category) {
+  public void fireUnpublishWorkspaceAction(long workspaceId, String prevCategory) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
@@ -174,7 +174,7 @@ public class AdminAuditorImpl implements AdminAuditor {
             .targetType(TargetType.WORKSPACE)
             .targetIdMaybe(workspaceId)
             .targetPropertyMaybe("Category")
-            .previousValueMaybe(category)
+            .previousValueMaybe(prevCategory)
             .timestamp(timestamp)
             .build();
 
