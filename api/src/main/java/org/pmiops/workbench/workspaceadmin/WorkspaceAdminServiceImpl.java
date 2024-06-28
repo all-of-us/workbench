@@ -458,7 +458,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
 
     FeaturedWorkspaceCategory requestedCategory =
-        featuredWorkspaceMapper.toFeaturedCategory(dbFeaturedWorkspace.getCategory());
+        featuredWorkspaceMapper.toFeaturedWorkspaceCategory(dbFeaturedWorkspace.getCategory());
 
     // Save in database
     featuredWorkspaceDao.save(dbFeaturedWorkspace);
