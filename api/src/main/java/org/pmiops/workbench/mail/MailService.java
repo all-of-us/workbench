@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
@@ -70,7 +71,7 @@ public interface MailService {
       throws MessagingException;
 
   void sendPublishWorkspaceByAdminEmail(
-      final DbWorkspace workspace, List<DbUser> owners, String publishCategory)
+      final DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException;
 
   void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)

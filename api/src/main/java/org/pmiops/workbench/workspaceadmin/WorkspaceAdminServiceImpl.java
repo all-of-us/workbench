@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -418,43 +419,47 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     String requestedCategory = publishWorkspaceRequest.getCategory().toString();
 
-    featuredWorkspaceDao.findByWorkspace(dbWorkspace).ifPresentOrElse(
-        (dbFeaturedWorkspace) -> {
-          // Check if category in database is same as requested: If true do nothing, else update database
-          String initialCategory = dbFeaturedWorkspace.getCategory().toString();
-          if (initialCategory.equals(requestedCategory)) {
-            log.warning(
-                String.format(
-                    "Workspace %s is already published in the same category", workspaceNamespace));
-            return;
-          }
+    featuredWorkspaceDao
+        .findByWorkspace(dbWorkspace)
+        .ifPresentOrElse(
+            (dbFeaturedWorkspace) -> {
+              // Check if category in database is same as requested: If true do nothing, else update
+              // database
+              String initialCategory = dbFeaturedWorkspace.getCategory().toString();
+              if (initialCategory.equals(requestedCategory)) {
+                log.warning(
+                    String.format(
+                        "Workspace %s is already published in the same category",
+                        workspaceNamespace));
+                return;
+              }
 
-          log.info(
-              String.format(
-                  "Featured Workspace %s under category %s will be re-published by Admin under new category %s ",
-                  workspaceNamespace,
-                  initialCategory,
-                  requestedCategory));
-          featuredWorkspaceDao.save(
-              featuredWorkspaceMapper.toDBFeaturedWorkspace(
-                  dbFeaturedWorkspace, publishWorkspaceRequest));
-          adminAuditor.firePublishWorkspaceAction(
-              dbWorkspace.getWorkspaceId(),
-              requestedCategory,
-              initialCategory);
-        },
-        () -> {
-          // Update Acl in firecloud so that everyone can view the workspace
-          updateACLForFeaturedWorkspace(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
-          featuredWorkspaceDao.save(featuredWorkspaceMapper.toDbFeaturedWorkspace(publishWorkspaceRequest, dbWorkspace));
-          adminAuditor.firePublishWorkspaceAction(
-              dbWorkspace.getWorkspaceId(), publishWorkspaceRequest.getCategory().toString(), "");
-        });
+              log.info(
+                  String.format(
+                      "Featured Workspace %s under category %s will be re-published by Admin under new category %s ",
+                      workspaceNamespace, initialCategory, requestedCategory));
+              featuredWorkspaceDao.save(
+                  featuredWorkspaceMapper.toDBFeaturedWorkspace(
+                      dbFeaturedWorkspace, publishWorkspaceRequest));
+              adminAuditor.firePublishWorkspaceAction(
+                  dbWorkspace.getWorkspaceId(), requestedCategory, initialCategory);
+            },
+            () -> {
+              // Update Acl in firecloud so that everyone can view the workspace
+              updateACLForFeaturedWorkspace(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
+              featuredWorkspaceDao.save(
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      publishWorkspaceRequest, dbWorkspace));
+              adminAuditor.firePublishWorkspaceAction(
+                  dbWorkspace.getWorkspaceId(),
+                  publishWorkspaceRequest.getCategory().toString(),
+                  "");
+            });
     log.info(String.format("Workspace %s has been published by Admin", workspaceNamespace));
 
     // Send Email to all workspace owners to let them know Workspace has been published
-    sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory().toString());
+    sendEmailToWorkspaceOwners(dbWorkspace, true, publishWorkspaceRequest.getCategory());
   }
 
   @Override
@@ -463,27 +468,29 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspaceOptional =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
 
-    // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do nothing
-    // and return
-    if (!dbFeaturedWorkspaceOptional.isPresent()) {
-      log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
-      return;
-    }
-    DbFeaturedWorkspace dbFeaturedWorkspace = dbFeaturedWorkspaceOptional.get();
-    String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
+    dbFeaturedWorkspaceOptional.ifPresentOrElse(
+        (dbFeaturedWorkspace) -> {
+          String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
 
-    updateACLForFeaturedWorkspace(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
-    featuredWorkspaceDao.delete(dbFeaturedWorkspace);
-    adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
-    log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+          updateACLForFeaturedWorkspace(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
 
-    // Send email to all workspace owners to let them know workspace has been unpublished
-    sendEmailToWorkspaceOwners(dbWorkspace, false, null);
+          featuredWorkspaceDao.delete(dbFeaturedWorkspace);
+          adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
+          log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+
+          // Send email to all workspace owners to let them know workspace has been unpublished
+          sendEmailToWorkspaceOwners(dbWorkspace, false, null);
+        },
+        () -> {
+          // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do
+          // nothing
+          log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
+        });
   }
 
   private void sendEmailToWorkspaceOwners(
-      DbWorkspace dbWorkspace, boolean published, String category) {
+      DbWorkspace dbWorkspace, boolean published, FeaturedWorkspaceCategory category) {
     final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
     try {
       if (published) {

@@ -135,7 +135,8 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void firePublishWorkspaceAction(long workspaceId, String updatedCategory, String prevCategoryIfAny) {
+  public void firePublishWorkspaceAction(
+      long workspaceId, String updatedCategory, String prevCategoryIfAny) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
