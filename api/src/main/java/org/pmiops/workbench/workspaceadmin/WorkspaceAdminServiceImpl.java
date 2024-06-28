@@ -450,7 +450,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
                       publishWorkspaceRequest, dbWorkspace);
-              publishWorkspace(dbFeaturedWorkspaceToSave, "");
+              publishWorkspace(dbFeaturedWorkspaceToSave, null);
             });
   }
 

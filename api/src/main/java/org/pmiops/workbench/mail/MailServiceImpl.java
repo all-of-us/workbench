@@ -425,23 +425,13 @@ public class MailServiceImpl implements MailService {
 
   private String featuredWorkspaceCategoryAsDisplayString(
       FeaturedWorkspaceCategory featuredWorkspaceCategory) {
-    switch (featuredWorkspaceCategory) {
-      case TUTORIAL_WORKSPACES -> {
-        return "Tutorial Workspaces";
-      }
-      case PHENOTYPE_LIBRARY -> {
-        return "Phenotype Library";
-      }
-      case DEMO_PROJECTS -> {
-        return "Demonstration Projects";
-      }
-      case COMMUNITY -> {
-        return "Community";
-      }
-      default -> {
-        return "";
-      }
-    }
+    return switch (featuredWorkspaceCategory) {
+      case TUTORIAL_WORKSPACES -> "Tutorial Workspaces";
+      case PHENOTYPE_LIBRARY -> "Phenotype Library";
+      case DEMO_PROJECTS -> "Demonstration Projects";
+      case COMMUNITY -> "Community";
+      default -> "";
+    };
   }
 
   @Override

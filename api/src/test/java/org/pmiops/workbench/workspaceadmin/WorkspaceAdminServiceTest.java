@@ -555,7 +555,7 @@ public class WorkspaceAdminServiceTest {
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
-            "");
+            null);
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
   }
 
@@ -592,7 +592,7 @@ public class WorkspaceAdminServiceTest {
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
-            "");
+            null);
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
 
     publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
