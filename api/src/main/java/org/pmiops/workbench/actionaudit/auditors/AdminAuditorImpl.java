@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import java.time.Clock;
 import java.util.Date;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -136,7 +137,7 @@ public class AdminAuditorImpl implements AdminAuditor {
   }
 
   public void firePublishWorkspaceAction(
-      long workspaceId, String updatedCategory, String prevCategoryIfAny) {
+      long workspaceId, String updatedCategory, @Nullable String prevCategoryIfAny) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();
