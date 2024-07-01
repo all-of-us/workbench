@@ -316,7 +316,7 @@ SELECT
     , 0
     , 'PERSON'
     , 1
-    , 'SELF_REPORTED_POPULATION'
+    , 'SELF_REPORTED_CATEGORY'
     , concept_id
     , regexp_replace(b.concept_name, r'^.+:\s', '')
     , 0
@@ -328,11 +328,11 @@ SELECT
     , 0
 FROM
     (
-        SELECT self_reported_population_concept_id, COUNT(DISTINCT person_id) cnt
+        SELECT self_reported_category_concept_id, COUNT(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.self_reported_population_concept_id = b.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.self_reported_category_concept_id = b.concept_id
 WHERE b.concept_id is not null"
 
 ## wait for process to end before copying

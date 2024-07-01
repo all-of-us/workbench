@@ -121,7 +121,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "self_reported_population",
+    "name": "self_reported_category",
     "type": "STRING"
   }
 ]

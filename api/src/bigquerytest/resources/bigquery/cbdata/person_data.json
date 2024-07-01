@@ -18,7 +18,7 @@
     "race_source_concept_id":1,
     "ethnicity_source_value":"esv",
     "ethnicity_source_concept_id":1,
-    "self_reported_population_concept_id":23455
+    "self_reported_category_concept_id":23455
   },
   {
     "person_id":2,

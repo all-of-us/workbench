@@ -66,8 +66,8 @@ public final class SearchGroupItemQueryBuilder {
           "sex_at_birth_concept_id",
           CriteriaType.ETHNICITY,
           "ethnicity_concept_id",
-          CriteriaType.SELF_REPORTED_POPULATION,
-          "self_reported_population_concept_id");
+          CriteriaType.SELF_REPORTED_CATEGORY,
+          "self_reported_category_concept_id");
   private static final ImmutableList<Domain> SOURCE_STANDARD_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
   private static final ImmutableMap<Domain, String> HAS_DATA_DOMAINS =
@@ -385,7 +385,7 @@ public final class SearchGroupItemQueryBuilder {
       case SEX:
       case ETHNICITY:
       case RACE:
-      case SELF_REPORTED_POPULATION:
+      case SELF_REPORTED_CATEGORY:
         // Gender, Sex, Ethnicity and Race all share the same implementation
         Long[] conceptIds =
             searchGroupItem.getSearchParameters().stream()

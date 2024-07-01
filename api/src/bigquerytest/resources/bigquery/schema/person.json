@@ -106,17 +106,17 @@
   },
   {
     "type": "integer",
-    "name": "self_reported_population_concept_id",
+    "name": "self_reported_category_concept_id",
     "mode": "nullable"
   },
   {
     "type": "integer",
-    "name": "self_reported_population_source_concept_id",
+    "name": "self_reported_category_source_concept_id",
     "mode": "nullable"
   },
   {
     "type": "string",
-    "name": "self_reported_population_source_value",
+    "name": "self_reported_category_source_value",
     "mode": "nullable"
   }
 ]
