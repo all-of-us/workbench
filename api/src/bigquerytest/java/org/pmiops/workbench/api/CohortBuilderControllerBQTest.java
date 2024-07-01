@@ -1645,9 +1645,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsDemoSelfReportedCategory() {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
-            Domain.PERSON.toString(),
-            ImmutableList.of(selfReportedCategory()),
-            new ArrayList<>());
+            Domain.PERSON.toString(), ImmutableList.of(selfReportedCategory()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
