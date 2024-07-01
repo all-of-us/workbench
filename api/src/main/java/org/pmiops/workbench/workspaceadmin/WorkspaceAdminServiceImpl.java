@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -417,7 +418,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
-    String requestedCategory = publishWorkspaceRequest.getCategory().toString();
 
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
@@ -425,7 +425,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             (dbFeaturedWorkspace) -> {
               // Check if category in database is same as requested: If true do nothing, else update
               // database
-              String existingCategory = dbFeaturedWorkspace.getCategory().toString();
+              DbFeaturedCategory requestedCategory =
+                  featuredWorkspaceMapper.toDbFeaturedCategory(
+                      publishWorkspaceRequest.getCategory());
+
+              DbFeaturedCategory existingCategory = dbFeaturedWorkspace.getCategory();
               if (existingCategory.equals(requestedCategory)) {
                 log.warning(
                     String.format(
@@ -441,7 +445,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               DbFeaturedWorkspace dbFeaturedWorkspaceToUpdate =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
                       dbFeaturedWorkspace, publishWorkspaceRequest);
-              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory);
+              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory.toString());
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
@@ -454,7 +458,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             });
   }
 
-  private void publishWorkspace(DbFeaturedWorkspace dbFeaturedWorkspace, String prevCategoryIfAny) {
+  private void publishWorkspace(
+      DbFeaturedWorkspace dbFeaturedWorkspace, @Nullable String prevCategoryIfAny) {
     DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
 
     FeaturedWorkspaceCategory requestedCategory =

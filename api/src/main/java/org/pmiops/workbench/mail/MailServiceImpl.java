@@ -430,7 +430,6 @@ public class MailServiceImpl implements MailService {
       case PHENOTYPE_LIBRARY -> "Phenotype Library";
       case DEMO_PROJECTS -> "Demonstration Projects";
       case COMMUNITY -> "Community";
-      default -> "";
     };
   }
 

@@ -22,4 +22,6 @@ public interface FeaturedWorkspaceMapper {
       DbFeaturedWorkspace dbFeaturedWorkspace, PublishWorkspaceRequest featuredWorkspace);
 
   FeaturedWorkspaceCategory toFeaturedWorkspaceCategory(DbFeaturedCategory dbFeaturedCategory);
+
+  DbFeaturedCategory toDbFeaturedCategory(FeaturedWorkspaceCategory dbFeaturedCategory);
 }
