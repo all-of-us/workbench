@@ -291,7 +291,7 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
 WHERE b.concept_id is not null"
 
-echo "DEMOGRAPHICS - Self Reported Population"
+echo "DEMOGRAPHICS - Self Reported Category"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
