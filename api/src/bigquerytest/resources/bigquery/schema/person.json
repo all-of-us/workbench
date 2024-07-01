@@ -103,5 +103,20 @@
     "type": "integer",
     "name": "sex_at_birth_source_concept_id",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "self_reported_category_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "self_reported_category_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "self_reported_category_source_value",
+    "mode": "nullable"
   }
 ]

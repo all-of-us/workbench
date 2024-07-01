@@ -58,10 +58,16 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final ImmutableMap<CriteriaType, String> DEMO_COLUMN_SQL_MAP =
       ImmutableMap.of(
-          CriteriaType.RACE, "race_concept_id",
-          CriteriaType.GENDER, "gender_concept_id",
-          CriteriaType.SEX, "sex_at_birth_concept_id",
-          CriteriaType.ETHNICITY, "ethnicity_concept_id");
+          CriteriaType.RACE,
+          "race_concept_id",
+          CriteriaType.GENDER,
+          "gender_concept_id",
+          CriteriaType.SEX,
+          "sex_at_birth_concept_id",
+          CriteriaType.ETHNICITY,
+          "ethnicity_concept_id",
+          CriteriaType.SELF_REPORTED_CATEGORY,
+          "self_reported_category_concept_id");
   private static final ImmutableList<Domain> SOURCE_STANDARD_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
   private static final ImmutableMap<Domain, String> HAS_DATA_DOMAINS =
@@ -379,6 +385,7 @@ public final class SearchGroupItemQueryBuilder {
       case SEX:
       case ETHNICITY:
       case RACE:
+      case SELF_REPORTED_CATEGORY:
         // Gender, Sex, Ethnicity and Race all share the same implementation
         Long[] conceptIds =
             searchGroupItem.getSearchParameters().stream()

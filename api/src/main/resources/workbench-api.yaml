@@ -11093,6 +11093,7 @@ components:
       - VISIT
       - NONE
       - HAS_EHR_DATA
+      - SELF_REPORTED_CATEGORY
     CriteriaSubType:
       type: string
       description: possible criteria types

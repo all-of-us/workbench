@@ -688,6 +688,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(9898L);
   }
 
+  private static SearchParameter selfReportedCategory() {
+    return new SearchParameter()
+        .domain(Domain.PERSON.toString())
+        .type(CriteriaType.SELF_REPORTED_CATEGORY.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(23455L);
+  }
+
   private static SearchParameter deceased() {
     return new SearchParameter()
         .domain(Domain.PERSON.toString())
@@ -1627,6 +1637,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
             Domain.PERSON.toString(), ImmutableList.of(ethnicity()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoSelfReportedCategory() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.PERSON.toString(), ImmutableList.of(selfReportedCategory()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
