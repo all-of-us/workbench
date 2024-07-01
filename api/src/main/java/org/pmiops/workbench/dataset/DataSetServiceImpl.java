@@ -37,6 +37,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
@@ -87,6 +90,10 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
+import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
+import org.pmiops.workbench.tanagra.model.ExportPreviewRequest;
 import org.pmiops.workbench.utils.WorkbenchStringUtils;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +179,25 @@ public class DataSetServiceImpl implements DataSetService {
           .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
           .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
           .build();
+  
+  private final BidiMap<String, Domain> TANAGRA_DOMAIN_MAP =
+          new DualHashBidiMap<>(ImmutableMap.<String, Domain>builder()
+                  .put("person", Domain.PERSON)
+                  .put("heartRateSummary", Domain.FITBIT_HEART_RATE_SUMMARY)
+                  .put("heartRateLevel", Domain.FITBIT_HEART_RATE_LEVEL)
+                  .put("activitySummary", Domain.FITBIT_ACTIVITY)
+                  .put("stepsIntraday", Domain.FITBIT_INTRADAY_STEPS)
+                  .put("sleepLevel", Domain.FITBIT_SLEEP_LEVEL)
+                  .put("sleepDailySummary", Domain.FITBIT_SLEEP_DAILY_SUMMARY)
+                  .put("conditionOccurrence", Domain.CONDITION)
+                  .put("procedureOccurrence", Domain.PROCEDURE)
+                  .put("observationOccurrence", Domain.OBSERVATION)
+                  .put("ingredientOccurrence", Domain.DRUG)
+                  .put("measurementOccurrence", Domain.MEASUREMENT)
+                  .put("visitOccurrence", Domain.VISIT)
+                  .put("deviceOccurrence", Domain.DEVICE)
+                  .put("surveyOccurrence", Domain.SURVEY)
+                  .build());
 
   /*
    * Stores the associated set of selects and joins for values for the data set builder,
@@ -252,6 +278,8 @@ public class DataSetServiceImpl implements DataSetService {
   private final Clock clock;
   private final Provider<DbUser> userProvider;
 
+  private final Provider<TanagraApi> tanagraApiProvider;
+
   @Autowired
   @VisibleForTesting
   public DataSetServiceImpl(
@@ -269,7 +297,8 @@ public class DataSetServiceImpl implements DataSetService {
       UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock,
-      Provider<DbUser> userProvider) {
+      Provider<DbUser> userProvider,
+      Provider<TanagraApi> tanagraApiProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortBuilderService = cohortBuilderService;
     this.cohortService = cohortService;
@@ -285,6 +314,7 @@ public class DataSetServiceImpl implements DataSetService {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
     this.userProvider = userProvider;
+    this.tanagraApiProvider = tanagraApiProvider;
   }
 
   @Override
@@ -365,7 +395,7 @@ public class DataSetServiceImpl implements DataSetService {
                 Domain.PHYSICAL_MEASUREMENT_CSS.equals(domain) ? Domain.MEASUREMENT : domain)
             .stream()
             .map(field -> field.getName().toLowerCase())
-            .collect(Collectors.toList());
+            .toList();
 
     final List<String> filteredDomainColumns =
         values.stream().distinct().filter(domainValues::contains).collect(Collectors.toList());
@@ -476,8 +506,44 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   public Map<String, QueryJobConfiguration> tanagraDomainToBigQueryConfig(
-      DataSetRequest dataSetRequest) {
-    return null;
+      DataSetRequest dataSetRequest, DbWorkspace dbWorkspace) {
+    Map<String, QueryJobConfiguration> queryJobConfigurationMap;
+    List<EntityOutputPreview> previewList;
+    String underlayName = "aou" + dbWorkspace.getCdrVersion().getBigqueryDataset();
+
+    ExportPreviewRequest exportPreviewRequest =
+        createExportPreviewRequest(dataSetRequest, dbWorkspace);
+
+    try {
+      previewList =
+          tanagraApiProvider
+              .get()
+              .describeExport(exportPreviewRequest, underlayName)
+              .getEntityOutputs();
+    } catch (ApiException e) {
+      throw new BadRequestException("Bad Request: " + e.getMessage());
+    }
+    queryJobConfigurationMap =
+        previewList.stream()
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    EntityOutputPreview::getEntity,
+                    p ->
+                        QueryJobConfiguration.newBuilder(p.getIndexSql())
+                            .setUseLegacySql(false)
+                            .build()));
+
+    return queryJobConfigurationMap;
+  }
+
+  private ExportPreviewRequest createExportPreviewRequest(
+      DataSetRequest dataSetRequest, DbWorkspace dbWorkspace) {
+    ExportPreviewRequest exportPreviewRequest =
+        new ExportPreviewRequest()
+            .study(dbWorkspace.getWorkspaceNamespace())
+            .cohorts(dataSetRequest.getTanagraCohortIds())
+            .conceptSets(dataSetRequest.getTanagraConceptSetIds());
+    return exportPreviewRequest;
   }
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(DbDataset dbDataset) {
@@ -554,7 +620,7 @@ public class DataSetServiceImpl implements DataSetService {
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       selectedConceptSetsBuilder.addAll(buildPrePackagedSurveyConceptSets(prePackagedConceptSet));
     } else {
-      // If pre packaged all survey concept set is selected create a temp concept set with concept
+      // If pre-packaged all survey concept set is selected create a temp concept set with concept
       // ids of all survey questions
       if (prePackagedConceptSet.contains(SURVEY)
           || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
@@ -724,7 +790,7 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  // In some cases, we don't require concept IDs, and in others their absense is fatal.
+  // In some cases, we don't require concept IDs, and in others their absence is fatal.
   // Even if Concept IDs have been selected, these don't work with all domains.
   @VisibleForTesting
   public Optional<String> buildConceptIdListClause(
@@ -769,7 +835,7 @@ public class DataSetServiceImpl implements DataSetService {
                     d ->
                         PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(
                             PrePackagedConceptSetEnum.valueOf(d.getName())))
-                .collect(Collectors.toList()));
+                .toList());
       }
     } else {
       dbConceptSetConceptIds.addAll(findMultipleDomainConceptIds(domain, dbConceptSetIds));
@@ -905,7 +971,7 @@ public class DataSetServiceImpl implements DataSetService {
 
     Map<String, QueryJobConfiguration> queriesByDomain =
         dbWorkspace.getCdrVersion().getTanagraEnabled()
-            ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest())
+            ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest(), dbWorkspace)
             : domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
@@ -959,7 +1025,7 @@ public class DataSetServiceImpl implements DataSetService {
     };
   }
 
-  // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
+  // ericsong: I really dislike using @VisibleForTesting, but I couldn't help it until the
   // refactoring in RW-6808 is complete. Then this function should be part of the public
   // interface for GenomicsExtractionService instead of just a private implementation detail
   // of DataSetService's generateCodeCells
@@ -1357,8 +1423,8 @@ public class DataSetServiceImpl implements DataSetService {
   private void validateDataSetRequestResources(
       long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
     if (dbCdrVersion.getTanagraEnabled()) {
-      tanagraValidateCohortsInWorkspace(workspaceId, request.getCohortIds());
-      tanagraValidateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+      tanagraValidateCohortsInWorkspace(request.getCohortIds());
+      tanagraValidateConceptSetsInWorkspace(request.getConceptSetIds());
     } else {
       if (request.getDataSetId() == null) {
         throw new BadRequestException("DataSetRequest.dataSetId can not be null.");
@@ -1368,19 +1434,16 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private void tanagraValidateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
+  private void tanagraValidateCohortsInWorkspace(@Nullable List<Long> cohortIds) {
     if (CollectionUtils.isEmpty(cohortIds)) {
       throw new BadRequestException("DataSetRequest.cohortIds can not be null.");
     }
-    validateCohortsInWorkspace(workspaceId, cohortIds);
   }
 
-  private void tanagraValidateConceptSetsInWorkspace(
-      long workspaceId, @Nullable List<Long> conceptSetIds) {
+  private void tanagraValidateConceptSetsInWorkspace(@Nullable List<Long> conceptSetIds) {
     if (CollectionUtils.isEmpty(conceptSetIds)) {
       throw new BadRequestException("DataSetRequest.conceptSetIds can not be null.");
     }
-    validateConceptSetsInWorkspace(workspaceId, conceptSetIds);
   }
 
   private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
@@ -1388,9 +1451,7 @@ public class DataSetServiceImpl implements DataSetService {
       return;
     }
     List<Long> workspaceCohortIds =
-        cohortService.findByWorkspaceId(workspaceId).stream()
-            .map(Cohort::getId)
-            .collect(Collectors.toList());
+        cohortService.findByWorkspaceId(workspaceId).stream().map(Cohort::getId).toList();
 
     if (!workspaceCohortIds.containsAll(cohortIds)) {
       throw new NotFoundException("one or more of the requested cohorts were not found");
@@ -1403,9 +1464,7 @@ public class DataSetServiceImpl implements DataSetService {
       return;
     }
     List<Long> workspaceConceptSetIds =
-        conceptSetService.findByWorkspaceId(workspaceId).stream()
-            .map(ConceptSet::getId)
-            .collect(Collectors.toList());
+        conceptSetService.findByWorkspaceId(workspaceId).stream().map(ConceptSet::getId).toList();
     if (!workspaceConceptSetIds.containsAll(conceptSetIds)) {
       throw new NotFoundException("one or more of the requested concept sets were not found");
     }
@@ -1782,7 +1841,7 @@ public class DataSetServiceImpl implements DataSetService {
                 cs ->
                     cs.getConceptSetConceptIds().stream()
                         .filter(c -> c.isStandard() == Boolean.FALSE))
-            .collect(Collectors.toList());
+            .toList();
 
     Long[] sourceConceptIds =
         dbPossibleSourceConceptIds.stream()
@@ -1816,7 +1875,7 @@ public class DataSetServiceImpl implements DataSetService {
                         .addConceptId(conceptId.get(0).getLongValue())
                         .addStandard(Boolean.FALSE)
                         .build())
-            .collect(Collectors.toList());
+            .toList();
 
     dbConceptSetConceptIds.addAll(sourceConceptIdsToAdd);
     return dbConceptSetConceptIds;

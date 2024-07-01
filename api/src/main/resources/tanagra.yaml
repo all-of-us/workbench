@@ -102,7 +102,6 @@ components:
         lastModified:
           type: string
           format: date-time
-          
     ExportPreviewRequest:
       type: object
       properties:
@@ -130,7 +129,6 @@ components:
         - study
         - cohorts
         - conceptSets
-    
     EntityOutputPreview:
       type: object
       properties:
@@ -168,7 +166,6 @@ components:
         - entity
         - includedAttributes
         - criteria
-
     EntityOutputPreviewList:
       type: object
       properties:
