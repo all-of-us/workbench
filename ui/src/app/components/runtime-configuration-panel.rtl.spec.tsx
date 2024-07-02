@@ -17,7 +17,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   disksApi,
@@ -78,10 +78,6 @@ import {
   RuntimeConfigurationPanelProps,
 } from './runtime-configuration-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
-import runOnlyPendingTimersAsync = jest.runOnlyPendingTimersAsync;
-import runOnlyPendingTimers = jest.runOnlyPendingTimers;
-import runAllTimers = jest.runAllTimers;
-import useFakeTimers = jest.useFakeTimers;
 
 describe(deriveCurrentRuntime.name, () => {
   it('returns an undefined runtime if the inputs are undefined', () => {
@@ -835,13 +831,13 @@ describe(RuntimeConfigurationPanel.name, () => {
   const getNumOfPreemptibleWorkersValue = () =>
     spinDiskElement('num-preemptible').getAttribute('value');
 
-  const decrementDetachableDiskSize = async (container): Promise<void> => {
+  const decrementDetachableDiskSize = async (): Promise<void> => {
     const diskValueAsInt =
       parseInt(getDetachableDiskValue().replace(/,/g, '')) - 1;
     await pickDetachableDiskSize(diskValueAsInt);
   };
 
-  const incrementDetachableDiskSize = async (container): Promise<void> => {
+  const incrementDetachableDiskSize = async (): Promise<void> => {
     const diskValueAsInt =
       parseInt(getDetachableDiskValue().replace(/,/g, '')) + 1;
     await pickDetachableDiskSize(diskValueAsInt);
@@ -887,21 +883,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const getPausedCost = () =>
     screen.getByLabelText('cost while paused').textContent;
 
-  const waitForFakeTimersAndUpdate = async (maxRetries = 10) => {
-    const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
-    if (runtimeApiStub.runtime.status === RuntimeStatus.DELETED) {
-      // Wait for the updates to complete
-      await act(async () => {
-        await waitFor(
-          async () => {
-            expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-          },
-          { timeout: 10000 }
-        );
-      });
-    }
-  };
-
   type DetachableDiskCase = [
     string,
     ((container: HTMLElement) => Promise<void>)[],
@@ -924,7 +905,7 @@ describe(RuntimeConfigurationPanel.name, () => {
         wantDeleteRuntime = false,
       },
     ]: DetachableDiskCase,
-    existingDiskName: string
+    _existingDiskName: string
   ) {
     const createRuntimeSpy = jest
       .spyOn(runtimeApi(), 'createRuntime')
