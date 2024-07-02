@@ -316,6 +316,9 @@ public class WorkbenchConfig {
     public boolean enableGKEAppPausing;
     // If true, allows users to set machine type for their GKE apps
     public boolean enableGKEAppMachineTypeChoice;
+    // If True, use featuredWorkspace Database to get data instead of featured_workspace.json config
+    // file
+    public boolean enablePublishedWorkspacesViaDb;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
   }

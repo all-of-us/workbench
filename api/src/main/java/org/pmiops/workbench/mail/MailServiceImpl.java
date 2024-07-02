@@ -50,6 +50,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,12 @@ public class MailServiceImpl implements MailService {
   private static final String WELCOME_RESOURCE = "emails/welcome/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
+
+  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
+      "emails/publish_workspace_by_admin/content.html";
+
+  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
+      "emails/unpublish_workspace_by_admin/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -381,6 +388,52 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendPublishWorkspaceByAdminEmail(
+      DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
+      throws MessagingException {
+    sendPublishUnpublishWorkspaceByAdminEmail(
+        workspace, owners, featuredWorkspaceCategoryAsDisplayString(publishCategory), true);
+  }
+
+  @Override
+  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
+  }
+
+  private void sendPublishUnpublishWorkspaceByAdminEmail(
+      DbWorkspace workspace, List<DbUser> owners, String cateogryIfAny, boolean publish)
+      throws MessagingException {
+    String actionType = publish ? "published" : "unpublished";
+
+    final String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.emptyList(),
+        "Your AoU Researcher Workbench workspace has been " + actionType,
+        String.format(
+            "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
+            actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+        buildHtml(
+            publish ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
+  }
+
+  private String featuredWorkspaceCategoryAsDisplayString(
+      FeaturedWorkspaceCategory featuredWorkspaceCategory) {
+    return switch (featuredWorkspaceCategory) {
+      case TUTORIAL_WORKSPACES -> "Tutorial Workspaces";
+      case PHENOTYPE_LIBRARY -> "Phenotype Library";
+      case DEMO_PROJECTS -> "Demonstration Projects";
+      case COMMUNITY -> "Community";
+    };
+  }
+
+  @Override
   public void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
       throws MessagingException {
     String htmlMessage =
@@ -597,6 +650,18 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
         .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
+      DbWorkspace workspace, String publishCategory, String supportEmail) {
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
         .build();
   }
 

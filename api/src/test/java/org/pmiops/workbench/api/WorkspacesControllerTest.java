@@ -195,6 +195,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -309,6 +310,7 @@ public class WorkspacesControllerTest {
 
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
+  @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
