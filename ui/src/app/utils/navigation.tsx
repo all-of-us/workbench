@@ -141,15 +141,15 @@ export const stringifyUrl = (url: UrlObj) => {
 
 function useMessageListener<T>(message: string, callback: (event: T) => void) {
   const listener = useCallback(
-    (event) => {
+    (event: MessageEvent) => {
+      const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
       if (
-        // event.origin != window.window.location.origin ||
+        event.origin !== tanagraUrl ||
         typeof event.data !== 'object' ||
-        event.data.message != message
+        event.data.message !== message
       ) {
         return;
       }
-      console.log('export callback');
       callback(event.data);
     },
     [message, callback]
@@ -167,15 +167,20 @@ export function useExitActionListener(callback: () => void) {
   useMessageListener('CLOSE', () => callback());
 }
 
-export type ExportResources = {
+export interface ExportResources {
   cohortIds: string[];
   conceptSetIds: string[];
-};
+}
 
 export function useExportListener(
   callback: (exportIds: ExportResources) => void
 ) {
-  useMessageListener('EXPORT', (event: { resources: ExportResources }) =>
-    callback(event.resources)
+  useMessageListener(
+    'EXPORT',
+    (event: { resources: { cohorts: string[]; featureSets: string[] } }) =>
+      callback({
+        cohortIds: event.resources.cohorts,
+        conceptSetIds: event.resources.featureSets,
+      })
   );
 }
