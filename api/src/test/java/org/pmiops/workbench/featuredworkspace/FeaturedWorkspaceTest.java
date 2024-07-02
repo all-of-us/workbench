@@ -1,4 +1,4 @@
-package org.pmiops.workbench.featuredWorkspace;
+package org.pmiops.workbench.featuredworkspace;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -82,7 +82,7 @@ public class FeaturedWorkspaceTest {
   }
 
   @Test
-  public void testFeaturedCategory_ifWorkspaceIsFeaturedWorkspace() {
+  public void testFeaturedCategory_getFeaturedCategoryForFeaturedWorkspace() {
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(dbWorkspace)

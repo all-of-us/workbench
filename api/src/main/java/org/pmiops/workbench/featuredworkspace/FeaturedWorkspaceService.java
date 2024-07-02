@@ -1,4 +1,4 @@
-package org.pmiops.workbench.featuredWorkspace;
+package org.pmiops.workbench.featuredworkspace;
 
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
