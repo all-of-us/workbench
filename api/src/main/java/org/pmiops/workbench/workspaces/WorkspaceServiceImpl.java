@@ -38,10 +38,12 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -77,6 +79,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
+  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
@@ -99,6 +102,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
+      FeaturedWorkspaceService featuredWorkspaceService,
       FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
@@ -119,6 +123,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
@@ -191,7 +196,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
-    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    Workspace workspace = workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb ?
+            workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService)
+            : workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceResponse.setWorkspace(workspace);
 
     return workspaceResponse;
   }

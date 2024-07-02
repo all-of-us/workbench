@@ -127,6 +127,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -385,6 +386,7 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     LeonardoApiClient.class,

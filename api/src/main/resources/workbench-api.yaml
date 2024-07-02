@@ -7165,7 +7165,8 @@ components:
           type: boolean
           default: false
         featuredCategory:
-          type: FeaturedWorkspaceCategory
+          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
+          description: The name of the category to which the workspace should be published
           default: null
         adminLocked:
           type: boolean
