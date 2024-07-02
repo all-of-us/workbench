@@ -388,6 +388,7 @@ export const useCustomRuntime = (
         }
 
         console.log('999999999999999');
+        aborter = new AbortController();
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
           targetRuntime: request.runtime,

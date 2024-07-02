@@ -2514,17 +2514,17 @@ describe(RuntimeConfigurationPanel.name, () => {
       [changeMainCpu_To8, decrementDetachableDiskSize],
       { wantDeleteDisk: true, wantDeleteRuntime: true },
     ],
-    // ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
-    // [
-    //   'recreate + disk type',
-    //   [clickEnableGpu, pickSsdType],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'recreate + disk decrease',
-    //   [clickEnableGpu, decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
+    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+    [
+      'recreate + disk type',
+      [clickEnableGpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk decrease',
+      [clickEnableGpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
   ] as DetachableDiskCase[])(
     'should allow runtime to recreate to attached PD: %s',
     async (desc: string, setters, expectations) => {
