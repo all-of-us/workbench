@@ -905,12 +905,12 @@ describe(RuntimeConfigurationPanel.name, () => {
         wantDeleteRuntime = false,
       },
     ]: DetachableDiskCase,
-    _existingDiskName: string
+    existingDiskName: string
   ) {
     const createRuntimeSpy = jest
       .spyOn(runtimeApi(), 'createRuntime')
       .mockImplementation((): Promise<any> => Promise.resolve());
-    const updateRuntimeSpy = jest
+    jest
       .spyOn(runtimeApi(), 'updateRuntime')
       .mockImplementation((): Promise<any> => {
         console.log('We updated');
@@ -967,13 +967,13 @@ describe(RuntimeConfigurationPanel.name, () => {
     // await waitForFakeTimersAndUpdate(/* maxRetries*/ 20);
     // }
 
-    // await waitFor(() => {
-    //   if (wantDeleteDisk) {
-    //     expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
-    //   } else {
-    //     expect(disksApiStub.disk.name).toEqual(existingDiskName);
-    //   }
-    // });
+    await waitFor(() => {
+      if (wantDeleteDisk) {
+        expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
+      } else {
+        expect(disksApiStub.disk.name).toEqual(existingDiskName);
+      }
+    });
   }
 
   beforeEach(async () => {
