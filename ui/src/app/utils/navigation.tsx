@@ -139,20 +139,20 @@ export const stringifyUrl = (url: UrlObj) => {
   );
 };
 
-export function useExitActionListener(callback: () => void) {
+function useMessageListener<T>(message: string, callback: (event: T) => void) {
   const listener = useCallback(
-    (event: MessageEvent) => {
-      const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
+    (event) => {
       if (
-        event.origin !== tanagraUrl ||
+        // event.origin != window.window.location.origin ||
         typeof event.data !== 'object' ||
-        event.data.message !== 'CLOSE'
+        event.data.message != message
       ) {
         return;
       }
-      callback();
+      console.log('export callback');
+      callback(event.data);
     },
-    [callback]
+    [message, callback]
   );
 
   useEffect(() => {
@@ -161,4 +161,21 @@ export function useExitActionListener(callback: () => void) {
       window.removeEventListener('message', listener);
     };
   }, [listener]);
+}
+
+export function useExitActionListener(callback: () => void) {
+  useMessageListener('CLOSE', () => callback());
+}
+
+export type ExportResources = {
+  cohortIds: string[];
+  conceptSetIds: string[];
+};
+
+export function useExportListener(
+  callback: (exportIds: ExportResources) => void
+) {
+  useMessageListener('EXPORT', (event: { resources: ExportResources }) =>
+    callback(event.resources)
+  );
 }

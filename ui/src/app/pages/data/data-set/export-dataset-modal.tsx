@@ -45,8 +45,10 @@ import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 interface Props {
   closeFunction: Function;
-  dataset: DataSet;
+  dataset?: DataSet;
   workspace: WorkspaceData;
+  tanagraCohortIds?: string[];
+  tanagraConceptSetIds?: string[];
 }
 
 const styles = reactStyles({
@@ -63,6 +65,8 @@ export const ExportDatasetModal = ({
   workspace,
   dataset,
   closeFunction,
+  tanagraCohortIds,
+  tanagraConceptSetIds,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
@@ -99,6 +103,8 @@ export const ExportDatasetModal = ({
             cohortIds: dataset.cohorts.map((c) => c.id),
             domainValuePairs: dataset.domainValuePairs,
             prePackagedConceptSet: dataset.prePackagedConceptSet,
+            tanagraCohortIds,
+            tanagraConceptSetIds,
           }),
       domainValuePairs: [],
     };
