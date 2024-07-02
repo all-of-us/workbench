@@ -153,6 +153,10 @@ let aborter = new AbortController();
 // other
 export const getAborter = () => aborter;
 
+export const resetAborter = () => {
+  aborter = new AbortController();
+};
+
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
@@ -197,9 +201,11 @@ export const useRuntimeStatus = (
       ]
     );
 
+    aborter = new AbortController();
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
+          console.log('777777777777777777777777');
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
@@ -305,6 +311,7 @@ export const useCustomRuntime = (
     // Calling updateRuntime will not immediately set the Runtime status to not Running so the
     // default initializer will resolve on its first call. The polling below first checks for the
     // non Running status before initializing the default one that checks for Running status
+    console.log('8888888888888888888888');
     await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       targetRuntime: request.runtime,
@@ -380,6 +387,7 @@ export const useCustomRuntime = (
           });
         }
 
+        console.log('999999999999999');
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
           targetRuntime: request.runtime,
@@ -387,6 +395,7 @@ export const useCustomRuntime = (
         });
       } catch (e) {
         if (!(e instanceof LeoRuntimeInitializationAbortedError)) {
+          console.log('CANNOT ABORT');
           throw e;
         }
       } finally {

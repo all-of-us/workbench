@@ -171,14 +171,14 @@ export const markCompoundRuntimeOperationCompleted = (
   const { [workspaceNamespace]: op, ...otherOps } =
     compoundRuntimeOpStore.get();
   if (op) {
-    op.aborter.abort();
+    op.aborter.abort('STORES AAAAA');
     compoundRuntimeOpStore.set(otherOps);
   }
 };
 
 export const clearCompoundRuntimeOperations = () => {
   const ops = compoundRuntimeOpStore.get();
-  Object.keys(ops).forEach((k) => ops[k].aborter.abort());
+  Object.keys(ops).forEach((k) => ops[k].aborter.abort('STORES BBBBBBB'));
   compoundRuntimeOpStore.set({});
 };
 

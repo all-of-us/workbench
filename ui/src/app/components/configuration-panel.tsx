@@ -59,7 +59,7 @@ export const ConfigurationPanel = fp.flow(
       fetchFreeCredits();
 
       return function cleanup() {
-        aborter.abort();
+        aborter.abort('CONFIG PANEL');
       };
     }, []);
 

@@ -52,7 +52,7 @@ const LeoCookieWrapper = ({ children }) => {
 
     return () => {
       clearTimeout(timer);
-      pollAborter.abort();
+      pollAborter.abort('LEO COOKIE');
     };
   }, []);
 

@@ -105,6 +105,7 @@ export const maybeInitializeRuntime = async (
   signal: AbortSignal,
   targetRuntime?: Runtime
 ): Promise<Runtime> => {
+  console.log('ZZZZZZZZZZZZZZZZZZZZZZZ');
   if (workspaceNamespace in compoundRuntimeOpStore.get()) {
     await new Promise<void>((resolve, reject) => {
       signal.addEventListener('abort', reject);
@@ -119,6 +120,7 @@ export const maybeInitializeRuntime = async (
   }
 
   try {
+    console.log('RUNTIME UTIILS');
     const runtime = await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       pollAbortSignal: signal,
