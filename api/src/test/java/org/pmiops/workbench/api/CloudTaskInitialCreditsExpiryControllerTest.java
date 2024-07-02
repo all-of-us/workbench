@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
@@ -87,23 +88,24 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     FreeTierBillingService.class
   })
   @MockBean({
-    ImpersonatedWorkspaceService.class,
-    MailService.class,
     AccessTierService.class,
     BillingProjectAuditor.class,
     CohortCloningService.class,
-    LeonardoApiClient.class,
     ConceptSetService.class,
+    CloudBillingClient.class,
     DataSetService.class,
+    FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     FireCloudService.class,
-    CloudBillingClient.class,
+    ImpersonatedWorkspaceService.class,
+    LeonardoApiClient.class,
+    MailService.class,
+    TaskQueueService.class,
     UserMapper.class,
     UserServiceAuditor.class,
     WorkspaceFreeTierUsageService.class,
     WorkspaceMapper.class,
-    WorkspaceAuthService.class,
-    TaskQueueService.class
+    WorkspaceAuthService.class
   })
   static class Configuration {
     @Bean

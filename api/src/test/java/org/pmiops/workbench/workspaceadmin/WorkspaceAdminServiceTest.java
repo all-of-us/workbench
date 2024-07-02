@@ -54,6 +54,7 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -111,6 +112,7 @@ public class WorkspaceAdminServiceTest {
   private static final String RUNTIME_NAME = "all-of-us-runtime";
   private static final String RUNTIME_NAME_2 = "all-of-us-runtime-2";
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
+  private static WorkbenchConfig providedWorkbenchConfig;
 
   private DbWorkspace dbWorkspace;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -128,6 +130,7 @@ public class WorkspaceAdminServiceTest {
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private MailService mailService;
   @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceService mockFeatureService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -156,6 +159,7 @@ public class WorkspaceAdminServiceTest {
     ConceptSetMapper.class,
     DataSetDao.class,
     DataSetMapper.class,
+    FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     LeonardoApiClient.class,
     UserMapper.class,
@@ -165,8 +169,9 @@ public class WorkspaceAdminServiceTest {
   })
   static class Configuration {
     @Bean
-    public WorkbenchConfig getConfig() {
-      return WorkbenchConfig.createEmptyConfig();
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
     }
 
     @Bean
@@ -179,11 +184,10 @@ public class WorkspaceAdminServiceTest {
   @BeforeEach
   public void setUp() {
     currentUser = new DbUser();
-
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersionDao.save(cdrVersion);
-
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(
             new RawlsWorkspaceResponse()
@@ -307,6 +311,33 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
+  }
+
+  @Test
+  public void testGetWorkspaceAdminView_publishInfo() {
+    // If Config enablePublishedWorkspacesViaDb is true,
+    // then get workspace Publish info from featuredWorkspace table
+    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+
+    when(mockFeatureService.isFeaturedWorkspace(dbWorkspace)).thenReturn(true);
+    when(mockFeatureService.getFeaturedCategory(dbWorkspace))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.TUTORIAL_WORKSPACES);
+    WorkspaceAdminView workspaceDetailsResponse =
+        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
+        .isEqualTo(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
+        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    // If Config enablePublishedWorkspacesViaDb is false,
+    // then get workspace Publish info from DbWorksapce
+    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = false;
+    workspaceDetailsResponse = workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();

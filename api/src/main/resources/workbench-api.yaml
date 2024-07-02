@@ -7164,6 +7164,10 @@ components:
         published:
           type: boolean
           default: false
+        featuredCategory:
+          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
+          description: The name of the category in which the workspace is published
+          default: null
         adminLocked:
           type: boolean
           description: Whether an administrator has prevented most actions on the
@@ -7189,7 +7193,8 @@ components:
         name: my newest workspace
         namespace: aou-rw-test-11112222
         googleProject: aou-rw-test-11112222
-        published: false
+        published: true
+        featuredCategory: DEMO_PROJECTS
         adminLocked: true
         adminLockedReason: locked by admin
         researchPurpose:

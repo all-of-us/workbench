@@ -95,6 +95,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -268,6 +269,7 @@ public class DataSetControllerTest {
     CohortCloningService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
+    FeaturedWorkspaceService.class,
     FreeTierBillingService.class,
     IamService.class,
     MailService.class,

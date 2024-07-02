@@ -56,6 +56,7 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.CohortReview;
@@ -132,6 +133,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     UserRecentResourceService.class,
