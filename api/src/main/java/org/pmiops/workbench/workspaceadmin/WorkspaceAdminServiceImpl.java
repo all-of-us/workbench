@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.featuredWorkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -86,12 +88,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final DataSetDao dataSetDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
+  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FireCloudService fireCloudService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
+  private final Provider<WorkbenchConfig> workspaceConfigProvider;
   private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
@@ -111,12 +115,14 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       DataSetDao dataSetDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceDao featuredWorkspaceDao,
+      FeaturedWorkspaceService featuredWorkspaceService,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
+      Provider<WorkbenchConfig> workspaceConfigProvider,
       Provider<DbUser> userProvider,
       UserMapper userMapper,
       UserService userService,
@@ -133,6 +139,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.dataSetDao = dataSetDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -142,6 +149,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
+    this.workspaceConfigProvider = workspaceConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
@@ -241,12 +249,21 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    return new WorkspaceAdminView()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
-        .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
-        .collaborators(collaborators)
-        .resources(adminWorkspaceResources)
-        .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
+    return workspaceConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb
+        ? new WorkspaceAdminView()
+            .workspace(
+                workspaceMapper.toApiWorkspace(
+                    dbWorkspace, firecloudWorkspace, featuredWorkspaceService))
+            .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
+            .collaborators(collaborators)
+            .resources(adminWorkspaceResources)
+            .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum())
+        : new WorkspaceAdminView()
+            .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
+            .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
+            .collaborators(collaborators)
+            .resources(adminWorkspaceResources)
+            .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
