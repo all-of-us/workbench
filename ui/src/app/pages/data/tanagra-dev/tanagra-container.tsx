@@ -38,7 +38,7 @@ export const TanagraContainer = fp.flow(
     navigate(['workspaces', namespace, id, 'data']);
   });
 
-  useExportListener(async (exportResourceIds) => {
+  useExportListener((exportResourceIds) => {
     setExportIds(exportResourceIds);
   });
 
