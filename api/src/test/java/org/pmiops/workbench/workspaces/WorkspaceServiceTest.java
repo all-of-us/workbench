@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -53,11 +54,14 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -125,6 +129,7 @@ public class WorkspaceServiceTest {
 
   @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
+  @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private CloudBillingClient mockCloudBillingClient;
   @Autowired private WorkspaceDao workspaceDao;
@@ -638,5 +643,44 @@ public class WorkspaceServiceTest {
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
 
     workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
+  }
+
+  @Test
+  public void testGetWorkspace_PublishInformationFromDbFeaturedWorkspace() {
+    // Arrange
+    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+    DbWorkspace dbWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Controlled Tier Workspace",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+    DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    cdrVersionDao.save(dbCdrVersion);
+    dbWorkspace.setCdrVersion(dbCdrVersion);
+    addMockedWorkspace(dbWorkspace);
+    dbWorkspace.setCreator(currentUser);
+
+    when(accessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
+        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    // Act
+    WorkspaceResponse response =
+        workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
+
+    // Assert
+    assertThat(response.getWorkspace().isPublished()).isTrue();
+    assertThat(response.getWorkspace().getFeaturedCategory())
+        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = false;
+    response =
+        workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
+    assertThat(response.getWorkspace().isPublished()).isFalse();
+    assertThat(response.getWorkspace().getFeaturedCategory()).isNull();
   }
 }

@@ -196,8 +196,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
-    Workspace workspace = workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb ?
-            workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService)
+    Workspace workspace =
+        workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb
+            ? workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService)
             : workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceResponse.setWorkspace(workspace);
 
