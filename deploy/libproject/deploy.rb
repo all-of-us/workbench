@@ -341,6 +341,11 @@ def deploy_tanagra(cmd_name, args)
     "Deploy, but do not yet serve traffic from this version - DB migrations " +
     "are still applied"
   )
+  op.add_option(
+    "--auth-token [auth-token]",
+    ->(opts, v) { opts.auth_token = v},
+    "Github token"
+  )
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
 
@@ -354,6 +359,7 @@ def deploy_tanagra(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
       #{op.opts.dry_run ? "--dry-run" : ""}
+      --auth-token #{op.opts.auth_token}
   }
 
   common.run_inline %W{

@@ -24,6 +24,9 @@ parameters:
   workbench-image:
     type: string
     default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.28"
+  tanagra-image:
+    type: string
+    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.26"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
@@ -129,6 +132,14 @@ executors:
     docker:
     - image: << pipeline.parameters.pact-image >>
     working_directory: ~
+
+  # Use Docker image for Tanagra deploys that require Java 11
+  tanagra-executor:
+    environment:
+      <<: *env-default
+    docker:
+    - image: << pipeline.parameters.tanagra-image >>
+    working_directory: ~/workbench
 
 # -------------------------
 #   COMMANDS
@@ -777,6 +788,20 @@ jobs:
               --key-file << pipeline.parameters.circle-service-account-key >> \
               --promote
 
+  tanagra-deploy-to-test:
+    executor: tanagra-executor
+    steps:
+      - checkout-code
+      - gcloud-auth-login-oidc-test
+      - run:
+          name: Deploy Tanagra API and UI to "test" App Engine
+          working_directory: ~/workbench
+          command: |
+            deploy/project.rb deploy-tanagra \
+              --project all-of-us-workbench-test \
+              --promote \
+              --auth-token $TANAGRA_DEPLOY_TOKEN
+
   # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
@@ -985,6 +1010,8 @@ workflows:
           <<: *filter-main-branch
           requires:
             - ui-unit-test
+      - tanagra-deploy-to-test:
+          <<: *filter-main-branch
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
       - puppeteer-env-setup
       - puppeteer-generate-access-tokens:
