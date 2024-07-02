@@ -64,6 +64,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -206,6 +207,7 @@ public class CohortsControllerTest {
     ConceptBigQueryService.class,
     DataSetService.class,
     DirectoryService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     LeonardoApiClient.class,
