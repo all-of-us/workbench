@@ -59,6 +59,7 @@ import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -249,21 +250,21 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    return workspaceConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb
-        ? new WorkspaceAdminView()
-            .workspace(
-                workspaceMapper.toApiWorkspace(
-                    dbWorkspace, firecloudWorkspace, featuredWorkspaceService))
-            .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
-            .collaborators(collaborators)
-            .resources(adminWorkspaceResources)
-            .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum())
-        : new WorkspaceAdminView()
-            .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
-            .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
-            .collaborators(collaborators)
-            .resources(adminWorkspaceResources)
-            .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
+    boolean featureFlagForPublish =
+        workspaceConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb;
+
+    Workspace workspace =
+        featureFlagForPublish
+            ? workspaceMapper.toApiWorkspace(
+                dbWorkspace, firecloudWorkspace, featuredWorkspaceService)
+            : workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
+
+    return new WorkspaceAdminView()
+        .workspace(workspace)
+        .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
+        .collaborators(collaborators)
+        .resources(adminWorkspaceResources)
+        .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
