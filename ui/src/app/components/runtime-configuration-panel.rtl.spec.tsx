@@ -962,19 +962,17 @@ describe(RuntimeConfigurationPanel.name, () => {
         { timeout: 5000 }
       );
     }
-    // screen.logTestingPlaygroundURL();
-    // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
-    // await waitForFakeTimersAndUpdate(/* maxRetries*/ 20);
-    // }
 
-    // Look into why this is failing
-    // await waitFor(() => {
-    //   if (wantDeleteDisk) {
-    //     expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
-    //   } else {
-    //     expect(disksApiStub.disk.name).toEqual(existingDiskName);
-    //   }
-    // });
+    const firstCall = 0;
+    const runtimeParameter = 1;
+    const newPdName =
+      createRuntimeSpy.mock.calls[firstCall][runtimeParameter].gceWithPdConfig
+        .persistentDisk.name;
+    if (wantDeleteDisk) {
+      expect(newPdName).not.toEqual(existingDiskName);
+    } else {
+      expect(newPdName).toEqual(existingDiskName);
+    }
   }
 
   beforeEach(async () => {
@@ -2481,32 +2479,32 @@ describe(RuntimeConfigurationPanel.name, () => {
       [pickSsdType],
       { wantDeleteDisk: true, wantDeleteRuntime: true },
     ],
-    // [
-    //   'disk decrease',
-    //   [decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'in-place + disk type',
-    //   [changeMainCpu_To8, pickSsdType],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'in-place + disk decrease',
-    //   [changeMainCpu_To8, decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
-    // [
-    //   'recreate + disk type',
-    //   [clickEnableGpu, pickSsdType],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
-    // [
-    //   'recreate + disk decrease',
-    //   [clickEnableGpu, decrementDetachableDiskSize],
-    //   { wantDeleteDisk: true, wantDeleteRuntime: true },
-    // ],
+    [
+      'disk decrease',
+      [decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk type',
+      [changeMainCpu_To8, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'in-place + disk decrease',
+      [changeMainCpu_To8, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+    [
+      'recreate + disk type',
+      [clickEnableGpu, pickSsdType],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
+    [
+      'recreate + disk decrease',
+      [clickEnableGpu, decrementDetachableDiskSize],
+      { wantDeleteDisk: true, wantDeleteRuntime: true },
+    ],
   ] as DetachableDiskCase[])(
     'should allow runtime to recreate to attached PD: %s',
     async (desc: string, setters, expectations) => {
