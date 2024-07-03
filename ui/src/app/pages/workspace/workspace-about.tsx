@@ -42,6 +42,8 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
+import {AboutPublishConsentModal} from 'app/pages/admin/workspace/about-publish-consent-modal';
+import {serverConfigStore} from 'app/utils/stores';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
@@ -54,6 +56,7 @@ interface WorkspaceState {
   workspaceInitialCreditsUsage: number;
   workspaceUserRoles: UserRole[];
   publishing: boolean;
+  showPublishConsentModal: boolean;
 }
 
 const styles = reactStyles({
@@ -111,6 +114,9 @@ const styles = reactStyles({
 });
 
 const pageId = 'workspace';
+
+const enablePublishedWorkspacesViaDb = serverConfigStore.get().config
+  .enablePublishedWorkspacesViaDb
 
 const ShareTooltipText = () => {
   return (
@@ -172,6 +178,7 @@ export const WorkspaceAbout = fp.flow(
         workspaceInitialCreditsUsage: undefined,
         workspaceUserRoles: [],
         publishing: false,
+        showPublishConsentModal: false
       };
     }
 
@@ -298,7 +305,7 @@ export const WorkspaceAbout = fp.flow(
         profileState: { profile },
         cdrVersionTiersResponse,
       } = this.props;
-      const { workspace, workspaceUserRoles, sharing, publishing } = this.state;
+      const { workspace, workspaceUserRoles, sharing, publishing, showPublishConsentModal } = this.state;
       const published = workspace?.published;
       return (
         <div style={styles.mainPage}>
@@ -347,7 +354,7 @@ export const WorkspaceAbout = fp.flow(
               </div>
             )}
             <ResearchPurpose />
-            {hasAuthorityForAction(
+            {!enablePublishedWorkspacesViaDb && hasAuthorityForAction(
               profile,
               AuthorityGuardedAction.PUBLISH_WORKSPACE
             ) && (
@@ -520,6 +527,36 @@ export const WorkspaceAbout = fp.flow(
                 Browse files in Google Cloud Platform
               </StyledExternalLink>
             </div>
+            {
+              /*TODO: Qi needs update permission check*/
+              enablePublishedWorkspacesViaDb &&
+              hasAuthorityForAction(
+              profile,
+              AuthorityGuardedAction.PUBLISH_WORKSPACE
+            ) && (
+              <TooltipTrigger
+                content='Only workspaces owners and creators are allowed to publish community workspace.'
+                disabled={
+                  workspace &&
+                  WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                }
+              >
+                <div>
+                  <h3 style={{marginBottom: '0.75rem'}}>Community Workspace</h3>
+
+                  <Button
+                    data-test-id='publish-button'
+                    onClick={() =>
+                      this.setState({showPublishConsentModal: true})
+                    }
+                    disabled={publishing || published} /*TODO: Qi update this*/
+                    style={{marginLeft: '0rem', padding: '2px'}}
+                  >
+                    Publish
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              )}
           </div>
           {sharing && (
             <WorkspaceShare
@@ -529,6 +566,16 @@ export const WorkspaceAbout = fp.flow(
               onClose={() => this.onShare()}
               userRoles={workspaceUserRoles}
               data-test-id='workspaceShareModal'
+            />
+          )}
+          {showPublishConsentModal && (
+            <AboutPublishConsentModal
+              onConfirm={() => {
+                console.log("hi eric")
+                this.publishUnpublishWorkspace(true)
+                this.setState({showPublishConsentModal: false})
+              }}
+              onCancel={() => this.setState({showPublishConsentModal: false})}
             />
           )}
         </div>
