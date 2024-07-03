@@ -8,4 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface FeaturedWorkspaceDao extends CrudRepository<DbFeaturedWorkspace, Long> {
 
   public Optional<DbFeaturedWorkspace> findByWorkspace(DbWorkspace workspace);
+
+  public boolean existsByWorkspace(DbWorkspace workspace);
 }

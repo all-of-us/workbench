@@ -54,6 +54,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -243,6 +244,7 @@ public class ConceptSetsControllerTest {
     DataSetMapperImpl.class,
     DataSetService.class,
     DirectoryService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
     FreeTierBillingService.class,

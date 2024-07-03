@@ -5,6 +5,7 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,6 +13,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -45,7 +47,36 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
+  @Mapping(target = "featuredCategory", ignore = true)
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
+
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
+  @Mapping(target = "name", source = "dbWorkspace.name")
+  @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
+  @Mapping(target = "id", source = "fcWorkspace.name")
+  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
+  @Mapping(target = "creator", source = "dbWorkspace.creator.username")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
+  @Mapping(target = "published", ignore = true)
+  @Mapping(target = "featuredCategory", ignore = true)
+  Workspace toApiWorkspace(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceDetails fcWorkspace,
+      FeaturedWorkspaceService featuredWorkspaceService);
+
+  @AfterMapping
+  default void setFeaturedWorkspaceInfo(
+      @MappingTarget Workspace workspace,
+      DbWorkspace dbWorkspace,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    boolean isPublished = featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace);
+    workspace.setPublished(isPublished);
+    workspace.setFeaturedCategory(
+        isPublished ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace) : null);
+  }
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
@@ -58,6 +89,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "featuredCategory", ignore = true)
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(
