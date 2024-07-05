@@ -195,6 +195,7 @@ public class DataSetControllerTest {
   private Cohort cohort;
   private Cohort noAccessCohort;
   private ConceptSet conceptSet1;
+  private DataSet dataSet1;
   private ConceptSet noAccessConceptSet;
   private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
@@ -431,6 +432,18 @@ public class DataSetControllerTest {
                     .conceptSet(conceptSet)
                     .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
+
+    dataSet1 =
+            dataSetController
+                    .createDataSet(
+                            workspace.getNamespace(),
+                            workspace.getName(),
+                            buildEmptyDataSetRequest()
+                                    .name("dataset")
+                                    .addCohortIdsItem(cohort.getId())
+                                    .addConceptSetIdsItem(conceptSet1.getId())
+                                    .domainValuePairs(mockDomainValuePair()))
+                    .getBody();
 
     conceptList = new ArrayList<>();
 
@@ -1414,6 +1427,7 @@ public class DataSetControllerTest {
 
   private DataSetRequest buildValidDataSetRequest() {
     return buildEmptyDataSetRequest()
+            .dataSetId(dataSet1.getId())
         .name("blah")
         .addCohortIdsItem(cohort.getId())
         .addConceptSetIdsItem(conceptSet1.getId())

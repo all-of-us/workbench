@@ -37,7 +37,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.lang3.StringUtils;
@@ -179,25 +178,26 @@ public class DataSetServiceImpl implements DataSetService {
           .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
           .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
           .build();
-  
+
   private final BidiMap<String, Domain> TANAGRA_DOMAIN_MAP =
-          new DualHashBidiMap<>(ImmutableMap.<String, Domain>builder()
-                  .put("person", Domain.PERSON)
-                  .put("heartRateSummary", Domain.FITBIT_HEART_RATE_SUMMARY)
-                  .put("heartRateLevel", Domain.FITBIT_HEART_RATE_LEVEL)
-                  .put("activitySummary", Domain.FITBIT_ACTIVITY)
-                  .put("stepsIntraday", Domain.FITBIT_INTRADAY_STEPS)
-                  .put("sleepLevel", Domain.FITBIT_SLEEP_LEVEL)
-                  .put("sleepDailySummary", Domain.FITBIT_SLEEP_DAILY_SUMMARY)
-                  .put("conditionOccurrence", Domain.CONDITION)
-                  .put("procedureOccurrence", Domain.PROCEDURE)
-                  .put("observationOccurrence", Domain.OBSERVATION)
-                  .put("ingredientOccurrence", Domain.DRUG)
-                  .put("measurementOccurrence", Domain.MEASUREMENT)
-                  .put("visitOccurrence", Domain.VISIT)
-                  .put("deviceOccurrence", Domain.DEVICE)
-                  .put("surveyOccurrence", Domain.SURVEY)
-                  .build());
+      new DualHashBidiMap<>(
+          ImmutableMap.<String, Domain>builder()
+              .put("person", Domain.PERSON)
+              .put("heartRateSummary", Domain.FITBIT_HEART_RATE_SUMMARY)
+              .put("heartRateLevel", Domain.FITBIT_HEART_RATE_LEVEL)
+              .put("activitySummary", Domain.FITBIT_ACTIVITY)
+              .put("stepsIntraday", Domain.FITBIT_INTRADAY_STEPS)
+              .put("sleepLevel", Domain.FITBIT_SLEEP_LEVEL)
+              .put("sleepDailySummary", Domain.FITBIT_SLEEP_DAILY_SUMMARY)
+              .put("conditionOccurrence", Domain.CONDITION)
+              .put("procedureOccurrence", Domain.PROCEDURE)
+              .put("observationOccurrence", Domain.OBSERVATION)
+              .put("ingredientOccurrence", Domain.DRUG)
+              .put("measurementOccurrence", Domain.MEASUREMENT)
+              .put("visitOccurrence", Domain.VISIT)
+              .put("deviceOccurrence", Domain.DEVICE)
+              .put("surveyOccurrence", Domain.SURVEY)
+              .build());
 
   /*
    * Stores the associated set of selects and joins for values for the data set builder,
@@ -277,7 +277,6 @@ public class DataSetServiceImpl implements DataSetService {
   private final UserRecentResourceService userRecentResourceService;
   private final Clock clock;
   private final Provider<DbUser> userProvider;
-
   private final Provider<TanagraApi> tanagraApiProvider;
 
   @Autowired
@@ -527,7 +526,7 @@ public class DataSetServiceImpl implements DataSetService {
         previewList.stream()
             .collect(
                 ImmutableMap.toImmutableMap(
-                    EntityOutputPreview::getEntity,
+                    p -> TANAGRA_DOMAIN_MAP.get(p.getEntity()).toString(),
                     p ->
                         QueryJobConfiguration.newBuilder(p.getIndexSql())
                             .setUseLegacySql(false)
@@ -987,11 +986,16 @@ public class DataSetServiceImpl implements DataSetService {
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
                             dataSetExportRequest.getAnalysisLanguage(),
-                            bigQueryService.getTableFieldsFromDomain(
-                                Domain.fromValue(entry.getKey())))
+                            generateFieldList(dbWorkspace, entry.getKey()))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .toList();
+  }
+
+  private FieldList generateFieldList(DbWorkspace dbWorkspace, String key) {
+    return dbWorkspace.getCdrVersion().getTanagraEnabled()
+        ? bigQueryService.getTableFieldsFromDomainForTanagra(TANAGRA_DOMAIN_MAP.getKey(key))
+        : bigQueryService.getTableFieldsFromDomain(Domain.fromValue(key));
   }
 
   private List<String> generateWgsCode(
@@ -1423,8 +1427,8 @@ public class DataSetServiceImpl implements DataSetService {
   private void validateDataSetRequestResources(
       long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
     if (dbCdrVersion.getTanagraEnabled()) {
-      tanagraValidateCohortsInWorkspace(request.getCohortIds());
-      tanagraValidateConceptSetsInWorkspace(request.getConceptSetIds());
+      tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
+      tanagraValidateConceptSetsInWorkspace(request.getTanagraConceptSetIds());
     } else {
       if (request.getDataSetId() == null) {
         throw new BadRequestException("DataSetRequest.dataSetId can not be null.");
@@ -1434,13 +1438,13 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private void tanagraValidateCohortsInWorkspace(@Nullable List<Long> cohortIds) {
+  private void tanagraValidateCohortsInWorkspace(@Nullable List<String> cohortIds) {
     if (CollectionUtils.isEmpty(cohortIds)) {
       throw new BadRequestException("DataSetRequest.cohortIds can not be null.");
     }
   }
 
-  private void tanagraValidateConceptSetsInWorkspace(@Nullable List<Long> conceptSetIds) {
+  private void tanagraValidateConceptSetsInWorkspace(@Nullable List<String> conceptSetIds) {
     if (CollectionUtils.isEmpty(conceptSetIds)) {
       throw new BadRequestException("DataSetRequest.conceptSetIds can not be null.");
     }
