@@ -432,18 +432,18 @@ public class DataSetControllerTest {
                     .conceptSet(conceptSet)
                     .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
-
-    dataSet1 =
-            dataSetController
-                    .createDataSet(
-                            workspace.getNamespace(),
-                            workspace.getName(),
-                            buildEmptyDataSetRequest()
-                                    .name("dataset")
-                                    .addCohortIdsItem(cohort.getId())
-                                    .addConceptSetIdsItem(conceptSet1.getId())
-                                    .domainValuePairs(mockDomainValuePair()))
-                    .getBody();
+    
+        dataSet1 = dataSetController
+            .createDataSet(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetRequest()
+                    .name("dataset")
+                    .addCohortIdsItem(cohort.getId())
+                    .addConceptSetIdsItem(conceptSet1.getId())
+                        .prePackagedConceptSet(new ArrayList<>())
+                    .domainValuePairs(mockDomainValuePair()))
+            .getBody();
 
     conceptList = new ArrayList<>();
 
@@ -576,6 +576,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void previewExportToNotebook_python() {
     String testHtml = "<body><div>test</div></body>";
     when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
@@ -591,6 +592,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void previewExportToNotebook_R() {
     String testHtml = "<body><div>test</div></body>";
     when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
@@ -608,6 +610,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void previewExportToNotebook_SAS() {
     String testHtml = "<body><div>test</div></body>";
     when(mockNotebooksService.convertJupyterNotebookToHtml(any())).thenReturn(testHtml);
@@ -670,12 +673,11 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void testGetQueryDropsQueriesWithNoValue() {
     final DataSetRequest dataSet =
         buildEmptyDataSetRequest()
-            .dataSetId(1L)
-            .addCohortIdsItem(cohort.getId())
-            .addConceptSetIdsItem(conceptSet1.getId());
+            .dataSetId(2L);
 
     assertThrows(
         NotFoundException.class,
@@ -744,6 +746,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void exportToNewNotebook() {
     DataSetExportRequest request = setUpValidDataSetExportRequest();
 
@@ -775,6 +778,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void exportToNotebook_noAccessDataSet() {
     assertThrows(
         NotFoundException.class,
@@ -815,7 +819,7 @@ public class DataSetControllerTest {
   @Test
   public void exportToNotebook_cohortInvalid() {
     assertThrows(
-        NotFoundException.class,
+        BadRequestException.class,
         () ->
             dataSetController.exportToNotebook(
                 workspace.getNamespace(),
@@ -831,7 +835,7 @@ public class DataSetControllerTest {
   @Test
   public void exportToNotebook_conceptSetInvalid() {
     assertThrows(
-        NotFoundException.class,
+        BadRequestException.class,
         () ->
             dataSetController.exportToNotebook(
                 workspace.getNamespace(),
@@ -891,6 +895,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void generateCode_noAccessDataSet() {
     assertThrows(
         NotFoundException.class,
@@ -906,7 +911,7 @@ public class DataSetControllerTest {
   @Test
   public void generateCode_cohortInvalid() {
     assertThrows(
-        NotFoundException.class,
+        BadRequestException.class,
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
@@ -922,7 +927,7 @@ public class DataSetControllerTest {
   @Test
   public void generateCode_conceptSetInvalid() {
     assertThrows(
-        NotFoundException.class,
+        BadRequestException.class,
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
@@ -937,10 +942,10 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void exportToExistingNotebook() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(cohort.getId());
-    dataSet = dataSet.addConceptSetIdsItem(conceptSet1.getId());
+    dataSet.setDataSetId(dataSet1.getId());
     List<DomainValuePair> domainValuePairs = mockDomainValuePair();
     dataSet.setDomainValuePairs(domainValuePairs);
 
@@ -1025,6 +1030,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void exportToNotebook_wgsCodegen_cdrCheck() {
     DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset(null);
@@ -1045,6 +1051,7 @@ public class DataSetControllerTest {
   }
 
   @Test
+  @Transactional
   public void exportToNotebook_wgsCodegen_kernelCheck() {
     DbCdrVersion cdrVersion = findCdrVersionOrThrow(workspace);
     cdrVersion.setWgsBigqueryDataset("wgs");
@@ -1427,7 +1434,7 @@ public class DataSetControllerTest {
 
   private DataSetRequest buildValidDataSetRequest() {
     return buildEmptyDataSetRequest()
-            .dataSetId(dataSet1.getId())
+        .dataSetId(dataSet1.getId())
         .name("blah")
         .addCohortIdsItem(cohort.getId())
         .addConceptSetIdsItem(conceptSet1.getId())

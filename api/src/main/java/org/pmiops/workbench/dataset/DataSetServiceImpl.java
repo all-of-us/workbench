@@ -491,15 +491,10 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Override
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
-    DbDataset dbDataset;
-    if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
-      // In case wrong dataSetId is passed to Api
-      if (dbDataset == null) {
-        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
-      }
-    } else {
-      dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
+    DbDataset dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
+    // In case wrong dataSetId is passed to Api
+    if (dbDataset == null) {
+      throw new BadRequestException("Data Set Generate code Failed: Data set not found");
     }
     return buildQueriesByDomain(dbDataset);
   }

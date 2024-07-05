@@ -7785,16 +7785,6 @@ components:
           items:
             type: integer
             format: int64
-        tanagraConceptSetIds:
-          type: array
-          description: The ids of all concept sets in the Tanagra export
-          items:
-            type: string
-        tanagraCohortIds:
-          type: array
-          description: The ids of all cohorts in the Tanagra export
-          items:
-            type: string
         domainValuePairs:
           type: array
           description: All the selected domain/value pairs in the data set
