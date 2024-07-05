@@ -432,8 +432,9 @@ public class DataSetControllerTest {
                     .conceptSet(conceptSet)
                     .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
-    
-        dataSet1 = dataSetController
+
+    dataSet1 =
+        dataSetController
             .createDataSet(
                 workspace.getNamespace(),
                 workspace.getName(),
@@ -441,7 +442,7 @@ public class DataSetControllerTest {
                     .name("dataset")
                     .addCohortIdsItem(cohort.getId())
                     .addConceptSetIdsItem(conceptSet1.getId())
-                        .prePackagedConceptSet(new ArrayList<>())
+                    .prePackagedConceptSet(new ArrayList<>())
                     .domainValuePairs(mockDomainValuePair()))
             .getBody();
 
@@ -675,9 +676,7 @@ public class DataSetControllerTest {
   @Test
   @Transactional
   public void testGetQueryDropsQueriesWithNoValue() {
-    final DataSetRequest dataSet =
-        buildEmptyDataSetRequest()
-            .dataSetId(2L);
+    final DataSetRequest dataSet = buildEmptyDataSetRequest().dataSetId(2L);
 
     assertThrows(
         NotFoundException.class,
