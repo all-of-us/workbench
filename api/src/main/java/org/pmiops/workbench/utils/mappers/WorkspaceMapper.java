@@ -23,7 +23,6 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 
 @Mapper(
@@ -49,16 +48,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
   @Mapping(target = "featuredCategory", ignore = true)
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
-
-  default Workspace toApiWorkspace(
-      DbWorkspace dbWorkspace, RawlsWorkspaceResponse rawlsWorkspaceResponse) {
-    return toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace());
-  }
-
-  default Workspace toApiWorkspace(
-      DbWorkspace dbWorkspace, RawlsWorkspaceListResponse rawlsWorkspaceListResponse) {
-    return toApiWorkspace(dbWorkspace, rawlsWorkspaceListResponse.getWorkspace());
-  }
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
@@ -113,7 +102,8 @@ public interface WorkspaceMapper {
             dbWorkspace -> {
               var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
               return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse), fcResponse.getAccessLevel());
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace()),
+                  fcResponse.getAccessLevel());
             })
         .toList();
   }
