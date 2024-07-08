@@ -141,10 +141,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private static boolean filterToNonPublished(WorkspaceResponse response) {
@@ -156,10 +156,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override

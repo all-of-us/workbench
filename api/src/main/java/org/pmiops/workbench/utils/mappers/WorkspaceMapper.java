@@ -84,7 +84,7 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
-  default List<WorkspaceResponse> toApiWorkspaceResponses(
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> workspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail

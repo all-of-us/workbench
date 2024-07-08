@@ -71,7 +71,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     try {
       return workspaceMapper
-          .toApiWorkspaceResponses(workspaceDao, impersonatedFirecloudService.getWorkspaces(dbUser))
+          .toApiWorkspaceResponseList(
+              workspaceDao, impersonatedFirecloudService.getWorkspaces(dbUser))
           .stream()
           .filter(response -> response.getAccessLevel() == WorkspaceAccessLevel.OWNER)
           .collect(Collectors.toList());

@@ -12,7 +12,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, FirecloudMapper.class})
 public interface UserMapper {
-  @Mapping(source = "acl", target = "role") // ,qualifiedByName = "apiToFcWorkspaceAccessLevel")
+  @Mapping(source = "acl", target = "role")
   @Mapping(source = "user.username", target = "email")
   UserRole toApiUserRole(DbUser user, RawlsWorkspaceAccessEntry acl);
 
