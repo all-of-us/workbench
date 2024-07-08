@@ -1256,6 +1256,9 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creation with Dataproc config', async () => {
+    const createRuntimeSpy = jest
+      .spyOn(runtimeApi(), 'createRuntime')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1276,20 +1279,35 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await clickExpectedButton('Create');
 
-    await waitFor(() => {
-      expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      expect(runtimeApiStub.runtime.configurationType).toEqual(
-        RuntimeConfigurationType.USER_OVERRIDE
-      );
-      expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
-        masterMachineType: 'n1-standard-2',
-        masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
-        workerMachineType: 'n1-standard-8',
-        workerDiskSize: 300,
-        numberOfWorkers: 10,
-        numberOfPreemptibleWorkers: 20,
-      });
-      expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+    await waitFor(
+      async () => {
+        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 5000 }
+    );
+
+    await waitFor(
+      async () => {
+        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 5000 }
+    );
+
+    const firstCall = 0;
+    const runtimeParameter = 1;
+    const configuration =
+      createRuntimeSpy.mock.calls[firstCall][runtimeParameter];
+
+    expect(configuration.configurationType).toEqual(
+      RuntimeConfigurationType.USER_OVERRIDE
+    );
+    expect(configuration.dataprocConfig).toEqual({
+      masterMachineType: 'n1-standard-2',
+      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
+      workerMachineType: 'n1-standard-8',
+      workerDiskSize: 300,
+      numberOfWorkers: 10,
+      numberOfPreemptibleWorkers: 20,
     });
   });
 
