@@ -9641,6 +9641,11 @@ components:
       - ADMIN
       - PROJECT_PERSONNEL
       - OTHER
+      - ASSOCIATE_SCIENTIST
+      - MID_CAREER_SCIENTIST
+      - SENIOR_SCIENTIST
+      - DATA_ANALYST
+      - HIGH_SCHOOL_STUDENT
     VerifiedInstitutionalAffiliation:
       required:
       - institutionShortName
