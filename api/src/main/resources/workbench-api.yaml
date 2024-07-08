@@ -1354,6 +1354,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
+  /v1/workspaces/{workspaceNamespace}/markAsFeaturedByOwner:
+    get:
+      tags:
+        - workspaces
+      description: Mark a workspace as Featured Community Workspace by Owner
+      operationId: markAsFeaturedByOwner
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Workspace has been marked as Featured Workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete:
     get:
       tags:

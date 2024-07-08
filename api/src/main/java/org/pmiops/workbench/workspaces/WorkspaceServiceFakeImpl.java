@@ -87,4 +87,9 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status) {
     // no-op
   }
+
+  @Override
+  public void markAsFeaturedByOwner(DbWorkspace dbWorkspace) {
+
+  }
 }

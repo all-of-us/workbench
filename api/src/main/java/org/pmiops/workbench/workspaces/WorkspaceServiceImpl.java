@@ -17,6 +17,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import jakarta.mail.MessagingException;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -25,28 +27,15 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.db.dao.*;
+import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.exceptions.*;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -54,6 +43,7 @@ import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.Study;
 import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -82,6 +72,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
+  private final FeaturedWorkspaceDao featuredWorkspaceDao;
+  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  private final MailService mailService;
+  private final UserService userService;
   private final FreeTierBillingService freeTierBillingService;
   private final CloudBillingClient cloudBillingClient;
   private final Provider<DbUser> userProvider;
@@ -102,15 +96,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
+      FeaturedWorkspaceDao featuredWorkspaceDao,
+      FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceService featuredWorkspaceService,
       FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       CloudBillingClient cloudBillingClient,
+      MailService mailService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserMapper userMapper,
+      UserService userService,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
@@ -123,13 +121,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
+    this.featuredWorkspaceDao = featuredWorkspaceDao;
+    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
+    this.mailService = mailService;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
+    this.userService = userService;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
@@ -484,5 +486,50 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .map(DbWorkspace::getWorkspaceId)
         .forEach(id -> workspaceDao.updateBillingStatus(id, status));
+  }
+
+  @Override
+  public void markAsFeaturedByOwner(DbWorkspace dbWorkspace) {
+    // If workspace is already marked as featured, throw an exception as owners can't mark it again
+    featuredWorkspaceDao
+            .findByWorkspace(dbWorkspace)
+            .ifPresentOrElse(
+                    (dbFeaturedWorkspace) -> {
+                      throw new BadRequestException("Workspace is already marked featured");
+                    },
+                    () -> {
+                      PublishWorkspaceRequest publishWorkspaceRequest = new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
+
+                      // Update Acl in firecloud so that everyone can view the workspace
+                      var aclUpdate = FirecloudTransforms.buildAclUpdate(getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
+                      fireCloudService.updateWorkspaceACL(
+                              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+
+                      DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
+                              featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                                      publishWorkspaceRequest, dbWorkspace);
+
+                      featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
+                      log.info(
+                              String.format(
+                                      "Workspace %s has been published by Owner", dbWorkspace.getWorkspaceNamespace()));
+
+                      // Send Email to all workspace owners to let them know Workspace has been published
+                      final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+                      try {
+                        mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
+                      } catch (final MessagingException e) {
+                        log.log(Level.WARNING, e.getMessage());
+                      }
+                    });
+  }
+
+  private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
+    return getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .stream()
+            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+            .map(UserRole::getEmail)
+            .map(userService::getByUsernameOrThrow)
+            .toList();
   }
 }

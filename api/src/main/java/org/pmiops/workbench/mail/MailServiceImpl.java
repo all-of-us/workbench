@@ -101,6 +101,9 @@ public class MailServiceImpl implements MailService {
   private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
       "emails/unpublish_workspace_by_admin/content.html";
 
+  private static final String PUBLISH_WORKSPACE_BY_OWNER_RESOURCE =
+          "emails/publish_workspace_by_owner/content.html";
+
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
   private static final String UNUSED_DISK_DELETE_HELP =
@@ -401,26 +404,42 @@ public class MailServiceImpl implements MailService {
     sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
   }
 
+  @Override
+  public void sendPublishWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners) throws MessagingException {
+    sendMarkAsFeaturedWorkspaceEmail(workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
+  }
+
   private void sendPublishUnpublishWorkspaceByAdminEmail(
-      DbWorkspace workspace, List<DbUser> owners, String cateogryIfAny, boolean publish)
-      throws MessagingException {
+          DbWorkspace workspace, List<DbUser> owners, String categoryIfAny, boolean publish) throws MessagingException {
+    sendMarkAsFeaturedWorkspaceEmail(workspace, owners, categoryIfAny, publish, true);
+  }
+
+  private void sendMarkAsFeaturedWorkspaceEmail(
+          DbWorkspace workspace, List<DbUser> owners, String category, boolean publish, boolean isAdmin) throws MessagingException {
+
     String actionType = publish ? "published" : "unpublished";
-
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
+    String ownersForLogging = owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
+    String subject = "Your AoU Researcher Workbench workspace has been " + actionType;
+    String message = isAdmin
+            ? String.format("%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
+            actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging)
+            : String.format("Workspace %s (%s) has been published by owner, mail sent to All workspace owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging);
+
+    String templateResource = publish
+            ? (isAdmin ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : PUBLISH_WORKSPACE_BY_OWNER_RESOURCE)
+            : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE;
+
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).toList(),
-        Collections.emptyList(),
-        "Your AoU Researcher Workbench workspace has been " + actionType,
-        String.format(
-            "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
-        buildHtml(
-            publish ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
-            publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
+            owners.stream().map(DbUser::getContactEmail).toList(),
+            // Send support team email
+            Collections.emptyList(),
+            subject,
+            message,
+            buildHtml(templateResource, publishUnpublishWorkspaceSubstitutionMap(workspace, category, supportEmail))
+    );
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(

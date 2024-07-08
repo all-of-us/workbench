@@ -42,6 +42,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
+import {serverConfigStore} from 'app/utils/stores';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
@@ -272,6 +273,19 @@ export const WorkspaceAbout = fp.flow(
         : '';
     }
 
+      publishByDb() {
+          const { workspace } = this.state;
+          const { namespace, id } = workspace;
+          this.setState({ publishing: true });
+          fetchWithErrorModal(() =>
+              workspacesApi().markAsFeaturedByOwner(namespace)
+          )
+              .then(() =>
+                  this.updateWorkspaceState({ ...workspace, published: true })
+              )
+              .finally(() => this.setState({ publishing: false }));
+      }
+
     publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
       const { namespace, id } = workspace;
@@ -286,6 +300,14 @@ export const WorkspaceAbout = fp.flow(
         )
         .finally(() => this.setState({ publishing: false }));
     }
+
+      publishByNew() {
+          if (serverConfigStore.get().config.enablePublishedWorkspacesViaDb) {
+              this.publishByDb();
+          } else {
+              this.publishUnpublishWorkspace(true);
+          }
+      }
 
     onShare() {
       this.setState({ sharing: false });
@@ -362,8 +384,8 @@ export const WorkspaceAbout = fp.flow(
                 </Button>
                 <Button
                   data-test-id='publish-button'
-                  onClick={() => this.publishUnpublishWorkspace(true)}
-                  disabled={publishing || published}
+                  onClick={() => this.publishByNew()}
+                  // disabled={publishing || published}
                   type={published ? 'secondary' : 'primary'}
                   style={{ marginLeft: '0.75rem' }}
                 >
