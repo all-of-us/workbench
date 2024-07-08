@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -137,6 +138,21 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
     workspaceAdminService.setPublished(workspaceNamespace, workspaceId, true);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<EmptyResponse> publishWorkspaceViaDB(
+      String workspaceNamespace, PublishWorkspaceRequest body) {
+    workspaceAdminService.publishWorkspaceViaDB(workspaceNamespace, body);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
+    workspaceAdminService.unpublishWorkspaceViaDB(workspaceNamespace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

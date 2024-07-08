@@ -44,7 +44,7 @@ import {
 } from 'app/utils/machines';
 import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
-import { oxfordCommaString, toPascalCase } from 'app/utils/strings';
+import { oxfordCommaString } from 'app/utils/strings';
 import {
   appTypeToString,
   isDiskSizeValid,
@@ -227,9 +227,7 @@ export const CreateGkeApp = ({
       !!app,
       `Disk size cannot be updated because the ${
         toUIAppType[appType]
-      } environment is in ${toPascalCase(
-        fromUserAppStatusWithFallback(app?.status)
-      )} state. 
+      } environment is in ${fromUserAppStatusWithFallback(app?.status)} state. 
       To make changes, please delete the disk and recreate the environment.`,
     ],
     [

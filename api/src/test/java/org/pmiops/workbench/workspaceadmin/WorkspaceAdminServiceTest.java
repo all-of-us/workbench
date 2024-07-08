@@ -22,10 +22,12 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
+import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,11 +46,15 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -66,8 +72,10 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -77,6 +85,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -103,6 +112,7 @@ public class WorkspaceAdminServiceTest {
   private static final String RUNTIME_NAME = "all-of-us-runtime";
   private static final String RUNTIME_NAME_2 = "all-of-us-runtime-2";
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
+  private static WorkbenchConfig providedWorkbenchConfig;
 
   private DbWorkspace dbWorkspace;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -117,6 +127,10 @@ public class WorkspaceAdminServiceTest {
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockBean private MailService mailService;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceService mockFeatureService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -138,7 +152,6 @@ public class WorkspaceAdminServiceTest {
   @MockBean({
     ActionAuditQueryService.class,
     AdminAuditor.class,
-    MailService.class,
     CohortDao.class,
     CohortReviewMapper.class,
     CommonMappers.class,
@@ -146,6 +159,7 @@ public class WorkspaceAdminServiceTest {
     ConceptSetMapper.class,
     DataSetDao.class,
     DataSetMapper.class,
+    FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     LeonardoApiClient.class,
     UserMapper.class,
@@ -155,8 +169,9 @@ public class WorkspaceAdminServiceTest {
   })
   static class Configuration {
     @Bean
-    public WorkbenchConfig getConfig() {
-      return WorkbenchConfig.createEmptyConfig();
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
     }
 
     @Bean
@@ -169,11 +184,10 @@ public class WorkspaceAdminServiceTest {
   @BeforeEach
   public void setUp() {
     currentUser = new DbUser();
-
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersionDao.save(cdrVersion);
-
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(
             new RawlsWorkspaceResponse()
@@ -297,6 +311,33 @@ public class WorkspaceAdminServiceTest {
     assertThat(cloudStorageCounts.getNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getNonNotebookFileCount()).isEqualTo(0);
     assertThat(cloudStorageCounts.getStorageBytesUsed()).isEqualTo(0L);
+  }
+
+  @Test
+  public void testGetWorkspaceAdminView_publishInfo() {
+    // If Config enablePublishedWorkspacesViaDb is true,
+    // then get workspace Publish info from featuredWorkspace table
+    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+
+    when(mockFeatureService.isFeaturedWorkspace(dbWorkspace)).thenReturn(true);
+    when(mockFeatureService.getFeaturedCategory(dbWorkspace))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.TUTORIAL_WORKSPACES);
+    WorkspaceAdminView workspaceDetailsResponse =
+        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
+        .isEqualTo(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
+        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    // If Config enablePublishedWorkspacesViaDb is false,
+    // then get workspace Publish info from DbWorksapce
+    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = false;
+    workspaceDetailsResponse = workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();
@@ -508,6 +549,157 @@ public class WorkspaceAdminServiceTest {
 
     workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), false);
     assertThat(mustGetDbWorkspace(w).getPublished()).isFalse();
+  }
+
+  @Test
+  public void testPublishWorkspaceViaDB() throws MessagingException {
+    // Arrange
+    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
+
+    DbFeaturedWorkspace mockFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setDescription("test");
+
+    PublishWorkspaceRequest publishWorkspaceRequest =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
+            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+        .thenReturn(mockFeaturedWorkspace);
+
+    // Act
+    workspaceAdminService.publishWorkspaceViaDB(
+        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+
+    // Assert
+    verify(mockFeaturedWorkspaceDao).save(any());
+    verify(mockAdminAuditor)
+        .firePublishWorkspaceAction(
+            mockDbWorkspace.getWorkspaceId(),
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
+            null);
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+  }
+
+  @Test
+  public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
+    // Arrange
+    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest publishWorkspaceRequest =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+    DbFeaturedWorkspace dbFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setDescription("test");
+
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(dbFeaturedWorkspace);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
+        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
+            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+        .thenReturn(dbFeaturedWorkspace);
+
+    workspaceAdminService.publishWorkspaceViaDB(
+        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+
+    verify(mockAdminAuditor)
+        .firePublishWorkspaceAction(
+            mockDbWorkspace.getWorkspaceId(),
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
+            null);
+    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+
+    publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+    DbFeaturedWorkspace mockFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
+            .setDescription("test");
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
+
+    // Act
+    workspaceAdminService.publishWorkspaceViaDB(
+        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+
+    // Assert
+    verify(mockFeaturedWorkspaceDao, times(2)).save(any());
+    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+  }
+
+  @Test
+  public void testPublishWorkspaceViaDB_updateWithSameCategory() throws MessagingException {
+
+    // Arrange
+    DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest request =
+        new PublishWorkspaceRequest()
+            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
+            .description("test");
+
+    DbFeaturedWorkspace mockFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(workspace)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
+        .thenReturn(Optional.of(mockFeaturedWorkspace));
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
+
+    // Act
+    workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
+
+    // Assert
+    // Since the category is the same, we should not save the workspace again or send emails
+    verify(mockFeaturedWorkspaceDao, never()).save(any());
+    verify(mockAdminAuditor, never())
+        .firePublishWorkspaceAction(
+            workspace.getWorkspaceId(), request.getCategory().toString(), "");
+    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+  }
+
+  @Test
+  public void testUnpublishWorkspaceViaDb() throws MessagingException {
+
+    // Arrange
+    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    DbFeaturedWorkspace mockFeaturedworkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
+            .setDescription("test");
+    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
+        .thenReturn(Optional.of(mockFeaturedworkspace));
+
+    // Act
+    workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
+
+    // Assert
+    verify(mockFeaturedWorkspaceDao).delete(any());
+    verify(mockAdminAuditor)
+        .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
+    verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

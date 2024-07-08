@@ -45,8 +45,10 @@ import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 interface Props {
   closeFunction: Function;
-  dataset: DataSet;
+  dataset?: DataSet;
   workspace: WorkspaceData;
+  tanagraCohortIds?: string[];
+  tanagraConceptSetIds?: string[];
 }
 
 const styles = reactStyles({
@@ -63,6 +65,8 @@ export const ExportDatasetModal = ({
   workspace,
   dataset,
   closeFunction,
+  tanagraCohortIds,
+  tanagraConceptSetIds,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
@@ -90,15 +94,17 @@ export const ExportDatasetModal = ({
   const createDataSetRequest = (): DataSetRequest => {
     return {
       name: dataset ? dataset.name : 'dataset',
-      ...(dataset.id
+      ...(dataset?.id
         ? { dataSetId: dataset.id }
         : {
-            dataSetId: dataset.id,
-            includesAllParticipants: dataset.includesAllParticipants,
-            conceptSetIds: dataset.conceptSets.map((cs) => cs.id),
-            cohortIds: dataset.cohorts.map((c) => c.id),
-            domainValuePairs: dataset.domainValuePairs,
-            prePackagedConceptSet: dataset.prePackagedConceptSet,
+            dataSetId: dataset?.id,
+            includesAllParticipants: dataset?.includesAllParticipants,
+            conceptSetIds: dataset?.conceptSets.map((cs) => cs.id),
+            cohortIds: dataset?.cohorts.map((c) => c.id),
+            domainValuePairs: dataset?.domainValuePairs,
+            prePackagedConceptSet: dataset?.prePackagedConceptSet ?? [],
+            tanagraCohortIds,
+            tanagraConceptSetIds,
           }),
       domainValuePairs: [],
     };
@@ -107,7 +113,7 @@ export const ExportDatasetModal = ({
   const hasWgs = () => {
     return fp.includes(
       PrePackagedConceptSetEnum.WHOLE_GENOME,
-      dataset.prePackagedConceptSet
+      dataset?.prePackagedConceptSet
     );
   };
 

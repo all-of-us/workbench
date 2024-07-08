@@ -127,6 +127,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -195,6 +196,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -309,6 +311,7 @@ public class WorkspacesControllerTest {
 
   @MockBean AccessTierService accessTierService;
   @MockBean CloudBillingClient mockCloudBillingClient;
+  @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
@@ -383,6 +386,7 @@ public class WorkspacesControllerTest {
     CohortBuilderService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
     LeonardoApiClient.class,

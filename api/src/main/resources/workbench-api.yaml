@@ -1771,6 +1771,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+  /v1/admin/workspaces/{workspaceNamespace}/publish:
+    post:
+      tags:
+        - workspaceAdmin
+      description: Publish the workspace so it features in the Featured Workspaces tab under requested category.Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: publishWorkspaceViaDB
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The admin request to publish workspace
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishWorkspaceRequest'
+      responses:
+        200:
+          description: Workspace has been published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+  /v1/admin/workspaces/{workspaceNamespace}/unpublish:
+    post:
+      tags:
+        - workspaceAdmin
+      description: Unpublish a workspace removing it from Featured Workspaces tab. Requires
+        RESEARCHER_DATA_VIEW authority.
+      operationId: unpublishWorkspaceViaDB
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace has been unpublished
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
   /v1/admin/workspaces/{workspaceNamespace}/audit:
     get:
       tags:
@@ -6545,6 +6593,7 @@ components:
       - DEMO_PROJECTS
       - PHENOTYPE_LIBRARY
       - TUTORIAL_WORKSPACES
+      - COMMUNITY
     CdrVersionTiersResponse:
       required:
       - tiers
@@ -6887,10 +6936,10 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to choose machine type when creating GKE applications.
-        enableVariantSelectAll:
+        enablePublishedWorkspacesViaDb:
           type: boolean
           default: false
-          description: Enable variant select all
+          description: Enable admin to publish workspace
     AccessModuleConfig:
       required:
       - expirable
@@ -7115,6 +7164,10 @@ components:
         published:
           type: boolean
           default: false
+        featuredCategory:
+          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
+          description: The name of the category in which the workspace is published
+          default: null
         adminLocked:
           type: boolean
           description: Whether an administrator has prevented most actions on the
@@ -7140,7 +7193,8 @@ components:
         name: my newest workspace
         namespace: aou-rw-test-11112222
         googleProject: aou-rw-test-11112222
-        published: false
+        published: true
+        featuredCategory: DEMO_PROJECTS
         adminLocked: true
         adminLockedReason: locked by admin
         researchPurpose:
@@ -7731,6 +7785,16 @@ components:
           items:
             type: integer
             format: int64
+        tanagraConceptSetIds:
+          type: array
+          description: The ids of all concept sets in the Tanagra export
+          items:
+            type: string
+        tanagraCohortIds:
+          type: array
+          description: The ids of all cohorts in the Tanagra export
+          items:
+            type: string
         domainValuePairs:
           type: array
           description: All the selected domain/value pairs in the data set
@@ -11097,6 +11161,7 @@ components:
       - VISIT
       - NONE
       - HAS_EHR_DATA
+      - SELF_REPORTED_CATEGORY
     CriteriaSubType:
       type: string
       description: possible criteria types
@@ -11744,6 +11809,17 @@ components:
           type: string
           description: Datetime at creation of this user's accont
           format: date-time
+    PublishWorkspaceRequest:
+      required:
+        - category
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
+          description: The name of the category to which the workspace should be published
+        description:
+          type: string
+          description: The description of why the workspace is being published
     AccountPropertyUpdate:
       required:
       - accessBypassRequests
