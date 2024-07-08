@@ -78,20 +78,6 @@ public interface WorkspaceMapper {
         isPublished ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace) : null);
   }
 
-  @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator", source = "creator.username")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
-  @Mapping(
-      target = "googleBucketName",
-      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
-  // fcWorkspace)
-  @Mapping(target = "id", source = "firecloudName")
-  @Mapping(target = "namespace", source = "workspaceNamespace")
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "featuredCategory", ignore = true)
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace);
-
   @Mapping(
       target = "accessLevel",
       source = "accessLevel",
@@ -140,6 +126,20 @@ public interface WorkspaceMapper {
   @Mapping(target = "disseminateResearchFindingList", source = "disseminateResearchEnumSet")
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
+
+  @Mapping(target = "cdrVersionId", source = "cdrVersion")
+  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
+  @Mapping(
+      target = "googleBucketName",
+      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
+  // fcWorkspace)
+  @Mapping(target = "id", source = "firecloudName")
+  @Mapping(target = "namespace", source = "workspaceNamespace")
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "featuredCategory", ignore = true)
+  Workspace toApiWorkspaceForRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);

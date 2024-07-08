@@ -110,17 +110,6 @@ public class WorkspaceOperationMapperTest {
         .isEqualTo(expectedOperation);
   }
 
-  private Workspace mapAndMockWorkspace(DbWorkspace dbWorkspace) {
-    String namespace = dbWorkspace.getWorkspaceNamespace();
-    String fcName = dbWorkspace.getFirecloudName();
-    RawlsWorkspaceDetails fcWorkspace =
-        new RawlsWorkspaceDetails().namespace(namespace).name(fcName);
-
-    when(mockFirecloudService.getWorkspace(namespace, fcName))
-        .thenReturn(new RawlsWorkspaceResponse().workspace(fcWorkspace));
-    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-  }
-
   @Test
   public void test_toModelWithWorkspace_null() {
     Timestamp time1 = new Timestamp(NOW_TIME - 10000);
@@ -186,5 +175,16 @@ public class WorkspaceOperationMapperTest {
             workspaceOperationMapper.getWorkspaceMaybe(
                 -1L, workspaceDao, mockFirecloudService, workspaceMapper))
         .isEmpty();
+  }
+
+  private Workspace mapAndMockWorkspace(DbWorkspace dbWorkspace) {
+    String namespace = dbWorkspace.getWorkspaceNamespace();
+    String fcName = dbWorkspace.getFirecloudName();
+    RawlsWorkspaceDetails fcWorkspace =
+        new RawlsWorkspaceDetails().namespace(namespace).name(fcName);
+
+    when(mockFirecloudService.getWorkspace(namespace, fcName))
+        .thenReturn(new RawlsWorkspaceResponse().workspace(fcWorkspace));
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 }
