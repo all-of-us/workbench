@@ -22,6 +22,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { AoU, AouTitle } from 'app/components/text-wrappers';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { AboutPublishConsentModal } from 'app/pages/admin/workspace/about-publish-consent-modal';
 import { ResearchPurpose } from 'app/pages/workspace/research-purpose';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import {
@@ -38,12 +39,11 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
-import {AboutPublishConsentModal} from 'app/pages/admin/workspace/about-publish-consent-modal';
-import {serverConfigStore} from 'app/utils/stores';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
@@ -115,9 +115,6 @@ const styles = reactStyles({
 
 const pageId = 'workspace';
 
-const enablePublishedWorkspacesViaDb = serverConfigStore.get().config
-  .enablePublishedWorkspacesViaDb
-
 const ShareTooltipText = () => {
   return (
     <div>
@@ -178,7 +175,7 @@ export const WorkspaceAbout = fp.flow(
         workspaceInitialCreditsUsage: undefined,
         workspaceUserRoles: [],
         publishing: false,
-        showPublishConsentModal: false
+        showPublishConsentModal: false,
       };
     }
 
@@ -301,11 +298,18 @@ export const WorkspaceAbout = fp.flow(
     }
 
     render() {
+      const { enablePublishedWorkspacesViaDb } = serverConfigStore.get().config;
       const {
         profileState: { profile },
         cdrVersionTiersResponse,
       } = this.props;
-      const { workspace, workspaceUserRoles, sharing, publishing, showPublishConsentModal } = this.state;
+      const {
+        workspace,
+        workspaceUserRoles,
+        sharing,
+        publishing,
+        showPublishConsentModal,
+      } = this.state;
       const published = workspace?.published;
       return (
         <div style={styles.mainPage}>
@@ -354,30 +358,31 @@ export const WorkspaceAbout = fp.flow(
               </div>
             )}
             <ResearchPurpose />
-            {!enablePublishedWorkspacesViaDb && hasAuthorityForAction(
-              profile,
-              AuthorityGuardedAction.PUBLISH_WORKSPACE
-            ) && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  data-test-id='unpublish-button'
-                  onClick={() => this.publishUnpublishWorkspace(false)}
-                  disabled={publishing || !published}
-                  type={published ? 'primary' : 'secondary'}
-                >
-                  Unpublish
-                </Button>
-                <Button
-                  data-test-id='publish-button'
-                  onClick={() => this.publishUnpublishWorkspace(true)}
-                  disabled={publishing || published}
-                  type={published ? 'secondary' : 'primary'}
-                  style={{ marginLeft: '0.75rem' }}
-                >
-                  Publish
-                </Button>
-              </div>
-            )}
+            {!enablePublishedWorkspacesViaDb &&
+              hasAuthorityForAction(
+                profile,
+                AuthorityGuardedAction.PUBLISH_WORKSPACE
+              ) && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    data-test-id='unpublish-button'
+                    onClick={() => this.publishUnpublishWorkspace(false)}
+                    disabled={publishing || !published}
+                    type={published ? 'primary' : 'secondary'}
+                  >
+                    Unpublish
+                  </Button>
+                  <Button
+                    data-test-id='publish-button'
+                    onClick={() => this.publishUnpublishWorkspace(true)}
+                    disabled={publishing || published}
+                    type={published ? 'secondary' : 'primary'}
+                    style={{ marginLeft: '0.75rem' }}
+                  >
+                    Publish
+                  </Button>
+                </div>
+              )}
           </FlexColumn>
           <div style={styles.rightSidebar}>
             <div style={styles.shareHeader}>
@@ -527,35 +532,37 @@ export const WorkspaceAbout = fp.flow(
                 Browse files in Google Cloud Platform
               </StyledExternalLink>
             </div>
-            {
-              /*TODO: Qi needs update permission check*/
-              enablePublishedWorkspacesViaDb &&
+            {enablePublishedWorkspacesViaDb &&
               hasAuthorityForAction(
-              profile,
-              AuthorityGuardedAction.PUBLISH_WORKSPACE
-            ) && (
-              <TooltipTrigger
-                content='Only workspaces owners and creators are allowed to publish community workspace.'
-                disabled={
-                  workspace &&
-                  WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
-                }
-              >
-                <div>
-                  <h3 style={{marginBottom: '0.75rem'}}>Community Workspace</h3>
+                profile,
+                AuthorityGuardedAction.PUBLISH_WORKSPACE
+              ) && (
+                <TooltipTrigger
+                  content='Only workspaces owners are allowed to publish community workspace.'
+                  disabled={
+                    workspace &&
+                    WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                  }
+                >
+                  <div>
+                    <h3 style={{ marginBottom: '0.75rem' }}>
+                      Community Workspace
+                    </h3>
 
-                  <Button
-                    data-test-id='publish-button'
-                    onClick={() =>
-                      this.setState({showPublishConsentModal: true})
-                    }
-                    disabled={publishing || published} /*TODO: Qi update this*/
-                    style={{marginLeft: '0rem', padding: '2px'}}
-                  >
-                    Publish
-                  </Button>
-                </div>
-              </TooltipTrigger>
+                    <Button
+                      data-test-id='publish-button'
+                      onClick={() =>
+                        this.setState({ showPublishConsentModal: true })
+                      }
+                      disabled={
+                        publishing || published
+                      } /* TODO: Qi update this*/
+                      style={{ marginLeft: '0rem', padding: '2px' }}
+                    >
+                      Publish
+                    </Button>
+                  </div>
+                </TooltipTrigger>
               )}
           </div>
           {sharing && (
@@ -571,11 +578,11 @@ export const WorkspaceAbout = fp.flow(
           {showPublishConsentModal && (
             <AboutPublishConsentModal
               onConfirm={() => {
-                console.log("hi eric")
-                this.publishUnpublishWorkspace(true)
-                this.setState({showPublishConsentModal: false})
+                console.log('hi eric');
+                this.publishUnpublishWorkspace(true);
+                this.setState({ showPublishConsentModal: false });
               }}
-              onCancel={() => this.setState({showPublishConsentModal: false})}
+              onCancel={() => this.setState({ showPublishConsentModal: false })}
             />
           )}
         </div>
