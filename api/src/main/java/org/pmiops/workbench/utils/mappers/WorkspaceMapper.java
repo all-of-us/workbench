@@ -50,6 +50,16 @@ public interface WorkspaceMapper {
   @Mapping(target = "featuredCategory", ignore = true)
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
 
+  default Workspace toApiWorkspace(
+      DbWorkspace dbWorkspace, RawlsWorkspaceResponse rawlsWorkspaceResponse) {
+    return toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace());
+  }
+
+  default Workspace toApiWorkspace(
+      DbWorkspace dbWorkspace, RawlsWorkspaceListResponse rawlsWorkspaceListResponse) {
+    return toApiWorkspace(dbWorkspace, rawlsWorkspaceListResponse.getWorkspace());
+  }
+
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
@@ -85,20 +95,6 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
-  default WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
-  default WorkspaceResponse toApiWorkspaceListResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceListResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
   default List<WorkspaceResponse> toApiWorkspaceResponses(
       WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> workspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
@@ -114,10 +110,12 @@ public interface WorkspaceMapper {
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
     return dbWorkspaces.stream()
         .map(
-            dbWorkspace ->
-                toApiWorkspaceListResponse(
-                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
-        .collect(Collectors.toList());
+            dbWorkspace -> {
+              var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
+              return toApiWorkspaceResponse(
+                  toApiWorkspace(dbWorkspace, fcResponse), fcResponse.getAccessLevel());
+            })
+        .toList();
   }
 
   @Mapping(target = "timeReviewed", ignore = true)
@@ -140,7 +138,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "featuredCategory", ignore = true)
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
-  Workspace toApiWorkspaceForRecentWorkspace(DbWorkspace dbWorkspace);
+  Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
