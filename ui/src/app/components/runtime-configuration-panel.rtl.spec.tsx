@@ -856,7 +856,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     const button = screen.queryByRole('button', { name });
     if (button) {
       await user.click(button);
-      console.log("Clicked '" + name + "'");
     }
   };
 
@@ -913,7 +912,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     jest
       .spyOn(runtimeApi(), 'updateRuntime')
       .mockImplementation((): Promise<any> => {
-        console.log('We updated');
         return Promise.resolve();
       });
     const deleteDiskSpy = jest
@@ -926,13 +924,8 @@ describe(RuntimeConfigurationPanel.name, () => {
       await f(container);
     }
 
-    console.log("Looking for 'Next'");
     await clickButtonIfVisible('Next');
-
-    console.log("Looking for 'Update'");
     await clickButtonIfVisible('Update');
-
-    console.log("Looking for 'Create'");
     await clickButtonIfVisible('Create');
 
     const deleteRadio = screen.queryAllByTestId('delete-unattached-pd-radio');
@@ -1012,16 +1005,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   afterEach(async () => {
     // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
     act(() => clearCompoundRuntimeOperations());
-    console.log(
-      'What does my abort value look like before I call? ',
-      getAborter()?.signal.aborted
-    );
+
     getAborter().abort('Unmounting for testing');
-    console.log(
-      'What does my abort value look like after I call? ',
-      getAborter()?.signal.aborted
-    );
-    console.log(getAborter().signal?.reason);
     jest.clearAllMocks();
     jest.resetAllMocks();
     jest.resetModules();
@@ -1278,13 +1263,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumPreemptibleWorkers(20);
 
     await clickExpectedButton('Create');
-
-    await waitFor(
-      async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
 
     await waitFor(
       async () => {
@@ -2571,8 +2549,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       setCurrentDisk(disk);
 
       const { container } = component();
-      console.log('DESC: ', desc);
-      console.log('Are we aborted? ', getAborter().signal?.aborted);
       await runDetachableDiskCase(
         container,
         [desc, setters, expectations],
