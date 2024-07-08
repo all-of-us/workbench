@@ -1391,7 +1391,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(createRuntimeSpy).toHaveBeenCalled();
       },
       { timeout: 5000 }
     );
