@@ -385,7 +385,7 @@ export const WorkspaceAbout = fp.flow(
                 <Button
                   data-test-id='publish-button'
                   onClick={() => this.publishByNew()}
-                  // disabled={publishing || published}
+                  disabled={publishing || published}
                   type={published ? 'secondary' : 'primary'}
                   style={{ marginLeft: '0.75rem' }}
                 >
