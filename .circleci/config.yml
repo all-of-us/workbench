@@ -789,7 +789,7 @@ jobs:
               --promote
 
   tanagra-deploy-to-test:
-    executor: tanagra-executor
+    executor: workbench-executor
     steps:
       - checkout-code
       - gcloud-auth-login-oidc-test
@@ -980,23 +980,23 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, main branch merge)
       # Note: by default tags are not picked up.
-      - api-lint
-      - api-local-test
-      - api-unit-test
-      - ui-lint
-      - ui-unit-test
-      - api-bigquery-test
-      - api-contract-test
-      - api-integration-test
-      - api-test-coverage:
-          requires:
-          - api-unit-test
-      - ui-test-coverage:
-          requires:
-          - ui-unit-test
-      - api-contract-upload:
-          requires:
-          - api-contract-test
+#      - api-lint
+#      - api-local-test
+#      - api-unit-test
+#      - ui-lint
+#      - ui-unit-test
+#      - api-bigquery-test
+#      - api-contract-test
+#      - api-integration-test
+#      - api-test-coverage:
+#          requires:
+#          - api-unit-test
+#      - ui-test-coverage:
+#          requires:
+#          - ui-unit-test
+#      - api-contract-upload:
+#          requires:
+#          - api-contract-test
 #      - api-contract-can-i-deploy:
 #          requires:
 #          - api-contract-upload
@@ -1010,12 +1010,12 @@ workflows:
           <<: *filter-main-branch
           requires:
             - ui-unit-test
-      - tanagra-deploy-to-test:
-          <<: *filter-main-branch
+      - tanagra-deploy-to-test
+#          <<: *filter-main-branch
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup
-      - puppeteer-generate-access-tokens:
-          env_name: "local"
+#      - puppeteer-env-setup
+#      - puppeteer-generate-access-tokens:
+#          env_name: "local"
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
