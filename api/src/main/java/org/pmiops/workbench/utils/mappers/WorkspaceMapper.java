@@ -139,6 +139,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "featuredCategory", ignore = true)
+  // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace toApiWorkspaceForRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
