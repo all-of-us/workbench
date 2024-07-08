@@ -1487,11 +1487,11 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     const { container } = component();
 
-    const CustomizeButton = screen.getByRole('button', {
+    const customizeButton = screen.getByRole('button', {
       name: 'Customize',
     });
 
-    await CustomizeButton.click();
+    await user.click(customizeButton);
 
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
 
@@ -1499,9 +1499,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     await waitFor(() => {
       expect(runtimeApiStub.runtime.status).toEqual('Creating');
     });
-    expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-    );
+
+    await waitFor(() => {
+      expect(runtimeApiStub.runtime.configurationType).toEqual(
+        RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
+      );
+    });
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
     );
