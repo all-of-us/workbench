@@ -236,18 +236,18 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     long timestamp = clock.millis();
 
     ActionAuditEvent event =
-            ActionAuditEvent.builder()
-                    .actionId(actionId)
-                    .actionType(ActionType.PUBLISH)
-                    .agentType(AgentType.USER)
-                    .agentEmailMaybe(dbUser.getUsername())
-                    .agentIdMaybe(dbUser.getUserId())
-                    .targetType(TargetType.WORKSPACE)
-                    .targetIdMaybe(workspaceId)
-                    .targetPropertyMaybe("Category")
-                    .newValueMaybe(FeaturedWorkspaceCategory.COMMUNITY.toString())
-                    .timestamp(timestamp)
-                    .build();
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.PUBLISH)
+            .agentType(AgentType.USER)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Category")
+            .newValueMaybe(FeaturedWorkspaceCategory.COMMUNITY.toString())
+            .timestamp(timestamp)
+            .build();
     actionAuditService.send(event);
   }
 

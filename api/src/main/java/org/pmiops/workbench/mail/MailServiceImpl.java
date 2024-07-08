@@ -102,7 +102,7 @@ public class MailServiceImpl implements MailService {
       "emails/unpublish_workspace_by_admin/content.html";
 
   private static final String PUBLISH_WORKSPACE_BY_OWNER_RESOURCE =
-          "emails/publish_workspace_by_owner/content.html";
+      "emails/publish_workspace_by_owner/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -405,41 +405,54 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners) throws MessagingException {
-    sendMarkAsFeaturedWorkspaceEmail(workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
+  public void sendPublishWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    sendMarkAsFeaturedWorkspaceEmail(
+        workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
   }
 
   private void sendPublishUnpublishWorkspaceByAdminEmail(
-          DbWorkspace workspace, List<DbUser> owners, String categoryIfAny, boolean publish) throws MessagingException {
+      DbWorkspace workspace, List<DbUser> owners, String categoryIfAny, boolean publish)
+      throws MessagingException {
     sendMarkAsFeaturedWorkspaceEmail(workspace, owners, categoryIfAny, publish, true);
   }
 
   private void sendMarkAsFeaturedWorkspaceEmail(
-          DbWorkspace workspace, List<DbUser> owners, String category, boolean publish, boolean isAdmin) throws MessagingException {
+      DbWorkspace workspace, List<DbUser> owners, String category, boolean publish, boolean isAdmin)
+      throws MessagingException {
 
     String actionType = publish ? "published" : "unpublished";
-    String ownersForLogging = owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+    String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
     String subject = "Your AoU Researcher Workbench workspace has been " + actionType;
-    String message = isAdmin
-            ? String.format("%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging)
-            : String.format("Workspace %s (%s) has been published by owner, mail sent to All workspace owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging);
+    String message =
+        isAdmin
+            ? String.format(
+                "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
+                actionType,
+                workspace.getName(),
+                workspace.getWorkspaceNamespace(),
+                ownersForLogging)
+            : String.format(
+                "Workspace %s (%s) has been published by owner, mail sent to All workspace owners %s",
+                workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging);
 
-    String templateResource = publish
+    String templateResource =
+        publish
             ? (isAdmin ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : PUBLISH_WORKSPACE_BY_OWNER_RESOURCE)
             : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE;
 
     sendWithRetries(
-            owners.stream().map(DbUser::getContactEmail).toList(),
-            // Send support team email
-            Collections.emptyList(),
-            subject,
-            message,
-            buildHtml(templateResource, publishUnpublishWorkspaceSubstitutionMap(workspace, category, supportEmail))
-    );
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        // Send support team email
+        Collections.emptyList(),
+        subject,
+        message,
+        buildHtml(
+            templateResource,
+            publishUnpublishWorkspaceSubstitutionMap(workspace, category, supportEmail)));
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(

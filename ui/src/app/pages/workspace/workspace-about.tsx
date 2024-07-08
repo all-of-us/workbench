@@ -38,11 +38,11 @@ import {
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import { supportUrls } from 'app/utils/zendesk';
-import {serverConfigStore} from 'app/utils/stores';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: { profile: Profile; reload: Function; updateCache: Function };
@@ -273,18 +273,18 @@ export const WorkspaceAbout = fp.flow(
         : '';
     }
 
-      publishByDb() {
-          const { workspace } = this.state;
-          const { namespace, id } = workspace;
-          this.setState({ publishing: true });
-          fetchWithErrorModal(() =>
-              workspacesApi().markAsFeaturedByOwner(namespace)
-          )
-              .then(() =>
-                  this.updateWorkspaceState({ ...workspace, published: true })
-              )
-              .finally(() => this.setState({ publishing: false }));
-      }
+    publishByDb() {
+      const { workspace } = this.state;
+      const { namespace } = workspace;
+      this.setState({ publishing: true });
+      fetchWithErrorModal(() =>
+        workspacesApi().markAsFeaturedByOwner(namespace)
+      )
+        .then(() =>
+          this.updateWorkspaceState({ ...workspace, published: true })
+        )
+        .finally(() => this.setState({ publishing: false }));
+    }
 
     publishUnpublishWorkspace(publish: boolean) {
       const { workspace } = this.state;
@@ -301,13 +301,13 @@ export const WorkspaceAbout = fp.flow(
         .finally(() => this.setState({ publishing: false }));
     }
 
-      publishByNew() {
-          if (serverConfigStore.get().config.enablePublishedWorkspacesViaDb) {
-              this.publishByDb();
-          } else {
-              this.publishUnpublishWorkspace(true);
-          }
+    publishByNew() {
+      if (serverConfigStore.get().config.enablePublishedWorkspacesViaDb) {
+        this.publishByDb();
+      } else {
+        this.publishUnpublishWorkspace(true);
       }
+    }
 
     onShare() {
       this.setState({ sharing: false });

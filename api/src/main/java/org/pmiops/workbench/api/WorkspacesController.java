@@ -36,7 +36,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -840,19 +839,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> markAsFeaturedByOwner( String  workspaceNamespace) {
+  public ResponseEntity<EmptyResponse> markAsFeaturedByOwner(String workspaceNamespace) {
 
-    //Ensure user is the owner of the workspace before marking as Featured
+    // Ensure user is the owner of the workspace before marking as Featured
     DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     workspaceAuthService.enforceWorkspaceAccessLevel(
-                    workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
-
+        workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
 
     workspaceService.markAsFeaturedByOwner(dbWorkspace);
     workspaceAuditor.fireMarkAsFeaturedAction(dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(new EmptyResponse());
   }
-
 
   @Override
   public ResponseEntity<WorkspaceResourceResponse> getWorkspaceResourcesV2(

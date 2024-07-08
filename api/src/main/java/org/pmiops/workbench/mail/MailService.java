@@ -77,7 +77,6 @@ public interface MailService {
   void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 
-  void sendPublishWorkspaceByOwnerEmail(
-          final DbWorkspace workspace, List<DbUser> owners)
-          throws MessagingException;
+  void sendPublishWorkspaceByOwnerEmail(final DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException;
 }

@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaces;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -17,8 +18,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import jakarta.mail.MessagingException;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -492,44 +491,51 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public void markAsFeaturedByOwner(DbWorkspace dbWorkspace) {
     // If workspace is already marked as featured, throw an exception as owners can't mark it again
     featuredWorkspaceDao
-            .findByWorkspace(dbWorkspace)
-            .ifPresentOrElse(
-                    (dbFeaturedWorkspace) -> {
-                      throw new BadRequestException("Workspace is already marked featured");
-                    },
-                    () -> {
-                      PublishWorkspaceRequest publishWorkspaceRequest = new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
+        .findByWorkspace(dbWorkspace)
+        .ifPresentOrElse(
+            (dbFeaturedWorkspace) -> {
+              throw new BadRequestException("Workspace is already marked featured");
+            },
+            () -> {
+              PublishWorkspaceRequest publishWorkspaceRequest =
+                  new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
 
-                      // Update Acl in firecloud so that everyone can view the workspace
-                      var aclUpdate = FirecloudTransforms.buildAclUpdate(getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
-                      fireCloudService.updateWorkspaceACL(
-                              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+              // Update Acl in firecloud so that everyone can view the workspace
+              var aclUpdate =
+                  FirecloudTransforms.buildAclUpdate(
+                      getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
+              fireCloudService.updateWorkspaceACL(
+                  dbWorkspace.getWorkspaceNamespace(),
+                  dbWorkspace.getFirecloudName(),
+                  List.of(aclUpdate));
 
-                      DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
-                              featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                                      publishWorkspaceRequest, dbWorkspace);
+              DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      publishWorkspaceRequest, dbWorkspace);
 
-                      featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
-                      log.info(
-                              String.format(
-                                      "Workspace %s has been published by Owner", dbWorkspace.getWorkspaceNamespace()));
+              featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
+              log.info(
+                  String.format(
+                      "Workspace %s has been published by Owner",
+                      dbWorkspace.getWorkspaceNamespace()));
 
-                      // Send Email to all workspace owners to let them know Workspace has been published
-                      final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
-                      try {
-                        mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
-                      } catch (final MessagingException e) {
-                        log.log(Level.WARNING, e.getMessage());
-                      }
-                    });
+              // Send Email to all workspace owners to let them know Workspace has been published
+              final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+              try {
+                mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
+              } catch (final MessagingException e) {
+                log.log(Level.WARNING, e.getMessage());
+              }
+            });
   }
 
   private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    return getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-            .stream()
-            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-            .map(UserRole::getEmail)
-            .map(userService::getByUsernameOrThrow)
-            .toList();
+    return getFirecloudUserRoles(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+        .stream()
+        .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+        .map(UserRole::getEmail)
+        .map(userService::getByUsernameOrThrow)
+        .toList();
   }
 }
