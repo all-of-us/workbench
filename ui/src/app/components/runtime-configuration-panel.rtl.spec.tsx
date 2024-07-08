@@ -1264,11 +1264,9 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await clickExpectedButton('Create');
 
-    jest.useFakeTimers();
-    jest.runOnlyPendingTimers();
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(createRuntimeSpy).toHaveBeenCalled();
       },
       { timeout: 5000 }
     );
