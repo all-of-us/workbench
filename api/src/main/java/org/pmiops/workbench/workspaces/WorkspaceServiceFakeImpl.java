@@ -31,6 +31,11 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
+  public List<WorkspaceResponse> getFeaturedWorkspaces() {
+    return null;
+  }
+
+  @Override
   public String getPublishedWorkspacesGroupEmail() {
     return null;
   }

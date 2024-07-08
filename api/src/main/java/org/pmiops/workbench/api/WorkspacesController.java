@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
@@ -788,6 +789,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(workspaceService.getPublishedWorkspaces());
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> getFeaturedWorkspaces() {
+    if (workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb) {
+      return ResponseEntity.ok(
+          new WorkspaceResponseListResponse().items(workspaceService.getFeaturedWorkspaces()));
+    } else {
+      throw new NotImplementedException(
+          "Not implemented in this environment: combine the results of getFeaturedWorkspacesConfig() and getPublishedWorkspaces() to generate the list of featured workspaces.");
+    }
   }
 
   @Override

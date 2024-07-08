@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.pmiops.workbench.api.FeaturedWorkspacesController;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -34,7 +35,23 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getWorkspaces();
 
+  /**
+   * @deprecated Get all Published workspaces as we defined this term before Summer 2024. Use this
+   *     in conjunction with {@link FeaturedWorkspacesController#getFeaturedWorkspacesConfig()} to
+   *     construct the list of (pre-Summer-2024) Featured workspaces.
+   *     <p>Use {@link WorkspaceService#getFeaturedWorkspaces()} to retrieve the Featured/Published
+   *     workspaces from Summer 2024 onward.
+   * @return List of all Published workspaces
+   */
+  @Deprecated(since = "Summer 2024")
   List<WorkspaceResponse> getPublishedWorkspaces();
+
+  /**
+   * Get all Featured workspaces from the DB.
+   *
+   * @return List of all Featured workspaces
+   */
+  List<WorkspaceResponse> getFeaturedWorkspaces();
 
   /**
    * Return the email associated with the group that we use to indicate that a workspace is
