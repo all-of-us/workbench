@@ -270,7 +270,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_measurement",
         "ds_person",
         "ds_procedure_occurrence",
-        "T_ENT_person");
+        "t_ent_person");
   }
 
   @Override
@@ -782,7 +782,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     EntityOutputPreview preview =
         new EntityOutputPreview()
             .entity("person")
-            .indexSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
+            .indexSql("SELECT person_id FROM `project.dataset`.t_ent_person");
     EntityOutputPreviewList previewList =
         new EntityOutputPreviewList().addEntityOutputsItem(preview);
 
