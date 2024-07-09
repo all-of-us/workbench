@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceOperation;
@@ -21,14 +22,20 @@ public interface WorkspaceOperationMapper {
       DbWorkspaceOperation source,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      FeaturedWorkspaceService featuredWorkspaceService) {
 
     WorkspaceOperation modelOperation = toModelWithoutWorkspace(source);
     // set the operation's workspace, if possible
     Optional.ofNullable(source.getWorkspaceId())
         .flatMap(
             workspaceId ->
-                getWorkspaceMaybe(workspaceId, workspaceDao, fireCloudService, workspaceMapper))
+                getWorkspaceMaybe(
+                    workspaceId,
+                    workspaceDao,
+                    fireCloudService,
+                    workspaceMapper,
+                    featuredWorkspaceService))
         .ifPresent(modelOperation::workspace);
 
     return modelOperation;
@@ -50,7 +57,8 @@ public interface WorkspaceOperationMapper {
       long workspaceId,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      FeaturedWorkspaceService featuredWorkspaceService) {
     return workspaceDao
         .findActiveByWorkspaceId(workspaceId)
         .flatMap(
@@ -61,6 +69,8 @@ public interface WorkspaceOperationMapper {
                     .map(
                         fcWorkspaceResponse ->
                             workspaceMapper.toApiWorkspace(
-                                dbWorkspace, fcWorkspaceResponse.getWorkspace())));
+                                dbWorkspace,
+                                fcWorkspaceResponse.getWorkspace(),
+                                featuredWorkspaceService)));
   }
 }

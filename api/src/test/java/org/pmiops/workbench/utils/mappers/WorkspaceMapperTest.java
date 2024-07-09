@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -65,6 +66,8 @@ public class WorkspaceMapperTest {
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
+
+  @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
 
   @TestConfiguration
   @Import({
@@ -150,7 +153,8 @@ public class WorkspaceMapperTest {
   public void testConvertsDbToApiWorkspace() {
 
     final Workspace ws =
-        workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
+        workspaceMapper.toApiWorkspace(
+            sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService);
     assertThat(ws.getId()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -173,7 +177,8 @@ public class WorkspaceMapperTest {
   public void testConvertsFirecloudResponseToApiResponse() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace),
+            workspaceMapper.toApiWorkspace(
+                sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);

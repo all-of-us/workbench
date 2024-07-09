@@ -35,7 +35,6 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
       WorkspaceResourceMapper.class,
     })
 public interface WorkspaceMapper {
-
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
@@ -46,35 +45,21 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  @Mapping(target = "featuredCategory", ignore = true)
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
-
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
-  @Mapping(target = "name", source = "dbWorkspace.name")
-  @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
-  @Mapping(target = "id", source = "fcWorkspace.name")
-  @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "creator", source = "dbWorkspace.creator.username")
-  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  @Mapping(target = "published", ignore = true)
-  @Mapping(target = "featuredCategory", ignore = true)
+  @Mapping(target = "featuredCategory", ignore = true) // set by setFeaturedWorkspaceCategory()
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
       FeaturedWorkspaceService featuredWorkspaceService);
 
   @AfterMapping
-  default void setFeaturedWorkspaceInfo(
+  default void setFeaturedWorkspaceCategory(
       @MappingTarget Workspace workspace,
       DbWorkspace dbWorkspace,
       FeaturedWorkspaceService featuredWorkspaceService) {
-    boolean isPublished = featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace);
-    workspace.setPublished(isPublished);
     workspace.setFeaturedCategory(
-        isPublished ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace) : null);
+        featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)
+            ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace)
+            : null);
   }
 
   @Mapping(
@@ -85,7 +70,9 @@ public interface WorkspaceMapper {
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
-      WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> workspaces) {
+      WorkspaceDao workspaceDao,
+      List<RawlsWorkspaceListResponse> workspaces,
+      FeaturedWorkspaceService featuredWorkspaceService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
@@ -102,7 +89,7 @@ public interface WorkspaceMapper {
             dbWorkspace -> {
               var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
               return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace()),
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), featuredWorkspaceService),
                   fcResponse.getAccessLevel());
             })
         .toList();

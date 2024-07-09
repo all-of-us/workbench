@@ -7164,6 +7164,10 @@ components:
         published:
           type: boolean
           default: false
+          description: indicates whether the workspace has been shared as READER to all Registered
+            Tier users.  Used in conjunction with FeaturedWorkspacesConfig to show Featured
+            Workspaces in the UI.  DEPRECATED in favor of featuredCategory when the Feature Flag
+            enablePublishedWorkspacesViaDb is set.
         featuredCategory:
           $ref: '#/components/schemas/FeaturedWorkspaceCategory'
           description: The name of the category in which the workspace is published
