@@ -1667,9 +1667,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow configuration via dataproc preset from modified form', async () => {
-    const createRuntimeSpy = jest
-      .spyOn(runtimeApi(), 'createRuntime')
-      .mockImplementation((): Promise<any> => Promise.resolve());
     setCurrentRuntime(null);
 
     const { container } = component();
