@@ -310,6 +310,7 @@ export const VariantSearch = fp.flow(
           if (newInputErrors.length > 0) {
             setInputErrors(newInputErrors);
           } else {
+            setInputErrors([]);
             setLoading(true);
             setSearching(true);
             clearFilters(false);
