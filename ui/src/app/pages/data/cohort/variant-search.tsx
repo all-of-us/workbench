@@ -335,6 +335,7 @@ export const VariantSearch = fp.flow(
     };
 
     const clearSearch = () => {
+      setInputErrors([]);
       setSearching(false);
       setSearchTerms('');
       setSearchResults([]);
