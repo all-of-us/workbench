@@ -153,7 +153,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private WorkspaceDao workspaceDao;
-  private Provider<TanagraApi> mockTanagraProvider = mock(Provider.class);
+  private final Provider<TanagraApi> mockTanagraProvider = mock(Provider.class);
   @Autowired UserDao userDao;
 
   @Autowired
@@ -174,7 +174,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSet allSurveysButPFHHDataSet;
   private DataSet heartRateLevelDataSet;
   private DbCdrVersion dbCdrVersion;
-  private DbCdrVersion tanagraDBCdrVersion;
   private DbCohort dbCohort1;
   private DbCohort dbCohort2;
   private DbCohort dbCohort3;
@@ -185,7 +184,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbMeasurementConceptSet;
   private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
-  private DbWorkspace tanagraDBWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
   private DbDSLinking personLinking1;
@@ -270,7 +268,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_measurement",
         "ds_person",
         "ds_procedure_occurrence",
-        "t_ent_person");
+        "T_ENT_person");
   }
 
   @Override
@@ -334,7 +332,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
 
-    tanagraDBCdrVersion = new DbCdrVersion();
+    DbCdrVersion tanagraDBCdrVersion = new DbCdrVersion();
     tanagraDBCdrVersion.setName("1");
     tanagraDBCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     tanagraDBCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
@@ -343,11 +341,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     tanagraDBCdrVersion.setTanagraEnabled(true);
     tanagraDBCdrVersion = cdrVersionDao.save(tanagraDBCdrVersion);
 
-    tanagraDBWorkspace = new DbWorkspace();
+    DbWorkspace tanagraDBWorkspace = new DbWorkspace();
     tanagraDBWorkspace.setWorkspaceNamespace(TANAGRA_WORKSPACE_NAMESPACE);
     tanagraDBWorkspace.setFirecloudName(TANAGRA_WORKSPACE_NAME);
     tanagraDBWorkspace.setCdrVersion(tanagraDBCdrVersion);
-    tanagraDBWorkspace = workspaceDao.save(tanagraDBWorkspace);
+    workspaceDao.save(tanagraDBWorkspace);
 
     dbConditionConceptSet =
         conceptSetDao.save(
@@ -782,7 +780,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     EntityOutputPreview preview =
         new EntityOutputPreview()
             .entity("person")
-            .indexSql("SELECT person_id FROM `project.dataset`.t_ent_person");
+            .indexSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
     EntityOutputPreviewList previewList =
         new EntityOutputPreviewList().addEntityOutputsItem(preview);
 
@@ -797,7 +795,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequestTanagra(
-                            oneCohortDataSet.getId(),
                             ImmutableList.of(Domain.PERSON),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -1428,7 +1425,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private DataSetRequest createDataSetRequestTanagra(
-      Long dataSetId,
       List<Domain> domains,
       boolean allParticipants,
       List<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList) {
