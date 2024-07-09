@@ -108,6 +108,8 @@ public class DataSetServiceImpl implements DataSetService {
       "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
 
+  private static final String LOCAL_CDR_STRING = "all-of-us-ehr-dev";
+
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
   // This is implicitly handled by bigrquery, so we don't need this variable.
@@ -523,11 +525,23 @@ public class DataSetServiceImpl implements DataSetService {
                 ImmutableMap.toImmutableMap(
                     p -> TANAGRA_DOMAIN_MAP.get(p.getEntity()).toString(),
                     p ->
-                        QueryJobConfiguration.newBuilder(p.getIndexSql())
+                        QueryJobConfiguration.newBuilder(
+                                replaceProjectIdAndDataSet(p, dbWorkspace.getCdrVersion()))
                             .setUseLegacySql(false)
                             .build()));
 
     return queryJobConfigurationMap;
+  }
+
+  @org.jetbrains.annotations.NotNull
+  private String replaceProjectIdAndDataSet(EntityOutputPreview p, DbCdrVersion dbCdrVersion) {
+    String regexToFixTicks = "`([^`]+)`\\.([^\\s]+)";
+    String query = p.getIndexSql();
+    String cdrProject =
+        query.contains(LOCAL_CDR_STRING) ? LOCAL_CDR_STRING : dbCdrVersion.getBigqueryProject();
+    return p.getIndexSql()
+        .replaceAll(regexToFixTicks, "`$1.$2`")
+        .replace(cdrProject + "." + dbCdrVersion.getBigqueryDataset(), "${projectId}.${dataSetId}");
   }
 
   private ExportPreviewRequest createExportPreviewRequest(
@@ -964,7 +978,7 @@ public class DataSetServiceImpl implements DataSetService {
         dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest(), dbCdrVersion);
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dbWorkspace.getCdrVersion().getTanagraEnabled()
+        dbCdrVersion.getTanagraEnabled()
             ? tanagraDomainToBigQueryConfig(dataSetExportRequest.getDataSetRequest(), dbWorkspace)
             : domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
@@ -981,16 +995,16 @@ public class DataSetServiceImpl implements DataSetService {
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
                             dataSetExportRequest.getAnalysisLanguage(),
-                            generateFieldList(dbWorkspace, entry.getKey()))
+                            generateFieldList(dbCdrVersion, Domain.fromValue(entry.getKey())))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .toList();
   }
 
-  private FieldList generateFieldList(DbWorkspace dbWorkspace, String key) {
-    return dbWorkspace.getCdrVersion().getTanagraEnabled()
-        ? bigQueryService.getTableFieldsFromDomainForTanagra(TANAGRA_DOMAIN_MAP.getKey(key))
-        : bigQueryService.getTableFieldsFromDomain(Domain.fromValue(key));
+  private FieldList generateFieldList(DbCdrVersion dbCdrVersion, Domain domain) {
+    return dbCdrVersion.getTanagraEnabled()
+        ? bigQueryService.getTableFieldsFromDomainForTanagra(TANAGRA_DOMAIN_MAP.getKey(domain))
+        : bigQueryService.getTableFieldsFromDomain(domain);
   }
 
   private List<String> generateWgsCode(

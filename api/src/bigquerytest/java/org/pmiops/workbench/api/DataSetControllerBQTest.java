@@ -1,8 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -88,7 +87,11 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
+import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
+import org.pmiops.workbench.tanagra.model.EntityOutputPreviewList;
+import org.pmiops.workbench.tanagra.model.ExportPreviewRequest;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -116,7 +119,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
+  private static final String TANAGRA_WORKSPACE_NAMESPACE = "tanagraNamespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String TANAGRA_WORKSPACE_NAME = "tanagraName";
   private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
   private static DbUser currentUser;
@@ -137,7 +142,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DataSetMapper dataSetMapper;
-  @Autowired private DataSetService dataSetService;
+  private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private GenomicExtractionService genomicExtractionService;
   @Autowired private NotebooksService notebooksService;
@@ -148,7 +153,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private WorkspaceDao workspaceDao;
-  @MockBean private Provider<TanagraApi> mockTanagraProvider;
+  private Provider<TanagraApi> mockTanagraProvider = mock(Provider.class);
   @Autowired UserDao userDao;
 
   @Autowired
@@ -169,6 +174,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSet allSurveysButPFHHDataSet;
   private DataSet heartRateLevelDataSet;
   private DbCdrVersion dbCdrVersion;
+  private DbCdrVersion tanagraDBCdrVersion;
   private DbCohort dbCohort1;
   private DbCohort dbCohort2;
   private DbCohort dbCohort3;
@@ -179,6 +185,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbMeasurementConceptSet;
   private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
+  private DbWorkspace tanagraDBWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
   private DbDSLinking personLinking1;
@@ -222,7 +229,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     UserMapper.class,
     UserRecentResourceService.class,
     WorkspaceMapperImpl.class,
-    TanagraApi.class,
   })
   static class Configuration {
     @Bean
@@ -263,7 +269,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_condition_occurrence",
         "ds_measurement",
         "ds_person",
-        "ds_procedure_occurrence");
+        "ds_procedure_occurrence",
+        "T_ENT_person");
   }
 
   @Override
@@ -273,7 +280,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @BeforeEach
   public void setUp() {
-    DataSetServiceImpl dataSetServiceImpl =
+    dataSetService =
         new DataSetServiceImpl(
             bigQueryService,
             cohortBuilderService,
@@ -296,7 +303,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             new DataSetController(
                 analysisLanguageMapper,
                 cdrVersionService,
-                dataSetServiceImpl,
+                dataSetService,
                 fireCloudService,
                 notebooksService,
                 userProvider,
@@ -317,6 +324,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
+    dbCdrVersion.setTanagraEnabled(false);
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbCdrVersion);
 
@@ -325,6 +333,21 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
+
+    tanagraDBCdrVersion = new DbCdrVersion();
+    tanagraDBCdrVersion.setName("1");
+    tanagraDBCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    tanagraDBCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    tanagraDBCdrVersion.setArchivalStatus(
+        DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
+    tanagraDBCdrVersion.setTanagraEnabled(true);
+    tanagraDBCdrVersion = cdrVersionDao.save(tanagraDBCdrVersion);
+
+    tanagraDBWorkspace = new DbWorkspace();
+    tanagraDBWorkspace.setWorkspaceNamespace(TANAGRA_WORKSPACE_NAMESPACE);
+    tanagraDBWorkspace.setFirecloudName(TANAGRA_WORKSPACE_NAME);
+    tanagraDBWorkspace.setCdrVersion(tanagraDBCdrVersion);
+    tanagraDBWorkspace = workspaceDao.save(tanagraDBWorkspace);
 
     dbConditionConceptSet =
         conceptSetDao.save(
@@ -748,9 +771,63 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                dbWorkspace));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
+  }
+
+  @Test
+  @Transactional
+  public void testGenerateCodePythonTanagra() throws ApiException {
+    EntityOutputPreview preview =
+        new EntityOutputPreview()
+            .entity("person")
+            .indexSql(
+                "SELECT person_id FROM `project.dataset`.T_ENT_person");
+    EntityOutputPreviewList previewList =
+        new EntityOutputPreviewList().addEntityOutputsItem(preview);
+
+    TanagraApi mockTanagraApi = mock(TanagraApi.class);
+    when(mockTanagraProvider.get()).thenReturn(mockTanagraApi);
+    when(mockTanagraApi.describeExport(any(ExportPreviewRequest.class), anyString()))
+        .thenReturn(previewList);
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequestTanagra(
+                            oneCohortDataSet.getId(),
+                            ImmutableList.of(Domain.PERSON),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(TANAGRA_WORKSPACE_NAMESPACE, TANAGRA_WORKSPACE_NAME)));
+
+    String expected =
+            String.format(
+                    "import pandas\n" +
+                            "import os\n" +
+                            "\n" +
+                            "# This query represents dataset \"Arbitrary Dataset v1.0\" for domain \"person\" and was generated for 1\n" +
+                            "dataset_00000000_person_sql = \"\"\"\n" +
+                            "    SELECT\n" +
+                            "        person_id \n" +
+                            "    FROM\n" +
+                            "        `project.dataset.T_ENT_person`\"\"\"\n" +
+                            "\n" +
+                            "dataset_00000000_person_df = pandas.read_gbq(\n" +
+                            "    dataset_00000000_person_sql,\n" +
+                            "    dialect=\"standard\",\n" +
+                            "    use_bqstorage_api=(\"BIGQUERY_STORAGE_API_ENABLED\" in os.environ),\n" +
+                            "    progress_bar_type=\"tqdm_notebook\")\n" +
+                            "\n" +
+                            "dataset_00000000_person_df.head(5)",
+                    DATASET_NAME,
+                    Domain.PERSON.toString().toLowerCase(),
+                    dbCdrVersion.getName(),
+                    Domain.PERSON.toString().toLowerCase());
+    assertThat(code).isEqualTo(expected);
   }
 
   @Test
@@ -1344,6 +1421,23 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .name(DATASET_NAME)
         .dataSetId(dataSetId)
         .includesAllParticipants(allParticipants)
+        .prePackagedConceptSet(prePackagedConceptSetEnumList)
+        .domainValuePairs(
+            domains.stream()
+                .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                .collect(Collectors.toList()));
+  }
+
+  private DataSetRequest createDataSetRequestTanagra(
+      Long dataSetId,
+      List<Domain> domains,
+      boolean allParticipants,
+      List<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList) {
+    return new DataSetRequest()
+        .name(DATASET_NAME)
+        .includesAllParticipants(allParticipants)
+        .tanagraCohortIds(ImmutableList.of("tanagraCohortId"))
+        .tanagraConceptSetIds(ImmutableList.of("tanagraConceptSetId"))
         .prePackagedConceptSet(prePackagedConceptSetEnumList)
         .domainValuePairs(
             domains.stream()
