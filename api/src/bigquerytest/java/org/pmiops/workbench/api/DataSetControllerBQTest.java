@@ -782,8 +782,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     EntityOutputPreview preview =
         new EntityOutputPreview()
             .entity("person")
-            .indexSql(
-                "SELECT person_id FROM `project.dataset`.T_ENT_person");
+            .indexSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
     EntityOutputPreviewList previewList =
         new EntityOutputPreviewList().addEntityOutputsItem(preview);
 
@@ -805,28 +804,28 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 workspaceDao.get(TANAGRA_WORKSPACE_NAMESPACE, TANAGRA_WORKSPACE_NAME)));
 
     String expected =
-            String.format(
-                    "import pandas\n" +
-                            "import os\n" +
-                            "\n" +
-                            "# This query represents dataset \"Arbitrary Dataset v1.0\" for domain \"person\" and was generated for 1\n" +
-                            "dataset_00000000_person_sql = \"\"\"\n" +
-                            "    SELECT\n" +
-                            "        person_id \n" +
-                            "    FROM\n" +
-                            "        `project.dataset.T_ENT_person`\"\"\"\n" +
-                            "\n" +
-                            "dataset_00000000_person_df = pandas.read_gbq(\n" +
-                            "    dataset_00000000_person_sql,\n" +
-                            "    dialect=\"standard\",\n" +
-                            "    use_bqstorage_api=(\"BIGQUERY_STORAGE_API_ENABLED\" in os.environ),\n" +
-                            "    progress_bar_type=\"tqdm_notebook\")\n" +
-                            "\n" +
-                            "dataset_00000000_person_df.head(5)",
-                    DATASET_NAME,
-                    Domain.PERSON.toString().toLowerCase(),
-                    dbCdrVersion.getName(),
-                    Domain.PERSON.toString().toLowerCase());
+        String.format(
+            "import pandas\n"
+                + "import os\n"
+                + "\n"
+                + "# This query represents dataset \"Arbitrary Dataset v1.0\" for domain \"person\" and was generated for 1\n"
+                + "dataset_00000000_person_sql = \"\"\"\n"
+                + "    SELECT\n"
+                + "        person_id \n"
+                + "    FROM\n"
+                + "        `project.dataset.T_ENT_person`\"\"\"\n"
+                + "\n"
+                + "dataset_00000000_person_df = pandas.read_gbq(\n"
+                + "    dataset_00000000_person_sql,\n"
+                + "    dialect=\"standard\",\n"
+                + "    use_bqstorage_api=(\"BIGQUERY_STORAGE_API_ENABLED\" in os.environ),\n"
+                + "    progress_bar_type=\"tqdm_notebook\")\n"
+                + "\n"
+                + "dataset_00000000_person_df.head(5)",
+            DATASET_NAME,
+            Domain.PERSON.toString().toLowerCase(),
+            dbCdrVersion.getName(),
+            Domain.PERSON.toString().toLowerCase());
     assertThat(code).isEqualTo(expected);
   }
 
