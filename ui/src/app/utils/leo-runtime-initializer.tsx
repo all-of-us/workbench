@@ -266,7 +266,7 @@ export class LeoRuntimeInitializer {
       throwRuntimeNotFound(this.currentRuntime, gcePersistentDisk);
     }
 
-    if (this.createCount >= 10) {
+    if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`,
         this.currentRuntime
