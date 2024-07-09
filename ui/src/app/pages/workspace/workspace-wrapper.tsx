@@ -162,6 +162,8 @@ const updateRuntimeStores = async ({
     await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       pollAbortSignal: newPollAborter.signal,
+      maxCreateCount: 0,
+      maxResumeCount: 0,
     });
   } catch {
     // Ignore InitialRuntimeNotFoundError.
