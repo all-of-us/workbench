@@ -646,7 +646,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void testGetWorkspace_PublishInformationFromDbFeaturedWorkspace() {
+  public void testGetWorkspace_featuredCategory() {
     // Arrange
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
