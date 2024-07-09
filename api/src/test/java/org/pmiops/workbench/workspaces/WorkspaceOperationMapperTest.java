@@ -87,9 +87,7 @@ public class WorkspaceOperationMapperTest {
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             new DbWorkspace().setWorkspaceNamespace("a").setName("b").setFirecloudName("c"));
-    Workspace expectedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace);
-
-    mockFirecloudGetWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    Workspace expectedWorkspace = mapAndMockWorkspace(dbWorkspace);
 
     DbWorkspaceOperation dbOperation =
         new DbWorkspaceOperation()
@@ -162,9 +160,7 @@ public class WorkspaceOperationMapperTest {
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             new DbWorkspace().setWorkspaceNamespace("a").setName("b").setFirecloudName("c"));
-    Workspace expectedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace);
-
-    mockFirecloudGetWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    Workspace expectedWorkspace = mapAndMockWorkspace(dbWorkspace);
 
     Optional<Workspace> maybeWorkspace =
         workspaceOperationMapper.getWorkspaceMaybe(
@@ -181,10 +177,14 @@ public class WorkspaceOperationMapperTest {
         .isEmpty();
   }
 
-  private void mockFirecloudGetWorkspace(String namespace, String firecloudName) {
-    RawlsWorkspaceResponse mockResponse =
-        new RawlsWorkspaceResponse()
-            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(firecloudName));
-    when(mockFirecloudService.getWorkspace(namespace, firecloudName)).thenReturn(mockResponse);
+  private Workspace mapAndMockWorkspace(DbWorkspace dbWorkspace) {
+    String namespace = dbWorkspace.getWorkspaceNamespace();
+    String fcName = dbWorkspace.getFirecloudName();
+    RawlsWorkspaceDetails fcWorkspace =
+        new RawlsWorkspaceDetails().namespace(namespace).name(fcName);
+
+    when(mockFirecloudService.getWorkspace(namespace, fcName))
+        .thenReturn(new RawlsWorkspaceResponse().workspace(fcWorkspace));
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
   }
 }

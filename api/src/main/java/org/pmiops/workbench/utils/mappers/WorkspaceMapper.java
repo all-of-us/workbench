@@ -23,7 +23,6 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 
 @Mapper(
@@ -78,20 +77,6 @@ public interface WorkspaceMapper {
         isPublished ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace) : null);
   }
 
-  @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator", source = "creator.username")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
-  @Mapping(
-      target = "googleBucketName",
-      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
-  // fcWorkspace)
-  @Mapping(target = "id", source = "firecloudName")
-  @Mapping(target = "namespace", source = "workspaceNamespace")
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "featuredCategory", ignore = true)
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace);
-
   @Mapping(
       target = "accessLevel",
       source = "accessLevel",
@@ -99,21 +84,7 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
-  default WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
-  default WorkspaceResponse toApiWorkspaceListResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceListResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
-  default List<WorkspaceResponse> toApiWorkspaceResponses(
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> workspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
@@ -128,10 +99,13 @@ public interface WorkspaceMapper {
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
     return dbWorkspaces.stream()
         .map(
-            dbWorkspace ->
-                toApiWorkspaceListResponse(
-                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
-        .collect(Collectors.toList());
+            dbWorkspace -> {
+              var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
+              return toApiWorkspaceResponse(
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace()),
+                  fcResponse.getAccessLevel());
+            })
+        .toList();
   }
 
   @Mapping(target = "timeReviewed", ignore = true)
@@ -140,6 +114,21 @@ public interface WorkspaceMapper {
   @Mapping(target = "disseminateResearchFindingList", source = "disseminateResearchEnumSet")
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
+
+  @Mapping(target = "cdrVersionId", source = "cdrVersion")
+  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
+  @Mapping(
+      target = "googleBucketName",
+      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
+  // fcWorkspace)
+  @Mapping(target = "id", source = "firecloudName")
+  @Mapping(target = "namespace", source = "workspaceNamespace")
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "featuredCategory", ignore = true)
+  // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
+  Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
   RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
