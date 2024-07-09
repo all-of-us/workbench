@@ -48,6 +48,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -59,6 +60,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Filter;
@@ -84,6 +86,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
@@ -133,10 +136,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortService.class,
     ConceptSetService.class,
     DataSetService.class,
+    FeaturedWorkspaceMapper.class,
     FeaturedWorkspaceService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
+    MailService.class,
     UserRecentResourceService.class,
+    UserService.class,
     CloudBillingClientImpl.class
   })
   static class Configuration {
