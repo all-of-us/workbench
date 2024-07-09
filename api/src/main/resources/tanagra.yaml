@@ -36,6 +36,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Study'
+                
+  /v2/underlays/{underlayName}/describeExport:
+    post:
+      tags:
+        - Tanagra
+      summary: Describe the entities and attributes that will be included in export query
+      operationId: describeExport
+      parameters:
+        - in: path
+          name: underlayName
+          description: underlayName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportPreviewRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityOutputPreviewList"
 
 ##########################################################################################
 ## COMPONENTS
@@ -75,5 +102,79 @@ components:
         lastModified:
           type: string
           format: date-time
+    ExportPreviewRequest:
+      type: object
+      properties:
+        study:
+          type: string
+        cohorts:
+          description: List of cohort ids
+          type: array
+          items:
+            type: string
+        conceptSets:
+          description: List of concept set ids
+          type: array
+          items:
+            type: string
+        limit:
+          type: integer
+        includeAllAttributes:
+          type: boolean
+          description: |
+            When true, ignore the selected attributes in the data feature set definitions and include all
+            attributes for each output entity.
+          default: false
+      required:
+        - study
+        - cohorts
+        - conceptSets
+    EntityOutputPreview:
+      type: object
+      properties:
+        entity:
+          description: Entity name
+          type: string
+        includedAttributes:
+          type: array
+          description: Names of attributes included in the output
+          items:
+            type: string
+        criteria:
+          type: array
+          items:
+            type: object
+            properties:
+              conceptSetId:
+                type: string
+              criteriaId:
+                type: string
+            required:
+              - conceptSetId
+              - criteriaId
+        indexSql:
+          type: string
+          description: |
+            SQL string against the index tables.
+            This will be populated if source queries are not configured for this entity.
+        sourceSql:
+          type: string
+          description: |
+            SQL string against the index tables.
+            This will be populated if source queries are configured for this entity.
+      required:
+        - entity
+        - includedAttributes
+        - criteria
+    EntityOutputPreviewList:
+      type: object
+      properties:
+        entityOutputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntityOutputPreview"
+      required:
+        - entityOutputs
+
 security:
   - oauth: []

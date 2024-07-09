@@ -113,6 +113,15 @@ public class BigQueryService {
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }
 
+  public FieldList getTableFieldsFromDomainForTanagra(String tableName) {
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    TableId tableId =
+        TableId.of(
+            cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), "T_ENT_" + tableName);
+
+    return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
+  }
+
   public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
     return defaultBigQuery.insertAll(insertAllRequest);
   }
