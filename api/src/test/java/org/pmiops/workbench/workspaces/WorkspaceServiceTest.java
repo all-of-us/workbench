@@ -154,7 +154,8 @@ public class WorkspaceServiceTest {
   private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
   private static final String FREE_TIER_BILLING_ACCOUNT_ID = "free-tier-account";
 
-  private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
+  private static final long INITIAL_WORKSPACE_ID = 1;
+  private final AtomicLong workspaceIdIncrementer = new AtomicLong(INITIAL_WORKSPACE_ID);
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -675,5 +676,37 @@ public class WorkspaceServiceTest {
     assertThat(response.getWorkspace().isPublished()).isFalse();
     assertThat(response.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+  }
+
+  @Test
+  public void testGetFeaturedWorkspaces_all() {
+    // start with none
+    var before = workspaceService.getFeaturedWorkspaces();
+    assertThat(before).isEmpty();
+
+    // set all workspaces as featured
+    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    var result = workspaceService.getFeaturedWorkspaces();
+    assertThat(result).hasSize(dbWorkspaces.size());
+  }
+
+  @Test
+  public void testGetFeaturedWorkspaces_one() {
+    // arbitrary choice from dbWorkspaces
+    var testWorkspace = dbWorkspaces.get(2);
+
+    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    var result = workspaceService.getFeaturedWorkspaces();
+    assertThat(result).hasSize(1);
+    var resultWorkspace = result.get(0).getWorkspace();
+    assertThat(resultWorkspace.getName()).isEqualTo(testWorkspace.getName());
+    assertThat(resultWorkspace.getNamespace()).isEqualTo(testWorkspace.getWorkspaceNamespace());
+    assertThat(resultWorkspace.getId()).isEqualTo(testWorkspace.getFirecloudName());
   }
 }
