@@ -452,7 +452,7 @@ public class DataSetServiceTest {
                 .setValues(
                     ImmutableList.of(
                         new DbDatasetValue()
-                            .setDomainId(DbStorageEnums.domainToStorage(Domain.PERSON).toString())
+                            .setDomainId(domainToStorage(Domain.PERSON).toString())
                             .setValue("PERSON_ID"))));
 
     mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
@@ -492,12 +492,12 @@ public class DataSetServiceTest {
                     ImmutableList.of(
                         new DbDatasetValue()
                             .setDomainId(
-                                DbStorageEnums.domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
+                                domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
                                     .toString())
                             .setValue("PERSON_ID"),
                         new DbDatasetValue()
                             .setDomainId(
-                                DbStorageEnums.domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
+                                domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
                                     .toString())
                             .setValue("DATETIME"))));
 
