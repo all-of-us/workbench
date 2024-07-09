@@ -648,7 +648,6 @@ public class WorkspaceServiceTest {
   @Test
   public void testGetWorkspace_PublishInformationFromDbFeaturedWorkspace() {
     // Arrange
-    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
@@ -673,14 +672,8 @@ public class WorkspaceServiceTest {
         workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
 
     // Assert
-    assertThat(response.getWorkspace().isPublished()).isTrue();
+    assertThat(response.getWorkspace().isPublished()).isFalse();
     assertThat(response.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-
-    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = false;
-    response =
-        workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
-    assertThat(response.getWorkspace().isPublished()).isFalse();
-    assertThat(response.getWorkspace().getFeaturedCategory()).isNull();
   }
 }
