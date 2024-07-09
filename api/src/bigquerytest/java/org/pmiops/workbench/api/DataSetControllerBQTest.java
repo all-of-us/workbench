@@ -174,6 +174,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSet allSurveysButPFHHDataSet;
   private DataSet heartRateLevelDataSet;
   private DbCdrVersion dbCdrVersion;
+  private DbCdrVersion tanagraDBCdrVersion;
   private DbCohort dbCohort1;
   private DbCohort dbCohort2;
   private DbCohort dbCohort3;
@@ -184,6 +185,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbMeasurementConceptSet;
   private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
+  private DbWorkspace tanagraDBWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
   private DbDSLinking personLinking1;
@@ -332,7 +334,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
 
-    DbCdrVersion tanagraDBCdrVersion = new DbCdrVersion();
+    tanagraDBCdrVersion = new DbCdrVersion();
+    tanagraDBCdrVersion.setCdrVersionId(2L);
     tanagraDBCdrVersion.setName("1");
     tanagraDBCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     tanagraDBCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
@@ -341,11 +344,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     tanagraDBCdrVersion.setTanagraEnabled(true);
     tanagraDBCdrVersion = cdrVersionDao.save(tanagraDBCdrVersion);
 
-    DbWorkspace tanagraDBWorkspace = new DbWorkspace();
+    tanagraDBWorkspace = new DbWorkspace();
     tanagraDBWorkspace.setWorkspaceNamespace(TANAGRA_WORKSPACE_NAMESPACE);
     tanagraDBWorkspace.setFirecloudName(TANAGRA_WORKSPACE_NAME);
     tanagraDBWorkspace.setCdrVersion(tanagraDBCdrVersion);
-    workspaceDao.save(tanagraDBWorkspace);
+    tanagraDBWorkspace = workspaceDao.save(tanagraDBWorkspace);
 
     dbConditionConceptSet =
         conceptSetDao.save(
@@ -738,7 +741,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     conceptSetDao.deleteById(dbConditionConceptSetForValues2.getConceptSetId());
     conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
+    workspaceDao.deleteById(tanagraDBWorkspace.getWorkspaceId());
     cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
+    cdrVersionDao.deleteById(tanagraDBCdrVersion.getCdrVersionId());
     dsLinkingDao.delete(conditionLinking1);
     dsLinkingDao.delete(conditionLinking2);
     dsLinkingDao.delete(personLinking1);
@@ -798,7 +803,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(Domain.PERSON),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(TANAGRA_WORKSPACE_NAMESPACE, TANAGRA_WORKSPACE_NAME)));
+                tanagraDBWorkspace));
 
     String expected =
         String.format(
