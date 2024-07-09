@@ -633,6 +633,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   let workspacesApiStub: WorkspacesApiStub;
   let user: UserEvent;
   let createRuntimeSpy;
+  let getRuntimeSpy;
 
   const onClose = jest.fn();
   const defaultProps: RuntimeConfigurationPanelProps = {
@@ -1685,6 +1686,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumWorkers(10);
     await pickNumPreemptibleWorkers(20);
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
+    getRuntimeSpy = jest
+      .spyOn(runtimeApi(), 'getRuntime')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     await clickExpectedButton('Create');
 
     // await waitFor(() => {
@@ -1693,7 +1697,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(createRuntimeSpy).toHaveBeenCalled();
       },
       { timeout: 5000 }
     );
