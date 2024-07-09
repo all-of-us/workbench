@@ -491,14 +491,10 @@ public class DataSetServiceTest {
                 .setValues(
                     ImmutableList.of(
                         new DbDatasetValue()
-                            .setDomainId(
-                                domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
-                                    .toString())
+                            .setDomainId(domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL).toString())
                             .setValue("PERSON_ID"),
                         new DbDatasetValue()
-                            .setDomainId(
-                                domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL)
-                                    .toString())
+                            .setDomainId(domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL).toString())
                             .setValue("DATETIME"))));
 
     mockLinkingTableQuery(
