@@ -36,14 +36,14 @@ public interface WorkspaceService {
   List<WorkspaceResponse> getWorkspaces();
 
   /**
-   * @deprecated Get all Published workspaces as we defined this term before Summer 2024. Use this
-   *     in conjunction with {@link FeaturedWorkspacesController#getFeaturedWorkspacesConfig()} to
-   *     construct the list of (pre-Summer-2024) Featured workspaces.
+   * @deprecated Get all Published workspaces, as we defined this term before July 2024. Use this in
+   *     conjunction with {@link FeaturedWorkspacesController#getFeaturedWorkspacesConfig()} to
+   *     construct the list of (pre-July-2024) Featured workspaces.
    *     <p>Use {@link WorkspaceService#getFeaturedWorkspaces()} to retrieve the Featured/Published
-   *     workspaces from Summer 2024 onward.
+   *     workspaces from July 2024 onward.
    * @return List of all Published workspaces
    */
-  @Deprecated(since = "Summer 2024")
+  @Deprecated(since = "July 2024", forRemoval = true)
   List<WorkspaceResponse> getPublishedWorkspaces();
 
   /**
