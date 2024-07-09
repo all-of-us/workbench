@@ -3,6 +3,11 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
+
 import { AboutPublishConsentModal } from './about-publish-consent-modal';
 
 describe('AboutPublishConsentModal', () => {
@@ -18,13 +23,15 @@ describe('AboutPublishConsentModal', () => {
 
     const user = userEvent.setup();
     const checkboxes = screen.getAllByRole('checkbox');
-    const confirmButton = screen.getByRole('button', { name: 'CONFIRM' });
+
+    const confirmButton = screen.getByRole('button', { name: /confirm/i });
     const cancelButton = screen.getByRole('button', { name: 'CANCEL' });
 
     // Initially, the confirm button should be disabled
-    screen.logTestingPlaygroundURL();
-    // expect(confirmButton).toBeDisabled();
-    expect(cancelButton).toBeDisabled();
+    expectButtonElementDisabled(confirmButton);
+    expectButtonElementDisabled(confirmButton);
+    // User can hit cancel to exit the modal
+    expectButtonElementEnabled(cancelButton);
 
     // Check all checkboxes
     for (const checkbox of checkboxes) {
@@ -32,12 +39,12 @@ describe('AboutPublishConsentModal', () => {
     }
 
     // Now, the confirm button should be enabled
-    expect(confirmButton).toBeEnabled();
+    expectButtonElementEnabled(confirmButton);
 
     // Uncheck the first checkbox
     await user.click(checkboxes[0]);
 
-    // // The confirm button should be disabled again
-    // expect(confirmButton).toBeDisabled();
+    // The confirm button should be disabled again
+    expectButtonElementDisabled(confirmButton);
   });
 });

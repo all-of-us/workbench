@@ -36,7 +36,7 @@ export const AboutPublishConsentModal = (props: Props) => {
   );
 
   return (
-    <Modal width={1000}>
+    <Modal width={800}>
       <ModalTitle>
         <SemiBoldHeader>Publish As a Community Workspace</SemiBoldHeader>
       </ModalTitle>
@@ -45,8 +45,10 @@ export const AboutPublishConsentModal = (props: Props) => {
         <div>
           <label style={{ color: colors.primary }}>
             Please read and agree to the following statements to confirm that
-            your workspace meets All of US Researcher Workbench community
-            sharing requirements.
+            your workspace meets the{' '}
+            <span style={{ fontStyle: 'italic' }}>All of US</span> Researcher
+            Workbench community sharing requirements. Read the NAME article on
+            the User Support Hub to learn more about community workspaces.
           </label>
           <br />
           <br />
@@ -55,7 +57,7 @@ export const AboutPublishConsentModal = (props: Props) => {
             onChange={(checked) => handleCheckboxChange('checkbox1', checked)}
             checked={checkboxStates.checkbox1}
           />
-          <label>
+          <label style={{ color: colors.primary }}>
             I confirm that the workspace does not include any harmful or
             discriminatory language
           </label>
@@ -68,7 +70,7 @@ export const AboutPublishConsentModal = (props: Props) => {
             }}
             checked={checkboxStates.checkbox2}
           />
-          <label>
+          <label style={{ color: colors.primary }}>
             I confirm that the workspace includes contact information in the
             'About' section of the workspace, such as the email address for the
             lead author or the URL to the lab's website
@@ -80,19 +82,25 @@ export const AboutPublishConsentModal = (props: Props) => {
             onChange={(checked) => handleCheckboxChange('checkbox3', checked)}
             checked={checkboxStates.checkbox3}
           />
-          <label>
+          <label style={{ color: colors.primary }}>
             I confirm that the workspace collaborators gave permission to share
             the workspace or that I do not have workspace collaborators.
           </label>
           <br />
           <br />
-          <label>
+          <label style={{ color: colors.primary }}>
             By clicking the publish button, you agree for your workspace to be
-            shared as a community workspace. If you want to remove your
-            workspace as a community workspace, contact our support team by
-            using the Help Desk widget in the Workbench or by emailing
-            support@researchallofus.org.
+            shared under the community workspace section of the Researcher
+            Workbench.
           </label>
+          <br />
+          <br />
+          <label style={{ color: colors.primary }}>
+            If you want to remove your workspace as a community workspace,
+            contact our support team by using the Help Desk widget in the
+            Workbench or by emailing support@researchallofus.org.
+          </label>
+          <br />
         </div>
       </ModalBody>
       <ModalFooter>

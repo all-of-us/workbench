@@ -137,6 +137,15 @@ const ShareTooltipText = () => {
   );
 };
 
+const CommunityWorkspaceTooltipText = () => {
+  return (
+    <div>
+      Community workspaces are shared by researchers with the Workbench
+      community to foster knowledge-sharing and learning.
+    </div>
+  );
+};
+
 const WorkspaceInfoTooltipText = () => {
   return (
     <div>
@@ -399,6 +408,7 @@ export const WorkspaceAbout = fp.flow(
                     height: '22px',
                     fontSize: 12,
                     marginRight: '0.75rem',
+                    padding: '5px',
                     maxWidth: '13px',
                   }}
                   disabled={
@@ -532,38 +542,48 @@ export const WorkspaceAbout = fp.flow(
                 Browse files in Google Cloud Platform
               </StyledExternalLink>
             </div>
-            {enablePublishedWorkspacesViaDb &&
-              hasAuthorityForAction(
-                profile,
-                AuthorityGuardedAction.PUBLISH_WORKSPACE
-              ) && (
+            {enablePublishedWorkspacesViaDb && (
+              <div>
+                <h3 style={{ marginBottom: '0.75rem' }}>
+                  Community Workspace
+                  <TooltipTrigger content={CommunityWorkspaceTooltipText()}>
+                    <InfoIcon style={{ margin: '0 0.25rem' }} />
+                  </TooltipTrigger>
+                </h3>
+
                 <TooltipTrigger
-                  content='Only workspaces owners are allowed to publish community workspace.'
+                  content='Only workspaces owners can publish community workspace.'
                   disabled={
                     workspace &&
                     WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
                   }
                 >
-                  <div>
-                    <h3 style={{ marginBottom: '0.75rem' }}>
-                      Community Workspace
-                    </h3>
-
-                    <Button
-                      data-test-id='publish-button'
-                      onClick={() =>
-                        this.setState({ showPublishConsentModal: true })
-                      }
-                      disabled={
-                        publishing || published
-                      } /* TODO: Qi update this*/
-                      style={{ marginLeft: '0rem', padding: '2px' }}
-                    >
-                      Publish
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={() =>
+                      this.setState({ showPublishConsentModal: true })
+                    }
+                    disabled={
+                      !(
+                        workspace &&
+                        WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
+                      ) ||
+                      publishing ||
+                      published
+                    }
+                    style={{
+                      height: '22px',
+                      fontSize: 12,
+                      marginRight: '0.75rem',
+                      maxWidth: '30px',
+                      padding: '10px',
+                    }}
+                  >
+                    Publish
+                  </Button>
                 </TooltipTrigger>
-              )}
+              </div>
+            )}
+            <br />
           </div>
           {sharing && (
             <WorkspaceShare
