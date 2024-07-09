@@ -1270,9 +1270,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow creation with Dataproc config', async () => {
-    const createRuntimeSpy = jest
-      .spyOn(runtimeApi(), 'createRuntime')
-      .mockImplementation((): Promise<any> => Promise.resolve());
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1695,12 +1692,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
     // });
 
-    await waitFor(
-      async () => {
-        expect(createRuntimeSpy).toHaveBeenCalled();
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(async () => {
+      expect(createRuntimeSpy).toHaveBeenCalled();
+    });
 
     // expect(runtimeApiStub.runtime.configurationType).toEqual(
     //   RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
@@ -2409,9 +2403,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow disk deletion when detaching', async () => {
-    const createRuntimeSpy = jest
-      .spyOn(runtimeApi(), 'createRuntime')
-      .mockImplementation((): Promise<any> => Promise.resolve());
     setCurrentRuntime(detachableDiskRuntime());
     setCurrentDisk(existingDisk());
 
@@ -2446,9 +2437,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow skipping disk deletion when detaching', async () => {
-    const createRuntimeSpy = jest
-      .spyOn(runtimeApi(), 'createRuntime')
-      .mockImplementation((): Promise<any> => Promise.resolve());
     const deleteDiskSpy = jest
       .spyOn(disksApi(), 'deleteDisk')
       .mockImplementation((): Promise<any> => Promise.resolve());
