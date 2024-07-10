@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -31,6 +32,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -142,7 +144,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+            fireCloudService.getWorkspaces(), workspaceDao, featuredWorkspaceService)
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
@@ -158,7 +160,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getPublishedWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+            fireCloudService.getWorkspaces(), workspaceDao, featuredWorkspaceService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
         .toList();
@@ -166,12 +168,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
-        .stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
-        .toList();
+    var featuredWorkspaces =
+        StreamSupport.stream(featuredWorkspaceService.getFeaturedWorkspaces().spliterator(), false)
+            .map(DbFeaturedWorkspace::getWorkspace)
+            .toList();
+    return workspaceMapper.toApiWorkspaceResponseList(
+        fireCloudService.getWorkspaces(), featuredWorkspaces, featuredWorkspaceService);
   }
 
   @Override

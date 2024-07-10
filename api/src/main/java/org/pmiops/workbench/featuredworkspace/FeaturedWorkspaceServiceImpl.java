@@ -31,4 +31,9 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
         featuredWorkspaceDao.findByWorkspace(dbWorkspace).orElseThrow();
     return featuredWorkspaceMapper.toFeaturedWorkspaceCategory(dbFeaturedWorkspace.getCategory());
   }
+
+  @Override
+  public Iterable<DbFeaturedWorkspace> getFeaturedWorkspaces() {
+    return featuredWorkspaceDao.findAll();
+  }
 }

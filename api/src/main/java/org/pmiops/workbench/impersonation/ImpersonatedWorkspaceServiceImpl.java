@@ -76,12 +76,12 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       return workspaceMapper
           .toApiWorkspaceResponseList(
-              workspaceDao,
               impersonatedFirecloudService.getWorkspaces(dbUser),
+              workspaceDao,
               featuredWorkspaceService)
           .stream()
           .filter(response -> response.getAccessLevel() == WorkspaceAccessLevel.OWNER)
-          .collect(Collectors.toList());
+          .toList();
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

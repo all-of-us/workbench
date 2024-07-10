@@ -70,8 +70,8 @@ public interface WorkspaceMapper {
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
-      WorkspaceDao workspaceDao,
       List<RawlsWorkspaceListResponse> fcWorkspaces,
+      List<DbWorkspace> dbWorkspaces,
       FeaturedWorkspaceService featuredWorkspaceService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
@@ -82,8 +82,6 @@ public interface WorkspaceMapper {
                     fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                     fcWorkspace -> fcWorkspace));
 
-    List<DbWorkspace> dbWorkspaces =
-        workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
     return dbWorkspaces.stream()
         .map(
             dbWorkspace -> {
@@ -93,6 +91,17 @@ public interface WorkspaceMapper {
                   fcResponse.getAccessLevel());
             })
         .toList();
+  }
+
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
+      List<RawlsWorkspaceListResponse> fcWorkspaces,
+      WorkspaceDao workspaceDao,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    List<DbWorkspace> dbWorkspaces =
+        workspaceDao.findActiveByFirecloudUuidIn(
+            fcWorkspaces.stream().map(fc -> fc.getWorkspace().getWorkspaceId()).toList());
+
+    return toApiWorkspaceResponseList(fcWorkspaces, dbWorkspaces, featuredWorkspaceService);
   }
 
   @Mapping(target = "timeReviewed", ignore = true)
