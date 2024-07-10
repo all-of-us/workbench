@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,8 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -33,7 +36,8 @@ import org.springframework.context.annotation.Import;
 public class FeaturedWorkspaceTest {
 
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FireCloudService mockFireCloudService;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
@@ -49,7 +53,6 @@ public class FeaturedWorkspaceTest {
   })
   @MockBean({
     AccessTierServiceImpl.class,
-    FireCloudService.class,
     WorkspaceAdminServiceImpl.class,
   })
   static class Configuration {
@@ -61,8 +64,9 @@ public class FeaturedWorkspaceTest {
 
   @BeforeEach
   public void setUp() {
-    dbWorkspace = new DbWorkspace();
-    when(featuredWorkspaceMapper.toFeaturedWorkspaceCategory(
+    dbWorkspace = new DbWorkspace().setFirecloudUuid("fc-uuid-123");
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
             DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
@@ -102,30 +106,26 @@ public class FeaturedWorkspaceTest {
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
-  //  @Test
-  //  public void testGetFeaturedWorkspaces_all() {
-  //    // start with none
-  //    var before = featuredWorkspaceService.getFeaturedWorkspaces();
-  //    assertThat(before).isEmpty();
-  //
-  //    // set all workspaces as featured
-  //    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
-  //    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-  //        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-  //
-  //    var result = workspaceService.getFeaturedWorkspaces();
-  //    assertThat(result).hasSize(dbWorkspaces.size());
-  //  }
-
   @Test
-  public void testGetFeaturedWorkspaces_one() {
+  public void testGetFeaturedWorkspaces() {
+    var mockDbFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(dbWorkspace)
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    when(mockFeaturedWorkspaceDao.findAll()).thenReturn(List.of(mockDbFeaturedWorkspace));
+    when(mockFeaturedWorkspaceDao.existsByWorkspace(dbWorkspace)).thenReturn(true);
+    when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
+        .thenReturn(Optional.of(mockDbFeaturedWorkspace));
+
+    var mockRawlsWorkspace =
+        new RawlsWorkspaceDetails().workspaceId(dbWorkspace.getFirecloudUuid());
+    when(mockFireCloudService.getWorkspaces())
+        .thenReturn(List.of(new RawlsWorkspaceListResponse().workspace(mockRawlsWorkspace)));
+
     var result = featuredWorkspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
     var resultWorkspace = result.get(0).getWorkspace();
-    assertThat(resultWorkspace.getName()).isEqualTo(dbWorkspace.getName());
-    assertThat(resultWorkspace.getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
-    assertThat(resultWorkspace.getId()).isEqualTo(dbWorkspace.getFirecloudName());
     assertThat(resultWorkspace.getFeaturedCategory())
-        .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 }
