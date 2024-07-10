@@ -1357,7 +1357,7 @@ paths:
   /v1/workspaces/featured:
     get:
       tags:
-        - workspaces
+        - Featured Workspace
       description: Returns a list of featured workspaces
       operationId: getFeaturedWorkspaces
       responses:
