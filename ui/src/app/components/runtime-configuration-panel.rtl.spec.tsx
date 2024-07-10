@@ -1737,11 +1737,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   // });
 
   it('should tag as user override after preset modification', async () => {
-    const mockRuntime = {
-      /* mock runtime object */
-    };
+    mockUseCustomRuntime();
 
-    // Mock the return value of useCustomRuntime
     setCurrentRuntime(null);
 
     const { container } = component();
