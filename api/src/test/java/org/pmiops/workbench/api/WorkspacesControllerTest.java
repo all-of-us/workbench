@@ -3014,4 +3014,36 @@ public class WorkspacesControllerTest {
     assertThat(dataSets).hasSize(1);
     compareDatasetMetadata(dataSets.get(0), dataSet);
   }
+
+  @Test
+  public void testMarkWorkspacePublished_ByUserWithWriterAccess() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+          workspacesController.markAsFeaturedByOwner(ws.getNamespace());
+        });
+  }
+
+  @Test
+  public void testMarkWorkspacePublished_ByUserWithReaderAccess() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.markAsFeaturedByOwner(ws.getNamespace());
+        });
+  }
 }
