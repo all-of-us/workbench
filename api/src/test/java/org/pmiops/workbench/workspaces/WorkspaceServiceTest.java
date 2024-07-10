@@ -16,6 +16,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdr
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +44,13 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -60,9 +65,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -97,7 +100,7 @@ public class WorkspaceServiceTest {
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAuthService.class,
+    //    WorkspaceAuthService.class,
     CloudStorageClientImpl.class,
     ObjectNameLengthServiceImpl.class,
   })
@@ -111,11 +114,11 @@ public class WorkspaceServiceTest {
     FeaturedWorkspaceMapper.class,
     FirecloudMapper.class,
     FreeTierBillingService.class,
-    MailService.class,
     ProfileMapper.class,
     UserDao.class,
     UserMapper.class,
     IamService.class,
+    WorkspaceAuthService.class
   })
   static class Configuration {
     @Bean
@@ -133,9 +136,12 @@ public class WorkspaceServiceTest {
 
   @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
+  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private CloudBillingClient mockCloudBillingClient;
+  @MockBean private MailService mockMailService;
+  ;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
   @MockBean private AccessTierService accessTierService;
@@ -686,5 +692,72 @@ public class WorkspaceServiceTest {
         workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
     assertThat(response.getWorkspace().isPublished()).isFalse();
     assertThat(response.getWorkspace().getFeaturedCategory()).isNull();
+  }
+
+  @Test
+  public void markWorkspaceAsFeatured_workspaceAlreadyMarkedFeatured() {
+    DbWorkspace dbWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Controlled Tier Workspace",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+
+    DbFeaturedWorkspace mockDBFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(dbWorkspace)
+            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
+        .thenReturn(Optional.of(mockDBFeaturedWorkspace));
+
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceService.markAsFeaturedByOwner(dbWorkspace),
+        "Workspace is already featured");
+  }
+
+  public static DbAccessTier createControlledTier() {
+    return new DbAccessTier()
+        .setAccessTierId(1)
+        .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+        .setDisplayName("Registered Tier")
+        .setAuthDomainName("Registered Tier Auth Domain")
+        .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+        .setServicePerimeter("registered/tier/perimeter")
+        .setEnableUserWorkflows(false);
+  }
+
+  @Test
+  public void markWorkspaceAsFeatured() throws MessagingException {
+    DbWorkspace dbWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "Controlled Tier Workspace",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+
+    DbFeaturedWorkspace mockDBFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(dbWorkspace)
+            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace)).thenReturn(Optional.empty());
+
+    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockDBFeaturedWorkspace);
+    when(mockFireCloudService.getWorkspaceAsService(any(), any()))
+        .thenReturn(
+            new RawlsWorkspaceResponse()
+                .workspace(
+                    new RawlsWorkspaceDetails()
+                        .bucketName("bucket")
+                        .namespace(DEFAULT_WORKSPACE_NAMESPACE)));
+
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(createControlledTier());
+
+    workspaceService.markAsFeaturedByOwner(dbWorkspace);
+
+    verify(mockFeaturedWorkspaceDao).save(any());
+    verify(mockMailService).sendPublishWorkspaceByOwnerEmail(any(), any());
   }
 }
