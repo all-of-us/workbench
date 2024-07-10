@@ -598,7 +598,6 @@ export const WorkspaceAbout = fp.flow(
           {showPublishConsentModal && (
             <AboutPublishConsentModal
               onConfirm={() => {
-                console.log('hi eric');
                 this.publishUnpublishWorkspace(true);
                 this.setState({ showPublishConsentModal: false });
               }}
