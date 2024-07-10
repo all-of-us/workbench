@@ -1027,7 +1027,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     jest.useRealTimers();
   });
 
-  const mockUseCustomRuntime = () => {
+  const mockUseCustomRuntime = (
+    currentRuntime: Runtime,
+    pendingRuntime: Runtime
+  ) => {
     jest
       .spyOn(runtimeHooks, 'useCustomRuntime')
       .mockImplementation(
@@ -1547,6 +1550,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   // });
 
   it('should allow configuration via dataproc preset', async () => {
+    mockUseCustomRuntime(null, null);
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1560,26 +1564,21 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickPresets(container, runtimePresets.hailAnalysis.displayName);
 
     await clickExpectedButton('Create');
-
-    await waitFor(
-      async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    // });
-
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.configurationType).toEqual(
-    //     RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-    //   );
-    // });
-    // expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
-    //   runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-    // );
-    // expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS);
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig);
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceConfig
+    ).toBeFalsy();
   });
 
   it(
@@ -1737,7 +1736,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   // });
 
   it('should tag as user override after preset modification', async () => {
-    mockUseCustomRuntime();
+    mockUseCustomRuntime(null, null);
 
     setCurrentRuntime(null);
 
