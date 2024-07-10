@@ -967,6 +967,10 @@ describe(RuntimeConfigurationPanel.name, () => {
     }
   }
 
+  let mockSetRuntimeRequest;
+  const firstCall = 0;
+  const firstParameter = 0;
+
   beforeEach(async () => {
     resetAborter();
     user = userEvent.setup();
@@ -1004,6 +1008,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     createRuntimeSpy = jest
       .spyOn(runtimeApi(), 'createRuntime')
       .mockImplementation((): Promise<any> => Promise.resolve());
+
+    mockSetRuntimeRequest = jest
+      .fn()
+      .mockImplementation((x) =>
+        console.log('Set runtime request with :::::::::::::::::::: ', x)
+      );
   });
 
   afterEach(async () => {
@@ -1017,7 +1027,22 @@ describe(RuntimeConfigurationPanel.name, () => {
     jest.useRealTimers();
   });
 
+  const mockUseCustomRuntime = () => {
+    jest
+      .spyOn(runtimeHooks, 'useCustomRuntime')
+      .mockImplementation(
+        (currentWorkspaceNamespace: string, detachablePd: Disk | null) => {
+          console.log('You did it!!!!!!!:   ', currentWorkspaceNamespace);
+          return [
+            { currentRuntime: null, pendingRuntime: null },
+            mockSetRuntimeRequest,
+          ];
+        }
+      );
+  };
+
   it('should show loading spinner while loading', async () => {
+    const x = runtimeStore.get();
     // simulate not done loading
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
 
@@ -1715,23 +1740,8 @@ describe(RuntimeConfigurationPanel.name, () => {
     const mockRuntime = {
       /* mock runtime object */
     };
-    const mockSetRuntimeRequest = jest
-      .fn()
-      .mockImplementation((x) =>
-        console.log('Set runtime request with :::::::::::::::::::: ', x)
-      );
+
     // Mock the return value of useCustomRuntime
-    jest
-      .spyOn(runtimeHooks, 'useCustomRuntime')
-      .mockImplementation(
-        (currentWorkspaceNamespace: string, detachablePd: Disk | null) => {
-          console.log('You did it!!!!!!!:   ', currentWorkspaceNamespace);
-          return [
-            { currentRuntime: null, pendingRuntime: null },
-            mockSetRuntimeRequest,
-          ];
-        }
-      );
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1747,8 +1757,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
     });
 
-    const firstCall = 0;
-    const firstParameter = 0;
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .configurationType
