@@ -1587,7 +1587,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     async () => {
       const customMachineType = 'n1-standard-16';
       const customDiskSize = 1000;
-      setCurrentRuntime({
+      const currentRuntime = {
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.DELETED,
         configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
@@ -1597,7 +1597,9 @@ describe(RuntimeConfigurationPanel.name, () => {
           diskSize: customDiskSize,
         },
         dataprocConfig: null,
-      });
+      };
+      setCurrentRuntime(currentRuntime);
+      mockUseCustomRuntime(currentRuntime, null);
 
       // show that the preset values do not match the existing runtime
 
@@ -1607,9 +1609,13 @@ describe(RuntimeConfigurationPanel.name, () => {
       expect(customMachineType).not.toEqual(machineType);
       expect(customDiskSize).not.toEqual(persistentDisk.size);
       const { container } = component();
-      expect(getMainCpu(container)).toEqual(
-        findMachineByName(machineType).cpu.toString()
-      );
+
+      const customizeButton = await screen.findByRole('button', {
+        name: 'Customize',
+      });
+
+      await user.click(customizeButton);
+
       expect(getMainRam(container)).toEqual(
         findMachineByName(machineType).memory.toString()
       );
