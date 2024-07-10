@@ -17,7 +17,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -32,7 +31,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -164,16 +162,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
         .toList();
-  }
-
-  @Override
-  public List<WorkspaceResponse> getFeaturedWorkspaces() {
-    var featuredWorkspaces =
-        StreamSupport.stream(featuredWorkspaceService.getFeaturedWorkspaces().spliterator(), false)
-            .map(DbFeaturedWorkspace::getWorkspace)
-            .toList();
-    return workspaceMapper.toApiWorkspaceResponseList(
-        fireCloudService.getWorkspaces(), featuredWorkspaces, featuredWorkspaceService);
   }
 
   @Override

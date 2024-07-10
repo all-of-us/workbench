@@ -1,8 +1,10 @@
 package org.pmiops.workbench.featuredworkspace;
 
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import java.util.List;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
+import org.pmiops.workbench.model.WorkspaceResponse;
 
 public interface FeaturedWorkspaceService {
 
@@ -10,5 +12,11 @@ public interface FeaturedWorkspaceService {
 
   FeaturedWorkspaceCategory getFeaturedCategory(DbWorkspace dbWorkspace);
 
-  Iterable<DbFeaturedWorkspace> getFeaturedWorkspaces();
+  /**
+   * Get all Workspaces with entries in the Featured Workspace table. Use {@link
+   * FeaturedWorkspaceDao#findAll()} to access the featured workspace rows themselves.
+   */
+  List<DbWorkspace> getDbWorkspaces();
+
+  List<WorkspaceResponse> getFeaturedWorkspaces();
 }

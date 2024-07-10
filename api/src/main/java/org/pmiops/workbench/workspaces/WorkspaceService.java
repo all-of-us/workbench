@@ -7,6 +7,7 @@ import org.pmiops.workbench.api.FeaturedWorkspacesController;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -39,19 +40,12 @@ public interface WorkspaceService {
    * @deprecated Get all Published workspaces, as we defined this term before July 2024. Use this in
    *     conjunction with {@link FeaturedWorkspacesController#getFeaturedWorkspacesConfig()} to
    *     construct the list of (pre-July-2024) Featured workspaces.
-   *     <p>Use {@link WorkspaceService#getFeaturedWorkspaces()} to retrieve the Featured/Published
-   *     workspaces from July 2024 onward.
+   *     <p>Use {@link FeaturedWorkspaceService#getFeaturedWorkspaces()} to retrieve the
+   *     Featured/Published workspaces from July 2024 onward.
    * @return List of all Published workspaces
    */
   @Deprecated(since = "July 2024", forRemoval = true)
   List<WorkspaceResponse> getPublishedWorkspaces();
-
-  /**
-   * Get all Featured workspaces from the DB.
-   *
-   * @return List of all Featured workspaces
-   */
-  List<WorkspaceResponse> getFeaturedWorkspaces();
 
   /**
    * Return the email associated with the group that we use to indicate that a workspace is

@@ -2,6 +2,7 @@ package org.pmiops.workbench.utils.mappers;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -70,8 +72,8 @@ public interface WorkspaceMapper {
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
-      List<RawlsWorkspaceListResponse> fcWorkspaces,
-      List<DbWorkspace> dbWorkspaces,
+      Collection<RawlsWorkspaceListResponse> fcWorkspaces,
+      Collection<DbWorkspace> dbWorkspaces,
       FeaturedWorkspaceService featuredWorkspaceService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
@@ -102,6 +104,14 @@ public interface WorkspaceMapper {
             fcWorkspaces.stream().map(fc -> fc.getWorkspace().getWorkspaceId()).toList());
 
     return toApiWorkspaceResponseList(fcWorkspaces, dbWorkspaces, featuredWorkspaceService);
+  }
+
+  default List<WorkspaceResponse> toFeaturedWorkspaceResponseList(
+      FireCloudService fireCloudService, FeaturedWorkspaceService featuredWorkspaceService) {
+    return toApiWorkspaceResponseList(
+        fireCloudService.getWorkspaces(),
+        featuredWorkspaceService.getDbWorkspaces(),
+        featuredWorkspaceService);
   }
 
   @Mapping(target = "timeReviewed", ignore = true)
