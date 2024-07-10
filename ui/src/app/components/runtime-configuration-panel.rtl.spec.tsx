@@ -1760,6 +1760,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should tag as preset if configuration matches', async () => {
+    mockUseCustomRuntime(null, null);
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1772,18 +1773,13 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickComputeType(container, ComputeType.Standard);
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
     await clickExpectedButton('Create');
-    await waitFor(
-      async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    // });
-    // expect(runtimeApiStub.runtime.configurationType).toEqual(
-    //   RuntimeConfigurationType.GENERAL_ANALYSIS
-    // );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.GENERAL_ANALYSIS);
   });
 
   it('should restrict memory options by cpu', async () => {
