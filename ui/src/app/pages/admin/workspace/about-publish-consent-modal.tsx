@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
