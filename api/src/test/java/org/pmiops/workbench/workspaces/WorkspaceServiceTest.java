@@ -700,7 +700,7 @@ public class WorkspaceServiceTest {
 
     when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
@@ -708,5 +708,7 @@ public class WorkspaceServiceTest {
     assertThat(resultWorkspace.getName()).isEqualTo(testWorkspace.getName());
     assertThat(resultWorkspace.getNamespace()).isEqualTo(testWorkspace.getWorkspaceNamespace());
     assertThat(resultWorkspace.getId()).isEqualTo(testWorkspace.getFirecloudName());
+    assertThat(resultWorkspace.getFeaturedCategory())
+        .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
   }
 }
