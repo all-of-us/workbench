@@ -18,7 +18,6 @@ import {
   profileStore,
   serverConfigStore,
 } from 'app/utils/stores';
-import { workspaceStore } from 'terraui/.repo/src/libs/state';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -357,11 +356,11 @@ describe('WorkspaceAbout', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
-    const workspace = {
+    const nonOwnerWorkspace = {
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
     };
-    currentWorkspaceStore.next(workspace);
+    currentWorkspaceStore.next(nonOwnerWorkspace);
     component();
     const publishButton = screen.getByText('Publish');
     expect(publishButton).toBeEnabled();
