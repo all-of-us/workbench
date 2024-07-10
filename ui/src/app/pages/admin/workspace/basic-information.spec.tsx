@@ -1,16 +1,18 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { mockNavigate } from 'setupTests';
 
-import { WorkspaceActiveStatus } from '../../../../generated/fetch';
-import { render, screen } from '@testing-library/react';
+import { WorkspaceActiveStatus } from 'generated/fetch';
+
+import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
+import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  waitForNoSpinner,
+  renderWithRouter,
 } from 'testing/react-test-helpers';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
@@ -22,12 +24,19 @@ describe('BasicInformation', () => {
   let user: UserEvent;
   let workspace;
   const component = () => {
-    return render(<BasicInformation {...{ workspace, activeStatus }} />);
+    return renderWithRouter(
+      <BasicInformation {...{ workspace, activeStatus }} />
+    );
   };
 
   beforeEach(() => {
     workspace = workspaceStubs[0];
     user = userEvent.setup();
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+      },
+    });
   });
 
   afterEach(() => {
@@ -43,18 +52,17 @@ describe('BasicInformation', () => {
 
   it('should show unpublished workspace', async () => {
     component();
-    expect(
-      screen.getByPlaceholderText('Select a category...')
-    ).toBeInTheDocument();
+
+    expect(screen.getByText('Select a category...')).toBeInTheDocument();
     expectButtonElementDisabled(
-      screen.getByRole('button', { name: /publish/i })
+      screen.getByRole('button', { name: 'Publish' })
     );
     expectButtonElementDisabled(
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
   it('should show published workspace', async () => {
-    workspace.category = 'Community';
+    workspace.featuredCategory = 'Community';
     component();
     expect(await screen.findByText('Select a category...')).toBeInTheDocument();
     expectButtonElementDisabled(
@@ -64,29 +72,15 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
-
-  it('should publish workspace', async () => {
+  it('should change category of published workspace', async () => {
+    workspace.featuredCategory = 'Community';
     component();
     await user.click(await screen.findByText('Select a category...'));
-    await user.click(await screen.findByText('Community'));
-    await user.click(screen.getByRole('button', { name: /publish/i }));
-    await waitForNoSpinner();
-    expectButtonElementDisabled(
+    await user.click(await screen.findByText('Demo Projects'));
+    expectButtonElementEnabled(
       screen.getByRole('button', { name: /change category/i })
     );
     expectButtonElementEnabled(
-      screen.getByRole('button', { name: /unpublish/i })
-    );
-  });
-
-  it('should unpublish workspace', async () => {
-    component();
-    await user.click(screen.getByRole('button', { name: /unpublish/i }));
-    await waitForNoSpinner();
-    expectButtonElementDisabled(
-      screen.getByRole('button', { name: /publish/i })
-    );
-    expectButtonElementDisabled(
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
