@@ -20,6 +20,7 @@ import {
 } from 'app/utils/stores';
 import { workspaceStore } from 'terraui/.repo/src/libs/state';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
@@ -328,24 +329,24 @@ describe('WorkspaceAbout', () => {
   });
 
   it('renders Community Workspace section when enabled', () => {
-    jest.spyOn(serverConfigStore, 'get').mockReturnValue({
-      config: { enablePublishedWorkspacesViaDb: true },
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     component();
     expect(screen.getByText('Community Workspace')).toBeInTheDocument();
   });
 
   it('does not render Community Workspace section when enablePublishedWorkspacesViaDb disabled', () => {
-    jest.spyOn(serverConfigStore, 'get').mockReturnValue({
-      config: { enablePublishedWorkspacesViaDb: false },
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: false },
     });
     component();
     expect(screen.queryByText('Community Workspace')).not.toBeInTheDocument();
   });
 
   it('Publish button is enabled for workspace owner', () => {
-    jest.spyOn(serverConfigStore, 'get').mockReturnValue({
-      config: { enablePublishedWorkspacesViaDb: true },
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     component();
     const publishButton = screen.getByText('Publish');
@@ -353,8 +354,8 @@ describe('WorkspaceAbout', () => {
   });
 
   it('Publish button is disabled for non workspace owner', () => {
-    jest.spyOn(serverConfigStore, 'get').mockReturnValue({
-      config: { enablePublishedWorkspacesViaDb: true },
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     const workspace = {
       ...workspaceStubs[0],
@@ -367,8 +368,8 @@ describe('WorkspaceAbout', () => {
   });
 
   it('Publish button click sets showPublishConsentModal to true', () => {
-    jest.spyOn(serverConfigStore, 'get').mockReturnValue({
-      config: { enablePublishedWorkspacesViaDb: true },
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     component();
     fireEvent.click(screen.getByText('Publish'));
