@@ -1791,6 +1791,8 @@ describe(RuntimeConfigurationPanel.name, () => {
   it('should restrict memory options by cpu', async () => {
     const { container } = component();
 
+    await screen.findByText('Cloud compute profile');
+
     await pickMainCpu(container, 8);
     const dropdown: HTMLElement = expectDropdown(container, 'runtime-ram');
     dropdown.click();
