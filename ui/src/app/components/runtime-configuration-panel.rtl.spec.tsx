@@ -33,6 +33,7 @@ import {
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import * as runtimeHooks from 'app/utils/runtime-hooks';
 import { getAborter, resetAborter } from 'app/utils/runtime-hooks';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
@@ -1711,6 +1712,26 @@ describe(RuntimeConfigurationPanel.name, () => {
   // });
 
   it('should tag as user override after preset modification', async () => {
+    const mockRuntime = {
+      /* mock runtime object */
+    };
+    const mockSetRuntimeRequest = jest
+      .fn()
+      .mockImplementation((x) =>
+        console.log('Set runtime request with :::::::::::::::::::: ', x)
+      );
+    // Mock the return value of useCustomRuntime
+    jest
+      .spyOn(runtimeHooks, 'useCustomRuntime')
+      .mockImplementation(
+        (currentWorkspaceNamespace: string, detachablePd: Disk | null) => {
+          console.log('You did it!!!!!!!:   ', currentWorkspaceNamespace);
+          return [
+            { currentRuntime: null, pendingRuntime: null },
+            mockSetRuntimeRequest,
+          ];
+        }
+      );
     setCurrentRuntime(null);
 
     const { container } = component();
@@ -1722,18 +1743,16 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickNumPreemptibleWorkers(20);
 
     await clickExpectedButton('Create');
-    await waitFor(
-      async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    // });
-    // expect(runtimeApiStub.runtime.configurationType).toEqual(
-    //   RuntimeConfigurationType.USER_OVERRIDE
-    // );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
+
+    const firstCall = 0;
+    const firstParameter = 0;
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
   });
 
   it('should tag as preset if configuration matches', async () => {
