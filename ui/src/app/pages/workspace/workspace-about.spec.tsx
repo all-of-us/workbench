@@ -344,7 +344,7 @@ describe('WorkspaceAbout', () => {
     expect(screen.queryByText('Community Workspace')).not.toBeInTheDocument();
   });
 
-  it('Publish button is enabled for workspace owner', () => {
+  it('Publish button is enabled for workspace owner when the workspace is not published previously', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
@@ -393,7 +393,7 @@ describe('WorkspaceAbout', () => {
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     component();
-    fireEvent.click(screen.getByText('Publish'));
+    user.click(screen.getByText('Publish'));
     expect(
       screen.getByText('Publish As a Community Workspace')
     ).toBeInTheDocument();

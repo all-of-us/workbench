@@ -18,9 +18,9 @@ interface Props {
 }
 export const AboutPublishConsentModal = (props: Props) => {
   const [checkboxStates, setCheckboxStates] = useState({
-    checkbox1: false,
-    checkbox2: false,
-    checkbox3: false,
+    readAndAgreeCheckbox: false,
+    noHarmfulLanguageCheckbox: false,
+    confirmContactCheckbox: false,
   });
 
   const handleCheckboxChange = (checkboxId: string, checked: boolean) => {
@@ -54,8 +54,10 @@ export const AboutPublishConsentModal = (props: Props) => {
           <br />
           <CheckBox
             style={{ marginRight: '0.375rem' }}
-            onChange={(checked) => handleCheckboxChange('checkbox1', checked)}
-            checked={checkboxStates.checkbox1}
+            onChange={(checked) =>
+              handleCheckboxChange('readAndAgreeCheckbox', checked)
+            }
+            checked={checkboxStates.readAndAgreeCheckbox}
           />
           <label style={{ color: colors.primary }}>
             I confirm that the workspace does not include any harmful or
@@ -66,9 +68,9 @@ export const AboutPublishConsentModal = (props: Props) => {
           <CheckBox
             style={{ marginRight: '0.375rem' }}
             onChange={(checked) => {
-              handleCheckboxChange('checkbox2', checked);
+              handleCheckboxChange('noHarmfulLanguageCheckbox', checked);
             }}
-            checked={checkboxStates.checkbox2}
+            checked={checkboxStates.noHarmfulLanguageCheckbox}
           />
           <label style={{ color: colors.primary }}>
             I confirm that the workspace includes contact information in the
@@ -79,8 +81,10 @@ export const AboutPublishConsentModal = (props: Props) => {
           <br />
           <CheckBox
             style={{ marginRight: '0.375rem' }}
-            onChange={(checked) => handleCheckboxChange('checkbox3', checked)}
-            checked={checkboxStates.checkbox3}
+            onChange={(checked) =>
+              handleCheckboxChange('confirmContactCheckbox', checked)
+            }
+            checked={checkboxStates.confirmContactCheckbox}
           />
           <label style={{ color: colors.primary }}>
             I confirm that the workspace collaborators gave permission to share
