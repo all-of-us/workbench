@@ -115,6 +115,16 @@ const styles = reactStyles({
 
 const pageId = 'workspace';
 
+const PublishButtonToolTipText = (isWorkspaceOwner: boolean) => {
+  let toolTip;
+  if (isWorkspaceOwner) {
+    toolTip = 'Contact Support to unpublish';
+  } else {
+    toolTip = 'Only workspaces owners can publish community workspace.';
+  }
+  return toolTip;
+};
+
 const ShareTooltipText = () => {
   return (
     <div>
@@ -320,6 +330,16 @@ export const WorkspaceAbout = fp.flow(
         showPublishConsentModal,
       } = this.state;
       const published = workspace?.published;
+      const featuredCategory = workspace?.featuredCategory;
+      const NotPublished = !featuredCategory;
+      const isWorkspaceOwner =
+        workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+      // isWorkspaceOwner NotPublished disabled
+      // true            true         true
+      // true            false        false
+      // false           true         false
+      // false           false        false
+      const publishButtonToolTipDisabled = isWorkspaceOwner && NotPublished;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
@@ -510,7 +530,7 @@ export const WorkspaceAbout = fp.flow(
             </div>
 
             <TooltipTrigger
-              content='Only workspaces owners can view the billing report'
+              content='Only workspaces owners can view the billing report.'
               disabled={
                 workspace &&
                 WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
@@ -552,24 +572,14 @@ export const WorkspaceAbout = fp.flow(
                 </h3>
 
                 <TooltipTrigger
-                  content='Only workspaces owners can publish community workspace.'
-                  disabled={
-                    workspace &&
-                    WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
-                  }
+                  content={PublishButtonToolTipText(isWorkspaceOwner)}
+                  disabled={publishButtonToolTipDisabled}
                 >
                   <Button
                     onClick={() =>
                       this.setState({ showPublishConsentModal: true })
                     }
-                    disabled={
-                      !(
-                        workspace &&
-                        WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
-                      ) ||
-                      publishing ||
-                      published
-                    }
+                    disabled={!publishButtonToolTipDisabled}
                     style={{
                       height: '22px',
                       fontSize: 12,

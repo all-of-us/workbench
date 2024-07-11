@@ -349,7 +349,7 @@ describe('WorkspaceAbout', () => {
     });
     component();
     const publishButton = screen.getByText('Publish');
-    expect(publishButton).toBeEnabled();
+    expectButtonElementEnabled(publishButton);
   });
 
   it('Publish button is disabled for non workspace owner', () => {
@@ -363,7 +363,22 @@ describe('WorkspaceAbout', () => {
     currentWorkspaceStore.next(nonOwnerWorkspace);
     component();
     const publishButton = screen.getByText('Publish');
-    expect(publishButton).toBeEnabled();
+    expectButtonElementDisabled(publishButton);
+  });
+
+  it('Publish button is disabled for workspace owner if workspace is already published', () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    const publishedWorkspace = {
+      ...workspaceStubs[0],
+      featuredCategory: 'COMMUNITY',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    };
+    currentWorkspaceStore.next(publishedWorkspace);
+    component();
+    const publishButton = screen.getByText('Publish');
+    expectButtonElementDisabled(publishButton);
   });
 
   it('Publish button click sets showPublishConsentModal to true', () => {
