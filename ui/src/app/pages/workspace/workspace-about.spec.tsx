@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 
 import {
   Authority,
+  FeaturedWorkspaceCategory,
   ProfileApi,
   RuntimeApi,
   WorkspaceAccessLevel,
@@ -372,7 +373,7 @@ describe('WorkspaceAbout', () => {
     });
     const publishedWorkspace = {
       ...workspaceStubs[0],
-      featuredCategory: 'COMMUNITY',
+      featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
       accessLevel: WorkspaceAccessLevel.OWNER,
     };
     currentWorkspaceStore.next(publishedWorkspace);
