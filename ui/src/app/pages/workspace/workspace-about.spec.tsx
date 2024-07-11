@@ -353,7 +353,7 @@ describe('WorkspaceAbout', () => {
     expectButtonElementEnabled(publishButton);
   });
 
-  it('Publish button is disabled for non workspace owner', () => {
+  it('Publish button is disabled for non workspace owner', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
@@ -365,9 +365,12 @@ describe('WorkspaceAbout', () => {
     component();
     const publishButton = screen.getByText('Publish');
     expectButtonElementDisabled(publishButton);
+
+    await user.hover(publishButton);
+    screen.getByText('Only workspaces owners can publish community workspace.');
   });
 
-  it('Publish button is disabled for workspace owner if workspace is already published', () => {
+  it('Publish button is disabled for workspace owner if workspace is already published', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
@@ -380,6 +383,9 @@ describe('WorkspaceAbout', () => {
     component();
     const publishButton = screen.getByText('Publish');
     expectButtonElementDisabled(publishButton);
+
+    await user.hover(publishButton);
+    screen.getByText('Contact Support to unpublish');
   });
 
   it('Publish button click sets showPublishConsentModal to true', () => {
