@@ -898,76 +898,76 @@ describe(RuntimeConfigurationPanel.name, () => {
     }
   ];
 
-  async function runDetachableDiskCase(
-    container,
-    [
-      _,
-      setters,
-      {
-        wantUpdateDisk = false,
-        wantDeleteDisk = false,
-        wantDeleteRuntime = false,
-      },
-    ]: DetachableDiskCase,
-    existingDiskName: string
-  ) {
-    jest
-      .spyOn(runtimeApi(), 'updateRuntime')
-      .mockImplementation((): Promise<any> => {
-        return Promise.resolve();
-      });
-    const deleteDiskSpy = jest
-      .spyOn(disksApi(), 'deleteDisk')
-      .mockImplementation((): Promise<any> => Promise.resolve());
-
-    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
-
-    for (const f of setters) {
-      await f(container);
-    }
-
-    await clickButtonIfVisible('Next');
-    await clickButtonIfVisible('Update');
-    await clickButtonIfVisible('Create');
-
-    const deleteRadio = screen.queryAllByTestId('delete-unattached-pd-radio');
-    if (deleteRadio && deleteRadio.length > 0) {
-      expect(deleteRadio[0]).not.toBeChecked();
-      await user.click(deleteRadio[0]);
-      expect(deleteRadio[0]).toBeChecked();
-      await clickExpectedButton('Delete');
-    }
-
-    await waitFor(() => {
-      expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
-      expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
-    });
-
-    if (wantDeleteRuntime) {
-      // await waitFor(() => {
-      //   expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
-      // });
-      runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-
-      await waitFor(
-        async () => {
-          expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-        },
-        { timeout: 5000 }
-      );
-    }
-
-    const firstCall = 0;
-    const runtimeParameter = 1;
-    const newPdName =
-      createRuntimeSpy.mock.calls[firstCall][runtimeParameter].gceWithPdConfig
-        .persistentDisk.name;
-    if (wantDeleteDisk) {
-      expect(newPdName).not.toEqual(existingDiskName);
-    } else {
-      expect(newPdName).toEqual(existingDiskName);
-    }
-  }
+  // async function runDetachableDiskCase(
+  //   container,
+  //   [
+  //     _,
+  //     setters,
+  //     {
+  //       wantUpdateDisk = false,
+  //       wantDeleteDisk = false,
+  //       wantDeleteRuntime = false,
+  //     },
+  //   ]: DetachableDiskCase,
+  //   existingDiskName: string
+  // ) {
+  //   jest
+  //     .spyOn(runtimeApi(), 'updateRuntime')
+  //     .mockImplementation((): Promise<any> => {
+  //       return Promise.resolve();
+  //     });
+  //   const deleteDiskSpy = jest
+  //     .spyOn(disksApi(), 'deleteDisk')
+  //     .mockImplementation((): Promise<any> => Promise.resolve());
+  //
+  //   const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
+  //
+  //   for (const f of setters) {
+  //     await f(container);
+  //   }
+  //
+  //   await clickButtonIfVisible('Next');
+  //   await clickButtonIfVisible('Update');
+  //   await clickButtonIfVisible('Create');
+  //
+  //   const deleteRadio = screen.queryAllByTestId('delete-unattached-pd-radio');
+  //   if (deleteRadio && deleteRadio.length > 0) {
+  //     expect(deleteRadio[0]).not.toBeChecked();
+  //     await user.click(deleteRadio[0]);
+  //     expect(deleteRadio[0]).toBeChecked();
+  //     await clickExpectedButton('Delete');
+  //   }
+  //
+  //   await waitFor(() => {
+  //     expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+  //     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
+  //   });
+  //
+  //   if (wantDeleteRuntime) {
+  //     // await waitFor(() => {
+  //     //   expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
+  //     // });
+  //     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
+  //
+  //     await waitFor(
+  //       async () => {
+  //         expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+  //       },
+  //       { timeout: 5000 }
+  //     );
+  //   }
+  //
+  //   const firstCall = 0;
+  //   const runtimeParameter = 1;
+  //   const newPdName =
+  //     createRuntimeSpy.mock.calls[firstCall][runtimeParameter].gceWithPdConfig
+  //       .persistentDisk.name;
+  //   if (wantDeleteDisk) {
+  //     expect(newPdName).not.toEqual(existingDiskName);
+  //   } else {
+  //     expect(newPdName).toEqual(existingDiskName);
+  //   }
+  // }
 
   let mockSetRuntimeRequest;
   const firstCall = 0;
@@ -2445,7 +2445,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Create');
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
       },
       { timeout: 5000 }
     );
@@ -2630,108 +2630,108 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   // These tests require a little more simplification, so we are skippingg them for now. However, they will run as
   // part of runtime-configuration-panel.enzyme.spec.tsx.
-  test.each([
-    [
-      'disk type',
-      [pickSsdType],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-    [
-      'disk decrease',
-      [decrementDetachableDiskSize],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-    [
-      'in-place + disk type',
-      [changeMainCpu_To8, pickSsdType],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-    [
-      'in-place + disk decrease',
-      [changeMainCpu_To8, decrementDetachableDiskSize],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-    ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
-    [
-      'recreate + disk type',
-      [clickEnableGpu, pickSsdType],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-    [
-      'recreate + disk decrease',
-      [clickEnableGpu, decrementDetachableDiskSize],
-      { wantDeleteDisk: true, wantDeleteRuntime: true },
-    ],
-  ] as DetachableDiskCase[])(
-    'should allow runtime to recreate to attached PD: %s',
-    async (desc: string, setters, expectations) => {
-      // jest.setTimeout(100000);
-      setCurrentRuntime(detachableDiskRuntime());
+  // test.each([
+  //   [
+  //     'disk type',
+  //     [pickSsdType],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  //   [
+  //     'disk decrease',
+  //     [decrementDetachableDiskSize],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  //   [
+  //     'in-place + disk type',
+  //     [changeMainCpu_To8, pickSsdType],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  //   [
+  //     'in-place + disk decrease',
+  //     [changeMainCpu_To8, decrementDetachableDiskSize],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  //   ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
+  //   [
+  //     'recreate + disk type',
+  //     [clickEnableGpu, pickSsdType],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  //   [
+  //     'recreate + disk decrease',
+  //     [clickEnableGpu, decrementDetachableDiskSize],
+  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
+  //   ],
+  // ] as DetachableDiskCase[])(
+  //   'should allow runtime to recreate to attached PD: %s',
+  //   async (desc: string, setters, expectations) => {
+  //     // jest.setTimeout(100000);
+  //     setCurrentRuntime(detachableDiskRuntime());
+  //
+  //     const disk = existingDisk();
+  //     setCurrentDisk(disk);
+  //
+  //     const { container } = component();
+  //     await runDetachableDiskCase(
+  //       container,
+  //       [desc, setters, expectations],
+  //       disk.name
+  //     );
+  //   }
+  // );
 
-      const disk = existingDisk();
-      setCurrentDisk(disk);
+  // test.each([
+  //   ['disk increase', [incrementDetachableDiskSize]],
+  //   ['in-place', [changeMainCpu_To8]],
+  //   [
+  //     'in-place + disk increase',
+  //     [changeMainCpu_To8, incrementDetachableDiskSize],
+  //   ],
+  //   ['recreate + disk increase', [clickEnableGpu, incrementDetachableDiskSize]],
+  // ])(
+  //   'should allow runtime updates to attached PD: %s',
+  //   async (desc: string, setters) => {
+  //     setCurrentRuntime(detachableDiskRuntime());
+  //
+  //     const disk = existingDisk();
+  //     setCurrentDisk(disk);
+  //
+  //     const { container } = component();
+  //     const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+  //
+  //     for (const action of setters) {
+  //       await action(container);
+  //     }
+  //
+  //     await clickButtonIfVisible('Next');
+  //     await clickButtonIfVisible('Update');
+  //     await waitFor(() => {
+  //       expect(updateRuntimeSpy).toHaveBeenCalledTimes(1);
+  //     });
+  //     expect(disksApiStub.disk.name).toEqual(disk.name);
+  //   }
+  // );
 
-      const { container } = component();
-      await runDetachableDiskCase(
-        container,
-        [desc, setters, expectations],
-        disk.name
-      );
-    }
-  );
-
-  test.each([
-    ['disk increase', [incrementDetachableDiskSize]],
-    ['in-place', [changeMainCpu_To8]],
-    [
-      'in-place + disk increase',
-      [changeMainCpu_To8, incrementDetachableDiskSize],
-    ],
-    ['recreate + disk increase', [clickEnableGpu, incrementDetachableDiskSize]],
-  ])(
-    'should allow runtime updates to attached PD: %s',
-    async (desc: string, setters) => {
-      setCurrentRuntime(detachableDiskRuntime());
-
-      const disk = existingDisk();
-      setCurrentDisk(disk);
-
-      const { container } = component();
-      const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
-
-      for (const action of setters) {
-        await action(container);
-      }
-
-      await clickButtonIfVisible('Next');
-      await clickButtonIfVisible('Update');
-      await waitFor(() => {
-        expect(updateRuntimeSpy).toHaveBeenCalledTimes(1);
-      });
-      expect(disksApiStub.disk.name).toEqual(disk.name);
-    }
-  );
-
-  test.each([
-    ['disk type', [pickSsdType], { wantDeleteDisk: true }],
-    ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
-    ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
-  ] as DetachableDiskCase[])(
-    'should allow runtime creates with existing disk: %s',
-    async (desc, setters, expectations) => {
-      setCurrentRuntime(null);
-
-      const disk = existingDisk();
-      setCurrentDisk(disk);
-      mockUseCustomRuntime();
-      const { container } = component();
-      await clickExpectedButton('Customize');
-
-      runDetachableDiskCase(
-        container,
-        [desc, setters, expectations],
-        disk.name
-      );
-    }
-  );
+  // test.each([
+  //   ['disk type', [pickSsdType], { wantDeleteDisk: true }],
+  //   ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
+  //   ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
+  // ] as DetachableDiskCase[])(
+  //   'should allow runtime creates with existing disk: %s',
+  //   async (desc, setters, expectations) => {
+  //     setCurrentRuntime(null);
+  //
+  //     const disk = existingDisk();
+  //     setCurrentDisk(disk);
+  //     mockUseCustomRuntime();
+  //     const { container } = component();
+  //     await clickExpectedButton('Customize');
+  //
+  //     runDetachableDiskCase(
+  //       container,
+  //       [desc, setters, expectations],
+  //       disk.name
+  //     );
+  //   }
+  // );
 });
