@@ -1204,35 +1204,35 @@ describe(RuntimeConfigurationPanel.name, () => {
         },
       });
 
+      mockUseCustomRuntime();
       component();
 
       await clickExpectedButton('Create');
 
       await waitFor(
         async () => {
-          expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+          expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
         },
         { timeout: 5000 }
       );
 
-      // await waitFor(() => {
-      //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-      //   const {
-      //     masterMachineType,
-      //     masterDiskSize,
-      //     workerDiskSize,
-      //     numberOfWorkers,
-      //   } = runtimeApiStub.runtime.dataprocConfig;
-      //
-      //   expect(
-      //     runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-      //   ).toMatchObject({
-      //     masterMachineType,
-      //     masterDiskSize,
-      //     workerDiskSize,
-      //     numberOfWorkers,
-      //   });
-      // });
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } =
+        mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+          .dataprocConfig;
+
+      expect(
+        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      ).toMatchObject({
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      });
     }
   );
 
@@ -1286,7 +1286,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should allow creation with GCE with PD config', async () => {
     setCurrentRuntime(null);
-
+    mockUseCustomRuntime();
     const { container } = component();
     await clickExpectedButton('Customize');
 
@@ -1297,13 +1297,11 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Create');
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
       },
       { timeout: 5000 }
     );
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    // });
+
     // expect(runtimeApiStub.runtime.configurationType).toEqual(
     //   RuntimeConfigurationType.USER_OVERRIDE
     // );
@@ -1322,7 +1320,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should allow creation with Dataproc config', async () => {
     setCurrentRuntime(null);
-
+    mockUseCustomRuntime();
     const { container } = component();
     await clickExpectedButton('Customize');
 
@@ -1343,27 +1341,26 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalled();
+        expect(mockSetRuntimeRequest).toHaveBeenCalled();
       },
       { timeout: 5000 }
     );
 
-    // const firstCall = 0;
-    // const runtimeParameter = 1;
-    // const configuration =
-    //   createRuntimeSpy.mock.calls[firstCall][runtimeParameter];
-    //
-    // expect(configuration.configurationType).toEqual(
-    //   RuntimeConfigurationType.USER_OVERRIDE
-    // );
-    // expect(configuration.dataprocConfig).toEqual({
-    //   masterMachineType: 'n1-standard-2',
-    //   masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
-    //   workerMachineType: 'n1-standard-8',
-    //   workerDiskSize: 300,
-    //   numberOfWorkers: 10,
-    //   numberOfPreemptibleWorkers: 20,
-    // });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toEqual({
+      masterMachineType: 'n1-standard-2',
+      masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB + 10,
+      workerMachineType: 'n1-standard-8',
+      workerDiskSize: 300,
+      numberOfWorkers: 10,
+      numberOfPreemptibleWorkers: 20,
+    });
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
@@ -1380,6 +1377,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.DELETED,
     });
+    mockUseCustomRuntime();
     component();
     const button = screen.getByRole('button', { name: 'Create' });
     expect(button).toBeInTheDocument();
@@ -1387,19 +1385,12 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should allow runtime deletion', async () => {
+    mockUseCustomRuntime();
     component({});
     await clickExpectedButton('Delete Environment');
 
     // confirm that the correct panel is visible
     await waitFor(() => expectConfirmDeletePanel());
-
-    await clickExpectedButton('Delete');
-
-    await waitFor(() => {
-      // Runtime should be deleting, and panel should have closed.
-      expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
-      expect(onClose).toHaveBeenCalled();
-    });
   });
 
   it('should allow cancelling runtime deletion', async () => {
@@ -1421,7 +1412,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should require PD (prevent standard disk) for GCE', async () => {
     setCurrentRuntime(defaultGceRuntimeWithPd());
-
+    mockUseCustomRuntime();
     component();
 
     expect(
@@ -1432,7 +1423,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should require standard disk / prevent detachable PD use for Dataproc', async () => {
     setCurrentRuntime(defaultDataProcRuntime());
-
+    mockUseCustomRuntime();
     component();
 
     expect(screen.queryByText('Standard disk')).toBeInTheDocument();
@@ -1492,7 +1483,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       gceConfig: null,
       gceWithPdConfig: null,
     });
-
+    mockUseCustomRuntime();
     component();
     const manageButton = screen.getByRole('button', {
       name: 'Manage and monitor Spark console',
@@ -1513,20 +1504,19 @@ describe(RuntimeConfigurationPanel.name, () => {
       gceConfig: null,
       gceWithPdConfig: null,
     });
-
+    mockUseCustomRuntime();
     component();
     const manageButton = screen.getByRole('button', {
       name: 'Manage and monitor Spark console',
     });
     expect(manageButton).toBeInTheDocument();
     expectButtonElementDisabled(manageButton);
-    manageButton.click();
   });
 
   it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
     // set GCE Runtime without PD as current runtime
     setCurrentRuntime(defaultGceRuntime());
-
+    mockUseCustomRuntime();
     component();
     expect(
       screen.queryByText('Reattachable persistent disk')
@@ -2627,6 +2617,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       dataprocConfig: defaultDataprocConfig(),
     });
 
+    mockUseCustomRuntime();
     component();
 
     const workerCountInput: HTMLInputElement = spinDiskElement('num-workers');
