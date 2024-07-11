@@ -1082,23 +1082,34 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should allow creation with defaults when no runtime exists', async () => {
     setCurrentRuntime(null);
-
+    mockUseCustomRuntime();
     component();
 
     await clickExpectedButton('Create');
 
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
       },
       { timeout: 5000 }
     );
 
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig.machineType
+    ).toEqual('n1-standard-4');
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceConfig
+    ).toBeUndefined();
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toBeUndefined();
+
     // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    //   expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
-    //     'n1-standard-4'
-    //   );
     //   expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
     //   expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
     // });
@@ -1138,28 +1149,36 @@ describe(RuntimeConfigurationPanel.name, () => {
       },
     });
 
+    mockUseCustomRuntime();
+
     component();
 
     await clickExpectedButton('Create');
     await waitFor(
       async () => {
-        expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
+        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
       },
       { timeout: 5000 }
     );
 
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    //   expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-    //   expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
-    //     runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-    //       .machineType
-    //   );
-    //   expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
-    //     runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-    //       .persistentDisk.size
-    //   );
-    // });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceConfig
+    ).toBeUndefined();
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig.machineType
+    ).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
+    );
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig.persistentDisk.size
+    ).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        .persistentDisk.size
+    );
   });
 
   it(
@@ -1230,7 +1249,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       },
       dataprocConfig: null,
     });
-
+    mockUseCustomRuntime();
     component();
 
     await clickExpectedButton('Try Again');
@@ -1349,6 +1368,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
     setCurrentRuntime(defaultGceRuntimeWithPd());
+    mockUseCustomRuntime();
     component();
     const button = screen.getByRole('button', { name: 'Next' });
     expect(button).toBeInTheDocument();
@@ -2296,6 +2316,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should prevent runtime update when disk size is invalid', async () => {
+    mockUseCustomRuntime();
     const { container } = component();
 
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
@@ -2313,6 +2334,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should prevent runtime update when disk size of Standard disk type is invalid', async () => {
+    mockUseCustomRuntime();
     component();
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
 
@@ -2326,6 +2348,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   it('should prevent runtime update when PD disk size is invalid', async () => {
+    mockUseCustomRuntime();
     const { container } = component();
     const getNextButton = () => screen.getByRole('button', { name: 'Next' });
 
@@ -2343,6 +2366,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when disk size is invalid', async () => {
     setCurrentRuntime(null);
+    mockUseCustomRuntime();
 
     const getCreateButton = () =>
       screen.getByRole('button', { name: 'Create' });
@@ -2378,7 +2402,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
     });
-
+    mockUseCustomRuntime();
     const { container } = component();
     await pickComputeType(container, ComputeType.Dataproc);
 
@@ -2517,6 +2541,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when running cost is too high for initial credits', async () => {
     setCurrentRuntime(null);
+    mockUseCustomRuntime();
     const { container } = component();
     await clickExpectedButton('Customize');
     const createButton = screen.getByRole('button', { name: 'Create' });
@@ -2533,6 +2558,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should prevent runtime creation when worker count is invalid', async () => {
     setCurrentRuntime(null);
+    mockUseCustomRuntime();
     const { container } = component();
     await clickExpectedButton('Customize');
 
@@ -2556,6 +2582,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     });
+    mockUseCustomRuntime();
     const { container } = component();
 
     await clickExpectedButton('Customize');
