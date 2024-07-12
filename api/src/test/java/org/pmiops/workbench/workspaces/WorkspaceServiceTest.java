@@ -100,13 +100,13 @@ public class WorkspaceServiceTest {
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
-    //    WorkspaceAuthService.class,
     CloudStorageClientImpl.class,
     ObjectNameLengthServiceImpl.class,
   })
   @MockBean({
     AccessTierService.class,
     BillingProjectAuditor.class,
+    BucketAuditQueryService.class,
     CohortCloningService.class,
     CohortService.class,
     ConceptSetService.class,
@@ -114,11 +114,10 @@ public class WorkspaceServiceTest {
     FeaturedWorkspaceMapper.class,
     FirecloudMapper.class,
     FreeTierBillingService.class,
+    IamService.class,
     ProfileMapper.class,
     UserDao.class,
-    UserMapper.class,
-    IamService.class,
-    WorkspaceAuthService.class
+    UserMapper.class
   })
   static class Configuration {
     @Bean
@@ -134,21 +133,21 @@ public class WorkspaceServiceTest {
     }
   }
 
+  @MockBean private AccessTierService accessTierService;
   @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
+  @MockBean private CloudBillingClient mockCloudBillingClient;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
   @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private CloudBillingClient mockCloudBillingClient;
   @MockBean private MailService mockMailService;
-  ;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
-  @MockBean private AccessTierService accessTierService;
+  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
+  @MockBean UserService userService;
+
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @MockBean private BucketAuditQueryService bucketAuditQueryService;
-  @MockBean UserService userService;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceService workspaceService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -473,7 +472,9 @@ public class WorkspaceServiceTest {
             RawlsWorkspaceAccessLevel.NO_ACCESS,
             WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(sharedWorkspace);
-
+    when(mockWorkspaceAuthService.enforceWorkspaceAccessLevel(
+            "shared_namespace", "shared", WorkspaceAccessLevel.READER))
+        .thenThrow(ForbiddenException.class);
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
