@@ -503,7 +503,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public void markWorkspaceAsFeatured(DbWorkspace dbWorkspace) {
-    // If workspace is already marked as featured, throw an exception as owners can't mark it again even in a
+    // If workspace is already marked as featured, throw an exception as owners can't mark it again
+    // even in a
     // different category
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
