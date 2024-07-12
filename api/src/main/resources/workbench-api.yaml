@@ -7190,6 +7190,10 @@ components:
         published:
           type: boolean
           default: false
+          description: indicates whether the workspace has been shared as READER to all Registered
+            Tier users.  Used in conjunction with FeaturedWorkspacesConfig to show Featured
+            Workspaces in the UI.  DEPRECATED in favor of featuredCategory when the Feature Flag
+            enablePublishedWorkspacesViaDb is set.
         featuredCategory:
           $ref: '#/components/schemas/FeaturedWorkspaceCategory'
           description: The name of the category in which the workspace is published
@@ -7811,21 +7815,21 @@ components:
           items:
             type: integer
             format: int64
-        tanagraConceptSetIds:
-          type: array
-          description: The ids of all concept sets in the Tanagra export
-          items:
-            type: string
-        tanagraCohortIds:
-          type: array
-          description: The ids of all cohorts in the Tanagra export
-          items:
-            type: string
         domainValuePairs:
           type: array
           description: All the selected domain/value pairs in the data set
           items:
             $ref: '#/components/schemas/DomainValuePair'
+        tanagraConceptSetIds:
+          type: array
+          description: The ids of all concept sets in the data set
+          items:
+            type: string
+        tanagraCohortIds:
+          type: array
+          description: The ids of all cohorts in the data set
+          items:
+            type: string
     PrePackagedConceptSetEnum:
       type: string
       enum:
@@ -9667,6 +9671,11 @@ components:
       - ADMIN
       - PROJECT_PERSONNEL
       - OTHER
+      - ASSOCIATE_SCIENTIST
+      - MID_CAREER_SCIENTIST
+      - SENIOR_SCIENTIST
+      - DATA_ANALYST
+      - HIGH_SCHOOL_STUDENT
     VerifiedInstitutionalAffiliation:
       required:
       - institutionShortName

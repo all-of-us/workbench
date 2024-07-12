@@ -250,14 +250,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    boolean featureFlagForPublish =
-        workspaceConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb;
-
     Workspace workspace =
-        featureFlagForPublish
-            ? workspaceMapper.toApiWorkspace(
-                dbWorkspace, firecloudWorkspace, featuredWorkspaceService)
-            : workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
+        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, featuredWorkspaceService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
@@ -269,7 +263,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
     return new WorkspaceAdminView()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
+        .workspace(
+            workspaceMapper.toApiWorkspace(
+                dbWorkspace, new RawlsWorkspaceDetails(), featuredWorkspaceService))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }

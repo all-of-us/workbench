@@ -95,6 +95,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -296,6 +297,7 @@ public class CohortReviewControllerTest {
     CloudStorageClient.class,
     DataSetService.class,
     DirectoryService.class,
+    FeaturedWorkspaceService.class,
     FireCloudService.class,
     FreeTierBillingService.class,
     IamService.class,

@@ -314,11 +314,25 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testGetWorkspaceAdminView_publishInfo() {
-    // If Config enablePublishedWorkspacesViaDb is true,
-    // then get workspace Publish info from featuredWorkspace table
-    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+  public void testGetWorkspaceAdminView_published_false() {
+    workspaceDao.save(dbWorkspace.setPublished(false));
+    WorkspaceAdminView workspaceDetailsResponse =
+        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
+  }
 
+  @Test
+  public void testGetWorkspaceAdminView_published_true() {
+    workspaceDao.save(dbWorkspace.setPublished(true));
+    WorkspaceAdminView workspaceDetailsResponse =
+        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
+    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
+  }
+
+  @Test
+  public void testGetWorkspaceAdminView_featuredCategory() {
     when(mockFeatureService.isFeaturedWorkspace(dbWorkspace)).thenReturn(true);
     when(mockFeatureService.getFeaturedCategory(dbWorkspace))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.TUTORIAL_WORKSPACES);
@@ -328,16 +342,10 @@ public class WorkspaceAdminServiceTest {
         .isEqualTo(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
 
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
+    // this refers to the old-style "published" flag, not the new "featured category" field
+    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
     assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-
-    // If Config enablePublishedWorkspacesViaDb is false,
-    // then get workspace Publish info from DbWorksapce
-    providedWorkbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = false;
-    workspaceDetailsResponse = workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
   }
 
   private final long dummyTime = Instant.now().toEpochMilli();
