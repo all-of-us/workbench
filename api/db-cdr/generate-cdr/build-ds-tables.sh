@@ -8,6 +8,10 @@ export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 export DOMAIN=$3       # specific domain table to build
 
+echo "Getting self_reported_category_concept_id column count"
+query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name='person' AND column_name = 'self_reported_category_concept_id'"
+selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
@@ -140,18 +144,35 @@ function do_ds_observation(){
 }
 
 function do_ds_person(){
-  echo "ds_person - inserting data"
-  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
-      (PERSON_ID, GENDER_CONCEPT_ID, GENDER, DATE_OF_BIRTH, RACE_CONCEPT_ID, RACE, ETHNICITY_CONCEPT_ID, ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, SEX_AT_BIRTH)
-  SELECT
-      PERSON_ID, GENDER_CONCEPT_ID, c1.concept_name as GENDER, BIRTH_DATETIME as DATE_OF_BIRTH, RACE_CONCEPT_ID,
-      c2.concept_name as RACE, ETHNICITY_CONCEPT_ID, c3.concept_name as ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, c4.concept_name as SEX_AT_BIRTH
-  FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.gender_concept_id = c1.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.race_concept_id = c2.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.ethnicity_concept_id = c3.CONCEPT_ID
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.sex_at_birth_concept_id = c4.CONCEPT_ID"
+  if [[ $selfReportedCategoryDataCount > 0 ]];
+  then
+    echo "ds_person - inserting data"
+    bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
+        (PERSON_ID, GENDER_CONCEPT_ID, GENDER, DATE_OF_BIRTH, RACE_CONCEPT_ID, RACE, ETHNICITY_CONCEPT_ID, ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, SEX_AT_BIRTH, SELF_REPORTED_CATEGORY_CONCEPT_ID, SELF_REPORTED_CATEGORY)
+    SELECT
+        PERSON_ID, GENDER_CONCEPT_ID, c1.concept_name as GENDER, BIRTH_DATETIME as DATE_OF_BIRTH, RACE_CONCEPT_ID,
+        c2.concept_name as RACE, ETHNICITY_CONCEPT_ID, c3.concept_name as ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, c4.concept_name as SEX_AT_BIRTH,
+        SELF_REPORTED_CATEGORY_CONCEPT_ID, c5.concept_name as SELF_REPORTED_CATEGORY
+    FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.gender_concept_id = c1.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.race_concept_id = c2.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.ethnicity_concept_id = c3.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.sex_at_birth_concept_id = c4.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.self_reported_category_concept_id = c5.CONCEPT_ID"
+  else
+    echo "ds_person - inserting data"
+    bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+    "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_person\` AS
+    SELECT
+        PERSON_ID, GENDER_CONCEPT_ID, c1.concept_name as GENDER, BIRTH_DATETIME as DATE_OF_BIRTH, RACE_CONCEPT_ID,
+        c2.concept_name as RACE, ETHNICITY_CONCEPT_ID, c3.concept_name as ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, c4.concept_name as SEX_AT_BIRTH
+    FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.gender_concept_id = c1.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.race_concept_id = c2.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.ethnicity_concept_id = c3.CONCEPT_ID
+    LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.sex_at_birth_concept_id = c4.CONCEPT_ID" 
+  fi
 }
 
 function do_ds_procedure_occurrence(){
