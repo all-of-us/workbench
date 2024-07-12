@@ -391,7 +391,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishWorkspaceByAdminEmail(
+  public void sendFeaturedWorkspaceByAdminEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
     sendPublishUnpublishWorkspaceByAdminEmail(
@@ -399,13 +399,13 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendUnfeatureWorkspaceEmailByAdmin(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
   }
 
   @Override
-  public void sendPublishWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendFeaturedWorkspaceEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendMarkAsFeaturedWorkspaceEmail(
         workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);

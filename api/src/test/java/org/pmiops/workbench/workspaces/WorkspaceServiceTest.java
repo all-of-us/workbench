@@ -759,6 +759,6 @@ public class WorkspaceServiceTest {
     workspaceService.markAsFeaturedByOwner(dbWorkspace);
 
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockMailService).sendPublishWorkspaceByOwnerEmail(any(), any());
+    verify(mockMailService).sendFeaturedWorkspaceEmail(any(), any());
   }
 }

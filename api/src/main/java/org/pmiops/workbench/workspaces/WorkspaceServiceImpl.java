@@ -536,7 +536,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               // Send Email to all workspace owners to let them know Workspace has been published
               final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
               try {
-                mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
+                mailService.sendFeaturedWorkspaceEmail(dbWorkspace, owners);
               } catch (final MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }

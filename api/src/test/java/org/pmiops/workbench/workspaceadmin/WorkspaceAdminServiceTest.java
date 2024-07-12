@@ -588,7 +588,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -626,7 +626,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
 
     publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
     DbFeaturedWorkspace mockFeaturedWorkspace =
@@ -642,7 +642,7 @@ public class WorkspaceAdminServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService, times(2)).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -676,7 +676,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService, never()).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -699,7 +699,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
+    verify(mailService).sendUnfeatureWorkspaceEmailByAdmin(any(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

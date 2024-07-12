@@ -1374,6 +1374,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+        403:
+          description: Forbidden as user is not the owner of the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete:
     get:
       tags:
