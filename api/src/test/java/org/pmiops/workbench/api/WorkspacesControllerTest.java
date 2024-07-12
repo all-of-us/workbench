@@ -3027,7 +3027,7 @@ public class WorkspacesControllerTest {
           request.setWorkspace(ws);
           stubGetWorkspace(
               ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
-          workspacesController.markAsFeaturedByOwner(ws.getNamespace());
+          workspacesController.markWorkspaceAsFeatured(ws.getNamespace());
         });
   }
 
@@ -3043,7 +3043,7 @@ public class WorkspacesControllerTest {
           request.setWorkspace(ws);
           stubGetWorkspace(
               ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-          workspacesController.markAsFeaturedByOwner(ws.getNamespace());
+          workspacesController.markWorkspaceAsFeatured(ws.getNamespace());
         });
   }
 }
