@@ -136,7 +136,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void firePublishWorkspaceAction(
+  public void fireMarkAsFeaturedAction(
       long workspaceId, String updatedCategory, @Nullable String prevCategoryIfAny) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
@@ -160,7 +160,7 @@ public class AdminAuditorImpl implements AdminAuditor {
     actionAuditService.send(event);
   }
 
-  public void fireUnpublishWorkspaceAction(long workspaceId, String prevCategory) {
+  public void fireUnmarkAsFeaturedAction(long workspaceId, String prevCategory) {
     DbUser dbUser = userProvider.get();
     String actionId = actionIdProvider.get();
     long timestamp = clock.millis();

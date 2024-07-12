@@ -75,7 +75,7 @@ import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.MarkWorkspaceFeaturedRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -570,8 +570,8 @@ public class WorkspaceAdminServiceTest {
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
 
-    PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest()
+    MarkWorkspaceFeaturedRequest markWorkspaceFeaturedRequest =
+        new MarkWorkspaceFeaturedRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
 
@@ -582,17 +582,17 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+            any(MarkWorkspaceFeaturedRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
     // Act
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    workspaceAdminService.markWorkspaceAsFeatured(
+        mockDbWorkspace.getWorkspaceNamespace(), markWorkspaceFeaturedRequest);
 
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(
+        .fireMarkAsFeaturedAction(
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
@@ -603,8 +603,8 @@ public class WorkspaceAdminServiceTest {
   public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest()
+    MarkWorkspaceFeaturedRequest markWorkspaceAsFeaturedRequest =
+        new MarkWorkspaceFeaturedRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
     DbFeaturedWorkspace dbFeaturedWorkspace =
@@ -623,20 +623,20 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+            any(MarkWorkspaceFeaturedRequest.class), any(DbWorkspace.class)))
         .thenReturn(dbFeaturedWorkspace);
 
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    workspaceAdminService.markWorkspaceAsFeatured(
+        mockDbWorkspace.getWorkspaceNamespace(), markWorkspaceAsFeaturedRequest);
 
     verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(
+        .fireMarkAsFeaturedAction(
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
     verify(mailService).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
 
-    publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+    markWorkspaceAsFeaturedRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
@@ -645,8 +645,8 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     // Act
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    workspaceAdminService.markWorkspaceAsFeatured(
+        mockDbWorkspace.getWorkspaceNamespace(), markWorkspaceAsFeaturedRequest);
 
     // Assert
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
@@ -658,8 +658,8 @@ public class WorkspaceAdminServiceTest {
 
     // Arrange
     DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest()
+    MarkWorkspaceFeaturedRequest markWorkspaceFeaturedRequest =
+        new MarkWorkspaceFeaturedRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
 
@@ -676,14 +676,14 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     // Act
-    workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
+    workspaceAdminService.markWorkspaceAsFeatured(workspace.getWorkspaceNamespace(), markWorkspaceFeaturedRequest);
 
     // Assert
     // Since the category is the same, we should not save the workspace again or send emails
     verify(mockFeaturedWorkspaceDao, never()).save(any());
     verify(mockAdminAuditor, never())
-        .firePublishWorkspaceAction(
-            workspace.getWorkspaceId(), request.getCategory().toString(), "");
+        .fireMarkAsFeaturedAction(
+            workspace.getWorkspaceId(), markWorkspaceFeaturedRequest.getCategory().toString(), "");
     verify(mailService, never()).sendFeaturedWorkspaceByAdminEmail(any(), any(), any());
   }
 
@@ -701,12 +701,12 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
     // Act
-    workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
+    workspaceAdminService.unmarkAsFeaturedWorkspace(mockDbWorkspace.getWorkspaceNamespace());
 
     // Assert
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
-        .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
+        .fireUnmarkAsFeaturedAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
     verify(mailService).sendUnfeatureWorkspaceEmailByAdmin(any(), any());
   }
 

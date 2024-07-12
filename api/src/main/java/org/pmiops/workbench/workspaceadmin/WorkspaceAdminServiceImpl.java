@@ -55,7 +55,7 @@ import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.MarkWorkspaceFeaturedRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
@@ -429,8 +429,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void publishWorkspaceViaDB(
-      String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
+  public void markWorkspaceAsFeatured(
+      String workspaceNamespace, MarkWorkspaceFeaturedRequest markWorkspaceFeaturedRequest) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
 
     featuredWorkspaceDao
@@ -441,7 +441,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               // database
               DbFeaturedCategory requestedCategory =
                   featuredWorkspaceMapper.toDbFeaturedCategory(
-                      publishWorkspaceRequest.getCategory());
+                      markWorkspaceFeaturedRequest.getCategory());
 
               DbFeaturedCategory existingCategory = dbFeaturedWorkspace.getCategory();
               if (existingCategory.equals(requestedCategory)) {
@@ -458,8 +458,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                       workspaceNamespace, existingCategory, requestedCategory));
               DbFeaturedWorkspace dbFeaturedWorkspaceToUpdate =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      dbFeaturedWorkspace, publishWorkspaceRequest);
-              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory.toString());
+                      dbFeaturedWorkspace, markWorkspaceFeaturedRequest);
+              markAsFeatured(dbFeaturedWorkspaceToUpdate, existingCategory.toString());
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
@@ -467,12 +467,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                   dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      publishWorkspaceRequest, dbWorkspace);
-              publishWorkspace(dbFeaturedWorkspaceToSave, null);
+                      markWorkspaceFeaturedRequest, dbWorkspace);
+              markAsFeatured(dbFeaturedWorkspaceToSave, null);
             });
   }
 
-  private void publishWorkspace(
+  private void markAsFeatured(
       DbFeaturedWorkspace dbFeaturedWorkspace, @Nullable String prevCategoryIfAny) {
     DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
 
@@ -483,7 +483,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     featuredWorkspaceDao.save(dbFeaturedWorkspace);
 
     // Fire Publish action type Audit action
-    adminAuditor.firePublishWorkspaceAction(
+    adminAuditor.fireMarkAsFeaturedAction(
         dbWorkspace.getWorkspaceId(), requestedCategory.toString(), prevCategoryIfAny);
     log.info(
         String.format(
@@ -494,7 +494,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public void unpublishWorkspaceViaDB(String workspaceNamespace) {
+  public void unmarkAsFeaturedWorkspace(String workspaceNamespace) {
     final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspaceOptional =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
@@ -507,7 +507,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
 
           featuredWorkspaceDao.delete(dbFeaturedWorkspace);
-          adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
+          adminAuditor.fireUnmarkAsFeaturedAction(dbWorkspace.getWorkspaceId(), featuredCategory);
           log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
 
           // Send email to all workspace owners to let them know workspace has been unpublished

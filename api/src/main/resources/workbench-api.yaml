@@ -1801,9 +1801,9 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Publish the workspace so it features in the Featured Workspaces tab under requested category.Requires
-        RESEARCHER_DATA_VIEW authority.
-      operationId: publishWorkspaceViaDB
+      description: Marks the workspace as featured, making it appear under the "Featured Workspaces" tab in the
+                   requested category. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: markAsFeatured
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1812,25 +1812,24 @@ paths:
           schema:
             type: string
       requestBody:
-        description: The admin request to publish workspace
+        description: The admin request to mark workspace as feature
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PublishWorkspaceRequest'
+              $ref: '#/components/schemas/MarkWorkspaceFeaturedRequest'
       responses:
         200:
-          description: Workspace has been published
+          description: Workspace has been marked as featured
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/admin/workspaces/{workspaceNamespace}/unpublish:
+  /v1/admin/workspaces/{workspaceNamespace}/unmarkAsFeaturedWorkspace:
     post:
       tags:
         - workspaceAdmin
-      description: Unpublish a workspace removing it from Featured Workspaces tab. Requires
-        RESEARCHER_DATA_VIEW authority.
-      operationId: unpublishWorkspaceViaDB
+      description: Removes workspace Featured Workspaces list. Requires RESEARCHER_DATA_VIEW authority.
+      operationId: unmarkAsFeaturedWorkspace
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1840,7 +1839,7 @@ paths:
             type: string
       responses:
         200:
-          description: Workspace has been unpublished
+          description: Workspace has been unmarked as featured workspace
           content:
             application/json:
               schema:
@@ -11844,7 +11843,7 @@ components:
           type: string
           description: Datetime at creation of this user's accont
           format: date-time
-    PublishWorkspaceRequest:
+    MarkWorkspaceFeaturedRequest:
       required:
         - category
       type: object

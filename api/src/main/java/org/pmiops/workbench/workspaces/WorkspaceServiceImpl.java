@@ -528,7 +528,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY),
+                      new MarkWorkspaceFeaturedRequest().category(FeaturedWorkspaceCategory.COMMUNITY),
                       dbWorkspace);
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 

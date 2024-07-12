@@ -15,8 +15,8 @@ public interface AdminAuditor {
 
   void fireUnlockWorkspaceAction(long workspaceId);
 
-  void firePublishWorkspaceAction(
+  void fireMarkAsFeaturedAction(
       long workspaceId, String updatedCategory, @Nullable String prevCategoryIfAny);
 
-  void fireUnpublishWorkspaceAction(long workspaceId, String prevCategory);
+  void fireUnmarkAsFeaturedAction(long workspaceId, String prevCategory);
 }

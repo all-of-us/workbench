@@ -6,7 +6,7 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.MarkWorkspaceFeaturedRequest;
 
 @Mapper(config = MapStructConfig.class)
 public interface FeaturedWorkspaceMapper {
@@ -14,12 +14,12 @@ public interface FeaturedWorkspaceMapper {
   @Mapping(target = "workspace", source = "dbWorkspace")
   @Mapping(target = "id", ignore = true)
   DbFeaturedWorkspace toDbFeaturedWorkspace(
-      PublishWorkspaceRequest featuredWorkspace, DbWorkspace dbWorkspace);
+      MarkWorkspaceFeaturedRequest featuredWorkspace, DbWorkspace dbWorkspace);
 
   @Mapping(target = "description", source = "featuredWorkspace.description")
   @Mapping(target = "category", source = "featuredWorkspace.category")
   DbFeaturedWorkspace toDbFeaturedWorkspace(
-      DbFeaturedWorkspace dbFeaturedWorkspace, PublishWorkspaceRequest featuredWorkspace);
+      DbFeaturedWorkspace dbFeaturedWorkspace, MarkWorkspaceFeaturedRequest featuredWorkspace);
 
   FeaturedWorkspaceCategory toFeaturedWorkspaceCategory(DbFeaturedCategory dbFeaturedCategory);
 

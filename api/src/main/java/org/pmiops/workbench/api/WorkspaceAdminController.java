@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.MarkWorkspaceFeaturedRequest;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAdminView;
@@ -143,16 +143,16 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<EmptyResponse> publishWorkspaceViaDB(
-      String workspaceNamespace, PublishWorkspaceRequest body) {
-    workspaceAdminService.publishWorkspaceViaDB(workspaceNamespace, body);
+  public ResponseEntity<EmptyResponse> markAsFeatured(
+      String workspaceNamespace, MarkWorkspaceFeaturedRequest body) {
+    workspaceAdminService.markWorkspaceAsFeatured(workspaceNamespace, body);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
-    workspaceAdminService.unpublishWorkspaceViaDB(workspaceNamespace);
+  public ResponseEntity<EmptyResponse> unmarkAsFeaturedWorkspace(String workspaceNamespace) {
+    workspaceAdminService.unmarkAsFeaturedWorkspace(workspaceNamespace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
