@@ -502,8 +502,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void markAsFeaturedByOwner(DbWorkspace dbWorkspace) {
-    // If workspace is already marked as featured, throw an exception as owners can't mark it again
+  public void markWorkspaceAsFeatured(DbWorkspace dbWorkspace) {
+    // If workspace is already marked as featured, throw an exception as owners can't mark it again even in a
+    // different category
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
         .ifPresentOrElse(
@@ -536,7 +537,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               // Send Email to all workspace owners to let them know Workspace has been published
               final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
               try {
-                mailService.sendFeaturedWorkspaceEmail(dbWorkspace, owners);
+                mailService.sendFeaturedWorkspaceByOwnerEmail(dbWorkspace, owners);
               } catch (final MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }

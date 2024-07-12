@@ -1354,12 +1354,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
-  /v1/workspaces/{workspaceNamespace}/markAsFeaturedByOwner:
+  /v1/workspaces/{workspaceNamespace}/markWorkspaceAsFeatured:
     get:
       tags:
         - workspaces
       description: Mark a workspace as Featured Community Workspace by Owner
-      operationId: markAsFeaturedByOwner
+      operationId: markWorkspaceAsFeatured
       parameters:
         - name: workspaceNamespace
           in: path

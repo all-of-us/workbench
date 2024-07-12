@@ -71,5 +71,5 @@ public interface WorkspaceService {
 
   void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status);
 
-  void markAsFeaturedByOwner(DbWorkspace dbWorkspace);
+  void markWorkspaceAsFeatured(DbWorkspace dbWorkspace);
 }

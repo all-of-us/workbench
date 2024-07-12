@@ -839,14 +839,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> markAsFeaturedByOwner(String workspaceNamespace) {
+  public ResponseEntity<EmptyResponse> markWorkspaceAsFeatured(String workspaceNamespace) {
 
     // Ensure user is the owner of the workspace before marking as Featured
     DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
 
-    workspaceService.markAsFeaturedByOwner(dbWorkspace);
+    workspaceService.markWorkspaceAsFeatured(dbWorkspace);
     workspaceAuditor.fireMarkAsFeaturedAction(dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(new EmptyResponse());
   }

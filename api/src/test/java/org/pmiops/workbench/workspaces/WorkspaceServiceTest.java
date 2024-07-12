@@ -714,7 +714,7 @@ public class WorkspaceServiceTest {
 
     assertThrows(
         BadRequestException.class,
-        () -> workspaceService.markAsFeaturedByOwner(dbWorkspace),
+        () -> workspaceService.markWorkspaceAsFeatured(dbWorkspace),
         "Workspace is already featured");
   }
 
@@ -756,9 +756,9 @@ public class WorkspaceServiceTest {
 
     when(accessTierService.getRegisteredTierOrThrow()).thenReturn(createControlledTier());
 
-    workspaceService.markAsFeaturedByOwner(dbWorkspace);
+    workspaceService.markWorkspaceAsFeatured(dbWorkspace);
 
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockMailService).sendFeaturedWorkspaceEmail(any(), any());
+    verify(mockMailService).sendFeaturedWorkspaceByOwnerEmail(any(), any());
   }
 }

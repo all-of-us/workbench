@@ -89,7 +89,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public void markAsFeaturedByOwner(DbWorkspace dbWorkspace) {
+  public void markWorkspaceAsFeatured(DbWorkspace dbWorkspace) {
     // no-op
   }
 }

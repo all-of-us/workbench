@@ -405,7 +405,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendFeaturedWorkspaceEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendFeaturedWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendMarkAsFeaturedWorkspaceEmail(
         workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
