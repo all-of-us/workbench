@@ -38,5 +38,13 @@
   {
     "name": "SEX_AT_BIRTH",
     "type": "STRING"
+  },
+  {
+    "name": "SELF_REPORTED_CATEGORY_CONCEPT_ID",
+    "type": "INTEGER"
+  },
+  {
+    "name": "SELF_REPORTED_CATEGORY",
+    "type": "STRING"
   }
 ]
