@@ -22,6 +22,6 @@ public interface WorkspaceAuditor {
   /** Fires an audit log event for collaborating on a workspace. */
   void fireCollaborateAction(long sourceWorkspaceId, Map<Long, String> aclStringsByUserId);
 
-  /** Fires an audit log event for marking workspace as featured workspace */
+  /** Fires an audit log event for marking workspace as featured */
   void fireMarkAsFeaturedAction(long workspaceId);
 }

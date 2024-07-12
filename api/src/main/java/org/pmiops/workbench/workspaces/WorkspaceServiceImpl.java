@@ -501,22 +501,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .forEach(id -> workspaceDao.updateBillingStatus(id, status));
   }
 
+  /**
+   * Marks a workspace as featured and sends an email to the workspace owners.
+   *
+   * @param dbWorkspace The workspace to be marked as featured.
+   * @throws BadRequestException if the workspace is already marked as featured.
+   */
   @Override
   public void markWorkspaceAsFeatured(DbWorkspace dbWorkspace) {
-    // If workspace is already marked as featured, throw an exception as owners can't mark it again
-    // even in a
-    // different category
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
         .ifPresentOrElse(
             (dbFeaturedWorkspace) -> {
+              // If the workspace is already featured, a BadRequestException is thrown
               throw new BadRequestException("Workspace is already marked featured");
             },
             () -> {
-              PublishWorkspaceRequest publishWorkspaceRequest =
-                  new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
-
-              // Update Acl in firecloud so that everyone can view the workspace
+              // Update Acl in firecloud so that everyone can view the workspace with READ access
               var aclUpdate =
                   FirecloudTransforms.buildAclUpdate(
                       getPublishedWorkspacesGroupEmail(), WorkspaceAccessLevel.READER);
@@ -527,19 +528,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      publishWorkspaceRequest, dbWorkspace);
-
+                      new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY),
+                      dbWorkspace);
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
-              log.info(
-                  String.format(
-                      "Workspace %s has been published by Owner",
-                      dbWorkspace.getWorkspaceNamespace()));
 
-              // Send Email to all workspace owners to let them know Workspace has been published
-              final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+              List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
               try {
                 mailService.sendFeaturedWorkspaceByOwnerEmail(dbWorkspace, owners);
-              } catch (final MessagingException e) {
+              } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }
             });

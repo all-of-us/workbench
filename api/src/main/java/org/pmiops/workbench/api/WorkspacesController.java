@@ -851,6 +851,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 
+  /**
+   * Marks a workspace as featured.
+   *
+   * <p>This method is used to mark a workspace as featured. It first ensures that the user is the
+   * owner of the workspace. If the user is not the owner, an exception is thrown. If the user is
+   * the owner, the workspace is marked as featured. An audit event is then fired to record the
+   * action of marking the workspace as featured.
+   *
+   * @param workspaceNamespace The namespace of the workspace to be marked as featured.
+   * @return ResponseEntity<EmptyResponse> Returns an HTTP response entity with an empty body and a
+   *     status of 200 OK.
+   * @throws NotFoundException if the workspace with the provided namespace is not found.
+   * @throws ForbiddenException if the user is not the owner of the workspace.
+   */
   @Override
   public ResponseEntity<EmptyResponse> markWorkspaceAsFeatured(String workspaceNamespace) {
 
@@ -859,8 +873,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
 
+    // Mark the workspace as featured
     workspaceService.markWorkspaceAsFeatured(dbWorkspace);
+
+    // Fire an audit event to record the action of marking the workspace as featured
     workspaceAuditor.fireMarkAsFeaturedAction(dbWorkspace.getWorkspaceId());
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
