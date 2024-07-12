@@ -388,12 +388,12 @@ describe('WorkspaceAbout', () => {
     screen.getByText('Contact Support to unpublish');
   });
 
-  it('Publish button click sets showPublishConsentModal to true', () => {
+  it('Publish button click sets showPublishConsentModal to true', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
     });
     component();
-    user.click(screen.getByText('Publish'));
+    await user.click(screen.getByText('Publish'));
     expect(
       screen.getByText('Publish As a Community Workspace')
     ).toBeInTheDocument();
