@@ -418,7 +418,11 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendMarkAsFeaturedWorkspaceEmail(
-      DbWorkspace workspace, List<DbUser> owners, String category, boolean featured, boolean isAdmin)
+      DbWorkspace workspace,
+      List<DbUser> owners,
+      String category,
+      boolean featured,
+      boolean isAdmin)
       throws MessagingException {
 
     String actionType = featured ? "published" : "unpublished";
@@ -451,8 +455,7 @@ public class MailServiceImpl implements MailService {
         subject,
         message,
         buildHtml(
-            templateResource,
-            featuredWorkspaceSubstitutionMap(workspace, category, supportEmail)));
+            templateResource, featuredWorkspaceSubstitutionMap(workspace, category, supportEmail)));
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
