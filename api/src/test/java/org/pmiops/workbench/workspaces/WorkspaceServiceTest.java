@@ -759,5 +759,38 @@ public class WorkspaceServiceTest {
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockMailService).sendFeaturedWorkspaceByOwnerEmail(any(), any());
-  }
 }
+
+  @Test
+  public void testGetFeaturedWorkspaces_all() {
+    // start with none
+    var before = workspaceService.getFeaturedWorkspaces();
+    assertThat(before).isEmpty();
+
+    // set all workspaces as featured
+    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
+            .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    var result = workspaceService.getFeaturedWorkspaces();
+    assertThat(result).hasSize(dbWorkspaces.size());
+  }
+
+  @Test
+  public void testGetFeaturedWorkspaces_one() {
+    // arbitrary choice from dbWorkspaces
+    var testWorkspace = dbWorkspaces.get(2);
+
+    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
+            .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+
+    var result = workspaceService.getFeaturedWorkspaces();
+    assertThat(result).hasSize(1);
+    var resultWorkspace = result.get(0).getWorkspace();
+    assertThat(resultWorkspace.getName()).isEqualTo(testWorkspace.getName());
+    assertThat(resultWorkspace.getNamespace()).isEqualTo(testWorkspace.getWorkspaceNamespace());
+    assertThat(resultWorkspace.getId()).isEqualTo(testWorkspace.getFirecloudName());
+    assertThat(resultWorkspace.getFeaturedCategory())
+            .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+  }
