@@ -1354,6 +1354,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
+  /v1/workspaces/featured:
+    get:
+      tags:
+        - Featured Workspace
+      description: Returns a list of featured workspaces
+      operationId: getFeaturedWorkspaces
+      responses:
+        200:
+          description: A list of featured workspace entity objects including their featured
+           workspace categories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponseListResponse'
+        501:
+          description: This endpoint is not available in this environment because
+           enablePublishedWorkspacesViaDb is not set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete:
     get:
       tags:

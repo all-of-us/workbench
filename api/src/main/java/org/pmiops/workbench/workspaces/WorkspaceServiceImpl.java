@@ -165,6 +165,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public List<WorkspaceResponse> getFeaturedWorkspaces() {
+    return workspaceMapper
+        .toApiWorkspaceResponseList(
+            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+        .stream()
+        .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
+        .toList();
+  }
+
+  @Override
   public String getPublishedWorkspacesGroupEmail() {
     // All users with CT access also have RT access, so we know that any user with access to
     // workspaces will be a member of the RT Auth Domain Group.  Therefore, we can use this group

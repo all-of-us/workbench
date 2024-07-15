@@ -71,12 +71,12 @@ public interface WorkspaceMapper {
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
       WorkspaceDao workspaceDao,
-      List<RawlsWorkspaceListResponse> workspaces,
+      List<RawlsWorkspaceListResponse> fcWorkspaces,
       FeaturedWorkspaceService featuredWorkspaceService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
-        workspaces.stream()
+        fcWorkspaces.stream()
             .collect(
                 Collectors.toMap(
                     fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
