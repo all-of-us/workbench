@@ -545,7 +545,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
               List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
               try {
-                mailService.sendWorkspaceIsFeaturedEmail(dbWorkspace, owners);
+                mailService.sendWorkspaceIsCommunityWorkspaceEmail(dbWorkspace, owners);
               } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }

@@ -95,13 +95,13 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
+  private static final String FEATURED_WORKSPACE_ADMIN_RESOURCE =
       "emails/featured_workspace_admin/content.html";
 
-  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
+  private static final String UNMARK_FEATURED_WORKSPACE_ADMIN_RESOURCE =
       "emails/unmark_featured_admin/content.html";
 
-  private static final String PUBLISH_WORKSPACE_BY_OWNER_RESOURCE =
+  private static final String FEATURED_WORKSPACE_BY_OWNER_RESOURCE =
       "emails/featured_workspace_owner/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
@@ -394,34 +394,34 @@ public class MailServiceImpl implements MailService {
   public void sendWorkspaceIsFeaturedByAdminEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(
+    sendFeaturedWorkspaceByAdminEmail(
         workspace, owners, featuredWorkspaceCategoryAsDisplayString(publishCategory), true);
   }
 
   @Override
   public void sendWorkspaceIsNotFeaturedByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
+    sendFeaturedWorkspaceByAdminEmail(workspace, owners, "", false);
   }
 
   @Override
-  public void sendWorkspaceIsFeaturedEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendWorkspaceIsCommunityWorkspaceEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendMarkAsFeaturedWorkspaceEmail(
         workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
   }
 
-  private void sendPublishUnpublishWorkspaceByAdminEmail(
-      DbWorkspace workspace, List<DbUser> owners, String categoryIfAny, boolean publish)
+  private void sendFeaturedWorkspaceByAdminEmail(
+      DbWorkspace workspace, List<DbUser> owners, String categoryIfAny, boolean featured)
       throws MessagingException {
-    sendMarkAsFeaturedWorkspaceEmail(workspace, owners, categoryIfAny, publish, true);
+    sendMarkAsFeaturedWorkspaceEmail(workspace, owners, categoryIfAny, featured, true);
   }
 
   private void sendMarkAsFeaturedWorkspaceEmail(
-      DbWorkspace workspace, List<DbUser> owners, String category, boolean publish, boolean isAdmin)
+      DbWorkspace workspace, List<DbUser> owners, String category, boolean featured, boolean isAdmin)
       throws MessagingException {
 
-    String actionType = publish ? "published" : "unpublished";
+    String actionType = featured ? "published" : "unpublished";
     String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
@@ -440,9 +440,9 @@ public class MailServiceImpl implements MailService {
                 workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging);
 
     String templateResource =
-        publish
-            ? (isAdmin ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : PUBLISH_WORKSPACE_BY_OWNER_RESOURCE)
-            : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE;
+        featured
+            ? (isAdmin ? FEATURED_WORKSPACE_ADMIN_RESOURCE : FEATURED_WORKSPACE_BY_OWNER_RESOURCE)
+            : UNMARK_FEATURED_WORKSPACE_ADMIN_RESOURCE;
 
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
@@ -452,7 +452,7 @@ public class MailServiceImpl implements MailService {
         message,
         buildHtml(
             templateResource,
-            publishUnpublishWorkspaceSubstitutionMap(workspace, category, supportEmail)));
+            featuredWorkspaceSubstitutionMap(workspace, category, supportEmail)));
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
@@ -685,7 +685,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
+  private Map<EmailSubstitutionField, String> featuredWorkspaceSubstitutionMap(
       DbWorkspace workspace, String publishCategory, String supportEmail) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())

@@ -77,6 +77,6 @@ public interface MailService {
   void sendWorkspaceIsNotFeaturedByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 
-  void sendWorkspaceIsFeaturedEmail(final DbWorkspace workspace, List<DbUser> owners)
+  void sendWorkspaceIsCommunityWorkspaceEmail(final DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 }
