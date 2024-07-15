@@ -758,7 +758,7 @@ public class WorkspaceServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockMailService).sendFeaturedWorkspaceByOwnerEmail(any(), any());
+    verify(mockMailService).sendMarkWorkspaceAsFeaturedByOwnerEmail(any(), any());
 }
 
   @Test

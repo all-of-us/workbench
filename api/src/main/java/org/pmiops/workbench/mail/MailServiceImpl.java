@@ -96,13 +96,13 @@ public class MailServiceImpl implements MailService {
       "emails/workspace_admin_locking/content.html";
 
   private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/publish_workspace_by_admin/content.html";
+      "emails/featured_workspace_admin/content.html";
 
   private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/unpublish_workspace_by_admin/content.html";
+      "emails/unmark_featured_admin/content.html";
 
   private static final String PUBLISH_WORKSPACE_BY_OWNER_RESOURCE =
-      "emails/publish_workspace_by_owner/content.html";
+      "emails/featured_workspace_owner/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -391,7 +391,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendFeaturedWorkspaceByAdminEmail(
+  public void sendMarkWorkspaceAsFeaturedByAdminEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
     sendPublishUnpublishWorkspaceByAdminEmail(
@@ -399,13 +399,13 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendUnfeatureWorkspaceEmailByAdmin(DbWorkspace workspace, List<DbUser> owners)
+  public void sendUnmarkWorkspaceAsFeaturedEmailByAdmin(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
   }
 
   @Override
-  public void sendFeaturedWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
+  public void sendMarkWorkspaceAsFeaturedByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendMarkAsFeaturedWorkspaceEmail(
         workspace, owners, FeaturedWorkspaceCategory.COMMUNITY.toString(), true, false);
