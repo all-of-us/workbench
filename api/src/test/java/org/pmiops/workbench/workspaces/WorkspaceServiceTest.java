@@ -759,7 +759,7 @@ public class WorkspaceServiceTest {
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockMailService).sendMarkWorkspaceAsFeaturedByOwnerEmail(any(), any());
-}
+  }
 
   @Test
   public void testGetFeaturedWorkspaces_all() {
@@ -770,7 +770,7 @@ public class WorkspaceServiceTest {
     // set all workspaces as featured
     when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-            .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(dbWorkspaces.size());
@@ -783,7 +783,7 @@ public class WorkspaceServiceTest {
 
     when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
-            .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
@@ -792,5 +792,6 @@ public class WorkspaceServiceTest {
     assertThat(resultWorkspace.getNamespace()).isEqualTo(testWorkspace.getWorkspaceNamespace());
     assertThat(resultWorkspace.getId()).isEqualTo(testWorkspace.getFirecloudName());
     assertThat(resultWorkspace.getFeaturedCategory())
-            .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+        .isEqualTo(FeaturedWorkspaceCategory.DEMO_PROJECTS);
   }
+}
