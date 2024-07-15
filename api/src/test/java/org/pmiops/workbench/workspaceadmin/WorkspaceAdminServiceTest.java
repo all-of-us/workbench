@@ -596,7 +596,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendMarkWorkspaceAsFeaturedByAdminEmail(any(), any(), any());
+    verify(mailService).sendWorkspaceIsFeaturedByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -634,7 +634,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendMarkWorkspaceAsFeaturedByAdminEmail(any(), any(), any());
+    verify(mailService).sendWorkspaceIsFeaturedByAdminEmail(any(), any(), any());
 
     markWorkspaceAsFeaturedRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
     DbFeaturedWorkspace mockFeaturedWorkspace =
@@ -650,7 +650,7 @@ public class WorkspaceAdminServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mailService, times(2)).sendMarkWorkspaceAsFeaturedByAdminEmail(any(), any(), any());
+    verify(mailService, times(2)).sendWorkspaceIsFeaturedByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -685,7 +685,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .fireMarkAsFeaturedAction(
             workspace.getWorkspaceId(), markWorkspaceFeaturedRequest.getCategory().toString(), "");
-    verify(mailService, never()).sendMarkWorkspaceAsFeaturedByAdminEmail(any(), any(), any());
+    verify(mailService, never()).sendWorkspaceIsFeaturedByAdminEmail(any(), any(), any());
   }
 
   @Test
@@ -708,7 +708,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
         .fireUnmarkAsFeaturedAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    verify(mailService).sendUnmarkWorkspaceAsFeaturedEmailByAdmin(any(), any());
+    verify(mailService).sendWorkspaceIsNotFeaturedByAdminEmail(any(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

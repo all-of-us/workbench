@@ -525,9 +525,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
     try {
       if (published) {
-        mailService.sendMarkWorkspaceAsFeaturedByAdminEmail(dbWorkspace, owners, category);
+        mailService.sendWorkspaceIsFeaturedByAdminEmail(dbWorkspace, owners, category);
       } else {
-        mailService.sendUnmarkWorkspaceAsFeaturedEmailByAdmin(dbWorkspace, owners);
+        mailService.sendWorkspaceIsNotFeaturedByAdminEmail(dbWorkspace, owners);
       }
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
