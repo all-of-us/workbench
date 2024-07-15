@@ -2,10 +2,8 @@ package org.pmiops.workbench.featuredworkspace;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,13 +71,8 @@ public class FeaturedWorkspaceTest {
   }
 
   @Test
-  public void testFeaturedCategory_ThrowExceptionIfWorkspaceDoesntExist() {
-    NoSuchElementException exception =
-        assertThrows(
-            NoSuchElementException.class,
-            () -> featuredWorkspaceService.getFeaturedCategory(dbWorkspace));
-
-    assertThat(exception.getMessage()).isEqualTo("No value present");
+  public void testFeaturedCategory_EmptyIfWorkspaceDoesntExist() {
+    assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace)).isEmpty();
   }
 
   @Test
