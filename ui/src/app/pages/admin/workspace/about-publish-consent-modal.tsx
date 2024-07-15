@@ -47,8 +47,14 @@ export const AboutPublishConsentModal = (props: Props) => {
             Please read and agree to the following statements to confirm that
             your workspace meets the{' '}
             <span style={{ fontStyle: 'italic' }}>All of US</span> Researcher
-            Workbench community sharing requirements. Read the NAME article on
-            the User Support Hub to learn more about community workspaces.
+            Workbench community sharing requirements. Read the{' '}
+            <a
+              href='https://support.researchallofus.org/hc/en-us/articles/24058730663828-Working-Title-Publishing-your-workspace-as-a-community-workspace-in-the-Researcher-Workbench'
+              style={{ color: colors.primary, textDecoration: 'underline' }}
+            >
+              article
+            </a>{' '}
+            on the User Support Hub to learn more about community workspaces.
           </label>
           <br />
           <br />
