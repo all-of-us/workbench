@@ -154,8 +154,7 @@ public class WorkspaceServiceTest {
   private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
   private static final String FREE_TIER_BILLING_ACCOUNT_ID = "free-tier-account";
 
-  private static final long INITIAL_WORKSPACE_ID = 1;
-  private final AtomicLong workspaceIdIncrementer = new AtomicLong(INITIAL_WORKSPACE_ID);
+  private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
 
   private static WorkbenchConfig workbenchConfig;
 
