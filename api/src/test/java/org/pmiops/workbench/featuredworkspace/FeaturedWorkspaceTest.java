@@ -1,6 +1,7 @@
 package org.pmiops.workbench.featuredworkspace;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -91,6 +92,6 @@ public class FeaturedWorkspaceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(dbFeaturedWorkspace));
     assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace))
-        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .hasValue(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 }

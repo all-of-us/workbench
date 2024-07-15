@@ -58,7 +58,7 @@ public interface WorkspaceMapper {
       FeaturedWorkspaceService featuredWorkspaceService) {
     workspace.setFeaturedCategory(
         featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)
-            ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace)
+            ? featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null)
             : null);
   }
 
