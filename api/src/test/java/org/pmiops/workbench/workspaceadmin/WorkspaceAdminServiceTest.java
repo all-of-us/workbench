@@ -560,7 +560,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishWorkspaceViaDB() throws MessagingException {
+  public void testMarkWorkspaceAsFeatured() throws MessagingException {
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
 
@@ -600,7 +600,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
+  public void testMarkWorkspaceAsFeatured_updateWithDifferentCategory() throws MessagingException {
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     MarkWorkspaceFeaturedRequest markWorkspaceAsFeaturedRequest =
@@ -654,7 +654,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishWorkspaceViaDB_updateWithSameCategory() throws MessagingException {
+  public void testMarkWorkspaceAsFeatured_updateWithSameCategory() throws MessagingException {
 
     // Arrange
     DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
@@ -689,17 +689,17 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testUnpublishWorkspaceViaDb() throws MessagingException {
+  public void testUnMarkWorkspaceAsFeatured() throws MessagingException {
 
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    DbFeaturedWorkspace mockFeaturedworkspace =
+    DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
-        .thenReturn(Optional.of(mockFeaturedworkspace));
+        .thenReturn(Optional.of(mockFeaturedWorkspace));
 
     // Act
     workspaceAdminService.unmarkAsFeaturedWorkspace(mockDbWorkspace.getWorkspaceNamespace());

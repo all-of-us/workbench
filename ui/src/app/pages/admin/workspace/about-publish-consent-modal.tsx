@@ -4,15 +4,19 @@ import { useState } from 'react';
 import { Button } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
 import { CheckBox } from 'app/components/inputs';
+import { ErrorMessage } from 'app/components/messages';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { Spinner } from 'app/components/spinners';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 
 interface Props {
+  workspaceNamespace: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -30,10 +34,29 @@ export const AboutPublishConsentModal = (props: Props) => {
       [checkboxId]: checked,
     }));
   };
+
+  const [publishing, setPublishing] = useState(false);
+
+  const [showError, setShowError] = useState(false);
+
   // State to control the visibility of the button
-  const showConfirmButton = Object.values(checkboxStates).every(
-    (state) => state === true
-  );
+  const showConfirmButton =
+    !showError &&
+    Object.values(checkboxStates).every((state) => state === true) &&
+    !publishing;
+
+  const publishWorkspace = async () => {
+    setPublishing(true);
+    try {
+      await workspacesApi().markWorkspaceAsFeatured(props.workspaceNamespace);
+      props.onConfirm();
+    } catch (ex) {
+      console.log(ex);
+      setShowError(true);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   return (
     <Modal width={800}>
@@ -43,6 +66,11 @@ export const AboutPublishConsentModal = (props: Props) => {
       <ModalBody>
         {/* Text area to enter the reason for locking workspace */}
         <div>
+          {showError && (
+            <ErrorMessage>
+              There was an error while Publishing Workspace. Please try later
+            </ErrorMessage>
+          )}
           <label style={{ color: colors.primary }}>
             Please read and agree to the following statements to confirm that
             your workspace meets the{' '}
@@ -115,11 +143,15 @@ export const AboutPublishConsentModal = (props: Props) => {
         >
           CANCEL
         </Button>
+
         <Button
           type='primary'
-          onClick={props.onConfirm}
+          onClick={publishWorkspace}
           disabled={!showConfirmButton}
         >
+          {publishing && (
+            <Spinner size={16} style={{ marginRight: '0.25rem' }} />
+          )}
           CONFIRM
         </Button>
       </ModalFooter>

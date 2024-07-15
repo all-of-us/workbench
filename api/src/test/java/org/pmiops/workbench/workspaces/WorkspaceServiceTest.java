@@ -690,6 +690,7 @@ public class WorkspaceServiceTest {
 
   @Test
   public void markWorkspaceAsFeatured_workspaceAlreadyMarkedFeatured() {
+    // Arrange
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
@@ -705,13 +706,14 @@ public class WorkspaceServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(mockDBFeaturedWorkspace));
 
+    // Assert
     assertThrows(
         BadRequestException.class,
         () -> workspaceService.markWorkspaceAsFeatured(dbWorkspace),
         "Workspace is already featured");
   }
 
-  public static DbAccessTier createControlledTier() {
+  public static DbAccessTier createRegisteredTier() {
     return new DbAccessTier()
         .setAccessTierId(1)
         .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
@@ -724,10 +726,11 @@ public class WorkspaceServiceTest {
 
   @Test
   public void markWorkspaceAsFeatured() throws MessagingException {
+    // Arrange
     DbWorkspace dbWorkspace =
         buildDbWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
-            "Controlled Tier Workspace",
+            "Registered Tier Workspace",
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
 
@@ -739,6 +742,7 @@ public class WorkspaceServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace)).thenReturn(Optional.empty());
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockDBFeaturedWorkspace);
+
     when(mockFireCloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(
             new RawlsWorkspaceResponse()
@@ -747,10 +751,12 @@ public class WorkspaceServiceTest {
                         .bucketName("bucket")
                         .namespace(DEFAULT_WORKSPACE_NAMESPACE)));
 
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(createControlledTier());
+    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(createRegisteredTier());
 
+    // Act
     workspaceService.markWorkspaceAsFeatured(dbWorkspace);
 
+    // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockMailService).sendFeaturedWorkspaceByOwnerEmail(any(), any());
   }

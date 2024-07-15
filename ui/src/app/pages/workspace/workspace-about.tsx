@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
+  FeaturedWorkspaceCategory,
   Profile,
   UserRole,
   WorkspaceBillingUsageResponse,
@@ -607,8 +608,14 @@ export const WorkspaceAbout = fp.flow(
           )}
           {showPublishConsentModal && (
             <AboutPublishConsentModal
+              workspaceNamespace={workspace.namespace}
               onConfirm={() => {
-                this.publishUnpublishWorkspace(true);
+                this.setState({
+                  workspace: {
+                    ...workspace,
+                    featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
+                  },
+                });
                 this.setState({ showPublishConsentModal: false });
               }}
               onCancel={() => this.setState({ showPublishConsentModal: false })}

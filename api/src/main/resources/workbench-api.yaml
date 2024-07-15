@@ -1369,11 +1369,17 @@ paths:
             type: string
       responses:
         202:
-          description: Workspace has been marked as Featured Workspace
+          description: Workspace has been marked as Featured Community Workspace
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
+        400:
+          description: Bad Request as workspace is already marked as Featured Workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         403:
           description: Forbidden as user is not the owner of the workspace
           content:
