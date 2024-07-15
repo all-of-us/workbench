@@ -676,7 +676,8 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     // Act
-    workspaceAdminService.markWorkspaceAsFeatured(workspace.getWorkspaceNamespace(), markWorkspaceFeaturedRequest);
+    workspaceAdminService.markWorkspaceAsFeatured(
+        workspace.getWorkspaceNamespace(), markWorkspaceFeaturedRequest);
 
     // Assert
     // Since the category is the same, we should not save the workspace again or send emails
