@@ -115,12 +115,12 @@ const styles = reactStyles({
 
 const pageId = 'workspace';
 
-const PublishButtonToolTipText = (isWorkspaceOwner: boolean) => {
+const publishButtonToolTipText = (isWorkspaceOwner: boolean) => {
   let toolTip;
   if (isWorkspaceOwner) {
     toolTip = 'Contact Support to unpublish';
   } else {
-    toolTip = 'Only workspaces owners can publish community workspace.';
+    toolTip = 'Only workspace owners can publish community workspaces.';
   }
   return toolTip;
 };
@@ -147,7 +147,7 @@ const ShareTooltipText = () => {
   );
 };
 
-const CommunityWorkspaceTooltipText = () => {
+const communityWorkspaceTooltipText = () => {
   return (
     <div>
       Community workspaces are shared by researchers with the Workbench
@@ -331,15 +331,15 @@ export const WorkspaceAbout = fp.flow(
       } = this.state;
       const published = workspace?.published;
       const featuredCategory = workspace?.featuredCategory;
-      const NotPublished = !featuredCategory;
+      const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
-      // isWorkspaceOwner NotPublished disabled
+      // isWorkspaceOwner notPublished disabled
       // true            true         true
       // true            false        false
       // false           true         false
       // false           false        false
-      const publishButtonToolTipDisabled = isWorkspaceOwner && NotPublished;
+      const publishButtonToolTipDisabled = isWorkspaceOwner && notPublished;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
@@ -530,7 +530,7 @@ export const WorkspaceAbout = fp.flow(
             </div>
 
             <TooltipTrigger
-              content='Only workspaces owners can view the billing report.'
+              content='Only workspace owners can view the billing report.'
               disabled={
                 workspace &&
                 WorkspacePermissionsUtil.isOwner(workspace.accessLevel)
@@ -566,13 +566,13 @@ export const WorkspaceAbout = fp.flow(
               <div>
                 <h3 style={{ marginBottom: '0.75rem' }}>
                   Community Workspace
-                  <TooltipTrigger content={CommunityWorkspaceTooltipText()}>
+                  <TooltipTrigger content={communityWorkspaceTooltipText()}>
                     <InfoIcon style={{ margin: '0 0.25rem' }} />
                   </TooltipTrigger>
                 </h3>
 
                 <TooltipTrigger
-                  content={PublishButtonToolTipText(isWorkspaceOwner)}
+                  content={publishButtonToolTipText(isWorkspaceOwner)}
                   disabled={publishButtonToolTipDisabled}
                 >
                   <Button

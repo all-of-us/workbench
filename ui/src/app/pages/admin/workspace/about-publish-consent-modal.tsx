@@ -41,7 +41,6 @@ export const AboutPublishConsentModal = (props: Props) => {
         <SemiBoldHeader>Publish As a Community Workspace</SemiBoldHeader>
       </ModalTitle>
       <ModalBody>
-        {/* Text area to enter the reason for locking workspace */}
         <div>
           <label style={{ color: colors.primary }}>
             Please read and agree to the following statements to confirm that
