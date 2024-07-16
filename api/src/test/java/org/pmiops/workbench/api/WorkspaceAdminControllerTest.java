@@ -31,7 +31,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
+import org.pmiops.workbench.model.MarkWorkspaceFeaturedRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -254,36 +254,35 @@ public class WorkspaceAdminControllerTest {
 
   @Test
   public void publishWorkspaceViaDB_Success() {
-    PublishWorkspaceRequest request = new PublishWorkspaceRequest();
-    workspaceAdminController.publishWorkspaceViaDB(WORKSPACE_NAMESPACE, request);
-    verify(mockWorkspaceAdminService).publishWorkspaceViaDB(WORKSPACE_NAMESPACE, request);
+    MarkWorkspaceFeaturedRequest request = new MarkWorkspaceFeaturedRequest();
+    workspaceAdminController.markAsFeatured(WORKSPACE_NAMESPACE, request);
+    verify(mockWorkspaceAdminService).markWorkspaceAsFeatured(WORKSPACE_NAMESPACE, request);
   }
 
   @Test
   public void publishWorkspaceViaDB_NotFound() {
-    PublishWorkspaceRequest request = new PublishWorkspaceRequest();
+    MarkWorkspaceFeaturedRequest request = new MarkWorkspaceFeaturedRequest();
     doThrow(new NotFoundException("not found"))
         .when(mockWorkspaceAdminService)
-        .publishWorkspaceViaDB(NONSENSE_NAMESPACE, request);
+        .markWorkspaceAsFeatured(NONSENSE_NAMESPACE, request);
 
     assertThatExceptionOfType(NotFoundException.class)
-        .isThrownBy(
-            () -> workspaceAdminController.publishWorkspaceViaDB(NONSENSE_NAMESPACE, request));
+        .isThrownBy(() -> workspaceAdminController.markAsFeatured(NONSENSE_NAMESPACE, request));
   }
 
   @Test
   public void unpublishWorkspaceViaDB_Success() {
-    workspaceAdminController.unpublishWorkspaceViaDB(WORKSPACE_NAMESPACE);
-    verify(mockWorkspaceAdminService).unpublishWorkspaceViaDB(WORKSPACE_NAMESPACE);
+    workspaceAdminController.unmarkAsFeaturedWorkspace(WORKSPACE_NAMESPACE);
+    verify(mockWorkspaceAdminService).unmarkAsFeaturedWorkspace(WORKSPACE_NAMESPACE);
   }
 
   @Test
   public void unpublishWorkspaceViaDB_NotFound() {
     doThrow(new NotFoundException("not found"))
         .when(mockWorkspaceAdminService)
-        .unpublishWorkspaceViaDB(NONSENSE_NAMESPACE);
+        .unmarkAsFeaturedWorkspace(NONSENSE_NAMESPACE);
 
     assertThatExceptionOfType(NotFoundException.class)
-        .isThrownBy(() -> workspaceAdminController.unpublishWorkspaceViaDB(NONSENSE_NAMESPACE));
+        .isThrownBy(() -> workspaceAdminController.unmarkAsFeaturedWorkspace(NONSENSE_NAMESPACE));
   }
 }
