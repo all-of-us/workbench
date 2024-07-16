@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { WorkspaceAccessLevel, WorkspacesApi } from 'generated/fetch';
+import {
+  FeaturedWorkspaceCategory,
+  WorkspaceAccessLevel,
+  WorkspacesApi,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -41,5 +45,12 @@ describe('WorkspaceCard', () => {
     workspaceStubs[0].adminLocked = true;
     component(WorkspaceAccessLevel.OWNER);
     expect(await screen.findByTestId('workspace-lock')).toBeInTheDocument();
+  });
+
+  it('show Community workspace icon if workspace is published by owner', async () => {
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    workspaceStubs[0].featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    component(WorkspaceAccessLevel.OWNER);
+    expect(screen.queryByRole('img').getAttribute('src')).toBe('CW_icon.png');
   });
 });

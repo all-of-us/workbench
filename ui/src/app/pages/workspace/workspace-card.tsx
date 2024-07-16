@@ -25,6 +25,8 @@ import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { isCommunityWorkspace } from 'app/utils/workspace-utils';
+import CW_icon from 'assets/icons/CW_icon.png';
 
 import { WorkspaceActionsMenu } from './workspace-actions-menu';
 
@@ -284,6 +286,24 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     style={{ justifyContent: 'flex-end', marginLeft: '1.2rem' }}
                   >
                     <FlexRow style={{ alignContent: 'space-between' }}>
+                      {accessTierShortName ===
+                        AccessTierShortNames.Controlled && (
+                        <ControlledTierBadge />
+                      )}
+                      {isCommunityWorkspace(workspace) && (
+                        <FlexColumn
+                          aria-label='Community Workspace'
+                          style={{
+                            justifyContent: 'flex-end',
+                            marginLeft: '0.5rem',
+                            marginRight: '0.5rem',
+                          }}
+                        >
+                          <TooltipTrigger content='Workspace is published as Community Workspace'>
+                            <img src={CW_icon} style={{ width: '25px' }} />
+                          </TooltipTrigger>
+                        </FlexColumn>
+                      )}
                       {adminLocked && (
                         <FlexColumn
                           data-test-id='workspace-lock'
@@ -296,10 +316,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             />
                           </TooltipTrigger>
                         </FlexColumn>
-                      )}
-                      {accessTierShortName ===
-                        AccessTierShortNames.Controlled && (
-                        <ControlledTierBadge />
                       )}
                     </FlexRow>
                   </FlexColumn>
