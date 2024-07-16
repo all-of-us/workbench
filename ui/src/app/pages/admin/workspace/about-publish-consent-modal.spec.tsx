@@ -60,7 +60,7 @@ describe('AboutPublishConsentModal', () => {
     expectButtonElementDisabled(confirmButton);
   });
 
-  it('show Error Message box in case of any error from API', async () => {
+  it('Verify that an error message box is displayed when the API returns an error', async () => {
     const mockOnConfirm = jest.fn();
     const mockOnCancel = jest.fn();
     render(
@@ -95,9 +95,10 @@ describe('AboutPublishConsentModal', () => {
       await confirmButton.click();
     });
 
+    console.log(screen.logTestingPlaygroundURL());
     expect(
       screen.getByText(
-        /there was an error while publishing workspace\. please try later/i
+        /there was an error while publishing the workspace\. please try again later\./i
       )
     ).toBeInTheDocument();
   });
