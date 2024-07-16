@@ -116,15 +116,20 @@ public interface WorkspaceMapper {
   Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
-  RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel,
-                                       FeaturedWorkspaceService featuredWorkspaceService);
+  RecentWorkspace toApiRecentWorkspace(
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService);
 
   @AfterMapping
   default void setFeaturedWorkspaceCategory(
-          @MappingTarget RecentWorkspace recentWorkspace,
-          DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel,
-          FeaturedWorkspaceService featuredWorkspaceService) {
-    recentWorkspace.getWorkspace().setFeaturedCategory(
+      @MappingTarget RecentWorkspace recentWorkspace,
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    recentWorkspace
+        .getWorkspace()
+        .setFeaturedCategory(
             featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null));
   }
 
