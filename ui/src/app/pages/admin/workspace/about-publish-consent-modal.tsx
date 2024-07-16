@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
 import { CheckBox } from 'app/components/inputs';
 import {
@@ -11,6 +11,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
+import { supportUrls } from 'app/utils/zendesk';
 
 interface Props {
   onConfirm: () => void;
@@ -47,12 +48,12 @@ export const AboutPublishConsentModal = (props: Props) => {
             your workspace meets the{' '}
             <span style={{ fontStyle: 'italic' }}>All of US</span> Researcher
             Workbench community sharing requirements. Read the{' '}
-            <a
-              href='https://support.researchallofus.org/hc/en-us/articles/24058730663828-Working-Title-Publishing-your-workspace-as-a-community-workspace-in-the-Researcher-Workbench'
-              style={{ color: colors.primary, textDecoration: 'underline' }}
+            <StyledExternalLink
+              href={supportUrls.publishCommunityWorkspace}
+              target='_blank'
             >
               article
-            </a>{' '}
+            </StyledExternalLink>{' '}
             on the User Support Hub to learn more about community workspaces.
           </label>
           <br />
