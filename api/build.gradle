@@ -3,6 +3,20 @@ import org.pmiops.workbench.tooling.GenerateAPIListingTask
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
+    // keep in sync with:
+    // the runtime field in api/src/main/webapp/WEB-INF/appengine-web.xml.template
+    // the Docker image in ci/Dockerfile.circle_build
+    // the Docker image in deploy/Dockerfile
+    // in this file:
+    // * sourceCompatibility
+    // * targetCompatibility
+    if (JavaVersion.current() != JavaVersion.VERSION_17) {
+        throw new GradleException(
+                "This build must be run with Java 17. " +
+                        "See developer-system-initialization.md. " +
+                        "The java version used was ${JavaVersion.current()}.")
+    }
+
     // External properties on the default project. Values declared in ext blocks
     // outside of the buildscript block aren't usable here.
     ext {
@@ -53,20 +67,6 @@ plugins {
     id 'org.owasp.dependencycheck' version '8.4.2'
     id 'org.springframework.boot' version '3.2.4'
     id 'jacoco'
-}
-
-// keep in sync with:
-// the runtime field in api/src/main/webapp/WEB-INF/appengine-web.xml.template
-// the Docker image in ci/Dockerfile.circle_build
-// the Docker image in deploy/Dockerfile
-// in this file:
-// * sourceCompatibility
-// * targetCompatibility
-if (JavaVersion.current() != JavaVersion.VERSION_17) {
-     throw new GradleException(
-            "This build must be run with Java 17. " +
-                    "See developer-system-initialization.md. " +
-                    "The java version used was ${JavaVersion.current()}.")
 }
 
 if (System.getenv("ADD_XLINT_DEPRECATION")) {
