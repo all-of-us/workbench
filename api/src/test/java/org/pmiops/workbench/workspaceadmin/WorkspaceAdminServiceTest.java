@@ -333,9 +333,8 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testGetWorkspaceAdminView_featuredCategory() {
-    when(mockFeatureService.isFeaturedWorkspace(dbWorkspace)).thenReturn(true);
     when(mockFeatureService.getFeaturedCategory(dbWorkspace))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.TUTORIAL_WORKSPACES);
+        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
     WorkspaceAdminView workspaceDetailsResponse =
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())

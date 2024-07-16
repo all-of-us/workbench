@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
 import { CheckBox } from 'app/components/inputs';
 import { ErrorMessage } from 'app/components/messages';
@@ -14,6 +14,7 @@ import {
 import { SpinnerOverlay } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { supportUrls } from 'app/utils/zendesk';
 
 interface Props {
   workspaceNamespace: string;
@@ -80,8 +81,14 @@ export const AboutPublishConsentModal = (props: Props) => {
             Please read and agree to the following statements to confirm that
             your workspace meets the{' '}
             <span style={{ fontStyle: 'italic' }}>All of US</span> Researcher
-            Workbench community sharing requirements. Read the NAME article on
-            the User Support Hub to learn more about community workspaces.
+            Workbench community sharing requirements. Read the{' '}
+            <StyledExternalLink
+              href={supportUrls.publishCommunityWorkspace}
+              target='_blank'
+            >
+              article
+            </StyledExternalLink>{' '}
+            on the User Support Hub to learn more about community workspaces.
           </label>
           <br />
           <br />
