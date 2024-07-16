@@ -29,7 +29,6 @@ describe('AboutPublishConsentModal', () => {
 
     // Initially, the confirm button should be disabled
     expectButtonElementDisabled(confirmButton);
-    expectButtonElementDisabled(confirmButton);
     // User can hit cancel to exit the modal
     expectButtonElementEnabled(cancelButton);
 
