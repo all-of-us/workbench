@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { Spinner } from 'app/components/spinners';
+import { SpinnerOverlay } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 
@@ -64,13 +64,18 @@ export const AboutPublishConsentModal = (props: Props) => {
         <SemiBoldHeader>Publish As a Community Workspace</SemiBoldHeader>
       </ModalTitle>
       <ModalBody>
+        {/* Show a spinner when publish API is being called*/}
+        {publishing && <SpinnerOverlay />}
         {/* Text area to enter the reason for locking workspace */}
         <div>
-          {showError && (
-            <ErrorMessage>
-              There was an error while Publishing Workspace. Please try later
-            </ErrorMessage>
-          )}
+          <div style={{ paddingBottom: '1rem' }}>
+            {showError && (
+              <ErrorMessage>
+                There was an error while publishing the workspace. Please try
+                again later.
+              </ErrorMessage>
+            )}
+          </div>
           <label style={{ color: colors.primary }}>
             Please read and agree to the following statements to confirm that
             your workspace meets the{' '}
@@ -149,9 +154,6 @@ export const AboutPublishConsentModal = (props: Props) => {
           onClick={publishWorkspace}
           disabled={!showConfirmButton}
         >
-          {publishing && (
-            <Spinner size={16} style={{ marginRight: '0.25rem' }} />
-          )}
           CONFIRM
         </Button>
       </ModalFooter>
