@@ -21,11 +21,6 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   }
 
   @Override
-  public boolean isFeaturedWorkspace(DbWorkspace dbWorkspace) {
-    return featuredWorkspaceDao.existsByWorkspace(dbWorkspace);
-  }
-
-  @Override
   public Optional<FeaturedWorkspaceCategory> getFeaturedCategory(DbWorkspace dbWorkspace) {
     return featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)

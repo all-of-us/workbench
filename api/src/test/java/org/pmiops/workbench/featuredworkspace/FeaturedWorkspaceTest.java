@@ -59,18 +59,6 @@ public class FeaturedWorkspaceTest {
   }
 
   @Test
-  public void testIsFeaturedWorkspace_workspaceExist() {
-    when(mockFeaturedWorkspaceDao.existsByWorkspace(dbWorkspace)).thenReturn(true);
-    assertThat(featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)).isTrue();
-  }
-
-  @Test
-  public void testIsFeaturedWorkspace_workspaceDoesNotExist() {
-    when(mockFeaturedWorkspaceDao.existsByWorkspace(dbWorkspace)).thenReturn(false);
-    assertThat(featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)).isFalse();
-  }
-
-  @Test
   public void testFeaturedCategory_EmptyIfWorkspaceDoesntExist() {
     assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace)).isEmpty();
   }

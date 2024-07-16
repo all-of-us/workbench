@@ -664,7 +664,6 @@ public class WorkspaceServiceTest {
 
     when(accessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
         .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
@@ -685,7 +684,6 @@ public class WorkspaceServiceTest {
     assertThat(before).isEmpty();
 
     // set all workspaces as featured
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
         .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
@@ -698,7 +696,6 @@ public class WorkspaceServiceTest {
     // arbitrary choice from dbWorkspaces
     var testWorkspace = dbWorkspaces.get(2);
 
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
         .thenReturn(Optional.of(FeaturedWorkspaceCategory.DEMO_PROJECTS));
 
