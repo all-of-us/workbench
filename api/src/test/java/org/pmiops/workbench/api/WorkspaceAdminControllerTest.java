@@ -1,12 +1,12 @@
 package org.pmiops.workbench.api;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +31,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -63,8 +64,6 @@ public class WorkspaceAdminControllerTest {
   private static final String BAD_EXCEPTION_REQUEST_REASON_CHAR =
       "Locking Reason text length should be at least 10 characters long and at most 4000 characters";
 
-  @MockBean private ActionAuditQueryService mockActionAuditQueryService;
-  @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
@@ -85,10 +84,12 @@ public class WorkspaceAdminControllerTest {
     WorkspaceMapperImpl.class,
   })
   @MockBean({
+    ActionAuditQueryService.class,
+    CloudMonitoringService.class,
     CloudStorageClient.class,
-    NotebooksService.class,
-    ConceptSetService.class,
     CohortService.class,
+    ConceptSetService.class,
+    NotebooksService.class,
   })
   static class Configuration {}
 
@@ -106,7 +107,7 @@ public class WorkspaceAdminControllerTest {
 
     final UserRole collaborator =
         new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
-    final List<UserRole> collaborators = ImmutableList.of(collaborator);
+    final List<UserRole> collaborators = List.of(collaborator);
     when(mockWorkspaceService.getFirecloudUserRoles(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(collaborators);
@@ -127,7 +128,7 @@ public class WorkspaceAdminControllerTest {
 
     LeonardoListRuntimeResponse leonardoListRuntimeResponse =
         TestMockFactory.createLeonardoListRuntimesResponse();
-    List<LeonardoListRuntimeResponse> runtimes = ImmutableList.of(leonardoListRuntimeResponse);
+    List<LeonardoListRuntimeResponse> runtimes = List.of(leonardoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
 
@@ -249,5 +250,40 @@ public class WorkspaceAdminControllerTest {
   public void getWorkspace_setAdminUnlock() {
     workspaceAdminController.setAdminUnlockedState(WORKSPACE_NAMESPACE);
     verify(mockWorkspaceAdminService).setAdminUnlockedState(WORKSPACE_NAMESPACE);
+  }
+
+  @Test
+  public void publishWorkspaceViaDB_Success() {
+    PublishWorkspaceRequest request = new PublishWorkspaceRequest();
+    workspaceAdminController.publishWorkspaceViaDB(WORKSPACE_NAMESPACE, request);
+    verify(mockWorkspaceAdminService).publishWorkspaceViaDB(WORKSPACE_NAMESPACE, request);
+  }
+
+  @Test
+  public void publishWorkspaceViaDB_NotFound() {
+    PublishWorkspaceRequest request = new PublishWorkspaceRequest();
+    doThrow(new NotFoundException("not found"))
+        .when(mockWorkspaceAdminService)
+        .publishWorkspaceViaDB(NONSENSE_NAMESPACE, request);
+
+    assertThatExceptionOfType(NotFoundException.class)
+        .isThrownBy(
+            () -> workspaceAdminController.publishWorkspaceViaDB(NONSENSE_NAMESPACE, request));
+  }
+
+  @Test
+  public void unpublishWorkspaceViaDB_Success() {
+    workspaceAdminController.unpublishWorkspaceViaDB(WORKSPACE_NAMESPACE);
+    verify(mockWorkspaceAdminService).unpublishWorkspaceViaDB(WORKSPACE_NAMESPACE);
+  }
+
+  @Test
+  public void unpublishWorkspaceViaDB_NotFound() {
+    doThrow(new NotFoundException("not found"))
+        .when(mockWorkspaceAdminService)
+        .unpublishWorkspaceViaDB(NONSENSE_NAMESPACE);
+
+    assertThatExceptionOfType(NotFoundException.class)
+        .isThrownBy(() -> workspaceAdminController.unpublishWorkspaceViaDB(NONSENSE_NAMESPACE));
   }
 }
