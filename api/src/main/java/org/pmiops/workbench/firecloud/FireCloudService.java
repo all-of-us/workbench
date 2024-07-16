@@ -96,6 +96,9 @@ public interface FireCloudService {
   RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates);
 
+  RawlsWorkspaceACLUpdateResponseList updateWorkspaceACLAsService(
+      String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates);
+
   RawlsWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
 
   /**
