@@ -1,10 +1,12 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -171,6 +174,18 @@ public class WorkspaceMapperTest {
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
     assertThat(ws.isPublished()).isEqualTo(sourceDbWorkspace.getPublished());
+    assertThat(ws.getFeaturedCategory()).isNull();
+  }
+
+  @Test
+  public void testConvertsFeaturedWorkspace() {
+    when(mockFeaturedWorkspaceService.getFeaturedCategory(sourceDbWorkspace))
+        .thenReturn(Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
+
+    final Workspace ws =
+        workspaceMapper.toApiWorkspace(
+            sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService);
+    assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
   @Test

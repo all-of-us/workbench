@@ -431,7 +431,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
-    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
+    final DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
 
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
@@ -495,7 +501,13 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public void unpublishWorkspaceViaDB(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace = workspaceDao.getByNamespace(workspaceNamespace).orElseThrow();
+    final DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
     Optional<DbFeaturedWorkspace> dbFeaturedWorkspaceOptional =
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
 

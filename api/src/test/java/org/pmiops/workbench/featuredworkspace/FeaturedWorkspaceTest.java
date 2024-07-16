@@ -1,10 +1,9 @@
 package org.pmiops.workbench.featuredworkspace;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,25 +59,8 @@ public class FeaturedWorkspaceTest {
   }
 
   @Test
-  public void testIsFeaturedWorkspace_workspaceExist() {
-    when(mockFeaturedWorkspaceDao.existsByWorkspace(dbWorkspace)).thenReturn(true);
-    assertThat(featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)).isTrue();
-  }
-
-  @Test
-  public void testIsFeaturedWorkspace_workspaceDoesNotExist() {
-    when(mockFeaturedWorkspaceDao.existsByWorkspace(dbWorkspace)).thenReturn(false);
-    assertThat(featuredWorkspaceService.isFeaturedWorkspace(dbWorkspace)).isFalse();
-  }
-
-  @Test
-  public void testFeaturedCategory_ThrowExceptionIfWorkspaceDoesntExist() {
-    NoSuchElementException exception =
-        assertThrows(
-            NoSuchElementException.class,
-            () -> featuredWorkspaceService.getFeaturedCategory(dbWorkspace));
-
-    assertThat(exception.getMessage()).isEqualTo("No value present");
+  public void testFeaturedCategory_EmptyIfWorkspaceDoesntExist() {
+    assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace)).isEmpty();
   }
 
   @Test
@@ -91,6 +73,6 @@ public class FeaturedWorkspaceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(dbFeaturedWorkspace));
     assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace))
-        .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .hasValue(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 }

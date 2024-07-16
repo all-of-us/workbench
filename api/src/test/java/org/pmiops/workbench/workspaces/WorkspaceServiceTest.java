@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -663,9 +664,8 @@ public class WorkspaceServiceTest {
 
     when(accessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
     // Act
     WorkspaceResponse response =
@@ -684,9 +684,8 @@ public class WorkspaceServiceTest {
     assertThat(before).isEmpty();
 
     // set all workspaces as featured
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(any())).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(dbWorkspaces.size());
@@ -697,9 +696,8 @@ public class WorkspaceServiceTest {
     // arbitrary choice from dbWorkspaces
     var testWorkspace = dbWorkspaces.get(2);
 
-    when(mockFeaturedWorkspaceService.isFeaturedWorkspace(testWorkspace)).thenReturn(true);
     when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
-        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+        .thenReturn(Optional.of(FeaturedWorkspaceCategory.DEMO_PROJECTS));
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
