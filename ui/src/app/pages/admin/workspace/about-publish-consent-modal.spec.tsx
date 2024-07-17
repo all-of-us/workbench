@@ -59,7 +59,7 @@ describe('AboutPublishConsentModal', () => {
     expectButtonElementDisabled(confirmButton);
   });
 
-  it('Verify that an error message box is displayed when the API returns an error', async () => {
+  it('verify that an error message box is displayed when the API returns an error', async () => {
     const mockOnConfirm = jest.fn();
     const mockOnCancel = jest.fn();
     render(

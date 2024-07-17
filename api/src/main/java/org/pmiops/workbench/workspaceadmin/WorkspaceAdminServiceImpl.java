@@ -546,7 +546,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
     try {
       if (published) {
-        mailService.sendPublishWorkspaceByAdminEmail(dbWorkspace, owners, category);
+        mailService.sendPublishWorkspaceEmail(dbWorkspace, owners, category);
       } else {
         mailService.sendUnpublishWorkspaceByAdminEmail(dbWorkspace, owners);
       }

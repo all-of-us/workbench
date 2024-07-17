@@ -70,13 +70,10 @@ public interface MailService {
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
 
-  void sendPublishWorkspaceByAdminEmail(
+  void sendPublishWorkspaceEmail(
       final DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException;
 
   void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
-      throws MessagingException;
-
-  void sendPublishWorkspaceByOwnerEmail(final DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 }

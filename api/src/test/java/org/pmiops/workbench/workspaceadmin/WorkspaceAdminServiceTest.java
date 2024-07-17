@@ -595,7 +595,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test
@@ -633,7 +633,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
 
     publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
     DbFeaturedWorkspace mockFeaturedWorkspace =
@@ -649,7 +649,7 @@ public class WorkspaceAdminServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService, times(2)).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test
@@ -683,7 +683,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService, never()).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test

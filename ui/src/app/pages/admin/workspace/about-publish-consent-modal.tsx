@@ -52,7 +52,6 @@ export const AboutPublishConsentModal = (props: Props) => {
       await workspacesApi().publishCommunityWorkspace(props.workspaceNamespace);
       props.onConfirm();
     } catch (ex) {
-      console.log(ex);
       setShowError(true);
     } finally {
       setPublishing(false);
@@ -67,7 +66,6 @@ export const AboutPublishConsentModal = (props: Props) => {
       <ModalBody>
         {/* Show a spinner when publish API is being called*/}
         {publishing && <SpinnerOverlay />}
-        {/* Text area to enter the reason for locking workspace */}
         <div>
           <div style={{ paddingBottom: '1rem' }}>
             {showError && (

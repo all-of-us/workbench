@@ -539,9 +539,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                       dbWorkspace);
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 
-              List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
               try {
-                mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
+                mailService.sendPublishWorkspaceEmail(
+                    dbWorkspace,
+                    getWorkspaceOwnerList(dbWorkspace),
+                    FeaturedWorkspaceCategory.COMMUNITY);
               } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }
