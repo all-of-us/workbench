@@ -94,7 +94,6 @@ describe('AboutPublishConsentModal', () => {
       await confirmButton.click();
     });
 
-    console.log(screen.logTestingPlaygroundURL());
     expect(
       screen.getByText(
         /there was an error while publishing the workspace\. please try again later\./i
