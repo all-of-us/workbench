@@ -4033,7 +4033,8 @@ paths:
           type: string
       - name: terraName
         in: path
-        description: the workspace name as stored in Terra and displayed in the URL
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -13152,7 +13153,7 @@ components:
       name: terraName
       in: path
       description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
-         due to confusion with DB IDs, which it is not)
+        due to confusion with DB IDs, which it is not)
       required: true
       schema:
         type: string
