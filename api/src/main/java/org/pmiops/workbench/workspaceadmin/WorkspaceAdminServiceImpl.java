@@ -554,7 +554,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     var aclUpdate =
         FirecloudTransforms.buildAclUpdate(
             workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
-    fireCloudService.updateWorkspaceACL(workspaceNamespace, firecloudName, List.of(aclUpdate));
+    fireCloudService.updateWorkspaceACLAsService(
+        workspaceNamespace, firecloudName, List.of(aclUpdate));
   }
 
   private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {

@@ -56,6 +56,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -78,6 +79,7 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -123,14 +125,15 @@ public class WorkspaceAdminServiceTest {
   @MockBean private AdminAuditor mockAdminAuditor;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
+  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceService mockFeatureService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private NotebooksService mockNotebooksService;
-  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private MailService mailService;
-  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
-  @MockBean private FeaturedWorkspaceService mockFeatureService;
+  @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -165,7 +168,6 @@ public class WorkspaceAdminServiceTest {
     UserMapper.class,
     UserService.class,
     WorkspaceAuthService.class,
-    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -584,6 +586,10 @@ public class WorkspaceAdminServiceTest {
             any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
     // Act
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
@@ -596,6 +602,17 @@ public class WorkspaceAdminServiceTest {
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
     verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+
+    // verify that the ACL update was performed as the RWB system, not as the admin user
+
+    verify(mockFirecloudService)
+        .updateWorkspaceACLAsService(
+            mockDbWorkspace.getWorkspaceNamespace(),
+            mockDbWorkspace.getFirecloudName(),
+            List.of(
+                FirecloudTransforms.buildAclUpdate(
+                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.READER)));
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   @Test
@@ -643,6 +660,10 @@ public class WorkspaceAdminServiceTest {
             .setDescription("test");
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
     // Act
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
@@ -650,6 +671,17 @@ public class WorkspaceAdminServiceTest {
     // Assert
     verify(mockFeaturedWorkspaceDao, times(2)).save(any());
     verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+
+    // verify that the ACL update was performed as the RWB system, not as the admin user
+
+    verify(mockFirecloudService)
+        .updateWorkspaceACLAsService(
+            mockDbWorkspace.getWorkspaceNamespace(),
+            mockDbWorkspace.getFirecloudName(),
+            List.of(
+                FirecloudTransforms.buildAclUpdate(
+                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.READER)));
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   @Test
@@ -699,6 +731,10 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
     // Act
     workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
 
@@ -707,6 +743,17 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
     verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
+
+    // verify that the ACL update was performed as the RWB system, not as the admin user
+
+    verify(mockFirecloudService)
+        .updateWorkspaceACLAsService(
+            mockDbWorkspace.getWorkspaceNamespace(),
+            mockDbWorkspace.getFirecloudName(),
+            List.of(
+                FirecloudTransforms.buildAclUpdate(
+                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.NO_ACCESS)));
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {
