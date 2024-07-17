@@ -39,6 +39,15 @@ export interface Machine {
   preemptiblePrice: number;
 }
 
+export interface AutopilotMachine {
+  cpu: number;
+  memory: number;
+}
+export const DEFAULT_AUTOPILOT_MACHINE: AutopilotMachine = {
+  cpu: 4,
+  memory: 15,
+};
+
 const machineBases: Machine[] = [
   {
     name: 'n1-standard-1',
@@ -455,80 +464,90 @@ export const machineStorageCostBreakdown = ({
 };
 
 export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
-  const { computeType, machine, gpuConfig, numNodes } = analysisConfig;
-  const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    analysisConfig.dataprocConfig ?? {};
+  if (analysisConfig.autopilot) {
+    return 0; // TODO fix this
+  } else {
+    const { computeType, machine, gpuConfig, numNodes } = analysisConfig;
+    const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
+      analysisConfig.dataprocConfig ?? {};
 
-  const workerMachine =
-    workerMachineType && findMachineByName(workerMachineType);
-  const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
-  const dataprocPrice =
-    computeType === ComputeType.Dataproc
-      ? fp.sum([
-          dataprocSurcharge({
-            masterMachine: machine,
-            numberOfWorkers,
-            numberOfPreemptibleWorkers,
-            workerMachine,
-          }),
-          workerMachine
-            ? fp.sum([
-                numberOfWorkers * workerMachine.price,
-                numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
-              ])
-            : 0,
-        ])
-      : 0;
-  return fp.sum([
-    dataprocPrice,
-    machine.price * (numNodes ?? 1),
-    gpu ? gpu.price : 0,
-    machineStorageCost(analysisConfig),
-  ]);
+    const workerMachine =
+      workerMachineType && findMachineByName(workerMachineType);
+    const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
+    const dataprocPrice =
+      computeType === ComputeType.Dataproc
+        ? fp.sum([
+            dataprocSurcharge({
+              masterMachine: machine,
+              numberOfWorkers,
+              numberOfPreemptibleWorkers,
+              workerMachine,
+            }),
+            workerMachine
+              ? fp.sum([
+                  numberOfWorkers * workerMachine.price,
+                  numberOfPreemptibleWorkers * workerMachine.preemptiblePrice,
+                ])
+              : 0,
+          ])
+        : 0;
+    return fp.sum([
+      dataprocPrice,
+      machine.price * (numNodes ?? 1),
+      gpu ? gpu.price : 0,
+      machineStorageCost(analysisConfig),
+    ]);
+  }
 };
 
-export const machineRunningCostBreakdown = (analysisConfig: AnalysisConfig) => {
-  const { computeType, machine, gpuConfig } = analysisConfig;
-  const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
-    analysisConfig.dataprocConfig ?? {};
-
-  const workerMachine =
-    workerMachineType && findMachineByName(workerMachineType);
-  const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
-  const costs = [];
-  if (computeType === ComputeType.Dataproc) {
-    if (workerMachine) {
-      costs.push(`${formatUsd(machine.price)}/hr Master VM`);
-      if (numberOfWorkers > 0) {
-        costs.push(
-          `${formatUsd(
-            workerMachine.price * numberOfWorkers
-          )}/hr Worker VM(s) (${numberOfWorkers})`
-        );
-      }
-      if (numberOfPreemptibleWorkers > 0) {
-        costs.push(
-          `${formatUsd(
-            workerMachine.preemptiblePrice * numberOfPreemptibleWorkers
-          )}/hr Preemptible Worker VM(s) ` + `(${numberOfPreemptibleWorkers})`
-        );
-      }
-    }
-    const dataprocSurchargeAmount = dataprocSurcharge({
-      masterMachine: machine,
-      numberOfWorkers: numberOfWorkers,
-      numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
-      workerMachine: workerMachine,
-    });
-    costs.push(
-      `${formatUsd(dataprocSurchargeAmount)}/hr Dataproc Per-CPU Surcharge`
-    );
+export const machineRunningCostBreakdown = (
+  analysisConfig: AnalysisConfig
+): any[] => {
+  if (analysisConfig.autopilot) {
+    return [];
   } else {
-    costs.push(`${formatUsd(machine.price)}/hr VM`);
-    if (gpu) {
-      costs.push(`${formatUsd(gpu.price)}/hr GPU`);
+    const { computeType, machine, gpuConfig } = analysisConfig;
+    const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
+      analysisConfig.dataprocConfig ?? {};
+
+    const workerMachine =
+      workerMachineType && findMachineByName(workerMachineType);
+    const gpu = gpuConfig && findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus);
+    const costs = [];
+    if (computeType === ComputeType.Dataproc) {
+      if (workerMachine) {
+        costs.push(`${formatUsd(machine.price)}/hr Master VM`);
+        if (numberOfWorkers > 0) {
+          costs.push(
+            `${formatUsd(
+              workerMachine.price * numberOfWorkers
+            )}/hr Worker VM(s) (${numberOfWorkers})`
+          );
+        }
+        if (numberOfPreemptibleWorkers > 0) {
+          costs.push(
+            `${formatUsd(
+              workerMachine.preemptiblePrice * numberOfPreemptibleWorkers
+            )}/hr Preemptible Worker VM(s) ` + `(${numberOfPreemptibleWorkers})`
+          );
+        }
+      }
+      const dataprocSurchargeAmount = dataprocSurcharge({
+        masterMachine: machine,
+        numberOfWorkers: numberOfWorkers,
+        numberOfPreemptibleWorkers: numberOfPreemptibleWorkers,
+        workerMachine: workerMachine,
+      });
+      costs.push(
+        `${formatUsd(dataprocSurchargeAmount)}/hr Dataproc Per-CPU Surcharge`
+      );
+    } else {
+      costs.push(`${formatUsd(machine.price)}/hr VM`);
+      if (gpu) {
+        costs.push(`${formatUsd(gpu.price)}/hr GPU`);
+      }
     }
+    costs.push(...machineStorageCostBreakdown(analysisConfig));
+    return costs;
   }
-  costs.push(...machineStorageCostBreakdown(analysisConfig));
-  return costs;
 };

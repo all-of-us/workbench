@@ -115,7 +115,8 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": true,
     "enablePublishedWorkspacesViaDb": false,
-    "enableGcsFuseOnGke": true
+    "enableGcsFuseOnGke": true,
+    "enableAutopilot": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

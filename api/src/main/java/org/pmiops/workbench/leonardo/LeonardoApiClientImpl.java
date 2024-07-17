@@ -37,6 +37,7 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
+import org.pmiops.workbench.leonardo.model.LeonardoAutopilot;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
@@ -54,6 +55,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.Autopilot;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -557,10 +559,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
+    boolean enableAutopilot = workbenchConfigProvider.get().featureFlags.enableAutopilot;
 
     AppType appType = createAppRequest.getAppType();
-    KubernetesRuntimeConfig kubernetesRuntimeConfig = createAppRequest.getKubernetesRuntimeConfig();
+    KubernetesRuntimeConfig kubernetesRuntimeConfig = enableAutopilot? null : createAppRequest.getKubernetesRuntimeConfig();
     PersistentDiskRequest persistentDiskRequest = createAppRequest.getPersistentDiskRequest();
+    Autopilot autopilot = enableAutopilot ? createAppRequest.getAutopilot(): null;
 
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
@@ -641,7 +645,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .workspaceId(dbWorkspace.getFirecloudUuid())
         .labels(appLabels)
         .autodeleteEnabled(createAppRequest.isAutodeleteEnabled())
-        .autodeleteThreshold(createAppRequest.getAutodeleteThreshold());
+        .autodeleteThreshold(createAppRequest.getAutodeleteThreshold())
+        .autopilot(leonardoMapper.toLeonardoAutopilot(autopilot));
 
     if (workbenchConfigProvider.get().featureFlags.enableGcsFuseOnGke
         && (appType.equals(AppType.RSTUDIO) || appType.equals(AppType.SAS))) {

@@ -6961,6 +6961,10 @@ components:
           type: boolean
           default: false
           description: Enable admin to publish workspace
+        enableAutopilot:
+          type: boolean
+          default: false
+          description: Enable autopilot mode when creating GKE apps
     AccessModuleConfig:
       required:
       - expirable
@@ -8650,7 +8654,6 @@ components:
     CreateAppRequest:
       required:
       - appType
-      - kubernetesRuntimeConfig
       - persistentDiskRequest
       type: object
       properties:
@@ -8658,6 +8661,8 @@ components:
           $ref: '#/components/schemas/AppType'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        autopilot:
+          $ref: '#/components/schemas/Autopilot'
         persistentDiskRequest:
           $ref: '#/components/schemas/PersistentDiskRequest'
         autodeleteEnabled:
@@ -8788,7 +8793,23 @@ components:
         autoscalingEnabled:
           type: boolean
           description: whether or not the nodes autoscale up and down for this app
-      description: configuration for a kubernetes app
+      description: configuration for a kubernetes app. DEPRECATED. Use Autopilot instead.
+    Autopilot:
+      description: Defines app's Autopilot configuration.
+      type: object
+      properties:
+        computeClass:
+          type: string
+          description: Enum of compute class. Possible values are General-purpose, Accelerator, Balanced, Performance, Scale-Out.
+        cpuInMillicores:
+          type: integer
+          description: Number of CPUs in autopilot mode measured in millicores. For example, 500m refers to half a core of computing processing time. 2000m is 2 cores.
+        memoryInGb:
+          type: integer
+          description: memory in GB.
+        ephemeralStorageInGb:
+          type: integer
+          description: ephemeral storage size in GB.
     PersistentDiskRequest:
       type: object
       properties:

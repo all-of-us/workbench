@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 
 import {
+  Autopilot,
   DataprocConfig,
   Disk,
   DiskType,
@@ -26,7 +27,8 @@ import { DiskConfig } from './runtime-utils';
 
 export interface AnalysisConfig {
   computeType: ComputeType;
-  machine: Machine;
+  machine?: Machine;
+  autopilot?: Autopilot;
   diskConfig: DiskConfig;
   // TODO: Document types of disks available (RW-9490)
   // This should only be populated if !diskconfig.detachable.

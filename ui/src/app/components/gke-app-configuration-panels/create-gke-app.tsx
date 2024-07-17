@@ -61,22 +61,40 @@ const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
-const toMachine = (createAppRequest: CreateAppRequest): Machine =>
-  findMachineByName(createAppRequest?.kubernetesRuntimeConfig.machineType);
+const toMachine = (createAppRequest: CreateAppRequest): Machine => {
+  if (createAppRequest?.autopilot) {
+    return {
+      name: 'undefined',
+      cpu: createAppRequest.autopilot.cpuInMillicores / 1000, // TODO: how we display this
+      memory: createAppRequest.autopilot.memoryInGb,
+      price: 0,
+      preemptiblePrice: 0,
+    };
+  } else {
+    return findMachineByName(
+      createAppRequest.kubernetesRuntimeConfig.machineType
+    );
+  }
+};
 
 const toAnalysisConfig = (
   createAppRequest: CreateAppRequest
 ): AnalysisConfig => {
-  const { persistentDiskRequest, kubernetesRuntimeConfig } = createAppRequest;
+  const { persistentDiskRequest } = createAppRequest;
   return {
-    machine: toMachine(createAppRequest),
+    machine: createAppRequest.kubernetesRuntimeConfig
+      ? toMachine(createAppRequest)
+      : undefined,
+    autopilot: createAppRequest.autopilot,
     diskConfig: {
       size: persistentDiskRequest.size,
       detachable: true,
       detachableType: persistentDiskRequest.diskType,
       existingDiskName: null,
     },
-    numNodes: kubernetesRuntimeConfig.numNodes,
+    numNodes: createAppRequest.kubernetesRuntimeConfig
+      ? createAppRequest.kubernetesRuntimeConfig.numNodes
+      : undefined,
     // defaults
     computeType: ComputeType.Standard,
     dataprocConfig: undefined,
@@ -169,23 +187,27 @@ export const CreateGkeApp = ({
 
   const app = findApp(userApps, toUIAppType[appType]);
 
+  const { enableAutopilot } = serverConfigStore.get().config;
   // there may or may not be an existing `app` and/or `disk`
   // start with the default config, but override with the existing app and disk configs
 
   const [createAppRequest, setCreateAppRequest] =
     React.useState<CreateAppRequest>({
       ...defaultCreateRequest,
-      kubernetesRuntimeConfig: {
-        ...defaultCreateRequest.kubernetesRuntimeConfig,
-        machineType:
-          // if there is an active app, use its machineType for display
-          app?.kubernetesRuntimeConfig.machineType ??
-          // otherwise, if there is an active app of a different type, use its machine type to configure this one
-          maybeGetOtherMachineType(userApps, appType) ??
-          // use the default if neither of these cases apply
-          defaultCreateRequest.kubernetesRuntimeConfig.machineType,
-      },
+      kubernetesRuntimeConfig: enableAutopilot
+        ? undefined
+        : {
+            ...defaultCreateRequest.kubernetesRuntimeConfig,
+            machineType:
+              // if there is an active app, use its machineType for display
+              app?.kubernetesRuntimeConfig.machineType ??
+              // otherwise, if there is an active app of a different type, use its machine type to configure this one
+              maybeGetOtherMachineType(userApps, appType) ??
+              // use the default if neither of these cases apply
+              defaultCreateRequest.kubernetesRuntimeConfig.machineType,
+          },
 
+      autopilot: enableAutopilot ? defaultCreateRequest.autopilot : undefined,
       persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
       autodeleteEnabled:
         app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
@@ -333,9 +355,7 @@ export const CreateGkeApp = ({
                       },
                     }))
                   }
-                  machineType={
-                    createAppRequest?.kubernetesRuntimeConfig.machineType
-                  }
+                  machineType={toMachine(createAppRequest).name}
                 />
               </div>
             </FlexRow>

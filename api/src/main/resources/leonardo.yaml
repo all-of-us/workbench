@@ -2655,6 +2655,9 @@ components:
       description: Defines app's Autopilot configuration
       type: object
       properties:
+        computeClass:
+          type: string
+          description: Enum of compute class. Possible values are General-purpose, Accelerator, Balanced, Performance, Scale-Out.
         cpuInMillicores:
           type: integer
           description: Number of CPUs in autopilot mode measured in millicores. For example, 500m refers to half a core of computing processing time. 2000m is 2 cores.

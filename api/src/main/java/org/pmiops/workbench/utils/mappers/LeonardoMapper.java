@@ -18,6 +18,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
+import org.pmiops.workbench.leonardo.model.LeonardoAutopilot;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
@@ -41,6 +42,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.Autopilot;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -238,6 +240,9 @@ public interface LeonardoMapper {
 
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
+
+  LeonardoAutopilot toLeonardoAutopilot(
+      Autopilot autopilot);
 
   // SAS and RStudio apps are implemented as ALLOWED Helm Charts
   @ValueMapping(source = "RSTUDIO", target = "ALLOWED")

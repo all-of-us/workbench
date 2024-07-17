@@ -54,5 +54,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
+  @Mapping(
+      target = "enableAutopilot",
+      source = "config.featureFlags.enableAutopilot")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

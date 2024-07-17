@@ -321,6 +321,8 @@ public class WorkbenchConfig {
     public boolean enablePublishedWorkspacesViaDb;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
+    // If true, create GKE cluster in autopilot mode
+    public boolean enableAutopilot;
   }
 
   public static class ActionAuditConfig {

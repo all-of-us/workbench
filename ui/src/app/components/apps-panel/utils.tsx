@@ -74,7 +74,6 @@ export const appMinDiskSize: Record<AppType, number> = {
 
 export const appMaxDiskSize = 1000;
 
-// TODO replace with better defaults?
 export const defaultCromwellCreateRequest: CreateAppRequest = {
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
@@ -88,9 +87,14 @@ export const defaultCromwellCreateRequest: CreateAppRequest = {
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 7 * 24 * 60, // in minutes, so this is 7 days
+  autopilot: {
+    computeClass: 'General-purpose',
+    cpuInMillicores: 3000,
+    memoryInGb: 10,
+    ephemeralStorageInGb: 2,
+  },
 };
 
-// TODO replace with better defaults?
 export const defaultRStudioCreateRequest: CreateAppRequest = {
   appType: AppType.RSTUDIO,
   kubernetesRuntimeConfig: {
@@ -104,9 +108,14 @@ export const defaultRStudioCreateRequest: CreateAppRequest = {
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
+  autopilot: {
+    computeClass: 'General-purpose',
+    cpuInMillicores: 3000,
+    memoryInGb: 10,
+    ephemeralStorageInGb: 2,
+  },
 };
 
-// TODO replace with better defaults?
 export const defaultSASCreateRequest: CreateAppRequest = {
   appType: AppType.SAS,
   kubernetesRuntimeConfig: {
@@ -120,6 +129,12 @@ export const defaultSASCreateRequest: CreateAppRequest = {
   },
   autodeleteEnabled: true,
   autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
+  autopilot: {
+    computeClass: 'General-purpose', // let's not expose this to users in the beginning
+    cpuInMillicores: 3000,
+    memoryInGb: 10,
+    ephemeralStorageInGb: 2, // let's not expose this to users in the beginning
+  },
 };
 
 export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
