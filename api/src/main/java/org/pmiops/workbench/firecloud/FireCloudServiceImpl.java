@@ -380,6 +380,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public RawlsWorkspaceACL getWorkspaceAclAsService(
+      String workspaceNamespace, String firecloudName) {
+    WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
+    return rawlsRetryHandler.run(
+        (context) -> workspacesApi.getACL(workspaceNamespace, firecloudName));
+  }
+
+  @Override
   public RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
@@ -404,15 +412,15 @@ public class FireCloudServiceImpl implements FireCloudService {
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     var aclUpdate = FirecloudTransforms.buildAclUpdate(groupEmail, accessLevel);
-    updateWorkspaceACL(workspaceNamespace, firecloudName, List.of(aclUpdate));
+    updateWorkspaceACLAsService(workspaceNamespace, firecloudName, List.of(aclUpdate));
   }
 
   @Override
-  public RawlsWorkspaceACL getWorkspaceAclAsService(
-      String workspaceNamespace, String firecloudName) {
+  public RawlsWorkspaceACLUpdateResponseList updateWorkspaceACLAsService(
+      String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates) {
     WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return rawlsRetryHandler.run(
-        (context) -> workspacesApi.getACL(workspaceNamespace, firecloudName));
+        (context) -> workspacesApi.updateACL(aclUpdates, workspaceNamespace, firecloudName, false));
   }
 
   @Override

@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -391,9 +392,6 @@ public class MailServiceImpl implements MailService {
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
 
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
     sendWithRetries(
@@ -402,7 +400,7 @@ public class MailServiceImpl implements MailService {
         "Your AoU Researcher Workbench workspace has been published",
         String.format(
             "Publish workspace email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
             PUBLISH_WORKSPACE_RESOURCE,
             publishUnpublishWorkspaceSubstitutionMap(
@@ -472,16 +470,13 @@ public class MailServiceImpl implements MailService {
             ? List.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
@@ -900,5 +895,9 @@ public class MailServiceImpl implements MailService {
 
   private String userForLogging(DbUser user) {
     return userForLogging(user.getUsername(), user.getContactEmail());
+  }
+
+  private String ownersForLogging(Collection<DbUser> owners) {
+    return owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
   }
 }
