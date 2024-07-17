@@ -49,7 +49,6 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
-import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -535,8 +534,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
-                      new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY),
-                      dbWorkspace);
+                      FeaturedWorkspaceCategory.COMMUNITY, dbWorkspace);
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 
               try {
