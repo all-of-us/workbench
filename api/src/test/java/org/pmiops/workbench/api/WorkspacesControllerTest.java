@@ -292,6 +292,8 @@ public class WorkspacesControllerTest {
   @Autowired DataSetService dataSetService;
   @Autowired FakeClock fakeClock;
   @Autowired FireCloudService fireCloudService;
+  @Autowired FirecloudMapper firecloudMapper;
+  @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -301,26 +303,21 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
-  @Autowired ObjectNameLengthService objectNameLengthService;
-
-  @Autowired FirecloudMapper firecloudMapper;
-
-  @SpyBean @Autowired WorkspaceDao workspaceDao;
-
-  @MockBean CohortBuilderService cohortBuilderService;
 
   @MockBean AccessTierService accessTierService;
+  @MockBean BucketAuditQueryService bucketAuditQueryService;
   @MockBean CloudBillingClient mockCloudBillingClient;
+  @MockBean CohortBuilderService cohortBuilderService;
   @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean FireCloudService mockFireCloudService;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
+
+  @SpyBean @Autowired WorkspaceDao workspaceDao;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
-
-  @MockBean private FireCloudService mockFireCloudService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
@@ -3013,5 +3010,37 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0)).isEqualTo(conceptSet);
     assertThat(dataSets).hasSize(1);
     compareDatasetMetadata(dataSets.get(0), dataSet);
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace_ByUserWithWriterAccess() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+          workspacesController.publishCommunityWorkspace(ws.getNamespace());
+        });
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace_ByUserWithReaderAccess() {
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.publishCommunityWorkspace(ws.getNamespace());
+        });
   }
 }
