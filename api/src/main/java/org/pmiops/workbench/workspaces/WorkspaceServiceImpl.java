@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaces;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -25,23 +26,26 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.*;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -54,6 +58,7 @@ import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.tanagra.model.Study;
 import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -79,16 +84,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
+  private final FeaturedWorkspaceDao featuredWorkspaceDao;
+  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final CloudBillingClient cloudBillingClient;
+  private final MailService mailService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private final UserService userService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceAuthService workspaceAuthService;
@@ -102,16 +111,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
+      FeaturedWorkspaceDao featuredWorkspaceDao,
+      FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceService featuredWorkspaceService,
       FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       CloudBillingClient cloudBillingClient,
+      MailService mailService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
+      UserService userService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService,
@@ -123,14 +136,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
+    this.featuredWorkspaceDao = featuredWorkspaceDao;
+    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
+    this.mailService = mailService;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -494,5 +511,47 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .map(DbWorkspace::getWorkspaceId)
         .forEach(id -> workspaceDao.updateBillingStatus(id, status));
+  }
+
+  @Override
+  public void publishCommunityWorkspace(DbWorkspace dbWorkspace) {
+    featuredWorkspaceDao
+        .findByWorkspace(dbWorkspace)
+        .ifPresentOrElse(
+            (dbFeaturedWorkspace) -> {
+              // If the workspace is already featured, a BadRequestException is thrown
+              throw new BadRequestException("Workspace is already marked featured");
+            },
+            () -> {
+              fireCloudService.updatePublishedWorkspaceACL(
+                  dbWorkspace.getWorkspaceNamespace(),
+                  dbWorkspace.getFirecloudName(),
+                  getPublishedWorkspacesGroupEmail(),
+                  true);
+
+              DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY),
+                      dbWorkspace);
+              featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
+
+              List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+              try {
+                mailService.sendPublishWorkspaceByOwnerEmail(dbWorkspace, owners);
+              } catch (MessagingException e) {
+                log.log(Level.WARNING, e.getMessage());
+              }
+            });
+  }
+
+  @Override
+  public List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
+    return getFirecloudUserRoles(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+        .stream()
+        .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
+        .map(UserRole::getEmail)
+        .map(userService::getByUsernameOrThrow)
+        .toList();
   }
 }

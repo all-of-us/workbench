@@ -1738,6 +1738,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceUserRolesResponse'
+  /v1/workspaces/{workspaceNamespace}/publishCommunityWorkspace:
+    post:
+      tags:
+        - workspaces
+      description: Publishes a workspace as Community Workspace by Owner
+      operationId: publishCommunityWorkspace
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: The Workspace namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully published the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+        400:
+          description: Workspace is already published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        403:
+          description: User cannot publish the workspace because they are not the owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/publish:
     post:
       tags:

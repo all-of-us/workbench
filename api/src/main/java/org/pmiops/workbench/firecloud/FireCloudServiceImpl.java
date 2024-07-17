@@ -37,6 +37,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
@@ -384,6 +385,26 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return rawlsRetryHandler.run(
         (context) -> workspacesApi.updateACL(aclUpdates, workspaceNamespace, firecloudName, false));
+  }
+
+  /**
+   * Updates the Access Control List (ACL) for a specified workspace. If Published: Grant Reader
+   * access to all users in the groupEmail If Unpublished: Grant No access to all users in the
+   * groupEmail
+   *
+   * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
+   * @param firecloudName the Terra Name of the Workspace to modify
+   * @param groupEmail the email of the group to update
+   * @return
+   */
+  @Override
+  public void updatePublishedWorkspaceACL(
+      String workspaceNamespace, String firecloudName, String groupEmail, boolean publish) {
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
+
+    var aclUpdate = FirecloudTransforms.buildAclUpdate(groupEmail, accessLevel);
+    updateWorkspaceACL(workspaceNamespace, firecloudName, List.of(aclUpdate));
   }
 
   @Override

@@ -38,7 +38,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -60,7 +59,6 @@ import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
@@ -401,7 +399,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
     try {
       mailService.sendWorkspaceAdminLockingEmail(
-          dbWorkspace, adminLockingRequest.getRequestReason(), getWorkspaceOwnerList(dbWorkspace));
+          dbWorkspace,
+          adminLockingRequest.getRequestReason(),
+          workspaceService.getWorkspaceOwnerList(dbWorkspace));
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
@@ -421,8 +421,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    updateACLForFeaturedWorkspace(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), publish);
+    fireCloudService.updatePublishedWorkspaceACL(
+        workspaceNamespace,
+        firecloudName,
+        workspaceService.getPublishedWorkspacesGroupEmail(),
+        publish);
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
@@ -469,8 +472,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
-              updateACLForFeaturedWorkspace(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
+              fireCloudService.updatePublishedWorkspaceACL(
+                  dbWorkspace.getWorkspaceNamespace(),
+                  dbWorkspace.getFirecloudName(),
+                  workspaceService.getPublishedWorkspacesGroupEmail(),
+                  true);
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
                       publishWorkspaceRequest, dbWorkspace);
@@ -515,8 +521,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         (dbFeaturedWorkspace) -> {
           String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
 
-          updateACLForFeaturedWorkspace(
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
+          fireCloudService.updatePublishedWorkspaceACL(
+              dbWorkspace.getWorkspaceNamespace(),
+              dbWorkspace.getFirecloudName(),
+              workspaceService.getPublishedWorkspacesGroupEmail(),
+              false);
 
           featuredWorkspaceDao.delete(dbFeaturedWorkspace);
           adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
@@ -534,7 +543,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private void sendEmailToWorkspaceOwners(
       DbWorkspace dbWorkspace, boolean published, FeaturedWorkspaceCategory category) {
-    final List<DbUser> owners = getWorkspaceOwnerList(dbWorkspace);
+    final List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
     try {
       if (published) {
         mailService.sendPublishWorkspaceByAdminEmail(dbWorkspace, owners, category);
@@ -544,27 +553,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
-  }
-
-  private void updateACLForFeaturedWorkspace(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    var aclUpdate =
-        FirecloudTransforms.buildAclUpdate(
-            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
-    fireCloudService.updateWorkspaceACL(workspaceNamespace, firecloudName, List.of(aclUpdate));
-  }
-
-  private List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace) {
-    return workspaceService
-        .getFirecloudUserRoles(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-        .stream()
-        .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-        .map(UserRole::getEmail)
-        .map(userService::getByUsernameOrThrow)
-        .toList();
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results

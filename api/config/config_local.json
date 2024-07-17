@@ -79,7 +79,7 @@
     "loginUrl": "http:\/\/localhost:4200/login"
   },
   "mandrill": {
-    "fromEmail": "support@researchallofus.org",
+    "fromEmail": "localSupport@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {

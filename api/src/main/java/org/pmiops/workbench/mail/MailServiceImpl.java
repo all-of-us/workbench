@@ -388,6 +388,29 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendPublishWorkspaceByOwnerEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    final String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been published",
+        String.format(
+            "Workspace has been published by owner. Email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+        buildHtml(
+            PUBLISH_WORKSPACE_ADMIN_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(
+                workspace,
+                featuredWorkspaceCategoryAsDisplayString(FeaturedWorkspaceCategory.COMMUNITY),
+                supportEmail)));
+  }
+
+  @Override
   public void sendPublishWorkspaceByAdminEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
@@ -413,7 +436,7 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
-        Collections.emptyList(),
+        Collections.singletonList(supportEmail),
         "Your AoU Researcher Workbench workspace has been " + actionType,
         String.format(
             "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",

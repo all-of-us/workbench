@@ -21,6 +21,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.ModelBackedTargetProper
 import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -215,6 +216,28 @@ public class WorkspaceAuditorImpl implements WorkspaceAuditor {
     List<ActionAuditEvent> allEvents = new ArrayList<>(List.of(workspaceTargetEvent));
     allEvents.addAll(inviteeEvents);
     actionAuditService.send(allEvents);
+  }
+
+  @Override
+  public void firePublishAction(long workspaceId) {
+    DbUser dbUser = userProvider.get();
+    String actionId = actionIdProvider.get();
+    long timestamp = clock.millis();
+
+    ActionAuditEvent event =
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.PUBLISH)
+            .agentType(AgentType.USER)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Category")
+            .newValueMaybe(FeaturedWorkspaceCategory.COMMUNITY.toString())
+            .timestamp(timestamp)
+            .build();
+    actionAuditService.send(event);
   }
 
   @Nullable
