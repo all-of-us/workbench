@@ -7148,6 +7148,9 @@ components:
       properties:
         id:
           type: string
+          description: DEPRECATED. This "id" refers to the name of the workspace in Terra.
+           Terra does not refer to this as an "id" and we should stop doing this.
+           Renamed to the more accurate "terraName" - use this instead.
         etag:
           type: string
           description: Entity tag for optimistic concurrency control. To be set during
@@ -7155,8 +7158,25 @@ components:
             a changed resource.
         name:
           type: string
+          description: DEPRECATED. A workspace has both an AoU UI name (displayName) and a
+           terraName.  Use one of these to be explicit about which is desired.
+        displayName:
+          type: string
+          description: The name of the workspace as displayed in the UI.  This name is not known to
+           Terra, so it's necessary to use `terraName` and/or `namespace` for Terra calls.
+           Formerly known simply as "name".
         namespace:
           type: string
+        terraName:
+          type: string
+          description: >
+           The name of this workspace as stored in Terra.  This is also part of the
+           workspace component of the URL, and is therefore user-visible.
+           Formerly known as "id" in some contexts, but this was confusing because this does not
+           refer to the AoU or Terra database IDs corresponding to the workspace.
+           When a workspace is initially created, this is equal to the "slugified" version of
+           displayName (example: "My Workspace" becomes "myworkspace"). However, when the
+           workspace is renamed (in the AoU RWB UI) the terraName does not change.
         cdrVersionId:
           type: string
         creator:

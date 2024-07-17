@@ -57,7 +57,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
@@ -1090,6 +1089,7 @@ public class WorkspacesControllerTest {
         .updateBillingAccount(ws.getNamespace(), ws.getBillingAccountName());
 
     ws.setName("updated-name");
+    ws.setDisplayName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
@@ -1098,13 +1098,11 @@ public class WorkspacesControllerTest {
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
-    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<ProjectBillingInfo> billingCaptor =
-        ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), "update-billing-account");
 
     ws.setName("updated-name2");
+    ws.setDisplayName("updated-name2");
     updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
