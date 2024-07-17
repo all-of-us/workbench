@@ -1312,7 +1312,7 @@ public class DataSetControllerTest {
         new MarkDataSetRequest().resourceType(ResourceType.COHORT).id(cohort.getId());
     assertThat(
             dataSetController
-                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .markDirty(workspace.getNamespace(), workspace.getTerraName(), markDataSetRequest)
                 .getBody())
         .isTrue();
   }
@@ -1323,7 +1323,7 @@ public class DataSetControllerTest {
         new MarkDataSetRequest().resourceType(ResourceType.CONCEPT_SET).id(conceptSet1.getId());
     assertThat(
             dataSetController
-                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .markDirty(workspace.getNamespace(), workspace.getTerraName(), markDataSetRequest)
                 .getBody())
         .isTrue();
   }
@@ -1334,7 +1334,7 @@ public class DataSetControllerTest {
         new MarkDataSetRequest().resourceType(ResourceType.DATASET).id(noAccessDataSet.getId());
     assertThat(
             dataSetController
-                .markDirty(workspace.getNamespace(), workspace.getId(), markDataSetRequest)
+                .markDirty(workspace.getNamespace(), workspace.getTerraName(), markDataSetRequest)
                 .getBody())
         .isTrue();
   }
@@ -1351,7 +1351,7 @@ public class DataSetControllerTest {
 
     DataSet dataset =
         dataSetController
-            .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
+            .createDataSet(workspace.getNamespace(), workspace.getTerraName(), dataSetRequest)
             .getBody();
     // criteriums must be empty and not null, since
     // conceptSetDao will return an empty hashSet for dbConceptEtConceptIds
@@ -1374,7 +1374,7 @@ public class DataSetControllerTest {
 
     DataSet dataset =
         dataSetController
-            .createDataSet(workspace.getNamespace(), workspace.getId(), dataSetRequest)
+            .createDataSet(workspace.getNamespace(), workspace.getTerraName(), dataSetRequest)
             .getBody();
     // criteriums must be empty and not null, since
     // conceptSetDao will return an empty hashSet for dbConceptEtConceptIds
@@ -1400,7 +1400,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () ->
                 dataSetController.createDataSet(
-                    workspace.getNamespace(), workspace.getId(), dataSetRequest));
+                    workspace.getNamespace(), workspace.getTerraName(), dataSetRequest));
 
     assertForbiddenException(exception);
   }
@@ -1420,7 +1420,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () ->
                 dataSetController.createDataSet(
-                    workspace.getNamespace(), workspace.getId(), dataSetRequest));
+                    workspace.getNamespace(), workspace.getTerraName(), dataSetRequest));
 
     assertForbiddenException(exception);
   }

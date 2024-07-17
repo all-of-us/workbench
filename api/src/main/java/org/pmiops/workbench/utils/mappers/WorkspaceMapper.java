@@ -17,6 +17,7 @@ import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -183,4 +184,9 @@ public interface WorkspaceMapper {
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
   }
+
+  @Mapping(target = "wsNamespace", source = "workspace.namespace")
+  // TODO: change TestUserWorkspace.wsFirecloudId to terraName
+  @Mapping(target = "wsFirecloudId", source = "workspace.terraName")
+  TestUserWorkspace toTestUserWorkspace(Workspace workspace, String username);
 }
