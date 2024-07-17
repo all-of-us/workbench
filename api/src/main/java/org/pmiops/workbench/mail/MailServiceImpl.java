@@ -432,29 +432,6 @@ public class MailServiceImpl implements MailService {
             publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
   }
 
-  //  private void sendPublishUnpublishWorkspaceByAdminEmail(
-  //      DbWorkspace workspace, List<DbUser> owners, String cateogryIfAny, boolean publish)
-  //      throws MessagingException {
-  //    String actionType = publish ? "published" : "unpublished";
-  //
-  //    final String ownersForLogging =
-  //        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-  //
-  //    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
-  //
-  //    sendWithRetries(
-  //        owners.stream().map(DbUser::getContactEmail).toList(),
-  //        Collections.singletonList(supportEmail),
-  //        "Your AoU Researcher Workbench workspace has been " + actionType,
-  //        String.format(
-  //            "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
-  //            actionType, workspace.getName(), workspace.getWorkspaceNamespace(),
-  // ownersForLogging),
-  //        buildHtml(
-  //            publish ? PUBLISH_WORKSPACE_RESOURCE : UNPUBLISH_WORKSPACE_RESOURCE,
-  //            publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
-  //  }
-
   private String featuredWorkspaceCategoryAsDisplayString(
       FeaturedWorkspaceCategory featuredWorkspaceCategory) {
     return switch (featuredWorkspaceCategory) {

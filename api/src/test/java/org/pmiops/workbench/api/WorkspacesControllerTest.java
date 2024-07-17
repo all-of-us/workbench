@@ -3020,8 +3020,6 @@ public class WorkspacesControllerTest {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
           ws.setName("updated-name");
-          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-          request.setWorkspace(ws);
           stubGetWorkspace(
               ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
           workspacesController.publishCommunityWorkspace(ws.getNamespace());
@@ -3036,8 +3034,6 @@ public class WorkspacesControllerTest {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
           ws.setName("updated-name");
-          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-          request.setWorkspace(ws);
           stubGetWorkspace(
               ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
           workspacesController.publishCommunityWorkspace(ws.getNamespace());

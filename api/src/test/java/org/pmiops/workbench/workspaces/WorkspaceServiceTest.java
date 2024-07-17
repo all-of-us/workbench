@@ -760,7 +760,7 @@ public class WorkspaceServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
-    verify(mockMailService).sendPublishWorkspaceByOwnerEmail(any(), any());
+    verify(mockMailService).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test
