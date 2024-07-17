@@ -95,8 +95,7 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_RESOURCE =
-      "emails/publish_workspace/content.html";
+  private static final String PUBLISH_WORKSPACE_RESOURCE = "emails/publish_workspace/content.html";
 
   private static final String UNPUBLISH_WORKSPACE_RESOURCE =
       "emails/unpublish_workspace/content.html";
@@ -403,7 +402,7 @@ public class MailServiceImpl implements MailService {
             "Workspace has been published by owner. Email for workspace '%s' (%s) sent to owners %s",
             workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
-                PUBLISH_WORKSPACE_RESOURCE,
+            PUBLISH_WORKSPACE_RESOURCE,
             publishUnpublishWorkspaceSubstitutionMap(
                 workspace,
                 featuredWorkspaceCategoryAsDisplayString(FeaturedWorkspaceCategory.COMMUNITY),

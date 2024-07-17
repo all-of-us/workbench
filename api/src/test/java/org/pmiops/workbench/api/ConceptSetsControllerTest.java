@@ -81,10 +81,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
-import org.pmiops.workbench.utils.mappers.UserMapperImpl;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.*;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -244,6 +241,7 @@ public class ConceptSetsControllerTest {
     DataSetMapperImpl.class,
     DataSetService.class,
     DirectoryService.class,
+    FeaturedWorkspaceMapper.class,
     FeaturedWorkspaceService.class,
     FireCloudService.class,
     FirecloudMapperImpl.class,
