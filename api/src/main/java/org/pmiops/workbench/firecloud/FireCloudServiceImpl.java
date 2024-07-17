@@ -398,7 +398,7 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   @Override
-  public void updatePublishedWorkspaceACL(
+  public void updatePublishWorkspaceACL(
       String workspaceNamespace, String firecloudName, String groupEmail, boolean publish) {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;

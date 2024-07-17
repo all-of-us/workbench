@@ -85,7 +85,7 @@ describe('AboutPublishConsentModal', () => {
 
     const message = 'bad request workspace already published';
     jest
-      .spyOn(workspacesApi(), 'markWorkspaceAsFeatured')
+      .spyOn(workspacesApi(), 'publishCommunityWorkspace')
       .mockRejectedValueOnce(
         new Response(JSON.stringify({ message }), { status: 400 })
       );
@@ -126,13 +126,13 @@ describe('AboutPublishConsentModal', () => {
     // Now, the confirm button should be enabled
     expectButtonElementEnabled(confirmButton);
 
-    jest.spyOn(workspacesApi(), 'markWorkspaceAsFeatured');
+    jest.spyOn(workspacesApi(), 'publishCommunityWorkspace');
 
     await act(() => {
       confirmButton.click();
     });
 
     expectButtonElementDisabled(confirmButton);
-    expect(workspacesApi().markWorkspaceAsFeatured).toHaveBeenCalled();
+    expect(workspacesApi().publishCommunityWorkspace).toHaveBeenCalled();
   });
 });

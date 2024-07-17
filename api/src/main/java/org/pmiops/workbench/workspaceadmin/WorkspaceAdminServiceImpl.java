@@ -421,7 +421,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    fireCloudService.updatePublishedWorkspaceACL(
+    fireCloudService.updatePublishWorkspaceACL(
         workspaceNamespace,
         firecloudName,
         workspaceService.getPublishedWorkspacesGroupEmail(),
@@ -472,7 +472,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
-              fireCloudService.updatePublishedWorkspaceACL(
+              fireCloudService.updatePublishWorkspaceACL(
                   dbWorkspace.getWorkspaceNamespace(),
                   dbWorkspace.getFirecloudName(),
                   workspaceService.getPublishedWorkspacesGroupEmail(),
@@ -521,7 +521,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         (dbFeaturedWorkspace) -> {
           String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
 
-          fireCloudService.updatePublishedWorkspaceACL(
+          fireCloudService.updatePublishWorkspaceACL(
               dbWorkspace.getWorkspaceNamespace(),
               dbWorkspace.getFirecloudName(),
               workspaceService.getPublishedWorkspacesGroupEmail(),

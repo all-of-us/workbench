@@ -523,7 +523,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               throw new BadRequestException("Workspace is already marked featured");
             },
             () -> {
-              fireCloudService.updatePublishedWorkspaceACL(
+              fireCloudService.updatePublishWorkspaceACL(
                   dbWorkspace.getWorkspaceNamespace(),
                   dbWorkspace.getFirecloudName(),
                   getPublishedWorkspacesGroupEmail(),
