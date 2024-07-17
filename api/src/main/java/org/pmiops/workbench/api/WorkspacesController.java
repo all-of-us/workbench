@@ -801,7 +801,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                         String.format(
                             "Workspace with namespace %s not found", workspaceNamespace)));
 
-    // Ensure user is workspace OWNER
+    // Make sure the current user is the workspace owner
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
 

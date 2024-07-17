@@ -95,11 +95,11 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/publish_workspace_by_admin/content.html";
+  private static final String PUBLISH_WORKSPACE_RESOURCE =
+      "emails/publish_workspace/content.html";
 
-  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/unpublish_workspace_by_admin/content.html";
+  private static final String UNPUBLISH_WORKSPACE_RESOURCE =
+      "emails/unpublish_workspace/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -403,7 +403,7 @@ public class MailServiceImpl implements MailService {
             "Workspace has been published by owner. Email for workspace '%s' (%s) sent to owners %s",
             workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
-            PUBLISH_WORKSPACE_ADMIN_RESOURCE,
+                PUBLISH_WORKSPACE_RESOURCE,
             publishUnpublishWorkspaceSubstitutionMap(
                 workspace,
                 featuredWorkspaceCategoryAsDisplayString(FeaturedWorkspaceCategory.COMMUNITY),
@@ -442,7 +442,7 @@ public class MailServiceImpl implements MailService {
             "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
             actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
-            publish ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
+            publish ? PUBLISH_WORKSPACE_RESOURCE : UNPUBLISH_WORKSPACE_RESOURCE,
             publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
   }
 
