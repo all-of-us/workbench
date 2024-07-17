@@ -610,13 +610,9 @@ export const WorkspaceAbout = fp.flow(
             <AboutPublishConsentModal
               workspaceNamespace={workspace.namespace}
               onConfirm={() => {
-                this.setState({
-                  workspace: {
-                    ...workspace,
-                    featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
-                  },
-                });
-                this.setState({ showPublishConsentModal: false });
+                workspace.featuredCategory =
+                  FeaturedWorkspaceCategory.COMMUNITY;
+                this.setState({ workspace, showPublishConsentModal: false });
               }}
               onCancel={() => this.setState({ showPublishConsentModal: false })}
             />
