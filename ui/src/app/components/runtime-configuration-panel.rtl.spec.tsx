@@ -846,77 +846,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const getPausedCost = () =>
     screen.getByLabelText('cost while paused').textContent;
 
-  // async function runDetachableDiskCase(
-  //   container,
-  //   [
-  //     _,
-  //     setters,
-  //     {
-  //       wantUpdateDisk = false,
-  //       wantDeleteDisk = false,
-  //       wantDeleteRuntime = false,
-  //     },
-  //   ]: DetachableDiskCase,
-  //   existingDiskName: string
-  // ) {
-  //   jest
-  //     .spyOn(runtimeApi(), 'updateRuntime')
-  //     .mockImplementation((): Promise<any> => {
-  //       return Promise.resolve();
-  //     });
-  //   const deleteDiskSpy = jest
-  //     .spyOn(disksApi(), 'deleteDisk')
-  //     .mockImplementation((): Promise<any> => Promise.resolve());
-  //
-  //   const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
-  //
-  //   for (const f of setters) {
-  //     await f(container);
-  //   }
-  //
-  //   await clickButtonIfVisible('Next');
-  //   await clickButtonIfVisible('Update');
-  //   await clickButtonIfVisible('Create');
-  //
-  //   const deleteRadio = screen.queryAllByTestId('delete-unattached-pd-radio');
-  //   if (deleteRadio && deleteRadio.length > 0) {
-  //     expect(deleteRadio[0]).not.toBeChecked();
-  //     await user.click(deleteRadio[0]);
-  //     expect(deleteRadio[0]).toBeChecked();
-  //     await clickExpectedButton('Delete');
-  //   }
-  //
-  //   await waitFor(() => {
-  //     expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
-  //     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
-  //   });
-  //
-  //   if (wantDeleteRuntime) {
-  //     // await waitFor(() => {
-  //     //   expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
-  //     // });
-  //     runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //
-  //     await waitFor(
-  //       async () => {
-  //         expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-  //       },
-  //       { timeout: 5000 }
-  //     );
-  //   }
-  //
-  //   const firstCall = 0;
-  //   const runtimeParameter = 1;
-  //   const newPdName =
-  //     createRuntimeSpy.mock.calls[firstCall][runtimeParameter].gceWithPdConfig
-  //       .persistentDisk.name;
-  //   if (wantDeleteDisk) {
-  //     expect(newPdName).not.toEqual(existingDiskName);
-  //   } else {
-  //     expect(newPdName).toEqual(existingDiskName);
-  //   }
-  // }
-
   let mockSetRuntimeRequest;
   const firstCall = 0;
   const firstParameter = 0;
@@ -1054,25 +983,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     //   expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
     // });
   });
-
-  // it('should show customize after create', async () => {
-  //   setCurrentRuntime(null);
-  //
-  //   component();
-  //
-  //   await clickExpectedButton('Create');
-  //
-  //   // creation closes the panel. re-render with the new runtime state
-  //   await waitFor(() => {
-  //     component();
-  //
-  //     // now in Customize mode
-  //
-  //     const button = screen.getByRole('button', { name: 'Customize' });
-  //     expect(button).toBeInTheDocument();
-  //     expectButtonElementEnabled(button);
-  //   });
-  // });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
@@ -1367,48 +1277,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     ).not.toBeInTheDocument();
   });
 
-  // Disabling this test, because of leoinitilizer peculiarities
-  // it('should allow Dataproc -> PD transition', async () => {
-  //   const createRuntimeSpy = jest
-  //     .spyOn(runtimeApi(), 'createRuntime')
-  //     .mockImplementation((): Promise<any> => Promise.resolve());
-  //
-  //   setCurrentRuntime(defaultDataProcshould allow configuration via dataproc preset from modified formRuntime());
-  //
-  //   const { container } = component();
-  //
-  //   // confirm Dataproc by observing that Standard disk is required
-  //   expect(screen.queryByText('Standard disk')).toBeInTheDocument();
-  //
-  //   await pickComputeType(container, ComputeType.Standard);
-  //
-  //   await waitFor(() => {
-  //     // confirm GCE by observing that PD is required
-  //     expect(
-  //       screen.queryByText('Reattachable persistent disk')
-  //     ).toBeInTheDocument();
-  //   });
-  //
-  //   await clickExpectedButton('Next');
-  //   await clickExpectedButton('Update');
-  //
-  //   // after deletion happens, confirm the new runtime state
-  //   runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //   await waitFor(
-  //     async () => {
-  //       expect(createRuntimeSpy).toHaveBeenCalled();
-  //     },
-  //     { timeout: 5000 }
-  //   );
-  //   const firstCall = 0;
-  //   const runtimeParameter = 1;
-  //   const disk =
-  //     createRuntimeSpy.mock.calls[firstCall][runtimeParameter].gceWithPdConfig
-  //       .persistentDisk;
-  //
-  //   expect(disk).toBeTruthy();
-  // });
-
   it('should render Spark console links for a running cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
@@ -1458,44 +1326,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     ).toBeInTheDocument();
     expect(screen.queryByText('Standard disk')).not.toBeInTheDocument();
   });
-
-  // Disabling this test, because of leoinitilizer peculiarities
-  // it('should allow configuration via GCE preset', async () => {
-  //   setCurrentRuntime(null);
-  //
-  //   const { container } = component();
-  //
-  //   const customizeButton = screen.getByRole('button', {
-  //     name: 'Customize',
-  //   });
-  //
-  //   await user.click(customizeButton);
-  //
-  //   // Ensure set the form to something non-standard to start
-  //   await pickMainCpu(container, 8);
-  //   await pickComputeType(container, ComputeType.Dataproc);
-  //   await pickStandardDiskSize(MIN_DISK_SIZE_GB + 10);
-  //
-  //   // GPU
-  //   await pickPresets(container, runtimePresets.generalAnalysis.displayName);
-  //
-  //   await clickExpectedButton('Create');
-  //   await waitFor(() => {
-  //     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-  //   });
-  //   await waitFor(() => {
-  //     expect(runtimeApiStub.runtime.configurationType).toEqual(
-  //       RuntimeConfigurationType.GENERAL_ANALYSIS
-  //     );
-  //   });
-  //   expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
-  //     diskType: 'pd-standard',
-  //     labels: {},
-  //     name: 'stub-disk',
-  //     size: MIN_DISK_SIZE_GB,
-  //   });
-  //   expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
-  // });
 
   it('should allow configuration via dataproc preset', async () => {
     setCurrentRuntime(null);
@@ -1565,59 +1395,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     }
   );
 
-  // it(
-  //   'should set runtime preset values in customize panel instead of getRuntime values ' +
-  //     'if configurationType is HailGenomicsAnalysis',
-  //   async () => {
-  //     const customMasterMachineType = 'n1-standard-16';
-  //     const customMasterDiskSize = 999;
-  //     const customWorkerDiskSize = 444;
-  //     const customNumberOfWorkers = 5;
-  //     setCurrentRuntime({
-  //       ...runtimeApiStub.runtime,
-  //       status: RuntimeStatus.DELETED,
-  //       configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-  //       gceConfig: null,
-  //       gceWithPdConfig: null,
-  //       dataprocConfig: {
-  //         ...defaultDataprocConfig(),
-  //         masterMachineType: customMasterMachineType,
-  //         masterDiskSize: customMasterDiskSize,
-  //         workerDiskSize: customWorkerDiskSize,
-  //         numberOfWorkers: customNumberOfWorkers,
-  //       },
-  //     });
-  //
-  //     // show that the preset values do not match the existing runtime
-  //
-  //     const {
-  //       masterMachineType,
-  //       masterDiskSize,
-  //       workerDiskSize,
-  //       numberOfWorkers,
-  //     } = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
-  //
-  //     expect(customMasterMachineType).not.toEqual(masterMachineType);
-  //     expect(customMasterDiskSize).not.toEqual(masterDiskSize);
-  //     expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
-  //     expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
-  //
-  //     const { container } = component();
-  //
-  //     await clickExpectedButton('Customize');
-  //     expect(getMainCpu(container)).toEqual(
-  //       findMachineByName(masterMachineType).cpu.toString()
-  //     );
-  //     expect(getMainRam(container)).toEqual(
-  //       findMachineByName(masterMachineType).memory.toString()
-  //     );
-  //
-  //     expect(getMasterDiskValue()).toEqual(masterDiskSize.toString());
-  //     expect(getWorkerDiskValue()).toEqual(workerDiskSize.toString());
-  //     expect(getNumOfWorkersValue()).toEqual(numberOfWorkers.toString());
-  //   }
-  // );
-
   it('should reattach to an existing disk by default, for deleted VMs', async () => {
     const disk = existingDisk();
     setCurrentDisk(disk);
@@ -1636,52 +1413,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     const numberFormatter = new Intl.NumberFormat('en-US');
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
-
-  // it('should allow configuration via dataproc preset from modified form', async () => {
-  //   setCurrentRuntime(null);
-  //
-  //   const { container } = component();
-  //   await clickExpectedButton('Customize');
-  //
-  //   // Configure the form - we expect all of the changes to be overwritten by
-  //   // the Hail preset selection.
-  //   await pickMainCpu(container, 2);
-  //   await pickMainRam(container, 7.5);
-  //   await pickDetachableDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
-  //   await pickComputeType(container, ComputeType.Dataproc);
-  //
-  //   await pickWorkerCpu(container, 8);
-  //   await pickWorkerRam(container, 30);
-  //   await pickWorkerDiskSize(300);
-  //   await pickNumWorkers(10);
-  //   await pickNumPreemptibleWorkers(20);
-  //   await pickPresets(container, runtimePresets.hailAnalysis.displayName);
-  //   getRuntimeSpy = jest
-  //     .spyOn(runtimeApi(), 'getRuntime')
-  //     .mockImplementation((): Promise<any> => Promise.resolve());
-  //
-  //   createRuntimeSpy = jest
-  //     .spyOn(runtimeApi(), 'createRuntime')
-  //     .mockImplementation((): Promise<any> => Promise.resolve());
-  //
-  //   await clickExpectedButton('Create');
-  //
-  //   // await waitFor(() => {
-  //   //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-  //   // });
-  //
-  //   await waitFor(async () => {
-  //     expect(createRuntimeSpy).toHaveBeenCalled();
-  //   });
-  //
-  //   // expect(runtimeApiStub.runtime.configurationType).toEqual(
-  //   //   RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
-  //   // );
-  //   // expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
-  //   //   runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-  //   // );
-  //   // expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
-  // });
 
   it('should tag as user override after preset modification', async () => {
     setCurrentRuntime(null);
@@ -2082,74 +1813,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     expectButtonElementDisabled(nextButton);
   });
 
-  // it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
-  //   setCurrentRuntime({
-  //     ...runtimeApiStub.runtime,
-  //     status: RuntimeStatus.RUNNING,
-  //     configurationType: RuntimeConfigurationType.USER_OVERRIDE,
-  //     gceConfig: null,
-  //     gceWithPdConfig: null,
-  //     dataprocConfig: {
-  //       masterMachineType: 'n1-standard-4',
-  //       masterDiskSize: 1000,
-  //       numberOfWorkers: 2,
-  //       numberOfPreemptibleWorkers: 0,
-  //       workerMachineType: 'n1-standard-4',
-  //       workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
-  //     },
-  //   });
-  //   mockUseCustomRuntime();
-  //   component();
-  //   const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
-  //   const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
-  //
-  //   await pickStandardDiskSize(
-  //     parseInt(getMasterDiskValue().replace(/,/g, '')) + 20
-  //   );
-  //
-  //   await clickExpectedButton('Next');
-  //
-  //   await clickExpectedButton('Update');
-  //   await waitFor(() => {
-  //     expect(updateSpy).toHaveBeenCalled();
-  //     expect(deleteSpy).toHaveBeenCalledTimes(0);
-  //   });
-  // });
-
-  // it('should send an updateDisk API call if disk changes do not require a delete', async () => {
-  //   setCurrentRuntime(detachableDiskRuntime());
-  //   setCurrentDisk(existingDisk());
-  //   mockUseCustomRuntime();
-  //   component();
-  //
-  //   const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
-  //   const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
-  //
-  //   await pickDetachableDiskSize(1010);
-  //
-  //   await clickExpectedButton('Next');
-  //
-  //   await clickExpectedButton('Update');
-  //   await waitFor(() => {
-  //     expect(updateSpy).toHaveBeenCalled();
-  //     expect(deleteSpy).toHaveBeenCalledTimes(0);
-  //   });
-  // });
-
-  // it('should send a delete call if an update requires delete', async () => {
-  //   mockUseCustomRuntime();
-  //   const { container } = component();
-  //
-  //   await pickComputeType(container, ComputeType.Dataproc);
-  //
-  //   await clickExpectedButton('Next');
-  //   await clickExpectedButton('Update');
-  //
-  //   await waitFor(() => {
-  //     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
-  //   });
-  // });
-
   it('should add additional options when the compute type changes', async () => {
     mockUseCustomRuntime();
     const { container } = component();
@@ -2424,40 +2087,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(pdConfig).toBeUndefined();
   });
 
-  // it('should allow skipping disk deletion when detaching', async () => {
-  //   const deleteDiskSpy = jest
-  //     .spyOn(disksApi(), 'deleteDisk')
-  //     .mockImplementation((): Promise<any> => Promise.resolve());
-  //   setCurrentRuntime(detachableDiskRuntime());
-  //   const disk = existingDisk();
-  //   setCurrentDisk(disk);
-  //
-  //   const { container } = component();
-  //   await pickComputeType(container, ComputeType.Dataproc);
-  //
-  //   await clickExpectedButton('Next');
-  //
-  //   expect(
-  //     screen.getByText(
-  //       /your environment currently has a reattachable disk, which will be unused after you apply this update\./i
-  //     )
-  //   ).toBeInTheDocument();
-  //
-  //   // Default option should be NOT to delete.
-  //   await clickExpectedButton('Next');
-  //   await clickExpectedButton('Update');
-  //   runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
-  //
-  //   await waitFor(
-  //     async () => {
-  //       expect(createRuntimeSpy).toHaveBeenCalledTimes(1);
-  //     },
-  //     { timeout: 5000 }
-  //   );
-  //
-  //   expect(deleteDiskSpy).not.toHaveBeenCalled();
-  // });
-
   it('should prevent runtime creation when running cost is too high for initial credits', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
@@ -2556,111 +2185,4 @@ describe(RuntimeConfigurationPanel.name, () => {
       spinDiskElement('num-preemptible');
     expect(preemptibleCountInput.disabled).toBeTruthy();
   });
-
-  // These tests require a little more simplification, so we are skippingg them for now. However, they will run as
-  // part of runtime-configuration-panel.enzyme.spec.tsx.
-  // test.each([
-  //   [
-  //     'disk type',
-  //     [pickSsdType],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  //   [
-  //     'disk decrease',
-  //     [decrementDetachableDiskSize],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  //   [
-  //     'in-place + disk type',
-  //     [changeMainCpu_To8, pickSsdType],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  //   [
-  //     'in-place + disk decrease',
-  //     [changeMainCpu_To8, decrementDetachableDiskSize],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  //   ['recreate', [clickEnableGpu], { wantDeleteRuntime: true }],
-  //   [
-  //     'recreate + disk type',
-  //     [clickEnableGpu, pickSsdType],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  //   [
-  //     'recreate + disk decrease',
-  //     [clickEnableGpu, decrementDetachableDiskSize],
-  //     { wantDeleteDisk: true, wantDeleteRuntime: true },
-  //   ],
-  // ] as DetachableDiskCase[])(
-  //   'should allow runtime to recreate to attached PD: %s',
-  //   async (desc: string, setters, expectations) => {
-  //     // jest.setTimeout(100000);
-  //     setCurrentRuntime(detachableDiskRuntime());
-  //
-  //     const disk = existingDisk();
-  //     setCurrentDisk(disk);
-  //
-  //     const { container } = component();
-  //     await runDetachableDiskCase(
-  //       container,
-  //       [desc, setters, expectations],
-  //       disk.name
-  //     );
-  //   }
-  // );
-
-  // test.each([
-  //   ['disk increase', [incrementDetachableDiskSize]],
-  //   ['in-place', [changeMainCpu_To8]],
-  //   [
-  //     'in-place + disk increase',
-  //     [changeMainCpu_To8, incrementDetachableDiskSize],
-  //   ],
-  //   ['recreate + disk increase', [clickEnableGpu, incrementDetachableDiskSize]],
-  // ])(
-  //   'should allow runtime updates to attached PD: %s',
-  //   async (desc: string, setters) => {
-  //     setCurrentRuntime(detachableDiskRuntime());
-  //
-  //     const disk = existingDisk();
-  //     setCurrentDisk(disk);
-  //
-  //     const { container } = component();
-  //     const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
-  //
-  //     for (const action of setters) {
-  //       await action(container);
-  //     }
-  //
-  //     await clickButtonIfVisible('Next');
-  //     await clickButtonIfVisible('Update');
-  //     await waitFor(() => {
-  //       expect(updateRuntimeSpy).toHaveBeenCalledTimes(1);
-  //     });
-  //     expect(disksApiStub.disk.name).toEqual(disk.name);
-  //   }
-  // );
-
-  // test.each([
-  //   ['disk type', [pickSsdType], { wantDeleteDisk: true }],
-  //   ['disk decrease', [decrementDetachableDiskSize], { wantDeleteDisk: true }],
-  //   ['disk increase', [incrementDetachableDiskSize], { wantUpdateDisk: true }],
-  // ] as DetachableDiskCase[])(
-  //   'should allow runtime creates with existing disk: %s',
-  //   async (desc, setters, expectations) => {
-  //     setCurrentRuntime(null);
-  //
-  //     const disk = existingDisk();
-  //     setCurrentDisk(disk);
-  //     mockUseCustomRuntime();
-  //     const { container } = component();
-  //     await clickExpectedButton('Customize');
-  //
-  //     runDetachableDiskCase(
-  //       container,
-  //       [desc, setters, expectations],
-  //       disk.name
-  //     );
-  //   }
-  // );
 });
