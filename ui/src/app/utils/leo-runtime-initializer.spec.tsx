@@ -59,7 +59,7 @@ describe('RuntimeInitializer', () => {
 
     registerApiClient(RuntimeApi, new RuntimeApiStub());
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
-
+    const x = runtimeApi();
     mockGetRuntime = jest.spyOn(runtimeApi(), 'getRuntime');
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
