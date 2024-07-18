@@ -20,7 +20,6 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
-  disksApi,
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
@@ -735,9 +734,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       diskTypeLabels[diskType]
     );
 
-  const pickSsdType = (container: HTMLElement): Promise<void> =>
-    pickDetachableType(container, DiskType.SSD);
-
   const getMainCpu = (container: HTMLElement): string =>
     getDropdownSelection(container, 'runtime-cpu');
 
@@ -777,19 +773,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const pickDetachableDiskSize = async (size: number): Promise<void> =>
     pickSpinButtonSize('detachable-disk', size);
-
-  const changeMainCpu_To8 = async (container: HTMLElement) =>
-    pickMainCpu(container, 8);
-
-  const clickEnableGpu = async () => {
-    const enableGpu = screen.getByRole('checkbox', {
-      name: /enable gpus/i,
-    });
-    expect(enableGpu).toBeInTheDocument();
-    expect(enableGpu).not.toBeChecked();
-    await user.click(enableGpu);
-    expect(enableGpu).toBeChecked();
-  };
 
   const pickStandardDiskSize = async (size: number): Promise<void> =>
     pickSpinButtonSize('standard-disk', size);
@@ -835,18 +818,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const getNumOfPreemptibleWorkersValue = () =>
     spinDiskElement('num-preemptible').getAttribute('value');
-
-  const decrementDetachableDiskSize = async (): Promise<void> => {
-    const diskValueAsInt =
-      parseInt(getDetachableDiskValue().replace(/,/g, '')) - 1;
-    await pickDetachableDiskSize(diskValueAsInt);
-  };
-
-  const incrementDetachableDiskSize = async (): Promise<void> => {
-    const diskValueAsInt =
-      parseInt(getDetachableDiskValue().replace(/,/g, '')) + 1;
-    await pickDetachableDiskSize(diskValueAsInt);
-  };
 
   const getDeletePDRadio = () =>
     screen.queryByRole('radio', {
@@ -1032,23 +1003,19 @@ describe(RuntimeConfigurationPanel.name, () => {
   const mockUseCustomRuntime = () => {
     jest
       .spyOn(runtimeHooks, 'useCustomRuntime')
-      .mockImplementation(
-        (currentWorkspaceNamespace: string, detachablePd: Disk | null) => {
-          const runtimeOps = useStore(compoundRuntimeOpStore);
-          const { pendingRuntime = null } =
-            runtimeOps[currentWorkspaceNamespace] || {};
-          const { runtime } = useStore(runtimeStore);
-          console.log('You did it!!!!!!!:   ', currentWorkspaceNamespace);
-          return [
-            { currentRuntime: runtime, pendingRuntime: pendingRuntime },
-            mockSetRuntimeRequest,
-          ];
-        }
-      );
+      .mockImplementation((currentWorkspaceNamespace: string) => {
+        const runtimeOps = useStore(compoundRuntimeOpStore);
+        const { pendingRuntime = null } =
+          runtimeOps[currentWorkspaceNamespace] || {};
+        const { runtime } = useStore(runtimeStore);
+        return [
+          { currentRuntime: runtime, pendingRuntime: pendingRuntime },
+          mockSetRuntimeRequest,
+        ];
+      });
   };
 
   it('should show loading spinner while loading', async () => {
-    const x = runtimeStore.get();
     // simulate not done loading
     runtimeStore.set({ ...runtimeStore.get(), runtimeLoaded: false });
 
