@@ -634,8 +634,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let user: UserEvent;
-  let createRuntimeSpy;
-  let getRuntimeSpy;
 
   const onClose = jest.fn();
   const defaultProps: RuntimeConfigurationPanelProps = {
@@ -828,13 +826,6 @@ describe(RuntimeConfigurationPanel.name, () => {
     getDeletePDRadio().click();
   };
 
-  const clickButtonIfVisible = async (name) => {
-    const button = screen.queryByRole('button', { name });
-    if (button) {
-      await user.click(button);
-    }
-  };
-
   const confirmDeleteText =
     'You’re about to delete your cloud analysis environment.';
 
@@ -857,17 +848,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   const getPausedCost = () =>
     screen.getByLabelText('cost while paused').textContent;
-
-  type DetachableDiskCase = [
-    string,
-    ((container: HTMLElement) => Promise<void>)[],
-    {
-      wantUpdateDisk?: boolean;
-      wantDeleteDisk?: boolean;
-      wantUpdateRuntime?: boolean;
-      wantDeleteRuntime?: boolean;
-    }
-  ];
 
   // async function runDetachableDiskCase(
   //   container,
@@ -977,10 +957,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       workspaceNamespace: workspaceStubs[0].namespace,
       gcePersistentDisk: null,
     });
-
-    createRuntimeSpy = jest
-      .spyOn(runtimeApi(), 'createRuntime')
-      .mockImplementation((): Promise<any> => Promise.resolve());
 
     mockSetRuntimeRequest = jest
       .fn()
