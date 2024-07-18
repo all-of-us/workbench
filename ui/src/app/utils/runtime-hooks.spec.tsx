@@ -7,7 +7,6 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 
-import { stubDisk } from 'testing/stubs/disks-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
