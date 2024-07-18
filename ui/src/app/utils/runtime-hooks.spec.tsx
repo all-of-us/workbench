@@ -1,4 +1,4 @@
-import { Disk, RuntimeApi, RuntimeStatus } from 'generated/fetch';
+import { RuntimeApi, RuntimeStatus } from 'generated/fetch';
 
 import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -14,7 +14,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
 import { useCustomRuntime } from './runtime-hooks';
 import { runtimeStore } from './stores';
-import useFakeTimers = jest.useFakeTimers;
 
 describe('useCustomRuntime', () => {
   let deleteRuntimeSpy;
@@ -41,7 +40,7 @@ describe('useCustomRuntime', () => {
     jest.resetAllMocks();
   });
 
-  const testUseCustomRuntime = (currentDisk?: Disk) => {
+  const testUseCustomRuntime = () => {
     const { result } = renderHook(() =>
       useCustomRuntime('workspaceNamespace', null)
     );
@@ -50,7 +49,7 @@ describe('useCustomRuntime', () => {
   };
 
   it('should update runtime when request includes updated runtime', async () => {
-    const [_, setRequest] = testUseCustomRuntime();
+    const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = defaultRuntime();
     newRuntime.gceConfig.diskSize = newRuntime.gceConfig.diskSize * 2;
@@ -65,7 +64,7 @@ describe('useCustomRuntime', () => {
   });
 
   it('should not update runtime when request does not include an updated runtime', async () => {
-    const [_, setRequest] = testUseCustomRuntime();
+    const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = currentRuntime;
 
@@ -77,9 +76,8 @@ describe('useCustomRuntime', () => {
   });
 
   it('should delete runtime and create a new one when disk is decreased', async () => {
-    const currentDisk = stubDisk();
     const newDisk = null;
-    const [_, setRequest] = testUseCustomRuntime(currentDisk);
+    const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = defaultRuntime();
     // THis is what is triggering the delete
@@ -99,7 +97,7 @@ describe('useCustomRuntime', () => {
   });
 
   it('should delete runtime and create a new one when current runtime is in error state', async () => {
-    const [_, setRequest] = testUseCustomRuntime();
+    const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = { ...currentRuntime };
 
