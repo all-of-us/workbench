@@ -320,12 +320,11 @@ export const RuntimeConfigurationPanel = fp.flow(
         })
     );
 
-    const requestAnalysisConfig = (config: AnalysisConfig) => {
+    const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
         runtime: fromAnalysisConfig(config),
         detachedDisk: config.detachedDisk,
       });
-    };
 
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
       {
