@@ -883,11 +883,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       gcePersistentDisk: null,
     });
 
-    mockSetRuntimeRequest = jest
-      .fn()
-      .mockImplementation((x) =>
-        console.log('Set runtime request with :::::::::::::::::::: ', x)
-      );
+    mockSetRuntimeRequest = jest.fn();
   });
 
   afterEach(async () => {
