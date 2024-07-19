@@ -7,8 +7,7 @@ export const LOGIN_ERROR_BANNER = () => (
     style={{
       fontWeight: 800,
       fontSize: 'large',
-      paddingLeft: '1rem',
-      paddingRight: '1rem',
+      padding: '1rem',
       lineHeight: '2rem',
     }}
   >
