@@ -522,14 +522,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .findByWorkspace(dbWorkspace)
         .ifPresentOrElse(
             (dbFeaturedWorkspace) -> {
-              // If the workspace is already featured, a BadRequestException is thrown
-              throw new BadRequestException("Workspace is already marked featured");
+              // Throw exception if workspace is already Published
+              throw new BadRequestException("Workspace is already published");
             },
             () -> {
               fireCloudService.updatePublishWorkspaceACL(
                   dbWorkspace.getWorkspaceNamespace(),
                   dbWorkspace.getFirecloudName(),
-                  getPublishedWorkspacesGroupEmail(),
                   true);
 
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =

@@ -55,8 +55,10 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequestClone;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.sam.SamRetryHandler;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryException;
 import org.springframework.stereotype.Service;
 
@@ -104,6 +106,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final FirecloudRetryHandler retryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
   private final SamRetryHandler samRetryHandler;
+  private final WorkspaceService workspaceService;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -158,6 +161,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       RawlsRetryHandler rawlsRetryHandler,
       CalhounRetryHandler calhounRetryHandler,
       SamRetryHandler samRetryHandler,
+      @Lazy WorkspaceService workspaceService,
 
       // old Terms of Service endpoints, before RW-11416
       @Deprecated
@@ -184,6 +188,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.samRetryHandler = samRetryHandler;
     this.firecloudTermsOfServiceApiProvider = firecloudTermsOfServiceApiProvider;
     this.termsOfServiceApiProvider = termsOfServiceApiProvider;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -402,16 +407,17 @@ public class FireCloudServiceImpl implements FireCloudService {
    *
    * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
    * @param firecloudName the Terra Name of the Workspace to modify
-   * @param groupEmail the email of the group to update
+   * @param publish true if we want to publish workspace false if we are unpublishing it
    * @return
    */
   @Override
   public void updatePublishWorkspaceACL(
-      String workspaceNamespace, String firecloudName, String groupEmail, boolean publish) {
+      String workspaceNamespace, String firecloudName, boolean publish) {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    var aclUpdate = FirecloudTransforms.buildAclUpdate(groupEmail, accessLevel);
+    String publishGroupEmail = workspaceService.getPublishedWorkspacesGroupEmail();
+    var aclUpdate = FirecloudTransforms.buildAclUpdate(publishGroupEmail, accessLevel);
     updateWorkspaceACLAsService(workspaceNamespace, firecloudName, List.of(aclUpdate));
   }
 

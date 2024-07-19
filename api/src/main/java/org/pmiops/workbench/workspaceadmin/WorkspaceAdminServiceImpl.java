@@ -424,7 +424,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     fireCloudService.updatePublishWorkspaceACL(
         workspaceNamespace,
         firecloudName,
-        workspaceService.getPublishedWorkspacesGroupEmail(),
         publish);
 
     dbWorkspace.setPublished(publish);
@@ -475,7 +474,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
               fireCloudService.updatePublishWorkspaceACL(
                   dbWorkspace.getWorkspaceNamespace(),
                   dbWorkspace.getFirecloudName(),
-                  workspaceService.getPublishedWorkspacesGroupEmail(),
                   true);
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
@@ -524,7 +522,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
           fireCloudService.updatePublishWorkspaceACL(
               dbWorkspace.getWorkspaceNamespace(),
               dbWorkspace.getFirecloudName(),
-              workspaceService.getPublishedWorkspacesGroupEmail(),
               false);
 
           featuredWorkspaceDao.delete(dbFeaturedWorkspace);

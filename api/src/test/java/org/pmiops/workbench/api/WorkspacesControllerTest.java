@@ -603,6 +603,14 @@ public class WorkspacesControllerTest {
         .collect(Collectors.toList());
   }
 
+  private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(
+            ws.getNamespace(), ws.getId(), ws.getCreator(), accessLevel);
+    return ws;
+  }
+
   @Test
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
@@ -3014,29 +3022,33 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testPublishCommunityWorkspace_ByUserWithWriterAccess() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.WRITER);
+    String wsNamespace = ws.getNamespace();
     assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Workspace ws = createWorkspace();
-          ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
-          stubGetWorkspace(
-              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
-          workspacesController.publishCommunityWorkspace(ws.getNamespace());
-        });
+            ForbiddenException.class,
+            () -> {
+              workspacesController.publishCommunityWorkspace(wsNamespace);
+            });
   }
 
   @Test
   public void testPublishCommunityWorkspace_ByUserWithReaderAccess() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.READER);
+    String wsNamespace = ws.getNamespace();
     assertThrows(
         ForbiddenException.class,
         () -> {
-          Workspace ws = createWorkspace();
-          ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
-          stubGetWorkspace(
-              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-          workspacesController.publishCommunityWorkspace(ws.getNamespace());
+          workspacesController.publishCommunityWorkspace(wsNamespace);
         });
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.READER);
+    String wsNamespace = ws.getNamespace();
+    workspacesController.publishCommunityWorkspace(wsNamespace);
+    verify(workspaceService).publishCommunityWorkspace(any());
+    verify(mockWorkspaceAuditor).firePublishAction(any());
+
   }
 }

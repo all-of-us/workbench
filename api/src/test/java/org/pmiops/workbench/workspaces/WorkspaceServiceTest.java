@@ -142,7 +142,7 @@ public class WorkspaceServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
 
-  @MockBean private AccessTierService accessTierService;
+  @MockBean private AccessTierService mockAccessTierService;
   @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
   @MockBean private CloudBillingClient mockCloudBillingClient;
@@ -629,7 +629,7 @@ public class WorkspaceServiceTest {
     accessTierDao.save(dbCdrVersion.getAccessTier());
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
-    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
     assertThrows(
         ForbiddenException.class,
@@ -653,7 +653,7 @@ public class WorkspaceServiceTest {
 
     addMockedWorkspace(dbWorkspace);
 
-    when(accessTierService.getAccessTierShortNamesForUser(currentUser))
+    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
 
     workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
@@ -675,7 +675,7 @@ public class WorkspaceServiceTest {
     addMockedWorkspace(dbWorkspace);
     dbWorkspace.setCreator(currentUser);
 
-    when(accessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
+    when(mockAccessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
     when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
         .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
@@ -715,17 +715,6 @@ public class WorkspaceServiceTest {
         "Workspace is already featured");
   }
 
-  public static DbAccessTier createRegisteredTier() {
-    return new DbAccessTier()
-        .setAccessTierId(1)
-        .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-        .setDisplayName("Registered Tier")
-        .setAuthDomainName("Registered Tier Auth Domain")
-        .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-        .setServicePerimeter("registered/tier/perimeter")
-        .setEnableUserWorkflows(false);
-  }
-
   @Test
   public void testPublishCommunityWorkspace() throws MessagingException {
     // Arrange
@@ -753,7 +742,7 @@ public class WorkspaceServiceTest {
                         .bucketName("bucket")
                         .namespace(DEFAULT_WORKSPACE_NAMESPACE)));
 
-    when(accessTierService.getRegisteredTierOrThrow()).thenReturn(createRegisteredTier());
+    when(mockAccessTierService.getRegisteredTierOrThrow()).thenReturn(createRegisteredTier());
 
     // Act
     workspaceService.publishCommunityWorkspace(dbWorkspace);
