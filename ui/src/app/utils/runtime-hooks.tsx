@@ -197,7 +197,6 @@ export const useRuntimeStatus = (
       ]
     );
 
-    aborter = new AbortController();
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
@@ -381,7 +380,6 @@ export const useCustomRuntime = (
           });
         }
 
-        aborter = new AbortController();
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
           targetRuntime: request.runtime,
