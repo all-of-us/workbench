@@ -56,7 +56,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -79,7 +78,6 @@ import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -606,12 +604,8 @@ public class WorkspaceAdminServiceTest {
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
     verify(mockFirecloudService)
-        .updateWorkspaceACLAsService(
-            mockDbWorkspace.getWorkspaceNamespace(),
-            mockDbWorkspace.getFirecloudName(),
-            List.of(
-                FirecloudTransforms.buildAclUpdate(
-                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.READER)));
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
     verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
@@ -664,6 +658,10 @@ public class WorkspaceAdminServiceTest {
     when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
         .thenReturn(rtAuthDomainGroupEmail);
 
+    when(mockFeaturedWorkspaceDao.findByWorkspace(any()))
+        .thenReturn(
+            Optional.of(mockFeaturedWorkspace.setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)));
+
     // Act
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
@@ -675,12 +673,8 @@ public class WorkspaceAdminServiceTest {
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
     verify(mockFirecloudService)
-        .updateWorkspaceACLAsService(
-            mockDbWorkspace.getWorkspaceNamespace(),
-            mockDbWorkspace.getFirecloudName(),
-            List.of(
-                FirecloudTransforms.buildAclUpdate(
-                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.READER)));
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
     verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
@@ -747,12 +741,8 @@ public class WorkspaceAdminServiceTest {
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
     verify(mockFirecloudService)
-        .updateWorkspaceACLAsService(
-            mockDbWorkspace.getWorkspaceNamespace(),
-            mockDbWorkspace.getFirecloudName(),
-            List.of(
-                FirecloudTransforms.buildAclUpdate(
-                    rtAuthDomainGroupEmail, WorkspaceAccessLevel.NO_ACCESS)));
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), false);
     verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
