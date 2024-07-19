@@ -153,12 +153,11 @@ const updateRuntimeStores = async ({
     runtime: undefined,
     runtimeLoaded: false,
   });
-  pollAborter.abort('Wrapper');
+  pollAborter.abort();
   const newPollAborter = new AbortController();
   setPollAborter(newPollAborter);
 
   try {
-    console.log('QQQQQQQQQQQQQQQQQQQQ');
     await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       pollAbortSignal: newPollAborter.signal,
