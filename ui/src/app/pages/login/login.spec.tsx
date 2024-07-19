@@ -45,7 +45,7 @@ describe('LoginComponent', () => {
     component(loginProps);
     expect(
       screen.getByText(
-        /we are currently experiencing technical difficulties with our login system\./i
+        /Researcher Workbench is currently experiencing an outage\./i
       )
     ).toBeInTheDocument();
   });
