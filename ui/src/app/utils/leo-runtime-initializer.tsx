@@ -363,7 +363,6 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
-    console.log('Polling runtime...', this.currentRuntime);
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
@@ -371,10 +370,6 @@ export class LeoRuntimeInitializer {
     // Certain runtime states require active intervention, such as deleting or resuming the runtime;
     // these are handled within the the polling loop.
     if (this.pollAbortSignal?.aborted) {
-      console.log('--------------------ß? ', getAborter().signal?.aborted);
-      console.log('--------------------ß2? ', getAborter().signal?.reason);
-      console.log('AAAAAAAAAA: ', this.pollAbortSignal?.aborted);
-      console.log('AAAAAAAAAA2: ', this.pollAbortSignal?.reason);
       // We'll bail out early if an abort signal was triggered while waiting for the poll cycle.
       return this.reject(
         new LeoRuntimeInitializationAbortedError(
@@ -384,7 +379,6 @@ export class LeoRuntimeInitializer {
       );
     }
     if (Date.now() - this.initializeStartTime > this.overallTimeout) {
-      console.log('BBBBBBBBBBBBB');
       return this.reject(
         new LeoRuntimeInitializationFailedError(
           `Initialization attempt took longer than the max time allowed (${this.overallTimeout}ms)`,
@@ -396,7 +390,6 @@ export class LeoRuntimeInitializer {
     // Fetch the current runtime status, with some graceful error handling for NOT_FOUND response
     // and abort signals.
     try {
-      console.log('Get Runtime');
       this.currentRuntime = await runtimeApi().getRuntime(
         this.workspaceNamespace,
         { signal: this.pollAbortSignal }
@@ -437,7 +430,6 @@ export class LeoRuntimeInitializer {
       }
     }
 
-    console.log('We made it here in polling');
     // Attempt to take the appropriate next action given the current runtime status.
     try {
       if (this.reachedResolution()) {
