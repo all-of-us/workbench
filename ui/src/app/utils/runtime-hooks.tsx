@@ -205,7 +205,6 @@ export const useRuntimeStatus = (
     const initializePolling = async () => {
       if (!!runtimeStatusRequest) {
         try {
-          console.log('777777777777777777777777');
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
