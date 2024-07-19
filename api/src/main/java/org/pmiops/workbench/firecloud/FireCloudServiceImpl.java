@@ -401,17 +401,18 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   /**
-   * Updates the Access Control List (ACL) for a specified workspace. If Published: Grant Reader
-   * access to all users in the groupEmail If Unpublished: Grant No access to all users in the
-   * groupEmail
+   * Updates the Access Control List (ACL) for a specified workspace to make it readable (or not) to
+   * all members of a group If Published: Grant Reader access to all users in the groupEmail If
+   * Unpublished: Remove access (grant NO_ACCESS) to all users in the groupEmail, unless they have
+   * access independently of publishing status
    *
    * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
    * @param firecloudName the Terra Name of the Workspace to modify
-   * @param publish true if we want to publish workspace false if we are unpublishing it
+   * @param publish true if we want to publish workspace false if we are unpublished it
    * @return
    */
   @Override
-  public void updatePublishWorkspaceACL(
+  public void updateWorkspaceAclForPublishing(
       String workspaceNamespace, String firecloudName, boolean publish) {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;

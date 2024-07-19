@@ -526,10 +526,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               throw new BadRequestException("Workspace is already published");
             },
             () -> {
-              fireCloudService.updatePublishWorkspaceACL(
-                  dbWorkspace.getWorkspaceNamespace(),
-                  dbWorkspace.getFirecloudName(),
-                  true);
+              fireCloudService.updateWorkspaceAclForPublishing(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
 
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(

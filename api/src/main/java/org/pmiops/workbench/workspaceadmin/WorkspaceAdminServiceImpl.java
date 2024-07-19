@@ -421,10 +421,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    fireCloudService.updatePublishWorkspaceACL(
-        workspaceNamespace,
-        firecloudName,
-        publish);
+    fireCloudService.updateWorkspaceAclForPublishing(workspaceNamespace, firecloudName, publish);
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
@@ -471,10 +468,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             },
             () -> {
               // Update Acl in firecloud so that everyone can view the workspace
-              fireCloudService.updatePublishWorkspaceACL(
-                  dbWorkspace.getWorkspaceNamespace(),
-                  dbWorkspace.getFirecloudName(),
-                  true);
+              fireCloudService.updateWorkspaceAclForPublishing(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
               DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
                   featuredWorkspaceMapper.toDbFeaturedWorkspace(
                       publishWorkspaceRequest, dbWorkspace);
@@ -519,10 +514,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         (dbFeaturedWorkspace) -> {
           String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
 
-          fireCloudService.updatePublishWorkspaceACL(
-              dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(),
-              false);
+          fireCloudService.updateWorkspaceAclForPublishing(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
 
           featuredWorkspaceDao.delete(dbFeaturedWorkspace);
           adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);

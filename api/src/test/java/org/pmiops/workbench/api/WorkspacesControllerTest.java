@@ -606,8 +606,7 @@ public class WorkspacesControllerTest {
   private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(
-            ws.getNamespace(), ws.getId(), ws.getCreator(), accessLevel);
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), accessLevel);
     return ws;
   }
 
@@ -3025,10 +3024,10 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.WRITER);
     String wsNamespace = ws.getNamespace();
     assertThrows(
-            ForbiddenException.class,
-            () -> {
-              workspacesController.publishCommunityWorkspace(wsNamespace);
-            });
+        ForbiddenException.class,
+        () -> {
+          workspacesController.publishCommunityWorkspace(wsNamespace);
+        });
   }
 
   @Test
@@ -3049,6 +3048,5 @@ public class WorkspacesControllerTest {
     workspacesController.publishCommunityWorkspace(wsNamespace);
     verify(workspaceService).publishCommunityWorkspace(any());
     verify(mockWorkspaceAuditor).firePublishAction(any());
-
   }
 }

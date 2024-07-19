@@ -48,7 +48,6 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;

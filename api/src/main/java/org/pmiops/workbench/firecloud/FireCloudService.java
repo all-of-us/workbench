@@ -14,7 +14,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.RandomUtils;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 
 /**
  * Encapsulate Firecloud API interaction details and provide a simple/mockable interface for
@@ -97,7 +96,7 @@ public interface FireCloudService {
   RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
       String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates);
 
-  void updatePublishWorkspaceACL(
+  void updateWorkspaceAclForPublishing(
       String workspaceNamespace, String firecloudName, boolean publish);
 
   RawlsWorkspaceACLUpdateResponseList updateWorkspaceACLAsService(
