@@ -7,6 +7,9 @@ import { Header, SmallHeader } from 'app/components/headers';
 import { AouTitle } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { serverConfigStore } from 'app/utils/stores';
+
+import { LOGIN_ERROR_BANNER } from './login-error-banner';
 
 export const styles = reactStyles({
   sign: {
@@ -46,6 +49,9 @@ interface LoginProps {
 export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
   return (
     <React.Fragment>
+      {serverConfigStore.get().config.enableLoginIssueBanner && (
+        <LOGIN_ERROR_BANNER />
+      )}
       <div
         data-test-id='login'
         style={{
