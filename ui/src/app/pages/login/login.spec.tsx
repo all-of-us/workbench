@@ -4,6 +4,7 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { render, screen } from '@testing-library/react';
+import { serverConfigStore } from 'app/utils/stores';
 
 import LoginReactComponent from './login';
 
@@ -22,12 +23,27 @@ describe('LoginComponent', () => {
       signIn: () => {},
       onCreateAccount: () => {},
     };
+    serverConfigStore.set({
+      config: {
+        enableLoginIssueBanner: false,
+      },
+    });
   });
 
   it('should render', () => {
     component(loginProps);
     expect(
       screen.getByText('Already have a Researcher Workbench account?')
+    ).toBeInTheDocument();
+  });
+
+  it('should show banner if flag is on', () => {
+    serverConfigStore.get().config.enableLoginIssueBanner = true;
+    component(loginProps);
+    expect(
+      screen.getByText(
+        /we are currently experiencing technical difficulties with our login system\./i
+      )
     ).toBeInTheDocument();
   });
 });
