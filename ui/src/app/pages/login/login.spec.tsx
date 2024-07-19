@@ -6,6 +6,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
+
 import LoginReactComponent from './login';
 
 describe('LoginComponent', () => {
@@ -25,6 +27,7 @@ describe('LoginComponent', () => {
     };
     serverConfigStore.set({
       config: {
+        ...defaultServerConfig,
         enableLoginIssueBanner: false,
       },
     });
