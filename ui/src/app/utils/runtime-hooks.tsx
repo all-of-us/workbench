@@ -153,10 +153,6 @@ let aborter = new AbortController();
 // other
 export const getAborter = () => aborter;
 
-export const resetAborter = () => {
-  aborter = new AbortController();
-};
-
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.

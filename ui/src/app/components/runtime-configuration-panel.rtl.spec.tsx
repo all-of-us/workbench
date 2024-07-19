@@ -30,7 +30,7 @@ import {
 } from 'app/utils/machines';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import * as runtimeHooks from 'app/utils/runtime-hooks';
-import { getAborter, resetAborter } from 'app/utils/runtime-hooks';
+import { getAborter } from 'app/utils/runtime-hooks';
 import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
@@ -851,7 +851,6 @@ describe(RuntimeConfigurationPanel.name, () => {
   const firstParameter = 0;
 
   beforeEach(async () => {
-    resetAborter();
     user = userEvent.setup();
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
