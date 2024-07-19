@@ -311,7 +311,6 @@ export const useCustomRuntime = (
     // Calling updateRuntime will not immediately set the Runtime status to not Running so the
     // default initializer will resolve on its first call. The polling below first checks for the
     // non Running status before initializing the default one that checks for Running status
-    console.log('8888888888888888888888');
     await LeoRuntimeInitializer.initialize({
       workspaceNamespace,
       targetRuntime: request.runtime,
