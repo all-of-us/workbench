@@ -3,7 +3,15 @@ import * as React from 'react';
 import { ErrorMessage } from 'app/components/messages';
 
 export const LOGIN_ERROR_BANNER = () => (
-  <div style={{ fontWeight: 800, paddingLeft: '1rem', paddingRight: '1rem' }}>
+  <div
+    style={{
+      fontWeight: 800,
+      fontSize: 'large',
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+      lineHeight: '2rem',
+    }}
+  >
     <ErrorMessage>
       We are currently experiencing technical difficulties with our login
       system. Our team is actively working to resolve this issue as quickly as
