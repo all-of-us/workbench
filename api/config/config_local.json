@@ -172,6 +172,6 @@
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-workbench-test\/aou-rw-gar-remote-repo-docker-local"
   },
   "banner": {
-    "enableLoginIssueBanner": true
+    "enableLoginIssueBanner": false
   }
 }
