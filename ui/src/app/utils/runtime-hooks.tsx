@@ -387,7 +387,6 @@ export const useCustomRuntime = (
           });
         }
 
-        console.log('999999999999999');
         aborter = new AbortController();
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
@@ -396,7 +395,6 @@ export const useCustomRuntime = (
         });
       } catch (e) {
         if (!(e instanceof LeoRuntimeInitializationAbortedError)) {
-          console.log('CANNOT ABORT');
           throw e;
         }
       } finally {
