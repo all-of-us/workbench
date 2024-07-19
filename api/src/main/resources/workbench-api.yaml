@@ -6961,6 +6961,10 @@ components:
           type: boolean
           default: false
           description: Enable admin to publish workspace
+        enableLoginIssueBanner:
+          type: boolean
+          default: false
+          description: If true, show banner notifying users of login issue
     AccessModuleConfig:
       required:
       - expirable

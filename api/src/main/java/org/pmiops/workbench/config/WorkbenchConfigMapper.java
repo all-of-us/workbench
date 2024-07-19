@@ -54,5 +54,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
+  @Mapping(target = "enableLoginIssueBanner", source = "config.banner.enableLoginIssueBanner")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

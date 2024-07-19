@@ -178,5 +178,8 @@
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-staging\/aou-rw-gar-remote-repo-docker-staging"
+  },
+  "banner": {
+    "enableLoginIssueBanner": true
   }
 }
