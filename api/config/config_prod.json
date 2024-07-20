@@ -176,6 +176,6 @@
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-prod\/aou-rw-gar-remote-repo-docker-prod"
   },
   "banner": {
-    "enableLoginIssueBanner": true
+    "enableLoginIssueBanner": false
   }
 }
