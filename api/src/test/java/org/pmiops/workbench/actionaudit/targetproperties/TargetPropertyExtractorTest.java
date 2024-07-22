@@ -23,7 +23,7 @@ class TargetPropertyExtractorTest {
     workspace =
         new Workspace()
             .name("DbWorkspace 1")
-            .terraName("fc-id-1")
+            .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .creator("user@fake-research-aou.org")
             .cdrVersionId("1")

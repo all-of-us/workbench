@@ -115,9 +115,9 @@ public class WorkspaceAuditorTest {
 
     workspace1 =
         new Workspace()
-            .terraName("fc-id-1")
             .etag("etag_1")
             .name("DbWorkspace 1")
+            .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
             .creator("user@fake-research-aou.org")
