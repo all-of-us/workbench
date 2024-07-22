@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -709,10 +710,12 @@ public class WorkspaceServiceTest {
         .thenReturn(Optional.of(mockDBFeaturedWorkspace));
 
     // Assert
-    assertThrows(
-        BadRequestException.class,
-        () -> workspaceService.publishCommunityWorkspace(dbWorkspace),
-        "Workspace is already featured");
+    Exception alreadyPublishedException =
+        assertThrows(
+            BadRequestException.class,
+            () -> workspaceService.publishCommunityWorkspace(dbWorkspace));
+
+    assertEquals("Workspace is already published", alreadyPublishedException.getMessage());
   }
 
   @Test
