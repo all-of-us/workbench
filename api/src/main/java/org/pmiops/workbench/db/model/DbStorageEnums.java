@@ -291,6 +291,11 @@ public final class DbStorageEnums {
           .put(InstitutionalRole.ADMIN, (short) 11)
           .put(InstitutionalRole.PROJECT_PERSONNEL, (short) 12)
           .put(InstitutionalRole.OTHER, (short) 13)
+          .put(InstitutionalRole.ASSOCIATE_SCIENTIST, (short) 14)
+          .put(InstitutionalRole.MID_CAREER_SCIENTIST, (short) 15)
+          .put(InstitutionalRole.SENIOR_SCIENTIST, (short) 16)
+          .put(InstitutionalRole.DATA_ANALYST, (short) 17)
+          .put(InstitutionalRole.HIGH_SCHOOL_STUDENT, (short) 18)
           .build();
 
   public static InstitutionalRole institutionalRoleFromStorage(Short institutionalRole) {

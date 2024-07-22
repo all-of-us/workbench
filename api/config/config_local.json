@@ -79,7 +79,7 @@
     "loginUrl": "http:\/\/localhost:4200/login"
   },
   "mandrill": {
-    "fromEmail": "support@researchallofus.org",
+    "fromEmail": "localSupport@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {
@@ -170,5 +170,8 @@
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-workbench-test\/aou-rw-gar-remote-repo-docker-local"
+  },
+  "banner": {
+    "enableLoginIssueBanner": false
   }
 }

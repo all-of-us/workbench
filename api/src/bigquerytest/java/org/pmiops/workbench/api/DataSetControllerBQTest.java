@@ -1,8 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -56,6 +55,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -72,6 +72,7 @@ import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -86,6 +87,11 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
+import org.pmiops.workbench.tanagra.model.EntityOutputPreview;
+import org.pmiops.workbench.tanagra.model.EntityOutputPreviewList;
+import org.pmiops.workbench.tanagra.model.ExportPreviewRequest;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -100,18 +106,25 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.transaction.annotation.Transactional;
 
 @Import({TestJpaConfig.class, DataSetControllerBQTest.Configuration.class})
 public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String WORKSPACE_NAMESPACE = "namespace";
+  private static final String TANAGRA_WORKSPACE_NAMESPACE = "tanagraNamespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String TANAGRA_WORKSPACE_NAME = "tanagraName";
   private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
+
+  private static DbUser currentUser;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AnalysisLanguageMapper analysisLanguageMapper;
@@ -129,7 +142,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DataSetMapper dataSetMapper;
-  @Autowired private DataSetService dataSetService;
+  private DataSetService dataSetService;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private GenomicExtractionService genomicExtractionService;
   @Autowired private NotebooksService notebooksService;
@@ -140,6 +153,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private WorkspaceDao workspaceDao;
+  private final Provider<TanagraApi> mockTanagraProvider = mock(Provider.class);
+  @Autowired UserDao userDao;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -147,7 +162,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private DataSetController controller;
 
+  private DataSet oneCohortDataSet;
+  private DataSet twoCohortDataSet;
+  private DataSet conditionProcedureOneCohortDataSet;
+  private DataSet allParticipantsConditionsDataSet;
+  private DataSet cohort1PersonDataSet;
+  private DataSet surveyDataSet;
+  private DataSet basicsDataSet;
+  private DataSet basicsFitbitDataSet;
+  private DataSet pfhhDataSet;
+  private DataSet allSurveysButPFHHDataSet;
+  private DataSet heartRateLevelDataSet;
   private DbCdrVersion dbCdrVersion;
+  private DbCdrVersion tanagraDBCdrVersion;
   private DbCohort dbCohort1;
   private DbCohort dbCohort2;
   private DbCohort dbCohort3;
@@ -158,6 +185,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet dbMeasurementConceptSet;
   private DbConceptSet dbPFHHConceptSet;
   private DbWorkspace dbWorkspace;
+  private DbWorkspace tanagraDBWorkspace;
   private DbDSLinking conditionLinking1;
   private DbDSLinking conditionLinking2;
   private DbDSLinking personLinking1;
@@ -204,6 +232,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   })
   static class Configuration {
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser user() {
+      return currentUser;
+    }
+
+    @Bean
     public Clock clock() {
       return CLOCK;
     }
@@ -235,7 +269,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_condition_occurrence",
         "ds_measurement",
         "ds_person",
-        "ds_procedure_occurrence");
+        "ds_procedure_occurrence",
+        "T_ENT_person");
   }
 
   @Override
@@ -245,7 +280,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @BeforeEach
   public void setUp() {
-    DataSetServiceImpl dataSetServiceImpl =
+    dataSetService =
         new DataSetServiceImpl(
             bigQueryService,
             cohortBuilderService,
@@ -261,19 +296,22 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             userRecentResourceService,
             workbenchConfigProvider,
             CLOCK,
-            userProvider);
+            userProvider,
+            mockTanagraProvider);
     controller =
         spy(
             new DataSetController(
                 analysisLanguageMapper,
                 cdrVersionService,
-                dataSetServiceImpl,
+                dataSetService,
                 fireCloudService,
                 notebooksService,
                 userProvider,
                 genomicExtractionService,
                 workspaceAuthService,
                 workbenchConfigProvider));
+
+    currentUser = createUser();
 
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
@@ -286,6 +324,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
+    dbCdrVersion.setTanagraEnabled(false);
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbCdrVersion);
 
@@ -294,6 +333,22 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
+
+    tanagraDBCdrVersion = new DbCdrVersion();
+    tanagraDBCdrVersion.setCdrVersionId(2L);
+    tanagraDBCdrVersion.setName("1");
+    tanagraDBCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    tanagraDBCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    tanagraDBCdrVersion.setArchivalStatus(
+        DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
+    tanagraDBCdrVersion.setTanagraEnabled(true);
+    tanagraDBCdrVersion = cdrVersionDao.save(tanagraDBCdrVersion);
+
+    tanagraDBWorkspace = new DbWorkspace();
+    tanagraDBWorkspace.setWorkspaceNamespace(TANAGRA_WORKSPACE_NAMESPACE);
+    tanagraDBWorkspace.setFirecloudName(TANAGRA_WORKSPACE_NAME);
+    tanagraDBWorkspace.setCdrVersion(tanagraDBCdrVersion);
+    tanagraDBWorkspace = workspaceDao.save(tanagraDBWorkspace);
 
     dbConditionConceptSet =
         conceptSetDao.save(
@@ -315,6 +370,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         conceptSetDao.save(
             createConceptSet(
                 Domain.SURVEY, dbWorkspace.getWorkspaceId(), 43530446L, Boolean.FALSE));
+
     // adding pfhh survey module
     DbCriteria pfhhSurveyModule =
         cbCriteriaDao.save(
@@ -384,6 +440,197 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort3.setWorkspaceId(dbWorkspace.getWorkspaceId());
     dbCohort3.setCriteria(new Gson().toJson(CohortDefinitions.conditionPreviewCodes()));
     dbCohort3 = cohortDao.save(dbCohort3);
+
+    DataSetRequest oneCohortDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of(dbConditionConceptSet.getConceptSetId()))
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.CONDITION).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    oneCohortDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, oneCohortDataSetRequest)
+            .getBody();
+
+    DataSetRequest twoCohortDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(
+                ImmutableList.of(
+                    dbConditionConceptSet.getConceptSetId(),
+                    dbProcedureConceptSet.getConceptSetId()))
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.CONDITION).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    twoCohortDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, twoCohortDataSetRequest)
+            .getBody();
+
+    DataSetRequest conditionProcedureOneCohortDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of(dbConditionConceptSet.getConceptSetId()))
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId(), dbCohort2.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    conditionProcedureOneCohortDataSet =
+        controller
+            .createDataSet(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, conditionProcedureOneCohortDataSetRequest)
+            .getBody();
+
+    DataSetRequest allParticipantsConditionsDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of(dbConditionConceptSet.getConceptSetId()))
+            .cohortIds(ImmutableList.of())
+            .includesAllParticipants(true)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.CONDITION).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    allParticipantsConditionsDataSet =
+        controller
+            .createDataSet(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, allParticipantsConditionsDataSetRequest)
+            .getBody();
+
+    DataSetRequest cohort1PersonDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.PERSON))
+            .domainValuePairs(
+                ImmutableList.of(Domain.PERSON).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    cohort1PersonDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohort1PersonDataSetRequest)
+            .getBody();
+
+    DataSetRequest surveyDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))
+            .domainValuePairs(
+                ImmutableList.of(Domain.SURVEY).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    surveyDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, surveyDataSetRequest)
+            .getBody();
+
+    DataSetRequest basicsDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS))
+            .domainValuePairs(
+                ImmutableList.of(Domain.SURVEY).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    basicsDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, basicsDataSetRequest)
+            .getBody();
+
+    DataSetRequest basicsFitbitDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of())
+            .includesAllParticipants(true)
+            .prePackagedConceptSet(
+                ImmutableList.of(
+                    PrePackagedConceptSetEnum.SURVEY_BASICS,
+                    PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
+            .domainValuePairs(
+                ImmutableList.of(Domain.SURVEY, Domain.FITBIT_HEART_RATE_LEVEL).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    basicsFitbitDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, basicsFitbitDataSetRequest)
+            .getBody();
+
+    DataSetRequest pfhhDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of(dbPFHHConceptSet.getConceptSetId()))
+            .cohortIds(ImmutableList.of(dbCohort3.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.SURVEY).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    pfhhDataSet =
+        controller.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, pfhhDataSetRequest).getBody();
+
+    DataSetRequest allSurveysButPFHHDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(
+                ImmutableList.of(
+                    PrePackagedConceptSetEnum.SURVEY_BASICS,
+                    PrePackagedConceptSetEnum.SURVEY_LIFESTYLE,
+                    PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH,
+                    PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION,
+                    PrePackagedConceptSetEnum.SURVEY_COPE,
+                    PrePackagedConceptSetEnum.SURVEY_SDOH,
+                    PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE))
+            .domainValuePairs(
+                ImmutableList.of(Domain.SURVEY).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    allSurveysButPFHHDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, allSurveysButPFHHDataSetRequest)
+            .getBody();
+
+    DataSetRequest heartRateLevelDataSetRequest =
+        new DataSetRequest()
+            .name(DATASET_NAME)
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(dbCohort1.getCohortId()))
+            .includesAllParticipants(false)
+            .prePackagedConceptSet(
+                ImmutableList.of(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
+            .domainValuePairs(
+                ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL).stream()
+                    .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                    .collect(Collectors.toList()));
+    heartRateLevelDataSet =
+        controller
+            .createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, heartRateLevelDataSetRequest)
+            .getBody();
 
     conditionLinking1 =
         DbDSLinking.builder()
@@ -494,7 +741,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     conceptSetDao.deleteById(dbConditionConceptSetForValues2.getConceptSetId());
     conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
     workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
+    workspaceDao.deleteById(tanagraDBWorkspace.getWorkspaceId());
     cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
+    cdrVersionDao.deleteById(tanagraDBCdrVersion.getCdrVersionId());
     dsLinkingDao.delete(conditionLinking1);
     dsLinkingDao.delete(conditionLinking2);
     dsLinkingDao.delete(personLinking1);
@@ -512,6 +761,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePython() {
     String code =
         joinCodeCells(
@@ -520,17 +770,69 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet),
-                            ImmutableList.of(dbCohort1),
+                            oneCohortDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+                dbWorkspace));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION, 1L);
   }
 
   @Test
+  @Transactional
+  public void testGenerateCodePythonTanagra() throws ApiException {
+    EntityOutputPreview preview =
+        new EntityOutputPreview()
+            .entity("person")
+            .indexSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
+    EntityOutputPreviewList previewList =
+        new EntityOutputPreviewList().addEntityOutputsItem(preview);
+
+    TanagraApi mockTanagraApi = mock(TanagraApi.class);
+    when(mockTanagraProvider.get()).thenReturn(mockTanagraApi);
+    when(mockTanagraApi.describeExport(any(ExportPreviewRequest.class), anyString()))
+        .thenReturn(previewList);
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .analysisLanguage(AnalysisLanguage.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequestTanagra(
+                            ImmutableList.of(Domain.PERSON),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                tanagraDBWorkspace));
+
+    String expected =
+        String.format(
+            "import pandas\n"
+                + "import os\n"
+                + "\n"
+                + "# This query represents dataset \"Arbitrary Dataset v1.0\" for domain \"person\" and was generated for 1\n"
+                + "dataset_00000000_person_sql = \"\"\"\n"
+                + "    SELECT\n"
+                + "        person_id \n"
+                + "    FROM\n"
+                + "        `project.dataset.T_ENT_person`\"\"\"\n"
+                + "\n"
+                + "dataset_00000000_person_df = pandas.read_gbq(\n"
+                + "    dataset_00000000_person_sql,\n"
+                + "    dialect=\"standard\",\n"
+                + "    use_bqstorage_api=(\"BIGQUERY_STORAGE_API_ENABLED\" in os.environ),\n"
+                + "    progress_bar_type=\"tqdm_notebook\")\n"
+                + "\n"
+                + "dataset_00000000_person_df.head(5)",
+            DATASET_NAME,
+            Domain.PERSON.toString().toLowerCase(),
+            dbCdrVersion.getName(),
+            Domain.PERSON.toString().toLowerCase());
+    assertThat(code).isEqualTo(expected);
+  }
+
+  @Test
+  @Transactional
   public void testGenerateCodeR() {
     String expected =
         String.format(
@@ -546,8 +848,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.R)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet),
-                            ImmutableList.of(dbCohort1),
+                            oneCohortDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -575,6 +876,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodeTwoConceptSets() {
     String code =
         joinCodeCells(
@@ -583,8 +885,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
-                            ImmutableList.of(dbCohort1),
+                            conditionProcedureOneCohortDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -594,6 +895,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodeTwoCohorts() {
     String code =
         joinCodeCells(
@@ -602,8 +904,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet),
-                            ImmutableList.of(dbCohort1, dbCohort2),
+                            twoCohortDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -613,6 +914,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodeAllParticipants() {
     String code =
         joinCodeCells(
@@ -621,8 +923,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet),
-                            ImmutableList.of(),
+                            allParticipantsConditionsDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION),
                             true,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -632,6 +933,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedCohortDemographics() {
     String code =
         joinCodeCells(
@@ -640,8 +942,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(dbCohort1),
+                            cohort1PersonDataSet.getId(),
                             ImmutableList.of(Domain.PERSON),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.PERSON))),
@@ -651,6 +952,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedCohortSurveys() {
     String code =
         joinCodeCells(
@@ -659,8 +961,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(dbCohort1),
+                            surveyDataSet.getId(),
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
@@ -670,6 +971,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedCohortSurveyBasics() {
     final String expectedConceptId = "concept_id IN (1586134)";
     String code =
@@ -679,8 +981,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(dbCohort1),
+                            basicsDataSet.getId(),
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS))),
@@ -690,6 +991,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedCohortSurveyBasicsAndFitbitHeartRate() {
     final String expectedConceptId = "concept_id IN (1586134)"; // for survey_basics
     final String expectedFitbitHrLevel = ".heart_rate_minute_level";
@@ -700,8 +1002,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(),
+                            basicsFitbitDataSet.getId(),
                             ImmutableList.of(Domain.SURVEY, Domain.FITBIT_HEART_RATE_LEVEL),
                             true,
                             ImmutableList.of(
@@ -714,6 +1015,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedCohortAllIndividualSurveysExceptPfhhInOrder() {
     final ImmutableList<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList =
         ImmutableList.of(
@@ -734,8 +1036,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(dbCohort1),
+                            allSurveysButPFHHDataSet.getId(),
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             prePackagedConceptSetEnumList)),
@@ -745,6 +1046,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePrepackagedConceptSetFitBit() {
     String code =
         joinCodeCells(
@@ -753,8 +1055,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(),
-                            ImmutableList.of(dbCohort1),
+                            heartRateLevelDataSet.getId(),
                             ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
                             false,
                             ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
@@ -764,6 +1065,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodeTwoPrePackagedConceptSet() {
     String code =
         joinCodeCells(
@@ -772,8 +1074,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
-                            ImmutableList.of(dbCohort1),
+                            twoCohortDataSet.getId(),
                             ImmutableList.of(Domain.CONDITION),
                             false,
                             ImmutableList.of(
@@ -785,6 +1086,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Transactional
   public void testGenerateCodePFHHSurveyConceptSet() {
     String code =
         joinCodeCells(
@@ -793,8 +1095,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
                         createDataSetRequest(
-                            ImmutableList.of(dbPFHHConceptSet),
-                            ImmutableList.of(dbCohort3),
+                            pfhhDataSet.getId(),
                             ImmutableList.of(Domain.SURVEY),
                             false,
                             ImmutableList.of())),
@@ -1113,17 +1414,30 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   private DataSetRequest createDataSetRequest(
-      List<DbConceptSet> dbConceptSets,
-      List<DbCohort> dbCohorts,
+      Long dataSetId,
       List<Domain> domains,
       boolean allParticipants,
       List<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList) {
     return new DataSetRequest()
         .name(DATASET_NAME)
-        .conceptSetIds(
-            dbConceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList()))
-        .cohortIds(dbCohorts.stream().map(DbCohort::getCohortId).collect(Collectors.toList()))
+        .dataSetId(dataSetId)
         .includesAllParticipants(allParticipants)
+        .prePackagedConceptSet(prePackagedConceptSetEnumList)
+        .domainValuePairs(
+            domains.stream()
+                .map(d -> new DomainValuePair().domain(d).value("person_id"))
+                .collect(Collectors.toList()));
+  }
+
+  private DataSetRequest createDataSetRequestTanagra(
+      List<Domain> domains,
+      boolean allParticipants,
+      List<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList) {
+    return new DataSetRequest()
+        .name(DATASET_NAME)
+        .includesAllParticipants(allParticipants)
+        .tanagraCohortIds(ImmutableList.of("tanagraCohortId"))
+        .tanagraConceptSetIds(ImmutableList.of("tanagraConceptSetId"))
         .prePackagedConceptSet(prePackagedConceptSetEnumList)
         .domainValuePairs(
             domains.stream()
@@ -1162,5 +1476,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     return s.replace(
         "`" + tableName + "`",
         String.format("`%s`", projectId + "." + dataSetId + "." + tableName));
+  }
+
+  private DbUser createUser() {
+    DbUser user = new DbUser();
+    user.setUsername("bob@gmail.com");
+    user.setDisabled(false);
+    return userDao.save(user);
   }
 }

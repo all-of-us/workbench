@@ -90,6 +90,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
@@ -207,6 +208,7 @@ public class CohortsControllerTest {
     ConceptBigQueryService.class,
     DataSetService.class,
     DirectoryService.class,
+    FeaturedWorkspaceMapper.class,
     FeaturedWorkspaceService.class,
     FireCloudService.class,
     FreeTierBillingService.class,

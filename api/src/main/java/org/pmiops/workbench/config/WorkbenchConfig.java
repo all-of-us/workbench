@@ -40,6 +40,7 @@ public class WorkbenchConfig {
   public E2ETestUserConfig e2eTestUsers;
   public TermsOfServiceConfig termsOfService;
   public ArtifactRegistryConfig artifactRegistry;
+  public BannerConfig banner;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -456,5 +457,9 @@ public class WorkbenchConfig {
 
   public static class ArtifactRegistryConfig {
     public String dockerRepoName;
+  }
+
+  public static class BannerConfig {
+    public boolean enableLoginIssueBanner;
   }
 }

@@ -7,6 +7,11 @@ export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
 
+echo "Getting self_reported_category_concept_id column count"
+query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name='person' AND column_name = 'self_reported_category_concept_id'"
+selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 echo "Creating demographic criteria"
 
 CB_CRITERIA_START_ID=5000000000
@@ -291,49 +296,52 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
 WHERE b.concept_id is not null"
 
-echo "DEMOGRAPHICS - Self Reported Category"
-bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
-    (
-          id
-        , parent_id
-         , domain_id
-         , is_standard
-        , type
-        , concept_id
-        , name
-        , rollup_count
-        , item_count
-        , est_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-    )
-SELECT
-    ROW_NUMBER() OVER(ORDER BY a.cnt DESC)
-      + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
-    , 0
-    , 'PERSON'
-    , 1
-    , 'SELF_REPORTED_CATEGORY'
-    , concept_id
-    , regexp_replace(b.concept_name, r'^.+:\s', '')
-    , 0
-    , a.cnt
-    , a.cnt
-    , 0
-    , 1
-    , 0
-    , 0
-FROM
-    (
-        SELECT self_reported_category_concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
-        GROUP BY 1
-    ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.self_reported_category_concept_id = b.concept_id
-WHERE b.concept_id is not null"
+if [[ $selfReportedCategoryCount > 0 ]];
+then
+  echo "DEMOGRAPHICS - Self Reported Category"
+  bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+      (
+            id
+          , parent_id
+           , domain_id
+           , is_standard
+          , type
+          , concept_id
+          , name
+          , rollup_count
+          , item_count
+          , est_count
+          , is_group
+          , is_selectable
+          , has_attribute
+          , has_hierarchy
+      )
+  SELECT
+      ROW_NUMBER() OVER(ORDER BY a.cnt DESC)
+        + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` where id > $CB_CRITERIA_START_ID AND id < $CB_CRITERIA_END_ID) AS id
+      , 0
+      , 'PERSON'
+      , 1
+      , 'SELF_REPORTED_CATEGORY'
+      , concept_id
+      , regexp_replace(b.concept_name, r'^.+:\s', '')
+      , 0
+      , a.cnt
+      , a.cnt
+      , 0
+      , 1
+      , 0
+      , 0
+  FROM
+      (
+          SELECT self_reported_category_concept_id, COUNT(DISTINCT person_id) cnt
+          FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+          GROUP BY 1
+      ) a
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.self_reported_category_concept_id = b.concept_id
+  WHERE b.concept_id is not null"
+fi
 
 ## wait for process to end before copying
 wait

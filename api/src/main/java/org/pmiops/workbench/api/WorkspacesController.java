@@ -36,6 +36,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -79,6 +80,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
+  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final IamService iamService;
@@ -99,6 +101,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       CdrVersionDao cdrVersionDao,
       Clock clock,
+      FeaturedWorkspaceService featuredWorkspaceService,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       IamService iamService,
@@ -116,6 +119,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.iamService = iamService;
@@ -192,7 +196,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace createdWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
     if (cdrVersion.getTanagraEnabled()) {
@@ -279,7 +284,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 ResponseEntity.ok()
                     .body(
                         workspaceOperationMapper.toModelWithWorkspace(
-                            op, workspaceDao, fireCloudService, workspaceMapper)))
+                            op,
+                            workspaceDao,
+                            fireCloudService,
+                            workspaceMapper,
+                            featuredWorkspaceService)))
         .orElse(ResponseEntity.notFound().build());
   }
 
@@ -491,7 +500,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'etag'");
     }
 
-    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace originalWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService);
 
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
@@ -540,11 +550,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace editedWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService);
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService));
   }
 
   @Override
@@ -639,7 +651,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = dbWorkspace.setPublished(false);
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
-    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+    final Workspace savedWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace, featuredWorkspaceService);
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
@@ -775,6 +788,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(workspaceService.getPublishedWorkspaces());
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> publishCommunityWorkspace(String workspaceNamespace) {
+    DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace with namespace %s not found", workspaceNamespace)));
+
+    // Make sure the current user is the workspace owner
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
+
+    workspaceService.publishCommunityWorkspace(dbWorkspace);
+
+    workspaceAuditor.firePublishAction(dbWorkspace.getWorkspaceId());
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

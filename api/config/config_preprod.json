@@ -154,5 +154,8 @@
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-preprod\/aou-rw-gar-remote-repo-docker-preprod"
+  },
+  "banner": {
+    "enableLoginIssueBanner": false
   }
 }

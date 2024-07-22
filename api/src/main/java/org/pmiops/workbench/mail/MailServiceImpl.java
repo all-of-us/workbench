@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -95,11 +96,10 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/publish_workspace_by_admin/content.html";
+  private static final String PUBLISH_WORKSPACE_RESOURCE = "emails/publish_workspace/content.html";
 
-  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/unpublish_workspace_by_admin/content.html";
+  private static final String UNPUBLISH_WORKSPACE_RESOURCE =
+      "emails/unpublish_workspace/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -388,23 +388,30 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishWorkspaceByAdminEmail(
+  public void sendPublishWorkspaceEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(
-        workspace, owners, featuredWorkspaceCategoryAsDisplayString(publishCategory), true);
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been published",
+        String.format(
+            "Publish workspace email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+        buildHtml(
+            PUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(
+                workspace,
+                featuredWorkspaceCategoryAsDisplayString(publishCategory),
+                supportEmail)));
   }
 
   @Override
   public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
-  }
-
-  private void sendPublishUnpublishWorkspaceByAdminEmail(
-      DbWorkspace workspace, List<DbUser> owners, String cateogryIfAny, boolean publish)
-      throws MessagingException {
-    String actionType = publish ? "published" : "unpublished";
 
     final String ownersForLogging =
         owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
@@ -413,14 +420,14 @@ public class MailServiceImpl implements MailService {
 
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
-        Collections.emptyList(),
-        "Your AoU Researcher Workbench workspace has been " + actionType,
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been Unpublished",
         String.format(
-            "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            actionType, workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
         buildHtml(
-            publish ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
-            publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
+            UNPUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
@@ -463,16 +470,13 @@ public class MailServiceImpl implements MailService {
             ? List.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
@@ -891,5 +895,9 @@ public class MailServiceImpl implements MailService {
 
   private String userForLogging(DbUser user) {
     return userForLogging(user.getUsername(), user.getContactEmail());
+  }
+
+  private String ownersForLogging(Collection<DbUser> owners) {
+    return owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
   }
 }

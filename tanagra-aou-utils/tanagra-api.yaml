@@ -1,4 +1,4 @@
-runtime: java11
+runtime: java17
 env: standard
 service: 'tanagra-api'
 service_account: $TANAGRA_SERVICE_ACCOUNT@appspot.gserviceaccount.com

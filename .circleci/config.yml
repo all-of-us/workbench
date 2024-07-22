@@ -24,9 +24,6 @@ parameters:
   workbench-image:
     type: string
     default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.28"
-  tanagra-image:
-    type: string
-    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.26"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
@@ -132,14 +129,6 @@ executors:
     docker:
     - image: << pipeline.parameters.pact-image >>
     working_directory: ~
-
-  # Use Docker image for Tanagra deploys that require Java 11
-  tanagra-executor:
-    environment:
-      <<: *env-default
-    docker:
-    - image: << pipeline.parameters.tanagra-image >>
-    working_directory: ~/workbench
 
 # -------------------------
 #   COMMANDS
@@ -789,7 +778,7 @@ jobs:
               --promote
 
   tanagra-deploy-to-test:
-    executor: tanagra-executor
+    executor: workbench-executor
     steps:
       - checkout-code
       - gcloud-auth-login-oidc-test

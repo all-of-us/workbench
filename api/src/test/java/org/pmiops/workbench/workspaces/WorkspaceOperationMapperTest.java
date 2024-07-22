@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
@@ -40,6 +41,7 @@ public class WorkspaceOperationMapperTest {
   @Autowired private WorkspaceDao workspaceDao;
 
   @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
 
   @TestConfiguration
   @Import({
@@ -87,9 +89,7 @@ public class WorkspaceOperationMapperTest {
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             new DbWorkspace().setWorkspaceNamespace("a").setName("b").setFirecloudName("c"));
-    Workspace expectedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace);
-
-    mockFirecloudGetWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    Workspace expectedWorkspace = mapAndMockWorkspace(dbWorkspace);
 
     DbWorkspaceOperation dbOperation =
         new DbWorkspaceOperation()
@@ -108,7 +108,11 @@ public class WorkspaceOperationMapperTest {
 
     assertThat(
             workspaceOperationMapper.toModelWithWorkspace(
-                dbOperation, workspaceDao, mockFirecloudService, workspaceMapper))
+                dbOperation,
+                workspaceDao,
+                mockFirecloudService,
+                workspaceMapper,
+                mockFeaturedWorkspaceService))
         .isEqualTo(expectedOperation);
   }
 
@@ -130,7 +134,11 @@ public class WorkspaceOperationMapperTest {
 
     assertThat(
             workspaceOperationMapper.toModelWithWorkspace(
-                dbOperation, workspaceDao, mockFirecloudService, workspaceMapper))
+                dbOperation,
+                workspaceDao,
+                mockFirecloudService,
+                workspaceMapper,
+                mockFeaturedWorkspaceService))
         .isEqualTo(expectedOperation);
   }
 
@@ -153,7 +161,11 @@ public class WorkspaceOperationMapperTest {
 
     assertThat(
             workspaceOperationMapper.toModelWithWorkspace(
-                dbOperation, workspaceDao, mockFirecloudService, workspaceMapper))
+                dbOperation,
+                workspaceDao,
+                mockFirecloudService,
+                workspaceMapper,
+                mockFeaturedWorkspaceService))
         .isEqualTo(expectedOperation);
   }
 
@@ -162,13 +174,15 @@ public class WorkspaceOperationMapperTest {
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             new DbWorkspace().setWorkspaceNamespace("a").setName("b").setFirecloudName("c"));
-    Workspace expectedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace);
-
-    mockFirecloudGetWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    Workspace expectedWorkspace = mapAndMockWorkspace(dbWorkspace);
 
     Optional<Workspace> maybeWorkspace =
         workspaceOperationMapper.getWorkspaceMaybe(
-            dbWorkspace.getWorkspaceId(), workspaceDao, mockFirecloudService, workspaceMapper);
+            dbWorkspace.getWorkspaceId(),
+            workspaceDao,
+            mockFirecloudService,
+            workspaceMapper,
+            mockFeaturedWorkspaceService);
 
     assertThat(maybeWorkspace).hasValue(expectedWorkspace);
   }
@@ -177,14 +191,22 @@ public class WorkspaceOperationMapperTest {
   public void test_getWorkspaceMaybe_not_found() {
     assertThat(
             workspaceOperationMapper.getWorkspaceMaybe(
-                -1L, workspaceDao, mockFirecloudService, workspaceMapper))
+                -1L,
+                workspaceDao,
+                mockFirecloudService,
+                workspaceMapper,
+                mockFeaturedWorkspaceService))
         .isEmpty();
   }
 
-  private void mockFirecloudGetWorkspace(String namespace, String firecloudName) {
-    RawlsWorkspaceResponse mockResponse =
-        new RawlsWorkspaceResponse()
-            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(firecloudName));
-    when(mockFirecloudService.getWorkspace(namespace, firecloudName)).thenReturn(mockResponse);
+  private Workspace mapAndMockWorkspace(DbWorkspace dbWorkspace) {
+    String namespace = dbWorkspace.getWorkspaceNamespace();
+    String fcName = dbWorkspace.getFirecloudName();
+    RawlsWorkspaceDetails fcWorkspace =
+        new RawlsWorkspaceDetails().namespace(namespace).name(fcName);
+
+    when(mockFirecloudService.getWorkspace(namespace, fcName))
+        .thenReturn(new RawlsWorkspaceResponse().workspace(fcWorkspace));
+    return workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, mockFeaturedWorkspaceService);
   }
 }
