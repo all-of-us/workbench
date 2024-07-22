@@ -611,71 +611,47 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
+
     // Arrange
-    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest publishWorkspaceRequest =
+    DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    PublishWorkspaceRequest request =
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
-    DbFeaturedWorkspace dbFeaturedWorkspace =
+
+    DbFeaturedWorkspace existingDbFeaturedWorkspace =
         new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
+            .setWorkspace(workspace)
+            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
+            .setDescription("test");
+
+    DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
+        new DbFeaturedWorkspace()
+            .setWorkspace(workspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
 
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(dbFeaturedWorkspace);
+    when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
+        .thenReturn(Optional.of(existingDbFeaturedWorkspace));
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
+        .thenReturn(dbFeaturedWorkspaceToSave);
 
     when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
             DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
-        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
-
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
-        .thenReturn(dbFeaturedWorkspace);
-
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
-
-    verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(
-            mockDbWorkspace.getWorkspaceId(),
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
-            null);
-    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
-
-    publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
-    DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
-            .setDescription("test");
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
-
-    String rtAuthDomainGroupEmail = "rt@broad.org";
-    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
-        .thenReturn(rtAuthDomainGroupEmail);
-
-    when(mockFeaturedWorkspaceDao.findByWorkspace(any()))
-        .thenReturn(
-            Optional.of(mockFeaturedWorkspace.setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)));
-
     // Act
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
+    workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
 
     // Assert
-    verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mailService, times(2)).sendPublishWorkspaceEmail(any(), any(), any());
-
-    // verify that the ACL update was performed as the RWB system, not as the admin user
-
-    verify(mockFirecloudService)
-        .updateWorkspaceAclForPublishing(
-            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
-    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
+    verify(mockFeaturedWorkspaceDao).save(any());
+    verify(mockAdminAuditor)
+        .firePublishWorkspaceAction(
+            workspace.getWorkspaceId(),
+            dbFeaturedWorkspaceToSave.getCategory().toString(),
+            existingDbFeaturedWorkspace.getCategory().toString());
+    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test
