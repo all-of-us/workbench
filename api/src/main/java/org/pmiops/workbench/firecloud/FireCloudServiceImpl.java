@@ -403,9 +403,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   /**
    * Updates the Access Control List (ACL) for a specified workspace to make it readable (or not) to
-   * all members of a group If Published: Grant Reader access to all users in the groupEmail If
-   * Unpublished: Remove access (grant NO_ACCESS) to all users in the groupEmail, unless they have
-   * access independently of publishing status
+   * all members of a group
+   *
+   * <p>If Published: Grant Reader access to all users in the groupEmail
+   *
+   * <p>If Unpublished: Remove access (grant NO_ACCESS) to all users in the groupEmail, unless they
+   * have access independently of publishing status
    *
    * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
    * @param firecloudName the Terra Name of the Workspace to modify
