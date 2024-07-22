@@ -133,12 +133,6 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
             username, workspaces.size()));
 
     return workspaces.stream()
-        .map(
-            ws ->
-                new TestUserRawlsWorkspace()
-                    .username(username)
-                    .wsNamespace(ws.getWorkspace().getNamespace())
-                    .wsGoogleProject(ws.getWorkspace().getGoogleProject())
-                    .wsFirecloudId(ws.getWorkspace().getName()));
+        .map(ws -> workspaceMapper.toTestUserRawlsWorkspace(ws.getWorkspace(), username));
   }
 }

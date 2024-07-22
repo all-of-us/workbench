@@ -11583,39 +11583,39 @@ components:
     TestUserWorkspace:
       required:
       - username
-      - wsFirecloudId
-      - wsNamespace
+      - namespace
+      - terraName
       type: object
       properties:
         username:
           type: string
           description: Test username (email address including GSuite)
-        wsNamespace:
+        namespace:
           type: string
           description: Workspace Namespace
-        wsFirecloudId:
+        terraName:
           type: string
-          description: Firecloud ID for the Workspace
+          description: The name of the Workspace in Terra
     TestUserRawlsWorkspace:
       required:
       - username
-      - wsFirecloudId
-      - wsGoogleProject
-      - wsNamespace
+      - namespace
+      - googleProject
+      - terraName
       type: object
       properties:
         username:
           type: string
           description: Test username (email address including GSuite)
-        wsNamespace:
+        namespace:
           type: string
           description: Workspace Namespace
-        wsGoogleProject:
+        googleProject:
           type: string
           description: Workspace Google Project
-        wsFirecloudId:
+        terraName:
           type: string
-          description: Firecloud ID for the Workspace
+          description: The name of the Workspace in Terra
     CreateWorkspaceTaskRequest:
       required:
       - operationId
