@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import { Disk, DiskType } from 'generated/fetch';
+import { Autopilot, Disk, DiskType } from 'generated/fetch';
 
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
@@ -39,13 +39,11 @@ export interface Machine {
   preemptiblePrice: number;
 }
 
-export interface AutopilotMachine {
-  cpu: number;
-  memory: number;
-}
-export const DEFAULT_AUTOPILOT_MACHINE: AutopilotMachine = {
-  cpu: 4,
-  memory: 15,
+export const DEFAULT_AUTOPILOT_MACHINE: Autopilot = {
+  computeClass: 'General-purpose',
+  cpuInMillicores: 3000,
+  memoryInGb: 10,
+  ephemeralStorageInGb: 2,
 };
 
 const machineBases: Machine[] = [

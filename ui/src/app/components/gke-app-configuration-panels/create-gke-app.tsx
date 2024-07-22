@@ -5,6 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import {
   AppStatus,
   AppType,
+  Autopilot,
   CreateAppRequest,
   Disk,
   UserAppEnvironment,
@@ -22,6 +23,7 @@ import {
   toUIAppType,
 } from 'app/components/apps-panel/utils';
 import { LinkButton } from 'app/components/buttons';
+import { AutopilotMachineSelector } from 'app/components/common-env-conf-panels/autopilot-machine-selector';
 import { DeletePersistentDiskButton } from 'app/components/common-env-conf-panels/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/common-env-conf-panels/environment-informed-action-panel';
 import { MachineSelector } from 'app/components/common-env-conf-panels/machine-selector';
@@ -207,7 +209,13 @@ export const CreateGkeApp = ({
               defaultCreateRequest.kubernetesRuntimeConfig.machineType,
           },
 
-      autopilot: enableAutopilot ? defaultCreateRequest.autopilot : undefined,
+      autopilot: enableAutopilot
+        ? {
+            ...defaultCreateRequest.autopilot,
+            cpuInMillicores: defaultCreateRequest.autopilot.cpuInMillicores, // TODO: app.autopilot.cpuInMillicores,
+            memoryInGb: defaultCreateRequest.autopilot.memoryInGb, // TODO: app.memoryInGb,
+          }
+        : undefined,
       persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
       autodeleteEnabled:
         app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
@@ -340,24 +348,45 @@ export const CreateGkeApp = ({
               >
                 Cloud compute profile
               </h3>
-              <div style={styles.formGrid2}>
-                <MachineSelector
-                  {...{ validMachineTypes }}
-                  idPrefix={appTypeToString[appType]}
-                  disabled={false}
-                  selectedMachine={toMachine(createAppRequest)}
-                  onChange={(machine: Machine) =>
-                    setCreateAppRequest((prevState) => ({
-                      ...prevState,
-                      kubernetesRuntimeConfig: {
-                        ...prevState.kubernetesRuntimeConfig,
-                        machineType: machine.name,
-                      },
-                    }))
-                  }
-                  machineType={toMachine(createAppRequest).name}
-                />
-              </div>
+              {enableAutopilot ? (
+                <div style={styles.formGrid2}>
+                  <AutopilotMachineSelector
+                    selectedMachine={createAppRequest.autopilot}
+                    initialMachine={createAppRequest.autopilot}
+                    onChange={(machine: Autopilot) =>
+                      setCreateAppRequest((prevState) => ({
+                        ...prevState,
+                        autopilot: {
+                          ...prevState.autopilot,
+                          cpuInMillicores: machine.cpuInMillicores,
+                          memoryInGb: machine.memoryInGb,
+                        },
+                      }))
+                    }
+                    disabled={isAppActive(app)}
+                    idPrefix={appTypeToString[appType]}
+                  />
+                </div>
+              ) : (
+                <div style={styles.formGrid2}>
+                  <MachineSelector
+                    {...{ validMachineTypes }}
+                    idPrefix={appTypeToString[appType]}
+                    disabled={false}
+                    selectedMachine={toMachine(createAppRequest)}
+                    onChange={(machine: Machine) =>
+                      setCreateAppRequest((prevState) => ({
+                        ...prevState,
+                        kubernetesRuntimeConfig: {
+                          ...prevState.kubernetesRuntimeConfig,
+                          machineType: machine.name,
+                        },
+                      }))
+                    }
+                    machineType={toMachine(createAppRequest).name}
+                  />
+                </div>
+              )}
             </FlexRow>
             <div>{sharingNote}</div>
           </FlexColumn>

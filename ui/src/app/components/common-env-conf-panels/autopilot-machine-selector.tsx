@@ -2,17 +2,16 @@ import * as React from 'react';
 import { CSSProperties, Fragment } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
+import { Autopilot } from 'generated/fetch';
+
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
-import {
-  AutopilotMachine,
-  DEFAULT_AUTOPILOT_MACHINE,
-} from 'app/utils/machines';
+import { DEFAULT_AUTOPILOT_MACHINE } from 'app/utils/machines';
 
 interface Props {
-  selectedMachine: AutopilotMachine;
-  initialMachine?: AutopilotMachine;
-  onChange: (machine: AutopilotMachine) => void;
+  selectedMachine: Autopilot;
+  initialMachine?: Autopilot;
+  onChange: (machine: Autopilot) => void;
   disabled: boolean;
   idPrefix: string;
   cpuLabelStyles?: CSSProperties;
@@ -28,7 +27,7 @@ export const AutopilotMachineSelector = ({
   ramLabelStyles = {},
 }: Props) => {
   const initialMachineType = initialMachine || DEFAULT_AUTOPILOT_MACHINE;
-  const { cpu, memory } = selectedMachine || initialMachineType;
+  const { cpuInMillicores, memoryInGb } = selectedMachine || initialMachineType;
 
   return (
     <Fragment>
@@ -43,9 +42,10 @@ export const AutopilotMachineSelector = ({
           id={`${idPrefix}-cpu`}
           name={`${idPrefix}-cpu`}
           options={[1, 2, 3, 4, 5, 6, 7, 8]}
-          onChange={({ value }) => onChange}
+          onChange={({ value }) => onChange(value)}
           disabled={disabled}
-          value={cpu}
+          placeholder={'select'}
+          value={cpuInMillicores}
           appendTo='self'
         />
       </FlexRow>
@@ -60,9 +60,9 @@ export const AutopilotMachineSelector = ({
           id={`${idPrefix}-ram`}
           name={`${idPrefix}-ram`}
           options={[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-          onChange={({ value }) => onChange}
+          onChange={({ value }) => onChange(value)}
           disabled={disabled}
-          value={memory}
+          value={memoryInGb}
           appendTo='self'
         />
       </FlexRow>
