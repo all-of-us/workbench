@@ -613,7 +613,7 @@ public class WorkspaceAdminServiceTest {
   public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
 
     // Arrange
-    DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
+    DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     PublishWorkspaceRequest request =
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
@@ -621,17 +621,17 @@ public class WorkspaceAdminServiceTest {
 
     DbFeaturedWorkspace existingDbFeaturedWorkspace =
         new DbFeaturedWorkspace()
-            .setWorkspace(workspace)
+            .setWorkspace(mockDbWorkspace)
             .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
             .setDescription("test");
 
     DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
         new DbFeaturedWorkspace()
-            .setWorkspace(workspace)
+            .setWorkspace(mockDbWorkspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
 
-    when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
+    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(existingDbFeaturedWorkspace));
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
@@ -642,16 +642,23 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     // Act
-    workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
+    workspaceAdminService.publishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace(), request);
 
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
-            workspace.getWorkspaceId(),
+            mockDbWorkspace.getWorkspaceId(),
             dbFeaturedWorkspaceToSave.getCategory().toString(),
             existingDbFeaturedWorkspace.getCategory().toString());
     verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
+
+    // We should not update the ACL as we are just updating the category and the workspace is
+    // already published
+    verify(mockFirecloudService, never())
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   @Test
