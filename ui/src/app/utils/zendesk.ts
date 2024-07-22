@@ -6,6 +6,7 @@ interface ZendeskUrls {
   policy: string;
   createBillingAccount: string;
   egressFaq: string;
+  publishCommunityWorkspace: string;
   dataDictionary: string;
   videos: string;
   genomicExtraction: string;
@@ -71,6 +72,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360039539411'),
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
+      publishCommunityWorkspace: article('24058730663828'),
       videos: category('5942794068756'),
       genomicExtraction: article('4558187754772'),
       gettingStarted: category('360002157352'),
@@ -87,6 +89,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360060301171'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
+      publishCommunityWorkspace: article('24058730663828'),
       videos: category('360006379271'),
       genomicExtraction: article('4403537387412'),
       gpus: article('4428626363668'),
@@ -103,6 +106,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       createBillingAccount: article('360044792211'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
+      publishCommunityWorkspace: article('24058730663828'),
       videos: category('360003453651'),
       genomicExtraction: article('404'),
       gettingStarted: category('360003430652'),

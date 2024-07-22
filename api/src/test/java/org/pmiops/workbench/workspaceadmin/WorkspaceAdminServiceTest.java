@@ -123,14 +123,15 @@ public class WorkspaceAdminServiceTest {
   @MockBean private AdminAuditor mockAdminAuditor;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
+  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceService mockFeatureService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean private NotebooksService mockNotebooksService;
-  @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private MailService mailService;
-  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
-  @MockBean private FeaturedWorkspaceService mockFeatureService;
+  @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private AccessTierDao accessTierDao;
@@ -165,7 +166,6 @@ public class WorkspaceAdminServiceTest {
     UserMapper.class,
     UserService.class,
     WorkspaceAuthService.class,
-    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -584,6 +584,10 @@ public class WorkspaceAdminServiceTest {
             any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
     // Act
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
@@ -595,61 +599,66 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
+
+    // verify that the ACL update was performed as the RWB system, not as the admin user
+
+    verify(mockFirecloudService)
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   @Test
   public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
+
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest publishWorkspaceRequest =
+    PublishWorkspaceRequest request =
         new PublishWorkspaceRequest()
             .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
             .description("test");
-    DbFeaturedWorkspace dbFeaturedWorkspace =
+
+    DbFeaturedWorkspace existingDbFeaturedWorkspace =
+        new DbFeaturedWorkspace()
+            .setWorkspace(mockDbWorkspace)
+            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
+            .setDescription("test");
+
+    DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
             .setDescription("test");
 
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(dbFeaturedWorkspace);
+    when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
+        .thenReturn(Optional.of(existingDbFeaturedWorkspace));
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
+        .thenReturn(dbFeaturedWorkspaceToSave);
 
     when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
             DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
-        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+    // Act
+    workspaceAdminService.publishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace(), request);
 
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
-        .thenReturn(dbFeaturedWorkspace);
-
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
-
+    // Assert
+    verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
-            null);
-    verify(mailService).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+            dbFeaturedWorkspaceToSave.getCategory().toString(),
+            existingDbFeaturedWorkspace.getCategory().toString());
+    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
 
-    publishWorkspaceRequest.category(FeaturedWorkspaceCategory.DEMO_PROJECTS);
-    DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
-            .setDescription("test");
-    when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
-
-    // Act
-    workspaceAdminService.publishWorkspaceViaDB(
-        mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
-
-    // Assert
-    verify(mockFeaturedWorkspaceDao, times(2)).save(any());
-    verify(mailService, times(2)).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    // We should not update the ACL as we are just updating the category and the workspace is
+    // already published
+    verify(mockFirecloudService, never())
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), true);
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   @Test
@@ -670,6 +679,9 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
         .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
+            any(DbFeaturedWorkspace.class), any(PublishWorkspaceRequest.class)))
+        .thenReturn(mockFeaturedWorkspace);
     when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
         .thenReturn(Optional.of(mockFeaturedWorkspace));
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
@@ -683,7 +695,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    verify(mailService, never()).sendPublishWorkspaceByAdminEmail(any(), any(), any());
+    verify(mailService, never()).sendPublishWorkspaceEmail(any(), any(), any());
   }
 
   @Test
@@ -699,6 +711,10 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
     // Act
     workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
 
@@ -707,6 +723,13 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
     verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
+
+    // verify that the ACL update was performed as the RWB system, not as the admin user
+
+    verify(mockFirecloudService)
+        .updateWorkspaceAclForPublishing(
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName(), false);
+    verify(mockFirecloudService, never()).updateWorkspaceACL(anyString(), anyString(), any());
   }
 
   private DbWorkspace stubWorkspace(String namespace, String name) {

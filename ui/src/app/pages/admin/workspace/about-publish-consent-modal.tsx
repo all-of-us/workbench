@@ -1,18 +1,23 @@
 import * as React from 'react';
 import { useState } from 'react';
 
-import { Button } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import { SemiBoldHeader } from 'app/components/headers';
 import { CheckBox } from 'app/components/inputs';
+import { ErrorMessage } from 'app/components/messages';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { supportUrls } from 'app/utils/zendesk';
 
 interface Props {
+  workspaceNamespace: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -30,10 +35,28 @@ export const AboutPublishConsentModal = (props: Props) => {
       [checkboxId]: checked,
     }));
   };
+
+  const [publishing, setPublishing] = useState(false);
+
+  const [showError, setShowError] = useState(false);
+
   // State to control the visibility of the button
-  const showConfirmButton = Object.values(checkboxStates).every(
-    (state) => state === true
-  );
+  const showConfirmButton =
+    !showError &&
+    Object.values(checkboxStates).every((state) => state === true) &&
+    !publishing;
+
+  const publishWorkspace = async () => {
+    setPublishing(true);
+    try {
+      await workspacesApi().publishCommunityWorkspace(props.workspaceNamespace);
+      props.onConfirm();
+    } catch (ex) {
+      setShowError(true);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   return (
     <Modal width={800}>
@@ -41,14 +64,29 @@ export const AboutPublishConsentModal = (props: Props) => {
         <SemiBoldHeader>Publish As a Community Workspace</SemiBoldHeader>
       </ModalTitle>
       <ModalBody>
-        {/* Text area to enter the reason for locking workspace */}
+        {/* Show a spinner when publish API is being called*/}
+        {publishing && <SpinnerOverlay />}
         <div>
+          <div style={{ paddingBottom: '1rem' }}>
+            {showError && (
+              <ErrorMessage>
+                There was an error while publishing the workspace. Please try
+                again later.
+              </ErrorMessage>
+            )}
+          </div>
           <label style={{ color: colors.primary }}>
             Please read and agree to the following statements to confirm that
             your workspace meets the{' '}
             <span style={{ fontStyle: 'italic' }}>All of US</span> Researcher
-            Workbench community sharing requirements. Read the NAME article on
-            the User Support Hub to learn more about community workspaces.
+            Workbench community sharing requirements. Read the{' '}
+            <StyledExternalLink
+              href={supportUrls.publishCommunityWorkspace}
+              target='_blank'
+            >
+              article
+            </StyledExternalLink>{' '}
+            on the User Support Hub to learn more about community workspaces.
           </label>
           <br />
           <br />
@@ -117,7 +155,7 @@ export const AboutPublishConsentModal = (props: Props) => {
         </Button>
         <Button
           type='primary'
-          onClick={props.onConfirm}
+          onClick={publishWorkspace}
           disabled={!showConfirmButton}
         >
           CONFIRM

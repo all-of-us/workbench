@@ -791,6 +791,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<EmptyResponse> publishCommunityWorkspace(String workspaceNamespace) {
+    DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace with namespace %s not found", workspaceNamespace)));
+
+    // Make sure the current user is the workspace owner
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, dbWorkspace.getFirecloudName(), WorkspaceAccessLevel.OWNER);
+
+    workspaceService.publishCommunityWorkspace(dbWorkspace);
+
+    workspaceAuditor.firePublishAction(dbWorkspace.getWorkspaceId());
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
   public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
     List<DbUserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
     List<Long> workspaceIds =

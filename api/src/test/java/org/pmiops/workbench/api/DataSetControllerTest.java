@@ -141,6 +141,7 @@ import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AnalysisLanguageMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
@@ -270,6 +271,7 @@ public class DataSetControllerTest {
     CohortCloningService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
+    FeaturedWorkspaceMapper.class,
     FeaturedWorkspaceService.class,
     FreeTierBillingService.class,
     IamService.class,

@@ -367,7 +367,7 @@ describe('WorkspaceAbout', () => {
     expectButtonElementDisabled(publishButton);
 
     await user.hover(publishButton);
-    screen.getByText('Only workspaces owners can publish community workspace.');
+    screen.getByText('Only workspace owners can publish community workspaces.');
   });
 
   it('Publish button is disabled for workspace owner if workspace is already published', async () => {
