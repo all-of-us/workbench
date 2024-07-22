@@ -37,6 +37,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.rawls.RawlsConfig;
 import org.pmiops.workbench.rawls.RawlsRetryHandler;
@@ -54,8 +55,10 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequestClone;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.sam.SamRetryHandler;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryException;
 import org.springframework.stereotype.Service;
 
@@ -103,6 +106,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final FirecloudRetryHandler retryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
   private final SamRetryHandler samRetryHandler;
+  private final WorkspaceService workspaceService;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -157,6 +161,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       RawlsRetryHandler rawlsRetryHandler,
       CalhounRetryHandler calhounRetryHandler,
       SamRetryHandler samRetryHandler,
+      // To avoid circular dependencies, we use @Lazy to defer the creation of WorkspaceService
+      @Lazy WorkspaceService workspaceService,
 
       // old Terms of Service endpoints, before RW-11416
       @Deprecated
@@ -183,6 +189,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.samRetryHandler = samRetryHandler;
     this.firecloudTermsOfServiceApiProvider = firecloudTermsOfServiceApiProvider;
     this.termsOfServiceApiProvider = termsOfServiceApiProvider;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -392,6 +399,28 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return rawlsRetryHandler.run(
         (context) -> workspacesApi.updateACL(aclUpdates, workspaceNamespace, firecloudName, false));
+  }
+
+  /**
+   * Updates the Access Control List (ACL) for a specified workspace to make it readable (or not) to
+   * all members of a group If Published: Grant Reader access to all users in the groupEmail If
+   * Unpublished: Remove access (grant NO_ACCESS) to all users in the groupEmail, unless they have
+   * access independently of publishing status
+   *
+   * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
+   * @param firecloudName the Terra Name of the Workspace to modify
+   * @param publish true if we want to publish the workspace, false if we are unpublishing it
+   * @return
+   */
+  @Override
+  public void updateWorkspaceAclForPublishing(
+      String workspaceNamespace, String firecloudName, boolean publish) {
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
+
+    String publishGroupEmail = workspaceService.getPublishedWorkspacesGroupEmail();
+    var aclUpdate = FirecloudTransforms.buildAclUpdate(publishGroupEmail, accessLevel);
+    updateWorkspaceACLAsService(workspaceNamespace, firecloudName, List.of(aclUpdate));
   }
 
   @Override

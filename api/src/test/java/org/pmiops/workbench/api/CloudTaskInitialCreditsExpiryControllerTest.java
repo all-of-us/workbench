@@ -29,6 +29,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -44,6 +45,7 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -94,6 +96,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     ConceptSetService.class,
     CloudBillingClient.class,
     DataSetService.class,
+    FeaturedWorkspaceMapper.class,
     FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     FireCloudService.class,
@@ -105,7 +108,8 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     UserServiceAuditor.class,
     WorkspaceFreeTierUsageService.class,
     WorkspaceMapper.class,
-    WorkspaceAuthService.class
+    WorkspaceAuthService.class,
+    UserService.class
   })
   static class Configuration {
     @Bean

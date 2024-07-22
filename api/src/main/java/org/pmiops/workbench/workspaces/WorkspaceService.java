@@ -87,4 +87,8 @@ public interface WorkspaceService {
   Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException;
 
   void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status);
+
+  void publishCommunityWorkspace(DbWorkspace workspace);
+
+  List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);
 }

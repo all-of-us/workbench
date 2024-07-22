@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -291,6 +292,8 @@ public class WorkspacesControllerTest {
   @Autowired DataSetService dataSetService;
   @Autowired FakeClock fakeClock;
   @Autowired FireCloudService fireCloudService;
+  @Autowired FirecloudMapper firecloudMapper;
+  @Autowired ObjectNameLengthService objectNameLengthService;
   @Autowired UserDao userDao;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -298,28 +301,23 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   @Autowired WorkspaceOperationDao workspaceOperationDao;
-  @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
-  @Autowired ObjectNameLengthService objectNameLengthService;
-
-  @Autowired FirecloudMapper firecloudMapper;
-
-  @SpyBean @Autowired WorkspaceDao workspaceDao;
-
-  @MockBean CohortBuilderService cohortBuilderService;
 
   @MockBean AccessTierService accessTierService;
+  @MockBean BucketAuditQueryService bucketAuditQueryService;
   @MockBean CloudBillingClient mockCloudBillingClient;
+  @MockBean CohortBuilderService cohortBuilderService;
   @MockBean FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean FireCloudService mockFireCloudService;
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
-  @MockBean BucketAuditQueryService bucketAuditQueryService;
+
+  @SpyBean @Autowired WorkspaceDao workspaceDao;
+  @SpyBean @Autowired WorkspaceService workspaceService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
-
-  @MockBean private FireCloudService mockFireCloudService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
@@ -603,6 +601,13 @@ public class WorkspacesControllerTest {
     return collaborators.stream()
         .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
         .collect(Collectors.toList());
+  }
+
+  private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), accessLevel);
+    return ws;
   }
 
   @Test
@@ -3011,5 +3016,37 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0)).isEqualTo(conceptSet);
     assertThat(dataSets).hasSize(1);
     compareDatasetMetadata(dataSets.get(0), dataSet);
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace_ByUserWithWriterAccess() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.WRITER);
+    String wsNamespace = ws.getNamespace();
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          workspacesController.publishCommunityWorkspace(wsNamespace);
+        });
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace_ByUserWithReaderAccess() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.READER);
+    String wsNamespace = ws.getNamespace();
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          workspacesController.publishCommunityWorkspace(wsNamespace);
+        });
+  }
+
+  @Test
+  public void testPublishCommunityWorkspace() {
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.OWNER);
+    String wsNamespace = ws.getNamespace();
+    doNothing().when(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
+    workspacesController.publishCommunityWorkspace(wsNamespace);
+    verify(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditor).firePublishAction(anyLong());
   }
 }

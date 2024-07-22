@@ -21,4 +21,7 @@ public interface WorkspaceAuditor {
 
   /** Fires an audit log event for collaborating on a workspace. */
   void fireCollaborateAction(long sourceWorkspaceId, Map<Long, String> aclStringsByUserId);
+
+  /** Fires an audit log event for publishing a workspace */
+  void firePublishAction(long workspaceId);
 }

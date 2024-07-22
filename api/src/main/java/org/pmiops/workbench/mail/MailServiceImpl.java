@@ -96,11 +96,10 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/publish_workspace_by_admin/content.html";
+  private static final String PUBLISH_WORKSPACE_RESOURCE = "emails/publish_workspace/content.html";
 
-  private static final String UNPUBLISH_WORKSPACE_ADMIN_RESOURCE =
-      "emails/unpublish_workspace_by_admin/content.html";
+  private static final String UNPUBLISH_WORKSPACE_RESOURCE =
+      "emails/unpublish_workspace/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -389,39 +388,46 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishWorkspaceByAdminEmail(
+  public void sendPublishWorkspaceEmail(
       DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
       throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(
-        workspace, owners, featuredWorkspaceCategoryAsDisplayString(publishCategory), true);
-  }
-
-  @Override
-  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
-      throws MessagingException {
-    sendPublishUnpublishWorkspaceByAdminEmail(workspace, owners, "", false);
-  }
-
-  private void sendPublishUnpublishWorkspaceByAdminEmail(
-      DbWorkspace workspace, List<DbUser> owners, String cateogryIfAny, boolean publish)
-      throws MessagingException {
-    String actionType = publish ? "published" : "unpublished";
 
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
     sendWithRetries(
         owners.stream().map(DbUser::getContactEmail).toList(),
-        Collections.emptyList(),
-        "Your AoU Researcher Workbench workspace has been " + actionType,
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been published",
         String.format(
-            "%s workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            actionType,
-            workspace.getName(),
-            workspace.getWorkspaceNamespace(),
-            ownersForLogging(owners)),
+            "Publish workspace email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
-            publish ? PUBLISH_WORKSPACE_ADMIN_RESOURCE : UNPUBLISH_WORKSPACE_ADMIN_RESOURCE,
-            publishUnpublishWorkspaceSubstitutionMap(workspace, cateogryIfAny, supportEmail)));
+            PUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(
+                workspace,
+                featuredWorkspaceCategoryAsDisplayString(publishCategory),
+                supportEmail)));
+  }
+
+  @Override
+  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+
+    final String ownersForLogging =
+        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        owners.stream().map(DbUser::getContactEmail).toList(),
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been Unpublished",
+        String.format(
+            "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+        buildHtml(
+            UNPUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
