@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -301,7 +302,6 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   @Autowired WorkspaceOperationDao workspaceOperationDao;
-  @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
 
   @MockBean AccessTierService accessTierService;
@@ -314,6 +314,7 @@ public class WorkspacesControllerTest {
   @MockBean IamService mockIamService;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
+  @SpyBean @Autowired WorkspaceService workspaceService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -3043,10 +3044,11 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testPublishCommunityWorkspace() {
-    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.READER);
+    Workspace ws = createWorkspaceAndGrantAccess(WorkspaceAccessLevel.OWNER);
     String wsNamespace = ws.getNamespace();
+    doNothing().when(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
     workspacesController.publishCommunityWorkspace(wsNamespace);
-    verify(workspaceService).publishCommunityWorkspace(any());
-    verify(mockWorkspaceAuditor).firePublishAction(any());
+    verify(workspaceService).publishCommunityWorkspace(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditor).firePublishAction(anyLong());
   }
 }

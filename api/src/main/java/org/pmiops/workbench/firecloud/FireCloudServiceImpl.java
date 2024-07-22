@@ -161,6 +161,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       RawlsRetryHandler rawlsRetryHandler,
       CalhounRetryHandler calhounRetryHandler,
       SamRetryHandler samRetryHandler,
+      // To avoid circular dependencies, we use @Lazy to defer the creation of WorkspaceService
       @Lazy WorkspaceService workspaceService,
 
       // old Terms of Service endpoints, before RW-11416

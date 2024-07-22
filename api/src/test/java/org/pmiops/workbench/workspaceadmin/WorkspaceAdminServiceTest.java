@@ -696,6 +696,9 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
         .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
+            any(DbFeaturedWorkspace.class), any(PublishWorkspaceRequest.class)))
+        .thenReturn(mockFeaturedWorkspace);
     when(mockFeaturedWorkspaceDao.findByWorkspace(workspace))
         .thenReturn(Optional.of(mockFeaturedWorkspace));
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
