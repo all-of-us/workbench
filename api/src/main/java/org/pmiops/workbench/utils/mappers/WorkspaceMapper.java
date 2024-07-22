@@ -35,11 +35,17 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
       WorkspaceResourceMapper.class,
     })
 public interface WorkspaceMapper {
+
+  // DEPRECATED and subject to deletion.  Use terraName instead.
+  @Mapping(target = "id", source = "fcWorkspace.name")
+  // DEPRECATED and subject to deletion.
+  // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
+  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
-  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
-  @Mapping(target = "id", source = "fcWorkspace.name")
+  @Mapping(target = "displayName", source = "dbWorkspace.name")
+  @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "dbWorkspace.creator.username")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
@@ -100,6 +106,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
+  // DEPRECATED and subject to deletion.  Use terraName instead.
+  @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
   @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
@@ -107,7 +115,8 @@ public interface WorkspaceMapper {
       target = "googleBucketName",
       ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
   // fcWorkspace)
-  @Mapping(target = "id", source = "firecloudName")
+  @Mapping(target = "displayName", source = "name")
+  @Mapping(target = "terraName", source = "firecloudName")
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
