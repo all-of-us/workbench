@@ -409,7 +409,7 @@ public class FireCloudServiceImpl implements FireCloudService {
    *
    * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
    * @param firecloudName the Terra Name of the Workspace to modify
-   * @param publish true if we want to publish workspace false if we are unpublished it
+   * @param publish true if we want to publish the workspace, false if we are unpublishing it
    * @return
    */
   @Override
