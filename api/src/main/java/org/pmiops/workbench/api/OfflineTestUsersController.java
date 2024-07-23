@@ -15,6 +15,7 @@ import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.UserUtils;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,21 +24,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private static final Logger LOGGER = Logger.getLogger(OfflineTestUsersController.class.getName());
 
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ImpersonatedUserService impersonatedUserService;
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
+  private final WorkspaceMapper workspaceMapper;
 
   @Autowired
   public OfflineTestUsersController(
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       ImpersonatedUserService impersonatedUserService,
       ImpersonatedWorkspaceService impersonatedWorkspaceService,
-      TaskQueueService taskQueueService) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      TaskQueueService taskQueueService,
+      WorkspaceMapper workspaceMapper) {
     this.impersonatedUserService = impersonatedUserService;
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
     this.taskQueueService = taskQueueService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceMapper = workspaceMapper;
   }
 
   @Override
@@ -118,12 +122,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
             username, workspaces.size()));
 
     return workspaces.stream()
-        .map(
-            ws ->
-                new TestUserWorkspace()
-                    .username(username)
-                    .wsNamespace(ws.getWorkspace().getNamespace())
-                    .wsFirecloudId(ws.getWorkspace().getId()));
+        .map(ws -> workspaceMapper.toTestUserWorkspace(ws.getWorkspace(), username));
   }
 
   private Stream<TestUserRawlsWorkspace> enumerateRawlsWorkspaces(String username) {
@@ -134,12 +133,6 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
             username, workspaces.size()));
 
     return workspaces.stream()
-        .map(
-            ws ->
-                new TestUserRawlsWorkspace()
-                    .username(username)
-                    .wsNamespace(ws.getWorkspace().getNamespace())
-                    .wsGoogleProject(ws.getWorkspace().getGoogleProject())
-                    .wsFirecloudId(ws.getWorkspace().getName()));
+        .map(ws -> workspaceMapper.toTestUserRawlsWorkspace(ws.getWorkspace(), username));
   }
 }

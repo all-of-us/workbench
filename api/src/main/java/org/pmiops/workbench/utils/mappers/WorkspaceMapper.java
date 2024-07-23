@@ -17,6 +17,8 @@ import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.TestUserRawlsWorkspace;
+import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -183,4 +185,9 @@ public interface WorkspaceMapper {
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
   }
+
+  TestUserWorkspace toTestUserWorkspace(Workspace workspace, String username);
+
+  @Mapping(target = "terraName", source = "workspace.name")
+  TestUserRawlsWorkspace toTestUserRawlsWorkspace(RawlsWorkspaceDetails workspace, String username);
 }

@@ -180,9 +180,9 @@ public class DeleteWorkspaces extends Tool {
 
   private void deleteAouWorkspace(WorkspaceResponse response, String username) {
     String namespace = response.getWorkspace().getNamespace();
-    String fcName = response.getWorkspace().getId();
-    LOG.info(String.format("Deleting workspace %s/%s", namespace, fcName));
-    workspaceService.deleteWorkspace(username, namespace, fcName, DELETE_BILLING_PROJECTS);
+    String terraName = response.getWorkspace().getTerraName();
+    LOG.info(String.format("Deleting workspace %s/%s", namespace, terraName));
+    workspaceService.deleteWorkspace(username, namespace, terraName, DELETE_BILLING_PROJECTS);
   }
 
   private void deleteRawlsWorkspace(RawlsWorkspaceListResponse response, String username) {

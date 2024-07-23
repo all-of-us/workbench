@@ -115,9 +115,9 @@ public class WorkspaceAuditorTest {
 
     workspace1 =
         new Workspace()
-            .id("fc-id-1")
             .etag("etag_1")
             .name("DbWorkspace 1")
+            .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
             .creator("user@fake-research-aou.org")
@@ -168,7 +168,7 @@ public class WorkspaceAuditorTest {
 
   @Test
   public void testFiresDuplicateEvent() {
-    final Workspace workspace2 = clone(workspace1).id(String.valueOf(WORKSPACE_2_DB_ID));
+    final Workspace workspace2 = clone(workspace1).terraName(String.valueOf(WORKSPACE_2_DB_ID));
     workspaceAuditor.fireDuplicateAction(
         dbWorkspace1.getWorkspaceId(), WORKSPACE_2_DB_ID, workspace2);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
@@ -301,7 +301,7 @@ public class WorkspaceAuditorTest {
 
   private Workspace clone(Workspace in) {
     return new Workspace()
-        .id(in.getId())
+        .terraName(in.getTerraName())
         .etag(in.getEtag())
         .name(in.getName())
         .namespace(in.getNamespace())

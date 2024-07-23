@@ -495,7 +495,7 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId()));
 
     assertNotFoundException(exception, defaultConceptSet.getId());
   }
@@ -517,7 +517,7 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId()));
 
     assertNotFoundException(exception, defaultConceptSet.getId());
   }
@@ -533,7 +533,7 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.deleteConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId()));
 
     assertForbiddenException(exception);
   }
@@ -549,7 +549,7 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.deleteConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId()));
 
     assertForbiddenException(exception);
   }
@@ -563,7 +563,7 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace2.getNamespace(), workspace2.getId(), 1L));
+                    workspace2.getNamespace(), workspace2.getTerraName(), 1L));
 
     assertNotFoundException(exception, 1L);
   }
@@ -577,7 +577,9 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace2.getNamespace(), workspace2.getId(), defaultConceptSet.getId()));
+                    workspace2.getNamespace(),
+                    workspace2.getTerraName(),
+                    defaultConceptSet.getId()));
 
     assertNotFoundException(exception, 1L);
   }
@@ -593,7 +595,7 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), wrongConceptSetId));
+                    workspace.getNamespace(), workspace.getTerraName(), wrongConceptSetId));
 
     assertNotFoundException(exception, wrongConceptSetId);
   }
@@ -605,7 +607,8 @@ public class ConceptSetsControllerTest {
     stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
+            .getConceptSet(
+                workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId())
             .getBody();
 
     assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
@@ -619,7 +622,8 @@ public class ConceptSetsControllerTest {
 
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
+            .getConceptSet(
+                workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId())
             .getBody();
 
     assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
@@ -634,7 +638,8 @@ public class ConceptSetsControllerTest {
 
     ConceptSet retrieved =
         conceptSetsController
-            .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
+            .getConceptSet(
+                workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId())
             .getBody();
 
     assertThat(retrieved).isEqualTo(defaultConceptSet.participantCount(0));
@@ -651,7 +656,7 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId()));
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId()));
 
     assertForbiddenException(exception);
   }
@@ -662,7 +667,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceEmpty() {
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getId())
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getTerraName())
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -673,7 +678,7 @@ public class ConceptSetsControllerTest {
     // use defaultConceptSet
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getItems();
 
@@ -687,7 +692,7 @@ public class ConceptSetsControllerTest {
     assertThat(
             conceptSetsController
                 .countConceptsInConceptSet(
-                    workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
+                    workspace.getNamespace(), workspace.getTerraName(), defaultConceptSet.getId())
                 .getBody())
         .isEqualTo(1);
   }
@@ -722,7 +727,7 @@ public class ConceptSetsControllerTest {
     // check for 4 conceptSets
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getItems();
 
@@ -743,7 +748,7 @@ public class ConceptSetsControllerTest {
     // access from workspace2 check is empty
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getId())
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), workspace2.getTerraName())
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -757,7 +762,7 @@ public class ConceptSetsControllerTest {
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getItems();
 
@@ -773,7 +778,7 @@ public class ConceptSetsControllerTest {
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getItems();
 
@@ -789,7 +794,7 @@ public class ConceptSetsControllerTest {
 
     List<ConceptSet> response =
         conceptSetsController
-            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getId())
+            .getConceptSetsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getItems();
 
@@ -808,7 +813,7 @@ public class ConceptSetsControllerTest {
             ForbiddenException.class,
             () ->
                 conceptSetsController.getConceptSetsInWorkspace(
-                    workspace.getNamespace(), workspace.getId()));
+                    workspace.getNamespace(), workspace.getTerraName()));
 
     assertForbiddenException(exception);
   }
@@ -830,7 +835,10 @@ public class ConceptSetsControllerTest {
             NotFoundException.class,
             () ->
                 conceptSetsController.updateConceptSet(
-                    workspace2.getNamespace(), workspace2.getId(), conceptSet.getId(), conceptSet));
+                    workspace2.getNamespace(),
+                    workspace2.getTerraName(),
+                    conceptSet.getId(),
+                    conceptSet));
 
     assertNotFoundException(exception, conceptSet.getId());
   }
@@ -845,7 +853,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSet(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     defaultConceptSet.getId(),
                     defaultConceptSet));
 
@@ -866,7 +874,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     defaultConceptSet));
 
@@ -886,7 +894,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     defaultConceptSet));
 
@@ -906,7 +914,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME))
             .getBody();
@@ -925,7 +933,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME))
             .getBody();
@@ -946,7 +954,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME)));
 
@@ -966,7 +974,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     defaultConceptSet.description(UPDATED_DESC).name(UPDATED_NAME)));
 
@@ -1006,7 +1014,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 updateConceptSetRequest)
             .getBody();
@@ -1032,7 +1040,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 updateConceptSetRequest)
             .getBody();
@@ -1077,7 +1085,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 conceptSet.getId(),
                 updateConceptSetRequest)
             .getBody();
@@ -1109,7 +1117,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSetConcepts(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     updateConceptSetRequest));
 
@@ -1133,7 +1141,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 updateConceptSetRequest)
             .getBody();
@@ -1159,7 +1167,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 defaultConceptSet.getId(),
                 updateConceptSetRequest)
             .getBody();
@@ -1187,7 +1195,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSetConcepts(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     updateConceptSetRequest));
 
@@ -1210,7 +1218,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.updateConceptSetConcepts(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     defaultConceptSet.getId(),
                     updateConceptSetRequest));
 
@@ -1243,7 +1251,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .copyConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 String.valueOf(conceptSet.getId()),
                 copyRequest)
             .getBody();
@@ -1280,7 +1288,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .copyConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 String.valueOf(conceptSet.getId()),
                 copyRequest)
             .getBody();
@@ -1311,7 +1319,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.copyConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     String.valueOf(defaultConceptSet.getId()),
                     copyRequest));
 
@@ -1336,7 +1344,7 @@ public class ConceptSetsControllerTest {
             () ->
                 conceptSetsController.copyConceptSet(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     String.valueOf(defaultConceptSet.getId()),
                     copyRequest));
 
@@ -1546,7 +1554,8 @@ public class ConceptSetsControllerTest {
         buildCreateConceptSetRequest(conceptSet, domainConceptIds);
 
     return conceptSetsController
-        .createConceptSet(workspace.getNamespace(), workspace.getId(), createConceptSetRequest)
+        .createConceptSet(
+            workspace.getNamespace(), workspace.getTerraName(), createConceptSetRequest)
         .getBody();
   }
 

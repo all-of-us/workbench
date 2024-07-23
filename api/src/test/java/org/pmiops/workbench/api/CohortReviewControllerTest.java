@@ -576,7 +576,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohort.getCohortId(),
                     new CreateReviewRequest().size(1)));
 
@@ -594,7 +594,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohort.getCohortId(),
                     new CreateReviewRequest().size(0).name("review1")));
 
@@ -612,7 +612,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohort.getCohortId(),
                     new CreateReviewRequest().size(10001).name("review1")));
 
@@ -629,13 +629,13 @@ public class CohortReviewControllerTest {
     // create a new review
     cohortReviewController.createCohortReview(
         workspace.getNamespace(),
-        workspace.getId(),
+        workspace.getTerraName(),
         cohort.getCohortId(),
         new CreateReviewRequest().size(1).name("review1"));
     List<CohortReview> cohortReviewList =
         cohortReviewController
             .getCohortReviewsByCohortId(
-                workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+                workspace.getNamespace(), workspace.getTerraName(), cohort.getCohortId())
             .getBody()
             .getItems();
 
@@ -653,7 +653,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortId,
                     new CreateReviewRequest().size(1).name("review1")));
 
@@ -673,7 +673,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .createCohortReview(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortWithoutReview.getCohortId(),
                 new CreateReviewRequest().size(1).name(reviewName))
             .getBody();
@@ -696,7 +696,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortWithoutReview.getCohortId(),
                     new CreateReviewRequest().size(1).name("review1")));
 
@@ -719,7 +719,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     requestCohortReview.getCohortReviewId(),
                     requestCohortReview));
 
@@ -742,7 +742,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     requestCohortReview.getCohortReviewId(),
                     requestCohortReview));
 
@@ -767,7 +767,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateCohortReview(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     requestCohortReview.getCohortReviewId(),
                     requestCohortReview));
 
@@ -795,7 +795,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .updateCohortReview(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 requestCohortReview.getCohortReviewId(),
                 requestCohortReview)
             .getBody();
@@ -829,7 +829,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     requestCohortReview.getCohortReviewId(),
                     requestCohortReview));
 
@@ -852,7 +852,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.deleteCohortReview(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     requestCohortReview.getCohortReviewId()));
 
     assertNotFoundExceptionNoCohortReviewAndCohort(
@@ -872,7 +872,9 @@ public class CohortReviewControllerTest {
             .etag(Etags.fromVersion(cohortReview.getVersion()));
     ResponseEntity<EmptyResponse> response =
         cohortReviewController.deleteCohortReview(
-            workspace.getNamespace(), workspace.getId(), requestCohortReview.getCohortReviewId());
+            workspace.getNamespace(),
+            workspace.getTerraName(),
+            requestCohortReview.getCohortReviewId());
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
@@ -896,7 +898,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.deleteCohortReview(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     requestCohortReview.getCohortReviewId()));
 
     assertForbiddenException(exception);
@@ -915,7 +917,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantId,
                     new ParticipantCohortAnnotation()
@@ -944,7 +946,7 @@ public class CohortReviewControllerTest {
               () ->
                   cohortReviewController.createParticipantCohortAnnotation(
                       workspace.getNamespace(),
-                      workspace.getId(),
+                      workspace.getTerraName(),
                       cohortReviewId,
                       participantId,
                       request));
@@ -972,7 +974,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantId,
                     request));
@@ -998,7 +1000,11 @@ public class CohortReviewControllerTest {
     ParticipantCohortAnnotation response =
         cohortReviewController
             .createParticipantCohortAnnotation(
-                workspace.getNamespace(), workspace.getId(), cohortReviewId, participantId, request)
+                workspace.getNamespace(),
+                workspace.getTerraName(),
+                cohortReviewId,
+                participantId,
+                request)
             .getBody();
 
     assertCreatedParticipantCohortAnnotation(Objects.requireNonNull(response), request);
@@ -1025,7 +1031,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReview.getCohortReviewId(),
                 participantId,
                 request)
@@ -1056,7 +1062,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantId,
                     request));
@@ -1074,7 +1080,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
@@ -1094,7 +1100,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     wrongParticipantId,
                     participantAnnotation.getAnnotationId(),
@@ -1114,7 +1120,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     wrongAnnotationId,
@@ -1139,7 +1145,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
@@ -1164,7 +1170,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotationDate.getAnnotationId(),
@@ -1189,7 +1195,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
@@ -1218,7 +1224,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .updateParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 participantAnnotation.getAnnotationId(),
@@ -1245,7 +1251,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     participantAnnotation.getAnnotationId(),
@@ -1273,7 +1279,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.deleteParticipantCohortAnnotation(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     annotation.getAnnotationId()));
@@ -1295,7 +1301,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.deleteParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantId,
                     wrongAnnotationId));
@@ -1325,7 +1331,7 @@ public class CohortReviewControllerTest {
     ResponseEntity<EmptyResponse> response =
         cohortReviewController.deleteParticipantCohortAnnotation(
             workspace.getNamespace(),
-            workspace.getId(),
+            workspace.getTerraName(),
             cohortReview.getCohortReviewId(),
             participantCohortStatus1.getParticipantKey().getParticipantId(),
             annotation.getAnnotationId());
@@ -1350,7 +1356,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.deleteParticipantCohortAnnotation(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     annotation.getAnnotationId()));
@@ -1369,7 +1375,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortStatus(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
@@ -1387,7 +1393,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortStatus(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
@@ -1406,7 +1412,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortStatus(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     wrongParticipantId,
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
@@ -1428,7 +1434,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .updateParticipantCohortStatus(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
@@ -1454,7 +1460,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.updateParticipantCohortStatus(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)));
@@ -1473,7 +1479,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortAnnotations(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1491,7 +1497,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortAnnotations(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1512,7 +1518,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .getParticipantCohortAnnotations(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
@@ -1542,7 +1548,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortAnnotations(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1560,7 +1566,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortStatus(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1578,7 +1584,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortStatus(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1598,7 +1604,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .getParticipantCohortStatus(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
@@ -1631,7 +1637,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortStatus(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId()));
 
@@ -1649,7 +1655,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCount(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
@@ -1668,7 +1674,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCount(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
@@ -1686,7 +1692,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCount(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(null)));
@@ -1719,7 +1725,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCount(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(domain)));
@@ -1741,7 +1747,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .getParticipantCount(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReviewId,
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 new PageFilterRequest().domain(Domain.CONDITION))
@@ -1766,7 +1772,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCount(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
@@ -1784,7 +1790,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantData(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
@@ -1803,7 +1809,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantData(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     wrongCohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.CONDITION)));
@@ -1821,7 +1827,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantData(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(null)));
@@ -1854,7 +1860,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantData(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(domain)));
@@ -1875,7 +1881,7 @@ public class CohortReviewControllerTest {
         cohortReviewController
             .getParticipantData(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohortReviewId,
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 new PageFilterRequest().domain(Domain.OBSERVATION))
@@ -1899,7 +1905,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantData(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReviewId,
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     new PageFilterRequest().domain(Domain.SURVEY)));
@@ -1917,7 +1923,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     new PageFilterRequest()));
 
@@ -1942,7 +1948,7 @@ public class CohortReviewControllerTest {
                 cohortReviewController
                     .getParticipantCohortStatuses(
                         workspace.getNamespace(),
-                        workspace.getId(),
+                        workspace.getTerraName(),
                         cohortReview.getCohortReviewId(),
                         pageFilterRequest)
                     .getBody())
@@ -1973,7 +1979,7 @@ public class CohortReviewControllerTest {
                 cohortReviewController
                     .getParticipantCohortStatuses(
                         workspace.getNamespace(),
-                        workspace.getId(),
+                        workspace.getTerraName(),
                         cohortReview.getCohortReviewId(),
                         new PageFilterRequest())
                     .getBody())
@@ -2005,7 +2011,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantCohortStatuses(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     new PageFilterRequest()));
 
@@ -2031,7 +2037,7 @@ public class CohortReviewControllerTest {
     List<CohortReview> actual =
         Objects.requireNonNull(
                 cohortReviewController
-                    .getCohortReviewsInWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getCohortReviewsInWorkspace(workspace.getNamespace(), workspace.getTerraName())
                     .getBody())
             .getItems();
 
@@ -2054,7 +2060,7 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.getCohortReviewsInWorkspace(
-                    workspace.getNamespace(), workspace.getId()));
+                    workspace.getNamespace(), workspace.getTerraName()));
 
     assertForbiddenException(exception);
   }
@@ -2087,7 +2093,7 @@ public class CohortReviewControllerTest {
         Objects.requireNonNull(
                 cohortReviewController
                     .getCohortReviewsByCohortId(
-                        workspace.getNamespace(), workspace.getId(), cohort.getCohortId())
+                        workspace.getNamespace(), workspace.getTerraName(), cohort.getCohortId())
                     .getBody())
             .getItems();
 
@@ -2110,7 +2116,7 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.getCohortReviewsByCohortId(
-                    workspace.getNamespace(), workspace.getId(), cohort.getCohortId()));
+                    workspace.getNamespace(), workspace.getTerraName(), cohort.getCohortId()));
 
     assertForbiddenException(exception);
   }
@@ -2130,7 +2136,7 @@ public class CohortReviewControllerTest {
             NotFoundException.class,
             () ->
                 cohortReviewController.getCohortReviewsByCohortId(
-                    workspace2.getNamespace(), workspace2.getId(), cohort.getCohortId()));
+                    workspace2.getNamespace(), workspace2.getTerraName(), cohort.getCohortId()));
     assertNotFoundExceptionNoCohort(cohort.getCohortId(), exception);
   }
 
@@ -2151,7 +2157,7 @@ public class CohortReviewControllerTest {
                 cohortReviewController
                     .getParticipantChartData(
                         workspace.getNamespace(),
-                        workspace.getId(),
+                        workspace.getTerraName(),
                         cohortReview.getCohortReviewId(),
                         participantCohortStatus1.getParticipantKey().getParticipantId(),
                         Domain.CONDITION.toString())
@@ -2177,7 +2183,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.getParticipantChartData(
                     workspace.getNamespace(),
-                    workspace.getId(),
+                    workspace.getTerraName(),
                     cohortReview.getCohortReviewId(),
                     participantCohortStatus1.getParticipantKey().getParticipantId(),
                     Domain.CONDITION.toString()));
@@ -2202,7 +2208,7 @@ public class CohortReviewControllerTest {
                 cohortReviewController
                     .findCohortReviewDemoChartInfo(
                         workspace.getNamespace(),
-                        workspace.getId(),
+                        workspace.getTerraName(),
                         cohortReview.getCohortReviewId())
                     .getBody())
             .getItems();
@@ -2225,7 +2231,9 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.findCohortReviewDemoChartInfo(
-                    workspace.getNamespace(), workspace.getId(), cohortReview.getCohortReviewId()));
+                    workspace.getNamespace(),
+                    workspace.getTerraName(),
+                    cohortReview.getCohortReviewId()));
 
     assertForbiddenException(exception);
   }
@@ -2246,7 +2254,7 @@ public class CohortReviewControllerTest {
             () ->
                 cohortReviewController.findCohortReviewDemoChartInfo(
                     workspace2.getNamespace(),
-                    workspace2.getId(),
+                    workspace2.getTerraName(),
                     cohortReview.getCohortReviewId()));
     assertNotFoundExceptionNoCohortReviewAndCohort(cohortReview.getCohortReviewId(), exception);
   }
@@ -2264,7 +2272,7 @@ public class CohortReviewControllerTest {
     List<Vocabulary> actual =
         Objects.requireNonNull(
                 cohortReviewController
-                    .getVocabularies(workspace.getNamespace(), workspace.getId())
+                    .getVocabularies(workspace.getNamespace(), workspace.getTerraName())
                     .getBody())
             .getItems();
 
@@ -2284,7 +2292,7 @@ public class CohortReviewControllerTest {
             ForbiddenException.class,
             () ->
                 cohortReviewController.getVocabularies(
-                    workspace.getNamespace(), workspace.getId()));
+                    workspace.getNamespace(), workspace.getTerraName()));
 
     assertForbiddenException(exception);
   }
