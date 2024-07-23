@@ -22,7 +22,6 @@ import {
 } from 'testing/react-test-helpers';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { AdminWorkspaceSearch } from './admin-workspace-search';
 import { BasicInformation } from './basic-information';
 
 describe('BasicInformation', () => {
