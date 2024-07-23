@@ -27,6 +27,8 @@ describe('useCustomRuntime', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    // useCustomRuntime requires a runtime to be loaded in the
+    // runtimeStore. All tests start with the default runtime.
     currentRuntime = defaultRuntime();
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
@@ -49,6 +51,7 @@ describe('useCustomRuntime', () => {
       useCustomRuntime('workspaceNamespace', null)
     );
 
+    // Result's current property is the return value of the hook
     return result.current;
   };
 
@@ -56,7 +59,7 @@ describe('useCustomRuntime', () => {
     const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = defaultRuntime();
-    newRuntime.gceConfig.diskSize = newRuntime.gceConfig.diskSize * 2;
+    newRuntime.gceConfig.diskSize = currentRuntime.gceConfig.diskSize * 2;
 
     await act(async () => {
       setRequest({ runtime: newRuntime, detachedDisk: null });
@@ -76,6 +79,7 @@ describe('useCustomRuntime', () => {
       setRequest({ runtime: newRuntime, detachedDisk: null });
     });
 
+    // Since the runtimes are the same, the hook should not update the runtime
     expect(updateRuntimeSpy).not.toHaveBeenCalled();
   });
 
@@ -84,13 +88,13 @@ describe('useCustomRuntime', () => {
     const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = defaultRuntime();
-    // THis is what is triggering the delete
     newRuntime.gceConfig.diskSize = currentRuntime.gceConfig.diskSize / 2;
 
     await act(async () => {
       setRequest({ runtime: newRuntime, detachedDisk: newDisk });
     });
 
+    // Triggers a delete, because disk size decreased
     await waitFor(() => {
       expect(deleteRuntimeSpy).toHaveBeenCalled();
     });
@@ -103,8 +107,12 @@ describe('useCustomRuntime', () => {
   it('should delete runtime and create a new one when current runtime is in error state', async () => {
     const [, setRequest] = testUseCustomRuntime();
 
+    // Set the new runtime to be the same as the current runtime, but
+    // by using the spread operator, we create a new object
+    // rather than a reference
     const newRuntime = { ...currentRuntime };
 
+    // This means that settign the status to error will not affect the new runtime.
     currentRuntime.status = RuntimeStatus.ERROR;
 
     await act(async () => {
