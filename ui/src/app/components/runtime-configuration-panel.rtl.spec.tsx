@@ -1305,6 +1305,49 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(screen.queryByText('Standard disk')).not.toBeInTheDocument();
   });
 
+  it('should allow configuration via GCE preset', async () => {
+    setCurrentRuntime(null);
+    mockUseCustomRuntime();
+    const { container } = component();
+
+    const CustomizeButton = screen.getByRole('button', {
+      name: 'Customize',
+    });
+
+    await user.click(CustomizeButton);
+
+    // Ensure set the form to something non-standard to start
+    await pickMainCpu(container, 8);
+    await pickComputeType(container, ComputeType.Dataproc);
+    await pickStandardDiskSize(MIN_DISK_SIZE_GB + 10);
+
+    // GPU
+    await pickPresets(container, runtimePresets.generalAnalysis.displayName);
+
+    clickExpectedButton('Create');
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.GENERAL_ANALYSIS);
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig.persistentDisk
+    ).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: null,
+      size: MIN_DISK_SIZE_GB,
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toBeFalsy();
+  });
+
   it('should allow configuration via dataproc preset', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
