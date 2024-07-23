@@ -1162,12 +1162,9 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await clickExpectedButton('Create');
 
-    await waitFor(
-      async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalled();
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalled();
+    });
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -2118,22 +2115,17 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
 
     await clickExpectedButton('Create');
-    await waitFor(
-      async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    // });
-    // expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-    // expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
-    //   'stub-disk'
-    // );
-    // expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
-    //   2
-    // );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceConfig
+    ).toBeUndefined();
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig.gpuConfig.numOfGpus
+    ).toEqual(2);
   });
 
   it('should allow disk deletion when detaching', async () => {
