@@ -95,4 +95,14 @@ describe('BasicInformation', () => {
     await user.click(screen.getByRole('button', { name: 'Publish' }));
     expect(await screen.findByText('Demo Projects')).toBeInTheDocument();
   });
+
+  it('should unpublish a workspace', async () => {
+    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    jest
+      .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+    component();
+    await user.click(await screen.findByRole('button', { name: /unpublish/i }));
+    expect(screen.getByText('Select a category...')).toBeInTheDocument();
+  });
 });
