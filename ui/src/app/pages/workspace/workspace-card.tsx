@@ -300,7 +300,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           }}
                         >
                           <TooltipTrigger content='Workspace is published as Community Workspace'>
-                            <img src={CW_icon} style={{ width: '25px' }} />
+                            <img src={CW_icon} style={{ width: '1.75rem' }} />
                           </TooltipTrigger>
                         </FlexColumn>
                       )}
