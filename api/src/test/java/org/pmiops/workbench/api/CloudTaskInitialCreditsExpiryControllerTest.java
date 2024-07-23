@@ -35,7 +35,6 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
@@ -97,7 +96,6 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     CloudBillingClient.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     FireCloudService.class,
     ImpersonatedWorkspaceService.class,

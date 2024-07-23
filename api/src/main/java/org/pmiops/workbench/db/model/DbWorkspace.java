@@ -6,6 +6,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.SecondaryTable;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
@@ -22,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -29,6 +34,9 @@ import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
+@SecondaryTable(
+    name = "featured_workspace",
+    pkJoinColumns = @PrimaryKeyJoinColumn(name = "workspace_id"))
 @Table(name = "workspace")
 public class DbWorkspace {
   private String firecloudUuid;
@@ -98,6 +106,8 @@ public class DbWorkspace {
   */
   @Deprecated(since = "July 2024", forRemoval = true)
   private boolean published;
+
+  private DbFeaturedCategory featuredCategory;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -226,6 +236,16 @@ public class DbWorkspace {
   public DbWorkspace setPublished(boolean published) {
     this.published = published;
     return this;
+  }
+
+  @Column(name = "category", table = "featured_workspace")
+  @Enumerated(EnumType.STRING)
+  public DbFeaturedCategory getFeaturedCategory() {
+    return featuredCategory;
+  }
+
+  public void setFeaturedCategory(DbFeaturedCategory featuredCategory) {
+    this.featuredCategory = featuredCategory;
   }
 
   @Column(name = "rp_disease_focused_research")

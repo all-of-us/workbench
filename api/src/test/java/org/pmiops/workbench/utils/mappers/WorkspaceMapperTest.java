@@ -156,8 +156,7 @@ public class WorkspaceMapperTest {
   public void testConvertsDbToApiWorkspace() {
 
     final Workspace ws =
-        workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService);
+        workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
     assertThat(ws.getId()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -183,8 +182,7 @@ public class WorkspaceMapperTest {
         .thenReturn(Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
 
     final Workspace ws =
-        workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService);
+        workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
@@ -192,8 +190,7 @@ public class WorkspaceMapperTest {
   public void testConvertsFirecloudResponseToApiResponse() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            workspaceMapper.toApiWorkspace(
-                sourceDbWorkspace, sourceFirecloudWorkspace, mockFeaturedWorkspaceService),
+            workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
