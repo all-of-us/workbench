@@ -943,12 +943,9 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await clickExpectedButton('Create');
 
-    await waitFor(
-      async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
