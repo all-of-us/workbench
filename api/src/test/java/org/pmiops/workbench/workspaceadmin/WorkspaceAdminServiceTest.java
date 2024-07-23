@@ -54,7 +54,6 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -125,7 +124,6 @@ public class WorkspaceAdminServiceTest {
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
-  @MockBean private FeaturedWorkspaceService mockFeatureService;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private LeonardoApiClient mockLeonardoNotebooksClient;
   @MockBean private LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
@@ -160,7 +158,6 @@ public class WorkspaceAdminServiceTest {
     ConceptSetMapper.class,
     DataSetDao.class,
     DataSetMapper.class,
-    FeaturedWorkspaceService.class,
     FirecloudMapper.class,
     LeonardoApiClient.class,
     UserMapper.class,
@@ -315,7 +312,7 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testGetWorkspaceAdminView_published_false() {
-    workspaceDao.save(dbWorkspace.setPublished(false));
+    workspaceDao.save(dbWorkspace.setPublished(false).setFeaturedCategory(null));
     WorkspaceAdminView workspaceDetailsResponse =
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
@@ -324,7 +321,7 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testGetWorkspaceAdminView_published_true() {
-    workspaceDao.save(dbWorkspace.setPublished(true));
+    workspaceDao.save(dbWorkspace.setPublished(true).setFeaturedCategory(null));
     WorkspaceAdminView workspaceDetailsResponse =
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
@@ -333,8 +330,7 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testGetWorkspaceAdminView_featuredCategory() {
-    when(mockFeatureService.getFeaturedCategory(dbWorkspace))
-        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
+
     WorkspaceAdminView workspaceDetailsResponse =
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())

@@ -244,8 +244,9 @@ public class DbWorkspace {
     return featuredCategory;
   }
 
-  public void setFeaturedCategory(DbFeaturedCategory featuredCategory) {
+  public DbWorkspace setFeaturedCategory(DbFeaturedCategory featuredCategory) {
     this.featuredCategory = featuredCategory;
+    return this;
   }
 
   @Column(name = "rp_disease_focused_research")

@@ -52,6 +52,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -60,7 +61,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
@@ -148,7 +148,6 @@ public class WorkspaceServiceTest {
   @MockBean private Clock mockClock;
   @MockBean private CloudBillingClient mockCloudBillingClient;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceService mockFeaturedWorkspaceService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private MailService mockMailService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
@@ -253,17 +252,17 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace buildDbWorkspace(
       long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
-    DbWorkspace workspace = new DbWorkspace();
+    DbWorkspace dbWorkspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
-    workspace.setLastModifiedTime(nowTimestamp);
-    workspace.setCreationTime(nowTimestamp);
-    workspace.setName(name);
-    workspace.setWorkspaceId(dbId);
-    workspace.setWorkspaceNamespace(namespace);
-    workspace.setWorkspaceActiveStatusEnum(activeStatus);
-    workspace.setFirecloudName(name);
-    workspace.setFirecloudUuid(Long.toString(dbId));
-    return workspace;
+    dbWorkspace.setLastModifiedTime(nowTimestamp);
+    dbWorkspace.setCreationTime(nowTimestamp);
+    dbWorkspace.setName(name);
+    dbWorkspace.setWorkspaceId(dbId);
+    dbWorkspace.setWorkspaceNamespace(namespace);
+    dbWorkspace.setWorkspaceActiveStatusEnum(activeStatus);
+    dbWorkspace.setFirecloudName(name);
+    dbWorkspace.setFirecloudUuid(Long.toString(dbId));
+    return dbWorkspace;
   }
 
   private DbWorkspace addMockedWorkspace(
@@ -669,6 +668,8 @@ public class WorkspaceServiceTest {
             "Controlled Tier Workspace",
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
+    dbWorkspace.setFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+
     DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
     accessTierDao.save(dbCdrVersion.getAccessTier());
     cdrVersionDao.save(dbCdrVersion);
@@ -676,10 +677,11 @@ public class WorkspaceServiceTest {
     addMockedWorkspace(dbWorkspace);
     dbWorkspace.setCreator(currentUser);
 
+    when(mockAccessTierService.getAccessTierShortNamesForUser(currentUser))
+        .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
+
     when(mockAccessTierService.getAccessTierShortNamesForUser(dbWorkspace.getCreator()))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
-    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
 
     // Act
     WorkspaceResponse response =
@@ -704,7 +706,7 @@ public class WorkspaceServiceTest {
     DbFeaturedWorkspace mockDBFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(dbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(mockDBFeaturedWorkspace));
@@ -731,7 +733,7 @@ public class WorkspaceServiceTest {
     DbFeaturedWorkspace mockDBFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(dbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace)).thenReturn(Optional.empty());
 
@@ -761,9 +763,10 @@ public class WorkspaceServiceTest {
     var before = workspaceService.getFeaturedWorkspaces();
     assertThat(before).isEmpty();
 
-    // set all workspaces as featured
-    when(mockFeaturedWorkspaceService.getFeaturedCategory(any()))
-        .thenReturn(Optional.of(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES));
+    dbWorkspaces.forEach(
+        dbWorkspace ->
+            dbWorkspace.setFeaturedCategory(
+                DbFeaturedCategory.TUTORIAL_WORKSPACES)); // set all workspaces as featured
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(dbWorkspaces.size());
@@ -773,9 +776,7 @@ public class WorkspaceServiceTest {
   public void testGetFeaturedWorkspaces_one() {
     // arbitrary choice from dbWorkspaces
     var testWorkspace = dbWorkspaces.get(2);
-
-    when(mockFeaturedWorkspaceService.getFeaturedCategory(testWorkspace))
-        .thenReturn(Optional.of(FeaturedWorkspaceCategory.DEMO_PROJECTS));
+    testWorkspace.setFeaturedCategory(DbFeaturedCategory.DEMO_PROJECTS);
 
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
