@@ -12,7 +12,12 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import {
+  defaultDataProcRuntime,
+  defaultGceRuntime,
+  defaultRuntime,
+  RuntimeApiStub,
+} from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
@@ -111,6 +116,34 @@ describe(useCustomRuntime.name, () => {
     // by using the spread operator, we create a new object
     // rather than a reference
     const newRuntime = { ...currentRuntime };
+
+    // This means that settign the status to error will not affect the new runtime.
+    currentRuntime.status = RuntimeStatus.ERROR;
+
+    await act(async () => {
+      setRequest({ runtime: newRuntime, detachedDisk: null });
+    });
+
+    await waitFor(() => {
+      expect(deleteRuntimeSpy).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(initializerSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('should allow Dataproc -> PD transition', async () => {
+    currentRuntime = defaultDataProcRuntime();
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: currentRuntime,
+      runtimeLoaded: true,
+    });
+
+    const [, setRequest] = testUseCustomRuntime();
+
+    const newRuntime = defaultGceRuntime();
 
     // This means that settign the status to error will not affect the new runtime.
     currentRuntime.status = RuntimeStatus.ERROR;
