@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -9,8 +10,9 @@ import {
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
 import { Select } from 'app/components/inputs';
+import { Spinner } from 'app/components/spinners';
+import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
@@ -18,10 +20,24 @@ import { WorkspaceInfoField } from './workspace-info-field';
 interface Props {
   workspace: Workspace;
   activeStatus: WorkspaceActiveStatus;
+  reload: () => Promise<void>;
 }
-export const BasicInformation = ({ workspace, activeStatus }: Props) => {
+export const BasicInformation = ({
+  workspace,
+  activeStatus,
+  reload,
+}: Props) => {
   const [featuredCategory, setFeaturedCategory] =
     React.useState<FeaturedWorkspaceCategory>(workspace.featuredCategory);
+  const [featuredCategoryLoading, setFeaturedCategoryLoading] =
+    React.useState<boolean>(false);
+
+  console.log('workspace.featuredCategory', workspace.featuredCategory);
+
+  useEffect(() => {
+    setFeaturedCategory(workspace.featuredCategory);
+    setFeaturedCategoryLoading(false);
+  }, [workspace.featuredCategory]);
   return (
     <>
       <h3>Basic Information</h3>
@@ -60,8 +76,10 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => {
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Workspace Published'>
           <Select
-            value={workspace.featuredCategory}
+            key={featuredCategory || 'placeholder'}
+            value={featuredCategory || null}
             placeholder='Select a category...'
+            isDisabled={featuredCategoryLoading}
             options={[
               {
                 value: FeaturedWorkspaceCategory.DEMO_PROJECTS,
@@ -85,18 +103,39 @@ export const BasicInformation = ({ workspace, activeStatus }: Props) => {
           <Button
             type='primary'
             disabled={
+              featuredCategoryLoading ||
               !featuredCategory ||
               featuredCategory === workspace.featuredCategory
             }
+            onClick={() => {
+              setFeaturedCategoryLoading(true);
+              workspaceAdminApi()
+                .publishWorkspaceViaDB(workspace.namespace, {
+                  category: featuredCategory,
+                })
+                .then(async () => {
+                  await reload();
+                });
+            }}
           >
             Publish
           </Button>
           <Button
             type='secondaryOutline'
-            disabled={!workspace.featuredCategory}
+            disabled={featuredCategoryLoading || !workspace.featuredCategory}
+            onClick={() => {
+              setFeaturedCategory(undefined);
+              setFeaturedCategoryLoading(true);
+              workspaceAdminApi()
+                .unpublishWorkspaceViaDB(workspace.namespace)
+                .then(async () => {
+                  await reload();
+                });
+            }}
           >
             Unpublish
           </Button>
+          {featuredCategoryLoading && <Spinner size={36} />}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Audit'>
           {

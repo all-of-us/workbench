@@ -2,10 +2,16 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { WorkspaceActiveStatus } from 'generated/fetch';
+import {
+  FeaturedWorkspaceCategory,
+  WorkspaceActiveStatus,
+  WorkspaceAdminApi,
+} from 'generated/fetch';
 
+import { WorkspaceAdminApiStub } from '../../../../testing/stubs/workspace-admin-api-stub';
 import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -25,7 +31,10 @@ describe('BasicInformation', () => {
   let workspace;
   const component = () => {
     return renderWithRouter(
-      <BasicInformation {...{ workspace, activeStatus }} />
+      <BasicInformation
+        {...{ workspace, activeStatus }}
+        reload={async () => console.log('X')}
+      />
     );
   };
 
@@ -37,6 +46,7 @@ describe('BasicInformation', () => {
         ...defaultServerConfig,
       },
     });
+    registerApiClient(WorkspaceAdminApi, new WorkspaceAdminApiStub());
   });
 
   afterEach(() => {
@@ -62,26 +72,22 @@ describe('BasicInformation', () => {
     );
   });
   it('should show published workspace', async () => {
-    workspace.featuredCategory = 'Community';
+    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component();
-    expect(await screen.findByText('Select a category...')).toBeInTheDocument();
+    expect(await screen.findByText('Community')).toBeInTheDocument();
     expectButtonElementDisabled(
-      screen.getByRole('button', { name: /change category/i })
+      screen.getByRole('button', { name: 'Publish' })
     );
     expectButtonElementEnabled(
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
   it('should change category of published workspace', async () => {
-    workspace.featuredCategory = 'Community';
+    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component();
-    await user.click(await screen.findByText('Select a category...'));
+    await user.click(await screen.findByText('Community'));
     await user.click(await screen.findByText('Demo Projects'));
-    expectButtonElementEnabled(
-      screen.getByRole('button', { name: /change category/i })
-    );
-    expectButtonElementEnabled(
-      screen.getByRole('button', { name: /unpublish/i })
-    );
+    await user.click(screen.getByRole('button', { name: 'Publish' }));
+    expect(await screen.findByText('Demo Projects')).toBeInTheDocument();
   });
 });

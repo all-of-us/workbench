@@ -130,7 +130,12 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 }
               />
             )}
-            <BasicInformation {...{ workspace, activeStatus }} />
+            <BasicInformation
+              {...{ workspace, activeStatus }}
+              reload={async () =>
+                await this.populateFederatedWorkspaceInformation()
+              }
+            />
             <ResearchPurposeSection {...{ researchPurpose }} />
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
               <>
