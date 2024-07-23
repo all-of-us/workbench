@@ -19,7 +19,7 @@ import { LeoRuntimeInitializer } from './leo-runtime-initializer';
 import { useCustomRuntime } from './runtime-hooks';
 import { runtimeStore } from './stores';
 
-describe('useCustomRuntime', () => {
+describe(useCustomRuntime.name, () => {
   let deleteRuntimeSpy;
   let initializerSpy;
   let updateRuntimeSpy;
