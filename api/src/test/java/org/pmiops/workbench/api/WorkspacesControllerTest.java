@@ -638,7 +638,7 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.OWNER);
     Workspace retrievedWorkspace =
         workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getWorkspace();
     assertThat(retrievedWorkspace.getCreationTime()).isEqualTo(NOW_TIME);
@@ -647,7 +647,7 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(retrievedWorkspace.getId()).isEqualTo("name");
+    assertThat(retrievedWorkspace.getTerraName()).isEqualTo("name");
     assertThat(retrievedWorkspace.getName()).isEqualTo("name");
     assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
@@ -721,7 +721,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace2 =
         workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getWorkspace();
     assertThat(workspace2.getResearchPurpose().isApproved()).isNotEqualTo(true);
@@ -734,7 +734,7 @@ public class WorkspacesControllerTest {
     Set<String> uniqueIds = new HashSet<>();
     for (int i = 0; i < 3; i++) {
       workspace = workspacesController.createWorkspace(workspace).getBody();
-      uniqueIds.add(workspace.getId());
+      uniqueIds.add(workspace.getTerraName());
 
       workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     }
@@ -805,13 +805,13 @@ public class WorkspacesControllerTest {
     // mocks Terra returning workspace info
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getId(),
+        workspace.getTerraName(),
         currentUser.getUsername(),
         WorkspaceAccessLevel.READER);
 
     WorkspaceOperation operation =
         workspacesController
-            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getId(), request)
+            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
     assertThat(operation.getId()).isNotNull();
     assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.QUEUED);
@@ -866,7 +866,7 @@ public class WorkspacesControllerTest {
             new DbWorkspace()
                 .setWorkspaceNamespace(workspace.getNamespace())
                 .setName(workspace.getName())
-                .setFirecloudName(workspace.getId()));
+                .setFirecloudName(workspace.getTerraName()));
     DbWorkspaceOperation dbOperation =
         workspaceOperationDao.save(
             new DbWorkspaceOperation()
@@ -880,7 +880,7 @@ public class WorkspacesControllerTest {
     // mocks Terra returning workspace info
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getId(),
+        workspace.getTerraName(),
         workspace.getCreator(),
         WorkspaceAccessLevel.READER);
 
@@ -891,7 +891,7 @@ public class WorkspacesControllerTest {
     assertThat(operation.getWorkspace()).isNotNull();
     assertThat(operation.getWorkspace().getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(operation.getWorkspace().getName()).isEqualTo(workspace.getName());
-    assertThat(operation.getWorkspace().getId()).isEqualTo(workspace.getId());
+    assertThat(operation.getWorkspace().getTerraName()).isEqualTo(workspace.getTerraName());
   }
 
   @Test
@@ -965,13 +965,13 @@ public class WorkspacesControllerTest {
     // mocks Terra returning workspace info
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getId(),
+        workspace.getTerraName(),
         currentUser.getUsername(),
         WorkspaceAccessLevel.READER);
 
     WorkspaceOperation operation =
         workspacesController
-            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getId(), request)
+            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
 
     WorkspaceOperation operation2 =
@@ -997,7 +997,7 @@ public class WorkspacesControllerTest {
     Workspace workspace =
         createWorkspace()
             .name("nospacesallowed")
-            .id("nospacesallowed")
+            .terraName("nospacesallowed")
             .namespace("and finally a unique namespace");
     CloneWorkspaceRequest request =
         new CloneWorkspaceRequest().workspace(workspace).includeUserRoles(true);
@@ -1005,7 +1005,7 @@ public class WorkspacesControllerTest {
     // mocks Terra returning workspace info
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getId(),
+        workspace.getTerraName(),
         currentUser.getUsername(),
         WorkspaceAccessLevel.READER);
 
@@ -1016,7 +1016,7 @@ public class WorkspacesControllerTest {
     assertThat(operation2).isEqualTo(operation);
 
     // mocks Terra returning workspace duplication info
-    stubCloneWorkspace(workspace.getNamespace(), workspace.getId(), LOGGED_IN_USER_EMAIL);
+    stubCloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     DuplicateWorkspaceTaskRequest request2 =
         new DuplicateWorkspaceTaskRequest()
@@ -1045,7 +1045,7 @@ public class WorkspacesControllerTest {
   public void testGetWorkspaceAccess(RawlsWorkspaceAccessLevel accessLevel, String expected) {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubFcGetWorkspace(workspace.getNamespace(), workspace.getId(), accessLevel);
+    stubFcGetWorkspace(workspace.getNamespace(), workspace.getTerraName(), accessLevel);
     assertThat(workspacesController.getWorkspaceAccess(workspace.getNamespace()).getBody())
         .startsWith(expected);
   }
@@ -1097,7 +1097,9 @@ public class WorkspacesControllerTest {
     ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+        workspacesController
+            .updateWorkspace(ws.getNamespace(), ws.getTerraName(), request)
+            .getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
@@ -1107,11 +1109,16 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name2");
     ws.setDisplayName("updated-name2");
     updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+        workspacesController
+            .updateWorkspace(ws.getNamespace(), ws.getTerraName(), request)
+            .getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
     Workspace got =
-        workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
+        workspacesController
+            .getWorkspace(ws.getNamespace(), ws.getTerraName())
+            .getBody()
+            .getWorkspace();
     assertThat(got).isEqualTo(ws);
   }
 
@@ -1130,7 +1137,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(workspace);
     Workspace response =
         workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+            .updateWorkspace(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
@@ -1144,7 +1151,7 @@ public class WorkspacesControllerTest {
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
-            workspace.getId(),
+            workspace.getTerraName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
@@ -1158,7 +1165,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(workspace);
     Workspace response =
         workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+            .updateWorkspace(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
@@ -1187,7 +1194,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(ws);
     ResearchPurpose updatedRp =
         workspacesController
-            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
+            .updateWorkspace(ws.getNamespace(), ws.getTerraName(), request)
             .getBody()
             .getResearchPurpose();
 
@@ -1215,8 +1222,8 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
-              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+              ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
 
@@ -1231,8 +1238,8 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
-              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+              ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
 
@@ -1247,7 +1254,7 @@ public class WorkspacesControllerTest {
           ws.setAccessTierShortName("new tier");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
 
@@ -1265,7 +1272,7 @@ public class WorkspacesControllerTest {
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
           // Still using the initial now-stale etag; this should throw.
           request.setWorkspace(
               new Workspace()
@@ -1273,7 +1280,7 @@ public class WorkspacesControllerTest {
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
-          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         });
   }
 
@@ -1288,7 +1295,7 @@ public class WorkspacesControllerTest {
       try {
         UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
         request.setWorkspace(new Workspace().name("updated-name").etag(etag));
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch (BadRequestException e) {
         // expected
@@ -1342,7 +1349,7 @@ public class WorkspacesControllerTest {
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     final Workspace clonedWorkspace =
         workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
@@ -1353,7 +1360,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
     final Workspace retrievedWorkspace =
         workspacesController
-            .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
+            .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getTerraName())
             .getBody()
             .getWorkspace();
 
@@ -1396,7 +1403,7 @@ public class WorkspacesControllerTest {
 
     try {
       workspacesController
-          .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+          .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req)
           .getBody()
           .getWorkspace();
     } catch (Exception e) {
@@ -1426,7 +1433,7 @@ public class WorkspacesControllerTest {
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     workspacesController.cloneWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+        originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
     verify(fireCloudService, never())
         .updateBillingAccountAsService(eq(modWorkspace.getNamespace()), anyString());
     verify(fireCloudService, never())
@@ -1461,7 +1468,7 @@ public class WorkspacesControllerTest {
           stubCloneWorkspace(
               modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
           workspacesController.cloneWorkspace(
-              originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+              originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
         });
   }
 
@@ -1503,21 +1510,28 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     Cohort c1 = createDefaultCohort("c1");
-    c1 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c1).getBody();
+    c1 =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getTerraName(), c1)
+            .getBody();
     Cohort c2 = createDefaultCohort("c2");
-    c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
+    c2 =
+        cohortsController
+            .createCohort(workspace.getNamespace(), workspace.getTerraName(), c2)
+            .getBody();
 
     stubBigQueryCohortCalls();
     CreateReviewRequest reviewReq = new CreateReviewRequest().size(1).name("review1");
     CohortReview cr1 =
         cohortReviewController
-            .createCohortReview(workspace.getNamespace(), workspace.getId(), c1.getId(), reviewReq)
+            .createCohortReview(
+                workspace.getNamespace(), workspace.getTerraName(), c1.getId(), reviewReq)
             .getBody();
     CohortAnnotationDefinition cad1EnumResponse =
         cohortAnnotationDefinitionController
             .createCohortAnnotationDefinition(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 c1.getId(),
                 new CohortAnnotationDefinition()
                     .cohortId(c1.getId())
@@ -1529,7 +1543,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
@@ -1543,7 +1557,7 @@ public class WorkspacesControllerTest {
         cohortAnnotationDefinitionController
             .createCohortAnnotationDefinition(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 c1.getId(),
                 new CohortAnnotationDefinition()
                     .cohortId(c1.getId())
@@ -1554,7 +1568,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
@@ -1570,13 +1584,14 @@ public class WorkspacesControllerTest {
     reviewReq.setName("review2");
     CohortReview cr2 =
         cohortReviewController
-            .createCohortReview(workspace.getNamespace(), workspace.getId(), c2.getId(), reviewReq)
+            .createCohortReview(
+                workspace.getNamespace(), workspace.getTerraName(), c2.getId(), reviewReq)
             .getBody();
     CohortAnnotationDefinition cad2EnumResponse =
         cohortAnnotationDefinitionController
             .createCohortAnnotationDefinition(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 c2.getId(),
                 new CohortAnnotationDefinition()
                     .cohortId(c2.getId())
@@ -1588,7 +1603,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
@@ -1602,7 +1617,7 @@ public class WorkspacesControllerTest {
         cohortAnnotationDefinitionController
             .createCohortAnnotationDefinition(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 c2.getId(),
                 new CohortAnnotationDefinition()
                     .cohortId(c2.getId())
@@ -1613,7 +1628,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
@@ -1644,7 +1659,7 @@ public class WorkspacesControllerTest {
         conceptSetsController
             .createConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
@@ -1657,7 +1672,7 @@ public class WorkspacesControllerTest {
         conceptSetsController
             .createConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
@@ -1673,7 +1688,7 @@ public class WorkspacesControllerTest {
         conceptSetsController
             .updateConceptSetConcepts(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 conceptSet1.getId(),
                 new UpdateConceptSetRequest()
                     .etag(conceptSet1.getEtag())
@@ -1699,18 +1714,18 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
 
     List<Cohort> cohorts =
         cohortsController
-            .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getCohortsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
             .getBody()
             .getItems();
     List<CohortReview> cohortReviews =
         cohortReviewController
-            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getCohortReviewsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
             .getBody()
             .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
@@ -1725,7 +1740,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .getParticipantCohortStatuses(
                 cloned.getNamespace(),
-                cloned.getId(),
+                cloned.getTerraName(),
                 cohortReviewsByName.get("review1").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
@@ -1736,7 +1751,7 @@ public class WorkspacesControllerTest {
     CohortAnnotationDefinitionListResponse clonedCad1List =
         cohortAnnotationDefinitionController
             .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId())
+                cloned.getNamespace(), cloned.getTerraName(), cohortsByName.get("c1").getId())
             .getBody();
     assertCohortAnnotationDefinitions(
         clonedCad1List,
@@ -1746,7 +1761,10 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca1List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
+                cloned.getNamespace(),
+                cloned.getTerraName(),
+                gotCr1.getCohortReviewId(),
+                participantId)
             .getBody();
 
     assertParticipantCohortAnnotation(
@@ -1760,7 +1778,7 @@ public class WorkspacesControllerTest {
         cohortReviewController
             .getParticipantCohortStatuses(
                 cloned.getNamespace(),
-                cloned.getId(),
+                cloned.getTerraName(),
                 cohortReviewsByName.get("review2").getCohortReviewId(),
                 new PageFilterRequest())
             .getBody()
@@ -1771,7 +1789,7 @@ public class WorkspacesControllerTest {
     CohortAnnotationDefinitionListResponse clonedCad2List =
         cohortAnnotationDefinitionController
             .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId())
+                cloned.getNamespace(), cloned.getTerraName(), cohortsByName.get("c2").getId())
             .getBody();
     assertCohortAnnotationDefinitions(
         clonedCad2List,
@@ -1781,7 +1799,10 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca2List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(), cloned.getId(), gotCr2.getCohortReviewId(), participantId)
+                cloned.getNamespace(),
+                cloned.getTerraName(),
+                gotCr2.getCohortReviewId(),
+                participantId)
             .getBody();
     assertParticipantCohortAnnotation(
         clonedPca2List,
@@ -1795,14 +1816,14 @@ public class WorkspacesControllerTest {
 
     List<ConceptSet> conceptSets =
         conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
             .getBody()
             .getItems();
     assertThat(conceptSets.size()).isEqualTo(2);
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
     assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -1848,7 +1869,7 @@ public class WorkspacesControllerTest {
         conceptSetsController
             .createConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
@@ -1879,12 +1900,12 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
     List<ConceptSet> conceptSets =
         conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
+            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getTerraName())
             .getBody()
             .getItems();
     assertThat(conceptSets.size()).isEqualTo(1);
@@ -1900,7 +1921,7 @@ public class WorkspacesControllerTest {
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
-            workspace.getId(),
+            workspace.getTerraName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
@@ -1980,14 +2001,14 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
 
     DbWorkspace clonedDbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             cloned.getNamespace(),
-            cloned.getId(),
+            cloned.getTerraName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
@@ -2030,7 +2051,9 @@ public class WorkspacesControllerTest {
     clonedConceptSet =
         conceptSetsController
             .getConceptSet(
-                clonedWorkspace.getNamespace(), clonedWorkspace.getId(), clonedConceptSet.getId())
+                clonedWorkspace.getNamespace(),
+                clonedWorkspace.getTerraName(),
+                clonedConceptSet.getId())
             .getBody();
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
@@ -2104,7 +2127,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace2 =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
 
@@ -2134,7 +2157,7 @@ public class WorkspacesControllerTest {
     CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
     Workspace workspace2 =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(workspace.getNamespace(), workspace.getTerraName(), req)
             .getBody()
             .getWorkspace();
 
@@ -2158,7 +2181,7 @@ public class WorkspacesControllerTest {
 
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
-              workspace.getId(),
+              workspace.getTerraName(),
               new CloneWorkspaceRequest().workspace(modWorkspace));
         });
   }
@@ -2180,7 +2203,7 @@ public class WorkspacesControllerTest {
 
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
-              workspace.getId(),
+              workspace.getTerraName(),
               new CloneWorkspaceRequest().workspace(modWorkspace));
         });
   }
@@ -2201,7 +2224,7 @@ public class WorkspacesControllerTest {
               modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
-              workspace.getId(),
+              workspace.getTerraName(),
               new CloneWorkspaceRequest().workspace(modWorkspace));
         });
   }
@@ -2318,7 +2341,7 @@ public class WorkspacesControllerTest {
     Workspace clonedWorkspace =
         workspacesController
             .cloneWorkspace(
-                originalWorkspace.getNamespace(), originalWorkspace.getId(), cloneRequest)
+                originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), cloneRequest)
             .getBody()
             .getWorkspace();
 
@@ -2347,7 +2370,8 @@ public class WorkspacesControllerTest {
           modWorkspace.setNamespace("cloned-ns");
           req.setWorkspace(modWorkspace);
           // Missing research purpose.
-          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+          workspacesController.cloneWorkspace(
+              workspace.getNamespace(), workspace.getTerraName(), req);
         });
   }
 
@@ -2375,7 +2399,8 @@ public class WorkspacesControllerTest {
           ResearchPurpose modPurpose = new ResearchPurpose();
           modPurpose.setAncestry(true);
           modWorkspace.setResearchPurpose(modPurpose);
-          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+          workspacesController.cloneWorkspace(
+              workspace.getNamespace(), workspace.getTerraName(), req);
         });
   }
 
@@ -2652,7 +2677,7 @@ public class WorkspacesControllerTest {
             .getBody();
     Workspace workspace2 =
         workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
@@ -2730,7 +2755,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     WorkspaceUserRolesResponse resp =
         workspacesController
-            .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getId())
+            .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getTerraName())
             .getBody();
 
     assertThat(resp.getItems())
@@ -2741,14 +2766,14 @@ public class WorkspacesControllerTest {
   @Test
   public void testGetFirecloudWorkspaceUserRoles_noAccess() {
     Workspace workspace = createWorkspace();
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getId()))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getTerraName()))
         .thenThrow(new ForbiddenException());
 
     assertThrows(
         ForbiddenException.class,
         () ->
             workspacesController
-                .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getId())
+                .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getTerraName())
                 .getBody());
   }
 
@@ -2759,7 +2784,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
+    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
@@ -2779,7 +2804,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
+    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
@@ -2798,7 +2823,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
+    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
@@ -2817,7 +2842,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
+    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
@@ -2834,11 +2859,12 @@ public class WorkspacesControllerTest {
     Double cost = 150.50;
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(
+        ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
-        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);
   }
 
@@ -2850,8 +2876,8 @@ public class WorkspacesControllerTest {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
           stubGetWorkspace(
-              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-          workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+              ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName());
         });
   }
 
@@ -2859,9 +2885,10 @@ public class WorkspacesControllerTest {
   public void testGetBillingUsageWithNoSpend() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(
+        ws.getNamespace(), ws.getTerraName(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
-        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+        workspacesController.getBillingUsage(ws.getNamespace(), ws.getTerraName()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);
   }
 
@@ -2874,7 +2901,7 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getTerraName());
     workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
@@ -2932,14 +2959,14 @@ public class WorkspacesControllerTest {
     Cohort cohort =
         cohortsController
             .createCohort(
-                workspace.getNamespace(), workspace.getId(), createDefaultCohort("cohort"))
+                workspace.getNamespace(), workspace.getTerraName(), createDefaultCohort("cohort"))
             .getBody();
     stubBigQueryCohortCalls();
     CohortReview cohortReview =
         cohortReviewController
             .createCohortReview(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 cohort.getId(),
                 new CreateReviewRequest().size(1).name("review1"))
             .getBody();
@@ -2951,7 +2978,7 @@ public class WorkspacesControllerTest {
         conceptSetsController
             .createConceptSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
@@ -2961,7 +2988,7 @@ public class WorkspacesControllerTest {
         dataSetController
             .createDataSet(
                 workspace.getNamespace(),
-                workspace.getId(),
+                workspace.getTerraName(),
                 new DataSetRequest()
                     .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
                     .addConceptSetIdsItem(conceptSet.getId())
@@ -2981,7 +3008,8 @@ public class WorkspacesControllerTest {
 
     WorkspaceResourceResponse workspaceResourceResponse =
         workspacesController
-            .getWorkspaceResourcesV2(workspace.getNamespace(), workspace.getId(), typesToFetch)
+            .getWorkspaceResourcesV2(
+                workspace.getNamespace(), workspace.getTerraName(), typesToFetch)
             .getBody();
     assertThat(workspaceResourceResponse).hasSize(4);
 

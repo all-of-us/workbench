@@ -121,7 +121,7 @@ public class TestMockFactory {
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .id(WORKSPACE_FIRECLOUD_NAME)
+        .terraName(WORKSPACE_FIRECLOUD_NAME)
         .etag("\"1\"")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
@@ -254,7 +254,7 @@ public class TestMockFactory {
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     // a.k.a. RawlsWorkspaceDetails.name
-    dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
+    dbWorkspace.setFirecloudName(workspace.getTerraName()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.isDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());

@@ -38,14 +38,14 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
           try {
             impersonatedWorkspaceService.deleteWorkspace(
                 workspace.getUsername(),
-                workspace.getWsNamespace(),
-                workspace.getWsFirecloudId(),
+                workspace.getNamespace(),
+                workspace.getTerraName(),
                 DELETE_BILLING_PROJECTS);
           } catch (NotFoundException e) {
             LOGGER.info(
                 String.format(
                     "Workspace %s/%s was not found",
-                    workspace.getWsNamespace(), workspace.getWsFirecloudId()));
+                    workspace.getNamespace(), workspace.getTerraName()));
           }
         });
 
@@ -66,15 +66,15 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
           try {
             impersonatedWorkspaceService.deleteOrphanedRawlsWorkspace(
                 workspace.getUsername(),
-                workspace.getWsNamespace(),
-                workspace.getWsGoogleProject(),
-                workspace.getWsFirecloudId(),
+                workspace.getNamespace(),
+                workspace.getGoogleProject(),
+                workspace.getTerraName(),
                 DELETE_BILLING_PROJECTS);
           } catch (NotFoundException e) {
             LOGGER.info(
                 String.format(
                     "Workspace %s/%s was not found in Rawls",
-                    workspace.getWsNamespace(), workspace.getWsFirecloudId()));
+                    workspace.getNamespace(), workspace.getTerraName()));
           }
         });
 

@@ -311,8 +311,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceOperationDao.save(operation.setStatus(DbWorkspaceOperationStatus.PROCESSING));
 
       Workspace w = workspaceAction.get();
-      // careful: w.getId() refers to the Terra Name, not the DB ID
-      long workspaceId = workspaceDao.getRequired(w.getNamespace(), w.getId()).getWorkspaceId();
+      long workspaceId =
+          workspaceDao.getRequired(w.getNamespace(), w.getTerraName()).getWorkspaceId();
       log.info(
           String.format(
               "processWorkspaceTask: recording SUCCESS for operation %d - workspace ID %d",

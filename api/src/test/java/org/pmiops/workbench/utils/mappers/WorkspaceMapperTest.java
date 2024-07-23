@@ -153,7 +153,7 @@ public class WorkspaceMapperTest {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
-    assertThat(ws.getId()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
+    assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
