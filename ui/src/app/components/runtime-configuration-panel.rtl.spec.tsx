@@ -35,7 +35,6 @@ import { runtimePresets } from 'app/utils/runtime-presets';
 import { diskTypeLabels } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
-  clearCompoundRuntimeOperations,
   compoundRuntimeOpStore,
   runtimeDiskStore,
   runtimeStore,
@@ -887,14 +886,7 @@ describe(RuntimeConfigurationPanel.name, () => {
   });
 
   afterEach(async () => {
-    // Some test runtime pooling were interfering with other tests using fake timers helped stopping that
-    act(() => clearCompoundRuntimeOperations());
-
-    getAborter().abort('Unmounting for testing');
     jest.clearAllMocks();
-    jest.resetAllMocks();
-    jest.resetModules();
-    jest.useRealTimers();
   });
 
   const mockUseCustomRuntime = () => {
