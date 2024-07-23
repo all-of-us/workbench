@@ -1375,7 +1375,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/isNotebookTransferComplete:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/isNotebookTransferComplete:
     get:
       tags:
       - workspaces
@@ -1388,9 +1388,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+           due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1425,7 +1426,7 @@ paths:
         403:
           description: Forbidden
           content: {}
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}:
     get:
       tags:
       - workspaces
@@ -1438,9 +1439,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+           due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1469,9 +1471,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1495,9 +1498,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1516,7 +1520,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Workspace'
       x-codegen-request-body-name: workspace
-  /v2/workspaces/{workspaceNamespace}/{workspaceId}/resources:
+  /v2/workspaces/{workspaceNamespace}/{terraName}/resources:
     get:
       tags:
       - workspaces
@@ -1529,9 +1533,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1552,7 +1557,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResourceResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/billing-usage:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/billing-usage:
     get:
       tags:
       - workspaces
@@ -1565,9 +1570,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1578,7 +1584,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceBillingUsageResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/creator-free-credits-remaining:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/creator-free-credits-remaining:
     get:
       tags:
       - workspaces
@@ -1592,9 +1598,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1605,7 +1612,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceCreatorFreeCreditsRemainingResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/share:
     patch:
       tags:
       - workspaces
@@ -1620,9 +1627,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1641,7 +1649,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceUserRolesResponse'
       x-codegen-request-body-name: body
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/duplicate:
     post:
       tags:
       - workspaces
@@ -1658,9 +1666,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1678,7 +1687,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CloneWorkspaceResponse'
       x-codegen-request-body-name: body
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicateAsync:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/duplicateAsync:
     post:
       tags:
       - workspaces
@@ -1692,9 +1701,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1712,7 +1722,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceOperation'
       x-codegen-request-body-name: body
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/userRoles:
     get:
       tags:
       - workspaces
@@ -1725,9 +1735,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1776,7 +1787,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/publish:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/publish:
     post:
       tags:
       - workspaceAdmin
@@ -1790,9 +1801,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1803,7 +1815,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/unpublish:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/unpublish:
     post:
       tags:
       - workspaceAdmin
@@ -1817,9 +1829,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -1924,7 +1937,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceAuditLogQueryResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebook-list:
     get:
       tags:
       - notebooks
@@ -1939,9 +1952,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: workspaceId
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2708,7 +2722,7 @@ paths:
         204:
           description: No content.
           content: {}
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/readonly:
     post:
       tags:
       - notebooks
@@ -2721,9 +2735,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2739,7 +2754,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReadOnlyNotebookResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/rename:
     post:
       tags:
       - notebooks
@@ -2752,9 +2767,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2772,7 +2788,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileDetail'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/duplicate:
     post:
       tags:
       - notebooks
@@ -2785,9 +2801,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2803,7 +2820,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileDetail'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/copy:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/copy:
     post:
       tags:
       - notebooks
@@ -2816,9 +2833,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2841,7 +2859,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FileDetail'
       x-codegen-request-body-name: copyNotebookRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/kernel:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/kernel:
     get:
       tags:
       - notebooks
@@ -2854,9 +2872,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2872,7 +2891,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KernelTypeResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/delete:
     delete:
       tags:
       - notebooks
@@ -2885,9 +2904,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2903,7 +2923,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/lockingMetadata:
     get:
       tags:
       - notebooks
@@ -2921,9 +2941,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2939,7 +2960,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotebookLockingMetadataResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohort-reviews:
     get:
       tags:
       - cohortReview
@@ -2952,9 +2973,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -2965,7 +2987,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CohortReviewListResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{id}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohort-reviews/{id}:
     get:
       tags:
       - cohortReview
@@ -2978,9 +3000,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3010,9 +3033,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3043,9 +3067,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3071,7 +3096,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CohortReview'
       x-codegen-request-body-name: cohortReview
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohorts:
     get:
       tags:
       - cohorts
@@ -3084,9 +3109,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3109,9 +3135,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3133,7 +3160,7 @@ paths:
           description: Bad Request. Cohort name already exists
           content: {}
       x-codegen-request-body-name: cohort
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/duplicate:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohorts/duplicate:
     post:
       tags:
       - cohorts
@@ -3146,9 +3173,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3170,7 +3198,7 @@ paths:
           description: Bad Request. Cohort name already exists
           content: {}
       x-codegen-request-body-name: DuplicateCohortRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohorts/{cohortId}:
     get:
       tags:
       - cohorts
@@ -3183,9 +3211,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3215,9 +3244,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3248,9 +3278,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3289,7 +3320,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResourceResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/user-recent-resources/update:
     post:
       tags:
       - userMetrics
@@ -3302,9 +3333,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3342,7 +3374,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecentWorkspaceResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-workspaces/update:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/user-recent-workspaces/update:
     post:
       tags:
       - workspaces
@@ -3355,9 +3387,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3368,7 +3401,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecentWorkspaceResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/concept-sets:
     get:
       tags:
       - conceptSets
@@ -3381,9 +3414,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3406,9 +3440,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3427,7 +3462,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/concept-sets/{conceptSetId}:
     get:
       tags:
       - conceptSets
@@ -3440,9 +3475,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3472,9 +3508,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3505,9 +3542,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3533,7 +3571,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: conceptSet
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concept-count:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/concept-sets/{conceptSetId}/concept-count:
     get:
       tags:
       - conceptSets
@@ -3546,9 +3584,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3566,7 +3605,7 @@ paths:
             application/json:
               schema:
                 type: integer
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/concept-sets/{conceptSetId}/concepts:
     post:
       tags:
       - conceptSets
@@ -3579,9 +3618,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3607,7 +3647,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/concept-sets/{conceptSetId}/copy:
     post:
       tags:
       - conceptSets
@@ -3620,9 +3660,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3645,7 +3686,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSet'
       x-codegen-request-body-name: copyConceptSetRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/data-sets:
     post:
       tags:
       - dataSet
@@ -3658,9 +3699,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3690,7 +3732,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: dataSetRequest
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}:
+  /v1/{workspaceNamespace}/{terraName}/data-sets/{dataSetId}:
     get:
       tags:
       - dataSet
@@ -3702,9 +3744,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3734,9 +3777,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3765,9 +3809,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3805,7 +3850,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: dataSet
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByResourceId:
+  /v1/{workspaceNamespace}/{terraName}/data-sets/dataSetByResourceId:
     post:
       tags:
       - dataSet
@@ -3817,9 +3862,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3873,7 +3919,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataDictionaryEntry'
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
+  /v1/{workspaceNamespace}/{terraName}/data-set/markDirty:
     post:
       tags:
       - dataSet
@@ -3885,9 +3931,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3906,7 +3953,7 @@ paths:
                 type: boolean
                 default: false
       x-codegen-request-body-name: markDataSetRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/genomicExtractionJobs:
     get:
       tags:
       - dataSet
@@ -3920,9 +3967,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3933,7 +3981,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenomicExtractionJobListResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{dataSetId}/extractGenomicData:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/datasets/{dataSetId}/extractGenomicData:
     post:
       tags:
       - dataSet
@@ -3948,9 +3996,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -3968,7 +4017,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenomicExtractionJob'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/genomicExtractionJobs/{jobId}/abort:
     post:
       tags:
       - dataSet
@@ -3982,9 +4031,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: workspaceId
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4012,7 +4062,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
+  /v1/{workspaceNamespace}/{terraName}/data-set/exportToNotebook:
     post:
       tags:
       - dataSet
@@ -4025,9 +4075,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4051,7 +4102,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: dataSetExportRequest
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook/preview:
+  /v1/{workspaceNamespace}/{terraName}/data-set/exportToNotebook/preview:
     post:
       tags:
       - dataSet
@@ -4064,9 +4115,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4090,7 +4142,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: dataSetExportRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/data-set/preview:
     post:
       tags:
       - dataSet
@@ -4103,9 +4155,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4123,7 +4176,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DataSetPreviewResponse'
       x-codegen-request-body-name: dataSetPreviewRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/concept-sets/domainValues/{domain}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/data-set/concept-sets/domainValues/{domain}:
     get:
       tags:
       - dataSet
@@ -4136,9 +4189,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4614,7 +4668,7 @@ paths:
           description: Successfully removed the Institution-specific user instructions
             to be sent by email after registration.
           content: {}
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortId}:
     post:
       tags:
       - cohortReview
@@ -4628,9 +4682,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4656,7 +4711,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CohortReview'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/cohort-count:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortId}/cohort-count:
     get:
       tags:
       - cohortReview
@@ -4669,9 +4724,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4690,7 +4746,7 @@ paths:
               schema:
                 type: integer
                 format: int64
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants:
     post:
       tags:
       - cohortReview
@@ -4704,9 +4760,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4732,7 +4789,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CohortReviewWithCountResponse'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}:
     get:
       tags:
       - cohortReview
@@ -4745,9 +4802,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4784,9 +4842,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4819,7 +4878,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ParticipantCohortStatus'
       x-codegen-request-body-name: cohortStatusRequest
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/charts/{domain}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}/charts/{domain}:
     get:
       tags:
       - cohortReview
@@ -4833,9 +4892,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4866,7 +4926,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ParticipantChartDataListResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}/annotations:
     get:
       tags:
       - cohortReview
@@ -4879,9 +4939,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4918,9 +4979,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -4953,7 +5015,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ParticipantCohortAnnotation'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/data:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}/data:
     post:
       tags:
       - cohortReview
@@ -4968,9 +5030,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5003,7 +5066,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ParticipantDataListResponse'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/count:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}/count:
     post:
       tags:
       - cohortReview
@@ -5017,9 +5080,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5052,7 +5116,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ParticipantDataCountResponse'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
     put:
         tags:
         - cohortReview
@@ -5065,9 +5129,10 @@ paths:
           required: true
           schema:
             type: string
-        - name: workspaceId
+        - name: terraName
           in: path
-          description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+          description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
+           due to confusion with DB IDs, which it is not)
           required: true
           schema:
             type: string
@@ -5119,9 +5184,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5153,7 +5219,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/vocabularies:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/review/vocabularies:
     get:
       tags:
       - cohortReview
@@ -5166,9 +5232,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5179,7 +5246,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VocabularyListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{cohortReviewId}/demo:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/chartinfo/{cohortReviewId}/demo:
     get:
       tags:
       - cohortReview
@@ -5192,9 +5259,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5212,7 +5280,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DemoChartInfoListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{cohortReviewId}/{domain}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/top/chartinfo/{cohortReviewId}/{domain}:
     get:
       tags:
       - cohortReview
@@ -5225,9 +5293,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5251,7 +5320,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CohortChartDataListResponse'
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohorts/{cohortId}/annotationdefinitions:
     get:
       tags:
       - cohortAnnotationDefinition
@@ -5264,9 +5333,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5296,9 +5366,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5324,7 +5395,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CohortAnnotationDefinition'
       x-codegen-request-body-name: request
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+  /v1/workspaces/{workspaceNamespace}/{terraName}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
     get:
       tags:
       - cohortAnnotationDefinition
@@ -5337,9 +5408,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5376,9 +5448,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5423,9 +5496,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5450,7 +5524,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/menu/{parentId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/menu/{parentId}:
     get:
       tags:
       - cohortBuilder
@@ -5463,9 +5537,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5483,7 +5558,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaMenuListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domainCard:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/domainCard:
     get:
       tags:
       - cohortBuilder
@@ -5497,9 +5572,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5510,7 +5586,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DomainCardResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/surveymodule:
     get:
       tags:
       - cohortBuilder
@@ -5524,9 +5600,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5537,7 +5614,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SurveysResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/universalDomainCounts:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/universalDomainCounts:
     get:
       tags:
       - cohortBuilder
@@ -5550,9 +5627,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5569,7 +5647,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardCountResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/conceptCounts:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/conceptCounts:
     get:
       tags:
       - cohortBuilder
@@ -5583,9 +5661,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5603,7 +5682,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardCountResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/search/term:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/search/term:
     post:
       tags:
       - cohortBuilder
@@ -5616,9 +5695,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5637,7 +5717,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CriteriaListWithCountResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{conceptId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/{domain}/{conceptId}:
     get:
       tags:
       - cohortBuilder
@@ -5650,9 +5730,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5676,7 +5757,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/{domain}:
     get:
       tags:
       - cohortBuilder
@@ -5690,9 +5771,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5738,9 +5820,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5765,7 +5848,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria:
     post:
       tags:
       - cohortBuilder
@@ -5779,9 +5862,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5800,7 +5884,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/autocomplete:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/autocomplete:
     post:
       tags:
       - cohortBuilder
@@ -5813,9 +5897,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5834,7 +5919,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/drug:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/drug:
     get:
       tags:
       - cohortBuilder
@@ -5847,9 +5932,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5866,7 +5952,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/drug/ingredient/{conceptId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/drug/ingredient/{conceptId}:
     get:
       tags:
       - cohortBuilder
@@ -5879,9 +5965,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5899,7 +5986,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/attribute/{conceptId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/attribute/{conceptId}:
     get:
       tags:
       - cohortBuilder
@@ -5912,9 +5999,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5932,7 +6020,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaAttributeListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/survey/attribute/{questionConceptId}:
     get:
       tags:
       - cohortBuilder
@@ -5945,9 +6033,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -5965,7 +6054,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SurveyVersionListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{questionConceptId}/{answerConceptId}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/survey/attribute/{questionConceptId}/{answerConceptId}:
     get:
       tags:
       - cohortBuilder
@@ -5978,9 +6067,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6005,7 +6095,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SurveyVersionListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/versions:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/criteria/survey/versions:
     get:
       tags:
       - cohortBuilder
@@ -6018,9 +6108,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6031,7 +6122,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriteriaListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/age/counts:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/age/counts:
     get:
       tags:
       - cohortBuilder
@@ -6044,9 +6135,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6057,7 +6149,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgeTypeCountListResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/search:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/search:
     post:
       tags:
       - cohortBuilder
@@ -6071,9 +6163,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6093,7 +6186,7 @@ paths:
                 type: integer
                 format: int64
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderSexRaceOrEth}/{age}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/chartinfo/{genderSexRaceOrEth}/{age}:
     post:
       tags:
       - cohortBuilder
@@ -6106,9 +6199,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6139,7 +6233,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DemoChartInfoListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/ethnicity:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/chartinfo/ethnicity:
     post:
       tags:
       - cohortBuilder
@@ -6152,9 +6246,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6173,7 +6268,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EthnicityInfoListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/top/chartinfo/{domain}:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/top/chartinfo/{domain}:
     post:
       tags:
       - cohortBuilder
@@ -6186,9 +6281,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6213,7 +6309,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CohortChartDataListResponse'
       x-codegen-request-body-name: request
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/demographics:
     get:
       tags:
       - cohortBuilder
@@ -6226,9 +6322,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6240,7 +6337,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ParticipantDemographics'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/dataFilters:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/dataFilters:
     get:
       tags:
       - cohortBuilder
@@ -6253,9 +6350,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6266,7 +6364,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataFiltersResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variants:
+  /v1/cohortbuilder/{workspaceNamespace}/{terraName}/variants:
     post:
       tags:
         - cohortBuilder
@@ -6279,9 +6377,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6299,7 +6398,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VariantListResponse'
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filters":
+  "/v1/cohortbuilder/{workspaceNamespace}/{terraName}/variant/filters":
     post:
       tags:
       - cohortBuilder
@@ -6312,9 +6411,10 @@ paths:
         required: true
         schema:
           type: string
-      - name: workspaceId
+      - name: terraName
         in: path
-        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+         due to confusion with DB IDs, which it is not)
         required: true
         schema:
           type: string
@@ -6332,7 +6432,7 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/VariantFilterResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filter/info":
+  "/v1/cohortbuilder/{workspaceNamespace}/{terraName}/variant/filter/info":
     post:
       tags:
         - cohortBuilder
@@ -6345,9 +6445,10 @@ paths:
           required: true
           schema:
             type: string
-        - name: workspaceId
+        - name: terraName
           in: path
-          description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+          description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed
+           due to confusion with DB IDs, which it is not)
           required: true
           schema:
             type: string
@@ -13048,10 +13149,11 @@ components:
       required: true
       schema:
         type: string
-    workspaceId:
-      name: workspaceId
+    terraName:
+      name: terraName
       in: path
-      description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+      description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
+        due to confusion with DB IDs, which it is not)
       required: true
       schema:
         type: string
