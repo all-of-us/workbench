@@ -48,9 +48,18 @@ describe('WorkspaceCard', () => {
   });
 
   it('show Community workspace icon if workspace is published by owner', async () => {
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    let communityWorkspaceImg = screen.queryByRole('img', {
+      name: /community workspace/i,
+    });
+    expect(communityWorkspaceImg).not.toBeInTheDocument();
+
+    // Mark the workspace as a community workspace
     workspaceStubs[0].featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component(WorkspaceAccessLevel.OWNER);
-    expect(screen.queryByRole('img').getAttribute('src')).toBe('CW_icon.png');
+
+    communityWorkspaceImg = screen.queryByRole('img', {
+      name: /community workspace/i,
+    });
+    expect(communityWorkspaceImg).toBeInTheDocument();
   });
 });

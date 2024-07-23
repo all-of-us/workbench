@@ -302,6 +302,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           <TooltipTrigger content='Workspace is published as Community Workspace'>
                             {/* Keeping the style consistent with Controlled Tier Badge*/}
                             <img
+                              aria-label={'Community Workspace'}
                               src={CW_icon}
                               style={{ width: '25px', height: '27px' }}
                             />
