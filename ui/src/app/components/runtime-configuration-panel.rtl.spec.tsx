@@ -964,11 +964,6 @@ describe(RuntimeConfigurationPanel.name, () => {
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
     ).toBeUndefined();
-
-    // await waitFor(() => {
-    //   expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
-    //   expect(runtimeApiStub.runtime.dataprocConfig).toBeUndefined();
-    // });
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
