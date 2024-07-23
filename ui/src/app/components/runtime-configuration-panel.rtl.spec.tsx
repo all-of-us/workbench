@@ -983,12 +983,9 @@ describe(RuntimeConfigurationPanel.name, () => {
     component();
 
     await clickExpectedButton('Create');
-    await waitFor(
-      async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -1038,12 +1035,9 @@ describe(RuntimeConfigurationPanel.name, () => {
 
       await clickExpectedButton('Create');
 
-      await waitFor(
-        async () => {
-          expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-        },
-        { timeout: 5000 }
-      );
+      await waitFor(async () => {
+        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+      });
 
       const {
         masterMachineType,
@@ -1119,27 +1113,32 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB + 10);
 
     await clickExpectedButton('Create');
-    await waitFor(
-      async () => {
-        expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(async () => {
+      expect(mockSetRuntimeRequest).toHaveBeenCalledTimes(1);
+    });
 
-    // expect(runtimeApiStub.runtime.configurationType).toEqual(
-    //   RuntimeConfigurationType.USER_OVERRIDE
-    // );
-    // expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
-    //   machineType: 'n1-highmem-8',
-    //   gpuConfig: null,
-    //   persistentDisk: {
-    //     diskType: 'pd-standard',
-    //     labels: {},
-    //     name: 'stub-disk',
-    //     size: MIN_DISK_SIZE_GB + 10,
-    //   },
-    // });
-    // expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.USER_OVERRIDE);
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceWithPdConfig
+    ).toEqual({
+      machineType: 'n1-highmem-8',
+      gpuConfig: null,
+      persistentDisk: {
+        diskType: 'pd-standard',
+        labels: {},
+        name: null,
+        size: MIN_DISK_SIZE_GB + 10,
+      },
+    });
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toBeFalsy();
   });
 
   it('should allow creation with Dataproc config', async () => {
