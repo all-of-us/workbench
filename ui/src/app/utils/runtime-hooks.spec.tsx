@@ -1,6 +1,11 @@
 import { RuntimeApi, RuntimeStatus } from 'generated/fetch';
 
 import { waitFor } from '@testing-library/react';
+// Hooks cannot be tested outside of a functional component, so we need to use renderHook from @testing-library/react-hooks
+// This is explained further here: https://github.com/testing-library/react-hooks-testing-library?tab=readme-ov-file#the-problem
+// TODO: Once we update to React 18 and a more recent RTL version,
+//  these imports can be replaced with the standard RTL and
+// @testing-library/react-hooks can be uninstalled
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
   registerApiClient,
