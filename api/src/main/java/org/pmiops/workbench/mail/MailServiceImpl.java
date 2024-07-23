@@ -395,7 +395,7 @@ public class MailServiceImpl implements MailService {
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).toList(),
+        ownersEmailList(owners),
         Collections.singletonList(supportEmail),
         "Your AoU Researcher Workbench workspace has been published",
         String.format(
@@ -413,18 +413,15 @@ public class MailServiceImpl implements MailService {
   public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
 
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).toList(),
+        ownersEmailList(owners),
         Collections.singletonList(supportEmail),
         "Your AoU Researcher Workbench workspace has been Unpublished",
         String.format(
             "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
             UNPUBLISH_WORKSPACE_RESOURCE,
             publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
@@ -471,7 +468,7 @@ public class MailServiceImpl implements MailService {
             : Collections.emptyList();
 
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).toList(),
+        ownersEmailList(owners),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
@@ -899,5 +896,9 @@ public class MailServiceImpl implements MailService {
 
   private String ownersForLogging(Collection<DbUser> owners) {
     return owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+  }
+
+  private List<String> ownersEmailList(Collection<DbUser> owners) {
+    return owners.stream().map(DbUser::getContactEmail).toList();
   }
 }
