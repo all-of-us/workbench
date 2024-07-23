@@ -1526,6 +1526,62 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getMainRam(container)).toBe('7.5');
   });
 
+  it(
+    'should set runtime preset values in customize panel instead of getRuntime values ' +
+      'if configurationType is HailGenomicsAnalysis',
+    async () => {
+      const customMasterMachineType = 'n1-standard-16';
+      const customMasterDiskSize = 999;
+      const customWorkerDiskSize = 444;
+      const customNumberOfWorkers = 5;
+      setCurrentRuntime({
+        ...runtimeApiStub.runtime,
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+        gceConfig: null,
+        gceWithPdConfig: null,
+        dataprocConfig: {
+          ...defaultDataprocConfig(),
+          masterMachineType: customMasterMachineType,
+          masterDiskSize: customMasterDiskSize,
+          workerDiskSize: customWorkerDiskSize,
+          numberOfWorkers: customNumberOfWorkers,
+        },
+      });
+
+      // show that the preset values do not match the existing runtime
+
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+
+      expect(customMasterMachineType).not.toEqual(masterMachineType);
+      expect(customMasterDiskSize).not.toEqual(masterDiskSize);
+      expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
+      expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
+
+      mockUseCustomRuntime();
+
+      const { container } = component();
+
+      await clickExpectedButton('Customize');
+
+      expect(getMainCpu(container)).toEqual(
+        findMachineByName(masterMachineType).cpu.toString()
+      );
+      expect(getMainRam(container)).toEqual(
+        findMachineByName(masterMachineType).memory.toString()
+      );
+
+      expect(getMasterDiskValue()).toEqual(masterDiskSize.toString());
+      expect(getWorkerDiskValue()).toEqual(workerDiskSize.toString());
+      expect(getNumOfWorkersValue()).toEqual(numberOfWorkers.toString());
+    }
+  );
+
   it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
     mockUseCustomRuntime();
     component();
