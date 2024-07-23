@@ -10,7 +10,10 @@ import {
 
 import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  registerApiClient,
+  workspaceAdminApi,
+} from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -32,7 +35,7 @@ describe('BasicInformation', () => {
     return renderWithRouter(
       <BasicInformation
         {...{ workspace, activeStatus }}
-        reload={async () => console.log('X')}
+        reload={async () => Promise.resolve()}
       />
     );
   };
@@ -83,6 +86,9 @@ describe('BasicInformation', () => {
   });
   it('should change category of published workspace', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    jest
+      .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     component();
     await user.click(await screen.findByText('Community'));
     await user.click(await screen.findByText('Demo Projects'));
