@@ -8,7 +8,6 @@ import {
   WorkspaceAdminApi,
 } from 'generated/fetch';
 
-import { WorkspaceAdminApiStub } from '../../../../testing/stubs/workspace-admin-api-stub';
 import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -20,6 +19,7 @@ import {
   expectButtonElementEnabled,
   renderWithRouter,
 } from 'testing/react-test-helpers';
+import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { BasicInformation } from './basic-information';
