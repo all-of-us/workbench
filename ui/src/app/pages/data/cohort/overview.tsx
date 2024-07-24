@@ -128,13 +128,21 @@ const styles = reactStyles({
     padding: '0.375rem',
     textAlign: 'left',
     verticalAlign: 'middle',
-    width: '35%',
+    display: 'flex',
+    flex: '0 0 35%',
+  },
+  menuButtonText: {
+    flex: '0 0 90%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   refreshButton: {
     background: 'none',
     border: `1px solid ${colors.accent}`,
     color: colors.accent,
     cursor: 'pointer',
+    flex: '0 0 20%',
   },
 });
 
@@ -793,8 +801,15 @@ export const ListOverview = fp.flow(
               <div style={styles.cardContainer}>
                 <div style={styles.card}>
                   <div style={styles.cardHeader}>Results by</div>
-                  <div style={refreshing ? styles.disabled : {}}>
+                  <div
+                    style={
+                      refreshing
+                        ? { ...styles.disabled, display: 'flex' }
+                        : { display: 'flex' }
+                    }
+                  >
                     <Menu
+                      style={{ fontSize: '14px', width: '14rem' }}
                       appendTo={document.body}
                       model={this.chartTypeItems}
                       popup={true}
@@ -804,14 +819,17 @@ export const ListOverview = fp.flow(
                       style={styles.menuButton}
                       onClick={(event) => this.genderOrSexMenu.toggle(event)}
                     >
-                      {genderSexRaceOrEthTypeToText(chartType)}{' '}
+                      <div style={styles.menuButtonText}>
+                        {genderSexRaceOrEthTypeToText(chartType)}{' '}
+                      </div>
                       <ClrIcon
-                        style={{ float: 'right' }}
+                        style={{ flex: '0 0 10%' }}
                         shape='caret down'
                         size={12}
                       />
                     </button>
                     <Menu
+                      style={{ fontSize: '14px', width: '14rem' }}
                       appendTo={document.body}
                       model={this.ageItems}
                       popup={true}
@@ -821,9 +839,11 @@ export const ListOverview = fp.flow(
                       style={styles.menuButton}
                       onClick={(event) => this.ageMenu.toggle(event)}
                     >
-                      {ageTypeToText(ageType)}{' '}
+                      <div style={styles.menuButtonText}>
+                        {ageTypeToText(ageType)}{' '}
+                      </div>
                       <ClrIcon
-                        style={{ float: 'right' }}
+                        style={{ flex: '0 0 10%' }}
                         shape='caret down'
                         size={12}
                       />
