@@ -92,6 +92,9 @@ describe('BasicInformation', () => {
     await user.click(await screen.findByText('Demo Projects'));
     await user.click(screen.getByRole('button', { name: 'Publish' }));
     expect(await screen.findByText('Demo Projects')).toBeInTheDocument();
+    expectButtonElementDisabled(
+      screen.getByRole('button', { name: 'Publish' })
+    );
   });
 
   it('should unpublish a workspace', async () => {
