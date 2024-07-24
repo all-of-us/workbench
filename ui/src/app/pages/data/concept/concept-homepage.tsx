@@ -302,7 +302,7 @@ export const ConceptHomepage = fp.flow(
 
     async loadDomainsAndSurveys() {
       const {
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
       } = this.props;
       this.setState({
         domainInfoError: false,
@@ -310,7 +310,7 @@ export const ConceptHomepage = fp.flow(
         conceptCountInfoError: false,
       });
       const getDomainCards = cohortBuilderApi()
-        .findDomainCards(namespace, id)
+        .findDomainCards(namespace, terraName)
         .then((conceptDomainCards) =>
           this.setState({ conceptDomainCards: conceptDomainCards.items })
         )
@@ -319,7 +319,7 @@ export const ConceptHomepage = fp.flow(
           console.error(e);
         });
       const getSurveyInfo = cohortBuilderApi()
-        .findSurveyModules(namespace, id)
+        .findSurveyModules(namespace, terraName)
         .then((surveysInfo) =>
           this.setState({ conceptSurveysList: surveysInfo.items })
         )
@@ -332,7 +332,7 @@ export const ConceptHomepage = fp.flow(
     }
 
     async updateCardCounts() {
-      const { id, namespace } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       const { conceptDomainCards, conceptSurveysList, currentInputString } =
         this.state;
       this.setState({
@@ -343,7 +343,7 @@ export const ConceptHomepage = fp.flow(
       });
 
       cohortBuilderApi()
-        .findConceptCounts(namespace, id, currentInputString)
+        .findConceptCounts(namespace, terraName, currentInputString)
         .then((cardList) => {
           conceptDomainCards.forEach((conceptDomainCard) => {
             const cardCount = cardList.items.find(
@@ -407,13 +407,13 @@ export const ConceptHomepage = fp.flow(
     }
 
     browseDomain(domain: Domain, surveyName?: string) {
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       currentCohortSearchContextStore.next({
         domain: domain,
         searchTerms: this.state.currentSearchString,
         surveyName,
       });
-      const url = `${dataTabPath(namespace, id)}/concepts/${domain}`;
+      const url = `${dataTabPath(namespace, terraName)}/concepts/${domain}`;
 
       this.props.navigateByUrl(
         url,

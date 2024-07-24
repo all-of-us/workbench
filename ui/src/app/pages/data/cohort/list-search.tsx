@@ -371,7 +371,7 @@ export const ListSearch = fp.flow(
         cdrVersionTiersResponse,
         searchTerms,
         searchContext: { domain, source },
-        workspace: { cdrVersionId, id, namespace },
+        workspace: { cdrVersionId, namespace, terraName },
       } = this.props;
       this.setState({
         cdrVersion: findCdrVersion(cdrVersionId, cdrVersionTiersResponse),
@@ -382,16 +382,21 @@ export const ListSearch = fp.flow(
         if (this.criteriaLookupNeeded) {
           this.setState({ loading: true });
           await cohortBuilderApi()
-            .findCriteriaForCohortEdit(namespace, id, domain.toString(), {
-              sourceConceptIds: currentCohortCriteriaStore
-                .getValue()
-                .filter((s) => !s.standard)
-                .map((s) => s.conceptId),
-              standardConceptIds: currentCohortCriteriaStore
-                .getValue()
-                .filter((s) => s.standard)
-                .map((s) => s.conceptId),
-            })
+            .findCriteriaForCohortEdit(
+              namespace,
+              terraName,
+              domain.toString(),
+              {
+                sourceConceptIds: currentCohortCriteriaStore
+                  .getValue()
+                  .filter((s) => !s.standard)
+                  .map((s) => s.conceptId),
+                standardConceptIds: currentCohortCriteriaStore
+                  .getValue()
+                  .filter((s) => s.standard)
+                  .map((s) => s.conceptId),
+              }
+            )
             .then((response) =>
               updateCriteriaSelectionStore(response.items, domain)
             );
@@ -465,7 +470,7 @@ export const ListSearch = fp.flow(
         });
         const {
           searchContext: { domain, source, selectedSurvey },
-          workspace: { id, namespace },
+          workspace: { namespace, terraName },
         } = this.props;
         const { removeDrugBrand, searchSource } = this.state;
         const request: CriteriaSearchRequest = {
@@ -477,7 +482,7 @@ export const ListSearch = fp.flow(
         };
         const resp = await cohortBuilderApi().findCriteriaByDomain(
           namespace,
-          id,
+          terraName,
           request
         );
         let data: Criteria[];
@@ -598,18 +603,18 @@ export const ListSearch = fp.flow(
           };
           this.setState({ childNodes });
           const {
-            workspace: { id, namespace },
+            workspace: { namespace, terraName },
           } = this.props;
           const childResponse =
             domainId === Domain.DRUG.toString()
               ? await cohortBuilderApi().findDrugIngredientByConceptId(
                   namespace,
-                  id,
+                  terraName,
                   conceptId
                 )
               : await cohortBuilderApi().findCriteriaBy(
                   namespace,
-                  id,
+                  terraName,
                   domainId,
                   type,
                   standard,

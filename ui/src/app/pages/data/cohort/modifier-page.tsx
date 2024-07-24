@@ -514,7 +514,7 @@ export const ModifierPage = fp.flow(
 
     const calculate = async () => {
       const { domain, role } = cohortContext;
-      const { id, namespace } = workspace;
+      const { namespace, terraName } = workspace;
       AnalyticsTracker.CohortBuilder.ModifiersAction(
         `Calculate - ${domainToTitle(domain)}`
       );
@@ -539,7 +539,7 @@ export const ModifierPage = fp.flow(
           dataFilters: [],
         };
         await cohortBuilderApi()
-          .countParticipants(namespace, id, request)
+          .countParticipants(namespace, terraName, request)
           .then((response) => {
             setCalculating(false);
             setCount(response);

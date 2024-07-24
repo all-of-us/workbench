@@ -29,7 +29,7 @@ export function convertToResources(
 
 export const stubResource: WorkspaceResource = {
   workspaceNamespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-  workspaceFirecloudName: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+  workspaceFirecloudName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
   workspaceId: 1,
   permission: 'OWNER',
   cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,

@@ -158,7 +158,7 @@ const AnnotationItem = fp.flow(
           setAnnotation,
           cohortReview: { cohortReviewId },
           definition: { annotationType, cohortAnnotationDefinitionId },
-          workspace: { namespace, id },
+          workspace: { namespace, terraName },
           participantId,
         } = this.props;
         const { timeout } = this.state;
@@ -169,7 +169,7 @@ const AnnotationItem = fp.flow(
           setAnnotation(
             await cohortReviewApi().deleteParticipantCohortAnnotation(
               namespace,
-              id,
+              terraName,
               cohortReviewId,
               participantId,
               aid
@@ -181,7 +181,7 @@ const AnnotationItem = fp.flow(
           await cohortReviewApi()
             .updateParticipantCohortAnnotation(
               namespace,
-              id,
+              terraName,
               cohortReviewId,
               participantId,
               aid,
@@ -199,7 +199,7 @@ const AnnotationItem = fp.flow(
           await cohortReviewApi()
             .createParticipantCohortAnnotation(
               namespace,
-              id,
+              terraName,
               cohortReviewId,
               participantId,
               {
@@ -389,15 +389,15 @@ export const SidebarContent = fp.flow(
         cohortReview: { cohortId, cohortReviewId },
         participant,
       } = this.props;
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       this.getAnnotations(
         namespace,
-        id,
+        terraName,
         cohortReviewId,
         participant.participantId
       );
       cohortAnnotationDefinitionApi()
-        .getCohortAnnotationDefinitions(namespace, id, cohortId)
+        .getCohortAnnotationDefinitions(namespace, terraName, cohortId)
         .then(({ items }) => {
           this.setState({ annotationDefinitions: items });
         });
@@ -408,7 +408,7 @@ export const SidebarContent = fp.flow(
         cohortReview: { cohortReviewId },
         participant,
       } = this.props;
-      const { namespace, id } = this.props.workspace;
+      const { namespace, terraName } = this.props.workspace;
       if (
         participant.participantId !== prevProps.participant.participantId &&
         !isNaN(participant.participantId)
@@ -416,7 +416,7 @@ export const SidebarContent = fp.flow(
         // get values for annotations when switching participants
         this.getAnnotations(
           namespace,
-          id,
+          terraName,
           cohortReviewId,
           participant.participantId
         );
@@ -437,14 +437,14 @@ export const SidebarContent = fp.flow(
       try {
         const {
           cohortReview: { cohortReviewId },
-          workspace: { namespace, id },
+          workspace: { namespace, terraName },
           participant: { participantId },
         } = this.props;
         this.setState({ savingStatus: v });
         const participant =
           await cohortReviewApi().updateParticipantCohortStatus(
             namespace,
-            id,
+            terraName,
             cohortReviewId,
             participantId,
             { status: v }

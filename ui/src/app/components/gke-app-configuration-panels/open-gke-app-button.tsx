@@ -18,7 +18,7 @@ export interface OpenGkeAppButtonProps {
 export function OpenGkeAppButton({
   userApp,
   billingStatus,
-  workspace: { namespace, id },
+  workspace: { namespace, terraName },
   onClose,
   style,
 }: OpenGkeAppButtonProps) {
@@ -39,7 +39,7 @@ export function OpenGkeAppButton({
           id={`${appTypeString}-cloud-environment-open-button`}
           aria-label={`${appTypeString} cloud environment open button`}
           onClick={() => {
-            openAppInIframe(namespace, id, userApp, navigate);
+            openAppInIframe(namespace, terraName, userApp, navigate);
             onClose();
           }}
           disabled={!openEnabled}

@@ -214,7 +214,7 @@ export const isInteractiveUserApp = (appType: AppType) =>
 
 export const openAppInIframe = (
   workspaceNamespace: string,
-  workspaceId: string,
+  terraName: string,
   userApp: UserAppEnvironment,
   navigate: (commands: any, extras?: any) => void
 ) => {
@@ -236,11 +236,7 @@ export const openAppInIframe = (
     )
   );
   navigate([
-    appDisplayPath(
-      workspaceNamespace,
-      workspaceId,
-      toUIAppType[userApp.appType]
-    ),
+    appDisplayPath(workspaceNamespace, terraName, toUIAppType[userApp.appType]),
   ]);
 };
 
@@ -250,14 +246,14 @@ export const isDiskSizeValid = (appRequest) =>
 
 export const openAppOrConfigPanel = (
   workspaceNamespace: string,
-  workspaceId: string,
+  terraName: string,
   userApps: ListAppsResponse,
   requestedApp: UIAppType,
   navigate: (commands: any, extras?: any) => void
 ) => {
   const userApp = findApp(userApps, requestedApp);
   if (userApp?.status === AppStatus.RUNNING) {
-    openAppInIframe(workspaceNamespace, workspaceId, userApp, navigate);
+    openAppInIframe(workspaceNamespace, terraName, userApp, navigate);
   } else {
     openConfigPanelForUIApp(requestedApp);
   }

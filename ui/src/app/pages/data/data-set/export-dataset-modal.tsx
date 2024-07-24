@@ -138,11 +138,14 @@ export const ExportDatasetModal = ({
     try {
       await dataSetApi().exportToNotebook(
         workspace.namespace,
-        workspace.id,
+        workspace.terraName,
         createExportDatasetRequest(language)
       );
       const notebookUrl =
-        `${analysisTabPath(workspace.namespace, workspace.id)}/preview/` +
+        `${analysisTabPath(
+          workspace.namespace,
+          workspace.terraName
+        )}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );
@@ -232,7 +235,7 @@ export const ExportDatasetModal = ({
     dataSetApi()
       .previewExportToNotebook(
         workspace.namespace,
-        workspace.id,
+        workspace.terraName,
         createExportDatasetRequest(language)
       )
       .then((resp) => {
@@ -275,7 +278,7 @@ export const ExportDatasetModal = ({
       notebooksApi()
         .getNotebookKernel(
           workspace.namespace,
-          workspace.id,
+          workspace.terraName,
           appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
         .then((resp) => {

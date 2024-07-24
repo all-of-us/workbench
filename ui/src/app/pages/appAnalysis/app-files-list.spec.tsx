@@ -113,7 +113,7 @@ describe(AppFilesList.name, () => {
 
     expect(notebookLink).toHaveAttribute(
       'href',
-      `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/analysis/preview/${firstNotebook.name}`
+      `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.terraName}/analysis/preview/${firstNotebook.name}`
     );
   });
 

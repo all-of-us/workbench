@@ -181,15 +181,15 @@ describe('resources.tsx', () => {
   });
 
   it('should return resource URLs', () => {
-    const { DEFAULT_WORKSPACE_NS, DEFAULT_WORKSPACE_ID } =
+    const { DEFAULT_WORKSPACE_NS, DEFAULT_WORKSPACE_TERRA_NAME } =
       WorkspaceStubVariables;
     const dataTabPrefix = dataTabPath(
       DEFAULT_WORKSPACE_NS,
-      DEFAULT_WORKSPACE_ID
+      DEFAULT_WORKSPACE_TERRA_NAME
     );
     const analysisTabPrefix = analysisTabPath(
       DEFAULT_WORKSPACE_NS,
-      DEFAULT_WORKSPACE_ID
+      DEFAULT_WORKSPACE_TERRA_NAME
     );
     const EXPECTED_COHORT_URL = `${dataTabPrefix}/cohorts/build?cohortId=${COHORT_ID}`;
     const EXPECTED_COHORT_REVIEW_URL = `${dataTabPrefix}/cohorts/${COHORT_REVIEW_COHORT_ID}/reviews/${COHORT_REVIEW_ID}`;

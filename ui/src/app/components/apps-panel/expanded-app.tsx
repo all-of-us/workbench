@@ -176,9 +176,9 @@ const RStudioButtonRow = (props: {
 }) => {
   const { userApp, billingAccountDisabled } = props;
   const [navigate] = useNavigation();
-  const { namespace, id } = currentWorkspaceStore.getValue();
+  const { namespace, terraName } = currentWorkspaceStore.getValue();
   const onClickLaunch = async () => {
-    openAppInIframe(namespace, id, userApp, navigate);
+    openAppInIframe(namespace, terraName, userApp, navigate);
     sidebarActiveIconStore.next(null);
   };
   const launchButtonDisabled =
@@ -217,10 +217,10 @@ const SASButtonRow = (props: {
 }) => {
   const { userApp } = props;
   const [navigate] = useNavigation();
-  const { namespace, id } = currentWorkspaceStore.getValue();
+  const { namespace, terraName } = currentWorkspaceStore.getValue();
 
   const onClickLaunch = async () => {
-    openAppInIframe(namespace, id, userApp, navigate);
+    openAppInIframe(namespace, terraName, userApp, navigate);
     sidebarActiveIconStore.next(null);
   };
 

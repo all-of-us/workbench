@@ -107,11 +107,11 @@ export const ConceptAddModal = withCurrentWorkspace()(
         const {
           activeDomainTab: { domain },
           selectedConcepts,
-          workspace: { namespace, id },
+          workspace: { namespace, terraName },
         } = this.props;
         const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(
           namespace,
-          id
+          terraName
         );
         const conceptSetsInDomain = conceptSets.items.filter(
           (conceptSet) => conceptSet.domain === domain
@@ -135,7 +135,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
       const {
         activeDomainTab: { domain },
         onSave,
-        workspace: { namespace, id },
+        workspace: { namespace, terraName },
       } = this.props;
       const {
         selectedSet,
@@ -173,7 +173,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
         try {
           const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
             namespace,
-            id,
+            terraName,
             selectedSet.id,
             updateConceptSetReq
           );
@@ -196,7 +196,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
         try {
           const createdConceptSet = await conceptSetsApi().createConceptSet(
             namespace,
-            id,
+            terraName,
             request
           );
           this.setState({ saving: false });
@@ -230,11 +230,11 @@ export const ConceptAddModal = withCurrentWorkspace()(
     async selectConceptSet(conceptSet: ConceptSet) {
       this.setState({ loadingSelectedSet: true });
       const {
-        workspace: { namespace, id },
+        workspace: { namespace, terraName },
       } = this.props;
       const selectedSetCount = await conceptSetsApi().countConceptsInConceptSet(
         namespace,
-        id,
+        terraName,
         conceptSet.id
       );
       this.setState({

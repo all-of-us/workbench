@@ -108,8 +108,8 @@ export const getAppInfoFromFileName = (name: string) => {
 };
 
 export const listNotebooks = (workspace: Workspace): Promise<FileDetail[]> => {
-  const { namespace, id } = workspace;
-  return notebooksApi().getNoteBookList(namespace, id);
+  const { namespace, terraName } = workspace;
+  return notebooksApi().getNoteBookList(namespace, terraName);
 };
 
 export const getExistingJupyterNotebookNames = async (

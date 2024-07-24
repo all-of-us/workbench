@@ -220,20 +220,20 @@ export const CriteriaTree = fp.flow(
           source,
         } = this.props;
         this.setState({ loading: true });
-        const { id: workspaceId, namespace } = currentWorkspaceStore.getValue();
+        const { namespace, terraName } = currentWorkspaceStore.getValue();
         const criteriaType =
           domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
         const promises = [
           this.sendOnlyCriteriaType(domain)
             ? cohortBuilderApi().findCriteriaBy(
                 namespace,
-                workspaceId,
+                terraName,
                 domain.toString(),
                 criteriaType
               )
             : cohortBuilderApi().findCriteriaBy(
                 namespace,
-                workspaceId,
+                terraName,
                 domain.toString(),
                 criteriaType,
                 standard,
@@ -242,7 +242,7 @@ export const CriteriaTree = fp.flow(
           this.criteriaLookupNeeded
             ? cohortBuilderApi().findCriteriaForCohortEdit(
                 namespace,
-                workspaceId,
+                terraName,
                 domain.toString(),
                 {
                   sourceConceptIds: currentCohortCriteriaStore
@@ -257,7 +257,7 @@ export const CriteriaTree = fp.flow(
               )
             : Promise.resolve(null),
           domain === Domain.SURVEY
-            ? cohortBuilderApi().findVersionedSurveys(namespace, workspaceId)
+            ? cohortBuilderApi().findVersionedSurveys(namespace, terraName)
             : Promise.resolve(null),
         ];
         const [criteriaResponse, criteriaLookup, versionedSurveyLookup] =
@@ -353,12 +353,12 @@ export const CriteriaTree = fp.flow(
       const {
         node: { domainId, standard, type },
       } = this.props;
-      const { id, namespace } = currentWorkspaceStore.getValue();
+      const { namespace, terraName } = currentWorkspaceStore.getValue();
       if (selectedSurveyChild && selectedSurveyChild.length > 0) {
         cohortBuilderApi()
           .findCriteriaBy(
             namespace,
-            id,
+            terraName,
             domainId,
             type,
             standard,

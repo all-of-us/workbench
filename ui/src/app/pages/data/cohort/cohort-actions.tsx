@@ -128,9 +128,9 @@ export const CohortActions = fp.flow(
         this.setState({ cohort });
       } else {
         this.setState({ cohortLoading: true });
-        const { namespace, id } = this.props.workspace;
+        const { namespace, terraName } = this.props.workspace;
         cohortsApi()
-          .getCohort(namespace, id, +this.props.match.params.cid)
+          .getCohort(namespace, terraName, +this.props.match.params.cid)
           .then((c) => {
             if (c) {
               this.setState({ cohort: c, cohortLoading: false });
@@ -138,7 +138,7 @@ export const CohortActions = fp.flow(
               this.props.navigate([
                 'workspaces',
                 namespace,
-                id,
+                terraName,
                 'data',
                 'cohorts',
               ]);
@@ -149,8 +149,8 @@ export const CohortActions = fp.flow(
 
     getNavigationPath(action: string): string {
       const { cohort } = this.state;
-      const { namespace, id } = this.props.workspace;
-      let url = workspacePath(namespace, id) + '/';
+      const { namespace, terraName } = this.props.workspace;
+      let url = workspacePath(namespace, terraName) + '/';
       let queryParams: any = null;
 
       switch (action) {

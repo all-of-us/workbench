@@ -41,13 +41,13 @@ export const TanagraDev = fp.flow(
   ({
     cdrVersionTiersResponse,
     hideSpinner,
-    workspace: { cdrVersionId, id, namespace },
+    workspace: { cdrVersionId, namespace, terraName },
   }) => {
     const [navigate] = useNavigation();
 
     useExitActionListener(() => {
       // Navigate to Data tab when exiting Tanagra iframe
-      navigate(['workspaces', namespace, id, 'data']);
+      navigate(['workspaces', namespace, terraName, 'data']);
     });
 
     const { bigqueryDataset } = findCdrVersion(

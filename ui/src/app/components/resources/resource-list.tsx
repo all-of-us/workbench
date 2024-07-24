@@ -67,13 +67,13 @@ interface NavProps {
 
 const WorkspaceNavigation = (props: NavProps) => {
   const {
-    workspace: { name, namespace, id },
+    workspace: { name, namespace, terraName },
     resource,
     style,
   } = props;
   const url = isNotebook(resource)
-    ? analysisTabPath(namespace, id)
-    : dataTabPath(namespace, id);
+    ? analysisTabPath(namespace, terraName)
+    : dataTabPath(namespace, terraName);
   return (
     <Clickable>
       <Link to={url} style={style} data-test-id='workspace-navigation'>

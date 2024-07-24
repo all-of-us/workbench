@@ -281,13 +281,13 @@ export class SearchBar extends React.Component<Props, State> {
       `${domainToTitle(domainId)} - '${searchTerms}'`
     );
     this.setState({ inputErrors: [], loading: true });
-    const { id, namespace } = currentWorkspaceStore.getValue();
+    const { namespace, terraName } = currentWorkspaceStore.getValue();
     let apiCall;
     switch (domainId) {
       case Domain.DRUG.toString():
         apiCall = cohortBuilderApi().findDrugBrandOrIngredientByValue(
           namespace,
-          id,
+          terraName,
           searchTerms
         );
         break;
@@ -300,7 +300,7 @@ export class SearchBar extends React.Component<Props, State> {
         };
         apiCall = cohortBuilderApi().findCriteriaAutoComplete(
           namespace,
-          id,
+          terraName,
           surveyRequest
         );
         break;
@@ -313,7 +313,7 @@ export class SearchBar extends React.Component<Props, State> {
         };
         apiCall = cohortBuilderApi().findCriteriaAutoComplete(
           namespace,
-          id,
+          terraName,
           request
         );
     }
@@ -352,9 +352,9 @@ export class SearchBar extends React.Component<Props, State> {
         optionSelected: true,
       });
       if (option.type === CriteriaType.BRAND.toString()) {
-        const { id, namespace } = currentWorkspaceStore.getValue();
+        const { namespace, terraName } = currentWorkspaceStore.getValue();
         cohortBuilderApi()
-          .findDrugIngredientByConceptId(namespace, id, option.conceptId)
+          .findDrugIngredientByConceptId(namespace, terraName, option.conceptId)
           .then((resp) => {
             if (resp.items.length) {
               const ingredients = resp.items.map((it) => it.name);
