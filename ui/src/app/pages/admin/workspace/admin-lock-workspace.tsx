@@ -6,6 +6,7 @@ import { Workspace } from 'generated/fetch';
 import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 
@@ -60,23 +61,29 @@ export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
           <FlexColumn
             style={{ justifyContent: 'flex-end', marginRight: '4.5rem' }}
           >
-            <Button
-              data-test-id='lockUnlockButton'
-              type='secondary'
-              style={{ border: '2px solid' }}
-              onClick={() => {
-                workspace.adminLocked ? unlock() : setShowLockModal(true);
-              }}
+            <TooltipTrigger
+              disabled={!workspace.featuredCategory}
+              content={'Cannot lock published workspace'}
             >
-              <FlexRow>
-                {showSpinner && (
-                  <div style={{ paddingRight: '0.45rem' }}>
-                    <Spinner style={{ width: 20, height: 18 }} />
-                  </div>
-                )}
-                {buttonText}
-              </FlexRow>
-            </Button>
+              <Button
+                data-test-id='lockUnlockButton'
+                type='secondary'
+                style={{ border: '2px solid' }}
+                disabled={!!workspace.featuredCategory}
+                onClick={() => {
+                  workspace.adminLocked ? unlock() : setShowLockModal(true);
+                }}
+              >
+                <FlexRow>
+                  {showSpinner && (
+                    <div style={{ paddingRight: '0.45rem' }}>
+                      <Spinner style={{ width: 20, height: 18 }} />
+                    </div>
+                  )}
+                  {buttonText}
+                </FlexRow>
+              </Button>
+            </TooltipTrigger>
           </FlexColumn>
         </FlexRow>
       </h2>

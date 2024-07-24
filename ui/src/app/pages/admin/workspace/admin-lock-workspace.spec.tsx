@@ -2,11 +2,16 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { FeaturedWorkspaceCategory, Workspace } from 'generated/fetch';
+
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 
-import { renderModal } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  renderModal,
+} from 'testing/react-test-helpers';
 import { buildWorkspaceStub } from 'testing/stubs/workspaces';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
@@ -27,15 +32,17 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const renderAdminLockWorkspaceModal = (ws: Workspace) =>
+  renderModal(<AdminLockWorkspace reload={reload} workspace={ws} />);
+
 describe('AdminLockWorkspace', () => {
   it('opens a modal for locking an unlocked workspace', async () => {
     const user = userEvent.setup();
-    const { container } = renderModal(
-      <AdminLockWorkspace
-        {...{ reload }}
-        workspace={{ ...workspace, adminLocked: false }}
-      />
-    );
+    const { container } = renderAdminLockWorkspaceModal({
+      ...workspace,
+      adminLocked: false,
+    });
+
     expect(container).toBeInTheDocument();
 
     const lockButton = screen.getByText('LOCK WORKSPACE');
@@ -58,12 +65,10 @@ describe('AdminLockWorkspace', () => {
 
   it('unlocks a locked workspace', async () => {
     const user = userEvent.setup();
-    const { container } = render(
-      <AdminLockWorkspace
-        {...{ reload }}
-        workspace={{ ...workspace, adminLocked: true }}
-      />
-    );
+    const { container } = renderAdminLockWorkspaceModal({
+      ...workspace,
+      adminLocked: true,
+    });
     expect(container).toBeInTheDocument();
 
     const unlockButton = screen.getByText('UNLOCK WORKSPACE');
@@ -81,5 +86,24 @@ describe('AdminLockWorkspace', () => {
         expect(reload).toHaveBeenCalledTimes(1);
       });
     });
+  });
+
+  it('should disable lock button if its a published workspace', async () => {
+    const user = userEvent.setup();
+    const { container } = renderAdminLockWorkspaceModal({
+      ...workspace,
+      featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
+    });
+    expect(container).toBeInTheDocument();
+    expect(screen.queryByText('UNLOCK WORKSPACE')).not.toBeInTheDocument();
+    const lockButton = screen.queryByRole('button', {
+      name: /lock workspace/i,
+    });
+    expect(lockButton).toBeInTheDocument();
+    expectButtonElementDisabled(lockButton);
+    await user.hover(lockButton);
+    expect(
+      screen.getByText('Cannot lock published workspace')
+    ).toBeInTheDocument();
   });
 });
