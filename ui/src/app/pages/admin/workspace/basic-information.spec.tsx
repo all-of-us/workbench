@@ -44,9 +44,7 @@ describe('BasicInformation', () => {
     workspace = workspaceStubs[0];
     user = userEvent.setup();
     serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-      },
+      config: defaultServerConfig,
     });
     registerApiClient(WorkspaceAdminApi, new WorkspaceAdminApiStub());
   });
@@ -104,5 +102,8 @@ describe('BasicInformation', () => {
     component();
     await user.click(await screen.findByRole('button', { name: /unpublish/i }));
     expect(screen.getByText('Select a category...')).toBeInTheDocument();
+    expectButtonElementDisabled(
+      screen.getByRole('button', { name: /unpublish/i })
+    );
   });
 });
