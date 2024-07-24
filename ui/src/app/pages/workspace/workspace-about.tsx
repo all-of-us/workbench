@@ -12,6 +12,7 @@ import {
   WorkspaceUserRolesResponse,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import {
   Button,
   StyledExternalLink,
@@ -116,14 +117,18 @@ const styles = reactStyles({
 
 const pageId = 'workspace';
 
-const publishButtonToolTipText = (isWorkspaceOwner: boolean) => {
-  let toolTip;
-  if (isWorkspaceOwner) {
-    toolTip = 'Contact Support to unpublish';
-  } else {
-    toolTip = 'Only workspace owners can publish community workspaces.';
-  }
-  return toolTip;
+const publishButtonToolTipText = (workspace) => {
+  const featuredCategory = workspace?.featuredCategory;
+  const isWorkspaceOwner =
+    workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+
+  const workspaceLocked = workspace?.adminLocked;
+
+  return cond(
+    [!isWorkspaceOwner, () => 'Only workspace owners can publish workspaces'],
+    [workspaceLocked, () => 'Locked workspace cannot be published'],
+    [!!featuredCategory, () => 'Contact Support to unpublish']
+  );
 };
 
 const ShareTooltipText = () => {
@@ -335,16 +340,19 @@ export const WorkspaceAbout = fp.flow(
       const notPublished = !featuredCategory;
       const isWorkspaceOwner =
         workspace && WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
+
+      const workspaceLocked = workspace?.adminLocked;
       // isWorkspaceOwner notPublished disabled
       // true            true         true
       // true            false        false
       // false           true         false
       // false           false        false
-      const publishButtonToolTipDisabled = isWorkspaceOwner && notPublished;
+      const publishButtonToolTipDisabled =
+        isWorkspaceOwner && notPublished && !workspaceLocked;
       return (
         <div style={styles.mainPage}>
           <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
-            {workspace?.adminLocked && (
+            {workspaceLocked && (
               <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
                 <FlexRow>
                   <div style={{ marginRight: '1.5rem', color: colors.warning }}>
@@ -422,7 +430,7 @@ export const WorkspaceAbout = fp.flow(
               </TooltipTrigger>
               <TooltipTrigger
                 content={<div>Workspace compliance action is required</div>}
-                disabled={!workspace?.adminLocked}
+                disabled={!workspaceLocked}
               >
                 <Button
                   style={{
@@ -432,9 +440,7 @@ export const WorkspaceAbout = fp.flow(
                     padding: '5px',
                     maxWidth: '13px',
                   }}
-                  disabled={
-                    workspaceUserRoles.length === 0 || workspace?.adminLocked
-                  }
+                  disabled={workspaceUserRoles.length === 0 || workspaceLocked}
                   data-test-id='workspaceShareButton'
                   onClick={() => this.setState({ sharing: true })}
                 >
@@ -573,7 +579,7 @@ export const WorkspaceAbout = fp.flow(
                 </h3>
 
                 <TooltipTrigger
-                  content={publishButtonToolTipText(isWorkspaceOwner)}
+                  content={publishButtonToolTipText(workspace)}
                   disabled={publishButtonToolTipDisabled}
                 >
                   <Button
