@@ -8,10 +8,10 @@ import {
   WorkspaceActiveStatus,
 } from 'generated/fetch';
 
-import { FeaturedWorkspaceCategoryOptions } from '../admin-featured-category-options';
 import { Button } from 'app/components/buttons';
 import { Select } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
+import { FeaturedWorkspaceCategoryOptions } from 'app/pages/admin/admin-featured-category-options';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
