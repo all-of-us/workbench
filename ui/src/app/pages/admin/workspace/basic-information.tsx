@@ -31,8 +31,6 @@ export const BasicInformation = ({
   const [featuredCategoryLoading, setFeaturedCategoryLoading] =
     React.useState<boolean>(false);
 
-  console.log('workspace.featuredCategory', workspace.featuredCategory);
-
   useEffect(() => {
     setFeaturedCategory(workspace.featuredCategory);
     setFeaturedCategoryLoading(false);
