@@ -1870,8 +1870,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/admin/workspaces/{workspaceNamespace}/unpublish:
-    post:
+    delete:
       tags:
         - workspaceAdmin
       description: Unpublish a workspace removing it from Featured Workspaces tab. Requires
