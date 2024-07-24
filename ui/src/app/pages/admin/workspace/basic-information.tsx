@@ -10,6 +10,7 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { Select } from 'app/components/inputs';
+import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { FeaturedWorkspaceCategoryOptions } from 'app/pages/admin/admin-featured-category-options';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
@@ -36,6 +37,23 @@ export const BasicInformation = ({
     setFeaturedCategory(workspace.featuredCategory);
     setFeaturedCategoryLoading(false);
   }, [workspace.featuredCategory]);
+
+  const publishingDisabled =
+    featuredCategoryLoading ||
+    !featuredCategory ||
+    featuredCategory === workspace.featuredCategory;
+
+  const getWorkspacePublishTooltip = () => {
+    if (featuredCategoryLoading) {
+      return 'Your workspace is loading, please wait until loading is completed before publishing.';
+    } else if (!featuredCategory) {
+      return 'Please select a category to publish the workspace.';
+    } else if (featuredCategory === workspace.featuredCategory) {
+      return 'This workspace is already published in the selected category.';
+    } else {
+      return '';
+    }
+  };
   return (
     <>
       <h3>Basic Information</h3>
@@ -81,26 +99,27 @@ export const BasicInformation = ({
             options={FeaturedWorkspaceCategoryOptions}
             onChange={(v) => setFeaturedCategory(v)}
           />
-          <Button
-            type='primary'
-            disabled={
-              featuredCategoryLoading ||
-              !featuredCategory ||
-              featuredCategory === workspace.featuredCategory
-            }
-            onClick={() => {
-              setFeaturedCategoryLoading(true);
-              workspaceAdminApi()
-                .publishWorkspaceViaDB(workspace.namespace, {
-                  category: featuredCategory,
-                })
-                .then(async () => {
-                  await reload();
-                });
-            }}
+          <TooltipTrigger
+            disabled={!publishingDisabled}
+            content={getWorkspacePublishTooltip()}
           >
-            Publish
-          </Button>
+            <Button
+              type='primary'
+              disabled={publishingDisabled}
+              onClick={() => {
+                setFeaturedCategoryLoading(true);
+                workspaceAdminApi()
+                  .publishWorkspaceViaDB(workspace.namespace, {
+                    category: featuredCategory,
+                  })
+                  .then(async () => {
+                    await reload();
+                  });
+              }}
+            >
+              Publish
+            </Button>
+          </TooltipTrigger>
           <Button
             type='secondaryOutline'
             disabled={featuredCategoryLoading || !workspace.featuredCategory}
