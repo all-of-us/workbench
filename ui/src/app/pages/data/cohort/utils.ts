@@ -224,6 +224,8 @@ export function genderSexRaceOrEthTypeToText(
       return 'Race';
     case GenderSexRaceOrEthType.ETHNICITY:
       return 'Ethnicity';
+    case GenderSexRaceOrEthType.SELF_REPORTED_CATEGORY:
+      return 'Self Reported Category';
   }
 }
 

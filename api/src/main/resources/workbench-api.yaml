@@ -11418,6 +11418,7 @@ components:
       - SEX_AT_BIRTH
       - RACE
       - ETHNICITY
+      - SELF_REPORTED_CATEGORY
     DemoChartInfoListResponse:
       required:
       - items
@@ -11436,7 +11437,7 @@ components:
       properties:
         name:
           type: string
-          description: gender, sex at birth, race or ethnicity of subject
+          description: gender, sex at birth, race, ethnicity or self reported category of subject
         ageRange:
           type: string
           description: age range of subject
