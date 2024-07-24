@@ -566,13 +566,10 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
-            .setDescription("test");
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest()
-            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
-            .description("test");
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
@@ -615,21 +612,17 @@ public class WorkspaceAdminServiceTest {
     // Arrange
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest()
-            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
-            .description("test");
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     DbFeaturedWorkspace existingDbFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.DEMO_PROJECTS)
-            .setDescription("test");
+            .setCategory(DbFeaturedCategory.DEMO_PROJECTS);
 
     DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
-            .setDescription("test");
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(existingDbFeaturedWorkspace));
@@ -667,9 +660,7 @@ public class WorkspaceAdminServiceTest {
     // Arrange
     DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
     PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest()
-            .category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES)
-            .description("test");
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
@@ -706,8 +697,7 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedworkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES)
-            .setDescription("test");
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
 
