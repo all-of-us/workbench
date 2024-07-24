@@ -1630,7 +1630,8 @@ public class CohortBuilderControllerTest {
               "Expected BadRequestException is not thrown.");
       assertThat(exception)
           .hasMessageThat()
-          .contains("Please provide a valid gender, sex at birth, race, ethnicity or self reported category parameter");
+          .contains(
+              "Please provide a valid gender, sex at birth, race, ethnicity or self reported category parameter");
     }
   }
 
