@@ -8,6 +8,7 @@ import {
   WorkspaceActiveStatus,
 } from 'generated/fetch';
 
+import { FeaturedWorkspaceCategoryOptions } from '../admin-featured-category-options';
 import { Button } from 'app/components/buttons';
 import { Select } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
@@ -77,24 +78,7 @@ export const BasicInformation = ({
             value={featuredCategory}
             placeholder='Select a category...'
             isDisabled={featuredCategoryLoading}
-            options={[
-              {
-                value: FeaturedWorkspaceCategory.DEMO_PROJECTS,
-                label: 'Demo Projects',
-              },
-              {
-                value: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
-                label: 'Phenotype Library',
-              },
-              {
-                value: FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
-                label: 'Tutorial Workspaces',
-              },
-              {
-                value: FeaturedWorkspaceCategory.COMMUNITY,
-                label: 'Community',
-              },
-            ]}
+            options={FeaturedWorkspaceCategoryOptions}
             onChange={(v) => setFeaturedCategory(v)}
           />
           <Button
