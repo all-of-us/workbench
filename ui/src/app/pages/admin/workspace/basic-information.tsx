@@ -74,7 +74,7 @@ export const BasicInformation = ({
         <WorkspaceInfoField labelText='Workspace Published'>
           <Select
             key={featuredCategory || 'placeholder'}
-            value={featuredCategory || null}
+            value={featuredCategory}
             placeholder='Select a category...'
             isDisabled={featuredCategoryLoading}
             options={[
@@ -121,7 +121,7 @@ export const BasicInformation = ({
             type='secondaryOutline'
             disabled={featuredCategoryLoading || !workspace.featuredCategory}
             onClick={() => {
-              setFeaturedCategory(undefined);
+              setFeaturedCategory(null);
               setFeaturedCategoryLoading(true);
               workspaceAdminApi()
                 .unpublishWorkspaceViaDB(workspace.namespace)
