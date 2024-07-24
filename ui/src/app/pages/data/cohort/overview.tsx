@@ -530,6 +530,15 @@ export const ListOverview = fp.flow(
           command: () =>
             this.setState({ chartType: GenderSexRaceOrEthType.SEX_AT_BIRTH }),
         },
+        {
+          label: genderSexRaceOrEthTypeToText(
+            GenderSexRaceOrEthType.SELF_REPORTED_CATEGORY
+          ),
+          command: () =>
+            this.setState({
+              chartType: GenderSexRaceOrEthType.SELF_REPORTED_CATEGORY,
+            }),
+        },
       ];
     }
 
