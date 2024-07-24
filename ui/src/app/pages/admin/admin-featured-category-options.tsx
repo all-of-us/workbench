@@ -1,8 +1,4 @@
-import {
-  FeaturedWorkspaceCategory,
-  InstitutionMembershipRequirement,
-  OrganizationType,
-} from 'generated/fetch';
+import { FeaturedWorkspaceCategory } from 'generated/fetch';
 
 export const FeaturedWorkspaceCategoryOptions = [
   {
