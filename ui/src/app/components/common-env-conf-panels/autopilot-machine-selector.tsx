@@ -1,34 +1,42 @@
 import * as React from 'react';
 import { CSSProperties, Fragment } from 'react';
-import { Dropdown } from 'primereact/dropdown';
+import { InputNumber, InputNumberChangeEvent } from 'primereact/inputnumber';
 
 import { Autopilot } from 'generated/fetch';
 
 import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
-import { DEFAULT_AUTOPILOT_MACHINE } from 'app/utils/machines';
 
 interface Props {
   selectedMachine: Autopilot;
   initialMachine?: Autopilot;
-  onChange: (machine: Autopilot) => void;
+  onChange: (autopilot: Autopilot) => void;
   disabled: boolean;
   idPrefix: string;
   cpuLabelStyles?: CSSProperties;
   ramLabelStyles?: CSSProperties;
 }
+// Resource requirements https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-resource-requests#compute-class-min-max
 export const AutopilotMachineSelector = ({
-  onChange,
   selectedMachine,
-  initialMachine,
-  disabled,
   idPrefix,
+  onChange,
+  disabled,
   cpuLabelStyles = {},
   ramLabelStyles = {},
 }: Props) => {
-  const initialMachineType = initialMachine || DEFAULT_AUTOPILOT_MACHINE;
-  const { cpuInMillicores, memoryInGb } = selectedMachine || initialMachineType;
-
+  const cpuOnchange = (x: InputNumberChangeEvent) => {
+    onChange({
+      ...selectedMachine,
+      cpuInMillicores: x.value * 1000, // number is presented as number of CPUs, but backend we're using milicores as unit.
+    });
+  };
+  const memoryOnChange = (x: InputNumberChangeEvent) => {
+    onChange({
+      ...selectedMachine,
+      memoryInGb: x.value,
+    });
+  };
   return (
     <Fragment>
       <FlexRow style={styles.labelAndInput}>
@@ -38,15 +46,20 @@ export const AutopilotMachineSelector = ({
         >
           CPUs
         </label>
-        <Dropdown
+        <InputNumber
           id={`${idPrefix}-cpu`}
           name={`${idPrefix}-cpu`}
-          options={[1, 2, 3, 4, 5, 6, 7, 8]}
-          onChange={({ value }) => onChange(value)}
+          onChange={cpuOnchange}
+          allowEmpty={false}
           disabled={disabled}
-          placeholder={'select'}
-          value={cpuInMillicores}
-          appendTo='self'
+          inputStyle={styles.largeInputNumber}
+          maxFractionDigits={2}
+          value={0.5}
+          max={30}
+          min={0.5}
+          tooltip={
+            '0.5 to 30. CPU to Memory ratio needs to be between 1:1 and 1:6.5, or it may be auto adjusted ???.'
+          }
         />
       </FlexRow>
       <FlexRow style={styles.labelAndInput}>
@@ -56,14 +69,19 @@ export const AutopilotMachineSelector = ({
         >
           RAM (GB)
         </label>
-        <Dropdown
-          id={`${idPrefix}-ram`}
-          name={`${idPrefix}-ram`}
-          options={[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-          onChange={({ value }) => onChange(value)}
+        <InputNumber
+          id={`${idPrefix}-mem`}
+          name={`${idPrefix}-mem`}
+          onChange={memoryOnChange}
+          allowEmpty={false}
           disabled={disabled}
-          value={memoryInGb}
-          appendTo='self'
+          inputStyle={styles.largeInputNumber}
+          value={5}
+          max={110}
+          min={2}
+          tooltip={
+            '5GB to 110GB. CPU to Memory ratio needs to be between 1:1 and 1:6.5, or it may be auto adjusted ???'
+          }
         />
       </FlexRow>
     </Fragment>

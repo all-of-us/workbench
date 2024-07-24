@@ -2564,6 +2564,8 @@ components:
           $ref: '#/components/schemas/CloudContext'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        autopilot:
+          $ref: '#/components/schemas/Autopilot'
         errors:
           type: array
           description: The list of errors that the app has encountered.
@@ -2607,6 +2609,8 @@ components:
           $ref: '#/components/schemas/CloudContext'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        autopilot:
+          $ref: '#/components/schemas/Autopilot'
         errors:
           type: array
           description: The list of errors that the app has encountered.

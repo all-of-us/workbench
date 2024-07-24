@@ -210,11 +210,9 @@ export const CreateGkeApp = ({
           },
 
       autopilot: enableAutopilot
-        ? {
-            ...defaultCreateRequest.autopilot,
-            cpuInMillicores: defaultCreateRequest.autopilot.cpuInMillicores, // TODO: app.autopilot.cpuInMillicores,
-            memoryInGb: defaultCreateRequest.autopilot.memoryInGb, // TODO: app.memoryInGb,
-          }
+        ? app
+          ? app.autopilot
+          : defaultCreateRequest.autopilot
         : undefined,
       persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
       autodeleteEnabled:
@@ -352,19 +350,18 @@ export const CreateGkeApp = ({
                 <div style={styles.formGrid2}>
                   <AutopilotMachineSelector
                     selectedMachine={createAppRequest.autopilot}
-                    initialMachine={createAppRequest.autopilot}
-                    onChange={(machine: Autopilot) =>
+                    idPrefix={appTypeToString[appType]}
+                    onChange={(autopilot: Autopilot) =>
                       setCreateAppRequest((prevState) => ({
                         ...prevState,
                         autopilot: {
                           ...prevState.autopilot,
-                          cpuInMillicores: machine.cpuInMillicores,
-                          memoryInGb: machine.memoryInGb,
+                          cpuInMillicores: autopilot.cpuInMillicores,
+                          memoryInGb: autopilot.memoryInGb,
                         },
                       }))
                     }
                     disabled={isAppActive(app)}
-                    idPrefix={appTypeToString[appType]}
                   />
                 </div>
               ) : (

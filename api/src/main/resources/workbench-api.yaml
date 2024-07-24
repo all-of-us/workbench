@@ -8707,6 +8707,8 @@ components:
             deleted. When autodeleteEnabled is true, a positive integer is required
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
+        autopilot:
+          $ref: '#/components/schemas/Autopilot'
         proxyUrls:
           type: object
           properties: {}

@@ -216,6 +216,7 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "appName", source = "appName")
+  @Mapping(target = "autopilot", source = "autopilot")
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
