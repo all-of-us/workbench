@@ -9,7 +9,11 @@ import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
+import {
+  ClrIcon,
+  CommunityIcon,
+  ControlledTierBadge,
+} from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
@@ -26,7 +30,6 @@ import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { isCommunityWorkspace } from 'app/utils/workspace-utils';
-import CW_icon from 'assets/icons/CW_icon.png';
 
 import { WorkspaceActionsMenu } from './workspace-actions-menu';
 
@@ -301,11 +304,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         >
                           <TooltipTrigger content='Workspace is published as Community Workspace'>
                             {/* Keeping the style consistent with Controlled Tier Badge*/}
-                            <img
-                              aria-label={'Community Workspace'}
-                              src={CW_icon}
-                              style={{ width: '25px', height: '27px' }}
-                            />
+                            <CommunityIcon />
                           </TooltipTrigger>
                         </FlexColumn>
                       )}

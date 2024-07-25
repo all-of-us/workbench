@@ -48,6 +48,7 @@ describe('WorkspaceCard', () => {
   });
 
   it('show Community workspace icon if workspace is published by owner', async () => {
+    component(WorkspaceAccessLevel.OWNER);
     let communityWorkspaceImg = screen.queryByRole('img', {
       name: /community workspace/i,
     });
