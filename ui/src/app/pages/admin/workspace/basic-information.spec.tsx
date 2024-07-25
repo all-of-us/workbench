@@ -100,7 +100,7 @@ describe('BasicInformation', () => {
   it('should unpublish a workspace', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
-      .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
+      .spyOn(workspaceAdminApi(), 'unpublishWorkspaceViaDB')
       .mockImplementation((): Promise<any> => Promise.resolve());
     component();
     await user.click(await screen.findByRole('button', { name: /unpublish/i }));
