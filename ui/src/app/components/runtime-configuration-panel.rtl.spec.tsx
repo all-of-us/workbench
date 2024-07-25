@@ -1802,9 +1802,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     mockUseCustomRuntime();
     const { container } = component();
 
-    // I suspect changing to dataproc is supposed tochange the config, how do I handle that with mockUseCustomRuntime?
     await pickComputeType(container, ComputeType.Dataproc);
-    screen.logTestingPlaygroundURL();
     await clickExpectedButton('Next');
     expect(
       screen.getByText(
