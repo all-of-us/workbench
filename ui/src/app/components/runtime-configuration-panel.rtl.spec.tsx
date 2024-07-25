@@ -1449,6 +1449,43 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getDetachableDiskValue()).toEqual(numberFormatter.format(disk.size));
   });
 
+  it('should allow configuration via dataproc preset from modified form', async () => {
+    setCurrentRuntime(null);
+    mockUseCustomRuntime();
+    const { container } = component();
+    await clickExpectedButton('Customize');
+
+    // Configure the form - we expect all of the changes to be overwritten by
+    // the Hail preset selection.
+    await pickMainCpu(container, 2);
+    await pickMainRam(container, 7.5);
+    await pickDetachableDiskSize(DATAPROC_MIN_DISK_SIZE_GB);
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    await pickWorkerCpu(container, 8);
+    await pickWorkerRam(container, 30);
+    await pickWorkerDiskSize(300);
+    await pickNumWorkers(10);
+    await pickNumPreemptibleWorkers(20);
+    await pickPresets(container, runtimePresets.hailAnalysis.displayName);
+    await clickExpectedButton('Create');
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .configurationType
+    ).toEqual(RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS);
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .dataprocConfig
+    ).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig);
+
+    expect(
+      mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
+        .gceConfig
+    ).toBeFalsy();
+  });
+
   it('should tag as user override after preset modification', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
