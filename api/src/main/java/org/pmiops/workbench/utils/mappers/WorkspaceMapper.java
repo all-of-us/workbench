@@ -127,7 +127,22 @@ public interface WorkspaceMapper {
   Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
-  RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+  RecentWorkspace toApiRecentWorkspace(
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService);
+
+  @AfterMapping
+  default void setFeaturedWorkspaceCategory(
+      @MappingTarget RecentWorkspace recentWorkspace,
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    recentWorkspace
+        .getWorkspace()
+        .setFeaturedCategory(
+            featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null));
+  }
 
   /**
    * This method was written I think before we realized we could have multiple input arguments.
