@@ -1,4 +1,8 @@
-import { RuntimeApi, RuntimeStatus } from 'generated/fetch';
+import {
+  RuntimeApi,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
 
 import { waitFor } from '@testing-library/react';
 // Hooks cannot be tested outside of a functional component, so we need to use renderHook from @testing-library/react-hooks
@@ -21,6 +25,7 @@ import {
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
+import { DATAPROC_MIN_DISK_SIZE_GB } from './machines';
 import { useCustomRuntime } from './runtime-hooks';
 import { runtimeStore } from './stores';
 
@@ -159,5 +164,43 @@ describe(useCustomRuntime.name, () => {
     await waitFor(() => {
       expect(initializerSpy).toHaveBeenCalled();
     });
+  });
+
+  it("should update runtime, and not delete, when dataproc's master disk size is increased", async () => {
+    currentRuntime = {
+      ...defaultRuntime(),
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+      },
+    };
+
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: currentRuntime,
+      runtimeLoaded: true,
+    });
+
+    const [, setRequest] = testUseCustomRuntime();
+    const newRuntime = JSON.parse(JSON.stringify(currentRuntime));
+    newRuntime.dataprocConfig.masterDiskSize =
+      newRuntime.dataprocConfig.masterDiskSize + 20;
+
+    await act(async () => {
+      setRequest({ runtime: newRuntime, detachedDisk: null });
+    });
+
+    await waitFor(() => {
+      expect(updateRuntimeSpy).toHaveBeenCalled();
+    });
+    expect(deleteRuntimeSpy).not.toHaveBeenCalled();
   });
 });
