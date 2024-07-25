@@ -31,6 +31,7 @@ import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
 import { RuntimesList } from 'app/pages/runtimes-list';
+import { FeaturedWorkspaces } from 'app/pages/workspace/featured-workspaces';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -83,6 +84,10 @@ const DemographicSurveyPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DemographicSurvey);
+const FeaturedWorkspacesPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(FeaturedWorkspaces);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(
   withRouteData,
@@ -342,6 +347,15 @@ export const SignedInRoutes = () => {
       </AppRoute>
       <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
         <WorkspaceLibraryPage
+          routeData={{ title: 'Workspace Library', minimizeChrome: false }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path='/featured-workspaces'
+        guards={[getAccessModuleGuard()]}
+      >
+        <FeaturedWorkspacesPage
           routeData={{ title: 'Workspace Library', minimizeChrome: false }}
         />
       </AppRoute>
