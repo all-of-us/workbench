@@ -961,6 +961,25 @@ describe(RuntimeConfigurationPanel.name, () => {
     ).toBeUndefined();
   });
 
+  it('should close panel after creating a runtime', async () => {
+    setCurrentRuntime(null);
+    mockUseCustomRuntime();
+    component();
+
+    await clickExpectedButton('Create');
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show customize panel when opened with a running runtime', async () => {
+    setCurrentRuntime(defaultGceRuntimeWithPd());
+    mockUseCustomRuntime();
+    component();
+
+    const button = screen.getByRole('button', { name: /delete environment/i });
+    expectButtonElementEnabled(button);
+  });
+
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
