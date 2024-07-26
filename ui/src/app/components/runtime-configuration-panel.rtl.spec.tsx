@@ -16,6 +16,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { LeoRuntimeInitializer } from '../utils/leo-runtime-initializer';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -812,12 +813,12 @@ describe(RuntimeConfigurationPanel.name, () => {
     spinDiskElement('num-preemptible').getAttribute('value');
 
   const getDeletePDRadio = () =>
-    screen.queryByRole('radio', {
-      name: 'Delete Persistent Disk',
+    screen.getByRole('radio', {
+      name: /delete persistent disk/i,
     });
 
-  const togglePDRadioButton = () => {
-    getDeletePDRadio().click();
+  const togglePDRadioButton = async () => {
+    await user.click(getDeletePDRadio());
   };
 
   const confirmDeleteText =
@@ -2194,7 +2195,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       )
     ).toBeInTheDocument();
 
-    togglePDRadioButton();
+    await togglePDRadioButton();
 
     await clickExpectedButton('Next');
     await clickExpectedButton('Update');
@@ -2323,5 +2324,71 @@ describe(RuntimeConfigurationPanel.name, () => {
     const preemptibleCountInput: HTMLInputElement =
       spinDiskElement('num-preemptible');
     expect(preemptibleCountInput.disabled).toBeTruthy();
+  });
+
+  it('should require disk deletion when attempting to create a runtime with a different disk type', async () => {
+    const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
+    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
+    setCurrentRuntime(null);
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+    mockUseCustomRuntime();
+    const { container } = component();
+    await clickExpectedButton('Customize');
+    await pickDetachableType(container, DiskType.SSD);
+    await clickExpectedButton('Next');
+    screen.getByRole('heading', {
+      name: /environment creation requires deleting your unattached disk/i,
+    });
+    await togglePDRadioButton();
+    await clickExpectedButton('Delete');
+
+    await waitFor(() => {
+      expect(deleteDiskSpy).toHaveBeenCalled();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not delete disk when attempting to create a runtime with a larger disk', async () => {
+    const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
+    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
+    setCurrentRuntime(null);
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+    mockUseCustomRuntime();
+    const { container } = component();
+    await clickExpectedButton('Customize');
+    await pickDetachableDiskSize(disk.size + 10);
+    await clickExpectedButton('Create');
+
+    expect(deleteDiskSpy).not.toHaveBeenCalled();
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should require disk deletion when attempting to create a runtime with a smaller disk', async () => {
+    const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
+    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
+    setCurrentRuntime(null);
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+    mockUseCustomRuntime();
+    const { container } = component();
+    await clickExpectedButton('Customize');
+    await pickDetachableDiskSize(disk.size - 10);
+    await clickExpectedButton('Next');
+
+    screen.getByRole('heading', {
+      name: /environment creation requires deleting your unattached disk/i,
+    });
+    await togglePDRadioButton();
+    await clickExpectedButton('Delete');
+
+    await waitFor(() => {
+      expect(deleteDiskSpy).toHaveBeenCalled();
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
