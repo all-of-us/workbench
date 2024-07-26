@@ -2208,6 +2208,24 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(pdConfig).toBeUndefined();
   });
 
+  it('should allow skipping disk deletion when detaching', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    const disk = existingDisk();
+    setCurrentDisk(disk);
+    mockUseCustomRuntime();
+
+    const { container } = component();
+    await pickComputeType(container, ComputeType.Dataproc);
+
+    await clickExpectedButton('Next');
+
+    expect(
+      screen.getByText(
+        /your environment currently has a reattachable disk, which will be unused after you apply this update\./i
+      )
+    ).toBeInTheDocument();
+  });
+
   it('should prevent runtime creation when running cost is too high for initial credits', async () => {
     setCurrentRuntime(null);
     mockUseCustomRuntime();
