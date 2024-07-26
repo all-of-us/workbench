@@ -8,7 +8,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { DisksApiStub } from '../../testing/stubs/disks-api-stub';
 import { waitFor } from '@testing-library/react';
 // Hooks cannot be tested outside of a functional component, so we need to use renderHook from @testing-library/react-hooks
 // This is explained further here: https://github.com/testing-library/react-hooks-testing-library?tab=readme-ov-file#the-problem
@@ -21,6 +20,7 @@ import {
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
 
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataProcRuntime,
   defaultGceRuntime,

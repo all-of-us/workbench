@@ -16,7 +16,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { LeoRuntimeInitializer } from '../utils/leo-runtime-initializer';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -2328,7 +2327,6 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should require disk deletion when attempting to create a runtime with a different disk type', async () => {
     const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
-    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
     setCurrentRuntime(null);
     const disk = existingDisk();
     setCurrentDisk(disk);
@@ -2352,12 +2350,11 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should not delete disk when attempting to create a runtime with a larger disk', async () => {
     const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
-    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
     setCurrentRuntime(null);
     const disk = existingDisk();
     setCurrentDisk(disk);
     mockUseCustomRuntime();
-    const { container } = component();
+    component();
     await clickExpectedButton('Customize');
     await pickDetachableDiskSize(disk.size + 10);
     await clickExpectedButton('Create');
@@ -2369,12 +2366,11 @@ describe(RuntimeConfigurationPanel.name, () => {
 
   it('should require disk deletion when attempting to create a runtime with a smaller disk', async () => {
     const deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
-    const initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
     setCurrentRuntime(null);
     const disk = existingDisk();
     setCurrentDisk(disk);
     mockUseCustomRuntime();
-    const { container } = component();
+    component();
     await clickExpectedButton('Customize');
     await pickDetachableDiskSize(disk.size - 10);
     await clickExpectedButton('Next');
