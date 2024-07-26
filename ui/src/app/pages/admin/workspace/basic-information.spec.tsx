@@ -109,4 +109,13 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
+  it('should disable publish button if workspace is locked', async () => {
+    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    workspace.adminLocked = true;
+    component();
+    expectButtonElementDisabled(
+      screen.getByRole('button', { name: 'Publish' })
+    );
+  });
 });

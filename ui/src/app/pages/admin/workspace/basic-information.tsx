@@ -8,6 +8,7 @@ import {
   WorkspaceActiveStatus,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { Select } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
@@ -40,20 +41,28 @@ export const BasicInformation = ({
 
   const publishingDisabled =
     featuredCategoryLoading ||
+    workspace.adminLocked ||
     !featuredCategory ||
     featuredCategory === workspace.featuredCategory;
 
   const getWorkspacePublishTooltip = () => {
-    if (featuredCategoryLoading) {
-      return 'Your workspace is loading, please wait until loading is completed before publishing.';
-    } else if (!featuredCategory) {
-      return 'Please select a category to publish the workspace.';
-    } else if (featuredCategory === workspace.featuredCategory) {
-      return 'This workspace is already published in the selected category.';
-    } else {
-      return '';
-    }
+    return cond(
+      [
+        featuredCategoryLoading,
+        'Your workspace is loading, please wait until loading is completed before publishing.',
+      ],
+      [
+        workspace.adminLocked,
+        'This workspace is locked and cannot be published.',
+      ],
+      [
+        featuredCategory === workspace.featuredCategory,
+        'This workspace is already published in the selected category.',
+      ],
+      [!featuredCategory, 'Please select a category to publish the workspace.']
+    );
   };
+
   return (
     <>
       <h3>Basic Information</h3>
