@@ -1,9 +1,14 @@
 import {
+  Disk,
+  DisksApi,
+  DiskType,
+  GpuConfig,
   RuntimeApi,
   RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { DisksApiStub } from '../../testing/stubs/disks-api-stub';
 import { waitFor } from '@testing-library/react';
 // Hooks cannot be tested outside of a functional component, so we need to use renderHook from @testing-library/react-hooks
 // This is explained further here: https://github.com/testing-library/react-hooks-testing-library?tab=readme-ov-file#the-problem
@@ -19,6 +24,7 @@ import {
 import {
   defaultDataProcRuntime,
   defaultGceRuntime,
+  defaultGceRuntimeWithPd,
   defaultRuntime,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
@@ -27,16 +33,19 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { LeoRuntimeInitializer } from './leo-runtime-initializer';
 import { DATAPROC_MIN_DISK_SIZE_GB } from './machines';
 import { useCustomRuntime } from './runtime-hooks';
-import { runtimeStore } from './stores';
+import { runtimeDiskStore, runtimeStore } from './stores';
 
 describe(useCustomRuntime.name, () => {
+  let disksApiStub;
+  let runtimeApiStub;
   let deleteRuntimeSpy;
   let initializerSpy;
   let updateRuntimeSpy;
   let currentRuntime;
+  let deleteDiskSpy;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    // jest.useFakeTimers();
     // useCustomRuntime requires a runtime to be loaded in the
     // runtimeStore. All tests start with the default runtime.
     currentRuntime = defaultRuntime();
@@ -46,10 +55,14 @@ describe(useCustomRuntime.name, () => {
       runtimeLoaded: true,
     });
 
-    registerApiClient(RuntimeApi, new RuntimeApiStub());
+    runtimeApiStub = new RuntimeApiStub();
+    registerApiClient(RuntimeApi, runtimeApiStub);
     deleteRuntimeSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
     initializerSpy = jest.spyOn(LeoRuntimeInitializer, 'initialize');
     updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+    disksApiStub = new DisksApiStub();
+    registerApiClient(DisksApi, disksApiStub);
+    deleteDiskSpy = jest.spyOn(disksApiStub, 'deleteDisk');
   });
 
   afterEach(() => {
@@ -63,6 +76,11 @@ describe(useCustomRuntime.name, () => {
 
     // Result's current property is the return value of the hook
     return result.current;
+  };
+
+  const setCurrentDisk = (d: Disk) => {
+    disksApiStub.disk = d;
+    runtimeDiskStore.set({ ...runtimeDiskStore.get(), gcePersistentDisk: d });
   };
 
   it('should update runtime when request includes updated runtime', async () => {
@@ -202,5 +220,70 @@ describe(useCustomRuntime.name, () => {
       expect(updateRuntimeSpy).toHaveBeenCalled();
     });
     expect(deleteRuntimeSpy).not.toHaveBeenCalled();
+  });
+
+  it('should delete and recreate both the disk and runtime when the disk type is changed', async () => {
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: defaultGceRuntimeWithPd(),
+      runtimeLoaded: true,
+    });
+    const existingDisk = {
+      size: 1000,
+      diskType: DiskType.STANDARD,
+      name: 'my-existing-disk',
+      blockSize: 1,
+      gceRuntime: true,
+    };
+    setCurrentDisk(existingDisk);
+    const newRuntime = defaultGceRuntimeWithPd();
+    newRuntime.gceWithPdConfig.persistentDisk.diskType = DiskType.SSD;
+
+    const [, setRequest] = testUseCustomRuntime();
+
+    await act(async () => {
+      setRequest({ runtime: newRuntime, detachedDisk: null });
+    });
+
+    await waitFor(() => {
+      expect(deleteRuntimeSpy).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(deleteDiskSpy).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(initializerSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('should delete and recreate runtime and leave disk unchanged when GPU is enabled', async () => {
+    runtimeStore.set({
+      workspaceNamespace: workspaceDataStub.namespace,
+      runtime: defaultGceRuntimeWithPd(),
+      runtimeLoaded: true,
+    });
+    const newRuntime = defaultGceRuntimeWithPd();
+    newRuntime.gceWithPdConfig.gpuConfig = {
+      gpuType: 'the standard one',
+      numOfGpus: 1,
+    };
+
+    const [, setRequest] = testUseCustomRuntime();
+
+    await act(async () => {
+      setRequest({ runtime: newRuntime, detachedDisk: null });
+    });
+
+    await waitFor(() => {
+      expect(deleteRuntimeSpy).toHaveBeenCalled();
+    });
+
+    expect(deleteDiskSpy).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(initializerSpy).toHaveBeenCalled();
+    });
   });
 });
