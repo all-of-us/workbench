@@ -3,6 +3,7 @@ import {
   DisksApi,
   DiskType,
   GpuConfig,
+  Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
   RuntimeStatus,
@@ -167,9 +168,6 @@ describe(useCustomRuntime.name, () => {
     const [, setRequest] = testUseCustomRuntime();
 
     const newRuntime = defaultGceRuntime();
-
-    // This means that settign the status to error will not affect the new runtime.
-    currentRuntime.status = RuntimeStatus.ERROR;
 
     await act(async () => {
       setRequest({ runtime: newRuntime, detachedDisk: null });
