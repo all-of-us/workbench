@@ -2,7 +2,6 @@ import {
   Disk,
   DisksApi,
   DiskType,
-  GpuConfig,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -37,12 +36,12 @@ import { useCustomRuntime } from './runtime-hooks';
 import { runtimeDiskStore, runtimeStore } from './stores';
 
 describe(useCustomRuntime.name, () => {
-  let disksApiStub;
-  let runtimeApiStub;
+  let disksApiStub: DisksApiStub;
+  let runtimeApiStub: RuntimeApiStub;
   let deleteRuntimeSpy;
   let initializerSpy;
   let updateRuntimeSpy;
-  let currentRuntime;
+  let currentRuntime: Runtime;
   let deleteDiskSpy;
 
   beforeEach(() => {
