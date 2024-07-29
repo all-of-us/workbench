@@ -754,7 +754,6 @@ public class WorkspaceServiceTest {
 
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
-    boolean publish = true;
     verify(mockMailService).sendPublishCommunityWorkspaceEmails(any(), any());
   }
 
