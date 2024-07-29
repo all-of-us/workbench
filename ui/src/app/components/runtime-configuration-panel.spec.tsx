@@ -699,7 +699,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     dropDownId: string,
     optionText: string
   ): Promise<void> => {
-    const option = getDropdownOption(container, dropDownId, optionText);
+    const option = await getDropdownOption(container, dropDownId, optionText);
     await user.click(option);
   };
 
@@ -1540,7 +1540,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await pickMainCpu(container, 8);
     const dropdown: HTMLElement = expectDropdown(container, 'runtime-ram');
-    dropdown.click();
+    await user.click(dropdown);
 
     const runtimeRamOptions = Array.from(
       container.querySelectorAll(`#${'runtime-ram'} .p-dropdown-item`)

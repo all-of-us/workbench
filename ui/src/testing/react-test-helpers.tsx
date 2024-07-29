@@ -11,7 +11,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event/index';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 
 export async function waitAndExecute(timeMs?: number) {
   await new Promise((resolve) => setTimeout(resolve, timeMs || 100));
@@ -60,14 +60,14 @@ export const expectDropdown = (
   return dropdown;
 };
 
-export const getDropdownOption = (
+export const getDropdownOption = async (
   container: HTMLElement,
   dropDownId: string,
   optionText: string,
   expectedCount?: number
-): Element => {
+): Promise<Element> => {
   const dropdown: HTMLElement = expectDropdown(container, dropDownId);
-  dropdown.click();
+  await userEvent.click(dropdown);
 
   const allOptions = container.querySelectorAll(
     `#${dropDownId} .p-dropdown-item`

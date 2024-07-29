@@ -281,7 +281,7 @@ describe(CreateGkeApp.name, () => {
         );
 
         const autodeleteId = `${appTypeToString[appType]}-autodelete-threshold-dropdown`;
-        const autodeleteOption = getDropdownOption(
+        const autodeleteOption = await getDropdownOption(
           container,
           autodeleteId,
           `Idle for ${autodeleteDays} days`
@@ -398,7 +398,7 @@ describe(CreateGkeApp.name, () => {
           );
 
           const cpuId = `${appTypeToString[appType]}-cpu`;
-          const differentCpuOption = getDropdownOption(
+          const differentCpuOption = await getDropdownOption(
             container,
             cpuId,
             differentCpuCount
@@ -406,7 +406,7 @@ describe(CreateGkeApp.name, () => {
           await userEvent.click(differentCpuOption);
 
           const ramId = `${appTypeToString[appType]}-ram`;
-          const differentRamOption = getDropdownOption(
+          const differentRamOption = await getDropdownOption(
             container,
             ramId,
             differentRamCount
@@ -471,7 +471,7 @@ describe(CreateGkeApp.name, () => {
         // show that the default machine configuration is selected
 
         const cpuId = `${appTypeToString[appType]}-cpu`;
-        const defaultCpuOption = getDropdownOption(
+        const defaultCpuOption = await getDropdownOption(
           container,
           cpuId,
           cpu.toString()
@@ -480,7 +480,7 @@ describe(CreateGkeApp.name, () => {
         expect(defaultCpuOption).toHaveAttribute('aria-selected', 'true');
 
         const ramId = `${appTypeToString[appType]}-ram`;
-        const defaultRamOption = getDropdownOption(
+        const defaultRamOption = await getDropdownOption(
           container,
           ramId,
           memory.toString()
