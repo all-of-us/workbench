@@ -513,7 +513,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
         .ifPresentOrElse(
-            (dbFeaturedWorkspace) -> {
+            dbFeaturedWorkspace -> {
               // Throw exception if workspace is already Published
               throw new BadRequestException("Workspace is already published");
             },
@@ -527,10 +527,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 
               try {
-                mailService.sendPublishWorkspaceEmail(
+                mailService.sendPublishUnpublishWorkspaceEmail(
                     dbWorkspace,
                     getWorkspaceOwnerList(dbWorkspace),
-                    FeaturedWorkspaceCategory.COMMUNITY);
+                    true,
+                    Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
               } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }

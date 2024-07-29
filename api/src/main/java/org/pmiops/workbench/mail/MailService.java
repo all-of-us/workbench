@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
@@ -70,10 +71,10 @@ public interface MailService {
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
 
-  void sendPublishWorkspaceEmail(
-      final DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
-      throws MessagingException;
-
-  void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
+  void sendPublishUnpublishWorkspaceEmail(
+      DbWorkspace workspace,
+      List<DbUser> owners,
+      boolean publish,
+      Optional<FeaturedWorkspaceCategory> publishCategory)
       throws MessagingException;
 }

@@ -526,11 +526,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       DbWorkspace dbWorkspace, boolean published, FeaturedWorkspaceCategory category) {
     final List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
     try {
-      if (published) {
-        mailService.sendPublishWorkspaceEmail(dbWorkspace, owners, category);
-      } else {
-        mailService.sendUnpublishWorkspaceByAdminEmail(dbWorkspace, owners);
-      }
+      mailService.sendPublishUnpublishWorkspaceEmail(
+          dbWorkspace,
+          owners,
+          published,
+          published ? Optional.ofNullable(category) : Optional.empty());
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }

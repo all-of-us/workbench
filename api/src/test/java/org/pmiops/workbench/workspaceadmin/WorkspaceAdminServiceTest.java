@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -592,7 +593,8 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
+    boolean publish = true;
+    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
@@ -640,7 +642,8 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             dbFeaturedWorkspaceToSave.getCategory().toString(),
             existingDbFeaturedWorkspace.getCategory().toString());
-    verify(mailService).sendPublishWorkspaceEmail(any(), any(), any());
+    boolean publish = true;
+    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
 
     // We should not update the ACL as we are just updating the category and the workspace is
     // already published
@@ -682,7 +685,9 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    verify(mailService, never()).sendPublishWorkspaceEmail(any(), any(), any());
+    boolean publish = true;
+    verify(mailService, never())
+        .sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
   }
 
   @Test
@@ -708,7 +713,8 @@ public class WorkspaceAdminServiceTest {
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    verify(mailService).sendUnpublishWorkspaceByAdminEmail(any(), any());
+    boolean publish = false;
+    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 

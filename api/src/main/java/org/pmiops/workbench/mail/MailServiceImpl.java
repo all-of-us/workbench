@@ -388,47 +388,33 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishWorkspaceEmail(
-      DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
+  public void sendPublishUnpublishWorkspaceEmail(
+      DbWorkspace workspace,
+      List<DbUser> owners,
+      boolean publish,
+      Optional<FeaturedWorkspaceCategory> publishCategory)
       throws MessagingException {
+    final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
-    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+    final String resource = publish ? PUBLISH_WORKSPACE_RESOURCE : UNPUBLISH_WORKSPACE_RESOURCE;
+    final String presentTenseCapitalized = publish ? "Publish" : "Unpublish";
+    final String pastTense = publish ? "published" : "unpublished";
 
     for (DbUser owner : owners) {
       sendWithRetries(
-          List.of(owner.getContactEmail()),
+          Collections.singletonList(owner.getContactEmail()),
           Collections.singletonList(supportEmail),
-          "Your AoU Researcher Workbench workspace has been published",
+          String.format("Your AoU Researcher Workbench workspace has been %s", pastTense),
           String.format(
-              "Publish workspace email for workspace '%s' (%s) sent to owners %s",
-              workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+              "%s workspace email for workspace '%s' (%s) sent to owner %s",
+              presentTenseCapitalized,
+              workspace.getName(),
+              workspace.getWorkspaceNamespace(),
+              owner.getContactEmail()),
           buildHtml(
-              PUBLISH_WORKSPACE_RESOURCE,
+              resource,
               publishUnpublishWorkspaceSubstitutionMap(
-                  workspace,
-                  owner,
-                  featuredWorkspaceCategoryAsDisplayString(publishCategory),
-                  supportEmail)));
-    }
-  }
-
-  @Override
-  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
-      throws MessagingException {
-
-    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
-
-    for (DbUser owner : owners) {
-      sendWithRetries(
-          List.of(owner.getContactEmail()),
-          Collections.singletonList(supportEmail),
-          "Your AoU Researcher Workbench workspace has been Unpublished",
-          String.format(
-              "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
-              workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
-          buildHtml(
-              UNPUBLISH_WORKSPACE_RESOURCE,
-              publishUnpublishWorkspaceSubstitutionMap(workspace, owner, "", supportEmail)));
+                  workspace, owner, publishCategory, supportEmail)));
     }
   }
 
@@ -660,17 +646,26 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
-      DbWorkspace workspace, DbUser user, String publishCategory, String supportEmail) {
-    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
-        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
-        .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
-        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
-        .build();
+      DbWorkspace workspace,
+      DbUser user,
+      Optional<FeaturedWorkspaceCategory> publishCategory,
+      String supportEmail) {
+    var builder =
+        new ImmutableMap.Builder<EmailSubstitutionField, String>()
+            .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+            .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+            .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+            .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+            .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+            .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+            .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail);
+
+    publishCategory.ifPresent(
+        category ->
+            builder.put(
+                EmailSubstitutionField.PUBLISH_CATEGORY,
+                featuredWorkspaceCategoryAsDisplayString(category)));
+    return builder.build();
   }
 
   private String buildHtml(
