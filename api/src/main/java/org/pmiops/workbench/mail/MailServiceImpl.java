@@ -388,17 +388,38 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishUnpublishWorkspaceEmails(
+  public void sendPublishCommunityWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    sendPublishUnpublishWorkspaceEmails(
+        workspace,
+        owners,
+        PUBLISH_WORKSPACE_RESOURCE,
+        "Publish",
+        "published",
+        Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
+  }
+
+  @Override
+  public void sendAdminUnpublishWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+    sendPublishUnpublishWorkspaceEmails(
+        workspace,
+        owners,
+        UNPUBLISH_WORKSPACE_RESOURCE,
+        "Unpublish",
+        "unpublished",
+        Optional.empty());
+  }
+
+  private void sendPublishUnpublishWorkspaceEmails(
       DbWorkspace workspace,
       List<DbUser> owners,
-      boolean publish,
+      String emailResource,
+      String presentTenseCapitalized,
+      String pastTense,
       Optional<FeaturedWorkspaceCategory> publishCategory)
       throws MessagingException {
     final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
-
-    final String resource = publish ? PUBLISH_WORKSPACE_RESOURCE : UNPUBLISH_WORKSPACE_RESOURCE;
-    final String presentTenseCapitalized = publish ? "Publish" : "Unpublish";
-    final String pastTense = publish ? "published" : "unpublished";
 
     for (DbUser owner : owners) {
       sendWithRetries(
@@ -412,7 +433,7 @@ public class MailServiceImpl implements MailService {
               workspace.getWorkspaceNamespace(),
               owner.getContactEmail()),
           buildHtml(
-              resource,
+              emailResource,
               publishUnpublishWorkspaceSubstitutionMap(
                   workspace, owner, publishCategory, supportEmail)));
     }

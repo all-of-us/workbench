@@ -527,12 +527,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 
               try {
-                boolean publish = true;
-                mailService.sendPublishUnpublishWorkspaceEmails(
-                    dbWorkspace,
-                    getWorkspaceOwnerList(dbWorkspace),
-                    publish,
-                    Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
+                mailService.sendPublishCommunityWorkspaceEmails(dbWorkspace, getWorkspaceOwnerList(dbWorkspace));
               } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }

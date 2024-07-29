@@ -586,8 +586,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
-    boolean publish = true;
-    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
+    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
@@ -633,8 +632,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             dbFeaturedWorkspaceToSave.getCategory().toString(),
             existingDbFeaturedWorkspace.getCategory().toString());
-    boolean publish = true;
-    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
+    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
 
     // We should not update the ACL as we are just updating the category and the workspace is
     // already published
@@ -675,9 +673,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
-    boolean publish = true;
-    verify(mailService, never())
-        .sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
+    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
   }
 
   @Test
@@ -701,8 +697,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockFeaturedWorkspaceDao).delete(any());
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
-    boolean publish = false;
-    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
+    verify(mailService).sendAdminUnpublishWorkspaceEmails(any(), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
