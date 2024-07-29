@@ -574,14 +574,12 @@ public class WorkspaceAdminServiceTest {
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
 
     DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(mockDbWorkspace)
-            .setCategory(dbCategory);
+        new DbFeaturedWorkspace().setWorkspace(mockDbWorkspace).setCategory(dbCategory);
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-        any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
     // Act
@@ -593,10 +591,7 @@ public class WorkspaceAdminServiceTest {
     // Assert
     verify(mockFeaturedWorkspaceDao).save(any());
     verify(mockAdminAuditor)
-        .firePublishWorkspaceAction(
-            mockDbWorkspace.getWorkspaceId(),
-            category.toString(),
-            null);
+        .firePublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), category.toString(), null);
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
