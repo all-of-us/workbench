@@ -45,8 +45,8 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   public List<WorkspaceResponse> getByFeaturedCategory(String category) {
     Optional<List<DbFeaturedWorkspace>> featureWorkspacelistByCateogry =
         featuredWorkspaceDao.findDbFeaturedWorkspacesByCategory(
-                featuredWorkspaceMapper.toDbFeaturedCategory(
-            FeaturedWorkspaceCategory.fromValue(category)));
+            featuredWorkspaceMapper.toDbFeaturedCategory(
+                FeaturedWorkspaceCategory.fromValue(category)));
     List<WorkspaceResponse> workspaceResponsesByCategory =
         featureWorkspacelistByCateogry
             .map(

@@ -19,8 +19,9 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
 
   @Autowired
   FeaturedWorkspaceController(
-          FeaturedWorkspaceService featuredWorkspaceService,
-      Provider<WorkbenchConfig> workbenchConfigProvider, WorkspaceService workspaceService) {
+      FeaturedWorkspaceService featuredWorkspaceService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceService workspaceService) {
     this.featuredWorkspaceService = featuredWorkspaceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceService = workspaceService;
@@ -46,6 +47,7 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
   public ResponseEntity<WorkspaceResponseListResponse> getFeaturedWorkspacesByCategory(
       String category) {
     return ResponseEntity.ok(
-        new WorkspaceResponseListResponse().items(featuredWorkspaceService.getByFeaturedCategory(category)));
+        new WorkspaceResponseListResponse()
+            .items(featuredWorkspaceService.getByFeaturedCategory(category)));
   }
 }
