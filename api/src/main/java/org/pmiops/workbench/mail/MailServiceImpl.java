@@ -96,7 +96,8 @@ public class MailServiceImpl implements MailService {
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
 
-  private static final String PUBLISH_WORKSPACE_RESOURCE = "emails/publish_workspace/content.html";
+  private static final String PUBLISH_COMMUNITY_WORKSPACE_RESOURCE =
+      "emails/publish_community_workspace/content.html";
 
   private static final String UNPUBLISH_WORKSPACE_RESOURCE =
       "emails/unpublish_workspace/content.html";
@@ -391,24 +392,14 @@ public class MailServiceImpl implements MailService {
   public void sendPublishCommunityWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceEmails(
-        workspace,
-        owners,
-        PUBLISH_WORKSPACE_RESOURCE,
-        "Publish",
-        "published",
-        Optional.of(FeaturedWorkspaceCategory.COMMUNITY));
+        workspace, owners, PUBLISH_COMMUNITY_WORKSPACE_RESOURCE, "Publish", "published");
   }
 
   @Override
   public void sendAdminUnpublishWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceEmails(
-        workspace,
-        owners,
-        UNPUBLISH_WORKSPACE_RESOURCE,
-        "Unpublish",
-        "unpublished",
-        Optional.empty());
+        workspace, owners, UNPUBLISH_WORKSPACE_RESOURCE, "Unpublish", "unpublished");
   }
 
   private void sendPublishUnpublishWorkspaceEmails(
@@ -416,8 +407,7 @@ public class MailServiceImpl implements MailService {
       List<DbUser> owners,
       String emailResource,
       String presentTenseCapitalized,
-      String pastTense,
-      Optional<FeaturedWorkspaceCategory> publishCategory)
+      String pastTense)
       throws MessagingException {
     final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
@@ -434,8 +424,7 @@ public class MailServiceImpl implements MailService {
               owner.getContactEmail()),
           buildHtml(
               emailResource,
-              publishUnpublishWorkspaceSubstitutionMap(
-                  workspace, owner, publishCategory, supportEmail)));
+              publishUnpublishWorkspaceSubstitutionMap(workspace, owner, supportEmail)));
     }
   }
 
@@ -667,26 +656,16 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
-      DbWorkspace workspace,
-      DbUser user,
-      Optional<FeaturedWorkspaceCategory> publishCategory,
-      String supportEmail) {
-    var builder =
-        new ImmutableMap.Builder<EmailSubstitutionField, String>()
-            .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-            .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-            .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-            .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-            .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
-            .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
-            .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail);
-
-    publishCategory.ifPresent(
-        category ->
-            builder.put(
-                EmailSubstitutionField.PUBLISH_CATEGORY,
-                featuredWorkspaceCategoryAsDisplayString(category)));
-    return builder.build();
+      DbWorkspace workspace, DbUser user, String supportEmail) {
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
+        .build();
   }
 
   private String buildHtml(
