@@ -1,4 +1,4 @@
-version: 2.1
+version: 3.0
 
 # -------------------------
 #   ORBS
@@ -146,16 +146,16 @@ commands:
   gcloud-auth-login-oidc:
     description: "Activate CircleCI service account credential using OIDC"
     parameters:
-      project_id: 
+      project_id:
         type: string # env_var_name
         default: "602460048110" # Project ID for all-of-us-workbench-test
-      wip_id: 
+      wip_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL ID"
-      wip_provider_id: 
+      wip_provider_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL PROVIDER ID"
-      oidc_token_file_path: 
+      oidc_token_file_path:
         type: string
         default: /home/circleci/oidc_token.json
     steps:
