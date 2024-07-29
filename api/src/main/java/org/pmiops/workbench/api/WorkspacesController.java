@@ -832,7 +832,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 userRecentWorkspace ->
                     workspaceMapper.toApiRecentWorkspace(
                         dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
-                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId())))
+                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId()),
+                        featuredWorkspaceService))
             .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -854,7 +855,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
+        workspaceMapper.toApiRecentWorkspace(
+            dbWorkspace, workspaceAccessLevel, featuredWorkspaceService);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }

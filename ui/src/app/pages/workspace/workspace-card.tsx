@@ -9,7 +9,11 @@ import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
+import {
+  ClrIcon,
+  CommunityIcon,
+  ControlledTierBadge,
+} from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
@@ -25,6 +29,7 @@ import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { isCommunityWorkspace } from 'app/utils/workspace-utils';
 
 import { WorkspaceActionsMenu } from './workspace-actions-menu';
 
@@ -284,6 +289,25 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     style={{ justifyContent: 'flex-end', marginLeft: '1.2rem' }}
                   >
                     <FlexRow style={{ alignContent: 'space-between' }}>
+                      {accessTierShortName ===
+                        AccessTierShortNames.Controlled && (
+                        <ControlledTierBadge />
+                      )}
+                      {isCommunityWorkspace(workspace) && (
+                        <FlexColumn
+                          aria-label='Community Workspace'
+                          style={{
+                            justifyContent: 'flex-end',
+                            marginLeft: '0.5rem',
+                            marginRight: '0.5rem',
+                          }}
+                        >
+                          <TooltipTrigger content='Workspace is published as Community Workspace'>
+                            {/* Keeping the style consistent with Controlled Tier Badge*/}
+                            <CommunityIcon />
+                          </TooltipTrigger>
+                        </FlexColumn>
+                      )}
                       {adminLocked && (
                         <FlexColumn
                           data-test-id='workspace-lock'
@@ -296,10 +320,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                             />
                           </TooltipTrigger>
                         </FlexColumn>
-                      )}
-                      {accessTierShortName ===
-                        AccessTierShortNames.Controlled && (
-                        <ControlledTierBadge />
                       )}
                     </FlexRow>
                   </FlexColumn>

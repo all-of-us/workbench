@@ -33,14 +33,14 @@ class ServiceAccountContext
         # By default Tempfile on OS X does not use a docker-friendly location/
         # use /tmp/colima to make it work with colima, see https://github.com/abiosoft/colima/issues/844 for more details
         colima_path = "/tmp/colima"
-        Dir.mkdir(colima_path) unless File.exists?(colima_path)
+        Dir.mkdir(colima_path) unless File.exist?(colima_path)
         @keyfile_path = Tempfile.new(["#{@service_account}-key", ".json"], colima_path).path
       end
     end
   end
 
   def existing_file_account(keyfile_path)
-    if File.exists?(keyfile_path)
+    if File.exist?(keyfile_path)
       begin
         return JSON.parse(File.read(keyfile_path))["client_email"]
       rescue JSON::ParserError => e

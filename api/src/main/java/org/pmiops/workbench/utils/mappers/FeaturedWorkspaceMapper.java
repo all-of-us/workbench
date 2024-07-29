@@ -17,12 +17,10 @@ public interface FeaturedWorkspaceMapper {
       PublishWorkspaceRequest featuredWorkspace, DbWorkspace dbWorkspace);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
-  @Mapping(target = "description", ignore = true)
   @Mapping(target = "id", ignore = true)
   DbFeaturedWorkspace toDbFeaturedWorkspace(
       FeaturedWorkspaceCategory category, DbWorkspace dbWorkspace);
 
-  @Mapping(target = "description", source = "featuredWorkspace.description")
   @Mapping(target = "category", source = "featuredWorkspace.category")
   DbFeaturedWorkspace toDbFeaturedWorkspace(
       DbFeaturedWorkspace dbFeaturedWorkspace, PublishWorkspaceRequest featuredWorkspace);

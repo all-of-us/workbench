@@ -9,15 +9,12 @@ public class DbFeaturedWorkspace {
   private long id;
   private DbWorkspace workspace;
   private DbFeaturedCategory category;
-  private String description;
 
   public DbFeaturedWorkspace() {}
 
-  public DbFeaturedWorkspace(
-      DbWorkspace workspace, DbFeaturedCategory category, String description) {
+  public DbFeaturedWorkspace(DbWorkspace workspace, DbFeaturedCategory category) {
     this.workspace = workspace;
     this.category = category;
-    this.description = description;
   }
 
   @Id
@@ -51,16 +48,6 @@ public class DbFeaturedWorkspace {
 
   public DbFeaturedWorkspace setCategory(DbFeaturedCategory category) {
     this.category = category;
-    return this;
-  }
-
-  @Column(name = "description")
-  public String getDescription() {
-    return description;
-  }
-
-  public DbFeaturedWorkspace setDescription(String description) {
-    this.description = description;
     return this;
   }
 
