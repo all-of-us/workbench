@@ -5,7 +5,6 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,7 +12,6 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -53,20 +51,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  @Mapping(target = "featuredCategory", ignore = true) // set by setFeaturedWorkspaceCategory()
-  Workspace toApiWorkspace(
-      DbWorkspace dbWorkspace,
-      RawlsWorkspaceDetails fcWorkspace,
-      FeaturedWorkspaceService featuredWorkspaceService);
-
-  @AfterMapping
-  default void setFeaturedWorkspaceCategory(
-      @MappingTarget Workspace workspace,
-      DbWorkspace dbWorkspace,
-      FeaturedWorkspaceService featuredWorkspaceService) {
-    workspace.setFeaturedCategory(
-        featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null));
-  }
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
 
   @Mapping(
       target = "accessLevel",
@@ -76,9 +61,7 @@ public interface WorkspaceMapper {
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
-      WorkspaceDao workspaceDao,
-      List<RawlsWorkspaceListResponse> fcWorkspaces,
-      FeaturedWorkspaceService featuredWorkspaceService) {
+      WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> fcWorkspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
@@ -95,7 +78,7 @@ public interface WorkspaceMapper {
             dbWorkspace -> {
               var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
               return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), featuredWorkspaceService),
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace()),
                   fcResponse.getAccessLevel());
             })
         .toList();
@@ -122,7 +105,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "featuredCategory", ignore = true)
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
   Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
 
@@ -179,6 +161,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
+  @Mapping(target = "featuredCategory", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

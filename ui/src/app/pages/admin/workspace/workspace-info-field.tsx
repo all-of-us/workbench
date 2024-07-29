@@ -8,6 +8,7 @@ const styles = reactStyles({
   infoRow: {
     width: '80%',
     maxWidth: '1000px',
+    alignItems: 'center',
   },
   infoLabel: {
     width: '300px',
@@ -16,8 +17,11 @@ const styles = reactStyles({
     marginRight: '1.5rem',
   },
   infoValue: {
+    display: 'flex',
+    gap: '0.5rem',
     flex: 1,
     wordWrap: 'break-word',
+    alignItems: 'center',
   },
 });
 

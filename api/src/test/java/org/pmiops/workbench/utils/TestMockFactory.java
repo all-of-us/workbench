@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -272,6 +273,7 @@ public class TestMockFactory {
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
     dbWorkspace.setGoogleProject(workspace.getGoogleProject());
+    dbWorkspace.setFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
     return dbWorkspace;
   }
 
