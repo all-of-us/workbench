@@ -51,7 +51,6 @@ export const renderModal = <C,>(
 
 // seems to be the best we can do with Primereact Dropdown
 // based on runtime-configuration-panel.spec pickDropdownOption
-
 export const expectDropdown = (
   container: HTMLElement,
   dropDownId: string
