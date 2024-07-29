@@ -1,9 +1,7 @@
 import { configure } from '@testing-library/react';
-import { stubPopupDimensions } from 'app/components/popups';
 import { setupCustomValidators } from 'app/services/setup';
 
 setupCustomValidators();
-stubPopupDimensions();
 
 export const mockNavigate = jest.fn();
 export const mockNavigateByUrl = jest.fn();
