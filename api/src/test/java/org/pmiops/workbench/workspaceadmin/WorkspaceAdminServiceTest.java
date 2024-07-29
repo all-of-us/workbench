@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -557,6 +556,18 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testPublishWorkspaceViaDB() throws MessagingException {
+    testPublish(FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY, DbFeaturedCategory.PHENOTYPE_LIBRARY);
+    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
+  }
+
+  // differs only in that it sends emails
+  @Test
+  public void testPublishWorkspaceViaDB_Community() throws MessagingException {
+    testPublish(FeaturedWorkspaceCategory.COMMUNITY, DbFeaturedCategory.COMMUNITY);
+    verify(mailService).sendPublishCommunityWorkspaceEmails(any(), any());
+  }
+
+  private void testPublish(FeaturedWorkspaceCategory category, DbFeaturedCategory dbCategory) {
     // Arrange
     setupPublishWorkspaceMocks();
 
@@ -565,17 +576,17 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(dbCategory);
 
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
-            any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
+        any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
     // Act
     PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        new PublishWorkspaceRequest().category(category);
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
 
@@ -584,9 +595,8 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .firePublishWorkspaceAction(
             mockDbWorkspace.getWorkspaceId(),
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
+            category.toString(),
             null);
-    verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
@@ -612,13 +622,13 @@ public class WorkspaceAdminServiceTest {
     DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
         new DbFeaturedWorkspace()
             .setWorkspace(mockDbWorkspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.COMMUNITY);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(existingDbFeaturedWorkspace));
 
     PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
         .thenReturn(dbFeaturedWorkspaceToSave);
 
@@ -632,6 +642,7 @@ public class WorkspaceAdminServiceTest {
             mockDbWorkspace.getWorkspaceId(),
             dbFeaturedWorkspaceToSave.getCategory().toString(),
             existingDbFeaturedWorkspace.getCategory().toString());
+    // does not send emails because it's an update, not a new publish
     verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
 
     // We should not update the ACL as we are just updating the category and the workspace is
@@ -651,9 +662,7 @@ public class WorkspaceAdminServiceTest {
     DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
 
     DbFeaturedWorkspace mockFeaturedWorkspace =
-        new DbFeaturedWorkspace()
-            .setWorkspace(workspace)
-            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+        new DbFeaturedWorkspace().setWorkspace(workspace).setCategory(DbFeaturedCategory.COMMUNITY);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
             any(DbFeaturedWorkspace.class), any(PublishWorkspaceRequest.class)))
@@ -664,7 +673,7 @@ public class WorkspaceAdminServiceTest {
 
     // Act
     PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.COMMUNITY);
     workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
 
     // Assert
@@ -673,6 +682,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor, never())
         .firePublishWorkspaceAction(
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
+    // does not send emails because it's an update, not a new publish
     verify(mailService, never()).sendPublishCommunityWorkspaceEmails(any(), any());
   }
 

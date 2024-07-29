@@ -527,7 +527,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               featuredWorkspaceDao.save(dbFeaturedWorkspaceToSave);
 
               try {
-                mailService.sendPublishCommunityWorkspaceEmails(dbWorkspace, getWorkspaceOwnerList(dbWorkspace));
+                mailService.sendPublishCommunityWorkspaceEmails(
+                    dbWorkspace, getWorkspaceOwnerList(dbWorkspace));
               } catch (MessagingException e) {
                 log.log(Level.WARNING, e.getMessage());
               }
