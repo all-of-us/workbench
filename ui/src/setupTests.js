@@ -1,13 +1,12 @@
-const rtl = require('@testing-library/react');
-
-const { setupCustomValidators } = require('app/services/setup');
-const { stubPopupDimensions } = require('app/components/popups');
+import { configure } from '@testing-library/react';
+import { stubPopupDimensions } from 'app/components/popups';
+import { setupCustomValidators } from 'app/services/setup';
 
 setupCustomValidators();
 stubPopupDimensions();
 
-const mockNavigate = jest.fn();
-const mockNavigateByUrl = jest.fn();
+export const mockNavigate = jest.fn();
+export const mockNavigateByUrl = jest.fn();
 
 jest.mock('app/utils/navigation', () => ({
   ...jest.requireActual('app/utils/navigation'),
@@ -28,18 +27,9 @@ global.beforeEach(() => {
 });
 
 global.afterEach(() => {
-  // Unmount react components after each test
-  unmountCallbacks.forEach((unmount) => unmount());
-  unmountCallbacks.splice();
-
   // Remove this last, as unmounting may check the popup root.
   document.body.removeChild(document.getElementById('root'));
   document.body.removeChild(document.getElementById('popup-root'));
 });
 
-rtl.configure({ testIdAttribute: 'data-test-id' });
-
-module.exports = {
-  mockNavigate: mockNavigate,
-  mockNavigateByUrl: mockNavigateByUrl,
-};
+configure({ testIdAttribute: 'data-test-id' });
