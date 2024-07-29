@@ -1,12 +1,4 @@
-/**
- * Defines the React 16 Adapter for Enzyme.
- *
- * @link http://airbnb.io/enzyme/docs/installation/#working-with-react-16
- * @copyright 2017 Airbnb, Inc.
- */
-const enzyme = require('enzyme');
 const rtl = require('@testing-library/react');
-const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 
 const { setupCustomValidators } = require('app/services/setup');
 const { stubPopupDimensions } = require('app/components/popups');
@@ -22,22 +14,6 @@ jest.mock('app/utils/navigation', () => ({
   __esModule: true,
   useNavigation: () => [mockNavigate, mockNavigateByUrl],
 }));
-
-// Track all enzyme renderers for teardown.
-// See https://github.com/enzymejs/enzyme/issues/911
-const unmountCallbacks = [];
-
-class ReactAdapterWithMountTracking extends Adapter {
-  constructor(...args) {
-    super(...args);
-  }
-
-  createRenderer(...args) {
-    const renderer = Adapter.prototype.createRenderer.call(this, ...args);
-    unmountCallbacks.push(() => renderer.unmount());
-    return renderer;
-  }
-}
 
 global.beforeEach(() => {
   const appRoot = document.createElement('div');
@@ -61,7 +37,6 @@ global.afterEach(() => {
   document.body.removeChild(document.getElementById('popup-root'));
 });
 
-enzyme.configure({ adapter: new ReactAdapterWithMountTracking() });
 rtl.configure({ testIdAttribute: 'data-test-id' });
 
 module.exports = {

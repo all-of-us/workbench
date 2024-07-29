@@ -12,7 +12,6 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/index';
-import { setImmediate } from 'timers';
 
 export async function waitAndExecute(timeMs?: number) {
   await new Promise((resolve) => setTimeout(resolve, timeMs || 100));
