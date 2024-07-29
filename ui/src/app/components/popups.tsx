@@ -43,8 +43,7 @@ const styles = {
   },
 };
 
-// Enable stubbing out dimensions for testing purposes. Enzyme does not have
-// associated DOM, and therefore cannot do bounding box computations.
+// Enable stubbing out dimensions for testing purposes.
 let popupDimensionsOverride = null;
 export const stubPopupDimensions = (
   stub = {
@@ -378,7 +377,6 @@ interface PopupTriggerProps {
   side?: string;
 }
 
-// to test PopupTrigger using Enzyme simulate a click on the child element
 export class PopupTrigger extends React.Component<PopupTriggerProps, any> {
   static readonly defaultProps = {
     closeOnClick: false,
