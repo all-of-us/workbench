@@ -100,6 +100,17 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       .finally(() => this.setState({ loadingWorkspace: false }));
   }
 
+  async populateWorkspaceDetails() {
+    const { ns } = this.props.match.params;
+    this.setState({ loadingWorkspace: true });
+
+    await workspaceAdminApi()
+      .getWorkspaceAdminView(ns)
+      .then((workspaceDetails) => this.setState({ workspaceDetails }))
+      .catch(this.handleDataLoadError)
+      .finally(() => this.setState({ loadingWorkspace: false }));
+  }
+
   render() {
     const {
       cloudStorageTraffic,
@@ -130,7 +141,10 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 }
               />
             )}
-            <BasicInformation {...{ workspace, activeStatus }} />
+            <BasicInformation
+              {...{ workspace, activeStatus }}
+              reload={async () => await this.populateWorkspaceDetails()}
+            />
             <ResearchPurposeSection {...{ researchPurpose }} />
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
               <>
