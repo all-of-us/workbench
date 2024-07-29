@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -87,14 +86,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final DataSetDao dataSetDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
-  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FireCloudService fireCloudService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
-  private final Provider<WorkbenchConfig> workspaceConfigProvider;
   private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
@@ -114,7 +111,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       DataSetDao dataSetDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceDao featuredWorkspaceDao,
-      FeaturedWorkspaceService featuredWorkspaceService,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoNotebooksClient,
@@ -138,7 +134,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.dataSetDao = dataSetDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
-    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -148,7 +143,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
-    this.workspaceConfigProvider = workspaceConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
@@ -248,8 +242,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, featuredWorkspaceService);
+    Workspace workspace = workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
@@ -261,9 +254,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
     return new WorkspaceAdminView()
-        .workspace(
-            workspaceMapper.toApiWorkspace(
-                dbWorkspace, new RawlsWorkspaceDetails(), featuredWorkspaceService))
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }

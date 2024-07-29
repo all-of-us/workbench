@@ -10,7 +10,7 @@ import { Header } from 'app/components/headers';
 import { Spinner } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { featuredWorkspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
@@ -86,6 +86,7 @@ const createTab = (title, description, icon, category) => ({
         workspace.workspace.featuredCategory !== null &&
         workspace.workspace.featuredCategory === category
     ),
+  category,
 });
 
 const libraryTabs = {
@@ -173,7 +174,10 @@ export const FeaturedWorkspaces = (props) => {
     setPendingWorkspaceRequests((prev) => prev + 1);
 
     try {
-      const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
+      const workspacesReceived =
+        await featuredWorkspacesApi().getFeaturedWorkspacesByCategory(
+          currentTab.category
+        );
       workspacesReceived.items.sort((a, b) =>
         a.workspace.name.localeCompare(b.workspace.name)
       );
