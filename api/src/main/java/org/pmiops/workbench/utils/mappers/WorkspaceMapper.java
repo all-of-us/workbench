@@ -230,10 +230,6 @@ public interface WorkspaceMapper {
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 
-  default String cdrVersionId(CdrVersion cdrVersion) {
-    return String.valueOf(cdrVersion.getCdrVersionId());
-  }
-
   TestUserWorkspace toTestUserWorkspace(Workspace workspace, String username);
 
   @Mapping(target = "terraName", source = "workspace.name")

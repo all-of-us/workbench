@@ -2,6 +2,7 @@ package org.pmiops.workbench.institution;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -21,7 +22,6 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     config = MapStructConfig.class,
     nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
 public interface InstitutionTierConfigMapper {
-  // InstitutionTierConfig to DbInstitutionTierRequirement
   List<DbInstitutionTierRequirement> tierConfigsToDbTierRequirements(
       List<InstitutionTierConfig> tierConfigs,
       @Context DbInstitution dbInstitution,
@@ -50,37 +50,27 @@ public interface InstitutionTierConfigMapper {
                 dbAccessTiers, source.getAccessTierShortName()));
   }
 
-  // InstitutionTierConfig to DbInstitutionEmailDomain
-  Set<DbInstitutionEmailDomain> emailDomainsToDb(
-      Set<String> emailDomains,
-      @Context DbInstitution dbInstitution,
-      @Context DbAccessTier dbAccessTier);
-
-  default DbInstitutionEmailDomain emailDomainToDb(
-      String emailDomain,
-      @Context DbInstitution dbInstitution,
-      @Context DbAccessTier dbAccessTier) {
-    return new DbInstitutionEmailDomain()
-        .setEmailDomain(emailDomain)
-        .setInstitution(dbInstitution)
-        .setAccessTier(dbAccessTier);
+  default Set<DbInstitutionEmailDomain> emailDomainsToDb(
+      Set<String> emailDomains, DbInstitution institution, DbAccessTier accessTier) {
+    return emailDomains.stream()
+        .map(emailDomain -> emailDomainToDb(emailDomain, institution, accessTier))
+        .collect(Collectors.toSet());
   }
 
-  // InstitutionTierConfig to DbInstitutionEmailAddress
-  Set<DbInstitutionEmailAddress> emailAddressesToDb(
-      Set<String> emailAddresses,
-      @Context DbInstitution dbInstitution,
-      @Context DbAccessTier dbAccessTier);
+  @Mapping(target = "institutionEmailDomainId", ignore = true)
+  DbInstitutionEmailDomain emailDomainToDb(
+      String emailDomain, DbInstitution institution, DbAccessTier accessTier);
 
-  default DbInstitutionEmailAddress emailAddressToDb(
-      String emailAddress,
-      @Context DbInstitution dbInstitution,
-      @Context DbAccessTier dbAccessTier) {
-    return new DbInstitutionEmailAddress()
-        .setEmailAddress(emailAddress)
-        .setInstitution(dbInstitution)
-        .setAccessTier(dbAccessTier);
+  default Set<DbInstitutionEmailAddress> emailAddressesToDb(
+      Set<String> emailAddresses, DbInstitution institution, DbAccessTier accessTier) {
+    return emailAddresses.stream()
+        .map(emailAddress -> emailAddressToDb(emailAddress, institution, accessTier))
+        .collect(Collectors.toSet());
   }
+
+  @Mapping(target = "institutionEmailAddressId", ignore = true)
+  DbInstitutionEmailAddress emailAddressToDb(
+      String emailAddress, DbInstitution institution, DbAccessTier accessTier);
 
   // Combine DbInstitutionTierRequirement, emailAddresses, and emailDomains into
   // InstitutionTierConfig.
