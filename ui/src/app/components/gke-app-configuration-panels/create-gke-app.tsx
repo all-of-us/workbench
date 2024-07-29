@@ -279,9 +279,7 @@ export const CreateGkeApp = ({
     : {};
 
   const canConfigureMachineType =
-    enableGKEAppMachineTypeChoice &&
-    !isAppActive(app) &&
-    otherApps(userApps, appType).length === 0;
+    enableGKEAppMachineTypeChoice && !isAppActive(app);
 
   const machineTypeDisabledText = cond(
     [
