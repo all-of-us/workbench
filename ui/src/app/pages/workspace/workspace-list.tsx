@@ -117,7 +117,11 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   options={filters}
                   defaultValue={defaultFilter}
                   onChange={({ value }) =>
-                    this.setState({ filterLevels: value })
+                    this.setState({
+                      filterLevels: value.map(
+                        (level) => WorkspaceAccessLevel[level]
+                      ),
+                    })
                   }
                   styles={{
                     control: (baseStyles) => ({
