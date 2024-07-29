@@ -594,7 +594,7 @@ public class WorkspaceAdminServiceTest {
             FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString(),
             null);
     boolean publish = true;
-    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
+    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 
@@ -643,7 +643,7 @@ public class WorkspaceAdminServiceTest {
             dbFeaturedWorkspaceToSave.getCategory().toString(),
             existingDbFeaturedWorkspace.getCategory().toString());
     boolean publish = true;
-    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
+    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
 
     // We should not update the ACL as we are just updating the category and the workspace is
     // already published
@@ -687,7 +687,7 @@ public class WorkspaceAdminServiceTest {
             workspace.getWorkspaceId(), request.getCategory().toString(), "");
     boolean publish = true;
     verify(mailService, never())
-        .sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
+        .sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
   }
 
   @Test
@@ -714,7 +714,7 @@ public class WorkspaceAdminServiceTest {
     verify(mockAdminAuditor)
         .fireUnpublishWorkspaceAction(mockDbWorkspace.getWorkspaceId(), "TUTORIAL_WORKSPACES");
     boolean publish = false;
-    verify(mailService).sendPublishUnpublishWorkspaceEmail(any(), any(), eq(publish), any());
+    verify(mailService).sendPublishUnpublishWorkspaceEmails(any(), any(), eq(publish), any());
 
     // verify that the ACL update was performed as the RWB system, not as the admin user
 

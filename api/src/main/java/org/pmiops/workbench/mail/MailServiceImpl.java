@@ -388,7 +388,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendPublishUnpublishWorkspaceEmail(
+  public void sendPublishUnpublishWorkspaceEmails(
       DbWorkspace workspace,
       List<DbUser> owners,
       boolean publish,

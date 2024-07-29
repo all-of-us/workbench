@@ -71,7 +71,18 @@ public interface MailService {
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
 
-  void sendPublishUnpublishWorkspaceEmail(
+  /**
+   * Sends emails to workspace owners notifying them that a workspace has been published or
+   * unpublished. Note that it sends one email per owner, in order to address them in text
+   * individually.
+   *
+   * @param workspace the workspace being modified
+   * @param owners the workspace's owners
+   * @param publish whether the workspace is being published or unpublished
+   * @param publishCategory the category the workspace is being published to, if applicable
+   * @throws MessagingException
+   */
+  void sendPublishUnpublishWorkspaceEmails(
       DbWorkspace workspace,
       List<DbUser> owners,
       boolean publish,
