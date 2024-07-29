@@ -259,6 +259,27 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  getPublishedWorkspaces(): Promise<WorkspaceResponseListResponse> {
+    return new Promise<WorkspaceResponseListResponse>((resolve) => {
+      const publishedWorkspaces = this.workspaces.filter(
+        (w) => w.published === true
+      );
+      resolve({
+        items: publishedWorkspaces.map((workspace) => {
+          let accessLevel: WorkspaceAccessLevel =
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          if (this.workspaceAccess.has(workspace.id)) {
+            accessLevel = this.workspaceAccess.get(workspace.id);
+          }
+          return {
+            workspace: { ...workspace },
+            accessLevel: accessLevel,
+          };
+        }),
+      });
+    });
+  }
+
   getWorkspacesForReview(): Promise<WorkspaceListResponse> {
     return new Promise<WorkspaceListResponse>((resolve) => {
       resolve({
@@ -339,22 +360,5 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   notebookTransferComplete(): Promise<boolean> {
     return new Promise<boolean>((resolve) => resolve(true));
-  }
-
-  getPublishedWorkspaces(): Promise<WorkspaceResponseListResponse> {
-    return new Promise<WorkspaceResponseListResponse>((resolve) => {
-      resolve({
-        items: this.workspaces.map((workspace) => {
-          const accessLevel: WorkspaceAccessLevel =
-            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
-          if (workspace.featuredCategory != null) {
-            return {
-              workspace: { ...workspace },
-              accessLevel: accessLevel,
-            };
-          }
-        }),
-      });
-    });
   }
 }
