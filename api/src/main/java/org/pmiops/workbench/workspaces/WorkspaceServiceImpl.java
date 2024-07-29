@@ -43,7 +43,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.mail.MailService;
@@ -89,7 +88,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final DataSetService dataSetService;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
@@ -116,7 +114,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       DataSetService dataSetService,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
-      FeaturedWorkspaceService featuredWorkspaceService,
       FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
@@ -141,7 +138,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.dataSetService = dataSetService;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
-    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
@@ -161,8 +157,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
@@ -177,8 +172,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
         .toList();
@@ -187,8 +181,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), featuredWorkspaceService)
+        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
@@ -228,8 +221,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, featuredWorkspaceService);
+    Workspace workspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceResponse.setWorkspace(workspace);
 
     return workspaceResponse;

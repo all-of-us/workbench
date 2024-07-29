@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -37,7 +36,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       Logger.getLogger(ImpersonatedWorkspaceServiceImpl.class.getName());
 
   private final BillingProjectAuditor billingProjectAuditor;
-  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FireCloudService firecloudService;
   private final FirecloudMapper firecloudMapper;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
@@ -48,7 +46,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   @Autowired
   public ImpersonatedWorkspaceServiceImpl(
       BillingProjectAuditor billingProjectAuditor,
-      FeaturedWorkspaceService featuredWorkspaceService,
       FireCloudService firecloudService,
       FirecloudMapper firecloudMapper,
       ImpersonatedFirecloudService impersonatedFirecloudService,
@@ -56,7 +53,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.billingProjectAuditor = billingProjectAuditor;
-    this.featuredWorkspaceService = featuredWorkspaceService;
     this.firecloudMapper = firecloudMapper;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
@@ -76,9 +72,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       return workspaceMapper
           .toApiWorkspaceResponseList(
-              workspaceDao,
-              impersonatedFirecloudService.getWorkspaces(dbUser),
-              featuredWorkspaceService)
+              workspaceDao, impersonatedFirecloudService.getWorkspaces(dbUser))
           .stream()
           .filter(response -> response.getAccessLevel() == WorkspaceAccessLevel.OWNER)
           .collect(Collectors.toList());

@@ -1870,8 +1870,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmptyResponse'
-  /v1/admin/workspaces/{workspaceNamespace}/unpublish:
-    post:
+    delete:
       tags:
         - workspaceAdmin
       description: Unpublish a workspace removing it from Featured Workspaces tab. Requires
@@ -12011,9 +12010,6 @@ components:
         category:
           $ref: '#/components/schemas/FeaturedWorkspaceCategory'
           description: The name of the category to which the workspace should be published
-        description:
-          type: string
-          description: The description of why the workspace is being published
     AccountPropertyUpdate:
       required:
       - accessBypassRequests

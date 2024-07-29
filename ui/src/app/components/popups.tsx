@@ -43,18 +43,8 @@ const styles = {
   },
 };
 
-// Enable stubbing out dimensions for testing purposes.
-let popupDimensionsOverride = null;
-export const stubPopupDimensions = (
-  stub = {
-    element: { width: 0, height: 0 },
-    target: { top: 0, bottom: 0, left: 0, right: 0 },
-    viewport: { width: 0, height: 0 },
-  }
-) => (popupDimensionsOverride = stub);
-
-const computeNewDimensions = (el, target) =>
-  popupDimensionsOverride || {
+const computeNewDimensions = (el, target) => {
+  return {
     element: fp.pick(['width', 'height'], el.current.getBoundingClientRect()),
     target: fp.pick(
       ['top', 'bottom', 'left', 'right'],
@@ -62,6 +52,7 @@ const computeNewDimensions = (el, target) =>
     ),
     viewport: { width: window.innerWidth, height: window.innerHeight },
   };
+};
 
 interface WithDynamicPositionProps {
   target: string;
