@@ -394,19 +394,22 @@ public class MailServiceImpl implements MailService {
 
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
-    sendWithRetries(
-        ownersEmailList(owners),
-        Collections.singletonList(supportEmail),
-        "Your AoU Researcher Workbench workspace has been published",
-        String.format(
-            "Publish workspace email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
-        buildHtml(
-            PUBLISH_WORKSPACE_RESOURCE,
-            publishUnpublishWorkspaceSubstitutionMap(
-                workspace,
-                featuredWorkspaceCategoryAsDisplayString(publishCategory),
-                supportEmail)));
+    for (DbUser owner : owners) {
+      sendWithRetries(
+          List.of(owner.getContactEmail()),
+          Collections.singletonList(supportEmail),
+          "Your AoU Researcher Workbench workspace has been published",
+          String.format(
+              "Publish workspace email for workspace '%s' (%s) sent to owners %s",
+              workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+          buildHtml(
+              PUBLISH_WORKSPACE_RESOURCE,
+              publishUnpublishWorkspaceSubstitutionMap(
+                  workspace,
+                  owner,
+                  featuredWorkspaceCategoryAsDisplayString(publishCategory),
+                  supportEmail)));
+    }
   }
 
   @Override
@@ -415,16 +418,18 @@ public class MailServiceImpl implements MailService {
 
     String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
 
-    sendWithRetries(
-        ownersEmailList(owners),
-        Collections.singletonList(supportEmail),
-        "Your AoU Researcher Workbench workspace has been Unpublished",
-        String.format(
-            "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
-        buildHtml(
-            UNPUBLISH_WORKSPACE_RESOURCE,
-            publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
+    for (DbUser owner : owners) {
+      sendWithRetries(
+          List.of(owner.getContactEmail()),
+          Collections.singletonList(supportEmail),
+          "Your AoU Researcher Workbench workspace has been Unpublished",
+          String.format(
+              "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
+              workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+          buildHtml(
+              UNPUBLISH_WORKSPACE_RESOURCE,
+              publishUnpublishWorkspaceSubstitutionMap(workspace, owner, "", supportEmail)));
+    }
   }
 
   private String featuredWorkspaceCategoryAsDisplayString(
@@ -655,7 +660,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
-      DbWorkspace workspace, String publishCategory, String supportEmail) {
+      DbWorkspace workspace, DbUser user, String publishCategory, String supportEmail) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
