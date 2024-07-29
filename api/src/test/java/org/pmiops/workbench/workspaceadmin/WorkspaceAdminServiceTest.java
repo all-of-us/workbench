@@ -546,7 +546,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testPublishUnpublishWorkspace() {
+  public void testDeprecatedPublishUnpublishWorkspace() {
     DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
     workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), true);
     assertThat(mustGetDbWorkspace(w).getPublished()).isTrue();
@@ -558,6 +558,8 @@ public class WorkspaceAdminServiceTest {
   @Test
   public void testPublishWorkspaceViaDB() throws MessagingException {
     // Arrange
+    setupPublishWorkspaceMocks();
+
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
 
     DbFeaturedWorkspace mockFeaturedWorkspace =
@@ -565,24 +567,15 @@ public class WorkspaceAdminServiceTest {
             .setWorkspace(mockDbWorkspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
-    PublishWorkspaceRequest publishWorkspaceRequest =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
-
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
-            DbFeaturedCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
             any(PublishWorkspaceRequest.class), any(DbWorkspace.class)))
         .thenReturn(mockFeaturedWorkspace);
 
-    String rtAuthDomainGroupEmail = "rt@broad.org";
-    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
-        .thenReturn(rtAuthDomainGroupEmail);
-
     // Act
+    PublishWorkspaceRequest publishWorkspaceRequest =
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     workspaceAdminService.publishWorkspaceViaDB(
         mockDbWorkspace.getWorkspaceNamespace(), publishWorkspaceRequest);
 
@@ -608,9 +601,9 @@ public class WorkspaceAdminServiceTest {
   public void testPublishWorkspaceViaDB_updateWithDifferentCategory() throws MessagingException {
 
     // Arrange
+    setupPublishWorkspaceMocks();
+
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     DbFeaturedWorkspace existingDbFeaturedWorkspace =
         new DbFeaturedWorkspace()
@@ -625,12 +618,10 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(existingDbFeaturedWorkspace));
 
+    PublishWorkspaceRequest request =
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(existingDbFeaturedWorkspace, request))
         .thenReturn(dbFeaturedWorkspaceToSave);
-
-    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
-            DbFeaturedCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     // Act
     workspaceAdminService.publishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace(), request);
@@ -657,18 +648,15 @@ public class WorkspaceAdminServiceTest {
   public void testPublishWorkspaceViaDB_updateWithSameCategory() throws MessagingException {
 
     // Arrange
+    setupPublishWorkspaceMocks();
+
     DbWorkspace workspace = workspaceDao.save(stubWorkspace("ns", "n"));
-    PublishWorkspaceRequest request =
-        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     DbFeaturedWorkspace mockFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(workspace)
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
-    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
-        .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
     when(mockFeaturedWorkspaceMapper.toDbFeaturedWorkspace(
             any(DbFeaturedWorkspace.class), any(PublishWorkspaceRequest.class)))
         .thenReturn(mockFeaturedWorkspace);
@@ -677,6 +665,8 @@ public class WorkspaceAdminServiceTest {
     when(mockFeaturedWorkspaceDao.save(any())).thenReturn(mockFeaturedWorkspace);
 
     // Act
+    PublishWorkspaceRequest request =
+        new PublishWorkspaceRequest().category(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     workspaceAdminService.publishWorkspaceViaDB(workspace.getWorkspaceNamespace(), request);
 
     // Assert
@@ -694,6 +684,8 @@ public class WorkspaceAdminServiceTest {
   public void testUnpublishWorkspaceViaDb() throws MessagingException {
 
     // Arrange
+    setupPublishWorkspaceMocks();
+
     DbWorkspace mockDbWorkspace = workspaceDao.save(stubWorkspace("ns", "n"));
     DbFeaturedWorkspace mockFeaturedworkspace =
         new DbFeaturedWorkspace()
@@ -701,10 +693,6 @@ public class WorkspaceAdminServiceTest {
             .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
     when(mockFeaturedWorkspaceDao.findByWorkspace(mockDbWorkspace))
         .thenReturn(Optional.of(mockFeaturedworkspace));
-
-    String rtAuthDomainGroupEmail = "rt@broad.org";
-    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
-        .thenReturn(rtAuthDomainGroupEmail);
 
     // Act
     workspaceAdminService.unpublishWorkspaceViaDB(mockDbWorkspace.getWorkspaceNamespace());
@@ -734,5 +722,39 @@ public class WorkspaceAdminServiceTest {
 
   private DbWorkspace mustGetDbWorkspace(DbWorkspace w) {
     return workspaceDao.findDbWorkspaceByWorkspaceId(w.getWorkspaceId());
+  }
+
+  private void setupPublishWorkspaceMocks() {
+    String rtAuthDomainGroupEmail = "rt@broad.org";
+    when(mockWorkspaceService.getPublishedWorkspacesGroupEmail())
+        .thenReturn(rtAuthDomainGroupEmail);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(FeaturedWorkspaceCategory.DEMO_PROJECTS))
+        .thenReturn(DbFeaturedCategory.DEMO_PROJECTS);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
+            FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY))
+        .thenReturn(DbFeaturedCategory.PHENOTYPE_LIBRARY);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(FeaturedWorkspaceCategory.COMMUNITY))
+        .thenReturn(DbFeaturedCategory.COMMUNITY);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.DEMO_PROJECTS))
+        .thenReturn(FeaturedWorkspaceCategory.DEMO_PROJECTS);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
+            DbFeaturedCategory.PHENOTYPE_LIBRARY))
+        .thenReturn(FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY);
+
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(DbFeaturedCategory.COMMUNITY))
+        .thenReturn(FeaturedWorkspaceCategory.COMMUNITY);
   }
 }
