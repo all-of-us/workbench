@@ -39,6 +39,11 @@ query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\
 where has_wear_consent = 1"
 wearConsentDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
+echo "Getting self_reported_category_concept_id column count"
+query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name='person' AND column_name = 'self_reported_category_concept_id'"
+selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 ###############################
 # CREATE cb_criteria_menu TABLE
 ###############################
@@ -85,8 +90,13 @@ insertCriteriaMenu "
 ($((++ID)),1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
 ($((++ID)),1,'Program Data','PERSON','GENDER','Gender Identity',0,4),
 ($((++ID)),1,'Program Data','PERSON','RACE','Race',0,5),
-($((++ID)),1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6),
-($((++ID)),2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
+($((++ID)),1,'Program Data','PERSON','SEX','Sex Assigned at Birth',0,6)"
+
+if [[ $selfReportedCategoryDataCount > 0 ]];
+then
+  insertCriteriaMenu "($((++ID)),1,'Program Data','PERSON','SELF_REPORTED_CATEGORY','Self Reported Category',0,7)"
+fi
+insertCriteriaMenu "($((++ID)),2,'Program Data','SURVEY','PPI','All Surveys',0,1)"
 
 echo "Adding surveys"
 query="select name from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`

@@ -46,7 +46,7 @@ public class WorkspaceTargetPropertyTest {
     workspace1 =
         new Workspace()
             .name("Workspace 1")
-            .id("fc-id-1")
+            .terraName("workspace1")
             .namespace("aou-rw-local1-c4be869a")
             .creator("user@fake-research-aou.org")
             .cdrVersionId("1")
@@ -60,7 +60,7 @@ public class WorkspaceTargetPropertyTest {
     workspace2 =
         new Workspace()
             .name("Workspace 2")
-            .id("fc-id-1")
+            .terraName("workspace2")
             .namespace("aou-rw-local1-c4be869a")
             .creator("user@fake-research-aou.org")
             .cdrVersionId("33")

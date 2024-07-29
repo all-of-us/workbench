@@ -7,6 +7,11 @@ set -e
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 
+echo "Getting self_reported_category_concept_id column count"
+query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name='person' AND column_name = 'self_reported_category_concept_id'"
+selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
 ID=1
 
 ################################################
@@ -153,6 +158,15 @@ VALUES
     ($((ID++)), 'ETHNICITY', 'p_ethnicity_concept.concept_name as ethnicity', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept ON person.ethnicity_concept_id = p_ethnicity_concept.concept_id', 'Person'),
     ($((ID++)), 'SEX_AT_BIRTH_CONCEPT_ID', 'person.sex_at_birth_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
     ($((ID++)), 'SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as sex_at_birth', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept ON person.sex_at_birth_concept_id = p_sex_at_birth_concept.concept_id', 'Person')"
+
+if [[ $selfReportedCategoryDataCount > 0 ]];
+  then
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+    VALUES
+        ($((ID++)), 'SELF_REPORTED_CATEGORY_CONCEPT_ID', 'person.self_reported_category_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+        ($((ID++)), 'SELF_REPORTED_CATEGORY', 'p_self_reported_category_concept.concept_name as self_reported_category', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_self_reported_category_concept ON person.self_reported_category_concept_id = p_self_reported_category_concept.concept_id', 'Person')"
+fi
 
 echo "ds_linking - inserting procedure data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \

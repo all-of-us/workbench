@@ -114,7 +114,8 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
-    "enableVariantSelectAll": true
+    "enablePublishedWorkspacesViaDb": false,
+    "enableGcsFuseOnGke": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
@@ -173,5 +174,8 @@
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-prod\/aou-rw-gar-remote-repo-docker-prod"
+  },
+  "banner": {
+    "enableLoginIssueBanner": false
   }
 }

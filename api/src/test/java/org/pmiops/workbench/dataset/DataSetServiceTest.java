@@ -64,6 +64,8 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -126,7 +128,6 @@ public class DataSetServiceTest {
 
   private DbWorkspace workspace;
   private DbCohort cohort;
-  private DbDataset dbDataset;
 
   @TestConfiguration
   @Import({
@@ -165,7 +166,6 @@ public class DataSetServiceTest {
     cohort = cohortDao.save(buildSimpleCohort(workspace));
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
-    dbDataset = createDbDataSetEntry();
   }
 
   private DbCohort buildSimpleCohort(DbWorkspace workspace) {
@@ -209,7 +209,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testThrowsForNoCohortOrConcept() {
-    final DataSetRequest invalidRequest = buildEmptyRequest();
+    final DataSetRequest invalidRequest = buildEmptyRequest().dataSetId(99L);
     invalidRequest.setDomainValuePairs(
         ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
     assertThrows(
@@ -431,23 +431,40 @@ public class DataSetServiceTest {
 
   @Test
   public void testDomainToBigQueryConfig() {
-    mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
-
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(3L);
     dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
     dbConceptSet = conceptSetDao.save(dbConceptSet);
 
+    DbDataset dbDataset =
+        dataSetDao.save(
+            new DbDataset()
+                .setName("blah")
+                .setCohortIds(ImmutableList.of(cohort.getCohortId()))
+                .setWorkspaceId(cohort.getWorkspaceId())
+                .setCreatorId(cohort.getCreator().getUserId())
+                .setInvalid(false)
+                .setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()))
+                .setPrePackagedConceptSet(
+                    ImmutableList.of(
+                        DbStorageEnums.prePackagedConceptSetsToStorage(
+                            PrePackagedConceptSetEnum.NONE)))
+                .setValues(
+                    ImmutableList.of(
+                        new DbDatasetValue()
+                            .setDomainId(domainToStorage(Domain.PERSON).toString())
+                            .setValue("PERSON_ID"))));
+
+    mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
+
     final DataSetRequest dataSetRequest =
         new DataSetRequest()
-            .conceptSetIds(ImmutableList.of(cohort.getCohortId()))
-            .cohortIds(ImmutableList.of(dbConceptSet.getConceptSetId()))
-            .domainValuePairs(ImmutableList.of(new DomainValuePair()))
+            .dataSetId(dbDataset.getDataSetId())
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of())
             .name("blah")
             .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            .cohortIds(ImmutableList.of(cohort.getCohortId()))
-            .domainValuePairs(
-                ImmutableList.of(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID")));
+            .domainValuePairs(ImmutableList.of());
 
     final Map<String, QueryJobConfiguration> result =
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
@@ -458,24 +475,40 @@ public class DataSetServiceTest {
 
   @Test
   public void testFitbitDomainToBigQueryConfig() {
+    DbDataset dbDataset =
+        dataSetDao.save(
+            new DbDataset()
+                .setName("blah")
+                .setCohortIds(ImmutableList.of(cohort.getCohortId()))
+                .setWorkspaceId(cohort.getWorkspaceId())
+                .setCreatorId(cohort.getCreator().getUserId())
+                .setInvalid(false)
+                .setConceptSetIds(ImmutableList.of())
+                .setPrePackagedConceptSet(
+                    ImmutableList.of(
+                        DbStorageEnums.prePackagedConceptSetsToStorage(
+                            PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL)))
+                .setValues(
+                    ImmutableList.of(
+                        new DbDatasetValue()
+                            .setDomainId(domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL).toString())
+                            .setValue("PERSON_ID"),
+                        new DbDatasetValue()
+                            .setDomainId(domainToStorage(Domain.FITBIT_HEART_RATE_LEVEL).toString())
+                            .setValue("DATETIME"))));
+
     mockLinkingTableQuery(
         ImmutableList.of(
             "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level"));
     setupDsLinkingTableForFitbit();
     final DataSetRequest dataSetRequest =
         new DataSetRequest()
+            .dataSetId(dbDataset.getDataSetId())
             .conceptSetIds(ImmutableList.of())
-            .cohortIds(ImmutableList.of(cohort.getCohortId()))
-            .domainValuePairs(ImmutableList.of(new DomainValuePair()))
+            .cohortIds(ImmutableList.of())
             .name("blah")
-            .prePackagedConceptSet(
-                ImmutableList.of(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
-            .domainValuePairs(
-                ImmutableList.of(
-                    new DomainValuePair().domain(Domain.FITBIT_HEART_RATE_LEVEL).value("PERSON_ID"),
-                    new DomainValuePair()
-                        .domain(Domain.FITBIT_HEART_RATE_LEVEL)
-                        .value("DATETIME")));
+            .prePackagedConceptSet(ImmutableList.of())
+            .domainValuePairs(ImmutableList.of());
 
     final Map<String, QueryJobConfiguration> result =
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
@@ -785,6 +818,7 @@ public class DataSetServiceTest {
 
   @Test
   public void test_userRecentModifiedEntry_saveDataSet() {
+    DbDataset dbDataset = createDbDataSetEntry();
     DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
     verify(userRecentResourceService)
         .updateDataSetEntry(dbDataset.getWorkspaceId(), dbDataset.getCreatorId(), dataset.getId());
@@ -792,6 +826,7 @@ public class DataSetServiceTest {
 
   @Test
   public void test_userRecentModifiedEntry_deleteDataSet() {
+    DbDataset dbDataset = createDbDataSetEntry();
     dbDataset = dataSetDao.save(dbDataset);
     long dataSetId = dbDataset.getDataSetId();
     dataSetServiceImpl.deleteDataSet(dbDataset.getWorkspaceId(), dataSetId);

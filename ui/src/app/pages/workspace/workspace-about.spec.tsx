@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 
 import {
   Authority,
+  FeaturedWorkspaceCategory,
   ProfileApi,
   RuntimeApi,
   WorkspaceAccessLevel,
@@ -19,6 +20,7 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
@@ -324,5 +326,92 @@ describe('WorkspaceAbout', () => {
     expect(screen.getByTestId('workspaceNamespace').textContent).toContain(
       workspace.namespace
     );
+  });
+
+  it('renders Community Workspace section when enabled', () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    component();
+    expect(screen.getByText('Community Workspace')).toBeInTheDocument();
+  });
+
+  it('does not render Community Workspace section when enablePublishedWorkspacesViaDb disabled', () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: false },
+    });
+    component();
+    expect(screen.queryByText('Community Workspace')).not.toBeInTheDocument();
+  });
+
+  it('Publish button is enabled for workspace owner when the workspace is not published previously', () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    component();
+    const publishButton = screen.getByText('Publish');
+    expectButtonElementEnabled(publishButton);
+  });
+
+  it('should disable publish button for non workspace owner', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    const nonOwnerWorkspace = {
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    };
+    currentWorkspaceStore.next(nonOwnerWorkspace);
+    component();
+    const publishButton = screen.getByText('Publish');
+    expectButtonElementDisabled(publishButton);
+
+    await user.hover(publishButton);
+    screen.getByText('Only workspace owners can publish workspaces');
+  });
+
+  it('should disable publish button for locked workspace', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.getValue(),
+      adminLocked: true,
+    });
+    component();
+    const publishButton = screen.getByText('Publish');
+    expectButtonElementDisabled(publishButton);
+
+    await user.hover(publishButton);
+    screen.getByText('Locked workspace cannot be published');
+  });
+
+  it('should disable publish button for workspace owner if workspace is already published', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    const publishedWorkspace = {
+      ...workspaceStubs[0],
+      featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    };
+    currentWorkspaceStore.next(publishedWorkspace);
+    component();
+    const publishButton = screen.getByText('Publish');
+    expectButtonElementDisabled(publishButton);
+
+    await user.hover(publishButton);
+    screen.getByText('Contact Support to unpublish');
+  });
+
+  it('should set showPublishConsentModal to true if publish button is clicked ', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
+    });
+    component();
+    await user.click(screen.getByText('Publish'));
+    expect(
+      screen.getByText('Publish As a Community Workspace')
+    ).toBeInTheDocument();
   });
 });

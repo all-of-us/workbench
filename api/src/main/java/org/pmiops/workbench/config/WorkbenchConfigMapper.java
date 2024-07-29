@@ -49,8 +49,11 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   @Mapping(target = "enableGKEAppPausing", source = "config.featureFlags.enableGKEAppPausing")
   @Mapping(
+      target = "enablePublishedWorkspacesViaDb",
+      source = "config.featureFlags.enablePublishedWorkspacesViaDb")
+  @Mapping(
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
-  @Mapping(target = "enableVariantSelectAll", source = "config.featureFlags.enableVariantSelectAll")
+  @Mapping(target = "enableLoginIssueBanner", source = "config.banner.enableLoginIssueBanner")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

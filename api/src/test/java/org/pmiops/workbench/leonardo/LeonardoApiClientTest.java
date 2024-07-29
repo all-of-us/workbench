@@ -156,6 +156,7 @@ public class LeonardoApiClientTest {
   public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_BASE_URL;
+    config.featureFlags.enableGcsFuseOnGke = true;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
@@ -249,6 +250,7 @@ public class LeonardoApiClientTest {
             .allowedChartName(LeonardoAllowedChartName.RSTUDIO)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
+            .bucketNameToMount(WORKSPACE_BUCKET)
             .customEnvironmentVariables(customEnvironmentVariables);
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);
@@ -274,6 +276,22 @@ public class LeonardoApiClientTest {
 
     assertThat(createAppRequest.isAutodeleteEnabled()).isTrue();
     assertThat(createAppRequest.getAutodeleteThreshold()).isEqualTo(10);
+  }
+
+  @Test
+  public void testCreateApp_mountGcsFuseDisabled() throws Exception {
+    config.featureFlags.enableGcsFuseOnGke = false;
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    leonardoApiClient.createApp(createAppRequest, testWorkspace);
+    verify(userAppsApi)
+        .createApp(
+            eq(GOOGLE_PROJECT_ID),
+            startsWith(getAppName(AppType.RSTUDIO)),
+            createAppRequestArgumentCaptor.capture());
+
+    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+
+    assertThat(createAppRequest.getBucketNameToMount()).isNull();
   }
 
   @Test

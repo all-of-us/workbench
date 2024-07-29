@@ -69,8 +69,28 @@ export const AccountCreationOptions = {
       label: 'Senior Researcher (PI/Team Lead, senior scientist)',
       value: InstitutionalRole.SENIOR_RESEARCHER,
     },
+    {
+      label: 'Associate Scientist',
+      value: InstitutionalRole.ASSOCIATE_SCIENTIST,
+    },
+    {
+      label: 'Mid-career Scientist',
+      value: InstitutionalRole.MID_CAREER_SCIENTIST,
+    },
+    {
+      label: 'Senior Scientist/Principal Scientist',
+      value: InstitutionalRole.SENIOR_SCIENTIST,
+    },
+    {
+      label: 'Data Analyst/Scientist',
+      value: InstitutionalRole.DATA_ANALYST,
+    },
     { label: 'Teacher/Instructor/Professor', value: InstitutionalRole.TEACHER },
     { label: 'Student', value: InstitutionalRole.STUDENT },
+    {
+      label: 'High School Student',
+      value: InstitutionalRole.HIGH_SCHOOL_STUDENT,
+    },
     { label: 'Administrator', value: InstitutionalRole.ADMIN },
     { label: 'Other (free text)', value: InstitutionalRole.OTHER },
   ],

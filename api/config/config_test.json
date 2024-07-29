@@ -79,7 +79,7 @@
     "loginUrl": "https:\/\/test.fake-research-aou.org/login"
   },
   "mandrill": {
-    "fromEmail": "support@researchallofus.org",
+    "fromEmail": "testSupport@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {
@@ -114,7 +114,8 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
-    "enableVariantSelectAll": true
+    "enablePublishedWorkspacesViaDb": true,
+    "enableGcsFuseOnGke": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -189,5 +190,8 @@
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev/all-of-us-workbench-test/aou-rw-gar-remote-repo-docker-test"
+  },
+  "banner": {
+    "enableLoginIssueBanner": false
   }
 }

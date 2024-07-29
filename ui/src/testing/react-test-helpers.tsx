@@ -98,6 +98,13 @@ export const expectDropdownDisabled = (
   ).not.toBeInTheDocument();
 };
 
+export const getDropdownSelection = (
+  container: HTMLElement,
+  dropDownName: string
+): string => {
+  return container.querySelector(`select[name='${dropDownName}']`).textContent;
+};
+
 export const getHTMLInputElementValue = (element: HTMLElement): string => {
   return (element as HTMLInputElement).value;
 };

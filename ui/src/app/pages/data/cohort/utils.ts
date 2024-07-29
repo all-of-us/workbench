@@ -167,6 +167,9 @@ export function typeToTitle(_type: string): string {
     case CriteriaType[CriteriaType.HAS_EHR_DATA]:
       _type = 'Has EHR Data';
       break;
+    case CriteriaType[CriteriaType.SELF_REPORTED_CATEGORY]:
+      _type = 'Self Reported Category';
+      break;
   }
   return _type;
 }
@@ -221,6 +224,8 @@ export function genderSexRaceOrEthTypeToText(
       return 'Race';
     case GenderSexRaceOrEthType.ETHNICITY:
       return 'Ethnicity';
+    case GenderSexRaceOrEthType.SELF_REPORTED_CATEGORY:
+      return 'Self Reported Category';
   }
 }
 

@@ -464,7 +464,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 new BadRequestException(
                     String.format(
                         BAD_REQUEST_MESSAGE,
-                        "gender, sex at birth, race or ethnicity parameter",
+                        "gender, sex at birth, race, ethnicity or self reported category parameter",
                         genderSexRaceOrEth)));
   }
 }

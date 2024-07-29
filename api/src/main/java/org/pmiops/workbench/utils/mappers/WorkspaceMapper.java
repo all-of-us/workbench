@@ -5,6 +5,7 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,16 +13,18 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.TestUserRawlsWorkspace;
+import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
 
 @Mapper(
@@ -35,30 +38,35 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
     })
 public interface WorkspaceMapper {
 
+  // DEPRECATED and subject to deletion.  Use terraName instead.
+  @Mapping(target = "id", source = "fcWorkspace.name")
+  // DEPRECATED and subject to deletion.
+  // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
+  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
-  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
-  @Mapping(target = "id", source = "fcWorkspace.name")
+  @Mapping(target = "displayName", source = "dbWorkspace.name")
+  @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "dbWorkspace.creator.username")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
+  @Mapping(target = "featuredCategory", ignore = true) // set by setFeaturedWorkspaceCategory()
+  Workspace toApiWorkspace(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceDetails fcWorkspace,
+      FeaturedWorkspaceService featuredWorkspaceService);
 
-  @Mapping(target = "cdrVersionId", source = "cdrVersion")
-  @Mapping(target = "creator", source = "creator.username")
-  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
-  @Mapping(
-      target = "googleBucketName",
-      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
-  // fcWorkspace)
-  @Mapping(target = "id", source = "firecloudName")
-  @Mapping(target = "namespace", source = "workspaceNamespace")
-  @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace);
+  @AfterMapping
+  default void setFeaturedWorkspaceCategory(
+      @MappingTarget Workspace workspace,
+      DbWorkspace dbWorkspace,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    workspace.setFeaturedCategory(
+        featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null));
+  }
 
   @Mapping(
       target = "accessLevel",
@@ -67,26 +75,14 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
-  default WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
-  default WorkspaceResponse toApiWorkspaceListResponse(
-      DbWorkspace dbWorkspace, RawlsWorkspaceListResponse rawlsWorkspaceResponse) {
-    return toApiWorkspaceResponse(
-        toApiWorkspace(dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
-        rawlsWorkspaceResponse.getAccessLevel());
-  }
-
-  default List<WorkspaceResponse> toApiWorkspaceResponses(
-      WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> workspaces) {
+  default List<WorkspaceResponse> toApiWorkspaceResponseList(
+      WorkspaceDao workspaceDao,
+      List<RawlsWorkspaceListResponse> fcWorkspaces,
+      FeaturedWorkspaceService featuredWorkspaceService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
-        workspaces.stream()
+        fcWorkspaces.stream()
             .collect(
                 Collectors.toMap(
                     fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
@@ -96,10 +92,13 @@ public interface WorkspaceMapper {
         workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
     return dbWorkspaces.stream()
         .map(
-            dbWorkspace ->
-                toApiWorkspaceListResponse(
-                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
-        .collect(Collectors.toList());
+            dbWorkspace -> {
+              var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
+              return toApiWorkspaceResponse(
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), featuredWorkspaceService),
+                  fcResponse.getAccessLevel());
+            })
+        .toList();
   }
 
   @Mapping(target = "timeReviewed", ignore = true)
@@ -109,8 +108,41 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
+  // DEPRECATED and subject to deletion.  Use terraName instead.
+  @Mapping(target = "id", source = "firecloudName")
+  @Mapping(target = "cdrVersionId", source = "cdrVersion")
+  @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
+  @Mapping(
+      target = "googleBucketName",
+      ignore = true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
+  // fcWorkspace)
+  @Mapping(target = "displayName", source = "name")
+  @Mapping(target = "terraName", source = "firecloudName")
+  @Mapping(target = "namespace", source = "workspaceNamespace")
+  @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "featuredCategory", ignore = true)
+  // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
+  Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
+
   @Mapping(target = "workspace", source = "dbWorkspace")
-  RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+  RecentWorkspace toApiRecentWorkspace(
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService);
+
+  @AfterMapping
+  default void setFeaturedWorkspaceCategory(
+      @MappingTarget RecentWorkspace recentWorkspace,
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      FeaturedWorkspaceService featuredWorkspaceService) {
+    recentWorkspace
+        .getWorkspace()
+        .setFeaturedCategory(
+            featuredWorkspaceService.getFeaturedCategory(dbWorkspace).orElse(null));
+  }
 
   /**
    * This method was written I think before we realized we could have multiple input arguments.
@@ -168,4 +200,9 @@ public interface WorkspaceMapper {
   default String cdrVersionId(CdrVersion cdrVersion) {
     return String.valueOf(cdrVersion.getCdrVersionId());
   }
+
+  TestUserWorkspace toTestUserWorkspace(Workspace workspace, String username);
+
+  @Mapping(target = "terraName", source = "workspace.name")
+  TestUserRawlsWorkspace toTestUserRawlsWorkspace(RawlsWorkspaceDetails workspace, String username);
 }

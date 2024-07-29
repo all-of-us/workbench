@@ -6,6 +6,7 @@ import jakarta.inject.Provider;
 import java.time.Clock;
 import java.util.Date;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -129,6 +130,52 @@ public class AdminAuditorImpl implements AdminAuditor {
             .targetIdMaybe(workspaceId)
             .targetPropertyMaybe("locked")
             .newValueMaybe("false")
+            .timestamp(timestamp)
+            .build();
+
+    actionAuditService.send(event);
+  }
+
+  public void firePublishWorkspaceAction(
+      long workspaceId, String updatedCategory, @Nullable String prevCategoryIfAny) {
+    DbUser dbUser = userProvider.get();
+    String actionId = actionIdProvider.get();
+    long timestamp = clock.millis();
+
+    ActionAuditEvent event =
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.PUBLISH)
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Category")
+            .previousValueMaybe(prevCategoryIfAny)
+            .newValueMaybe(updatedCategory)
+            .timestamp(timestamp)
+            .build();
+
+    actionAuditService.send(event);
+  }
+
+  public void fireUnpublishWorkspaceAction(long workspaceId, String prevCategory) {
+    DbUser dbUser = userProvider.get();
+    String actionId = actionIdProvider.get();
+    long timestamp = clock.millis();
+
+    ActionAuditEvent event =
+        ActionAuditEvent.builder()
+            .actionId(actionId)
+            .actionType(ActionType.UNPUBLISH)
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentEmailMaybe(dbUser.getUsername())
+            .agentIdMaybe(dbUser.getUserId())
+            .targetType(TargetType.WORKSPACE)
+            .targetIdMaybe(workspaceId)
+            .targetPropertyMaybe("Category")
+            .previousValueMaybe(prevCategory)
             .timestamp(timestamp)
             .build();
 

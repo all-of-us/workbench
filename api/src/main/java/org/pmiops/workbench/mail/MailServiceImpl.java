@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +51,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +95,11 @@ public class MailServiceImpl implements MailService {
   private static final String WELCOME_RESOURCE = "emails/welcome/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
       "emails/workspace_admin_locking/content.html";
+
+  private static final String PUBLISH_WORKSPACE_RESOURCE = "emails/publish_workspace/content.html";
+
+  private static final String UNPUBLISH_WORKSPACE_RESOURCE =
+      "emails/unpublish_workspace/content.html";
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
@@ -381,6 +388,56 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendPublishWorkspaceEmail(
+      DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
+      throws MessagingException {
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        ownersEmailList(owners),
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been published",
+        String.format(
+            "Publish workspace email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+        buildHtml(
+            PUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(
+                workspace,
+                featuredWorkspaceCategoryAsDisplayString(publishCategory),
+                supportEmail)));
+  }
+
+  @Override
+  public void sendUnpublishWorkspaceByAdminEmail(DbWorkspace workspace, List<DbUser> owners)
+      throws MessagingException {
+
+    String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+
+    sendWithRetries(
+        ownersEmailList(owners),
+        Collections.singletonList(supportEmail),
+        "Your AoU Researcher Workbench workspace has been Unpublished",
+        String.format(
+            "Unpublish workspace by admin email for workspace '%s' (%s) sent to owners %s",
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
+        buildHtml(
+            UNPUBLISH_WORKSPACE_RESOURCE,
+            publishUnpublishWorkspaceSubstitutionMap(workspace, "", supportEmail)));
+  }
+
+  private String featuredWorkspaceCategoryAsDisplayString(
+      FeaturedWorkspaceCategory featuredWorkspaceCategory) {
+    return switch (featuredWorkspaceCategory) {
+      case TUTORIAL_WORKSPACES -> "Tutorial Workspaces";
+      case PHENOTYPE_LIBRARY -> "Phenotype Library";
+      case DEMO_PROJECTS -> "Demonstration Projects";
+      case COMMUNITY -> "Community";
+    };
+  }
+
+  @Override
   public void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
       throws MessagingException {
     String htmlMessage =
@@ -410,16 +467,13 @@ public class MailServiceImpl implements MailService {
             ? List.of(config.mandrill.fromEmail)
             : Collections.emptyList();
 
-    final String ownersForLogging =
-        owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
-
     sendWithRetries(
-        owners.stream().map(DbUser::getContactEmail).toList(),
+        ownersEmailList(owners),
         ccSupportMaybe,
         "[Response Required] AoU Researcher Workbench Workspace Admin Locked",
         String.format(
             "Admin locking email for workspace '%s' (%s) sent to owners %s",
-            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging),
+            workspace.getName(), workspace.getWorkspaceNamespace(), ownersForLogging(owners)),
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
@@ -597,6 +651,18 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
         .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> publishUnpublishWorkspaceSubstitutionMap(
+      DbWorkspace workspace, String publishCategory, String supportEmail) {
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.WORKSPACE_NAME, workspace.getName())
+        .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
+        .put(EmailSubstitutionField.PUBLISH_CATEGORY, publishCategory)
+        .put(EmailSubstitutionField.SUPPORT_EMAIL, supportEmail)
         .build();
   }
 
@@ -826,5 +892,13 @@ public class MailServiceImpl implements MailService {
 
   private String userForLogging(DbUser user) {
     return userForLogging(user.getUsername(), user.getContactEmail());
+  }
+
+  private String ownersForLogging(Collection<DbUser> owners) {
+    return owners.stream().map(this::userForLogging).collect(Collectors.joining(", "));
+  }
+
+  private List<String> ownersEmailList(Collection<DbUser> owners) {
+    return owners.stream().map(DbUser::getContactEmail).toList();
   }
 }

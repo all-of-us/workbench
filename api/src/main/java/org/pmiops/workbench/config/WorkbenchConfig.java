@@ -40,6 +40,7 @@ public class WorkbenchConfig {
   public E2ETestUserConfig e2eTestUsers;
   public TermsOfServiceConfig termsOfService;
   public ArtifactRegistryConfig artifactRegistry;
+  public BannerConfig banner;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -316,8 +317,11 @@ public class WorkbenchConfig {
     public boolean enableGKEAppPausing;
     // If true, allows users to set machine type for their GKE apps
     public boolean enableGKEAppMachineTypeChoice;
-    // If true, enable variant select all
-    public boolean enableVariantSelectAll;
+    // If True, use featuredWorkspace Database to get data instead of featured_workspace.json config
+    // file
+    public boolean enablePublishedWorkspacesViaDb;
+    // If true, enable mounting GCS buckets on GKE apps
+    public boolean enableGcsFuseOnGke;
   }
 
   public static class ActionAuditConfig {
@@ -453,5 +457,9 @@ public class WorkbenchConfig {
 
   public static class ArtifactRegistryConfig {
     public String dockerRepoName;
+  }
+
+  public static class BannerConfig {
+    public boolean enableLoginIssueBanner;
   }
 }

@@ -17,6 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import colors, { addOpacity } from 'app/styles/colors';
 import { ReactComponent as circleEllipsis } from 'assets/icons/circle-ellipsis.svg';
 import { ReactComponent as controlledTierBadge } from 'assets/icons/controlled-tier-badge.svg';
+import CW_icon from 'assets/icons/CW_icon.png';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
 import { ReactComponent as locationArrow } from 'assets/icons/location-arrow.svg';
 import { ReactComponent as registeredTierBadge } from 'assets/icons/registered-tier-badge.svg';
@@ -193,3 +194,12 @@ const svgIcon =
     <img style={{ height: size, width: size }} src={src} {...props} />;
 
 export const GoogleCloudLogoSvg = svgIcon(googleCloudLogo);
+
+export const CommunityIcon = ({ size = 25, ...props }) => (
+  <img
+    aria-label={'Community Workspace'}
+    src={CW_icon}
+    style={{ width: size, height: size }}
+    {...props}
+  />
+);

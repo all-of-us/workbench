@@ -23,17 +23,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -46,18 +50,21 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PublishWorkspaceRequest;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -78,12 +85,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
+  private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  private final FeaturedWorkspaceDao featuredWorkspaceDao;
+  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final FireCloudService fireCloudService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final MailService mailService;
   private final NotebooksService notebooksService;
+  private final Provider<WorkbenchConfig> workspaceConfigProvider;
   private final Provider<DbUser> userProvider;
   private final UserMapper userMapper;
   private final UserService userService;
@@ -101,12 +112,16 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
+      FeaturedWorkspaceMapper featuredWorkspaceMapper,
+      FeaturedWorkspaceDao featuredWorkspaceDao,
+      FeaturedWorkspaceService featuredWorkspaceService,
       FireCloudService fireCloudService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       MailService mailService,
       NotebooksService notebooksService,
+      Provider<WorkbenchConfig> workspaceConfigProvider,
       Provider<DbUser> userProvider,
       UserMapper userMapper,
       UserService userService,
@@ -121,6 +136,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetDao = dataSetDao;
+    this.featuredWorkspaceMapper = featuredWorkspaceMapper;
+    this.featuredWorkspaceDao = featuredWorkspaceDao;
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.fireCloudService = fireCloudService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
@@ -130,6 +148,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.userProvider = userProvider;
     this.userMapper = userMapper;
     this.userService = userService;
+    this.workspaceConfigProvider = workspaceConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
@@ -229,8 +248,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
+    Workspace workspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace, featuredWorkspaceService);
+
     return new WorkspaceAdminView()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace))
+        .workspace(workspace)
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .collaborators(collaborators)
         .resources(adminWorkspaceResources)
@@ -239,7 +261,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
     return new WorkspaceAdminView()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
+        .workspace(
+            workspaceMapper.toApiWorkspace(
+                dbWorkspace, new RawlsWorkspaceDetails(), featuredWorkspaceService))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }
@@ -373,17 +397,11 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     dbWorkspace = workspaceDao.save(dbWorkspace);
     adminAuditor.fireLockWorkspaceAction(dbWorkspace.getWorkspaceId(), adminLockingRequest);
 
-    final List<DbUser> owners =
-        workspaceService
-            .getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName())
-            .stream()
-            .filter(userRole -> userRole.getRole() == WorkspaceAccessLevel.OWNER)
-            .map(UserRole::getEmail)
-            .map(userService::getByUsernameOrThrow)
-            .collect(Collectors.toList());
     try {
       mailService.sendWorkspaceAdminLockingEmail(
-          dbWorkspace, adminLockingRequest.getRequestReason(), owners);
+          dbWorkspace,
+          adminLockingRequest.getRequestReason(),
+          workspaceService.getWorkspaceOwnerList(dbWorkspace));
     } catch (final MessagingException e) {
       log.log(Level.WARNING, e.getMessage());
     }
@@ -403,18 +421,128 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, String firecloudName, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    final WorkspaceAccessLevel accessLevel =
-        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
-
-    var aclUpdate =
-        FirecloudTransforms.buildAclUpdate(
-            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
-
-    fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
+    fireCloudService.updateWorkspaceAclForPublishing(workspaceNamespace, firecloudName, publish);
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
+  }
+
+  @Override
+  public void publishWorkspaceViaDB(
+      String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
+    final DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
+
+    featuredWorkspaceDao
+        .findByWorkspace(dbWorkspace)
+        .ifPresentOrElse(
+            (dbFeaturedWorkspace) -> {
+              // Check if category in database is same as requested: If true do nothing, else update
+              // database
+              DbFeaturedCategory requestedCategory =
+                  featuredWorkspaceMapper.toDbFeaturedCategory(
+                      publishWorkspaceRequest.getCategory());
+
+              DbFeaturedCategory existingCategory = dbFeaturedWorkspace.getCategory();
+              if (existingCategory.equals(requestedCategory)) {
+                log.warning(
+                    String.format(
+                        "Workspace %s is already published in the same category",
+                        workspaceNamespace));
+                return;
+              }
+
+              log.info(
+                  String.format(
+                      "Featured Workspace %s under category %s will be re-published by Admin under new category %s ",
+                      workspaceNamespace, existingCategory, requestedCategory));
+              DbFeaturedWorkspace dbFeaturedWorkspaceToUpdate =
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      dbFeaturedWorkspace, publishWorkspaceRequest);
+              publishWorkspace(dbFeaturedWorkspaceToUpdate, existingCategory.toString());
+            },
+            () -> {
+              // Update Acl in firecloud so that everyone can view the workspace
+              fireCloudService.updateWorkspaceAclForPublishing(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), true);
+              DbFeaturedWorkspace dbFeaturedWorkspaceToSave =
+                  featuredWorkspaceMapper.toDbFeaturedWorkspace(
+                      publishWorkspaceRequest, dbWorkspace);
+              publishWorkspace(dbFeaturedWorkspaceToSave, null);
+            });
+  }
+
+  private void publishWorkspace(
+      DbFeaturedWorkspace dbFeaturedWorkspace, @Nullable String prevCategoryIfAny) {
+    DbWorkspace dbWorkspace = dbFeaturedWorkspace.getWorkspace();
+
+    FeaturedWorkspaceCategory requestedCategory =
+        featuredWorkspaceMapper.toFeaturedWorkspaceCategory(dbFeaturedWorkspace.getCategory());
+
+    // Save in database
+    featuredWorkspaceDao.save(dbFeaturedWorkspace);
+
+    // Fire Publish action type Audit action
+    adminAuditor.firePublishWorkspaceAction(
+        dbWorkspace.getWorkspaceId(), requestedCategory.toString(), prevCategoryIfAny);
+    log.info(
+        String.format(
+            "Workspace %s has been published by Admin", dbWorkspace.getWorkspaceNamespace()));
+
+    // Send Email to all workspace owners to let them know Workspace has been published
+    sendEmailToWorkspaceOwners(dbWorkspace, true, requestedCategory);
+  }
+
+  @Override
+  public void unpublishWorkspaceViaDB(String workspaceNamespace) {
+    final DbWorkspace dbWorkspace =
+        workspaceDao
+            .getByNamespace(workspaceNamespace)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Workspace Namespace %s was not found", workspaceNamespace)));
+    Optional<DbFeaturedWorkspace> dbFeaturedWorkspaceOptional =
+        featuredWorkspaceDao.findByWorkspace(dbWorkspace);
+
+    dbFeaturedWorkspaceOptional.ifPresentOrElse(
+        (dbFeaturedWorkspace) -> {
+          String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
+
+          fireCloudService.updateWorkspaceAclForPublishing(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), false);
+
+          featuredWorkspaceDao.delete(dbFeaturedWorkspace);
+          adminAuditor.fireUnpublishWorkspaceAction(dbWorkspace.getWorkspaceId(), featuredCategory);
+          log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
+
+          // Send email to all workspace owners to let them know workspace has been unpublished
+          sendEmailToWorkspaceOwners(dbWorkspace, false, null);
+        },
+        () -> {
+          // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do
+          // nothing
+          log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
+        });
+  }
+
+  private void sendEmailToWorkspaceOwners(
+      DbWorkspace dbWorkspace, boolean published, FeaturedWorkspaceCategory category) {
+    final List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
+    try {
+      if (published) {
+        mailService.sendPublishWorkspaceEmail(dbWorkspace, owners, category);
+      } else {
+        mailService.sendUnpublishWorkspaceByAdminEmail(dbWorkspace, owners);
+      }
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
+    }
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
