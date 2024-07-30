@@ -11,15 +11,15 @@ export class FeaturedWorkspacesApiStub extends FeaturedWorkspaceApi {
   getFeaturedWorkspacesByCategory(
     category
   ): Promise<WorkspaceResponseListResponse> {
-    console.log(category);
-    const altWorkspace = buildWorkspaceStubs(['Featured', 'category']);
+    const stubWorkspace = buildWorkspaceStubs([category, category + '1']);
     return new Promise((resolve, reject) => {
       resolve({
-        items: altWorkspace.map((workspace) => {
+        items: stubWorkspace.map((workspace) => {
           return {
             workspace: {
               ...workspace,
-              featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
+              creator: 'spec@fakeresearch.com',
+              featuredCategory: category as FeaturedWorkspaceCategory,
             },
             accessLevel: WorkspaceAccessLevel.OWNER,
           };
