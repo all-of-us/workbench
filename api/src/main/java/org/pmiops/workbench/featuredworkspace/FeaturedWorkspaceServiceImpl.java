@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
@@ -45,11 +46,13 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   }
 
   @Override
-  public List<WorkspaceResponse> getByFeaturedCategory(String category) {
+  public List<WorkspaceResponse> getWorkspaceResponseByFeaturedCategory(
+      FeaturedWorkspaceCategory featuredWorkspaceCategory) {
+    DbFeaturedCategory requestedDbCategory =
+        featuredWorkspaceMapper.toDbFeaturedCategory(featuredWorkspaceCategory);
+
     return featuredWorkspaceDao
-        .findDbFeaturedWorkspacesByCategory(
-            featuredWorkspaceMapper.toDbFeaturedCategory(
-                FeaturedWorkspaceCategory.fromValue(category)))
+        .findDbFeaturedWorkspacesByCategory(requestedDbCategory)
         .orElseGet(Collections::emptyList)
         .stream()
         .map(

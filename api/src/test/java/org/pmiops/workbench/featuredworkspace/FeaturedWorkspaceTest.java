@@ -75,7 +75,7 @@ public class FeaturedWorkspaceTest {
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(dbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(dbFeaturedWorkspace));
@@ -83,8 +83,7 @@ public class FeaturedWorkspaceTest {
         .hasValue(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
-  void mockFeaturedWorkspaces(
-      String namespace, DbFeaturedWorkspace.DbFeaturedCategory dbFeaturedCategory) {
+  void mockFeaturedWorkspaces(String namespace, DbFeaturedCategory dbFeaturedCategory) {
     DbWorkspace mockdbWorkspace =
         new DbWorkspace().setWorkspaceNamespace(namespace).setWorkspaceId(1);
 
@@ -112,37 +111,35 @@ public class FeaturedWorkspaceTest {
 
   @Test
   public void testGetByFeaturedCategory() {
-    mockFeaturedWorkspaces(
-        "Tutorial_namespace", DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
-    mockFeaturedWorkspaces(
-        "Phenotype_namespace", DbFeaturedWorkspace.DbFeaturedCategory.PHENOTYPE_LIBRARY);
+    mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    mockFeaturedWorkspaces("Phenotype_namespace", DbFeaturedCategory.PHENOTYPE_LIBRARY);
     mockFeaturedWorkspaces("Demo_namespace", DbFeaturedCategory.DEMO_PROJECTS);
     mockFeaturedWorkspaces("Community_namespace", DbFeaturedCategory.COMMUNITY);
 
     List<WorkspaceResponse> workspaceResponsesList =
-        featuredWorkspaceService.getByFeaturedCategory(
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     assertThat(workspaceResponsesList.size()).isEqualTo(1);
     assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
         .isEqualTo("Tutorial_namespace");
 
     workspaceResponsesList =
-        featuredWorkspaceService.getByFeaturedCategory(
-            FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY.toString());
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY);
     assertThat(workspaceResponsesList.size()).isEqualTo(1);
     assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
         .isEqualTo("Phenotype_namespace");
 
     workspaceResponsesList =
-        featuredWorkspaceService.getByFeaturedCategory(
-            FeaturedWorkspaceCategory.DEMO_PROJECTS.toString());
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.DEMO_PROJECTS);
     assertThat(workspaceResponsesList.size()).isEqualTo(1);
     assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
         .isEqualTo("Demo_namespace");
 
     workspaceResponsesList =
-        featuredWorkspaceService.getByFeaturedCategory(
-            FeaturedWorkspaceCategory.COMMUNITY.toString());
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.COMMUNITY);
     assertThat(workspaceResponsesList.size()).isEqualTo(1);
     assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
         .isEqualTo("Community_namespace");
@@ -151,11 +148,11 @@ public class FeaturedWorkspaceTest {
   @Test
   public void testGetByFeaturedCategory_none() {
     when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(
-            DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES))
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(Optional.empty());
     List<WorkspaceResponse> workspaceResponsesList =
-        featuredWorkspaceService.getByFeaturedCategory(
-            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES.toString());
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
     assertThat(workspaceResponsesList.size()).isEqualTo(0);
   }
 }

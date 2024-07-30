@@ -198,7 +198,7 @@ export const FeaturedWorkspaces = (props) => {
 
   useEffect(() => {
     props.hideSpinner();
-    updateWorkspaces();
+    getAllPublishedWorkspaces();
   }, [currentTab]);
 
   const areWorkspacesLoading = () => {
@@ -211,9 +211,9 @@ export const FeaturedWorkspaces = (props) => {
     <FlexRow style={{ height: '100%' }}>
       <div style={styles.navPanel}>
         <FlexColumn>
-          {libraryTabsArray.map((tab, i) => {
+          {libraryTabsArray.map((tab, index) => {
             return (
-              <React.Fragment key={i}>
+              <React.Fragment key={index}>
                 <LibraryTab
                   icon={tab.icon}
                   title={tab.title}
@@ -221,7 +221,7 @@ export const FeaturedWorkspaces = (props) => {
                   onClick={() => setCurrentTab(tab)}
                   data-test-id={tab.title}
                 />
-                {i !== libraryTabsArray.length - 1 && (
+                {index !== libraryTabsArray.length - 1 && (
                   <hr style={styles.libraryTabDivider} />
                 )}
               </React.Fragment>
@@ -286,7 +286,7 @@ export const FeaturedWorkspaces = (props) => {
                       key={wp.workspace.name}
                       workspace={wp.workspace}
                       accessLevel={wp.accessLevel}
-                      reload={() => updateWorkspaces()}
+                      reload={() => getAllPublishedWorkspaces()}
                       tierAccessDisabled={
                         !hasTierAccess(
                           profile,

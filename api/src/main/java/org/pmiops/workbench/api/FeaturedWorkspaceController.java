@@ -2,8 +2,10 @@ package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +48,16 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getFeaturedWorkspacesByCategory(
       String category) {
+    FeaturedWorkspaceCategory requestedCategory = FeaturedWorkspaceCategory.fromValue(category);
+
+    if (requestedCategory == null) {
+      throw new BadRequestException("Invalid featured workspace category: " + category);
+    }
+
     return ResponseEntity.ok(
         new WorkspaceResponseListResponse()
-            .items(featuredWorkspaceService.getByFeaturedCategory(category)));
+            .items(
+                featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+                    requestedCategory)));
   }
 }
