@@ -50,16 +50,14 @@ describe('AdminLockWorkspace', () => {
 
     expect(screen.queryByText('UNLOCK WORKSPACE')).not.toBeInTheDocument();
 
-    await act(async () => {
-      await user.click(lockButton);
+    await user.click(lockButton);
 
-      await waitFor(() => {
-        // lock reason is inside modal
-        const lockReasonTextArea = screen.getByLabelText(
-          'Enter reason for researchers on why workspace access is locked'
-        );
-        expect(lockReasonTextArea).toBeInTheDocument();
-      });
+    await waitFor(() => {
+      // lock reason is inside modal
+      const lockReasonTextArea = screen.getByLabelText(
+        'Enter reason for researchers on why workspace access is locked'
+      );
+      expect(lockReasonTextArea).toBeInTheDocument();
     });
   });
 
