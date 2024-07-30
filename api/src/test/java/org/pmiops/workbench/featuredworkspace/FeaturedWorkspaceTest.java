@@ -50,7 +50,6 @@ public class FeaturedWorkspaceTest {
     FeaturedWorkspaceServiceImpl.class,
   })
   @MockBean({AccessTierServiceImpl.class, WorkspaceAdminServiceImpl.class})
-
   static class Configuration {
     @Bean
     public WorkbenchConfig getConfig() {
