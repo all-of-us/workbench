@@ -15,6 +15,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { waitForNoSpinner } from '../../../testing/react-test-helpers';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -252,7 +253,8 @@ describe('NotebookLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
@@ -276,7 +278,8 @@ describe('NotebookLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
@@ -500,7 +503,8 @@ describe('TerminalLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
