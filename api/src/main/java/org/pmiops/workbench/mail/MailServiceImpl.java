@@ -392,24 +392,22 @@ public class MailServiceImpl implements MailService {
   public void sendPublishCommunityWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceEmails(
-        workspace, owners, PUBLISH_COMMUNITY_WORKSPACE_RESOURCE, "Publish", "published");
+        workspace, owners, PUBLISH_COMMUNITY_WORKSPACE_RESOURCE, "publish");
   }
 
   @Override
   public void sendAdminUnpublishWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException {
     sendPublishUnpublishWorkspaceEmails(
-        workspace, owners, UNPUBLISH_WORKSPACE_RESOURCE, "Unpublish", "unpublished");
+        workspace, owners, UNPUBLISH_WORKSPACE_RESOURCE, "unpublish");
   }
 
   private void sendPublishUnpublishWorkspaceEmails(
-      DbWorkspace workspace,
-      List<DbUser> owners,
-      String emailResource,
-      String presentTenseCapitalized,
-      String pastTense)
+      DbWorkspace workspace, List<DbUser> owners, String emailResource, String actionPresentTense)
       throws MessagingException {
     final String supportEmail = workbenchConfigProvider.get().mandrill.fromEmail;
+    final String presentTenseCapitalized = StringUtils.capitalize(actionPresentTense);
+    final String pastTense = actionPresentTense.toLowerCase() + "ed";
 
     for (DbUser owner : owners) {
       sendWithRetries(
