@@ -289,8 +289,6 @@ describe('AdminUserProfile', () => {
     component();
     await waitUntilPageLoaded();
 
-    screen.logTestingPlaygroundURL();
-
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
     expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);

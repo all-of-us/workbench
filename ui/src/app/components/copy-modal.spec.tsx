@@ -289,7 +289,6 @@ describe(CopyModal.name, () => {
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
 
     const copyButton = screen.getByText('Copy Notebook');
-    screen.logTestingPlaygroundURL();
     await userEvent.click(copyButton);
 
     expect(spy).toHaveBeenCalledWith(
