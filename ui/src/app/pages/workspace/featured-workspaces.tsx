@@ -192,10 +192,6 @@ export const FeaturedWorkspaces = (props) => {
     }
   };
 
-  const updateWorkspaces = async () => {
-    await getAllPublishedWorkspaces();
-  };
-
   useEffect(() => {
     props.hideSpinner();
     getAllPublishedWorkspaces();

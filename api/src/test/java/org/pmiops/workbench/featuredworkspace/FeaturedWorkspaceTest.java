@@ -36,13 +36,13 @@ import org.springframework.context.annotation.Import;
 public class FeaturedWorkspaceTest {
 
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  @MockBean private WorkspaceMapper workspaceMapper;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private WorkspaceMapper mockWorkspaceMapper;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
   private DbWorkspace dbWorkspace;
-  @MockBean private FireCloudService mockFireCloudService;
 
   @TestConfiguration
   @Import({
@@ -50,6 +50,7 @@ public class FeaturedWorkspaceTest {
     FeaturedWorkspaceServiceImpl.class,
   })
   @MockBean({AccessTierServiceImpl.class, WorkspaceAdminServiceImpl.class})
+
   static class Configuration {
     @Bean
     public WorkbenchConfig getConfig() {
@@ -60,7 +61,7 @@ public class FeaturedWorkspaceTest {
   @BeforeEach
   public void setUp() {
     dbWorkspace = new DbWorkspace().setWorkspaceNamespace("ns").setName("name");
-    when(featuredWorkspaceMapper.toFeaturedWorkspaceCategory(
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
             DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
@@ -96,7 +97,7 @@ public class FeaturedWorkspaceTest {
             mockdbWorkspace.getWorkspaceNamespace(), mockdbWorkspace.getFirecloudName()))
         .thenReturn(rawlsWorkspaceResponse);
 
-    when(featuredWorkspaceMapper.toDbFeaturedCategory(
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
             FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString())))
         .thenReturn(dbFeaturedCategory);
     when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(dbFeaturedCategory))
@@ -105,7 +106,7 @@ public class FeaturedWorkspaceTest {
         new Workspace()
             .namespace(namespace)
             .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
-    when(workspaceMapper.toApiWorkspace(mockdbWorkspace, rawlsWorkspaceResponse.getWorkspace()))
+    when(mockWorkspaceMapper.toApiWorkspace(mockdbWorkspace, rawlsWorkspaceResponse.getWorkspace()))
         .thenReturn(mockWorkspace);
   }
 
