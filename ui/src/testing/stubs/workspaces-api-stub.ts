@@ -197,7 +197,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   ): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>((resolve) => {
       const newEtag = fp.defaults(2, body.workspaceEtag + 1);
-      const newItems = fp.defaults([], body.items);
+      const newItems = body?.items || [];
       resolve({
         workspaceEtag: newEtag,
         items: newItems,
