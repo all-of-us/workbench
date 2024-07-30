@@ -21,7 +21,10 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
-import { expectButtonElementDisabled } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  renderWithRouter,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -78,7 +81,7 @@ describe(CopyModal.name, () => {
   let props: CopyModalProps;
 
   const component = () => {
-    return render(<CopyModal {...props} />);
+    return renderWithRouter(<CopyModal {...props} />);
   };
 
   const defaultNamespace = 'El Capitan';
@@ -286,6 +289,7 @@ describe(CopyModal.name, () => {
     const spy = jest.spyOn(notebooksApi(), 'copyNotebook');
 
     const copyButton = screen.getByText('Copy Notebook');
+    screen.logTestingPlaygroundURL();
     await userEvent.click(copyButton);
 
     expect(spy).toHaveBeenCalledWith(

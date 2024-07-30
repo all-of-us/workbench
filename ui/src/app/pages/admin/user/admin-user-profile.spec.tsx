@@ -107,9 +107,13 @@ describe('AdminUserProfile', () => {
     user = userEvent.setup();
   });
 
+  const waitUntilPageLoaded = async () => {
+    await screen.findByText('User Profile Information');
+  };
+
   it('should render', async () => {
     component();
-    await screen.findByText('User Profile Information');
+    await waitUntilPageLoaded();
   });
 
   it("should display the user's name, username, and initial credits usage", async () => {
@@ -132,7 +136,7 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
     expect(
       within(screen.getByTestId('name')).getByText(expectedFullName)
     ).toBeInTheDocument();
@@ -169,7 +173,7 @@ describe('AdminUserProfile', () => {
       updateTargetProfile({ accessTierShortNames });
 
       component();
-      await waitForNoSpinner();
+      await waitUntilPageLoaded();
       expect(
         within(screen.getByTestId('data-access-tiers')).getByText(expectedText)
       ).toBeInTheDocument();
@@ -180,7 +184,7 @@ describe('AdminUserProfile', () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
       name: /contact email/i,
@@ -207,7 +211,7 @@ describe('AdminUserProfile', () => {
     updateTargetProfile({ contactEmail: BROAD_ADDR_1 });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
       name: /contact email/i,
@@ -246,7 +250,7 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const contactEmailInput: HTMLInputElement = screen.getByRole('textbox', {
       name: /contact email/i,
@@ -284,7 +288,9 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
+
+    screen.logTestingPlaygroundURL();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
@@ -329,7 +335,7 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
 
@@ -373,7 +379,7 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const verifiedInstitutionDropdown = getDropdown('verifiedInstitution');
     expect(verifiedInstitutionDropdown.value).toEqual(VERILY.shortName);
@@ -426,7 +432,7 @@ describe('AdminUserProfile', () => {
     });
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const institutionalRoleDropdown = getDropdown('institutionalRole');
 
@@ -466,7 +472,7 @@ describe('AdminUserProfile', () => {
 
   it('should allow updating initial credit limit', async () => {
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const initialCreditsDropdown = getDropdown('initial-credits-dropdown');
 
@@ -502,7 +508,7 @@ describe('AdminUserProfile', () => {
 
   it('should render the titles of all expected access modules', async () => {
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const table = screen.getByTestId('access-module-table');
     const rows = within(table).getAllByRole('row');
@@ -582,7 +588,7 @@ describe('AdminUserProfile', () => {
         },
       });
       component();
-      await waitForNoSpinner();
+      await waitUntilPageLoaded();
 
       const table = screen.getByTestId('access-module-table');
       const rows = within(table).getAllByRole('row');
@@ -620,7 +626,7 @@ describe('AdminUserProfile', () => {
     );
 
     component();
-    await waitForNoSpinner();
+    await waitUntilPageLoaded();
 
     const table = screen.getByTestId('access-module-table');
     const rows = within(table).getAllByRole('row');
@@ -690,7 +696,7 @@ describe('AdminUserProfile', () => {
       });
 
       component();
-      await waitForNoSpinner();
+      await waitUntilPageLoaded();
 
       const table = screen.getByTestId('access-module-table');
       expect(
