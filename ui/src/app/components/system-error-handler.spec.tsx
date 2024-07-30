@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { StatusApi } from 'generated/fetch';
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import {
   registerApiClient,
   statusApi,
@@ -29,7 +29,10 @@ describe(SystemErrorHandler.name, () => {
     } catch (e) {
       // expected
     }
-    expect(spy).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should check status on 503', async () => {
@@ -43,7 +46,9 @@ describe(SystemErrorHandler.name, () => {
     } catch (e) {
       // expected
     }
-    expect(spy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should not check status on 502', async () => {
