@@ -8,6 +8,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+// Hooks cannot be tested outside of a functional component, so we need to use renderHook
 import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   registerApiClient,
