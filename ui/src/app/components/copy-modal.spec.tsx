@@ -10,7 +10,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {

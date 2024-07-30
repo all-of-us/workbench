@@ -76,8 +76,6 @@ describe('Account Creation- Institution', () => {
       screen.getByDisplayValue(/contactemail@broadinstitute\.org/i)
     ).toBeInTheDocument();
 
-    screen.logTestingPlaygroundURL();
-
     const combobox = screen.getByDisplayValue(
       'Research fellow (a post-doctoral fellow or medical resident in training)'
     );

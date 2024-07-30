@@ -15,7 +15,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { waitForNoSpinner } from '../../../testing/react-test-helpers';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -46,6 +45,7 @@ import {
   RuntimesApi as LeoRuntimesApi,
 } from 'notebooks-generated/fetch';
 
+import { waitForNoSpinner } from 'testing/react-test-helpers';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
