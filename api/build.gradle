@@ -916,9 +916,9 @@ task backfillGSuiteUserData(type: JavaExec) {
 }
 
 // See project.rb command: populate-dbfeatured-workspaces
-task populateDbFeaturedWorkspacesTable(type: JavaExec) {
+task backfillDbFeaturedWorkspacesTable(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    mainClass = "org.pmiops.workbench.tools.PopulateDbFeaturedWorkspaceTable"
+    mainClass = "org.pmiops.workbench.tools.BackfillDbFeaturedWorkspaceTable"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }

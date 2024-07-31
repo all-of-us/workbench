@@ -3031,12 +3031,12 @@ def populateDbFeaturedWorkspaceTable(cmd_name, *args)
 
   ENV.update(read_db_vars(gcc))
   CloudSqlProxyContext.new(gcc.project).run do
-    common.run_inline %W{./gradlew populateDbFeaturedWorkspacesTable -PappArgs=[#{gradle_args.join(',')}]}
+    common.run_inline %W{./gradlew backfillDbFeaturedWorkspacesTable -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
 Common.register_command({
-    :invocation => "populate-featuredWorkspace-table",
+    :invocation => "backfill-featuredWorkspace-table",
     :description => "Populates DbFeaturedWorkspace table from featured_workspace config file.\n",
     :fn => ->(*args) {populateDbFeaturedWorkspaceTable("populateDbFeaturedWorkspaceTable", *args)}
 })

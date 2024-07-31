@@ -20,10 +20,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PopulateDbFeaturedWorkspaceTable extends Tool {
+public class BackfillDbFeaturedWorkspaceTable extends Tool {
 
   private static final Logger log =
-      Logger.getLogger(PopulateDbFeaturedWorkspaceTable.class.getName());
+      Logger.getLogger(BackfillDbFeaturedWorkspaceTable.class.getName());
 
   private static final Option RW_PROJ_OPT =
       Option.builder()
@@ -55,7 +55,7 @@ public class PopulateDbFeaturedWorkspaceTable extends Tool {
   private final WorkspaceDao workspaceDao;
 
   @Autowired
-  public PopulateDbFeaturedWorkspaceTable(
+  public BackfillDbFeaturedWorkspaceTable(
       FeaturedWorkspaceDao featuredWorkspaceDao, WorkspaceDao workspaceDao) {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.workspaceDao = workspaceDao;
@@ -117,6 +117,6 @@ public class PopulateDbFeaturedWorkspaceTable extends Tool {
   }
 
   public static void main(String[] args) {
-    CommandLineToolConfig.runCommandLine(PopulateDbFeaturedWorkspaceTable.class, args);
+    CommandLineToolConfig.runCommandLine(BackfillDbFeaturedWorkspaceTable.class, args);
   }
 }
