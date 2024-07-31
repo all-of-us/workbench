@@ -42,7 +42,6 @@ class Common
 
   def initialize()
     @docker = DockerHelper.new(self)
-    @sf = SyncFiles.new(self)
   end
 
   def print_usage()
