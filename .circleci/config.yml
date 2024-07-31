@@ -196,6 +196,14 @@ commands:
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
 
+  gcloud-auth-login-oidc-stable:
+    description: "Activate CircleCI service account credential for the Stable environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: " 56507752110"  # all-of-us-rw-stable
+        wip_id: "circleci-wip-stable"
+        wip_provider_id: "circleci-oidc-prv-stable"
+
   gcloud-auth-login-oidc-staging:
     description: "Activate CircleCI service account credential for the Staging environment"
     steps:
