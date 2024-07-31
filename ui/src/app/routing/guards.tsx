@@ -97,7 +97,7 @@ export const getAccessModuleGuard = (): Guard => {
 };
 
 // This is temporary until we switch on the flag to get Published workspace from DB rather than config
-export const getDBPublishedFlagIsOff = (): Guard => {
+export const dBPublishedFlagIsOnGuard = (): Guard => {
   return {
     allowed: (): boolean =>
       serverConfigStore.get().config.enablePublishedWorkspacesViaDb,

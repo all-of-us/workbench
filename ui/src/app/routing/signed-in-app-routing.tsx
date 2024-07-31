@@ -50,8 +50,8 @@ import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 
 import {
   authorityGuard,
+  dBPublishedFlagIsOnGuard,
   getAccessModuleGuard,
-  getDBPublishedFlagIsOff,
   restrictDemographicSurvey,
 } from './guards';
 
@@ -354,7 +354,7 @@ export const SignedInRoutes = () => {
       <AppRoute
         exact
         path='/featured-workspaces'
-        guards={[getAccessModuleGuard(), getDBPublishedFlagIsOff()]}
+        guards={[getAccessModuleGuard(), dBPublishedFlagIsOnGuard()]}
       >
         <FeaturedWorkspacesPage
           routeData={{ title: 'Workspace Library', minimizeChrome: false }}
