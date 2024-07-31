@@ -1101,10 +1101,6 @@ workflows:
         - api-deps-check
         - api-integration-test
         - ui-unit-test
-    - api-contract-update-stable:
-        <<: *filter-release-tags
-        requires:
-        - deploy-to-stable
 
   deploy-staging:
     jobs:
