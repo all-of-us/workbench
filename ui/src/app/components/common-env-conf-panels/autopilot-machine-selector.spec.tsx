@@ -46,7 +46,8 @@ describe('AutopilotMachineSelector', () => {
     );
 
     const cpuInput = screen.getByRole('spinbutton', { name: 'CPUs' });
-    fireEvent.change(cpuInput, { target: { value: 4 } });
+    fireEvent.change(cpuInput, { target: { value: '4' } });
+    fireEvent.blur(cpuInput);
 
     expect(cpuInput).toHaveValue('4');
     await waitFor(() =>
@@ -69,12 +70,13 @@ describe('AutopilotMachineSelector', () => {
     );
 
     const memoryInput = screen.getByRole('spinbutton', { name: 'RAM (GB)' });
-    fireEvent.change(memoryInput, { target: { value: 16 } });
+    fireEvent.change(memoryInput, { target: { value: 12 } });
+    fireEvent.blur(memoryInput);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       ...selectedMachine,
       cpuInMillicores: 2000,
-      memoryInGb: 16,
+      memoryInGb: 12,
     });
   });
 
@@ -90,11 +92,12 @@ describe('AutopilotMachineSelector', () => {
 
     const cpuInput = screen.getByRole('spinbutton', { name: 'CPUs' });
     fireEvent.change(cpuInput, { target: { value: 0.5 } });
+    fireEvent.blur(cpuInput);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       ...selectedMachine,
       cpuInMillicores: 500,
-      memoryInGb: 0.5,
+      memoryInGb: 3.25,
     });
   });
 
@@ -110,6 +113,7 @@ describe('AutopilotMachineSelector', () => {
 
     const memoryInput = screen.getByRole('spinbutton', { name: 'RAM (GB)' });
     fireEvent.change(memoryInput, { target: { value: 65 } });
+    fireEvent.blur(memoryInput);
 
     expect(mockOnChange).toHaveBeenCalledWith({
       ...selectedMachine,
