@@ -204,6 +204,26 @@ commands:
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
 
+  deploy-to-stable-command:
+    description: "Deploy API and UI to stable App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-stable
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-staging \
+            --account << pipeline.parameters.circle-service-account >> \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-stable App Engine
+
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
     steps:
