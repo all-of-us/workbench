@@ -3,7 +3,6 @@ require "ostruct"
 require "yaml"
 
 require_relative "dockerhelper"
-require_relative "syncfiles"
 
 class Common
   @@commands = []
@@ -40,7 +39,6 @@ class Common
   end
 
   attr :docker
-  attr :sf
 
   def initialize()
     @docker = DockerHelper.new(self)
@@ -85,14 +83,6 @@ class Common
     else
       handler[:fn].call(*args.drop(1))
     end
-  end
-
-  def load_env()
-    if not File.exist?("project.yaml")
-      error "Missing project.yaml"
-      exit 1
-    end
-    OpenStruct.new YAML.load(File.read("project.yaml"))
   end
 
   def red_term_text(text)
