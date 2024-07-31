@@ -811,6 +811,12 @@ jobs:
               --promote \
               --auth-token $TANAGRA_DEPLOY_TOKEN
 
+  deploy-to-stable:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+    - deploy-to-stable-command
+
   # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
