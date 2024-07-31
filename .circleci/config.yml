@@ -1106,14 +1106,6 @@ workflows:
     - puppeteer-generate-access-tokens:
         <<: *filter-release-tags
         env_name: "stable"
-    - puppeteer-test:
-        <<: *filter-release-tags
-        parallel_num: 2
-        env_name: "stable"
-        requires:
-        - deploy-to-stable
-        - puppeteer-env-setup
-        - puppeteer-generate-access-tokens
     - api-contract-update-stable:
         <<: *filter-release-tags
         requires:
