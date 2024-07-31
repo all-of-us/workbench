@@ -432,7 +432,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
         .ifPresentOrElse(
-            (dbFeaturedWorkspace) -> {
+            dbFeaturedWorkspace -> {
               // Check if category in database is same as requested: If true do nothing, else update
               // database
               DbFeaturedCategory requestedCategory =
@@ -485,8 +485,18 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         String.format(
             "Workspace %s has been published by Admin", dbWorkspace.getWorkspaceNamespace()));
 
-    // Send Email to all workspace owners to let them know Workspace has been published
-    sendEmailToWorkspaceOwners(dbWorkspace, true, requestedCategory);
+    // send an email to all workspace owners to let them know that the workspace has been
+    // published, but only if it's a newly published Community Workspace
+
+    if (requestedCategory.equals(FeaturedWorkspaceCategory.COMMUNITY)
+        && prevCategoryIfAny == null) {
+      try {
+        mailService.sendPublishCommunityWorkspaceEmails(
+            dbWorkspace, workspaceService.getWorkspaceOwnerList(dbWorkspace));
+      } catch (final MessagingException e) {
+        log.log(Level.WARNING, e.getMessage());
+      }
+    }
   }
 
   @Override
@@ -502,7 +512,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         featuredWorkspaceDao.findByWorkspace(dbWorkspace);
 
     dbFeaturedWorkspaceOptional.ifPresentOrElse(
-        (dbFeaturedWorkspace) -> {
+        dbFeaturedWorkspace -> {
           String featuredCategory = dbFeaturedWorkspace.getCategory().toString();
 
           fireCloudService.updateWorkspaceAclForPublishing(
@@ -513,27 +523,17 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
           log.info(String.format("Workspace %s has been Unpublished by Admin", workspaceNamespace));
 
           // Send email to all workspace owners to let them know workspace has been unpublished
-          sendEmailToWorkspaceOwners(dbWorkspace, false, null);
+          try {
+            mailService.sendAdminUnpublishWorkspaceEmails(
+                dbWorkspace, workspaceService.getWorkspaceOwnerList(dbWorkspace));
+          } catch (final MessagingException e) {
+            log.log(Level.WARNING, e.getMessage());
+          }
         },
-        () -> {
-          // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do
-          // nothing
-          log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace));
-        });
-  }
-
-  private void sendEmailToWorkspaceOwners(
-      DbWorkspace dbWorkspace, boolean published, FeaturedWorkspaceCategory category) {
-    final List<DbUser> owners = workspaceService.getWorkspaceOwnerList(dbWorkspace);
-    try {
-      if (published) {
-        mailService.sendPublishWorkspaceEmail(dbWorkspace, owners, category);
-      } else {
-        mailService.sendUnpublishWorkspaceByAdminEmail(dbWorkspace, owners);
-      }
-    } catch (final MessagingException e) {
-      log.log(Level.WARNING, e.getMessage());
-    }
+        () ->
+            // If there is no entry in featuredWorkspace table i.e workspace has been unpublished do
+            // nothing
+            log.warning(String.format("Workspace %s is already Unpublished", workspaceNamespace)));
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
