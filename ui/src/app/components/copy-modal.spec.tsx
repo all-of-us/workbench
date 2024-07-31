@@ -10,7 +10,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
@@ -21,7 +21,10 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { cdrVersionStore } from 'app/utils/stores';
 
-import { expectButtonElementDisabled } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  renderWithRouter,
+} from 'testing/react-test-helpers';
 import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
@@ -78,7 +81,7 @@ describe(CopyModal.name, () => {
   let props: CopyModalProps;
 
   const component = () => {
-    return render(<CopyModal {...props} />);
+    return renderWithRouter(<CopyModal {...props} />);
   };
 
   const defaultNamespace = 'El Capitan';

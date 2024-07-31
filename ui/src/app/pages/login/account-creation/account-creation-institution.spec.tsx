@@ -15,6 +15,7 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import {
   BROAD,
@@ -75,13 +76,11 @@ describe('Account Creation- Institution', () => {
       screen.getByDisplayValue(/contactemail@broadinstitute\.org/i)
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByRole('combobox', {
-        hidden: true,
-      }).textContent
-    ).toBe(
+    const combobox = screen.getByDisplayValue(
       'Research fellow (a post-doctoral fellow or medical resident in training)'
     );
+
+    expect(combobox).toBeInTheDocument();
   });
 
   it('should load dropdown with institutions list and institutions Role list', async () => {
@@ -141,9 +140,9 @@ describe('Account Creation- Institution', () => {
     mockGetPublicInstitutionDetails.mockRejectedValueOnce(
       new Response(null, { status: 500 })
     );
-    const { container } = setup();
+    setup();
 
-    await waitForSpinnerToGoAway(container);
+    await waitForNoSpinner();
 
     // Confirm it shows error after spinner goes away
     expect(

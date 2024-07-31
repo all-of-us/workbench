@@ -45,6 +45,7 @@ import {
   RuntimesApi as LeoRuntimesApi,
 } from 'notebooks-generated/fetch';
 
+import { waitForNoSpinner } from 'testing/react-test-helpers';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
@@ -252,7 +253,8 @@ describe('NotebookLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
@@ -276,7 +278,8 @@ describe('NotebookLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 
@@ -500,7 +503,8 @@ describe('TerminalLauncher', () => {
     await screen.findByTestId(
       getCardSpinnerTestId(ProgressCardState.Redirecting)
     );
-
+    act(() => jest.runOnlyPendingTimers());
+    await waitForNoSpinner();
     await screen.findByTitle('Iframe Container');
     expect(mockNavigate).not.toHaveBeenCalled();
 

@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { QuickTourAndVideos } from './quick-tour-and-videos';
 
@@ -21,9 +22,10 @@ describe('Quick Tour and Videos', () => {
     expect(screen.queryByTestId('quick-tour-react')).not.toBeInTheDocument();
   });
 
-  it('should display quick tour when clicked', () => {
+  it('should display quick tour when clicked', async () => {
     component(false);
-    screen.getByAltText('show quick tour').click();
+    const user = userEvent.setup();
+    await user.click(screen.getByAltText('show quick tour'));
     expect(screen.getByTestId('quick-tour-react')).toBeInTheDocument();
   });
 
