@@ -1101,11 +1101,6 @@ workflows:
         - api-deps-check
         - api-integration-test
         - ui-unit-test
-    - puppeteer-env-setup:
-        <<: *filter-release-tags
-    - puppeteer-generate-access-tokens:
-        <<: *filter-release-tags
-        env_name: "stable"
     - api-contract-update-stable:
         <<: *filter-release-tags
         requires:
