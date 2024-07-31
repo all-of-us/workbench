@@ -39,6 +39,7 @@ export const MachineSelector = ({
     <Fragment>
       <FlexRow style={styles.labelAndInput}>
         <label
+          id={`${idPrefix}-cpu-label`}
           style={{ ...styles.label, ...cpuLabelStyles }}
           htmlFor={`${idPrefix}-cpu`}
         >
@@ -47,6 +48,7 @@ export const MachineSelector = ({
         <Dropdown
           id={`${idPrefix}-cpu`}
           name={`${idPrefix}-cpu`}
+          aria-labelledby={`${idPrefix}-cpu-label`}
           options={fp.flow(
             // Show all CPU options.
             fp.map('cpu'),
