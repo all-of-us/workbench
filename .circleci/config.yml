@@ -146,16 +146,16 @@ commands:
   gcloud-auth-login-oidc:
     description: "Activate CircleCI service account credential using OIDC"
     parameters:
-      project_id: 
+      project_id:
         type: string # env_var_name
         default: "602460048110" # Project ID for all-of-us-workbench-test
-      wip_id: 
+      wip_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL ID"
-      wip_provider_id: 
+      wip_provider_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL PROVIDER ID"
-      oidc_token_file_path: 
+      oidc_token_file_path:
         type: string
         default: /home/circleci/oidc_token.json
     steps:
@@ -1043,6 +1043,47 @@ workflows:
       - e2ev2-run:
           requires:
             - e2ev2-deploy-ui
+
+  deploy-stable:
+    jobs:
+    - api-local-test:
+        <<: *filter-release-tags
+    - api-unit-test:
+        <<: *filter-release-tags
+    - ui-unit-test:
+        <<: *filter-release-tags
+    - api-bigquery-test:
+        <<: *filter-release-tags
+    - api-deps-check:
+        <<: *filter-release-tags
+    - api-integration-test:
+        <<: *filter-release-tags
+    - deploy-to-stable:
+        <<: *filter-release-tags
+        requires:
+        - api-local-test
+        - api-unit-test
+        - api-bigquery-test
+        - api-deps-check
+        - api-integration-test
+        - ui-unit-test
+    - puppeteer-env-setup:
+        <<: *filter-release-tags
+    - puppeteer-generate-access-tokens:
+        <<: *filter-release-tags
+        env_name: "stable"
+    - puppeteer-test:
+        <<: *filter-release-tags
+        parallel_num: 2
+        env_name: "stable"
+        requires:
+        - deploy-to-stable
+        - puppeteer-env-setup
+        - puppeteer-generate-access-tokens
+    - api-contract-update-stable:
+        <<: *filter-release-tags
+        requires:
+        - deploy-to-stable
 
   deploy-staging:
     jobs:
