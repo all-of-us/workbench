@@ -764,20 +764,20 @@ describe(CreateGkeApp.name, () => {
         ).toBeInTheDocument();
       });
 
-      // it('renders AutopilotMachineSelector when enableAutopilot is true', async () => {
-      //   serverConfigStore.set({
-      //     config: {
-      //       ...defaultServerConfig,
-      //       enableGKEAppMachineTypeChoice: true,
-      //       enableAutopilot: true,
-      //     },
-      //   });
-      //   await component(appType);
-      //   expect(
-      //     screen.getByRole('spinbutton', { name: 'CPUs' })
-      //   ).toBeInTheDocument();
-      // });
-      //
+      it('renders AutopilotMachineSelector when enableAutopilot is true', async () => {
+        serverConfigStore.set({
+          config: {
+            ...defaultServerConfig,
+            enableGKEAppMachineTypeChoice: true,
+            enableAutopilot: true,
+          },
+        });
+        await component(appType);
+        expect(
+          screen.getByRole('spinbutton', { name: 'CPUs' })
+        ).toBeInTheDocument();
+      });
+
       // it('renders MachineSelector when enableAutopilot is false', async () => {
       //   serverConfigStore.set({
       //     config: {
@@ -793,7 +793,7 @@ describe(CreateGkeApp.name, () => {
       //     screen.getByRole('listbox', { name: 'CPUs' })
       //   ).toBeInTheDocument();
       // });
-      //
+
       // it('calls onChange handler and updates state correctly for AutopilotMachineSelector', async () => {
       //   await component(appType);
       //
