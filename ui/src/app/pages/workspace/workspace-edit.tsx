@@ -2006,10 +2006,7 @@ export const WorkspaceEdit = fp.flow(
                 <div>
                   Any research that focuses on certain population
                   characteristics or&nbsp;
-                  <TooltipTrigger
-                    content={toolTipTextDemographic}
-                    style={{ display: 'inline-block' }}
-                  >
+                  <TooltipTrigger content={toolTipTextDemographic}>
                     <LinkButton style={{ display: 'inline-block' }}>
                       uses demographic variables
                     </LinkButton>
@@ -2033,10 +2030,7 @@ export const WorkspaceEdit = fp.flow(
                   provide feedback and, if needed, guidance for modifying your
                   research purpose or scope. To learn more, please refer to
                   the&nbsp;
-                  <TooltipTrigger
-                    content={toolTipTextStigmatization}
-                    style={{ display: 'inline-block' }}
-                  >
+                  <TooltipTrigger content={toolTipTextStigmatization}>
                     <LinkButton style={{ display: 'inline-block' }}>
                       <AoU /> Stigmatizing Research Policy
                     </LinkButton>

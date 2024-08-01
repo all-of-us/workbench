@@ -477,7 +477,6 @@ export class AccountCreation extends React.Component<
               contain more than one period (.) in a row.
             </div>
           }
-          style={{ marginLeft: '0.75rem' }}
         >
           <InfoIcon style={{ height: '16px', paddingLeft: '2px' }} />
         </TooltipTrigger>
