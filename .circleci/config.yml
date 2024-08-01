@@ -146,16 +146,16 @@ commands:
   gcloud-auth-login-oidc:
     description: "Activate CircleCI service account credential using OIDC"
     parameters:
-      project_id: 
+      project_id:
         type: string # env_var_name
         default: "602460048110" # Project ID for all-of-us-workbench-test
-      wip_id: 
+      wip_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL ID"
-      wip_provider_id: 
+      wip_provider_id:
         type: string
         default: "REPLACE WITH WORKLOAD IDENTITY POOL PROVIDER ID"
-      oidc_token_file_path: 
+      oidc_token_file_path:
         type: string
         default: /home/circleci/oidc_token.json
     steps:
@@ -196,6 +196,14 @@ commands:
           wip_id: "circleci-wip-test"
           wip_provider_id: "circleci-oidc-prv-test"
 
+  gcloud-auth-login-oidc-stable:
+    description: "Activate CircleCI service account credential for the Stable environment"
+    steps:
+    - gcloud-auth-login-oidc:
+        project_id: " 56507752110"  # all-of-us-rw-stable
+        wip_id: "circleci-wip-stable"
+        wip_provider_id: "circleci-oidc-prv-stable"
+
   gcloud-auth-login-oidc-staging:
     description: "Activate CircleCI service account credential for the Staging environment"
     steps:
@@ -203,6 +211,26 @@ commands:
           project_id: "657299777109"  # all-of-us-rw-staging
           wip_id: "circleci-wip-staging"
           wip_provider_id: "circleci-oidc-prv-staging"
+
+  deploy-to-stable-command:
+    description: "Deploy API and UI to stable App Engine"
+    steps:
+    - checkout-code
+    - attach_workspace:
+        at: .
+    - gcloud-auth-login-oidc-stable
+    - run:
+        working_directory: ~/workbench/deploy
+        command: |
+          ./project.rb deploy \
+            --project all-of-us-rw-staging \
+            --account << pipeline.parameters.circle-service-account >> \
+            --git-version "${CIRCLE_TAG}" \
+            --app-version "${CIRCLE_TAG}" \
+            --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+            --key-file << pipeline.parameters.circle-service-account-key >> \
+            --promote
+        name: Deploy API and UI to all-of-us-rw-stable App Engine
 
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
@@ -791,6 +819,12 @@ jobs:
               --promote \
               --auth-token $TANAGRA_DEPLOY_TOKEN
 
+  deploy-to-stable:
+    executor: workbench-executor
+    resource_class: large
+    steps:
+    - deploy-to-stable-command
+
   # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
@@ -1043,6 +1077,30 @@ workflows:
       - e2ev2-run:
           requires:
             - e2ev2-deploy-ui
+
+  deploy-stable:
+    jobs:
+    - api-local-test:
+        <<: *filter-release-tags
+    - api-unit-test:
+        <<: *filter-release-tags
+    - ui-unit-test:
+        <<: *filter-release-tags
+    - api-bigquery-test:
+        <<: *filter-release-tags
+    - api-deps-check:
+        <<: *filter-release-tags
+    - api-integration-test:
+        <<: *filter-release-tags
+    - deploy-to-stable:
+        <<: *filter-release-tags
+        requires:
+        - api-local-test
+        - api-unit-test
+        - api-bigquery-test
+        - api-deps-check
+        - api-integration-test
+        - ui-unit-test
 
   deploy-staging:
     jobs:
