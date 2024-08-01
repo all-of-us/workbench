@@ -140,12 +140,14 @@ interface State {
   nodes: Array<any>;
 }
 
+interface Slider {
+  get: () => Array<string>;
+  set: (values: Array<number>) => void;
+}
+
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
-  slider: {
-    get: () => Array<string>;
-    set: (values: Array<number>) => void;
-  };
+  slider: Slider;
 
   constructor(props: Props) {
     super(props);
@@ -269,11 +271,8 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({ ageType }, () => this.calculateAgeFromNodes());
   }
 
-  onSliderInit(slider: React.ReactNode) {
-    // Property 'noUiSlider' does not exist on type 'ReactNode'
-    // TODO RW-5572 confirm proper behavior and fix
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    this.slider = slider['noUiSlider'];
+  onSliderInit(slider) {
+    this.slider = slider.noUiSlider;
     if (this.slider) {
       this.centerAgeCount();
     }

@@ -59,8 +59,8 @@ interface WithDynamicPositionProps {
   handleClickOutside?: () => void;
   outsideClickIgnoreClass?: string;
   onClick?: () => void;
+  children?: React.ReactNode;
 }
-
 export const withDynamicPosition = () => (WrappedComponent) => {
   const Wrapper = class WithDynamicPosition extends React.Component<
     WithDynamicPositionProps,
