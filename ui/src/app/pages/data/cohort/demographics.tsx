@@ -112,8 +112,8 @@ const ageTypes = [
   { label: 'Age at CDR Date', type: AttrName.AGE_AT_CDR },
 ];
 
-const defaultMinAge = '18';
-const defaultMaxAge = '120';
+const defaultMinAge = '17';
+const defaultMaxAge = '125';
 
 function sortByCountThenName(critA, critB) {
   const A = critA.count || 0;
