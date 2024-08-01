@@ -88,7 +88,7 @@ class Common
   end
 
   def load_env()
-    if not File.exists?("project.yaml")
+    if not File.exist?("project.yaml")
       error "Missing project.yaml"
       exit 1
     end

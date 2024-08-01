@@ -54,7 +54,7 @@ class ServiceAccountManager
     @logger.debug("Making a new service account private key for #{@service_account} at #{credentials_path}")
     run_process %W[gcloud iam service-accounts keys create #{credentials_path}
         --iam-account=#{@service_account} --project=#{@project}]
-    unless File.exists? credentials_path
+    unless File.exist? credentials_path
       @logger.warning("Failed to create the key file at #{credentials_path}")
     end
     credentials_path
