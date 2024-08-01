@@ -140,12 +140,14 @@ interface State {
   nodes: Array<any>;
 }
 
+interface Slider {
+  get: () => Array<string>;
+  set: (values: Array<number>) => void;
+}
+
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
-  slider: {
-    get: () => Array<string>;
-    set: (values: Array<number>) => void;
-  };
+  slider: Slider;
 
   constructor(props: Props) {
     super(props);
