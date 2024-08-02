@@ -44,10 +44,11 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
   }
 
   /**
-   * This is temp and will be deleted once we run curl on every env Backfill the Featured Workspace
-   * DB table with the workspaces from the Featured Workspaces Config JSON.
+   * Temporary method to backfill the Featured Workspace DB table with information from the Featured
+   * Workspaces Config JSON. This method will be deleted after the backfill process has been
+   * completed in all environments using curl.
    *
-   * @return List of all Featured workspaces
+   * @return List of all Featured workspaces saved in database table featured_workspace
    */
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> backFillFeaturedWorkspaces() {
