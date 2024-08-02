@@ -118,4 +118,19 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: 'Publish' })
     );
   });
+
+  it('should show appropriate tooltip when workspace is not published', async () => {
+    const expectedTooltipText =
+      'Please select a category to publish the workspace.';
+    workspace.featuredCategory = null;
+    component();
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+    expect(screen.queryByText(expectedTooltipText)).not.toBeInTheDocument();
+    await user.hover(publishButton);
+    expect(screen.getByText(expectedTooltipText)).toBeInTheDocument();
+    await user.unhover(publishButton);
+    expect(screen.queryByText(expectedTooltipText)).not.toBeInTheDocument();
+  });
 });
