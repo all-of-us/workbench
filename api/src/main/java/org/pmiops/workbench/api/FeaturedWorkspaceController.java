@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,14 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceService workspaceService;
+  private final FeaturedWorkspaceService featuredWorkspaceService;
 
   @Autowired
   FeaturedWorkspaceController(
-      Provider<WorkbenchConfig> workbenchConfigProvider, WorkspaceService workspaceService) {
+      FeaturedWorkspaceService featuredWorkspaceService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceService workspaceService) {
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceService = workspaceService;
   }
@@ -36,5 +41,18 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
       throw new NotImplementedException(
           "Not implemented in this environment: combine the results of getFeaturedWorkspacesConfig() and getPublishedWorkspaces() to generate the list of featured workspaces.");
     }
+  }
+
+  /**
+   * This is temp and will be deleted once we run curl on every env Backfill the Featured Workspace
+   * DB table with the workspaces from the Featured Workspaces Config JSON.
+   *
+   * @return List of all Featured workspaces
+   */
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> backFillFeaturedWorkspaces() {
+    featuredWorkspaceService.backFillFeaturedWorkspaces();
+    // To confirm the entity stored in Database
+    return getFeaturedWorkspaces();
   }
 }
