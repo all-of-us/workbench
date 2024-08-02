@@ -68,6 +68,18 @@ describe('BasicInformation', () => {
     ).toBeInTheDocument();
   });
 
+  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = false;
+    component();
+    expect(await screen.findByText('No')).toBeInTheDocument();
+  });
+
+  it('should show published workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = true;
+    component();
+    expect(await screen.findByText('Yes')).toBeInTheDocument();
+  });
+
   it('should show unpublished workspace (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     component();
