@@ -131,7 +131,7 @@ const libraryTabs: Record<string, LibraryTabProps> = {
     'Community Workspaces',
     <div>
       Community workspaces are curated and maintained by researchers using the
-      Research Workbench and are intended for use by the Research Workbench
+      Researcher Workbench and are intended for use by the Researcher Workbench
       community. Please be sure to review the 'About' section of the workspace
       for how to use and cite the workspace in your own research and who to
       contact with any questions about the workspace.
