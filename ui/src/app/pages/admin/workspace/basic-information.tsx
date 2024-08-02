@@ -102,9 +102,7 @@ export const BasicInformation = ({
           {new Date(workspace.lastModifiedTime).toDateString()}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Workspace Published'>
-          {!enablePublishedWorkspacesViaDb &&
-            (workspace.published ? 'Yes' : 'No')}
-          {enablePublishedWorkspacesViaDb && (
+          {enablePublishedWorkspacesViaDb ? (
             <>
               <Select
                 key={featuredCategory || 'placeholder'}
@@ -154,6 +152,10 @@ export const BasicInformation = ({
               </Button>
               {featuredCategoryLoading && <Spinner size={36} />}
             </>
+          ) : workspace.published ? (
+            'Yes'
+          ) : (
+            'No'
           )}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Audit'>

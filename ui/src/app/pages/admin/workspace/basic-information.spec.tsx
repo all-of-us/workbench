@@ -41,6 +41,14 @@ describe('BasicInformation', () => {
     );
   };
 
+  const enablePublishedWorkspacesViaDb = () =>
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        enablePublishedWorkspacesViaDb: true,
+      },
+    });
+
   beforeEach(() => {
     workspace = JSON.parse(JSON.stringify(workspaceStubs[0]));
     user = userEvent.setup();
@@ -61,7 +69,20 @@ describe('BasicInformation', () => {
     ).toBeInTheDocument();
   });
 
-  it('should show unpublished workspace', async () => {
+  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = false;
+    component();
+    expect(await screen.findByText('No')).toBeInTheDocument();
+  });
+
+  it('should show published workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = true;
+    component();
+    expect(await screen.findByText('Yes')).toBeInTheDocument();
+  });
+
+  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     component();
 
     expect(screen.getByText('Select a category...')).toBeInTheDocument();
@@ -72,7 +93,8 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
-  it('should show published workspace', async () => {
+  it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component();
     expect(await screen.findByText('Community')).toBeInTheDocument();
@@ -83,7 +105,8 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
-  it('should change category of published workspace', async () => {
+  it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
@@ -98,7 +121,8 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should unpublish a workspace', async () => {
+  it('should unpublish a workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'unpublishWorkspaceViaDB')
@@ -111,7 +135,8 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should disable publishing when workspace is locked', async () => {
+  it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     workspace.adminLocked = true;
     component();
@@ -127,6 +152,7 @@ describe('BasicInformation', () => {
   });
 
   it('should show appropriate tooltip when workspace is not published', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = null;
     component();
     const publishButton = await screen.findByRole('button', {
