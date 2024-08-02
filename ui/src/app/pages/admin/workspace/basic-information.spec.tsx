@@ -41,7 +41,7 @@ describe('BasicInformation', () => {
   };
 
   beforeEach(() => {
-    workspace = workspaceStubs[0];
+    workspace = JSON.parse(JSON.stringify(workspaceStubs[0]));
     user = userEvent.setup();
     serverConfigStore.set({
       config: defaultServerConfig,

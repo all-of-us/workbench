@@ -57,11 +57,11 @@ export const BasicInformation = ({
         workspace.adminLocked,
         'This workspace is locked and cannot be published.',
       ],
+      [!featuredCategory, 'Please select a category to publish the workspace.'],
       [
         featuredCategory === workspace.featuredCategory,
         'This workspace is already published in the selected category.',
-      ],
-      [!featuredCategory, 'Please select a category to publish the workspace.']
+      ]
     );
   };
 
