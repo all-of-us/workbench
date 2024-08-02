@@ -28,7 +28,7 @@ describe('Featured Workspace List', () => {
     'Tutorial Workspaces',
     'Demonstration Projects',
     'Phenotype Library',
-    'Community Projects',
+    'Community Workspaces',
   ];
   const featuredCategory = [
     FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
