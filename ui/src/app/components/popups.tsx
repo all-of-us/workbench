@@ -43,7 +43,41 @@ const styles = {
   },
 };
 
-const computeNewDimensions = (el, target) => {
+type Side =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'top-left'
+  | 'top-right';
+
+interface Position {
+  top: number;
+  left: number;
+}
+interface Element {
+  width: number;
+  height: number;
+}
+interface Target {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+interface Viewport {
+  width: number;
+  height: number;
+}
+interface Dimensions {
+  element: Element;
+  target: Target;
+  viewport: Viewport;
+}
+
+const computeNewDimensions = (el, target): Dimensions => {
   return {
     element: fp.pick(['width', 'height'], el.current.getBoundingClientRect()),
     target: fp.pick(
@@ -71,7 +105,7 @@ export const withDynamicPosition = () => (WrappedComponent) => {
     element: any;
     animation: number;
 
-    constructor(props: any) {
+    constructor(props: WithDynamicPositionProps) {
       super(props);
       this.state = {
         dimensions: {
@@ -115,14 +149,21 @@ export const withDynamicPosition = () => (WrappedComponent) => {
   return Wrapper;
 };
 
+interface PopupPositionProps {
+  side: Side;
+  viewport: Viewport;
+  target: Target;
+  element: Element;
+  gap: number;
+}
 export const computePopupPosition = ({
   side,
   viewport,
   target,
   element,
   gap,
-}) => {
-  const getPosition = (s) => {
+}: PopupPositionProps): { position: any; side: string } => {
+  const getPosition = (s: string): Position => {
     const left = fp.flow(
       fp.clamp(0, viewport.width - element.width),
       fp.clamp(target.left - element.width + 16, target.right - 16)
@@ -171,11 +212,11 @@ export const computePopupPosition = ({
   const overflowsLeft = position.left < 0;
   const overflowsRight = position.left + element.width >= viewport.width;
 
-  const newTop = overflowsTop ? 'bottom' : 'top';
-  const newBottom = overflowsBottom ? 'top' : 'bottom';
-  const newLeft = overflowsLeft ? 'right' : 'left';
-  const newRight = overflowsRight ? 'left' : 'right';
-  const maybeFlip = (d) => {
+  const newTop: Side = overflowsTop ? 'bottom' : 'top';
+  const newBottom: Side = overflowsBottom ? 'top' : 'bottom';
+  const newLeft: Side = overflowsLeft ? 'right' : 'left';
+  const newRight: Side = overflowsRight ? 'left' : 'right';
+  const maybeFlip = (d: string) => {
     return switchCase(
       d,
       ['top', () => newTop],
@@ -200,8 +241,14 @@ export const PopupPortal = ({ children }) => {
   );
 };
 
+interface TooltipProps {
+  children: React.ReactNode;
+  side?: Side;
+  dimensions: Dimensions;
+  elementRef: React.RefObject<HTMLDivElement>;
+}
 export const Tooltip = withDynamicPosition()(
-  class TooltipComponent extends React.Component<any> {
+  class TooltipComponent extends React.Component<TooltipProps> {
     static readonly defaultProps = {
       side: 'bottom',
     };
@@ -269,10 +316,18 @@ export const Tooltip = withDynamicPosition()(
   }
 );
 
-export class TooltipTrigger extends React.Component<any, any> {
+interface TooltipTriggerProps {
+  children: React.ReactNode;
+  content: React.ReactNode;
+  disabled?: boolean;
+  side?: Side;
+  elementRef?: React.RefObject<HTMLDivElement>;
+  dimensions?: Dimensions;
+}
+export class TooltipTrigger extends React.Component<TooltipTriggerProps, any> {
   id: string;
 
-  constructor(props) {
+  constructor(props: TooltipTriggerProps) {
     super(props);
     this.state = { open: false };
     this.id = `tooltip-trigger-${fp.uniqueId('')}`;
@@ -312,11 +367,20 @@ export class TooltipTrigger extends React.Component<any, any> {
   }
 }
 
+interface PopupProps {
+  children: React.ReactNode;
+  side?: Side;
+  elementRef: React.RefObject<HTMLDivElement>;
+  dimensions: Dimensions;
+  onClick?: () => void;
+  handleClickOutside?: () => void;
+  outsideClickIgnoreClass?: string;
+}
 export const Popup = fp.flow(
   onClickOutside,
   withDynamicPosition()
 )(
-  class PopupComponent extends React.Component<any> {
+  class PopupComponent extends React.Component<PopupProps> {
     static displayName = 'Popup';
 
     static readonly defaultProps = {
@@ -365,9 +429,8 @@ interface PopupTriggerProps {
   content: any;
   onOpen?: () => void;
   onClose?: () => void;
-  side?: string;
+  side?: Side;
 }
-
 export class PopupTrigger extends React.Component<PopupTriggerProps, any> {
   static readonly defaultProps = {
     closeOnClick: false,
@@ -377,7 +440,7 @@ export class PopupTrigger extends React.Component<PopupTriggerProps, any> {
 
   id: string;
 
-  constructor(props: any) {
+  constructor(props: PopupTriggerProps) {
     super(props);
     this.state = { open: false };
     this.id = `popup-trigger-${fp.uniqueId('')}`;
