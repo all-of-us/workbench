@@ -1,6 +1,5 @@
 package org.pmiops.workbench.featuredworkspace;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,7 +9,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,20 +50,17 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
     DbFeaturedCategory requestedDbCategory =
         featuredWorkspaceMapper.toDbFeaturedCategory(featuredWorkspaceCategory);
 
-    return featuredWorkspaceDao
-        .findDbFeaturedWorkspacesByCategory(requestedDbCategory)
-        .orElseGet(Collections::emptyList)
-        .stream()
+    return featuredWorkspaceDao.findDbFeaturedWorkspacesByCategory(requestedDbCategory).stream()
         .map(
             dbFeaturedCategory -> {
               DbWorkspace dbWorkspace = dbFeaturedCategory.getWorkspace();
-              RawlsWorkspaceDetails fcWorkspace =
-                  fireCloudService
-                      .getWorkspace(
-                          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-                      .getWorkspace();
-              return new WorkspaceResponse()
-                  .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+              RawlsWorkspaceResponse rawlsWorkspaceResponse =
+                  fireCloudService.getWorkspace(
+                      dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+              return workspaceMapper.toWorkspaceResponseWithAccess(
+                  dbWorkspace,
+                  rawlsWorkspaceResponse.getWorkspace(),
+                  rawlsWorkspaceResponse.getAccessLevel());
             })
         .collect(Collectors.toList());
   }

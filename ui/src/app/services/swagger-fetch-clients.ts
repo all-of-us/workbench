@@ -113,7 +113,7 @@ export const dataSetApi = bindCtor(DataSetApi);
 export const disksApi = bindCtor(DisksApi);
 export const disksAdminApi = bindCtor(DiskAdminApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
-export const featuredWorkspacesApi = bindCtor(FeaturedWorkspaceApi);
+export const featuredWorkspaceApi = bindCtor(FeaturedWorkspaceApi);
 export const featuredWorkspacesConfigApi = bindCtor(
   FeaturedWorkspacesConfigApi
 );

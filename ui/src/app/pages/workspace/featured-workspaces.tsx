@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
-import { FeaturedWorkspaceCategory } from 'generated/fetch';
+import { FeaturedWorkspaceCategory, WorkspaceResponse } from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
@@ -10,7 +10,7 @@ import { Header } from 'app/components/headers';
 import { Spinner } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
 import { WorkspaceCard } from 'app/pages/workspace/workspace-card';
-import { featuredWorkspacesApi } from 'app/services/swagger-fetch-clients';
+import { featuredWorkspaceApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { hasTierAccess } from 'app/utils/access-tiers';
@@ -76,20 +76,21 @@ const styles = reactStyles({
   },
 });
 
-const createTab = (title, description, icon, category) => ({
+interface LibraryTabProps {
+  title: string;
+  description: ReactNode;
+  icon: string;
+  category: FeaturedWorkspaceCategory;
+}
+
+const createTab = (title, description, icon, category): LibraryTabProps => ({
   title,
   description,
   icon,
-  filter: (workspaceList) =>
-    workspaceList.filter(
-      (workspace) =>
-        workspace.workspace.featuredCategory !== null &&
-        workspace.workspace.featuredCategory === category
-    ),
   category,
 });
 
-const libraryTabs = {
+const libraryTabs: Record<string, LibraryTabProps> = {
   PHENOTYPE_LIBRARY: createTab(
     'Phenotype Library',
     <div>
@@ -127,10 +128,10 @@ const libraryTabs = {
     FeaturedWorkspaceCategory.DEMO_PROJECTS
   ),
   COMMUNITY: createTab(
-    'Community Projects',
+    'Community Workspaces',
     <div>
       Community workspaces are curated and maintained by researchers using the
-      Research Workbench and are intended for use by Research Workbench
+      Research Workbench and are intended for use by the Research Workbench
       community. Please be sure to review the 'About' section of the workspace
       for how to use and cite the workspace in your own research and who to
       contact with any questions about the workspace.
@@ -140,7 +141,14 @@ const libraryTabs = {
   ),
 };
 
-const LibraryTab = ({ title, icon, onClick, selected }) => {
+interface TabProps {
+  title: string;
+  icon: string;
+  onClick: () => void;
+  selected: boolean;
+}
+
+const LibraryTab = ({ title, icon, onClick, selected }: TabProps) => {
   return (
     <Clickable
       style={
@@ -158,12 +166,18 @@ const LibraryTab = ({ title, icon, onClick, selected }) => {
 };
 
 export const FeaturedWorkspaces = (props) => {
-  const [currentTab, setCurrentTab] = useState(libraryTabs.TUTORIAL_WORKSPACES);
-  const [errorText, setErrorText] = useState('');
-  const [workspaceList, setWorkspaceList] = useState([]);
-  const [pendingWorkspaceRequests, setPendingWorkspaceRequests] = useState(0);
+  const [currentTab, setCurrentTab] = useState<LibraryTabProps>(
+    libraryTabs.TUTORIAL_WORKSPACES
+  );
+  const [errorText, setErrorText] = useState<string>('');
 
-  const libraryTabsArray = [
+  const [workspaceList, setWorkspaceList] = useState<Array<WorkspaceResponse>>(
+    []
+  );
+  const [pendingWorkspaceRequests, setPendingWorkspaceRequests] =
+    useState<boolean>(false);
+
+  const libraryTabsArray: LibraryTabProps[] = [
     libraryTabs.TUTORIAL_WORKSPACES,
     libraryTabs.DEMO_PROJECTS,
     libraryTabs.PHENOTYPE_LIBRARY,
@@ -171,21 +185,19 @@ export const FeaturedWorkspaces = (props) => {
   ];
 
   const getAllPublishedWorkspaces = async () => {
-    setPendingWorkspaceRequests((prev) => prev + 1);
+    setPendingWorkspaceRequests(true);
 
     try {
       const workspacesReceived =
-        await featuredWorkspacesApi().getFeaturedWorkspacesByCategory(
+        await featuredWorkspaceApi().getFeaturedWorkspacesByCategory(
           currentTab.category
         );
-      workspacesReceived.items.sort((a, b) =>
-        a.workspace.name.localeCompare(b.workspace.name)
-      );
-
       setWorkspaceList(
-        workspacesReceived.items.map((w) => new WorkspacePermissions(w))
+        workspacesReceived.items
+          .sort((a, b) => a.workspace.name.localeCompare(b.workspace.name))
+          .map((w) => new WorkspacePermissions(w))
       );
-      setPendingWorkspaceRequests((prev) => prev - 1);
+      setPendingWorkspaceRequests(false);
     } catch (e) {
       const response = await convertAPIError(e);
       setErrorText(response.message);
@@ -198,7 +210,7 @@ export const FeaturedWorkspaces = (props) => {
   }, [currentTab]);
 
   const areWorkspacesLoading = () => {
-    return pendingWorkspaceRequests > 0;
+    return pendingWorkspaceRequests;
   };
 
   const { profile } = profileStore.get();
@@ -275,10 +287,10 @@ export const FeaturedWorkspaces = (props) => {
                   flexWrap: 'wrap',
                 }}
               >
-                {currentTab.filter(workspaceList).map((wp) => {
+                {workspaceList.map((wp) => {
                   return (
                     <WorkspaceCard
-                      workspaceLibrary
+                      isOriginFeaturedWorkspace
                       key={wp.workspace.name}
                       workspace={wp.workspace}
                       accessLevel={wp.accessLevel}
