@@ -111,24 +111,32 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should disable publish button if workspace is locked', async () => {
+  it('should disable publishing when workspace is locked', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     workspace.adminLocked = true;
     component();
-    expectButtonElementDisabled(
-      screen.getByRole('button', { name: 'Publish' })
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementDisabled(publishButton);
+    await expectTooltip(
+      publishButton,
+      'This workspace is locked and cannot be published.',
+      user
     );
   });
 
   it('should show appropriate tooltip when workspace is not published', async () => {
-    const expectedTooltipText =
-      'Please select a category to publish the workspace.';
     workspace.featuredCategory = null;
     component();
     const publishButton = await screen.findByRole('button', {
       name: 'Publish',
     });
 
-    await expectTooltip(publishButton, expectedTooltipText, user);
+    await expectTooltip(
+      publishButton,
+      'Please select a category to publish the workspace.',
+      user
+    );
   });
 });
