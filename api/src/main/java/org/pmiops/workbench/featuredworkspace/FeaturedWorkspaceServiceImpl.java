@@ -6,6 +6,7 @@ import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.FeaturedWorkspacesConfigResponse;
@@ -51,22 +52,29 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
     // Get featured workspaces from the config
     FeaturedWorkspacesConfigResponse configResponse =
         new FeaturedWorkspacesConfigResponse().featuredWorkspacesList(fwConfig.featuredWorkspaces);
-    configResponse.getFeaturedWorkspacesList().stream()
+    configResponse
+        .getFeaturedWorkspacesList()
         .forEach(
             fw -> {
               String workspaceNamespace = fw.getNamespace();
               String firecloudName = fw.getId();
-              // Get Dbworkspace from workspaceNamesapce and firecloudname
-              DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-              if (workspace.getPublished()) {
-                // If workspace was marked published, update the workspace acl to save to table
-                // featured_workspace
-                System.out.println(
-                    "workspace " + workspace.getFirecloudName() + " will be published");
-                fireCloudService.updateWorkspaceAclForPublishing(
-                    workspaceNamespace, firecloudName, true);
-                featuredWorkspaceDao.save(
-                    featuredWorkspaceMapper.toDbFeaturedWorkspace(fw.getCategory(), workspace));
+              try {
+                // Get Dbworkspace from workspaceNamesapce and firecloudname
+                DbWorkspace dbWorkspace =
+                    workspaceDao.getRequired(workspaceNamespace, firecloudName);
+
+                if (dbWorkspace.getPublished()) {
+                  // If workspace was marked published, update the workspace acl to save to table
+                  // featured_workspace
+                  System.out.println(
+                      "workspace " + dbWorkspace.getFirecloudName() + " will be published");
+                  fireCloudService.updateWorkspaceAclForPublishing(
+                      workspaceNamespace, firecloudName, true);
+                  featuredWorkspaceDao.save(
+                      featuredWorkspaceMapper.toDbFeaturedWorkspace(fw.getCategory(), dbWorkspace));
+                }
+              } catch (NotFoundException e) {
+                System.out.println("workspace  " + fw.getNamespace() + " could not be found");
               }
             });
   }
