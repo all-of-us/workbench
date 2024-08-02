@@ -20,6 +20,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
   renderWithRouter,
 } from 'testing/react-test-helpers';
 import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
@@ -127,10 +128,7 @@ describe('BasicInformation', () => {
     const publishButton = await screen.findByRole('button', {
       name: 'Publish',
     });
-    expect(screen.queryByText(expectedTooltipText)).not.toBeInTheDocument();
-    await user.hover(publishButton);
-    expect(screen.getByText(expectedTooltipText)).toBeInTheDocument();
-    await user.unhover(publishButton);
-    expect(screen.queryByText(expectedTooltipText)).not.toBeInTheDocument();
+
+    await expectTooltip(publishButton, expectedTooltipText, user);
   });
 });
