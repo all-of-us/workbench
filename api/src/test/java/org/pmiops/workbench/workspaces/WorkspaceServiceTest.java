@@ -338,6 +338,22 @@ public class WorkspaceServiceTest {
   }
 
   @Test
+  public void getWorkspaces_skipPublished() {
+    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+    DbWorkspace mockWorkspace =
+        buildDbWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "published",
+            DEFAULT_WORKSPACE_NAMESPACE,
+            WorkspaceActiveStatus.ACTIVE);
+    mockWorkspace.setPublished(false);
+    mockWorkspace.setFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    addMockedWorkspace(mockWorkspace);
+    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+  }
+
+  @Test
   public void activeStatus() {
     EnumSet.allOf(WorkspaceActiveStatus.class)
         .forEach(
