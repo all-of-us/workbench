@@ -4,16 +4,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.when;
 
+import jakarta.inject.Provider;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
@@ -30,6 +34,9 @@ public class FeaturedWorkspaceTest {
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
 
+  // Delete this once published flag is on
+  @MockBean private Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider;
+
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
   private DbWorkspace dbWorkspace;
@@ -42,6 +49,9 @@ public class FeaturedWorkspaceTest {
   @MockBean({
     AccessTierServiceImpl.class,
     WorkspaceAdminServiceImpl.class,
+    // Delete this once enablePublishedWorkspacesViaDb is on
+    FireCloudService.class,
+    WorkspaceDao.class,
   })
   static class Configuration {
     @Bean
