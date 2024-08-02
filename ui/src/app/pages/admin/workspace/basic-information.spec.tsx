@@ -20,6 +20,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
   renderWithRouter,
 } from 'testing/react-test-helpers';
 import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
@@ -49,7 +50,7 @@ describe('BasicInformation', () => {
     });
 
   beforeEach(() => {
-    workspace = workspaceStubs[0];
+    workspace = JSON.parse(JSON.stringify(workspaceStubs[0]));
     user = userEvent.setup();
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -134,13 +135,34 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should disable publish button if workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should disable publishing workspace is locked (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     workspace.adminLocked = true;
     component();
-    expectButtonElementDisabled(
-      screen.getByRole('button', { name: 'Publish' })
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementDisabled(publishButton);
+    await expectTooltip(
+      publishButton,
+      'This workspace is locked and cannot be published.',
+      user
+    );
+  });
+
+  it('should show appropriate tooltip when workspace is not published (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
+    workspace.featuredCategory = null;
+    component();
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+
+    await expectTooltip(
+      publishButton,
+      'Please select a category to publish the workspace.',
+      user
     );
   });
 });
