@@ -15,6 +15,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { FeaturedWorkspaceCategoryOptions } from 'app/pages/admin/admin-featured-category-options';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
@@ -33,6 +34,7 @@ export const BasicInformation = ({
     React.useState<FeaturedWorkspaceCategory>(workspace.featuredCategory);
   const [featuredCategoryLoading, setFeaturedCategoryLoading] =
     React.useState<boolean>(false);
+  const { enablePublishedWorkspacesViaDb } = serverConfigStore.get().config;
 
   useEffect(() => {
     setFeaturedCategory(workspace.featuredCategory);
@@ -100,51 +102,59 @@ export const BasicInformation = ({
           {new Date(workspace.lastModifiedTime).toDateString()}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Workspace Published'>
-          <Select
-            key={featuredCategory || 'placeholder'}
-            value={featuredCategory}
-            placeholder='Select a category...'
-            isDisabled={featuredCategoryLoading}
-            options={FeaturedWorkspaceCategoryOptions}
-            onChange={(v) => setFeaturedCategory(v)}
-          />
-          <TooltipTrigger
-            disabled={!publishingDisabled}
-            content={getWorkspacePublishTooltip()}
-          >
-            <Button
-              type='primary'
-              disabled={publishingDisabled}
-              onClick={() => {
-                setFeaturedCategoryLoading(true);
-                workspaceAdminApi()
-                  .publishWorkspaceViaDB(workspace.namespace, {
-                    category: featuredCategory,
-                  })
-                  .then(async () => {
-                    await reload();
-                  });
-              }}
-            >
-              Publish
-            </Button>
-          </TooltipTrigger>
-          <Button
-            type='secondaryOutline'
-            disabled={featuredCategoryLoading || !workspace.featuredCategory}
-            onClick={() => {
-              setFeaturedCategory(null);
-              setFeaturedCategoryLoading(true);
-              workspaceAdminApi()
-                .unpublishWorkspaceViaDB(workspace.namespace)
-                .then(async () => {
-                  await reload();
-                });
-            }}
-          >
-            Unpublish
-          </Button>
-          {featuredCategoryLoading && <Spinner size={36} />}
+          {!enablePublishedWorkspacesViaDb &&
+            (workspace.published ? 'Yes' : 'No')}
+          {enablePublishedWorkspacesViaDb && (
+            <>
+              <Select
+                key={featuredCategory || 'placeholder'}
+                value={featuredCategory}
+                placeholder='Select a category...'
+                isDisabled={featuredCategoryLoading}
+                options={FeaturedWorkspaceCategoryOptions}
+                onChange={(v) => setFeaturedCategory(v)}
+              />
+              <TooltipTrigger
+                disabled={!publishingDisabled}
+                content={getWorkspacePublishTooltip()}
+              >
+                <Button
+                  type='primary'
+                  disabled={publishingDisabled}
+                  onClick={() => {
+                    setFeaturedCategoryLoading(true);
+                    workspaceAdminApi()
+                      .publishWorkspaceViaDB(workspace.namespace, {
+                        category: featuredCategory,
+                      })
+                      .then(async () => {
+                        await reload();
+                      });
+                  }}
+                >
+                  Publish
+                </Button>
+              </TooltipTrigger>
+              <Button
+                type='secondaryOutline'
+                disabled={
+                  featuredCategoryLoading || !workspace.featuredCategory
+                }
+                onClick={() => {
+                  setFeaturedCategory(null);
+                  setFeaturedCategoryLoading(true);
+                  workspaceAdminApi()
+                    .unpublishWorkspaceViaDB(workspace.namespace)
+                    .then(async () => {
+                      await reload();
+                    });
+                }}
+              >
+                Unpublish
+              </Button>
+              {featuredCategoryLoading && <Spinner size={36} />}
+            </>
+          )}
         </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Audit'>
           {
