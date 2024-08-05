@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,11 +74,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.utils.mappers.UserMapper;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.utils.mappers.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -103,6 +98,7 @@ public class WorkspaceServiceTest {
     CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
     ObjectNameLengthServiceImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
@@ -116,7 +112,6 @@ public class WorkspaceServiceTest {
     ConceptSetService.class,
     DataSetService.class,
     FeaturedWorkspaceMapper.class,
-    FirecloudMapper.class,
     FreeTierBillingService.class,
     IamService.class,
     ProfileMapper.class,
@@ -149,6 +144,7 @@ public class WorkspaceServiceTest {
   @MockBean private CloudBillingClient mockCloudBillingClient;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FireCloudService mockFireCloudService;
+  //  @MockBean private FirecloudMapper mockFirecloudMapper;
   @MockBean private MailService mockMailService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
@@ -223,14 +219,15 @@ public class WorkspaceServiceTest {
       String workspaceName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceDetails mockWorkspace = mock(RawlsWorkspaceDetails.class);
-    doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
-    doReturn(workspaceName).when(mockWorkspace).getName();
-    doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
+    RawlsWorkspaceDetails mockWorkspace =
+        new RawlsWorkspaceDetails()
+            .workspaceId(workspaceId)
+            .name(workspaceName)
+            .namespace(workspaceNamespace);
 
-    RawlsWorkspaceResponse mockWorkspaceResponse = mock(RawlsWorkspaceResponse.class);
-    doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
-    doReturn(accessLevel).when(mockWorkspaceResponse).getAccessLevel();
+    RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
+    mockWorkspaceResponse.workspace(mockWorkspace);
+    mockWorkspaceResponse.accessLevel(accessLevel);
     return mockWorkspaceResponse;
   }
 
@@ -239,14 +236,15 @@ public class WorkspaceServiceTest {
       String workspaceName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceDetails mockWorkspace = mock(RawlsWorkspaceDetails.class);
-    doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
-    doReturn(workspaceName).when(mockWorkspace).getName();
-    doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
+    RawlsWorkspaceDetails mockWorkspace =
+        new RawlsWorkspaceDetails()
+            .workspaceId(workspaceId)
+            .name(workspaceName)
+            .namespace(workspaceNamespace);
 
-    RawlsWorkspaceListResponse mockWorkspaceResponse = mock(RawlsWorkspaceListResponse.class);
-    doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
-    doReturn(accessLevel).when(mockWorkspaceResponse).getAccessLevel();
+    RawlsWorkspaceListResponse mockWorkspaceResponse = new RawlsWorkspaceListResponse();
+    mockWorkspaceResponse.setAccessLevel(accessLevel);
+    mockWorkspaceResponse.setWorkspace(mockWorkspace);
     return mockWorkspaceResponse;
   }
 
@@ -280,6 +278,8 @@ public class WorkspaceServiceTest {
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
 
     firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
+    when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
+
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             buildDbWorkspace(
@@ -302,6 +302,33 @@ public class WorkspaceServiceTest {
 
     workspaceDao.save(dbWorkspace);
     dbWorkspaces.add(dbWorkspace);
+    return dbWorkspace;
+  }
+
+  private DbWorkspace addMockedPublishedWorkspace(
+      long workspaceId,
+      String workspaceName,
+      String workspaceNamespace,
+      DbFeaturedCategory featuredCategory,
+      WorkspaceActiveStatus activeStatus,
+      RawlsWorkspaceAccessLevel accessLevel) {
+    DbWorkspace dbWorkspace =
+        workspaceDao
+            .save(buildDbWorkspace(workspaceId, workspaceName, workspaceNamespace, activeStatus))
+            .setPublished(false)
+            .setFeaturedCategory(featuredCategory);
+
+    dbWorkspaces.add(dbWorkspace);
+
+    RawlsWorkspaceListResponse mockWorkspaceListResponse =
+        mockRawlsWorkspaceListResponse(
+            Long.toString(dbWorkspace.getWorkspaceId()),
+            workspaceName,
+            workspaceNamespace,
+            accessLevel);
+    firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
+    when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
+
     return dbWorkspace;
   }
 
@@ -341,16 +368,33 @@ public class WorkspaceServiceTest {
   public void getWorkspaces_skipPublished() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
     workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
-    DbWorkspace mockWorkspace =
-        buildDbWorkspace(
-            workspaceIdIncrementer.getAndIncrement(),
-            "published",
-            DEFAULT_WORKSPACE_NAMESPACE,
-            WorkspaceActiveStatus.ACTIVE);
-    mockWorkspace.setPublished(false);
-    mockWorkspace.setFeaturedCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
-    addMockedWorkspace(mockWorkspace);
+    addMockedPublishedWorkspace(
+        workspaceIdIncrementer.getAndIncrement(),
+        "published_reader",
+        DEFAULT_WORKSPACE_NAMESPACE,
+        DbFeaturedCategory.TUTORIAL_WORKSPACES,
+        WorkspaceActiveStatus.ACTIVE,
+        RawlsWorkspaceAccessLevel.READER);
+    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
+
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+  }
+
+  @Test
+  public void getWorkspaces_published_butOwner() {
+    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
+    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
+    addMockedPublishedWorkspace(
+        workspaceIdIncrementer.getAndIncrement(),
+        "published_reader",
+        DEFAULT_WORKSPACE_NAMESPACE,
+        DbFeaturedCategory.TUTORIAL_WORKSPACES,
+        WorkspaceActiveStatus.ACTIVE,
+        RawlsWorkspaceAccessLevel.OWNER);
+
+    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
+
+    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize + 1);
   }
 
   @Test
