@@ -172,9 +172,7 @@ export const FeaturedWorkspaces = (props) => {
   );
   const [errorText, setErrorText] = useState<string>('');
 
-  const [workspaceList, setWorkspaceList] = useState<Array<WorkspaceResponse>>(
-    []
-  );
+  const [workspaceList, setWorkspaceList] = useState<WorkspaceResponse[]>([]);
   const [pendingWorkspaceRequests, setPendingWorkspaceRequests] =
     useState<boolean>(false);
 

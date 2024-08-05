@@ -67,7 +67,7 @@ describe('Featured Workspace List', () => {
     });
   });
 
-  it('Shows each workspaces on clicking Tab name', async () => {
+  it('Shows all workspaces on clicking Tab name', async () => {
     component();
     expect(
       await screen.findByText('Researcher Workbench Workspace Library')
