@@ -156,17 +156,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
+    boolean enablePublishedWorkspaces =
+        workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb;
     return workspaceMapper
         .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
-        .filter(WorkspaceServiceImpl::filterToNonPublished)
+        .filter(
+            (workspaceResponse) ->
+                WorkspaceServiceImpl.filterToNonPublished(
+                    workspaceResponse, enablePublishedWorkspaces))
         .toList();
   }
 
-  private static boolean filterToNonPublished(WorkspaceResponse response) {
+  private static boolean filterToNonPublished(
+      WorkspaceResponse response, boolean enablePublishedWorkspacesViaDb) {
+    boolean workspaceIsPublished =
+        enablePublishedWorkspacesViaDb
+            ? response.getWorkspace().getFeaturedCategory() != null
+            : response.getWorkspace().isPublished();
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
-        || !response.getWorkspace().isPublished();
+        || !workspaceIsPublished;
   }
 
   @Override
