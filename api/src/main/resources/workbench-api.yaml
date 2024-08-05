@@ -1402,7 +1402,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/backfillfeatured:
-    get:
+    post:
       tags:
         - Featured Workspace
       description: Saves featured workspace from config to database. This is TEMP and will be removed once we run it
