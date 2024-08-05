@@ -74,7 +74,11 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.utils.mappers.*;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.utils.mappers.UserMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -144,7 +148,6 @@ public class WorkspaceServiceTest {
   @MockBean private CloudBillingClient mockCloudBillingClient;
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FireCloudService mockFireCloudService;
-  //  @MockBean private FirecloudMapper mockFirecloudMapper;
   @MockBean private MailService mockMailService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
@@ -278,7 +281,6 @@ public class WorkspaceServiceTest {
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
 
     firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
-    when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
 
     DbWorkspace dbWorkspace =
         workspaceDao.save(
@@ -375,7 +377,6 @@ public class WorkspaceServiceTest {
         DbFeaturedCategory.TUTORIAL_WORKSPACES,
         WorkspaceActiveStatus.ACTIVE,
         RawlsWorkspaceAccessLevel.READER);
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
 
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
@@ -391,8 +392,6 @@ public class WorkspaceServiceTest {
         DbFeaturedCategory.TUTORIAL_WORKSPACES,
         WorkspaceActiveStatus.ACTIVE,
         RawlsWorkspaceAccessLevel.OWNER);
-
-    doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
 
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize + 1);
   }
