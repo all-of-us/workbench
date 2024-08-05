@@ -95,7 +95,7 @@ interface WorkspaceCardProps extends NavigationProps {
   reload(): Promise<void>;
   // non-CT users cannot click or see on CT workspaces.
   tierAccessDisabled?: boolean;
-  isOriginFeaturedWorkspace?: boolean;
+  useFeaturedWorkspacePageUi?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -158,7 +158,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         accessLevel,
         tierAccessDisabled,
         navigate,
-        isOriginFeaturedWorkspace,
+        useFeaturedWorkspacePageUi,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       return (
@@ -286,7 +286,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
                     </div>
-                    {isOriginFeaturedWorkspace && (
+                    {useFeaturedWorkspacePageUi && (
                       <div style={{ fontSize: 12 }}>
                         Created By: {workspace.creator.split('@')[0]}
                       </div>
@@ -300,7 +300,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         AccessTierShortNames.Controlled && (
                         <ControlledTierBadge />
                       )}
-                      {!isOriginFeaturedWorkspace &&
+                      {!useFeaturedWorkspacePageUi &&
                         isCommunityWorkspace(workspace) && (
                           <FlexColumn
                             aria-label='Community Workspace'

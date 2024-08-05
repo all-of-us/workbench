@@ -84,32 +84,6 @@ public interface WorkspaceMapper {
         .toList();
   }
 
-  @Mapping(target = "workspace.id", source = "fcWorkspace.name")
-  @Mapping(target = "workspace.name", source = "dbWorkspace.name")
-  @Mapping(target = "workspace.researchPurpose", source = "dbWorkspace")
-  @Mapping(
-      target = "workspace.etag",
-      source = "dbWorkspace.version",
-      qualifiedByName = "versionToEtag")
-  @Mapping(target = "workspace.namespace", source = "dbWorkspace.workspaceNamespace")
-  @Mapping(target = "workspace.displayName", source = "dbWorkspace.name")
-  @Mapping(target = "workspace.terraName", source = "fcWorkspace.name")
-  @Mapping(target = "workspace.googleBucketName", source = "fcWorkspace.bucketName")
-  @Mapping(target = "workspace.creator", source = "dbWorkspace.creator.username")
-  @Mapping(target = "workspace.cdrVersionId", source = "dbWorkspace.cdrVersion")
-  @Mapping(
-      target = "workspace.accessTierShortName",
-      source = "dbWorkspace.cdrVersion.accessTier.shortName")
-  @Mapping(target = "workspace.googleProject", source = "dbWorkspace.googleProject")
-  @Mapping(
-      target = "accessLevel",
-      source = "accessLevel",
-      qualifiedByName = "fcToApiWorkspaceAccessLevel")
-  WorkspaceResponse toWorkspaceResponseWithAccess(
-      DbWorkspace dbWorkspace,
-      RawlsWorkspaceDetails fcWorkspace,
-      RawlsWorkspaceAccessLevel accessLevel);
-
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")

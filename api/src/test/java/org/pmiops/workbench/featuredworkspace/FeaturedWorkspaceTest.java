@@ -109,10 +109,10 @@ public class FeaturedWorkspaceTest {
         new Workspace()
             .namespace(namespace)
             .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
-    when(mockWorkspaceMapper.toWorkspaceResponseWithAccess(
-            mockdbWorkspace,
-            rawlsWorkspaceResponse.getWorkspace(),
-            rawlsWorkspaceResponse.getAccessLevel()))
+    when(mockWorkspaceMapper.toApiWorkspace(mockdbWorkspace, rawlsWorkspaceResponse.getWorkspace()))
+        .thenReturn(mockWorkspace);
+    when(mockWorkspaceMapper.toApiWorkspaceResponse(
+            mockWorkspace, rawlsWorkspaceResponse.getAccessLevel()))
         .thenReturn(
             new WorkspaceResponse()
                 .workspace(mockWorkspace)

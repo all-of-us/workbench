@@ -57,9 +57,9 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
               RawlsWorkspaceResponse rawlsWorkspaceResponse =
                   fireCloudService.getWorkspace(
                       dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-              return workspaceMapper.toWorkspaceResponseWithAccess(
-                  dbWorkspace,
-                  rawlsWorkspaceResponse.getWorkspace(),
+              return workspaceMapper.toApiWorkspaceResponse(
+                  workspaceMapper.toApiWorkspace(
+                      dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
                   rawlsWorkspaceResponse.getAccessLevel());
             })
         .collect(Collectors.toList());

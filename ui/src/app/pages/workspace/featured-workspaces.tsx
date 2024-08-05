@@ -83,62 +83,63 @@ interface LibraryTabProps {
   category: FeaturedWorkspaceCategory;
 }
 
-const createTab = (title, description, icon, category): LibraryTabProps => ({
-  title,
-  description,
-  icon,
-  category,
-});
-
 const libraryTabs: Record<string, LibraryTabProps> = {
-  PHENOTYPE_LIBRARY: createTab(
-    'Phenotype Library',
-    <div>
-      These workspaces demonstrate how computable electronic phenotypes can be
-      implemented within the <AoU /> dataset using examples of previously
-      published phenotype algorithms. You can open the workspaces to view them
-      or “duplicate” the workspaces to edit and execute the algorithms.
-    </div>,
-    phenotypeLibrary,
-    FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY
-  ),
-  TUTORIAL_WORKSPACES: createTab(
-    'Tutorial Workspaces',
-    <div>
-      These workspaces provide instructions for key Researcher Workbench
-      components and representations of the <AoU /> dataset. You can open the
-      workspaces to view them or “duplicate” the workspaces to edit and execute
-      them.
-    </div>,
-    tutorialWorkspaces,
-    FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES
-  ),
-  DEMO_PROJECTS: createTab(
-    'Demonstration Projects',
-    <div>
-      Workspaces included here are meant to demonstrate end-to-end analyses that
-      can be performed using <AoU /> Data. The current set of research example
-      analyses were developed as part of <AoU /> Demonstration Projects. They
-      are aimed at demonstrating the quality, utility, and diversity of <AoU />{' '}
-      data by replicating previously published studies. You can open the
-      workspaces to view them or “duplicate” the workspaces to edit and execute
-      them.
-    </div>,
-    demonstration,
-    FeaturedWorkspaceCategory.DEMO_PROJECTS
-  ),
-  COMMUNITY: createTab(
-    'Community Workspaces',
-    <div>
-      Community workspaces are curated and maintained by researchers using the
-      Researcher Workbench and are intended for use by the Researcher Workbench
-      community. Please be sure to review the 'About' section of the workspace
-      for how to use and cite the workspace in your own research and who to
-      contact with any questions about the workspace.
-    </div>,
-    community,
-    FeaturedWorkspaceCategory.COMMUNITY
-  ),
+  PHENOTYPE_LIBRARY: {
+    title: 'Phenotype Library',
+    description: (
+      <div>
+        These workspaces demonstrate how computable electronic phenotypes can be
+        implemented within the <AoU /> dataset using examples of previously
+        published phenotype algorithms. You can open the workspaces to view them
+        or “duplicate” the workspaces to edit and execute the algorithms.
+      </div>
+    ),
+    icon: phenotypeLibrary,
+    category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
+  },
+  TUTORIAL_WORKSPACES: {
+    title: 'Tutorial Workspaces',
+    description: (
+      <div>
+        These workspaces provide instructions for key Researcher Workbench
+        components and representations of the <AoU /> dataset. You can open the
+        workspaces to view them or “duplicate” the workspaces to edit and
+        execute them.
+      </div>
+    ),
+    icon: tutorialWorkspaces,
+    category: FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
+  },
+  DEMO_PROJECTS: {
+    title: 'Demonstration Projects',
+    description: (
+      <div>
+        Workspaces included here are meant to demonstrate end-to-end analyses
+        that can be performed using <AoU /> Data. The current set of research
+        example analyses were developed as part of <AoU /> Demonstration
+        Projects. They are aimed at demonstrating the quality, utility, and
+        diversity of <AoU /> data by replicating previously published studies.
+        You can open the workspaces to view them or “duplicate” the workspaces
+        to edit and execute them.
+      </div>
+    ),
+    icon: demonstration,
+    category: FeaturedWorkspaceCategory.DEMO_PROJECTS,
+  },
+  COMMUNITY: {
+    title: 'Community Workspaces',
+    description: (
+      <div>
+        Community workspaces are curated and maintained by researchers using the
+        Researcher Workbench and are intended for use by the Researcher
+        Workbench community. Please be sure to review the 'About' section of the
+        workspace for how to use and cite the workspace in your own research and
+        who to contact with any questions about the workspace.
+      </div>
+    ),
+    icon: community,
+    category: FeaturedWorkspaceCategory.COMMUNITY,
+  },
 };
 
 interface TabProps {
@@ -290,7 +291,7 @@ export const FeaturedWorkspaces = (props) => {
                 {workspaceList.map((wp) => {
                   return (
                     <WorkspaceCard
-                      isOriginFeaturedWorkspace
+                      useFeaturedWorkspacePageUi
                       key={wp.workspace.name}
                       workspace={wp.workspace}
                       accessLevel={wp.accessLevel}
