@@ -245,10 +245,10 @@ public class WorkspaceServiceTest {
             .name(workspaceName)
             .namespace(workspaceNamespace);
 
-    RawlsWorkspaceListResponse mockWorkspaceResponse = new RawlsWorkspaceListResponse();
-    mockWorkspaceResponse.setAccessLevel(accessLevel);
-    mockWorkspaceResponse.setWorkspace(mockWorkspace);
-    return mockWorkspaceResponse;
+    RawlsWorkspaceListResponse mockWorkspaceListResponse = new RawlsWorkspaceListResponse();
+    mockWorkspaceListResponse.setAccessLevel(accessLevel);
+    mockWorkspaceListResponse.setWorkspace(mockWorkspace);
+    return mockWorkspaceListResponse;
   }
 
   private DbWorkspace buildDbWorkspace(
