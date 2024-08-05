@@ -95,6 +95,7 @@ interface WorkspaceCardProps extends NavigationProps {
   reload(): Promise<void>;
   // non-CT users cannot click or see on CT workspaces.
   tierAccessDisabled?: boolean;
+  useFeaturedWorkspacePageUi?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -157,6 +158,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         accessLevel,
         tierAccessDisabled,
         navigate,
+        useFeaturedWorkspacePageUi,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
       return (
@@ -284,6 +286,11 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
                     </div>
+                    {useFeaturedWorkspacePageUi && (
+                      <div style={{ fontSize: 12 }}>
+                        Created By: {workspace.creator.split('@')[0]}
+                      </div>
+                    )}
                   </FlexColumn>
                   <FlexColumn
                     style={{ justifyContent: 'flex-end', marginLeft: '1.2rem' }}
@@ -293,21 +300,22 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         AccessTierShortNames.Controlled && (
                         <ControlledTierBadge />
                       )}
-                      {isCommunityWorkspace(workspace) && (
-                        <FlexColumn
-                          aria-label='Community Workspace'
-                          style={{
-                            justifyContent: 'flex-end',
-                            marginLeft: '0.5rem',
-                            marginRight: '0.5rem',
-                          }}
-                        >
-                          <TooltipTrigger content='Workspace is published as Community Workspace'>
-                            {/* Keeping the style consistent with Controlled Tier Badge*/}
-                            <CommunityIcon />
-                          </TooltipTrigger>
-                        </FlexColumn>
-                      )}
+                      {!useFeaturedWorkspacePageUi &&
+                        isCommunityWorkspace(workspace) && (
+                          <FlexColumn
+                            aria-label='Community Workspace'
+                            style={{
+                              justifyContent: 'flex-end',
+                              marginLeft: '0.5rem',
+                              marginRight: '0.5rem',
+                            }}
+                          >
+                            <TooltipTrigger content='Workspace is published as Community Workspace'>
+                              {/* Keeping the style consistent with Controlled Tier Badge*/}
+                              <CommunityIcon />
+                            </TooltipTrigger>
+                          </FlexColumn>
+                        )}
                       {adminLocked && (
                         <FlexColumn
                           data-test-id='workspace-lock'

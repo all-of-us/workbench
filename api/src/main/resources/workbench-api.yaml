@@ -1354,6 +1354,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
+  /v1/workspaces/featuredWorkspacesByCategory:
+    get:
+      tags:
+        - Featured Workspace
+      description: Fetches a list of published workspaces filtered by a specified category
+      operationId: getFeaturedWorkspacesByCategory
+      parameters:
+        - name: category
+          in: query
+          description: The category of the featured workspace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of workspace definitions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponseListResponse'
+        400:
+          description: Invalid category provided in the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/featured:
     get:
       tags:
