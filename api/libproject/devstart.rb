@@ -2267,7 +2267,7 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     run_with_redirects(
       "docker run -i -t --rm --network host --entrypoint '' " +
       "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
-      "mariadb:10.2 /bin/bash -c " +
+      "mariadb:10.11.8 /bin/bash -c " +
       "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end
@@ -2870,7 +2870,7 @@ def run_mysql_cmd(cmd)
     "--network host " +
     "--entrypoint '' " +
     "-it " +
-    "mariadb:10.2 " +
+    "mariadb:10.11.8 " +
     cmd
 end
 

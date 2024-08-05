@@ -1,9 +1,12 @@
 package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +54,9 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
    * @return List of all Featured workspaces saved in database table featured_workspace
    */
   @Override
-  public ResponseEntity<WorkspaceResponseListResponse> backFillFeaturedWorkspaces() {
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> backFillFeaturedWorkspaces() {
     featuredWorkspaceService.backFillFeaturedWorkspaces();
-    // To confirm the entity stored in Database
-    return getFeaturedWorkspaces();
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }
