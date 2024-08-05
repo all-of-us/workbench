@@ -2,7 +2,10 @@ package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate {
 
+  private final FeaturedWorkspaceService featuredWorkspaceService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceService workspaceService;
 
   @Autowired
   FeaturedWorkspaceController(
-      Provider<WorkbenchConfig> workbenchConfigProvider, WorkspaceService workspaceService) {
+      FeaturedWorkspaceService featuredWorkspaceService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceService workspaceService) {
+    this.featuredWorkspaceService = featuredWorkspaceService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceService = workspaceService;
   }
@@ -36,5 +43,21 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
       throw new NotImplementedException(
           "Not implemented in this environment: combine the results of getFeaturedWorkspacesConfig() and getPublishedWorkspaces() to generate the list of featured workspaces.");
     }
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> getFeaturedWorkspacesByCategory(
+      String category) {
+    FeaturedWorkspaceCategory requestedCategory = FeaturedWorkspaceCategory.fromValue(category);
+
+    if (requestedCategory == null) {
+      throw new BadRequestException("Invalid featured workspace category: " + category);
+    }
+
+    return ResponseEntity.ok(
+        new WorkspaceResponseListResponse()
+            .items(
+                featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+                    requestedCategory)));
   }
 }
