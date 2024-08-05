@@ -62,7 +62,7 @@ export const FilenameCell = (props: Props) => {
       <FileSpan />
       <TooltipTrigger
         content='Please enter an access reason below'
-        disabled={accessReason?.trim()}
+        disabled={!!accessReason?.trim()}
       >
         <Button
           style={styles.previewButton}

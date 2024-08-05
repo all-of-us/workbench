@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   db:
-    image: mariadb:10.2
+    image: mariadb:10.11.8
     environment:
       - MYSQL_ROOT_PASSWORD=root-notasecret
     volumes:

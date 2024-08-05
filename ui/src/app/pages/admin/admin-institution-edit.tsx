@@ -976,7 +976,6 @@ export const AdminInstitutionEdit = fp.flow(
                       </div>
                     )
                   }
-                  disable={this.isAddInstitutionMode}
                 >
                   <Button
                     type='primary'

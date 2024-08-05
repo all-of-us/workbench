@@ -20,6 +20,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
   renderWithRouter,
 } from 'testing/react-test-helpers';
 import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
@@ -40,8 +41,16 @@ describe('BasicInformation', () => {
     );
   };
 
+  const enablePublishedWorkspacesViaDb = () =>
+    serverConfigStore.set({
+      config: {
+        ...serverConfigStore.get().config,
+        enablePublishedWorkspacesViaDb: true,
+      },
+    });
+
   beforeEach(() => {
-    workspace = workspaceStubs[0];
+    workspace = JSON.parse(JSON.stringify(workspaceStubs[0]));
     user = userEvent.setup();
     serverConfigStore.set({
       config: defaultServerConfig,
@@ -60,7 +69,20 @@ describe('BasicInformation', () => {
     ).toBeInTheDocument();
   });
 
-  it('should show unpublished workspace', async () => {
+  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = false;
+    component();
+    expect(await screen.findByText('No')).toBeInTheDocument();
+  });
+
+  it('should show published workspace (enablePublishedWorkspacesViaDb = false)', async () => {
+    workspace.published = true;
+    component();
+    expect(await screen.findByText('Yes')).toBeInTheDocument();
+  });
+
+  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     component();
 
     expect(screen.getByText('Select a category...')).toBeInTheDocument();
@@ -71,7 +93,8 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
-  it('should show published workspace', async () => {
+  it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component();
     expect(await screen.findByText('Community')).toBeInTheDocument();
@@ -82,7 +105,8 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
-  it('should change category of published workspace', async () => {
+  it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
@@ -97,7 +121,8 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should unpublish a workspace', async () => {
+  it('should unpublish a workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'unpublishWorkspaceViaDB')
@@ -110,12 +135,34 @@ describe('BasicInformation', () => {
     );
   });
 
-  it('should disable publish button if workspace is locked', async () => {
+  it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
+    enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     workspace.adminLocked = true;
     component();
-    expectButtonElementDisabled(
-      screen.getByRole('button', { name: 'Publish' })
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+    expectButtonElementDisabled(publishButton);
+    await expectTooltip(
+      publishButton,
+      'This workspace is locked and cannot be published.',
+      user
+    );
+  });
+
+  it('should show appropriate tooltip when workspace is not published', async () => {
+    enablePublishedWorkspacesViaDb();
+    workspace.featuredCategory = null;
+    component();
+    const publishButton = await screen.findByRole('button', {
+      name: 'Publish',
+    });
+
+    await expectTooltip(
+      publishButton,
+      'Please select a category to publish the workspace.',
+      user
     );
   });
 });

@@ -4,18 +4,32 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.when;
 
+import jakarta.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.FeaturedWorkspaceMapper;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -28,7 +42,12 @@ import org.springframework.context.annotation.Import;
 public class FeaturedWorkspaceTest {
 
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
-  @MockBean private FeaturedWorkspaceMapper featuredWorkspaceMapper;
+  @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private WorkspaceMapper mockWorkspaceMapper;
+
+  // Delete this once published flag is on
+  @MockBean private Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
@@ -42,6 +61,9 @@ public class FeaturedWorkspaceTest {
   @MockBean({
     AccessTierServiceImpl.class,
     WorkspaceAdminServiceImpl.class,
+    // Delete this once enablePublishedWorkspacesViaDb is on
+    FireCloudService.class,
+    WorkspaceDao.class,
   })
   static class Configuration {
     @Bean
@@ -52,8 +74,8 @@ public class FeaturedWorkspaceTest {
 
   @BeforeEach
   public void setUp() {
-    dbWorkspace = new DbWorkspace();
-    when(featuredWorkspaceMapper.toFeaturedWorkspaceCategory(
+    dbWorkspace = new DbWorkspace().setWorkspaceNamespace("ns").setName("name");
+    when(mockFeaturedWorkspaceMapper.toFeaturedWorkspaceCategory(
             DbFeaturedCategory.TUTORIAL_WORKSPACES))
         .thenReturn(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
@@ -68,11 +90,91 @@ public class FeaturedWorkspaceTest {
     DbFeaturedWorkspace dbFeaturedWorkspace =
         new DbFeaturedWorkspace()
             .setWorkspace(dbWorkspace)
-            .setCategory(DbFeaturedWorkspace.DbFeaturedCategory.TUTORIAL_WORKSPACES);
+            .setCategory(DbFeaturedCategory.TUTORIAL_WORKSPACES);
 
     when(mockFeaturedWorkspaceDao.findByWorkspace(dbWorkspace))
         .thenReturn(Optional.of(dbFeaturedWorkspace));
     assertThat(featuredWorkspaceService.getFeaturedCategory(dbWorkspace))
         .hasValue(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+  }
+
+  void mockFeaturedWorkspaces(String namespace, DbFeaturedCategory dbFeaturedCategory) {
+    DbWorkspace mockdbWorkspace =
+        new DbWorkspace().setWorkspaceNamespace(namespace).setWorkspaceId(1);
+
+    DbFeaturedWorkspace dbFeaturedWorkspace =
+        new DbFeaturedWorkspace().setWorkspace(mockdbWorkspace).setCategory(dbFeaturedCategory);
+
+    RawlsWorkspaceResponse rawlsWorkspaceResponse = new RawlsWorkspaceResponse();
+    rawlsWorkspaceResponse.workspace(new RawlsWorkspaceDetails().workspaceId("1"));
+    rawlsWorkspaceResponse.accessLevel(RawlsWorkspaceAccessLevel.OWNER);
+    when(mockFireCloudService.getWorkspace(
+            mockdbWorkspace.getWorkspaceNamespace(), mockdbWorkspace.getFirecloudName()))
+        .thenReturn(rawlsWorkspaceResponse);
+
+    when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
+            FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString())))
+        .thenReturn(dbFeaturedCategory);
+    when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(dbFeaturedCategory))
+        .thenReturn(Collections.singletonList(dbFeaturedWorkspace));
+    Workspace mockWorkspace =
+        new Workspace()
+            .namespace(namespace)
+            .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
+    when(mockWorkspaceMapper.toApiWorkspace(mockdbWorkspace, rawlsWorkspaceResponse.getWorkspace()))
+        .thenReturn(mockWorkspace);
+    when(mockWorkspaceMapper.toApiWorkspaceResponse(
+            mockWorkspace, rawlsWorkspaceResponse.getAccessLevel()))
+        .thenReturn(
+            new WorkspaceResponse()
+                .workspace(mockWorkspace)
+                .accessLevel(WorkspaceAccessLevel.OWNER));
+  }
+
+  @Test
+  public void testGetByFeaturedCategory() {
+    mockFeaturedWorkspaces("Tutorial_namespace", DbFeaturedCategory.TUTORIAL_WORKSPACES);
+    mockFeaturedWorkspaces("Phenotype_namespace", DbFeaturedCategory.PHENOTYPE_LIBRARY);
+    mockFeaturedWorkspaces("Demo_namespace", DbFeaturedCategory.DEMO_PROJECTS);
+    mockFeaturedWorkspaces("Community_namespace", DbFeaturedCategory.COMMUNITY);
+
+    List<WorkspaceResponse> workspaceResponsesList =
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+    assertThat(workspaceResponsesList.size()).isEqualTo(1);
+    assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
+        .isEqualTo("Tutorial_namespace");
+
+    workspaceResponsesList =
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY);
+    assertThat(workspaceResponsesList.size()).isEqualTo(1);
+    assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
+        .isEqualTo("Phenotype_namespace");
+
+    workspaceResponsesList =
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.DEMO_PROJECTS);
+    assertThat(workspaceResponsesList.size()).isEqualTo(1);
+    assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
+        .isEqualTo("Demo_namespace");
+
+    workspaceResponsesList =
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.COMMUNITY);
+    assertThat(workspaceResponsesList.size()).isEqualTo(1);
+    assertThat(workspaceResponsesList.get(0).getWorkspace().getNamespace())
+        .isEqualTo("Community_namespace");
+  }
+
+  @Test
+  public void testGetByFeaturedCategory_none() {
+    when(mockFeaturedWorkspaceDao.findDbFeaturedWorkspacesByCategory(
+            DbFeaturedCategory.TUTORIAL_WORKSPACES))
+        .thenReturn(new ArrayList<DbFeaturedWorkspace>());
+    List<WorkspaceResponse> workspaceResponsesList =
+        featuredWorkspaceService.getWorkspaceResponseByFeaturedCategory(
+            FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
+    assertThat(workspaceResponsesList.size()).isEqualTo(0);
   }
 }

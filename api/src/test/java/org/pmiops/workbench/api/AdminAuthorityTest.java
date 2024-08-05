@@ -46,7 +46,8 @@ public class AdminAuthorityTest {
           "setInstitutionUserInstructions",
           "deleteInstitutionUserInstructions",
           "createAuthDomain",
-          "updateUserDisabledStatus");
+          "updateUserDisabledStatus",
+          "backFillFeaturedWorkspaces");
 
   /**
    * Conversely, methods which have an "/admin/" infix, but do not require an Authority. This should
