@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router';
 import { CohortBuilderApi, CriteriaType, Domain } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   currentCohortCriteriaStore,
@@ -96,7 +97,8 @@ describe('CohortSearch', () => {
     await waitFor(() => {
       expect(screen.queryByText(unsavedDialogText)).not.toBeInTheDocument();
     });
-    screen.getByAltText('Go back').click();
+    const user = userEvent.setup();
+    await user.click(screen.getByAltText('Go back'));
     expect(screen.queryByText(unsavedDialogText)).toBeInTheDocument();
   });
 });

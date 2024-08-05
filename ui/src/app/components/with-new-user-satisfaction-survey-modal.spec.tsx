@@ -8,6 +8,7 @@ import {
   SurveysApi,
 } from 'generated/fetch';
 
+import { screen } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { withNewUserSatisfactionSurveyModal } from 'app/components/with-new-user-satisfaction-survey-modal-wrapper';
@@ -52,9 +53,9 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
     const validationMock = jest
       .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
       .mockImplementationOnce(() => Promise.resolve(true));
-    const { queryByText } = await createWrapperAtPath(`?surveyCode=${code}`);
+    await createWrapperAtPath(`?surveyCode=${code}`);
     expect(validationMock).toHaveBeenCalledWith(code);
-    expect(queryByText(overallSatisfaction)).toBeInTheDocument();
+    expect(await screen.findByText(overallSatisfaction)).toBeInTheDocument();
   });
 
   it('should not show the modal if the code query parameter is not present', async () => {
@@ -102,13 +103,13 @@ describe(withNewUserSatisfactionSurveyModal.name, () => {
       .spyOn(surveysApi(), 'createNewUserSatisfactionSurveyWithOneTimeCode')
       .mockImplementationOnce(() => Promise.resolve(undefined));
 
-    const { getByRole } = await createWrapperWithValidCode(code);
+    await createWrapperWithValidCode(code);
 
-    const button = getByRole('button', { name: 'submit' });
+    const button = await screen.findByRole('button', { name: 'submit' });
     // because we haven't chosen a satisfaction level yet
     expectButtonElementDisabled(button);
 
-    await user.click(getByRole('radio', { name: /very satisfied/i }));
+    await user.click(screen.getByRole('radio', { name: /very satisfied/i }));
 
     await waitFor(() => expectButtonElementEnabled(button));
 

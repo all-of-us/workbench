@@ -8,7 +8,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
@@ -70,10 +69,26 @@ public interface MailService {
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
 
-  void sendPublishWorkspaceEmail(
-      final DbWorkspace workspace, List<DbUser> owners, FeaturedWorkspaceCategory publishCategory)
+  /**
+   * Sends emails to workspace owners notifying them that a workspace has been published as a
+   * Community Workspace. Note that it sends one email per owner, in order to address them in text
+   * individually.
+   *
+   * @param workspace the workspace being published as a Community Workspace
+   * @param owners the workspace's owners
+   * @throws MessagingException
+   */
+  void sendPublishCommunityWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 
-  void sendUnpublishWorkspaceByAdminEmail(final DbWorkspace workspace, List<DbUser> owners)
+  /**
+   * Sends emails to workspace owners notifying them that a workspace has been unpublished. Note
+   * that it sends one email per owner, in order to address them in text individually.
+   *
+   * @param workspace the workspace being unpublished
+   * @param owners the workspace's owners
+   * @throws MessagingException
+   */
+  void sendAdminUnpublishWorkspaceEmails(DbWorkspace workspace, List<DbUser> owners)
       throws MessagingException;
 }

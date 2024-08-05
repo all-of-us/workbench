@@ -20,7 +20,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import colors from 'app/styles/colors';
-import { withCurrentWorkspace } from 'app/utils';
+import { WithCurrentWorkspace, withCurrentWorkspace } from 'app/utils';
 import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -207,7 +207,7 @@ const FailedRequestMessage = () => (
 );
 
 export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
-  ({ workspace }) => {
+  ({ workspace }: WithCurrentWorkspace) => {
     const {
       data: jobs,
       error,

@@ -134,7 +134,7 @@ describe(CustomizePanel.name, () => {
       allowDataproc: true,
     });
 
-    const dataprocOption = getDropdownOption(
+    const dataprocOption = await getDropdownOption(
       container,
       'runtime-compute',
       ComputeType.Dataproc,
@@ -162,7 +162,7 @@ describe(CustomizePanel.name, () => {
       allowDataproc: true,
     });
 
-    const standardOption = getDropdownOption(
+    const standardOption = await getDropdownOption(
       container,
       'runtime-compute',
       ComputeType.Standard,
@@ -238,7 +238,7 @@ describe(CustomizePanel.name, () => {
 
     const { container } = await component();
 
-    const secondOptionOf4 = getDropdownOption(
+    const secondOptionOf4 = await getDropdownOption(
       container,
       'runtime-autopause',
       secondLabel,

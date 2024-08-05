@@ -113,7 +113,7 @@ const ageTypes = [
 ];
 
 const defaultMinAge = '18';
-const defaultMaxAge = '120';
+const defaultMaxAge = '125';
 
 function sortByCountThenName(critA, critB) {
   const A = critA.count || 0;
@@ -130,6 +130,7 @@ interface Props {
 }
 
 interface State {
+  ageRange: number[];
   ageType: AttrName;
   ageTypeNodes: any;
   calculating: boolean;
@@ -140,16 +141,19 @@ interface State {
   nodes: Array<any>;
 }
 
+interface Slider {
+  get: () => Array<string>;
+  set: (values: Array<number>) => void;
+}
+
 export class Demographics extends React.Component<Props, State> {
   ageWrapper: HTMLDivElement;
-  slider: {
-    get: () => Array<string>;
-    set: (values: Array<number>) => void;
-  };
+  slider: Slider;
 
   constructor(props: Props) {
     super(props);
     this.state = {
+      ageRange: [+defaultMinAge, +defaultMinAge],
       ageType: AttrName.AGE,
       ageTypeNodes: undefined,
       calculating: false,
@@ -203,6 +207,7 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   async loadAgeNodesFromApi() {
+    const { ageRange } = this.state;
     const { id, namespace } = currentWorkspaceStore.getValue();
     const initialValue = {
       [AttrName.AGE]: [],
@@ -212,16 +217,23 @@ export class Demographics extends React.Component<Props, State> {
     const response = await cohortBuilderApi().findAgeTypeCounts(namespace, id);
     const ageTypeNodes = response.items.reduce((acc, item) => {
       acc[item.ageType].push(item);
+      // Compare age with upper range and update if needed. Can't currently change lower range to prevent including ages < 18
+      if (item.age > ageRange[1]) {
+        ageRange[1] = item.age;
+      }
       return acc;
     }, initialValue);
-    this.setState({ ageTypeNodes }, () => this.calculateAgeFromNodes());
+    this.setState(
+      { ageRange, ageTypeNodes, maxAge: ageRange[1].toString() },
+      () => this.calculateAgeFromNodes()
+    );
   }
 
   onMinChange(minAge: string) {
-    const { maxAge } = this.state;
+    const { ageRange, maxAge } = this.state;
     let sliderMin = +minAge;
-    if (+minAge < +defaultMinAge) {
-      sliderMin = +defaultMinAge;
+    if (+minAge < ageRange[0]) {
+      sliderMin = ageRange[0];
     } else if (+minAge > +maxAge) {
       sliderMin = +maxAge;
     }
@@ -230,10 +242,10 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   onMaxChange(maxAge: string) {
-    const { minAge } = this.state;
+    const { ageRange, minAge } = this.state;
     let sliderMax = +maxAge;
-    if (+maxAge > +defaultMaxAge) {
-      sliderMax = +defaultMaxAge;
+    if (+maxAge > ageRange[1]) {
+      sliderMax = ageRange[1];
     } else if (+maxAge < +minAge) {
       sliderMax = +minAge;
     }
@@ -242,24 +254,24 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   onMaxBlur() {
-    const { minAge } = this.state;
+    const { ageRange, minAge } = this.state;
     let { maxAge } = this.state;
     if (+maxAge < +minAge) {
       maxAge = minAge;
-    } else if (+maxAge > +defaultMaxAge || maxAge === '') {
-      maxAge = defaultMaxAge;
+    } else if (+maxAge > ageRange[1] || maxAge === '') {
+      maxAge = ageRange[1].toString();
     }
     this.slider.set([null, +maxAge]);
     this.setState({ maxAge });
   }
 
   onMinBlur() {
-    const { maxAge } = this.state;
+    const { ageRange, maxAge } = this.state;
     let { minAge } = this.state;
     if (+minAge > +maxAge) {
       minAge = maxAge;
-    } else if (+minAge < +defaultMinAge || minAge === '') {
-      minAge = defaultMinAge;
+    } else if (+minAge < ageRange[0] || minAge === '') {
+      minAge = ageRange[0].toString();
     }
     this.slider.set([+minAge, null]);
     this.setState({ minAge });
@@ -269,11 +281,8 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({ ageType }, () => this.calculateAgeFromNodes());
   }
 
-  onSliderInit(slider: React.ReactNode) {
-    // Property 'noUiSlider' does not exist on type 'ReactNode'
-    // TODO RW-5572 confirm proper behavior and fix
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    this.slider = slider['noUiSlider'];
+  onSliderInit(slider) {
+    this.slider = slider.noUiSlider;
     if (this.slider) {
       this.centerAgeCount();
     }
@@ -312,15 +321,15 @@ export class Demographics extends React.Component<Props, State> {
 
   centerAgeCount() {
     if (!!this.slider) {
+      const {
+        ageRange: [minRange, maxRange],
+      } = this.state;
       // get range from slider element and convert the strings to numbers
       const [sliderMin, sliderMax] = this.slider.get().map((v) => +v);
       // get width as a % by dividing the selected age range by the full slider range
-      const width =
-        ((sliderMax - sliderMin) / (+defaultMaxAge - +defaultMinAge)) * 100;
+      const width = ((sliderMax - sliderMin) / (maxRange - minRange)) * 100;
       // get left margin as a % by dividing the change in minAge by the full slider range
-      const marginLeft =
-        ((sliderMin - +defaultMinAge) / (+defaultMaxAge - +defaultMinAge)) *
-        100;
+      const marginLeft = ((sliderMin - minRange) / (maxRange - minRange)) * 100;
       const wrapper = document.getElementById('count-wrapper');
       if (!!wrapper) {
         wrapper.setAttribute(
@@ -381,8 +390,16 @@ export class Demographics extends React.Component<Props, State> {
 
   render() {
     const { criteriaType, selectedIds } = this.props;
-    const { ageType, calculating, count, loading, maxAge, minAge, nodes } =
-      this.state;
+    const {
+      ageRange,
+      ageType,
+      calculating,
+      count,
+      loading,
+      maxAge,
+      minAge,
+      nodes,
+    } = this.state;
     return loading ? (
       <div style={{ textAlign: 'center' }}>
         <Spinner style={{ marginTop: '4.5rem' }} />
@@ -394,7 +411,7 @@ export class Demographics extends React.Component<Props, State> {
           <div style={{ width: '3.75rem' }}>
             <NumberInput
               style={styles.ageInput}
-              min={defaultMinAge}
+              min={ageRange[0].toString()}
               max={maxAge}
               value={minAge}
               onBlur={() => this.onMinBlur()}
@@ -416,8 +433,11 @@ export class Demographics extends React.Component<Props, State> {
               connect
               instanceRef={(slider) => this.onSliderInit(slider)}
               onSlide={(v) => this.onSliderUpdate(v)}
-              range={{ min: +defaultMinAge, max: +defaultMaxAge }}
-              start={[+defaultMinAge, +defaultMaxAge]}
+              range={{
+                min: ageRange[0],
+                max: ageRange[1],
+              }}
+              start={ageRange}
               step={1}
             />
           </div>
@@ -425,7 +445,7 @@ export class Demographics extends React.Component<Props, State> {
             <NumberInput
               style={styles.ageInput}
               min={minAge}
-              max={defaultMaxAge}
+              max={ageRange[1].toString()}
               value={maxAge}
               onBlur={() => this.onMaxBlur()}
               onChange={(v) => this.onMaxChange(v)}

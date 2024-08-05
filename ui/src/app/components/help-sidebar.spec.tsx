@@ -131,7 +131,7 @@ describe('HelpSidebar', () => {
   let props: {};
   let user;
 
-  const component = async () => {
+  const component = () => {
     /*
     The useSWR hook in useGenomicExtractionJobs is causing
     extractionJobs to carryover between tests. More details can be
@@ -227,8 +227,8 @@ describe('HelpSidebar', () => {
     });
   };
 
-  const setActiveIcon = async (activeIconKey) => {
-    sidebarActiveIconStore.next(activeIconKey);
+  const setActiveIcon = (activeIconKey) => {
+    act(() => sidebarActiveIconStore.next(activeIconKey));
   };
 
   const appsPanelTitle = /active applications/i;
@@ -329,13 +329,14 @@ describe('HelpSidebar', () => {
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async () => {
-    await component();
-    await setActiveIcon('help');
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
+    setActiveIcon('help');
     expect(
       (await screen.findByTestId('sidebar-content')).parentNode
     ).toHaveStyle({ width: 'calc(21rem + 70px)' });
 
-    await setActiveIcon(null);
+    setActiveIcon(null);
     expect(
       (await screen.findByTestId('sidebar-content')).parentNode
     ).toHaveStyle({ width: 0 });
@@ -371,14 +372,14 @@ describe('HelpSidebar', () => {
     props = { pageKey: 'cohortBuilder' };
     component();
     expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
-    currentCohortCriteriaStore.next([]);
+    act(() => currentCohortCriteriaStore.next([]));
 
     expect(
       screen.queryByLabelText('Open Actions Menu')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('criteria-count')).not.toBeInTheDocument();
 
-    currentCohortCriteriaStore.next([criteria1]);
+    act(() => currentCohortCriteriaStore.next([criteria1]));
     expect(await screen.findByTestId('criteria-count')).toBeInTheDocument();
   });
 
@@ -665,8 +666,8 @@ describe('HelpSidebar', () => {
 
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
     const rStudioPanelTitle = /RStudio Cloud Environment/i;
-    await component();
-
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     expect(screen.queryByText(rStudioPanelTitle)).not.toBeInTheDocument();
 
     await user.click(
@@ -684,8 +685,8 @@ describe('HelpSidebar', () => {
 
   it('should open the SAS config panel after clicking the SAS icon', async () => {
     const sasPanelTitle = /SAS Cloud Environment/i;
-    await component();
-
+    component();
+    expect(await screen.findByTestId('sidebar-content')).toBeInTheDocument();
     expect(screen.queryByText(sasPanelTitle)).not.toBeInTheDocument();
 
     await user.click(
