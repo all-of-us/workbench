@@ -1401,6 +1401,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/workspaces/backfillfeatured:
+    post:
+      tags:
+        - Featured Workspace
+      description: Saves featured workspace from config to database. This is TEMP and will be removed once we run it
+      operationId: backFillFeaturedWorkspaces
+      responses:
+        200:
+          description: success workspace from featured_workspaces have been saved to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+        403:
+          description: User doesnt have access to the backfill data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{terraName}/isNotebookTransferComplete:
     get:
       tags:

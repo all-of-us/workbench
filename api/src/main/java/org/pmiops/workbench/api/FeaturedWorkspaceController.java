@@ -1,10 +1,13 @@
 package org.pmiops.workbench.api;
 
 import jakarta.inject.Provider;
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -43,6 +46,20 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
       throw new NotImplementedException(
           "Not implemented in this environment: combine the results of getFeaturedWorkspacesConfig() and getPublishedWorkspaces() to generate the list of featured workspaces.");
     }
+  }
+
+  /**
+   * Temporary method to backfill the Featured Workspace DB table with information from the Featured
+   * Workspaces Config JSON. This method will be deleted after the backfill process has been
+   * completed in all environments using curl.
+   *
+   * @return List of all Featured workspaces saved in database table featured_workspace
+   */
+  @Override
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> backFillFeaturedWorkspaces() {
+    featuredWorkspaceService.backFillFeaturedWorkspaces();
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
