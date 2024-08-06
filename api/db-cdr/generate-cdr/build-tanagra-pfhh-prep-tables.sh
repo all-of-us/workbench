@@ -30,7 +30,7 @@ bq load --project_id="$BQ_PROJECT" --source_format=CSV "$BQ_DATASET.prep_pfhh_no
 echo "prep_pfhh_observation - inserting PFHH source data"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_observation\`
-SELECT DISTINCT o.person_id, o.observation_date, o.observation_datetime, o.observation_source_concept_id, p.birth_datetime, o.visit_detail_id, o.visit_occurrence_id, o.value_as_concept_id, o.value_as_number, o.value_source_concept_id, oe.survey_version_concept_id, sc.survey_concept_id, sc.collection_method_concept_id
+SELECT DISTINCT o.person_id, o.observation_date, o.observation_datetime, o.observation_source_concept_id, p.birth_datetime, o.value_as_number, o.visit_occurrence_id, o.value_source_concept_id, o.value_as_concept_id, sc.survey_concept_id, oe.survey_version_concept_id, sc.collection_method_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` oe on o.observation_id = oe.observation_id
@@ -51,7 +51,7 @@ FROM (
   JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_mapping\` pfhh_mapping ON pfhh.observation_source_concept_id = pfhh_mapping.historic_question_concept_id AND pfhh.value_source_concept_id = pfhh_mapping.pfhh_answer_concept_id
   AND survey_concept_id IN (43528698, 43529712)
 ) y
-WHERE x.concept_id = y.historic_question
+WHERE x.observation_source_concept_id = y.historic_question
 AND x.value_source_concept_id = y.answer
 AND x.person_id = y.person_id
 AND x.observation_date = y.observation_date"
@@ -74,15 +74,13 @@ SELECT DISTINCT
     , a.entry_date
     , a.entry_datetime
     , a.concept_id
-    , a.domain
-    , a.age_at_event
-    , a.visit_concept_id
-    , a.visit_occurrence_id
+    , b.birth_datetime
     , a.value_as_number
-    , a.value_as_concept_id
+    , a.visit_occurrence_id
     , a.value_source_concept_id
-    , a.survey_version_concept_id
+    , a.value_as_concept_id
     , a.survey_concept_id
+    , a.survey_version_concept_id
     , a.cati_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_non_answer_insert\` a
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id"
