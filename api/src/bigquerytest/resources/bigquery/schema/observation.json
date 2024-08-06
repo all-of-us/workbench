@@ -65,6 +65,11 @@
     "mode": "nullable"
   },
   {
+    "type": "integer",
+    "name": "visit_detail_id",
+    "mode": "nullable"
+  },
+  {
     "type": "string",
     "name": "observation_source_value",
     "mode": "nullable"

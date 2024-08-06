@@ -1,0 +1,62 @@
+[
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "observation_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "observation_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "observation_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "timestamp",
+    "name": "birth_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "float",
+    "name": "value_as_number",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "value_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "value_as_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "survey_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "survey_version_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "collection_method_concept_id",
+    "mode": "nullable"
+  }
+]
