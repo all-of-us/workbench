@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -21,6 +22,15 @@ public class ExceptionAdvice {
         .body(
             WorkbenchException.errorResponse("failed to parse valid JSON request message")
                 .statusCode(HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @ExceptionHandler({NoHandlerFoundException.class})
+  public ResponseEntity<?> noEndpointHandler(Exception e) {
+    log.log(Level.INFO, e.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(
+            WorkbenchException.errorResponse(e.getMessage())
+                .statusCode(HttpStatus.NOT_FOUND.value()));
   }
 
   @ExceptionHandler({Exception.class})
