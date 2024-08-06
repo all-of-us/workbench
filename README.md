@@ -343,12 +343,6 @@ configuration uses the port the API is listening on, *8001*.
 When this configuration is selected, clicking the debug icon (looks like a green bug) will
 cause the running API process to stop at breakpoints you have set for inspection.
 
-## DevOps
-The `devops` toolkit is described [here](ops/ruby/devops-framework/README.md). Other
-documentation (including the playbook) is available for oncall engineers. This toolkit
-is independent of the build and release system, and may be used by any GCP application
-for which they are useful.
-
 ## Manual Testing
 
 ### Backend Swagger Portals
