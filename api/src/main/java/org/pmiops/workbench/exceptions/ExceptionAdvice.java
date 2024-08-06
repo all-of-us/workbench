@@ -9,13 +9,14 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
 public class ExceptionAdvice {
   private static final Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
 
   @ExceptionHandler({HttpMessageNotReadableException.class})
-  public ResponseEntity<?> messageNotReadableError(Exception e) {
+  public ResponseEntity<ErrorResponse> messageNotReadableError(Exception e) {
     log.log(Level.INFO, "failed to parse HTTP request message, returning 400", e);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
@@ -23,8 +24,17 @@ public class ExceptionAdvice {
                 .statusCode(HttpStatus.BAD_REQUEST.value()));
   }
 
+  @ExceptionHandler({NoHandlerFoundException.class})
+  public ResponseEntity<ErrorResponse> notFoundHandler(Exception e) {
+    log.log(Level.INFO, e.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(
+            WorkbenchException.errorResponse(e.getMessage())
+                .statusCode(HttpStatus.NOT_FOUND.value()));
+  }
+
   @ExceptionHandler({Exception.class})
-  public ResponseEntity<?> serverError(Exception e) {
+  public ResponseEntity<ErrorResponse> serverError(Exception e) {
     final int statusCode;
     // if exception class has an HTTP status associated with it, grab it
     if (e.getClass().getAnnotation(ResponseStatus.class) != null) {
@@ -36,9 +46,9 @@ public class ExceptionAdvice {
     ErrorResponse errorResponse = WorkbenchException.errorResponse().statusCode(statusCode);
 
     // Only include Exception details on Workbench errors.
-    if (e instanceof WorkbenchException) {
+    if (e instanceof WorkbenchException exception) {
       errorResponse.setErrorClassName(e.getClass().getName());
-      ErrorResponse thrownErrorResponse = ((WorkbenchException) e).getErrorResponse();
+      ErrorResponse thrownErrorResponse = exception.getErrorResponse();
       if (thrownErrorResponse != null) {
         errorResponse
             .message(thrownErrorResponse.getMessage())
