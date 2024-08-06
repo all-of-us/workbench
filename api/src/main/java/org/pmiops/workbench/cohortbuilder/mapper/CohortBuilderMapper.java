@@ -15,7 +15,6 @@ import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbDomainCard;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
 import org.pmiops.workbench.model.CohortChartData;
