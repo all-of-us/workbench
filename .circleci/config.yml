@@ -223,7 +223,7 @@ commands:
         working_directory: ~/workbench/deploy
         command: |
           ./project.rb deploy \
-            --project all-of-us-rw-staging \
+            --project all-of-us-rw-stable \
             --account << pipeline.parameters.circle-service-account >> \
             --git-version "${CIRCLE_TAG}" \
             --app-version "${CIRCLE_TAG}" \
