@@ -184,7 +184,7 @@ commands:
           name: Configure gcloud to use the OIDC credential configuration
       - run:
           name: Verify that gcloud is authenticated
-          command: gcloud iam service-accounts get-iam-policy << pipeline.parameters.circle-service-account >>
+          command: gcloud iam service-accounts get-iam-policy << parameters.service_account >>
       - run:
           name: Verify that ADC works
           command: |
