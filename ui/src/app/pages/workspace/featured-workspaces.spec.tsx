@@ -67,6 +67,25 @@ describe('Featured Workspace List', () => {
     });
   });
 
+  it('Shows workspaces from correct category if tabs are clicked quickly', async () => {
+    component();
+    // Click Tab
+    await user.click(
+      await screen.getByRole('button', { name: 'Tutorial Workspaces' })
+    );
+    await user.click(
+      await screen.getByRole('button', { name: 'Demonstration Projects' })
+    );
+    await waitFor(() => {
+      expect(screen.queryAllByTestId('workspace-card').length).toBe(2);
+    });
+    // Ensure it doesnt attempt to append tutorial workspace list if tabs are clicked quickly
+    expect(screen.queryAllByTestId('workspace-card').length).not.toBe(4);
+    expect(
+      screen.queryByText('defaultWorkspace' + featuredCategory[1])
+    ).toBeInTheDocument();
+  });
+
   it('Shows all workspaces on clicking Tab name', async () => {
     component();
     expect(

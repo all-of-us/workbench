@@ -193,6 +193,7 @@ export const FeaturedWorkspaces = (props) => {
         );
       setWorkspaceList(
         workspacesReceived.items
+          .filter((wr) => wr.workspace.featuredCategory === currentTab.category)
           .sort((a, b) => a.workspace.name.localeCompare(b.workspace.name))
           .map((w) => new WorkspacePermissions(w))
       );
