@@ -223,8 +223,8 @@ commands:
         working_directory: ~/workbench/deploy
         command: |
           ./project.rb deploy \
-            --project all-of-us-rw-staging \
-            --account << pipeline.parameters.circle-service-account >> \
+            --project all-of-us-rw-stable \
+            --account "deploy@all-of-us-rw-stable.iam.gserviceaccount.com" \
             --git-version "${CIRCLE_TAG}" \
             --app-version "${CIRCLE_TAG}" \
             --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
@@ -1139,6 +1139,10 @@ workflows:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
       - api-contract-update-staging:
+          <<: *filter-release-tags
+          requires:
+            - deploy-to-staging
+      - deploy-to-stable:
           <<: *filter-release-tags
           requires:
             - deploy-to-staging
