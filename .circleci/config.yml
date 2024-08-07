@@ -1143,9 +1143,9 @@ workflows:
           requires:
             - deploy-to-staging
       - deploy-to-stable:
-        <<: *filter-release-tags
-        requires:
-        - deploy-to-staging
+          <<: *filter-release-tags
+          requires:
+            - deploy-to-staging
 
   nightly-tests:
     triggers:
