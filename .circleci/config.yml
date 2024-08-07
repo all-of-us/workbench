@@ -1101,7 +1101,6 @@ workflows:
         - api-deps-check
         - api-integration-test
         - ui-unit-test
-        - deploy-staging
 
   deploy-staging:
     jobs:
