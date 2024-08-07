@@ -158,6 +158,9 @@ commands:
       oidc_token_file_path:
         type: string
         default: /home/circleci/oidc_token.json
+      service_account:
+        type: string
+        default: "<< pipeline.parameters.circle-service-account >>"
     steps:
       - gcp-cli/install
       - run:
@@ -168,7 +171,7 @@ commands:
             gcloud iam workload-identity-pools create-cred-config \
                 "projects/<< parameters.project_id >>/locations/global/workloadIdentityPools/<< parameters.wip_id >>/providers/<< parameters.wip_provider_id >>"\
                 --output-file="<< pipeline.parameters.circle-service-account-key >>" \
-                --service-account="<< pipeline.parameters.circle-service-account >>" \
+                --service-account="<< parameters.service_account >>" \
                 --credential-source-file=<< parameters.oidc_token_file_path >>
           name: Store OIDC credential configuration in temp file
       - run:
@@ -203,6 +206,7 @@ commands:
         project_id: " 56507752110"  # all-of-us-rw-stable
         wip_id: "circleci-wip-stable"
         wip_provider_id: "circleci-oidc-prv-stable"
+        service_account: "deploy@all-of-us-rw-stable.iam.gserviceaccount.com"
 
   gcloud-auth-login-oidc-staging:
     description: "Activate CircleCI service account credential for the Staging environment"
