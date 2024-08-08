@@ -95,9 +95,6 @@ export const BasicInformation = ({
             ? 'Initial credits'
             : 'User provided'}
         </WorkspaceInfoField>
-        <WorkspaceInfoField labelText='Creator'>
-          {workspace.creator}
-        </WorkspaceInfoField>
         <WorkspaceInfoField labelText='Creation Time'>
           {new Date(workspace.creationTime).toDateString()}
         </WorkspaceInfoField>
