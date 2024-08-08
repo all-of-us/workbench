@@ -12,8 +12,6 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import {
-  appMaxDiskSize,
-  appMinDiskSize,
   canDeleteApp,
   defaultAppRequest,
   findApp,
@@ -46,6 +44,8 @@ import { sidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore, serverConfigStore, useStore } from 'app/utils/stores';
 import { oxfordCommaString } from 'app/utils/strings';
 import {
+  appMaxDiskSize,
+  appMinDiskSize,
   appTypeToString,
   isDiskSizeValid,
   isInteractiveUserApp,
@@ -165,7 +165,7 @@ export const CreateGkeApp = ({
   const { profile } = profileState;
   const { billingStatus } = workspace;
 
-  const defaultCreateRequest = defaultAppRequest[appType];
+  const defaultCreateRequest = defaultAppRequest(appType);
 
   const app = findApp(userApps, toUIAppType[appType]);
 
@@ -439,7 +439,7 @@ export const CreateGkeApp = ({
                 }
                 disabled={!canModifyDiskSize}
                 diskSize={createAppRequest.persistentDiskRequest.size}
-                idPrefix={'gke-app'}
+                idPrefix='gke-app'
               />
             </div>
           </TooltipTrigger>
@@ -449,7 +449,7 @@ export const CreateGkeApp = ({
       <FlexRow>
         {showErrorBanner && (
           <ErrorMessage>
-            Disk size must be between {appMinDiskSize[appType]} GB and{' '}
+            Disk size must be between {appMinDiskSize(appType)} GB and{' '}
             {appMaxDiskSize} GB
           </ErrorMessage>
         )}

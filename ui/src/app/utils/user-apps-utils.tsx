@@ -7,9 +7,8 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
-  appMaxDiskSize,
-  appMinDiskSize,
   findApp,
   openConfigPanelForUIApp,
   toUIAppType,
@@ -244,9 +243,19 @@ export const openAppInIframe = (
   ]);
 };
 
-export const isDiskSizeValid = (appRequest) =>
+export const appMinDiskSize = (appType: AppType): number =>
+  switchCase(
+    appType,
+    [AppType.CROMWELL, () => 50],
+    [AppType.RSTUDIO, () => 100],
+    [AppType.SAS, () => 150]
+  );
+
+export const appMaxDiskSize = 1000;
+
+export const isDiskSizeValid = (appRequest: CreateAppRequest) =>
   appRequest.persistentDiskRequest.size <= appMaxDiskSize &&
-  appRequest.persistentDiskRequest.size >= appMinDiskSize[appRequest.appType];
+  appRequest.persistentDiskRequest.size >= appMinDiskSize(appRequest.appType);
 
 export const openAppOrConfigPanel = (
   workspaceNamespace: string,
