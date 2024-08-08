@@ -18,7 +18,7 @@ import {
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { NavigateExtras, NavigateFn } from 'app/utils/navigation';
+import { NavigateFn } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
