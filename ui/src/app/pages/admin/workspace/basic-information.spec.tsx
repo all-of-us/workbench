@@ -93,6 +93,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
@@ -105,6 +106,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
@@ -137,7 +139,7 @@ describe('BasicInformation', () => {
 
   it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
-    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    workspace.featuredCategory = undefined;
     workspace.adminLocked = true;
     component();
     const publishButton = await screen.findByRole('button', {
