@@ -183,6 +183,12 @@ commands:
             source $BASH_ENV
           name: Configure gcloud to use the OIDC credential configuration
       - run:
+          command: |
+            echo "Circle OIDC Token: $CIRCLE_OIDC_TOKEN"
+            echo "circle-service-account-key: "
+            cat "<< pipeline.parameters.circle-service-account-key >>"
+          name: Debug OIDC to automate higher environment deploys (DELETE ME)
+      - run:
           name: Verify that gcloud is authenticated
           command: gcloud iam service-accounts get-iam-policy << parameters.service_account >>
       - run:
