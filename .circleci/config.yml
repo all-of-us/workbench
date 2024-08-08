@@ -1181,9 +1181,3 @@ workflows:
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
-
-experimental:
-  notify:
-    branches:
-      only:
-        - main
