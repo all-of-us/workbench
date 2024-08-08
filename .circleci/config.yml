@@ -183,12 +183,6 @@ commands:
             source $BASH_ENV
           name: Configure gcloud to use the OIDC credential configuration
       - run:
-          command: |
-            echo "Circle OIDC Token: $CIRCLE_OIDC_TOKEN"
-            echo "circle-service-account-key: "
-            cat "<< pipeline.parameters.circle-service-account-key >>"
-          name: Debug OIDC to automate higher environment deploys (DELETE ME)
-      - run:
           name: Verify that gcloud is authenticated
           command: gcloud iam service-accounts get-iam-policy << parameters.service_account >>
       - run:
@@ -1088,31 +1082,7 @@ workflows:
           requires:
             - e2ev2-deploy-ui
 
-  deploy-stable:
-    jobs:
-    - api-local-test:
-        <<: *filter-release-tags
-    - api-unit-test:
-        <<: *filter-release-tags
-    - ui-unit-test:
-        <<: *filter-release-tags
-    - api-bigquery-test:
-        <<: *filter-release-tags
-    - api-deps-check:
-        <<: *filter-release-tags
-    - api-integration-test:
-        <<: *filter-release-tags
-    - deploy-to-stable:
-        <<: *filter-release-tags
-        requires:
-        - api-local-test
-        - api-unit-test
-        - api-bigquery-test
-        - api-deps-check
-        - api-integration-test
-        - ui-unit-test
-
-  deploy-staging:
+  deploy-staging-and-stable:
     jobs:
       - api-local-test:
           <<: *filter-release-tags
