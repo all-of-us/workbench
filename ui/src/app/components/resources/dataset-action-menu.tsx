@@ -96,7 +96,7 @@ export const DatasetActionMenu = fp.flow(
               resource.workspaceFirecloudName,
               'data',
               'data-sets',
-              resource.dataSet.id,
+              resource.dataSet.id?.toString(),
             ]);
           },
           disabled: !canWrite(resource),
