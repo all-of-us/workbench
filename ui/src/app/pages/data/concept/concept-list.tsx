@@ -165,7 +165,7 @@ export const ConceptListPage = fp.flow(
           'data',
           'concepts',
           'sets',
-          conceptSet.id,
+          conceptSet.id?.toString(),
           'actions',
         ]);
       } catch (error) {
@@ -193,7 +193,7 @@ export const ConceptListPage = fp.flow(
         'data',
         'concepts',
         'sets',
-        conceptSet.id,
+        conceptSet.id?.toString(),
         'actions',
       ]);
     }

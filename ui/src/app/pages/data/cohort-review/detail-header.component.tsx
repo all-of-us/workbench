@@ -356,7 +356,7 @@ export const DetailHeader = fp.flow(
         'reviews',
         crid,
         'participants',
-        id,
+        id.toString(),
       ]);
     };
 
