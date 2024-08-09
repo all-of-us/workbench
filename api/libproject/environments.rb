@@ -53,7 +53,7 @@ ENVIRONMENTS = {
     :tanagra_access_control_model => "AOU_WORKBENCH",
     # turn on authN
     :tanagra_auth_disable_checks => "false",
-    :tanagra_auth_bearer_token => "true",
+    :tanagra_auth_gcp_access_token => "true",
     :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
     :tanagra_tag => "0.0.580",
     :accessTiers => {
@@ -143,7 +143,7 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
-    :tanagra_tag => "0.0.580",
+    :tanagra_tag => "0.0.554",
     :accessTiers => {
       "registered" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-prod",

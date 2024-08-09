@@ -2618,7 +2618,7 @@ def deploy_tanagra(cmd_name, args)
   ENV.update({"TANAGRA_ACCESS_CONTROL_BASE_PATH" => env_project.fetch(:api_endpoint_host)})
   ENV.update({"TANAGRA_ACCESS_CONTROL_MODEL" => env_project.fetch(:tanagra_access_control_model)})
   ENV.update({"TANAGRA_AUTH_DISABLE_CHECKS" => env_project.fetch(:tanagra_auth_disable_checks)})
-  ENV.update({"TANAGRA_AUTH_GCP_ACCESS_TOKEN" => env_project.fetch(:tanagra_auth_bearer_token)})
+  ENV.update({"TANAGRA_AUTH_GCP_ACCESS_TOKEN" => env_project.fetch(:tanagra_auth_gcp_access_token)})
   ENV.update({"TANAGRA_UNDERLAY_FILES" => env_project.fetch(:tanagra_underlay_files)})
 
   promote = "--no-promote"
