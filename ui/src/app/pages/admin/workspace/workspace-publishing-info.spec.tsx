@@ -2,11 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import {
-  FeaturedWorkspaceCategory,
-  WorkspaceActiveStatus,
-  WorkspaceAdminApi,
-} from 'generated/fetch';
+import { FeaturedWorkspaceCategory, WorkspaceAdminApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
@@ -26,16 +22,15 @@ import {
 import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { BasicInformation } from './basic-information';
+import { WorkspacePublishingInfo } from './workspace-publishing-info';
 
-describe('BasicInformation', () => {
-  const activeStatus = WorkspaceActiveStatus.ACTIVE;
+describe(WorkspacePublishingInfo.name, () => {
   let user: UserEvent;
   let workspace;
   const component = () => {
     return renderWithRouter(
-      <BasicInformation
-        {...{ workspace, activeStatus }}
+      <WorkspacePublishingInfo
+        {...{ workspace }}
         reload={async () => Promise.resolve()}
       />
     );
@@ -64,9 +59,7 @@ describe('BasicInformation', () => {
 
   it('renders', async () => {
     component();
-    expect(
-      await screen.findByRole('heading', { name: /basic information/i })
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Workspace Published/)).toBeInTheDocument();
   });
 
   it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
@@ -93,6 +86,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
@@ -105,6 +99,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
@@ -137,7 +132,7 @@ describe('BasicInformation', () => {
 
   it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
-    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    workspace.featuredCategory = undefined;
     workspace.adminLocked = true;
     component();
     const publishButton = await screen.findByRole('button', {
