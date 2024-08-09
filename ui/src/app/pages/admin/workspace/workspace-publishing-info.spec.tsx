@@ -27,15 +27,15 @@ import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { BasicInformation } from './basic-information';
+import { WorkspacePublishingInfo } from './workspace-publishing-info';
 
-describe('BasicInformation', () => {
-  const activeStatus = WorkspaceActiveStatus.ACTIVE;
+describe(WorkspacePublishingInfo.name, () => {
   let user: UserEvent;
   let workspace;
   const component = () => {
     return renderWithRouter(
-      <BasicInformation
-        {...{ workspace, activeStatus }}
+      <WorkspacePublishingInfo
+        {...{ workspace }}
         reload={async () => Promise.resolve()}
       />
     );
@@ -64,9 +64,7 @@ describe('BasicInformation', () => {
 
   it('renders', async () => {
     component();
-    expect(
-      await screen.findByRole('heading', { name: /basic information/i })
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Workspace Published/)).toBeInTheDocument();
   });
 
   it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
@@ -93,6 +91,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
@@ -105,6 +104,7 @@ describe('BasicInformation', () => {
       screen.getByRole('button', { name: /unpublish/i })
     );
   });
+
   it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
