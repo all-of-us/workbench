@@ -51,7 +51,6 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.mandrill.model.RecipientType;
-import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -424,16 +423,6 @@ public class MailServiceImpl implements MailService {
               emailResource,
               publishUnpublishWorkspaceSubstitutionMap(workspace, owner, supportEmail)));
     }
-  }
-
-  private String featuredWorkspaceCategoryAsDisplayString(
-      FeaturedWorkspaceCategory featuredWorkspaceCategory) {
-    return switch (featuredWorkspaceCategory) {
-      case TUTORIAL_WORKSPACES -> "Tutorial Workspaces";
-      case PHENOTYPE_LIBRARY -> "Phenotype Library";
-      case DEMO_PROJECTS -> "Demonstration Projects";
-      case COMMUNITY -> "Community";
-    };
   }
 
   @Override

@@ -132,7 +132,7 @@ describe(WorkspacePublishingInfo.name, () => {
 
   it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
     enablePublishedWorkspacesViaDb();
-    workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
+    workspace.featuredCategory = undefined;
     workspace.adminLocked = true;
     component();
     const publishButton = await screen.findByRole('button', {
