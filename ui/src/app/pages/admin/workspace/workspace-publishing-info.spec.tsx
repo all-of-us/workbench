@@ -2,11 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import {
-  FeaturedWorkspaceCategory,
-  WorkspaceActiveStatus,
-  WorkspaceAdminApi,
-} from 'generated/fetch';
+import { FeaturedWorkspaceCategory, WorkspaceAdminApi } from 'generated/fetch';
 
 import { screen } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
@@ -26,7 +22,6 @@ import {
 import { WorkspaceAdminApiStub } from 'testing/stubs/workspace-admin-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
-import { BasicInformation } from './basic-information';
 import { WorkspacePublishingInfo } from './workspace-publishing-info';
 
 describe(WorkspacePublishingInfo.name, () => {
