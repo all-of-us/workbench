@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
-  Authority,
   FeaturedWorkspaceCategory,
   ProfileApi,
   RuntimeApi,
@@ -20,12 +19,9 @@ import {
   serverConfigStore,
 } from 'app/utils/stores';
 
-import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  expectPrimaryButton,
-  expectSecondaryButton,
   renderWithRouter,
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
@@ -178,95 +174,6 @@ describe('WorkspaceAbout', () => {
     );
   });
 
-  it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
-    component();
-    await waitForNoSpinner();
-    expect(
-      screen.queryByRole('button', {
-        name: 'Publish',
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', {
-        name: 'Unpublish',
-      })
-    ).not.toBeInTheDocument();
-  });
-
-  test.each([Authority.FEATURED_WORKSPACE_ADMIN, Authority.DEVELOPER])(
-    `should display Publish/Unpublish buttons with %s Authority`,
-    async (authority) => {
-      const profileWithAuth = {
-        ...ProfileStubVariables.PROFILE_STUB,
-        authorities: [authority],
-      };
-      profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
-
-      component();
-      await waitForNoSpinner();
-      expect(
-        screen.getByRole('button', {
-          name: 'Publish',
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole('button', {
-          name: 'Unpublish',
-        })
-      ).toBeInTheDocument();
-    }
-  );
-
-  it('Publish/Unpublish button styling depends on state - unpublished', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.DEVELOPER],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
-
-    component();
-    await waitForNoSpinner();
-
-    const publishButton = screen.getByRole('button', {
-      name: 'Publish',
-    });
-    expectButtonElementEnabled(publishButton);
-    expectPrimaryButton(publishButton);
-
-    const unpublishButton = screen.getByRole('button', {
-      name: 'Unpublish',
-    });
-    expectButtonElementDisabled(unpublishButton);
-    expectSecondaryButton(unpublishButton);
-  });
-
-  it('Publish/Unpublish button styling depends on state - published', async () => {
-    const profileWithAuth = {
-      ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.DEVELOPER],
-    };
-    profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.getValue(),
-      published: true,
-    });
-
-    component();
-    await waitForNoSpinner();
-
-    const publishButton = screen.getByRole('button', {
-      name: 'Publish',
-    });
-    expectButtonElementDisabled(publishButton);
-    expectSecondaryButton(publishButton);
-
-    const unpublishButton = screen.getByRole('button', {
-      name: 'Unpublish',
-    });
-    expectButtonElementEnabled(unpublishButton);
-    expectPrimaryButton(unpublishButton);
-  });
-
   it('Should display locked workspace message if adminLocked is true', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
@@ -329,34 +236,22 @@ describe('WorkspaceAbout', () => {
   });
 
   it('renders Community Workspace section when enabled', () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     component();
     expect(screen.getByText('Community Workspace')).toBeInTheDocument();
   });
 
   it('does not render Community Workspace section when enablePublishedWorkspacesViaDb disabled', () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: false },
-    });
     component();
     expect(screen.queryByText('Community Workspace')).not.toBeInTheDocument();
   });
 
   it('Publish button is enabled for workspace owner when the workspace is not published previously', () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     component();
     const publishButton = screen.getByText('Publish');
     expectButtonElementEnabled(publishButton);
   });
 
   it('should disable publish button for non workspace owner', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     const nonOwnerWorkspace = {
       ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.WRITER,
@@ -371,9 +266,6 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should disable publish button for locked workspace', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.getValue(),
       adminLocked: true,
@@ -387,9 +279,6 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should disable publish button for workspace owner if workspace is already published', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     const publishedWorkspace = {
       ...workspaceStubs[0],
       featuredCategory: FeaturedWorkspaceCategory.COMMUNITY,
@@ -405,9 +294,6 @@ describe('WorkspaceAbout', () => {
   });
 
   it('should set showPublishConsentModal to true if publish button is clicked ', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enablePublishedWorkspacesViaDb: true },
-    });
     component();
     await user.click(screen.getByText('Publish'));
     expect(

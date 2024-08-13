@@ -18,7 +18,6 @@ describe(SideNav.name, () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        enablePublishedWorkspacesViaDb: false,
       },
     });
   });

@@ -10,7 +10,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { FeaturedWorkspaceCategoryOptions } from 'app/pages/admin/admin-featured-category-options';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore } from 'app/utils/stores';
 
 import { WorkspaceInfoField } from './workspace-info-field';
 
@@ -23,8 +22,6 @@ export const WorkspacePublishingInfo = ({
   workspace,
   reload,
 }: PublishingProps) => {
-  const { enablePublishedWorkspacesViaDb } = serverConfigStore.get().config;
-
   const [featuredCategory, setFeaturedCategory] = useState(
     workspace.featuredCategory
   );
@@ -60,59 +57,51 @@ export const WorkspacePublishingInfo = ({
 
   return (
     <WorkspaceInfoField labelText='Workspace Published'>
-      {enablePublishedWorkspacesViaDb ? (
-        <>
-          <Select
-            key={featuredCategory || 'placeholder'}
-            value={featuredCategory}
-            placeholder='Select a category...'
-            isDisabled={featuredCategoryLoading}
-            options={FeaturedWorkspaceCategoryOptions}
-            onChange={(v: FeaturedWorkspaceCategory) => setFeaturedCategory(v)}
-          />
-          <TooltipTrigger
-            disabled={!publishingDisabled}
-            content={getWorkspacePublishTooltip()}
-          >
-            <Button
-              type='primary'
-              disabled={publishingDisabled}
-              onClick={() => {
-                setFeaturedCategoryLoading(true);
-                workspaceAdminApi()
-                  .publishWorkspaceViaDB(workspace.namespace, {
-                    category: featuredCategory,
-                  })
-                  .then(async () => {
-                    await reload();
-                  });
-              }}
-            >
-              Publish
-            </Button>
-          </TooltipTrigger>
-          <Button
-            type='secondaryOutline'
-            disabled={featuredCategoryLoading || !workspace.featuredCategory}
-            onClick={() => {
-              setFeaturedCategory(null);
-              setFeaturedCategoryLoading(true);
-              workspaceAdminApi()
-                .unpublishWorkspaceViaDB(workspace.namespace)
-                .then(async () => {
-                  await reload();
-                });
-            }}
-          >
-            Unpublish
-          </Button>
-          {featuredCategoryLoading && <Spinner size={36} />}
-        </>
-      ) : workspace.published ? (
-        'Yes'
-      ) : (
-        'No'
-      )}
+      <Select
+        key={featuredCategory || 'placeholder'}
+        value={featuredCategory}
+        placeholder='Select a category...'
+        isDisabled={featuredCategoryLoading}
+        options={FeaturedWorkspaceCategoryOptions}
+        onChange={(v: FeaturedWorkspaceCategory) => setFeaturedCategory(v)}
+      />
+      <TooltipTrigger
+        disabled={!publishingDisabled}
+        content={getWorkspacePublishTooltip()}
+      >
+        <Button
+          type='primary'
+          disabled={publishingDisabled}
+          onClick={() => {
+            setFeaturedCategoryLoading(true);
+            workspaceAdminApi()
+              .publishWorkspaceViaDB(workspace.namespace, {
+                category: featuredCategory,
+              })
+              .then(async () => {
+                await reload();
+              });
+          }}
+        >
+          Publish
+        </Button>
+      </TooltipTrigger>
+      <Button
+        type='secondaryOutline'
+        disabled={featuredCategoryLoading || !workspace.featuredCategory}
+        onClick={() => {
+          setFeaturedCategory(null);
+          setFeaturedCategoryLoading(true);
+          workspaceAdminApi()
+            .unpublishWorkspaceViaDB(workspace.namespace)
+            .then(async () => {
+              await reload();
+            });
+        }}
+      >
+        Unpublish
+      </Button>
+      {featuredCategoryLoading && <Spinner size={36} />}
     </WorkspaceInfoField>
   );
 };

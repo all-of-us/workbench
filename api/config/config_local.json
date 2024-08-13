@@ -114,7 +114,6 @@
     "enableDataExplorer": true,
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
-    "enablePublishedWorkspacesViaDb": true,
     "enableGcsFuseOnGke": true
   },
   "actionAudit": {

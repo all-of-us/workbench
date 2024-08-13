@@ -24,12 +24,7 @@ import {
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
-import {
-  authStore,
-  MatchParams,
-  profileStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { authStore, MatchParams, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
 import { analysisTabName, analysisTabPath, workspacePath } from './utils';
@@ -93,15 +88,6 @@ export const getAccessModuleGuard = (): Guard => {
   return {
     allowed: () => !redirectPath,
     redirectPath,
-  };
-};
-
-// This is temporary until we switch on the flag to get Published workspace from DB rather than config
-export const dBPublishedFlagIsOnGuard = (): Guard => {
-  return {
-    allowed: (): boolean =>
-      serverConfigStore.get().config.enablePublishedWorkspacesViaDb,
-    redirectPath: '/library',
   };
 };
 

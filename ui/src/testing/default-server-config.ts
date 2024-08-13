@@ -77,7 +77,6 @@ const defaultServerConfig: ConfigResponse = {
   tanagraBaseUrl: 'https://test.fake-research-aou.org',
   enableGKEAppPausing: false,
   enableGKEAppMachineTypeChoice: false,
-  enablePublishedWorkspacesViaDb: false,
 };
 
 export default defaultServerConfig;
