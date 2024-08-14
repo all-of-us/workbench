@@ -27,10 +27,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AboutPublishConsentModal } from 'app/pages/admin/workspace/about-publish-consent-modal';
 import { ResearchPurpose } from 'app/pages/workspace/research-purpose';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
-import {
-  profileApi,
-  workspacesApi,
-} from 'app/services/swagger-fetch-clients';
+import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withUserProfile } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
