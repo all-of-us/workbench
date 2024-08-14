@@ -235,14 +235,9 @@ describe('WorkspaceAbout', () => {
     );
   });
 
-  it('renders Community Workspace section when enabled', () => {
+  it('renders Community Workspace section', () => {
     component();
     expect(screen.getByText('Community Workspace')).toBeInTheDocument();
-  });
-
-  it('does not render Community Workspace section when enablePublishedWorkspacesViaDb disabled', () => {
-    component();
-    expect(screen.queryByText('Community Workspace')).not.toBeInTheDocument();
   });
 
   it('Publish button is enabled for workspace owner when the workspace is not published previously', () => {
