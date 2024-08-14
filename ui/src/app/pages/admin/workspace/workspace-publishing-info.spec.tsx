@@ -54,19 +54,7 @@ describe(WorkspacePublishingInfo.name, () => {
     expect(await screen.findByText(/Workspace Published/)).toBeInTheDocument();
   });
 
-  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = false)', async () => {
-    workspace.published = false;
-    component();
-    expect(await screen.findByText('No')).toBeInTheDocument();
-  });
-
-  it('should show published workspace (enablePublishedWorkspacesViaDb = false)', async () => {
-    workspace.published = true;
-    component();
-    expect(await screen.findByText('Yes')).toBeInTheDocument();
-  });
-
-  it('should show unpublished workspace (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should show unpublished workspace', async () => {
     component();
 
     expect(screen.getByText('Select a category...')).toBeInTheDocument();
@@ -78,7 +66,7 @@ describe(WorkspacePublishingInfo.name, () => {
     );
   });
 
-  it('should show published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should show published workspace', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     component();
     expect(await screen.findByText('Community')).toBeInTheDocument();
@@ -90,7 +78,7 @@ describe(WorkspacePublishingInfo.name, () => {
     );
   });
 
-  it('should change category of published workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should change category of published workspace', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'publishWorkspaceViaDB')
@@ -105,7 +93,7 @@ describe(WorkspacePublishingInfo.name, () => {
     );
   });
 
-  it('should unpublish a workspace  (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should unpublish a workspace', async () => {
     workspace.featuredCategory = FeaturedWorkspaceCategory.COMMUNITY;
     jest
       .spyOn(workspaceAdminApi(), 'unpublishWorkspaceViaDB')
@@ -118,7 +106,7 @@ describe(WorkspacePublishingInfo.name, () => {
     );
   });
 
-  it('should disable publishing when workspace is locked  (enablePublishedWorkspacesViaDb = true)', async () => {
+  it('should disable publishing when workspace is locked', async () => {
     workspace.featuredCategory = undefined;
     workspace.adminLocked = true;
     component();

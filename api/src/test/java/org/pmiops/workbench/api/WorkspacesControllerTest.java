@@ -101,6 +101,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -114,6 +115,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -301,6 +303,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   @Autowired WorkspaceOperationDao workspaceOperationDao;
   @Autowired WorkspacesController workspacesController;
+  @Autowired FeaturedWorkspaceDao featuredWorkspaceDao;
 
   @MockBean AccessTierService accessTierService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
@@ -2842,7 +2845,12 @@ public class WorkspacesControllerTest {
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
+
+    DbFeaturedWorkspace featuredWorkspace = new DbFeaturedWorkspace();
+    featuredWorkspace.setCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
+    featuredWorkspace.setWorkspace(
+        workspaceDao.getRequired(workspace.getNamespace(), workspace.getName()));
+    featuredWorkspaceDao.save(featuredWorkspace);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
