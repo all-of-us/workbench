@@ -5,22 +5,14 @@ import * as React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-utils';
-import { notificationStore, serverConfigStore } from 'app/utils/stores';
+import { notificationStore } from 'app/utils/stores';
 
-import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementDisabled } from 'testing/react-test-helpers';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
 import { SideNav, SideNavProps } from './side-nav';
 
 describe(SideNav.name, () => {
-  beforeEach(() => {
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-      },
-    });
-  });
   const props: SideNavProps = {
     profile: ProfileStubVariables.PROFILE_STUB,
     onToggleSideNav: () => {},
