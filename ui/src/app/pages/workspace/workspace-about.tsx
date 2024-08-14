@@ -29,7 +29,6 @@ import { ResearchPurpose } from 'app/pages/workspace/research-purpose';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import {
   profileApi,
-  workspaceAdminApi,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -52,7 +51,6 @@ interface WorkspaceState {
   workspace: WorkspaceData;
   workspaceInitialCreditsUsage: number;
   workspaceUserRoles: UserRole[];
-  publishing: boolean;
   showPublishConsentModal: boolean;
 }
 
@@ -194,7 +192,6 @@ export const WorkspaceAbout = fp.flow(
         workspace: undefined,
         workspaceInitialCreditsUsage: undefined,
         workspaceUserRoles: [],
-        publishing: false,
         showPublishConsentModal: false,
       };
     }
@@ -294,21 +291,6 @@ export const WorkspaceAbout = fp.flow(
             '&authuser=' +
             this.props.profileState.profile.username
         : '';
-    }
-
-    publishUnpublishWorkspace(publish: boolean) {
-      const { workspace } = this.state;
-      const { namespace, id } = workspace;
-      this.setState({ publishing: true });
-      fetchWithErrorModal(() =>
-        publish
-          ? workspaceAdminApi().publishWorkspace(namespace, id)
-          : workspaceAdminApi().unpublishWorkspace(namespace, id)
-      )
-        .then(() =>
-          this.updateWorkspaceState({ ...workspace, published: publish })
-        )
-        .finally(() => this.setState({ publishing: false }));
     }
 
     onShare() {
