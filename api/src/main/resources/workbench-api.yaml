@@ -7148,6 +7148,10 @@ components:
           type: boolean
           default: false
           description: If true, show banner notifying users of login issue
+        enableInitialCreditsExpiration:
+          type: boolean
+          default: false
+          description: If true, allow for user's initial credits to expire.
     AccessModuleConfig:
       required:
       - expirable

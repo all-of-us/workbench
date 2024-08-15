@@ -322,6 +322,7 @@ public class WorkbenchConfig {
     public boolean enablePublishedWorkspacesViaDb;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
+    public boolean enableInitialCreditsExpiration;
   }
 
   public static class ActionAuditConfig {
