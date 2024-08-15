@@ -232,7 +232,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "from DbCriteria c "
               + "where c.selectable "
               + "and c.standard=:standard "
-                  + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaTopCountsByStandard(
       @Param("domain") String domain, @Param("standard") Boolean standard, Pageable page);
