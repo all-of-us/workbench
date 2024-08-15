@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="evrii" id="changelog-232-add-user_initial_credits_expiration">
+    <createTable tableName="user_initial_credits_expiration">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="credit_start_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expiration_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="bypassed" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="extension_count" type="tinyint" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="user_id"
+      baseTableName="user_initial_credits_expiration"
+      constraintName="fk_initial_credits_expiration_user_id"
+      referencedColumnNames="user_id"
+      referencedTableName="user" onDelete="CASCADE"/>
+  </changeSet>
+</databaseChangeLog>
