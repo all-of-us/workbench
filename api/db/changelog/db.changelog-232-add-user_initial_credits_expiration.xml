@@ -12,7 +12,7 @@
       <column name="user_id" type="bigint">
         <constraints nullable="false"/>
       </column>
-      <column name="creation_time" type="datetime">
+      <column name="credit_start_time" type="datetime">
         <constraints nullable="false"/>
       </column>
       <column name="expiration_time" type="datetime">
