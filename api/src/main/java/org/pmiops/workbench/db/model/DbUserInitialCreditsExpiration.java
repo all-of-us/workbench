@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "user_access_tier")
+@Table(name = "user_initial_credits_expiration")
 public class DbUserInitialCreditsExpiration {
 
   private long id;
@@ -30,7 +30,7 @@ public class DbUserInitialCreditsExpiration {
     return id;
   }
 
-public DbUserInitialCreditsExpiration setId(long id) {
+  public DbUserInitialCreditsExpiration setId(long id) {
     this.id = id;
     return this;
   }

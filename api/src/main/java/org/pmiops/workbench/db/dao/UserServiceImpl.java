@@ -32,11 +32,13 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -80,6 +82,7 @@ public class UserServiceImpl implements UserService {
   private final UserServiceAuditor userServiceAuditor;
 
   private final UserDao userDao;
+  private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -102,6 +105,7 @@ public class UserServiceImpl implements UserService {
       Random random,
       UserServiceAuditor userServiceAuditor,
       UserDao userDao,
+      UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       AccessModuleNameMapper accessModuleNameMapper,
@@ -118,6 +122,7 @@ public class UserServiceImpl implements UserService {
     this.random = random;
     this.userServiceAuditor = userServiceAuditor;
     this.userDao = userDao;
+    this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.accessModuleNameMapper = accessModuleNameMapper;
@@ -144,6 +149,22 @@ public class UserServiceImpl implements UserService {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+      List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
+      Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
+          userInitialCreditsExpirationDao.findByUser(dbUser);
+
+      if (!userTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
+
+        Timestamp now = clockNow();
+        Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(90));
+        userInitialCreditsExpirationDao.save(
+            new DbUserInitialCreditsExpiration()
+                .setUser(dbUser)
+                .setCreditStartTime(now)
+                .setExpirationTime(expirationTime));
+      }
+
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
