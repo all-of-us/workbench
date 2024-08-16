@@ -150,10 +150,10 @@ public class UserServiceImpl implements UserService {
       dbUser = userModifier.apply(dbUser);
       dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-      boolean enablePublishedWorkspaces =
+      boolean enableInitialCreditsExpiration =
           configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
-      if(enablePublishedWorkspaces) {
+      if(enableInitialCreditsExpiration) {
         List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
         Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
             userInitialCreditsExpirationDao.findByUser(dbUser);
