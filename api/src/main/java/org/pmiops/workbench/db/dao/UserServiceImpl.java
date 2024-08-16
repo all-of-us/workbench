@@ -150,19 +150,24 @@ public class UserServiceImpl implements UserService {
       dbUser = userModifier.apply(dbUser);
       dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-      List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
-      Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
-          userInitialCreditsExpirationDao.findByUser(dbUser);
+      boolean enablePublishedWorkspaces =
+          configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
-      if (!userTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
+      if(enablePublishedWorkspaces) {
+        List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
+        Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
+            userInitialCreditsExpirationDao.findByUser(dbUser);
 
-        Timestamp now = clockNow();
-        Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(90));
-        userInitialCreditsExpirationDao.save(
-            new DbUserInitialCreditsExpiration()
-                .setUser(dbUser)
-                .setCreditStartTime(now)
-                .setExpirationTime(expirationTime));
+        if (!userTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
+
+          Timestamp now = clockNow();
+          Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(90));
+          userInitialCreditsExpirationDao.save(
+              new DbUserInitialCreditsExpiration()
+                  .setUser(dbUser)
+                  .setCreditStartTime(now)
+                  .setExpirationTime(expirationTime));
+        }
       }
 
       try {
