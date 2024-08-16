@@ -257,6 +257,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     try {
       fireCloudService.deleteBillingProject(billingProjectName);
       billingProjectAuditor.fireDeleteAction(billingProjectName);
+      // Since deleted workspace entry still exist in database we have to explicitly remove it from
+      // featured_workspace
+      // if they exist
+      featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
     } catch (Exception e) {
       String msg =
           String.format(
