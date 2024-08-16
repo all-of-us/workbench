@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
       boolean enableInitialCreditsExpiration =
           configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
-      if(enableInitialCreditsExpiration) {
+      if (enableInitialCreditsExpiration) {
         List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
         Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
             userInitialCreditsExpirationDao.findByUser(dbUser);

@@ -20,13 +20,13 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -108,6 +109,7 @@ public class UserServiceAccessTest {
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
 
   @MockBean private MailService mailService;
 
@@ -198,8 +200,11 @@ public class UserServiceAccessTest {
     PROVIDED_CLOCK.setInstant(START_INSTANT);
   }
 
-  @Test
-  public void test_updateUserWithRetries_never_registered() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_never_registered(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserAccessTiers();
@@ -210,21 +215,28 @@ public class UserServiceAccessTest {
     Optional<DbUserAccessTier> userAccessMaybe =
         userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
     assertThat(userAccessMaybe).isEmpty();
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_register() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_register(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testSimulateUserFlowThroughRenewal() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testSimulateUserFlowThroughRenewal(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     // initialize user as registered with generic values including bypassed DUCC
-
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
 
@@ -250,6 +262,7 @@ public class UserServiceAccessTest {
         new Timestamp(PROVIDED_CLOCK.millis()));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
   private DbUser removeDuccBypass(DbUser user) {
@@ -265,53 +278,71 @@ public class UserServiceAccessTest {
 
   // enabled/disabled is more of a master switch than a module but let's verify it anyway
 
-  @Test
-  public void test_updateUserWithRetries_disable_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_disable_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           user.setDisabled(true);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // ERA Commons is not subject to annual renewal.
 
-  @Test
-  public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_era_unbypassed_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // Two Factor Auth (2FA) is not subject to annual renewal.
 
-  @Test
-  public void test_updateUserWithRetries_2fa_unbypassed_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_2fa_unbypassed_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, false);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // Compliance training is subject to annual renewal.
 
-  @Test
-  public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, false);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_training_unbypassed_aar_expired_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_training_unbypassed_aar_expired_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
@@ -323,24 +354,32 @@ public class UserServiceAccessTest {
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // DUCC is subject to annual renewal.
   // A missing DUCC version or a version other than the latest is also noncompliant.
 
-  @Test
-  public void test_updateUserWithRetries_ducc_unbypassed_aar_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_ducc_unbypassed_aar_missing_version_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_missing_version_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -348,11 +387,15 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_ducc_unbypassed_aar_wrong_version_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_wrong_version_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(4, 5);
 
     testUnregistration(
@@ -363,11 +406,15 @@ public class UserServiceAccessTest {
               dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
           user.setDuccAgreement(signDucc(user, 3));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_ducc_unbypassed_aar_expired_noncompliant() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_ducc_unbypassed_aar_expired_noncompliant(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
@@ -381,13 +428,17 @@ public class UserServiceAccessTest {
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // Publications confirmation is subject to annual renewal.
 
-  @Test
-  public void test_updateUserWithRetries_publications_unbypassed_publications_not_confirmed() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_publications_unbypassed_publications_not_confirmed(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -395,11 +446,15 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, null);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_publications_unbypassed_publications_expired() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_publications_unbypassed_publications_expired(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -410,13 +465,17 @@ public class UserServiceAccessTest {
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
   // Profile confirmation is subject to annual renewal.
 
-  @Test
-  public void test_updateUserWithRetries_profile_unbypassed_profile_not_confirmed() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_profile_unbypassed_profile_not_confirmed(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -424,11 +483,15 @@ public class UserServiceAccessTest {
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, null);
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_profile_unbypassed_profile_expired() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_profile_unbypassed_profile_expired(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
@@ -439,11 +502,16 @@ public class UserServiceAccessTest {
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_up_to_date() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_up_to_date(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
@@ -459,13 +527,16 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
   // bypassed modules do not expire: so no email
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_bypassed_is_up_to_date() {
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_bypassed_is_up_to_date(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
 
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
@@ -479,9 +550,11 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expiring_1_rt() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -516,7 +589,8 @@ public class UserServiceAccessTest {
     verify(mailService, never()).alertUserAccessTierExpiration(any(), any(), any());
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expiring_1_ct() throws MessagingException {
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -543,8 +617,11 @@ public class UserServiceAccessTest {
   // if any module is incomplete, we don't send an email
   // because the user is not expiring soon - they never had access at all
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_expired_but_missing() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_expired_but_missing(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(
@@ -566,12 +643,14 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
   // one or more bypassed modules will not affect whether emails are sent.
   // we consider only the unbypassed
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expiring_1_with_bypass()
       throws MessagingException {
     // these are up to date
@@ -599,7 +678,8 @@ public class UserServiceAccessTest {
 
   // bypass times are not relevant to expiration emails
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expiring_1_with_older_bypass()
       throws MessagingException {
     // these are up to date
@@ -628,8 +708,11 @@ public class UserServiceAccessTest {
   // we do not send an email if the expiration time is within the day.
   // we sent one yesterday for 1 day already, and we will send another once it actually expires.
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_expiring_today() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_expiring_today(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -650,9 +733,11 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmail_expiring_30() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -679,8 +764,11 @@ public class UserServiceAccessTest {
             dbUser, 30, expirationTime, REGISTERED_TIER_SHORT_NAME);
   }
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_expiring_31() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_expiring_31(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -699,11 +787,13 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
   // 15 days is sooner, so that's the email we send rather than 30
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expiring_15_and_30()
       throws MessagingException {
     // these are up to date
@@ -740,8 +830,11 @@ public class UserServiceAccessTest {
   // 14 days is sooner than 15, but 14 days is not one of our email warning thresholds
   // so we send no email
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_expiring_14_and_15() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_expiring_14_and_15(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -762,9 +855,11 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expired_rt() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -797,7 +892,8 @@ public class UserServiceAccessTest {
         .alertUserAccessTierWarningThreshold(any(), anyLong(), any(), any());
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
   public void test_maybeSendAccessTierExpirationEmails_expired_ct() throws MessagingException {
     // but this is expired
     final Duration oneHour = Duration.ofHours(1);
@@ -823,8 +919,11 @@ public class UserServiceAccessTest {
   // don't send an email if we have been expired for more than a day
   // because we sent the expiration email yesterday
 
-  @Test
-  public void test_maybeSendAccessTierExpirationEmails_extra_expired() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_maybeSendAccessTierExpirationEmails_extra_expired(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -848,10 +947,13 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyNoInteractions(mailService);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailDomainsNotMatch() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailDomainsNotMatch(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
@@ -859,32 +961,45 @@ public class UserServiceAccessTest {
               institution.tierConfigs(
                   ImmutableList.of(rtTierConfig.emailDomains(ImmutableList.of("test.com")))));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailDomainsNull() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailDomainsNull(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
               institution.getShortName(),
               institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null))));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailDomainsTierRequirementEmpty() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailDomainsTierRequirementEmpty(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
               institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailAddressMatch() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailAddressMatch(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     institutionService.updateInstitution(
         institution.getShortName(),
         institution.tierConfigs(
@@ -895,10 +1010,13 @@ public class UserServiceAccessTest {
                     .emailDomains(null))));
     dbUser = updateUserWithRetries(this::registerUser);
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailAddressNotMatch() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailAddressNotMatch(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
@@ -910,11 +1028,15 @@ public class UserServiceAccessTest {
                           .addEmailAddressesItem("randmom@email.com")
                           .emailDomains(null))));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailAddressNull() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailAddressNull(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
@@ -922,21 +1044,30 @@ public class UserServiceAccessTest {
               institution.tierConfigs(
                   ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionAddressInvalid_emailAddressTierConfigNotExist() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionAddressInvalid_emailAddressTierConfigNotExist(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     testUnregistration(
         user -> {
           institutionService.updateInstitution(
               institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
           return userDao.save(user);
-        });
+        },
+        enableInitialCreditsExpiration,
+        initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionRequirement_optionalEra() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionRequirement_optionalEra(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
@@ -959,10 +1090,14 @@ public class UserServiceAccessTest {
         institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionRequirement_optionalEra_loginGovFlagDisabled() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionRequirement_optionalEra_loginGovFlagDisabled(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // User not complete eRA, but it is optional for that institution
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
@@ -980,10 +1115,14 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
     updateUserWithRetries(this::registerUser);
@@ -996,10 +1135,14 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testRasLinkNotComplete() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testRasLinkNotComplete(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     dbUser = updateUserWithRetries(this::registerUser);
@@ -1019,10 +1162,14 @@ public class UserServiceAccessTest {
         dbUser, DbAccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testRasLinkNotComplete_LoginGovDisabled() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void testRasLinkNotComplete_LoginGovDisabled(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // IDENTITY and LOGIN.GOV modules are not required for registered tier access when
     // enableRasLoginGovLinking is disabled.
     assertThat(userAccessTierDao.findAll()).isEmpty();
@@ -1033,28 +1180,40 @@ public class UserServiceAccessTest {
         dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_addToControlledTier() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,true"})
+  public void test_updateUserWithRetries_addToControlledTier(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(this::completeRTAndCTRequirements);
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_completeCTRequirementsOnly() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_completeCTRequirementsOnly(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = updateUserWithRetries(this::completeCTRequirements);
     assertUserNotInAccessTier(dbUser, registeredTier);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_inCompleteCTRequirements_CTCompliance() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_inCompleteCTRequirements_CTCompliance(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1065,10 +1224,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1086,10 +1249,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_eraNotRequiredForTiers() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_eraNotRequiredForTiers(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
@@ -1103,10 +1270,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void testInstitutionRequirement_rtEraDoesNotAffectCTEra() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void testInstitutionRequirement_rtEraDoesNotAffectCTEra(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
@@ -1125,27 +1296,35 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_emailValidForRTButNotValidForCT() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_emailValidForRTButNotValidForCT(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    ctTierConfig.setEmailDomains(Arrays.asList("fakeDomain.com"));
+    ctTierConfig.setEmailDomains(List.of("fakeDomain.com"));
     updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_updateInvalidEmailForCT() {
-    test_updateUserWithRetries_emailValidForRTButNotValidForCT();
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_updateInvalidEmailForCT(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    test_updateUserWithRetries_emailValidForRTButNotValidForCT(
+        enableInitialCreditsExpiration, initialCreditsExpirationExists);
 
-    ctTierConfig.setEmailDomains(Arrays.asList("domain.com"));
+    ctTierConfig.setEmailDomains(List.of("domain.com"));
     updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserAccessTiers();
@@ -1154,8 +1333,11 @@ public class UserServiceAccessTest {
     assertControlledTierEnabled(dbUser);
   }
 
-  @Test
-  public void test_updateUserWithRetries_didNotSignCTAgreement() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_didNotSignCTAgreement(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     assertThat(userAccessTierDao.findAll()).isEmpty();
     dbUser = completeRTAndCTRequirements(dbUser);
     Institution institution = institutionService.getByUser(dbUser).get();
@@ -1170,10 +1352,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_eraFFisOff_CT() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_eraFFisOff_CT(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     providedWorkbenchConfig.access.enableEraCommons = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
@@ -1192,10 +1378,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     providedWorkbenchConfig.access.enableComplianceTraining = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
@@ -1211,10 +1401,14 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
-  @Test
-  public void test_updateUserWithRetries_noCT() {
+  @ParameterizedTest
+  @CsvSource({"false,false", "true,false"})
+  public void test_updateUserWithRetries_noCT(
+      boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // CT does not exist anywhere
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
@@ -1226,6 +1420,7 @@ public class UserServiceAccessTest {
 
     assertRegisteredTierEnabled(dbUser);
     assertUserNotInAccessTier(dbUser, controlledTier);
+    assertUserInitialCreditsExpirationExists(initialCreditsExpirationExists);
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
@@ -1264,7 +1459,11 @@ public class UserServiceAccessTest {
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
-  private void testUnregistration(Function<DbUser, DbUser> unregisteringFunction) {
+  private void testUnregistration(
+      Function<DbUser, DbUser> unregisteringFunction,
+      boolean enableInitialCreditsExpiration,
+      boolean userInitialCreditsExpirationExists) {
+    setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
     // initial state: user is unregistered (has no tier memberships)
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
@@ -1278,6 +1477,9 @@ public class UserServiceAccessTest {
     // The user received a DbUserAccessTier when they were registered.
     // They still have it after unregistering but now it is DISABLED.
     assertRegisteredTierDisabled(dbUser);
+
+    // Test whether the user has an initial credits expiration record
+    assertUserInitialCreditsExpirationExists(userInitialCreditsExpirationExists);
   }
 
   // we can trim the signatures since we always call these in the same way
@@ -1411,5 +1613,17 @@ public class UserServiceAccessTest {
             .setInstitution(inst)
             .setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
     verifiedInstitutionalAffiliationDao.save(affiliation);
+  }
+
+  private void setEnableInitialCreditsExpiration(boolean enable) {
+    providedWorkbenchConfig.featureFlags.enableInitialCreditsExpiration = enable;
+  }
+
+  private void assertUserInitialCreditsExpirationExists(boolean expectExists) {
+    if (expectExists) {
+      assertThat(userInitialCreditsExpirationDao.findByUser(dbUser)).isPresent();
+    } else {
+      assertThat(userInitialCreditsExpirationDao.findByUser(dbUser)).isEmpty();
+    }
   }
 }
