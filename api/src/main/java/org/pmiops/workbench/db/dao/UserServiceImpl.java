@@ -153,6 +153,8 @@ public class UserServiceImpl implements UserService {
 
       boolean enableInitialCreditsExpiration =
           configProvider.get().featureFlags.enableInitialCreditsExpiration;
+      long freeTierCreditValidityPeriodDays =
+          configProvider.get().billing.freeTierCreditValidityPeriodDays;
 
       if (enableInitialCreditsExpiration) {
         List<DbAccessTier> updatedUserTiers = accessTierService.getAccessTiersForUser(dbUser);
@@ -162,7 +164,7 @@ public class UserServiceImpl implements UserService {
         if (initialUserTiers.isEmpty() && !updatedUserTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
 
           Timestamp now = clockNow();
-          Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(90));
+          Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
           userInitialCreditsExpirationDao.save(
               new DbUserInitialCreditsExpiration()
                   .setUser(dbUser)
