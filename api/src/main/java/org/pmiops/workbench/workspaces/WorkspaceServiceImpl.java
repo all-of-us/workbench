@@ -252,6 +252,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspaceDao.saveWithLastModified(
             dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
             userProvider.get());
+    // Since deleted workspace entry still exist in database we have to explicitly remove it from
+    // featured_workspace
+    // if they exist
+    featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {
