@@ -147,6 +147,7 @@ public class UserServiceImpl implements UserService {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
+      List<DbAccessTier> initialUserTiers = accessTierService.getAccessTiersForUser(dbUser);
       dbUser = userModifier.apply(dbUser);
       dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
@@ -154,11 +155,11 @@ public class UserServiceImpl implements UserService {
           configProvider.get().featureFlags.enableInitialCreditsExpiration;
 
       if (enableInitialCreditsExpiration) {
-        List<DbAccessTier> userTiers = accessTierService.getAccessTiersForUser(dbUser);
+        List<DbAccessTier> updatedUserTiers = accessTierService.getAccessTiersForUser(dbUser);
         Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
             userInitialCreditsExpirationDao.findByUser(dbUser);
 
-        if (!userTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
+        if (initialUserTiers.isEmpty() && !updatedUserTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
 
           Timestamp now = clockNow();
           Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(90));
