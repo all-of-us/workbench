@@ -130,7 +130,8 @@ public class WorkbenchConfig {
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
 
     // The number of days that free tier credits are valid for.
-    // Extensions to free credit validity period are for the same duration as the original validity period.
+    // Extensions to free credit validity period are for the same duration as the original validity
+    // period.
     public Long freeTierCreditValidityPeriodDays;
   }
 

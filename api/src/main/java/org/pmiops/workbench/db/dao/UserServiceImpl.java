@@ -161,10 +161,14 @@ public class UserServiceImpl implements UserService {
         Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
             userInitialCreditsExpirationDao.findByUser(dbUser);
 
-        if (initialUserTiers.isEmpty() && !updatedUserTiers.isEmpty() && maybeCreditsExpiration.isEmpty()) {
+        if (initialUserTiers.isEmpty()
+            && !updatedUserTiers.isEmpty()
+            && maybeCreditsExpiration.isEmpty()) {
 
           Timestamp now = clockNow();
-          Timestamp expirationTime = new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
+          Timestamp expirationTime =
+              new Timestamp(
+                  now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
           userInitialCreditsExpirationDao.save(
               new DbUserInitialCreditsExpiration()
                   .setUser(dbUser)
