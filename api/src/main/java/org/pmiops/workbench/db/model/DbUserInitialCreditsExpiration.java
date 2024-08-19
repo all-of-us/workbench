@@ -21,8 +21,6 @@ public class DbUserInitialCreditsExpiration {
   private boolean bypassed;
   private int extensionCount;
 
-  public DbUserInitialCreditsExpiration() {}
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
