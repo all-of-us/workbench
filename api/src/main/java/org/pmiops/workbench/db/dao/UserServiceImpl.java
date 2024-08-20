@@ -144,7 +144,6 @@ public class UserServiceImpl implements UserService {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
-
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
