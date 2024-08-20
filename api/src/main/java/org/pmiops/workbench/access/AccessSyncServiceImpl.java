@@ -6,19 +6,24 @@ import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForContr
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
 import jakarta.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final InstitutionService institutionService;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
+  private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
+  private final Clock clock;
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -43,13 +50,17 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       AccessModuleService accessModuleService,
       InstitutionService institutionService,
       UserDao userDao,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
+      Clock clock) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
     this.institutionService = institutionService;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
+    this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
+    this.clock = clock;
   }
 
   /**
@@ -60,9 +71,34 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
+
+    boolean enableInitialCreditsExpiration =
+        workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+    long freeTierCreditValidityPeriodDays =
+        workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays;
+
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
+    }
+
+    if (enableInitialCreditsExpiration) {
+      Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
+          userInitialCreditsExpirationDao.findByUser(dbUser);
+
+      if (previousAccessTiers.isEmpty()
+          && !newAccessTiers.isEmpty()
+          && maybeCreditsExpiration.isEmpty()) {
+
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        Timestamp expirationTime =
+            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
+        userInitialCreditsExpirationDao.save(
+            new DbUserInitialCreditsExpiration()
+                .setUser(dbUser)
+                .setCreditStartTime(now)
+                .setExpirationTime(expirationTime));
+      }
     }
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains

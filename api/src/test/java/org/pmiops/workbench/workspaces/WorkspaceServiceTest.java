@@ -552,6 +552,7 @@ public class WorkspaceServiceTest {
     verify(mockFireCloudService).deleteWorkspace(eq(billingProject), eq(ws.getName()));
     verify(mockFireCloudService).deleteBillingProject(eq(billingProject));
     verify(mockBillingProjectAuditor).fireDeleteAction(eq(billingProject));
+    verify(mockFeaturedWorkspaceDao).deleteDbFeaturedWorkspaceByWorkspace(eq(ws));
   }
 
   @Test

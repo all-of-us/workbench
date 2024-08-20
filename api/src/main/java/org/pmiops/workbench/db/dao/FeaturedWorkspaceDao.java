@@ -11,4 +11,6 @@ public interface FeaturedWorkspaceDao extends CrudRepository<DbFeaturedWorkspace
 
   List<DbFeaturedWorkspace> findDbFeaturedWorkspacesByCategory(
       DbFeaturedWorkspace.DbFeaturedCategory category);
+
+  void deleteDbFeaturedWorkspaceByWorkspace(DbWorkspace workspace);
 }
