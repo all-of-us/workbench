@@ -63,14 +63,12 @@ public class AccessSyncServiceTest {
 
   @InjectMocks private AccessSyncServiceImpl accessSyncService;
 
-  private Institution institution;
   private DbAccessTier registeredTier;
   private DbUser dbUser;
   private Agent agent;
 
   @BeforeEach
   public void setUp() {
-    institution = new Institution();
     Mockito.reset(
         accessTierService,
         userDao,
@@ -85,8 +83,18 @@ public class AccessSyncServiceTest {
 
     dbUser = createDbUser();
     dbUser.setDisabled(false);
-    institution = new Institution();
+    Institution institution = new Institution();
     agent = Agent.asUser(dbUser);
+
+    // Ensures that users meets all requirements for any tier
+    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
+    when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
+    when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
+    Mockito.lenient()
+        .when(userInitialCreditsExpirationDao.findByUser(dbUser))
+        .thenReturn(Optional.empty());
+
+    when(userDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
   }
 
   private void stubWorkbenchConfig_enableInitialCreditsExpiration(boolean enable) {
@@ -115,15 +123,6 @@ public class AccessSyncServiceTest {
     // User starts with access to no tiers
     List<DbAccessTier> oldAccessTiers = List.of();
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
-    when(userDao.save(dbUser)).thenReturn(dbUser);
-
-    // Ensures that users meets all requirements for registered tier
-    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
-    when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
-    when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
-    Mockito.lenient()
-        .when(userInitialCreditsExpirationDao.findByUser(dbUser))
-        .thenReturn(Optional.empty());
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
@@ -161,15 +160,6 @@ public class AccessSyncServiceTest {
     // User starts with access to no tiers
     List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
-    when(userDao.save(dbUser)).thenReturn(dbUser);
-
-    // Ensures that users meets all requirements for registered tier
-    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
-    when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
-    when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
-    Mockito.lenient()
-        .when(userInitialCreditsExpirationDao.findByUser(dbUser))
-        .thenReturn(Optional.empty());
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
@@ -178,7 +168,7 @@ public class AccessSyncServiceTest {
   }
 
   @Test
-  public void testUpdateUserAccessTiers_existingCreditExpirationDoesNotChange() {
+  public void testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
 
     DbAccessTier controlledTier = createControlledTier();
@@ -186,18 +176,39 @@ public class AccessSyncServiceTest {
     when(accessTierService.getAccessTierByName(controlledTier.getShortName()))
         .thenReturn(Optional.of(controlledTier));
 
-    // User starts with access to no tiers
+    // User starts with access to registered tier
     List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
     when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
-    when(userDao.save(dbUser)).thenReturn(dbUser);
 
-    // Ensures that users meets all requirements for registered tier
-    when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
-    when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
-    when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
-    Mockito.lenient()
-        .when(userInitialCreditsExpirationDao.findByUser(dbUser))
-        .thenReturn(Optional.empty());
+    DbUserInitialCreditsExpiration existingExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setUser(dbUser)
+            .setCreditStartTime(new Timestamp(now.toEpochMilli()))
+            .setExpirationTime(new Timestamp(now.toEpochMilli() + TimeUnit.DAYS.toMillis(57L)))
+            .setBypassed(false)
+            .setExtensionCount(0);
+    when(userInitialCreditsExpirationDao.findByUser(dbUser))
+        .thenReturn(Optional.of(existingExpiration));
+
+    DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
+
+    verify(userInitialCreditsExpirationDao, Mockito.never()).save(any());
+    assertEquals(updatedUser, dbUser);
+    verify(accessTierService).addUserToTier(dbUser, controlledTier);
+  }
+
+  @Test
+  public void testUpdateUserAccessTiers_noExpirationForSubsequentAccessIfNoneToBeginWith() {
+    stubWorkbenchConfig_enableInitialCreditsExpiration(true);
+
+    DbAccessTier controlledTier = createControlledTier();
+    when(accessTierService.getAllTiers()).thenReturn(List.of(registeredTier, controlledTier));
+    when(accessTierService.getAccessTierByName(controlledTier.getShortName()))
+        .thenReturn(Optional.of(controlledTier));
+
+    // User starts with access to registered tier
+    List<DbAccessTier> oldAccessTiers = List.of(registeredTier);
+    when(accessTierService.getAccessTiersForUser(dbUser)).thenReturn(oldAccessTiers);
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
