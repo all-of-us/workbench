@@ -168,7 +168,8 @@ public class AccessSyncServiceTest {
   }
 
   @Test
-  public void testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
+  public void
+      testUpdateUserAccessTiers_existingCreditExpirationDoesNotChangeWithAdditionalAccess() {
     stubWorkbenchConfig_enableInitialCreditsExpiration(true);
 
     DbAccessTier controlledTier = createControlledTier();
