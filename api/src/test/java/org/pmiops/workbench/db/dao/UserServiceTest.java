@@ -28,6 +28,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -143,6 +144,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
+    providedWorkbenchConfig.billing.freeTierCreditValidityPeriodDays = 17L; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
     accessTierDao.save(createRegisteredTier());

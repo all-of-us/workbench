@@ -77,7 +77,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     long freeTierCreditValidityPeriodDays =
         workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays;
 
-
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
@@ -93,8 +92,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         Timestamp expirationTime =
-            new Timestamp(
-                now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
+            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
         userInitialCreditsExpirationDao.save(
             new DbUserInitialCreditsExpiration()
                 .setUser(dbUser)
