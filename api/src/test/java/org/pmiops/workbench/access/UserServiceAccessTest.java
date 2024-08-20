@@ -169,6 +169,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
+    providedWorkbenchConfig.billing.freeTierCreditValidityPeriodDays = 57L;
     registeredTier = accessTierDao.save(createRegisteredTier());
     controlledTier = accessTierDao.save(createControlledTier());
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
@@ -1210,7 +1211,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_inCompleteCTRequirements_CTCompliance(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1228,7 +1229,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1253,7 +1254,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_eraNotRequiredForTiers(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1274,7 +1275,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void testInstitutionRequirement_rtEraDoesNotAffectCTEra(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1300,7 +1301,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_emailValidForRTButNotValidForCT(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1318,7 +1319,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_updateInvalidEmailForCT(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     test_updateUserWithRetries_emailValidForRTButNotValidForCT(
@@ -1334,7 +1335,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_didNotSignCTAgreement(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1356,7 +1357,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_eraFFisOff_CT(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1382,7 +1383,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_ct_complianceTrainingFFisOff_CT(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
@@ -1405,7 +1406,7 @@ public class UserServiceAccessTest {
   }
 
   @ParameterizedTest
-  @CsvSource({"false,false", "true,false"})
+  @CsvSource({"false,false", "true,true"})
   public void test_updateUserWithRetries_noCT(
       boolean enableInitialCreditsExpiration, boolean initialCreditsExpirationExists) {
     setEnableInitialCreditsExpiration(enableInitialCreditsExpiration);
