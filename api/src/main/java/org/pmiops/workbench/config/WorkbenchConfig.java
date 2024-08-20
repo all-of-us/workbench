@@ -128,6 +128,11 @@ public class WorkbenchConfig {
     // workspace free tier usage to be updated. To account for charges that may occur after the
     // workspace gets deleted and after the last cron had run
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
+
+    // The number of days that free tier credits are valid for.
+    // Extensions to free credit validity period are for the same duration as the original validity
+    // period.
+    public Long freeTierCreditValidityPeriodDays;
   }
 
   public static class FireCloudConfig {
@@ -322,6 +327,7 @@ public class WorkbenchConfig {
     public boolean enablePublishedWorkspacesViaDb;
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
+    public boolean enableInitialCreditsExpiration;
   }
 
   public static class ActionAuditConfig {

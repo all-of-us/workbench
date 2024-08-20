@@ -55,5 +55,8 @@ public interface WorkbenchConfigMapper {
       target = "enableGKEAppMachineTypeChoice",
       source = "config.featureFlags.enableGKEAppMachineTypeChoice")
   @Mapping(target = "enableLoginIssueBanner", source = "config.banner.enableLoginIssueBanner")
+  @Mapping(
+      target = "enableInitialCreditsExpiration",
+      source = "config.featureFlags.enableInitialCreditsExpiration")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

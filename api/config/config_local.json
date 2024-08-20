@@ -28,6 +28,7 @@
       0.5,
       0.75
     ],
+    "freeTierCreditValidityPeriodDays": 120,
     "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com",
     "freeTierCronUserBatchSize": 100,
     "minutesBeforeLastFreeTierJob": 60,
@@ -115,7 +116,8 @@
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
     "enablePublishedWorkspacesViaDb": true,
-    "enableGcsFuseOnGke": true
+    "enableGcsFuseOnGke": true,
+    "enableInitialCreditsExpiration": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
