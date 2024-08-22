@@ -125,7 +125,6 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkUsername;
-  private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
   @Id
@@ -364,7 +363,6 @@ public class DbUser {
 
   @Deprecated
   public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
-    this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
     return this;
   }
 

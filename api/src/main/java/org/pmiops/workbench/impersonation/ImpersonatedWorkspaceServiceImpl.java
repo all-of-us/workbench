@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
+import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -36,6 +37,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       Logger.getLogger(ImpersonatedWorkspaceServiceImpl.class.getName());
 
   private final BillingProjectAuditor billingProjectAuditor;
+  private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService firecloudService;
   private final FirecloudMapper firecloudMapper;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
@@ -46,6 +48,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   @Autowired
   public ImpersonatedWorkspaceServiceImpl(
       BillingProjectAuditor billingProjectAuditor,
+      FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService firecloudService,
       FirecloudMapper firecloudMapper,
       ImpersonatedFirecloudService impersonatedFirecloudService,
@@ -53,6 +56,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.billingProjectAuditor = billingProjectAuditor;
+    this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.firecloudMapper = firecloudMapper;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
@@ -163,6 +167,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     workspaceDao.saveWithLastModified(
         dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED), dbUser);
+    featuredWorkspaceDao.deleteDbFeaturedWorkspaceByWorkspace(dbWorkspace);
 
     if (deleteBillingProjects) {
       try {
