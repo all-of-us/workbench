@@ -173,6 +173,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
+  /**
+   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
+   * workspaces to trigger alerts due to passing thresholds or exceeding limits
+   *
+   * @param body : Batch of user IDs from cloud task queue: checkCreditsExpirationForUserIDsQueue
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
+    if (userIdsList != null && userIdsList.size() > 0) {
+      log.info("Checking credits expiration for users: " + userIdsList);
+    }
+    return ResponseEntity.noContent().build();
+  }
+
   // v1 cloudresourcemanager project.getParent() returned a ResourceId with type and id fields
   // v3 returns a string instead, in the format type/id
 
