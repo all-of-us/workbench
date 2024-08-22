@@ -68,34 +68,12 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
 
-    boolean enableInitialCreditsExpiration =
-        workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
-    long freeTierCreditValidityPeriodDays =
-        workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays;
-
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
 
-    if (enableInitialCreditsExpiration) {
-      DbUserInitialCreditsExpiration maybeCreditsExpiration =
-          dbUser.getUserInitialCreditsExpiration();
-
-      if (previousAccessTiers.isEmpty()
-          && !newAccessTiers.isEmpty()
-          && null == maybeCreditsExpiration) {
-
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-        Timestamp expirationTime =
-            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
-        dbUser.setUserInitialCreditsExpiration(
-            new DbUserInitialCreditsExpiration()
-                .setUser(dbUser)
-                .setCreditStartTime(now)
-                .setExpirationTime(expirationTime));
-      }
-    }
+    addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
@@ -106,6 +84,34 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
     return userDao.save(dbUser);
+  }
+
+  private void addInitialCreditsExpirationIfAppropriate(
+      DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+    boolean enableInitialCreditsExpiration =
+        workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
+
+    if (enableInitialCreditsExpiration) {
+      DbUserInitialCreditsExpiration maybeCreditsExpiration =
+          dbUser.getUserInitialCreditsExpiration();
+
+      // A user's credits should begin to expire when they gain access to their first tier.
+      if (previousAccessTiers.isEmpty()
+          && !newAccessTiers.isEmpty()
+          && null == maybeCreditsExpiration) {
+
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        Timestamp expirationTime =
+            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
+        dbUser.setUserInitialCreditsExpiration(
+            new DbUserInitialCreditsExpiration()
+                .setUser(dbUser)
+                .setCreditStartTime(now)
+                .setExpirationTime(expirationTime));
+      }
+    }
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {

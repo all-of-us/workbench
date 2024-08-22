@@ -169,7 +169,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
-    providedWorkbenchConfig.billing.freeTierCreditValidityPeriodDays = 30L;
+    providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 30L;
     registeredTier = accessTierDao.save(createRegisteredTier());
     controlledTier = accessTierDao.save(createControlledTier());
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);

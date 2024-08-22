@@ -95,7 +95,7 @@ public class AccessSyncServiceTest {
     WorkbenchConfig workbenchConfig = createEmptyConfig();
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = enable;
     workbenchConfig.access.enableRasLoginGovLinking = false;
-    workbenchConfig.billing.freeTierCreditValidityPeriodDays = 57L;
+    workbenchConfig.billing.initialCreditsValidityPeriodDays = 57L;
 
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
@@ -129,7 +129,7 @@ public class AccessSyncServiceTest {
           new Timestamp(
               now.getTime()
                   + TimeUnit.DAYS.toMillis(
-                      workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays));
+                      workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays));
       expected.setCreditStartTime(now);
       expected.setExpirationTime(expirationTime);
       assertCreditExpirationEquality(expected, dbUser.getUserInitialCreditsExpiration());
