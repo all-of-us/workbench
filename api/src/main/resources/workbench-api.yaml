@@ -2766,6 +2766,24 @@ paths:
         204:
           description: No content.
           content: {}
+  /v1/cron/checkInitialCreditsExpiration:
+    get:
+      tags:
+      - offlineUser
+      - cron
+      description: Updates users if they their initial credits have recently expired
+      operationId: checkInitialCreditsExpiration
+      security: []
+      responses:
+        204:
+          description: No content.
+          content: {}
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{terraName}/notebooks/{notebookName}/readonly:
     post:
       tags:
@@ -4501,6 +4519,27 @@ paths:
       responses:
         200:
           description: Handle Free Credits Expiry Task Ran Successfully
+          content: { }
+      x-codegen-request-body-name: request
+  /v1/cloudTask/checkCreditsExpirationForUserIDs:
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      description: |
+        Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
+      operationId: checkCreditsExpirationForUserIDs
+      security: [ ]
+      requestBody:
+        description: Users that should be alerted about their free credits use.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UseridList'
+        required: true
+      responses:
+        200:
+          description: Check Credits Expiration For User IDs Task Ran Successfully
           content: { }
       x-codegen-request-body-name: request
   /v1/institutions:
@@ -9952,6 +9991,17 @@ components:
           properties: { }
           description: |
             A map of the total live cost of the user's workspaces, indexed by the user's ID.
+    CheckCreditsExpirationForUserIDsRequest:
+      required:
+      - userIds
+      type: object
+      properties:
+        userIds:
+          type: array
+          description: List of User IDs to check for initial free credits expiration
+          items:
+            type: integer
+            format: int64
     WorkspaceAdminView:
       type: object
       properties:
@@ -13165,6 +13215,12 @@ components:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
+    InitialCreditExpirationNotificationStatus:
+      type: string
+      description: Describes whether or not a user has been sent a notification about their initial credits expiring.
+      enum:
+      - NO_NOTIFICATION_SENT
+      - EXPIRATION_NOTIFICATION_SENT
   parameters:
     userId:
       name: userId
