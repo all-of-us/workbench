@@ -18,6 +18,7 @@ import {
 import { appDisplayPath } from 'app/routing/utils';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
+import { NavigateFn } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { fetchWithErrorModal } from './errors';
@@ -216,7 +217,7 @@ export const openAppInIframe = (
   workspaceNamespace: string,
   workspaceId: string,
   userApp: UserAppEnvironment,
-  navigate: (commands: any, extras?: any) => void
+  navigate: NavigateFn
 ) => {
   const url = decodeURI(window.location.href);
   const urlRoute = url.substring(url.lastIndexOf('/') + 1);
@@ -253,7 +254,7 @@ export const openAppOrConfigPanel = (
   workspaceId: string,
   userApps: ListAppsResponse,
   requestedApp: UIAppType,
-  navigate: (commands: any, extras?: any) => void
+  navigate: NavigateFn
 ) => {
   const userApp = findApp(userApps, requestedApp);
   if (userApp?.status === AppStatus.RUNNING) {
