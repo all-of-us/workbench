@@ -23,7 +23,7 @@ public class CommonMappers {
     this.clock = clock;
   }
 
-  public Long timestamp(Timestamp timestamp) {
+  public static Long timestamp(Timestamp timestamp) {
     if (timestamp != null) {
       return timestamp.getTime();
     }
