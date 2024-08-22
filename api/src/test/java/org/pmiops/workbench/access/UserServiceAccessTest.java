@@ -2,6 +2,8 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -34,7 +36,6 @@ import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -44,6 +45,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -109,7 +111,6 @@ public class UserServiceAccessTest {
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-  @Autowired private UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
 
   @MockBean private MailService mailService;
 
@@ -1621,10 +1622,13 @@ public class UserServiceAccessTest {
   }
 
   private void assertUserInitialCreditsExpirationExists(boolean expectExists) {
+    DbUserInitialCreditsExpiration dbUserInitialCreditsExpiration =
+        dbUser.getUserInitialCreditsExpiration();
+
     if (expectExists) {
-      assertThat(userInitialCreditsExpirationDao.findByUser(dbUser)).isPresent();
+      assertNotNull(dbUserInitialCreditsExpiration);
     } else {
-      assertThat(userInitialCreditsExpirationDao.findByUser(dbUser)).isEmpty();
+      assertNull(dbUserInitialCreditsExpiration);
     }
   }
 }
