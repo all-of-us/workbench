@@ -127,7 +127,7 @@ describe('User Apps Helper functions', () => {
     expect(sidebarActiveIconStore.value).toBeNull();
 
     userAppsUtils.openAppOrConfigPanel(
-      'ws',
+      'ns',
       'terraName',
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
       UIAppType.RSTUDIO,
@@ -136,7 +136,7 @@ describe('User Apps Helper functions', () => {
 
     // Since RStudio is NOT in running state this will open the RStudio config side panel and
     // There will be no navigation to any other page
-    expect(mockNavigate).not.toBeCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
     expect(sidebarActiveIconStore.value).toBe(rstudioConfigIconId);
   });
 
@@ -144,16 +144,19 @@ describe('User Apps Helper functions', () => {
     const navigate = mockNavigate;
     expect(sidebarActiveIconStore.value).toBeNull();
 
+    const ns = 'testNs';
+    const terraName = 'testTerraName';
+
     userAppsUtils.openAppOrConfigPanel(
-      'ws',
-      'terraName',
+      ns,
+      terraName,
       [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],
       UIAppType.RSTUDIO,
       navigate
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
     expect(mockNavigate).toHaveBeenCalledWith([
-      appDisplayPath('ws', 'terraName', UIAppType.RSTUDIO),
+      appDisplayPath(ns, terraName, UIAppType.RSTUDIO),
     ]);
     expect(sidebarActiveIconStore.value).toBeNull();
   });
