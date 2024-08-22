@@ -355,17 +355,6 @@ public class DbUser {
     return this;
   }
 
-  @Deprecated
-  @Column(name = "ras_link_login_gov_username")
-  public String getRasLinkLoginGovUsername() {
-    return rasLinkUsername;
-  }
-
-  @Deprecated
-  public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
-    return this;
-  }
-
   @Column(name = "ras_link_username")
   public String getRasLinkUsername() {
     return rasLinkUsername;
