@@ -132,7 +132,7 @@ public class WorkbenchConfig {
     // The number of days that free tier credits are valid for.
     // Extensions to free credit validity period are for the same duration as the original validity
     // period.
-    public Long freeTierCreditValidityPeriodDays;
+    public Long initialCreditsValidityPeriodDays;
   }
 
   public static class FireCloudConfig {

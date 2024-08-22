@@ -143,7 +143,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
-    providedWorkbenchConfig.billing.freeTierCreditValidityPeriodDays = 17L; // arbitrary
+    providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
     accessTierDao.save(createRegisteredTier());

@@ -193,7 +193,7 @@ public class RasLinkServiceTest {
       config.access.renewal.expiryDays = 365L;
       config.access.enableEraCommons = true;
       config.access.enableRasLoginGovLinking = true;
-      config.billing.freeTierCreditValidityPeriodDays = 57L;
+      config.billing.initialCreditsValidityPeriodDays = 57L;
       return config;
     }
 

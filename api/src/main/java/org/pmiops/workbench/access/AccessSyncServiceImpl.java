@@ -90,8 +90,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
     boolean enableInitialCreditsExpiration =
         workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
-    long freeTierCreditValidityPeriodDays =
-        workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays;
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
 
     if (enableInitialCreditsExpiration) {
       DbUserInitialCreditsExpiration maybeCreditsExpiration =
@@ -104,7 +104,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         Timestamp expirationTime =
-            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
+            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
         dbUser.setUserInitialCreditsExpiration(
             new DbUserInitialCreditsExpiration()
                 .setUser(dbUser)
