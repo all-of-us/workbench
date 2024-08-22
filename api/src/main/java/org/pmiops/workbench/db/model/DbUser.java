@@ -79,6 +79,7 @@ public class DbUser {
   private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
   private DbDemographicSurveyV2 demographicSurveyV2;
+  private DbUserInitialCreditsExpiration userInitialCreditsExpiration;
   private DbAddress address;
 
   public enum DbGeneralDiscoverySource {
@@ -390,6 +391,21 @@ public class DbUser {
 
   public DbUser setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
+    return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbUserInitialCreditsExpiration getUserInitialCreditsExpiration() {
+    return userInitialCreditsExpiration;
+  }
+
+  public DbUser setUserInitialCreditsExpiration(
+      DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
+    this.userInitialCreditsExpiration = userInitialCreditsExpiration;
     return this;
   }
 

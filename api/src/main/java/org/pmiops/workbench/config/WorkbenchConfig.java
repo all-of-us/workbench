@@ -129,10 +129,8 @@ public class WorkbenchConfig {
     // workspace gets deleted and after the last cron had run
     public Long numberOfDaysToConsiderForFreeTierUsageUpdate;
 
-    // The number of days that free tier credits are valid for.
-    // Extensions to free credit validity period are for the same duration as the original validity
-    // period.
-    public Long freeTierCreditValidityPeriodDays;
+    // The number of days that initial credits are valid for.
+    public Long initialCreditsValidityPeriodDays;
   }
 
   public static class FireCloudConfig {

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,7 +33,6 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -46,8 +45,6 @@ public class AccessSyncServiceTest {
   @Mock private AccessTierService accessTierService;
 
   @Mock private UserDao userDao;
-
-  @Mock UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
 
   @Mock Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -72,7 +69,6 @@ public class AccessSyncServiceTest {
     Mockito.reset(
         accessTierService,
         userDao,
-        userInitialCreditsExpirationDao,
         workbenchConfigProvider,
         accessModuleService,
         institutionService,
@@ -90,9 +86,6 @@ public class AccessSyncServiceTest {
     when(accessModuleService.isModuleCompliant(any(), any())).thenReturn(true);
     when(institutionService.getByUser(any())).thenReturn(Optional.of(institution));
     when(institutionService.validateInstitutionalEmail(any(), any(), any())).thenReturn(true);
-    Mockito.lenient()
-        .when(userInitialCreditsExpirationDao.findByUser(dbUser))
-        .thenReturn(Optional.empty());
 
     when(userDao.save(any())).thenAnswer(i -> i.getArguments()[0]);
   }
@@ -102,7 +95,7 @@ public class AccessSyncServiceTest {
     WorkbenchConfig workbenchConfig = createEmptyConfig();
     workbenchConfig.featureFlags.enableInitialCreditsExpiration = enable;
     workbenchConfig.access.enableRasLoginGovLinking = false;
-    workbenchConfig.billing.freeTierCreditValidityPeriodDays = 57L;
+    workbenchConfig.billing.initialCreditsValidityPeriodDays = 57L;
 
     when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
   }
@@ -131,21 +124,17 @@ public class AccessSyncServiceTest {
     expected.setUser(dbUser);
 
     if (enableInitialCreditsExpiration) {
-      ArgumentCaptor<DbUserInitialCreditsExpiration> captor =
-          ArgumentCaptor.forClass(DbUserInitialCreditsExpiration.class);
-      verify(userInitialCreditsExpirationDao).save(captor.capture());
-      DbUserInitialCreditsExpiration actual = captor.getValue();
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       Timestamp expirationTime =
           new Timestamp(
               now.getTime()
                   + TimeUnit.DAYS.toMillis(
-                      workbenchConfigProvider.get().billing.freeTierCreditValidityPeriodDays));
+                      workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays));
       expected.setCreditStartTime(now);
       expected.setExpirationTime(expirationTime);
-      assertCreditExpirationEquality(expected, actual);
+      assertCreditExpirationEquality(expected, dbUser.getUserInitialCreditsExpiration());
     } else {
-      verify(userInitialCreditsExpirationDao, Mockito.never()).save(any());
+      assertNull(dbUser.getUserInitialCreditsExpiration());
     }
 
     assertEquals(updatedUser, dbUser);
@@ -163,7 +152,6 @@ public class AccessSyncServiceTest {
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    verify(userInitialCreditsExpirationDao, Mockito.never()).save(any());
     assertEquals(updatedUser, dbUser);
   }
 
@@ -188,12 +176,10 @@ public class AccessSyncServiceTest {
             .setExpirationTime(new Timestamp(now.toEpochMilli() + TimeUnit.DAYS.toMillis(57L)))
             .setBypassed(false)
             .setExtensionCount(0);
-    when(userInitialCreditsExpirationDao.findByUser(dbUser))
-        .thenReturn(Optional.of(existingExpiration));
+    dbUser.setUserInitialCreditsExpiration(existingExpiration);
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    verify(userInitialCreditsExpirationDao, Mockito.never()).save(any());
     assertEquals(updatedUser, dbUser);
     verify(accessTierService).addUserToTier(dbUser, controlledTier);
   }
@@ -213,7 +199,6 @@ public class AccessSyncServiceTest {
 
     DbUser updatedUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
 
-    verify(userInitialCreditsExpirationDao, Mockito.never()).save(any());
     assertEquals(updatedUser, dbUser);
 
     verify(accessTierService).addUserToTier(dbUser, controlledTier);

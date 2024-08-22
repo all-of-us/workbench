@@ -118,7 +118,7 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
-    providedWorkbenchConfig.billing.freeTierCreditValidityPeriodDays = 57L;
+    providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 57L;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
