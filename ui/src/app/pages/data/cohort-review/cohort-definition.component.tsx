@@ -116,11 +116,11 @@ export const CohortDefinitionComponent = withRouter(
     }
 
     async componentDidMount() {
-      const { ns, wsid } = this.props.match.params;
+      const { ns, terraName } = this.props.match.params;
       // Get list of Visit criteria for displaying Visit Type modifiers
       const visits = await cohortBuilderApi().findCriteriaBy(
         ns,
-        wsid,
+        terraName,
         Domain.VISIT.toString(),
         CriteriaType.VISIT.toString()
       );

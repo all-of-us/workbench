@@ -177,13 +177,13 @@ const updateRuntimeStores = async ({
 };
 
 interface GetWorkspaceProps {
-  wsid: string;
+  terraName: string;
   setWorkspace: (w: Workspace) => void;
   navigate: NavigateFn;
 }
 const getWorkspaceAndUpdateStores = async ({
   workspaceNamespace,
-  wsid,
+  terraName,
   setWorkspace,
   navigate,
   pollAborter,
@@ -192,7 +192,7 @@ const getWorkspaceAndUpdateStores = async ({
   try {
     const { workspace, accessLevel } = await workspacesApi().getWorkspace(
       workspaceNamespace,
-      wsid
+      terraName
     );
     currentWorkspaceStore.next({
       ...workspace,
@@ -213,7 +213,7 @@ const getWorkspaceAndUpdateStores = async ({
 
 export const WorkspaceWrapper = ({ hideSpinner }) => {
   const params = useParams<MatchParams>();
-  const { ns, wsid } = params;
+  const { ns, terraName } = params;
   const routeData = useStore(routeDataStore);
   const [navigate] = useNavigation();
 
@@ -233,12 +233,12 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
 
   useEffect(() => {
     // abort if the routing is invalid (though this should never happen)
-    if (!ns || !wsid) {
+    if (!ns || !terraName) {
       return;
     }
 
     maybeStartPollingForUserApps(ns);
-    workspacesApi().updateRecentWorkspaces(ns, wsid);
+    workspacesApi().updateRecentWorkspaces(ns, terraName);
 
     // avoid a redundant fetch if we can find the workspace in the currentWorkspaceStore or the
     // nextWorkspaceWarmupStore (as a result of creation or duplication)
@@ -248,7 +248,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       wsInCurrentStore &&
       // can't use ?. here because we don't want to match against undefined
       wsInCurrentStore.namespace === ns &&
-      wsInCurrentStore.id === wsid
+      wsInCurrentStore.id === terraName
     ) {
       updateRuntimeStores({
         workspaceNamespace: ns,
@@ -266,7 +266,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
         wsInNextStore &&
         // can't use ?. here because we don't want to match against undefined
         wsInNextStore.namespace === ns &&
-        wsInNextStore.id === wsid
+        wsInNextStore.id === terraName
       ) {
         currentWorkspaceStore.next(wsInNextStore);
         updateRuntimeStores({
@@ -278,7 +278,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
       } else {
         getWorkspaceAndUpdateStores({
           workspaceNamespace: ns,
-          wsid,
+          terraName,
           setWorkspace,
           navigate,
           pollAborter,
@@ -286,7 +286,7 @@ export const WorkspaceWrapper = ({ hideSpinner }) => {
         });
       }
     }
-  }, [ns, wsid]);
+  }, [ns, terraName]);
 
   useEffect(() => {
     const isControlled =

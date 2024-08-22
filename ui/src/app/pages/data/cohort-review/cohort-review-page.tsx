@@ -124,7 +124,7 @@ export const CohortReviewPage = fp.flow(
   withSpinnerOverlay()
 )(({ hideSpinner, showSpinner, workspace }) => {
   const history = useHistory();
-  const { ns, wsid, cid, crid } = useParams<MatchParams>();
+  const { ns, terraName, cid, crid } = useParams<MatchParams>();
   const [navigate, navigateByUrl] = useNavigation();
   const [cohort, setCohort] = useState(undefined);
   const [cohortReviews, setCohortReviews] = useState(undefined);
@@ -139,7 +139,7 @@ export const CohortReviewPage = fp.flow(
     cohortReviewApi()
       .getParticipantCohortStatuses(
         ns,
-        wsid,
+        terraName,
         cohortReviewId,
         defaultReviewQuery
       )
@@ -162,15 +162,17 @@ export const CohortReviewPage = fp.flow(
   // sets the cohort review id as a url param or removes it if no id is passed
   const updateUrlWithCohortReviewId = (cohortReviewId?: number) =>
     history.push(
-      `${dataTabPath(ns, wsid)}/cohorts/${cid}/reviews/${cohortReviewId || ''}`
+      `${dataTabPath(ns, terraName)}/cohorts/${cid}/reviews/${
+        cohortReviewId || ''
+      }`
     );
 
   const loadCohortAndReviews = async () => {
     const [cohortResponse, cohortReviewResponse, participantCountResponse] =
       await Promise.all([
-        cohortsApi().getCohort(ns, wsid, +cid),
-        cohortReviewApi().getCohortReviewsByCohortId(ns, wsid, +cid),
-        cohortReviewApi().cohortParticipantCount(ns, wsid, +cid),
+        cohortsApi().getCohort(ns, terraName, +cid),
+        cohortReviewApi().getCohortReviewsByCohortId(ns, terraName, +cid),
+        cohortReviewApi().cohortParticipantCount(ns, terraName, +cid),
       ]);
     cohortReviewResponse.items.sort(sortByCreationTime);
     setCohort(cohortResponse);
@@ -213,7 +215,7 @@ export const CohortReviewPage = fp.flow(
     cohortBuilderApi()
       .findCriteriaBy(
         ns,
-        wsid,
+        terraName,
         Domain[Domain.VISIT],
         CriteriaType[CriteriaType.VISIT]
       )
@@ -264,7 +266,7 @@ export const CohortReviewPage = fp.flow(
               style={styles.backBtn}
               type='button'
               onClick={() =>
-                navigateByUrl(`${dataTabPath(ns, wsid)}/cohorts/build`, {
+                navigateByUrl(`${dataTabPath(ns, terraName)}/cohorts/build`, {
                   queryParams: { cohortId: cid },
                 })
               }
@@ -279,7 +281,7 @@ export const CohortReviewPage = fp.flow(
                   navigate([
                     'workspaces',
                     ns,
-                    wsid,
+                    terraName,
                     'data',
                     'cohorts',
                     cid,

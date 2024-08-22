@@ -32,7 +32,7 @@ describe('WorkspaceNavBar', () => {
           `/${workspaceDataStub.namespace}/${workspaceDataStub.id}`,
         ]}
       >
-        <Route path='/:ns/:wsid'>
+        <Route path='/:ns/:terraName'>
           <WorkspaceNavBar {...props} />
         </Route>
       </MemoryRouter>

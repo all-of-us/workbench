@@ -167,7 +167,7 @@ export const WorkspaceNavBar = fp.flow(
   // default to Data tab if the tabPath is not set
   const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], tabs);
   const [navigate] = useNavigation();
-  const { ns, wsid } = useParams<MatchParams>();
+  const { ns, terraName } = useParams<MatchParams>();
 
   useEffect(() => {
     if (
@@ -205,7 +205,7 @@ export const WorkspaceNavBar = fp.flow(
               ? experimentalTabStyle(selected)
               : {}),
           }}
-          onClick={() => navigate(['workspaces', ns, wsid, link])}
+          onClick={() => navigate(['workspaces', ns, terraName, link])}
         >
           {name}
         </Clickable>

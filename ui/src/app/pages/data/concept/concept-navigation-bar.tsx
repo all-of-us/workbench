@@ -61,12 +61,12 @@ const tooltipContent = [
 
 interface ConceptNavigationProps {
   ns: string;
-  wsId: string;
+  terraName: string;
   showConcepts: boolean;
 }
 export const ConceptNavigationBar = ({
   ns,
-  wsId,
+  terraName,
   showConcepts,
 }: ConceptNavigationProps) => {
   const [navigate] = useNavigation();
@@ -77,7 +77,9 @@ export const ConceptNavigationBar = ({
         style={
           showConcepts ? activatedStyles.headerActivated : styles.headerLinks
         }
-        onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
+        onClick={() =>
+          navigate(['workspaces', ns, terraName, 'data', 'concepts'])
+        }
         data-test-id='concepts-link'
       >
         Concepts
@@ -90,7 +92,7 @@ export const ConceptNavigationBar = ({
           marginLeft: '1.5rem',
         }}
         onClick={() =>
-          navigate(['workspaces', ns, wsId, 'data', 'concepts', 'sets'])
+          navigate(['workspaces', ns, terraName, 'data', 'concepts', 'sets'])
         }
         data-test-id='concept-sets-link'
       >

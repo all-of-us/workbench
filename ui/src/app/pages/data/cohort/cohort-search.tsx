@@ -313,7 +313,7 @@ export const CohortSearch = fp.flow(
       const {
         cohortContext,
         match: {
-          params: { wsid },
+          params: { terraName },
         },
       } = this.props;
       let { selectedIds, selections } = this.state;
@@ -329,7 +329,7 @@ export const CohortSearch = fp.flow(
       const cohort = currentCohortStore.getValue();
       cohortContext.item.searchParameters = selections;
       const localStorageContext = {
-        workspaceId: wsid,
+        workspaceId: terraName,
         cohortId: !!cohort ? cohort.id : null,
         cohortContext,
       };

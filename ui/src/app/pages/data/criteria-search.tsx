@@ -290,11 +290,11 @@ export const CriteriaSearch = fp.flow(
           : [selectCriteria];
       // Save selections in local storage in case of error or page refresh
       if (source === 'cohort') {
-        const { wsid } = params;
+        const { terraName } = params;
         const cohort = currentCohortStore.getValue();
         cohortContext.item.searchParameters = criteriaList;
         const localStorageContext = {
-          workspaceId: wsid,
+          workspaceId: terraName,
           cohortId: !!cohort ? cohort.id : null,
           cohortContext,
         };

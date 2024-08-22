@@ -91,25 +91,25 @@ export const getAccessModuleGuard = (): Guard => {
   };
 };
 
-export const adminLockedGuard = (ns: string, wsid: string): Guard => {
+export const adminLockedGuard = (ns: string, terraName: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
-    redirectPath: `${workspacePath(ns, wsid)}/about`,
+    redirectPath: `${workspacePath(ns, terraName)}/about`,
   };
 };
 
 export const confirmAppIsValid = () => {
   const urlMatchParam = matchPath<MatchParams>(location.pathname, {
-    path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
+    path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
   });
   const appFromUrl = urlMatchParam.params.appType as UIAppType;
   return Object.values(UIAppType).includes(appFromUrl);
 };
 
-export const appIsValidGuard = (ns: string, wsid: string): Guard => {
+export const appIsValidGuard = (ns: string, terraName: string): Guard => {
   return {
     allowed: (): boolean => confirmAppIsValid(),
-    redirectPath: `${analysisTabPath(ns, wsid)}`,
+    redirectPath: `${analysisTabPath(ns, terraName)}`,
   };
 };
 

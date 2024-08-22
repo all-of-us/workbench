@@ -52,7 +52,7 @@ describe('ConceptSearch', () => {
           )}/concepts/sets/${conceptSet.id}`,
         ]}
       >
-        <Route path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'>
+        <Route path='/workspaces/:ns/:terraName/data/concepts/sets/:csid'>
           <ConceptSearch
             setConceptSetUpdating={() => {}}
             setShowUnsavedModal={() => {}}

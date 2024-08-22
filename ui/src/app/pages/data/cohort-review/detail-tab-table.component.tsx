@@ -527,13 +527,13 @@ export const DetailTabTable = fp.flow(
       const {
         domain,
         match: {
-          params: { ns, wsid, crid },
+          params: { ns, terraName, crid },
         },
         participantId,
       } = this.props;
       let data = [];
       await cohortReviewApi()
-        .getParticipantData(ns, wsid, +crid, participantId, request, {
+        .getParticipantData(ns, terraName, +crid, participantId, request, {
           signal: this.dataAborter.signal,
         })
         .then((response) => {
@@ -559,13 +559,13 @@ export const DetailTabTable = fp.flow(
     async callCountApi(request: PageFilterRequest) {
       const {
         match: {
-          params: { ns, wsid, crid },
+          params: { ns, terraName, crid },
         },
         participantId,
       } = this.props;
       let count = null;
       await cohortReviewApi()
-        .getParticipantCount(ns, wsid, +crid, participantId, request, {
+        .getParticipantCount(ns, terraName, +crid, participantId, request, {
           signal: this.countAborter.signal,
         })
         .then((response) => {

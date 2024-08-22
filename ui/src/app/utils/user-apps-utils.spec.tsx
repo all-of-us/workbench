@@ -128,7 +128,7 @@ describe('User Apps Helper functions', () => {
 
     userAppsUtils.openAppOrConfigPanel(
       'ws',
-      'wsid',
+      'terraName',
       [{ status: AppStatus.STARTING, appType: AppType.RSTUDIO }],
       UIAppType.RSTUDIO,
       navigate
@@ -146,14 +146,14 @@ describe('User Apps Helper functions', () => {
 
     userAppsUtils.openAppOrConfigPanel(
       'ws',
-      'wsid',
+      'terraName',
       [{ status: AppStatus.RUNNING, appType: AppType.RSTUDIO }],
       UIAppType.RSTUDIO,
       navigate
     );
     // Since RStudio is running, navigate to open RStudio in iframe and do not open config panel
     expect(mockNavigate).toHaveBeenCalledWith([
-      appDisplayPath('ws', 'wsid', UIAppType.RSTUDIO),
+      appDisplayPath('ws', 'terraName', UIAppType.RSTUDIO),
     ]);
     expect(sidebarActiveIconStore.value).toBeNull();
   });
