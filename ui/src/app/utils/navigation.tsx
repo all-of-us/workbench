@@ -66,10 +66,7 @@ export interface NavigateExtras {
   event?: React.MouseEvent;
 }
 
-export type NavigateFn = (
-  path: string | string[],
-  extras?: NavigateExtras
-) => void;
+export type NavigateFn = (path: string[], extras?: NavigateExtras) => void;
 export type NavigateByUrlFn = (url: string, extras?: NavigateExtras) => void;
 
 export interface NavigationProps {
@@ -108,9 +105,8 @@ export const useNavigation = (): [NavigateFn, NavigateByUrlFn] => {
     });
   };
 
-  const navigate = (path: string | string[], extras?: NavigateExtras) => {
-    const url = Array.isArray(path) ? path.join('/') : path;
-    navigateByUrl(url, extras);
+  const navigate = (path: string[], extras?: NavigateExtras) => {
+    navigateByUrl(path.join('/'), extras);
   };
 
   return [navigate, navigateByUrl];
