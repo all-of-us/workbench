@@ -88,7 +88,8 @@ public class CloudTaskInitialCreditsExpiryController
 
     handleOverspentUsers(newlyOverspentUsers);
 
-    alertUsersBasedOnCostThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyOverspentUsers);
+    alertUsersBasedOnCostThreshold(
+        usersSet, dbCostByCreator, liveCostByCreator, newlyOverspentUsers);
 
     logger.info(
         "Free tier Billing Service: Finished handling initial credits overspend and expiration event for users: {}",
@@ -186,7 +187,8 @@ public class CloudTaskInitialCreditsExpiryController
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> newlyOverspentFreeTierUsers = Sets.intersection(overspentUsers, freeTierUsers);
+    final Set<DbUser> newlyOverspentFreeTierUsers =
+        Sets.intersection(overspentUsers, freeTierUsers);
 
     logger.info(
         String.format(
