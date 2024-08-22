@@ -596,17 +596,21 @@ public final class DbStorageEnums {
   }
 
   // InitialCreditExpirationNotificationStatus
-  private static final BiMap<InitialCreditExpirationNotificationStatus, Short> CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS =
-      ImmutableBiMap.<InitialCreditExpirationNotificationStatus, Short>builder()
-          .put(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT, (short) 0)
-          .put(InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT, (short) 1)
-          .build();
+  private static final BiMap<InitialCreditExpirationNotificationStatus, Short>
+      CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS =
+          ImmutableBiMap.<InitialCreditExpirationNotificationStatus, Short>builder()
+              .put(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT, (short) 0)
+              .put(
+                  InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT, (short) 1)
+              .build();
 
-  public static InitialCreditExpirationNotificationStatus initialCreditExpirationNotificationStatusFromStorage(Short s) {
+  public static InitialCreditExpirationNotificationStatus
+      initialCreditExpirationNotificationStatusFromStorage(Short s) {
     return CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS.inverse().get(s);
   }
 
-  public static Short initialCreditExpirationNotificationStatusToStorage(InitialCreditExpirationNotificationStatus s) {
+  public static Short initialCreditExpirationNotificationStatusToStorage(
+      InitialCreditExpirationNotificationStatus s) {
     return CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS.get(s);
   }
 }
