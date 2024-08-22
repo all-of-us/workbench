@@ -403,7 +403,8 @@ public class DbUser {
     return userInitialCreditsExpiration;
   }
 
-  public DbUser setUserInitialCreditsExpiration(DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
+  public DbUser setUserInitialCreditsExpiration(
+      DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
     this.userInitialCreditsExpiration = userInitialCreditsExpiration;
     return this;
   }
