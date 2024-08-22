@@ -19,7 +19,6 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
@@ -40,7 +39,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final InstitutionService institutionService;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
-  private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final Clock clock;
 
   @Autowired
@@ -51,7 +49,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       InstitutionService institutionService,
       UserDao userDao,
       UserServiceAuditor userServiceAuditor,
-      UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
       Clock clock) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
@@ -59,7 +56,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.institutionService = institutionService;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
-    this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.clock = clock;
   }
 
@@ -83,17 +79,17 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     }
 
     if (enableInitialCreditsExpiration) {
-      Optional<DbUserInitialCreditsExpiration> maybeCreditsExpiration =
-          userInitialCreditsExpirationDao.findByUser(dbUser);
+      DbUserInitialCreditsExpiration maybeCreditsExpiration =
+          dbUser.getUserInitialCreditsExpiration();
 
       if (previousAccessTiers.isEmpty()
           && !newAccessTiers.isEmpty()
-          && maybeCreditsExpiration.isEmpty()) {
+          && null == maybeCreditsExpiration) {
 
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         Timestamp expirationTime =
             new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(freeTierCreditValidityPeriodDays));
-        userInitialCreditsExpirationDao.save(
+        dbUser.setUserInitialCreditsExpiration(
             new DbUserInitialCreditsExpiration()
                 .setUser(dbUser)
                 .setCreditStartTime(now)
