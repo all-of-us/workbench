@@ -22,8 +22,10 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -55,6 +57,8 @@ public class WorkspaceMapperTest {
 
   private static final Timestamp DB_CREATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+  private static final Timestamp INITIAL_CREDITS_EXPIRATION_TIMESTAMP =
+      Timestamp.from(Instant.parse("2020-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
   private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
   private static final Set<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
@@ -68,7 +72,7 @@ public class WorkspaceMapperTest {
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
-  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
+  @Autowired private InitialCreditsExpirationService initialCreditsExpirationService;
 
   @TestConfiguration
   @Import({
@@ -79,6 +83,7 @@ public class WorkspaceMapperTest {
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
     FirecloudMapperImpl.class,
+    InitialCreditsExpirationServiceImpl.class,
     WorkspaceMapperImpl.class,
   })
   @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
@@ -94,15 +99,19 @@ public class WorkspaceMapperTest {
             .name(WORKSPACE_FIRECLOUD_NAME)
             .googleProject(GOOGLE_PROJECT);
 
-    final DbUser creatorUser = new DbUser();
-    creatorUser.setUsername(CREATOR_EMAIL);
-    creatorUser.setUserId(CREATOR_USER_ID);
+    final DbUser creatorUser =
+        new DbUser()
+            .setUsername(CREATOR_EMAIL)
+            .setUserId(CREATOR_USER_ID)
+            .setUserInitialCreditsExpiration(
+                new DbUserInitialCreditsExpiration()
+                    .setBypassed(false)
+                    .setExpirationTime(INITIAL_CREDITS_EXPIRATION_TIMESTAMP));
 
     final DbAccessTier accessTier = new DbAccessTier().setShortName(ACCESS_TIER_SHORT_NAME);
 
-    final DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(CDR_VERSION_ID);
-    cdrVersion.setAccessTier(accessTier);
+    final DbCdrVersion cdrVersion =
+        new DbCdrVersion().setCdrVersionId(CDR_VERSION_ID).setAccessTier(accessTier);
 
     sourceDbWorkspace =
         new DbWorkspace()
@@ -155,13 +164,15 @@ public class WorkspaceMapperTest {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
     assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
+    assertThat(ws.getInitialCreditsExpirationEpochMillis())
+        .isEqualTo(INITIAL_CREDITS_EXPIRATION_TIMESTAMP.getTime());
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
@@ -180,7 +191,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setFeaturedCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     final Workspace ws =
         workspaceMapper.toApiWorkspace(
-            sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService);
+            sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
@@ -189,7 +200,7 @@ public class WorkspaceMapperTest {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             workspaceMapper.toApiWorkspace(
-                sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService),
+                sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsExpirationService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
