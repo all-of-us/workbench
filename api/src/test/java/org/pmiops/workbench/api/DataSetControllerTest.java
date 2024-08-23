@@ -101,6 +101,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.BillingStatus;
@@ -273,6 +274,7 @@ public class DataSetControllerTest {
     FeaturedWorkspaceMapper.class,
     FreeTierBillingService.class,
     IamService.class,
+    InitialCreditsExpirationService.class,
     MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,

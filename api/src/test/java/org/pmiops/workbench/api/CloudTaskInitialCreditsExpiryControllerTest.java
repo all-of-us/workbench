@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -99,6 +100,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     FirecloudMapper.class,
     FireCloudService.class,
     ImpersonatedWorkspaceService.class,
+    InitialCreditsExpirationService.class,
     LeonardoApiClient.class,
     MailService.class,
     TaskQueueService.class,

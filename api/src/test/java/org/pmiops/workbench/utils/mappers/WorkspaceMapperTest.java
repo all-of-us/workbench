@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -67,6 +68,7 @@ public class WorkspaceMapperTest {
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
+  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
 
   @TestConfiguration
   @Import({
@@ -152,7 +154,8 @@ public class WorkspaceMapperTest {
   public void testConvertsDbToApiWorkspace() {
 
     final Workspace ws =
-        workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
+        workspaceMapper.toApiWorkspace(
+            sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
@@ -176,7 +179,8 @@ public class WorkspaceMapperTest {
   public void testConvertsFeaturedWorkspace() {
     sourceDbWorkspace.setFeaturedCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     final Workspace ws =
-        workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
+        workspaceMapper.toApiWorkspace(
+            sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService);
     assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.COMMUNITY);
   }
 
@@ -184,7 +188,8 @@ public class WorkspaceMapperTest {
   public void testConvertsFirecloudResponseToApiResponse() {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
-            workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace),
+            workspaceMapper.toApiWorkspace(
+                sourceDbWorkspace, sourceFirecloudWorkspace, mockInitialCreditsExpirationService),
             RawlsWorkspaceAccessLevel.PROJECT_OWNER);
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);

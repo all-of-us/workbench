@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -21,6 +22,7 @@ public interface WorkspaceOperationMapper {
       DbWorkspaceOperation source,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       WorkspaceMapper workspaceMapper) {
 
     WorkspaceOperation modelOperation = toModelWithoutWorkspace(source);
@@ -28,7 +30,12 @@ public interface WorkspaceOperationMapper {
     Optional.ofNullable(source.getWorkspaceId())
         .flatMap(
             workspaceId ->
-                getWorkspaceMaybe(workspaceId, workspaceDao, fireCloudService, workspaceMapper))
+                getWorkspaceMaybe(
+                    workspaceId,
+                    workspaceDao,
+                    fireCloudService,
+                    initialCreditsExpirationService,
+                    workspaceMapper))
         .ifPresent(modelOperation::workspace);
 
     return modelOperation;
@@ -50,6 +57,7 @@ public interface WorkspaceOperationMapper {
       long workspaceId,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       WorkspaceMapper workspaceMapper) {
     return workspaceDao
         .findActiveByWorkspaceId(workspaceId)
@@ -61,6 +69,8 @@ public interface WorkspaceOperationMapper {
                     .map(
                         fcWorkspaceResponse ->
                             workspaceMapper.toApiWorkspace(
-                                dbWorkspace, fcWorkspaceResponse.getWorkspace())));
+                                dbWorkspace,
+                                fcWorkspaceResponse.getWorkspace(),
+                                initialCreditsExpirationService)));
   }
 }
