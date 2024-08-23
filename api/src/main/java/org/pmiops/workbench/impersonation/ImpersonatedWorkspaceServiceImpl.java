@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -41,6 +42,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   private final FireCloudService firecloudService;
   private final FirecloudMapper firecloudMapper;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final UserDao userDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
@@ -52,6 +54,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       FireCloudService firecloudService,
       FirecloudMapper firecloudMapper,
       ImpersonatedFirecloudService impersonatedFirecloudService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       UserDao userDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
@@ -60,6 +63,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     this.firecloudMapper = firecloudMapper;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -76,7 +80,9 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       return workspaceMapper
           .toApiWorkspaceResponseList(
-              workspaceDao, impersonatedFirecloudService.getWorkspaces(dbUser))
+              workspaceDao,
+              impersonatedFirecloudService.getWorkspaces(dbUser),
+              initialCreditsExpirationService)
           .stream()
           .filter(response -> response.getAccessLevel() == WorkspaceAccessLevel.OWNER)
           .collect(Collectors.toList());

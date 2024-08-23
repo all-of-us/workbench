@@ -135,6 +135,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -384,6 +385,7 @@ public class WorkspacesControllerTest {
     ConceptBigQueryService.class,
     FireCloudService.class,
     GenomicExtractionService.class,
+    InitialCreditsExpirationService.class,
     LeonardoApiClient.class,
     LeonardoRuntimeAuditor.class,
     MailService.class,

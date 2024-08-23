@@ -45,6 +45,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
@@ -83,56 +84,58 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private final AccessTierService accessTierService;
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
+  private final CloudBillingClient cloudBillingClient;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
-  private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
+  private final FirecloudMapper firecloudMapper;
   private final FreeTierBillingService freeTierBillingService;
-  private final CloudBillingClient cloudBillingClient;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final MailService mailService;
   private final Provider<DbUser> userProvider;
+  private final Provider<TanagraApi> tanagraApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserMapper userMapper;
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final UserService userService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
-  private final WorkspaceAuthService workspaceAuthService;
-  private final Provider<TanagraApi> tanagraApiProvider;
 
   @Autowired
   public WorkspaceServiceImpl(
       AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
+      CloudBillingClient cloudBillingClient,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
-      FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
+      FirecloudMapper firecloudMapper,
       FreeTierBillingService freeTierBillingService,
-      CloudBillingClient cloudBillingClient,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       MailService mailService,
       Provider<DbUser> userProvider,
+      Provider<TanagraApi> tanagraApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       UserService userService,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService,
-      Provider<TanagraApi> tanagraApiProvider) {
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper) {
     this.accessTierService = accessTierService;
-    this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
+    this.cloudBillingClient = cloudBillingClient;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
@@ -141,17 +144,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.fireCloudService = fireCloudService;
     this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.mailService = mailService;
+    this.tanagraApiProvider = tanagraApiProvider;
     this.userDao = userDao;
     this.userMapper = userMapper;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-    this.workspaceAuthService = workspaceAuthService;
-    this.tanagraApiProvider = tanagraApiProvider;
   }
 
   @Override
@@ -159,7 +163,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     boolean enablePublishedWorkspaces =
         workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb;
     return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
+        .toApiWorkspaceResponseList(
+            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
         .stream()
         .filter(
             (workspaceResponse) ->
@@ -182,7 +187,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
+        .toApiWorkspaceResponseList(
+            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
         .toList();
@@ -191,7 +197,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
-        .toApiWorkspaceResponseList(workspaceDao, fireCloudService.getWorkspaces())
+        .toApiWorkspaceResponseList(
+            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getFeaturedCategory() != null)
         .toList();
@@ -231,7 +238,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspaceResponse.setAccessLevel(
         firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
-    Workspace workspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace workspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
     workspaceResponse.setWorkspace(workspace);
 
     return workspaceResponse;

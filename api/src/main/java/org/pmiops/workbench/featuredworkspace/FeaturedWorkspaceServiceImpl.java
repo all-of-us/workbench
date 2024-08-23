@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -25,6 +26,7 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider;
   private final FireCloudService fireCloudService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
 
@@ -34,12 +36,14 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider,
       FireCloudService fireCloudService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspacesConfigProvider = featuredWorkspacesConfigProvider;
     this.fireCloudService = fireCloudService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
   }
@@ -93,7 +97,9 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
                       dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
               return workspaceMapper.toApiWorkspaceResponse(
                   workspaceMapper.toApiWorkspace(
-                      dbWorkspace, rawlsWorkspaceResponse.getWorkspace()),
+                      dbWorkspace,
+                      rawlsWorkspaceResponse.getWorkspace(),
+                      initialCreditsExpirationService),
                   rawlsWorkspaceResponse.getAccessLevel());
             })
         .collect(Collectors.toList());

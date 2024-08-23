@@ -7,11 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +44,8 @@ public interface ProfileMapper {
   @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
   @Mapping(
       target = "initialCreditsExpirationEpochMillis",
-      ignore = true) // set by setInitialCreditsExpiration()
+      source = "dbUser",
+      qualifiedByName = "getInitialCreditsExpiration")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsExpirationService expirationService,
@@ -59,18 +58,6 @@ public interface ProfileMapper {
       ProfileAccessModules accessModules,
       boolean newUserSatisfactionSurveyEligibility,
       Instant newUserSatisfactionSurveyEligibilityEndTime);
-
-  @AfterMapping
-  default void setInitialCreditsExpiration(
-      @MappingTarget Profile target,
-      DbUser source,
-      @Context InitialCreditsExpirationService expirationService) {
-    expirationService
-        .getCreditsExpiration(source)
-        .ifPresent(
-            expiration ->
-                target.setInitialCreditsExpirationEpochMillis(CommonMappers.timestamp(expiration)));
-  }
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

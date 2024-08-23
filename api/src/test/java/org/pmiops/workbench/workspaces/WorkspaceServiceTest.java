@@ -64,6 +64,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -118,6 +119,7 @@ public class WorkspaceServiceTest {
     FeaturedWorkspaceMapper.class,
     FreeTierBillingService.class,
     IamService.class,
+    InitialCreditsExpirationService.class,
     ProfileMapper.class,
     UserDao.class,
     UserMapper.class,

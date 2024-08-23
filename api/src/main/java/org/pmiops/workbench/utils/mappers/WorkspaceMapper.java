@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -48,10 +50,17 @@ public interface WorkspaceMapper {
   @Mapping(target = "terraName", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "dbWorkspace.creator.username")
+  @Mapping(
+      target = "initialCreditsExpirationEpochMillis",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "getInitialCreditsExpiration")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
+  Workspace toApiWorkspace(
+      DbWorkspace dbWorkspace,
+      RawlsWorkspaceDetails fcWorkspace,
+      @Context InitialCreditsExpirationService expirationService);
 
   @Mapping(
       target = "accessLevel",
@@ -61,7 +70,9 @@ public interface WorkspaceMapper {
       Workspace workspace, RawlsWorkspaceAccessLevel accessLevel);
 
   default List<WorkspaceResponse> toApiWorkspaceResponseList(
-      WorkspaceDao workspaceDao, List<RawlsWorkspaceListResponse> fcWorkspaces) {
+      WorkspaceDao workspaceDao,
+      List<RawlsWorkspaceListResponse> fcWorkspaces,
+      InitialCreditsExpirationService expirationService) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     Map<String, RawlsWorkspaceListResponse> fcWorkspacesByUuid =
@@ -78,7 +89,7 @@ public interface WorkspaceMapper {
             dbWorkspace -> {
               var fcResponse = fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid());
               return toApiWorkspaceResponse(
-                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace()),
+                  toApiWorkspace(dbWorkspace, fcResponse.getWorkspace(), expirationService),
                   fcResponse.getAccessLevel());
             })
         .toList();
@@ -95,6 +106,10 @@ public interface WorkspaceMapper {
   @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
+  @Mapping(
+      target = "initialCreditsExpirationEpochMillis",
+      source = "dbWorkspace.creator",
+      qualifiedByName = "getInitialCreditsExpiration")
   @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(
       target = "googleBucketName",
@@ -106,10 +121,14 @@ public interface WorkspaceMapper {
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   // provides an incomplete workspace!  Only for use by the RecentWorkspace mapper
-  Workspace onlyForMappingRecentWorkspace(DbWorkspace dbWorkspace);
+  Workspace onlyForMappingRecentWorkspace(
+      DbWorkspace dbWorkspace, @Context InitialCreditsExpirationService expirationService);
 
   @Mapping(target = "workspace", source = "dbWorkspace")
-  RecentWorkspace toApiRecentWorkspace(DbWorkspace dbWorkspace, WorkspaceAccessLevel accessLevel);
+  RecentWorkspace toApiRecentWorkspace(
+      DbWorkspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel,
+      @Context InitialCreditsExpirationService expirationService);
 
   /**
    * This method was written I think before we realized we could have multiple input arguments.
