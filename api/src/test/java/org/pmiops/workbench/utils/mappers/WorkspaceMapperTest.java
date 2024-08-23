@@ -71,8 +71,8 @@ public class WorkspaceMapperTest {
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
-  @Autowired private WorkspaceMapper workspaceMapper;
   @Autowired private InitialCreditsExpirationService initialCreditsExpirationService;
+  @Autowired private WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
   @Import({
