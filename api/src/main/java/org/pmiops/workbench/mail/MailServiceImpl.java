@@ -214,7 +214,8 @@ public class MailServiceImpl implements MailService {
   public void alertUserInitialCreditsExhausted(final DbUser user) throws MessagingException {
     final String logMsg =
         String.format(
-            "Sending email because initial credits have been exhausted for User %s", userForLogging(user));
+            "Sending email because initial credits have been exhausted for User %s",
+            userForLogging(user));
     log.info(logMsg);
 
     final String htmlMessage =
