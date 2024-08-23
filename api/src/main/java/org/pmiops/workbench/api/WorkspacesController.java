@@ -38,6 +38,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
@@ -82,6 +83,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final IamService iamService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
@@ -102,6 +104,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       IamService iamService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       TaskQueueService taskQueueService,
@@ -119,6 +122,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.iamService = iamService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -192,7 +196,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
-    final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace createdWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
     if (cdrVersion.getTanagraEnabled()) {
@@ -279,7 +284,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 ResponseEntity.ok()
                     .body(
                         workspaceOperationMapper.toModelWithWorkspace(
-                            op, workspaceDao, fireCloudService, workspaceMapper)))
+                            op,
+                            workspaceDao,
+                            fireCloudService,
+                            initialCreditsExpirationService,
+                            workspaceMapper)))
         .orElse(ResponseEntity.notFound().build());
   }
 
@@ -491,7 +500,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'etag'");
     }
 
-    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace originalWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
 
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
@@ -540,11 +550,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace editedWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(editedWorkspace);
   }
 
   @Override
@@ -639,7 +650,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = dbWorkspace.setPublished(false);
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
-    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+    final Workspace savedWorkspace =
+        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace, initialCreditsExpirationService);
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
@@ -832,7 +844,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 userRecentWorkspace ->
                     workspaceMapper.toApiRecentWorkspace(
                         dbWorkspacesById.get(userRecentWorkspace.getWorkspaceId()),
-                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId())))
+                        workspaceAccessLevelsById.get(userRecentWorkspace.getWorkspaceId()),
+                        initialCreditsExpirationService))
             .collect(Collectors.toList());
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -854,7 +867,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        workspaceMapper.toApiRecentWorkspace(dbWorkspace, workspaceAccessLevel);
+        workspaceMapper.toApiRecentWorkspace(
+            dbWorkspace, workspaceAccessLevel, initialCreditsExpirationService);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }

@@ -1,16 +1,19 @@
 package org.pmiops.workbench.utils.mappers;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import org.mapstruct.Context;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,7 @@ public class CommonMappers {
     this.clock = clock;
   }
 
-  public static Long timestamp(Timestamp timestamp) {
+  public Long timestamp(Timestamp timestamp) {
     if (timestamp != null) {
       return timestamp.getTime();
     }
@@ -115,5 +118,12 @@ public class CommonMappers {
   @Named("domainIdToDomain")
   public Domain domainIdToDomain(String domainId) {
     return Enum.valueOf(Domain.class, domainId);
+  }
+
+  @Named("getInitialCreditsExpiration")
+  @Nullable
+  public Long getInitialCreditsExpiration(
+      DbUser source, @Context InitialCreditsExpirationService expirationService) {
+    return expirationService.getCreditsExpiration(source).map(this::timestamp).orElse(null);
   }
 }

@@ -58,6 +58,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
@@ -159,6 +160,7 @@ public class WorkspaceAdminServiceTest {
     DataSetDao.class,
     DataSetMapper.class,
     FirecloudMapper.class,
+    InitialCreditsExpirationService.class,
     LeonardoApiClient.class,
     UserMapper.class,
     UserService.class,

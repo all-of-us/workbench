@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.when;
 
-import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -21,6 +19,7 @@ import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -44,10 +43,8 @@ public class FeaturedWorkspaceTest {
   @MockBean private FeaturedWorkspaceDao mockFeaturedWorkspaceDao;
   @MockBean private FeaturedWorkspaceMapper mockFeaturedWorkspaceMapper;
   @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
   @MockBean private WorkspaceMapper mockWorkspaceMapper;
-
-  // Delete this once published flag is on
-  @MockBean private Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider;
 
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
@@ -61,8 +58,6 @@ public class FeaturedWorkspaceTest {
   @MockBean({
     AccessTierServiceImpl.class,
     WorkspaceAdminServiceImpl.class,
-    // Delete this once enablePublishedWorkspacesViaDb is on
-    FireCloudService.class,
     WorkspaceDao.class,
   })
   static class Configuration {
@@ -99,17 +94,17 @@ public class FeaturedWorkspaceTest {
   }
 
   void mockFeaturedWorkspaces(String namespace, DbFeaturedCategory dbFeaturedCategory) {
-    DbWorkspace mockdbWorkspace =
+    DbWorkspace mockDbWorkspace =
         new DbWorkspace().setWorkspaceNamespace(namespace).setWorkspaceId(1);
 
     DbFeaturedWorkspace dbFeaturedWorkspace =
-        new DbFeaturedWorkspace().setWorkspace(mockdbWorkspace).setCategory(dbFeaturedCategory);
+        new DbFeaturedWorkspace().setWorkspace(mockDbWorkspace).setCategory(dbFeaturedCategory);
 
     RawlsWorkspaceResponse rawlsWorkspaceResponse = new RawlsWorkspaceResponse();
     rawlsWorkspaceResponse.workspace(new RawlsWorkspaceDetails().workspaceId("1"));
     rawlsWorkspaceResponse.accessLevel(RawlsWorkspaceAccessLevel.OWNER);
     when(mockFireCloudService.getWorkspace(
-            mockdbWorkspace.getWorkspaceNamespace(), mockdbWorkspace.getFirecloudName()))
+            mockDbWorkspace.getWorkspaceNamespace(), mockDbWorkspace.getFirecloudName()))
         .thenReturn(rawlsWorkspaceResponse);
 
     when(mockFeaturedWorkspaceMapper.toDbFeaturedCategory(
@@ -121,7 +116,10 @@ public class FeaturedWorkspaceTest {
         new Workspace()
             .namespace(namespace)
             .featuredCategory(FeaturedWorkspaceCategory.valueOf(dbFeaturedCategory.toString()));
-    when(mockWorkspaceMapper.toApiWorkspace(mockdbWorkspace, rawlsWorkspaceResponse.getWorkspace()))
+    when(mockWorkspaceMapper.toApiWorkspace(
+            mockDbWorkspace,
+            rawlsWorkspaceResponse.getWorkspace(),
+            mockInitialCreditsExpirationService))
         .thenReturn(mockWorkspace);
     when(mockWorkspaceMapper.toApiWorkspaceResponse(
             mockWorkspace, rawlsWorkspaceResponse.getAccessLevel()))

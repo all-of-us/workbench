@@ -59,6 +59,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
@@ -130,6 +131,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @MockBean({
     AccessTierService.class,
     BillingProjectAuditor.class,
+    CloudBillingClientImpl.class,
     CohortBuilderService.class,
     CohortFactory.class,
     CohortService.class,
@@ -138,10 +140,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FeaturedWorkspaceMapper.class,
     FireCloudService.class,
     FreeTierBillingService.class,
+    InitialCreditsExpirationService.class,
     MailService.class,
     UserRecentResourceService.class,
     UserService.class,
-    CloudBillingClientImpl.class
   })
   static class Configuration {
     @Bean
