@@ -32,7 +32,9 @@ public class InitialCreditsExpirationServiceTest {
     DbUser user =
         new DbUser()
             .setUserInitialCreditsExpiration(
-                new DbUserInitialCreditsExpiration().setBypassed(true));
+                new DbUserInitialCreditsExpiration()
+                    .setBypassed(true)
+                    .setExpirationTime(new Timestamp(1234567890L)));
     assertThat(service.getCreditsExpiration(user)).isEmpty();
   }
 
