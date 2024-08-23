@@ -7,5 +7,6 @@ import org.pmiops.workbench.db.model.DbUser;
 
 public interface InitialCreditsExpirationService {
   Optional<Timestamp> getCreditsExpiration(DbUser user);
+
   void checkCreditsExpirationForUserIDs(List<Long> userIdsList);
 }

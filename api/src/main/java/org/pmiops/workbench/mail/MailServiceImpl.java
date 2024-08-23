@@ -236,13 +236,11 @@ public class MailServiceImpl implements MailService {
   public void alertUserInitialCreditsExpired(final DbUser user) throws MessagingException {
     final String logMsg =
         String.format(
-            "Sending email because initial credits have expired for User %s",
-            userForLogging(user));
+            "Sending email because initial credits have expired for User %s", userForLogging(user));
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
+        buildHtml(INITIAL_CREDITS_EXPIRED_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),

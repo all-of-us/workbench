@@ -29,7 +29,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
 
   @Override
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    if(userIdsList != null && !userIdsList.isEmpty()) {
+    if (userIdsList != null && !userIdsList.isEmpty()) {
       Timestamp now = new Timestamp(System.currentTimeMillis());
       List<DbUser> users = (List<DbUser>) userDao.findAllById(userIdsList);
       users.forEach(user -> checkCreditsExpirationForUser(user, now));
@@ -61,7 +61,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                   "Failed to send initial credits expiration notification for user %s",
                   user.getUserId()));
         }
-
       }
     }
   }
