@@ -46,9 +46,6 @@ public class FeaturedWorkspaceTest {
   @MockBean private InitialCreditsExpirationService mockInitialCreditsExpirationService;
   @MockBean private WorkspaceMapper mockWorkspaceMapper;
 
-  // Delete this once published flag is on
-  // @MockBean private Provider<FeaturedWorkspacesConfig> featuredWorkspacesConfigProvider;
-
   @Autowired private FeaturedWorkspaceService featuredWorkspaceService;
 
   private DbWorkspace dbWorkspace;
@@ -61,8 +58,6 @@ public class FeaturedWorkspaceTest {
   @MockBean({
     AccessTierServiceImpl.class,
     WorkspaceAdminServiceImpl.class,
-    // Delete this once enablePublishedWorkspacesViaDb is on
-    //  FireCloudService.class,
     WorkspaceDao.class,
   })
   static class Configuration {
