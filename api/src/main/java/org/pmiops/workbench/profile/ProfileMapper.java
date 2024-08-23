@@ -7,12 +7,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
@@ -40,8 +44,12 @@ public interface ProfileMapper {
   @Mapping(source = "dbUser.duccAgreement.userInitials", target = "duccSignedInitials")
   @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
+  @Mapping(
+      target = "initialCreditsExpirationEpochMillis",
+      ignore = true) // set by setInitialCreditsExpiration()
   Profile toModel(
       DbUser dbUser,
+      @Context InitialCreditsExpirationService expirationService,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,
@@ -51,6 +59,18 @@ public interface ProfileMapper {
       ProfileAccessModules accessModules,
       boolean newUserSatisfactionSurveyEligibility,
       Instant newUserSatisfactionSurveyEligibilityEndTime);
+
+  @AfterMapping
+  default void setInitialCreditsExpiration(
+      @MappingTarget Profile target,
+      DbUser source,
+      @Context InitialCreditsExpirationService expirationService) {
+    expirationService
+        .getCreditsExpiration(source)
+        .ifPresent(
+            expiration ->
+                target.setInitialCreditsExpirationEpochMillis(CommonMappers.timestamp(expiration)));
+  }
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
