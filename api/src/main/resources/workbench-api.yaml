@@ -8711,6 +8711,10 @@ components:
           type: string
           description: Timestamp indicating when the user is ineligible to take the
             new user survey in ISO 8601 format
+        initialCreditsExpirationEpochMillis:
+          type: integer
+          description: Timestamp indicating when the user's initial credits will expire, if applicable
+          format: int64
     AccessModuleStatus:
       required:
       - moduleName
