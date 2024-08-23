@@ -12,6 +12,7 @@ import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.billing.FreeTierBillingBatchUpdateService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.InitialCreditsExpirationService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
@@ -55,18 +56,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserService userService;
   private final AccessModuleService accessModuleService;
   private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
       AccessModuleService accessModuleService,
-      FreeTierBillingBatchUpdateService freeTierBillingUpdateService) {
+      FreeTierBillingBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsExpirationService initialCreditsExpirationService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
     this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
   }
 
   @Override
@@ -177,14 +181,13 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
    * Takes in batch of user Ids check whether users have incurred sufficient cost in their
    * workspaces to trigger alerts due to passing thresholds or exceeding limits
    *
-   * @param body : Batch of user IDs from cloud task queue: checkCreditsExpirationForUserIDsQueue
+   * @param body : Batch of user IDs from cloud task queue:
+   *     checkInitialCreditsExpirationForUserIDsQueue
    * @return
    */
   @Override
   public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
-    if (userIdsList != null && userIdsList.size() > 0) {
-      log.info("Checking credits expiration for users: " + userIdsList);
-    }
+    initialCreditsExpirationService.checkCreditsExpirationForUserIDs(userIdsList);
     return ResponseEntity.noContent().build();
   }
 

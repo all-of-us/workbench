@@ -67,10 +67,10 @@ public class TaskQueueService {
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
-  private WorkbenchLocationConfigService locationConfigService;
-  private Provider<CloudTasksClient> cloudTasksClientProvider;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private Provider<UserAuthentication> userAuthenticationProvider;
+  private final WorkbenchLocationConfigService locationConfigService;
+  private final Provider<CloudTasksClient> cloudTasksClientProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Provider<UserAuthentication> userAuthenticationProvider;
 
   public TaskQueueService(
       WorkbenchLocationConfigService locationConfigService,
@@ -224,7 +224,8 @@ public class TaskQueueService {
 
   public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask)
+    CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask)
         .forEach(
             batch ->
                 createAndPushTask(
