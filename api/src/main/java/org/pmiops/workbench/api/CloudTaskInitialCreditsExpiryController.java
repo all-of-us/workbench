@@ -71,7 +71,7 @@ public class CloudTaskInitialCreditsExpiryController
     }
 
     logger.info(
-        "Free tier Billing Service: Handling initial credits overspend and expiration event for users: {}",
+        "Free tier Billing Service: Handling initial credits expiry event for users: {}",
         request.getUsers().toString());
 
     Iterable<DbUser> users = userDao.findAllById(request.getUsers());
@@ -84,22 +84,21 @@ public class CloudTaskInitialCreditsExpiryController
     Map<String, Double> stringKeyLiveCostMap = (Map<String, Double>) request.getLiveCostByCreator();
     Map<Long, Double> liveCostByCreator = convertMapKeysToLong(stringKeyLiveCostMap);
 
-    var newlyOverspentUsers = getNewlyOverspentUsers(usersSet, dbCostByCreator, liveCostByCreator);
+    var newlyExpiredUsers = getNewlyExpiredUsers(usersSet, dbCostByCreator, liveCostByCreator);
 
-    handleOverspentUsers(newlyOverspentUsers);
+    handleExpiredUsers(newlyExpiredUsers);
 
-    alertUsersBasedOnCostThreshold(
-        usersSet, dbCostByCreator, liveCostByCreator, newlyOverspentUsers);
+    alertUsersBasedOnTheThreshold(usersSet, dbCostByCreator, liveCostByCreator, newlyExpiredUsers);
 
     logger.info(
-        "Free tier Billing Service: Finished handling initial credits overspend and expiration event for users: {}",
+        "Free tier Billing Service: Finished handling initial credits expiry event for users: {}",
         request.getUsers().toString());
 
     return ResponseEntity.noContent().build();
   }
 
-  private void handleOverspentUsers(Set<DbUser> newlyOverspentUsers) {
-    newlyOverspentUsers.forEach(
+  private void handleExpiredUsers(Set<DbUser> newlyExpiredUsers) {
+    newlyExpiredUsers.forEach(
         user -> {
           logger.info(
               "Free tier Billing Service: handling user with expired credits {}",
@@ -115,11 +114,11 @@ public class CloudTaskInitialCreditsExpiryController
         });
   }
 
-  private void alertUsersBasedOnCostThreshold(
+  private void alertUsersBasedOnTheThreshold(
       Set<DbUser> users,
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator,
-      Set<DbUser> newlyOverspentUsers) {
+      Set<DbUser> newlyExpiredUsers) {
     final List<Double> costThresholdsInDescOrder =
         workbenchConfig.get().billing.freeTierCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
@@ -132,7 +131,7 @@ public class CloudTaskInitialCreditsExpiryController
     // Filter out the users who have recently expired because we already alerted them
     Map<Long, Double> filteredLiveCostByCreator =
         liveCostByCreator.entrySet().stream()
-            .filter(entry -> !newlyOverspentUsers.contains(usersCache.get(entry.getKey())))
+            .filter(entry -> !newlyExpiredUsers.contains(usersCache.get(entry.getKey())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     logger.info("Handling cost alerts for users: {}", usersCache.keySet());
@@ -153,7 +152,7 @@ public class CloudTaskInitialCreditsExpiryController
   }
 
   /**
-   * Get the list of newly overspent users (who exceeded their free tier limit) and mark all their
+   * Get the list of newly expired users (who exceeded their free tier limit) and mark all their
    * workspaces as inactive
    *
    * @param allUsers set of all users to filter them whether they have active free tier workspace
@@ -161,7 +160,7 @@ public class CloudTaskInitialCreditsExpiryController
    * @param liveCostByCreator Map of userId->liveCost
    * @return a {@link Set} of newly expired users
    */
-  private Set<DbUser> getNewlyOverspentUsers(
+  private Set<DbUser> getNewlyExpiredUsers(
       final Set<DbUser> allUsers,
       Map<Long, Double> dbCostByCreator,
       Map<Long, Double> liveCostByCreator) {
@@ -175,7 +174,7 @@ public class CloudTaskInitialCreditsExpiryController
     // recently deleted workspaces in previous steps.
     // However, dbCostByCreator will contain the up-to-date costs for all the
     // other workspaces. This is why Math.max is used
-    final Set<DbUser> overspentUsers =
+    final Set<DbUser> expiredUsers =
         dbUsersWithChangedCosts.entrySet().stream()
             .filter(
                 e ->
@@ -187,15 +186,14 @@ public class CloudTaskInitialCreditsExpiryController
             .map(Map.Entry::getValue)
             .collect(Collectors.toSet());
 
-    final Set<DbUser> newlyOverspentFreeTierUsers =
-        Sets.intersection(overspentUsers, freeTierUsers);
+    final Set<DbUser> newlyExpiredFreeTierUsers = Sets.intersection(expiredUsers, freeTierUsers);
 
     logger.info(
         String.format(
             "Found %d users exceeding their free tier limit, out of which, %d are new",
-            overspentUsers.size(), newlyOverspentFreeTierUsers.size()));
+            expiredUsers.size(), newlyExpiredFreeTierUsers.size()));
 
-    return newlyOverspentFreeTierUsers;
+    return newlyExpiredFreeTierUsers;
   }
 
   /**
