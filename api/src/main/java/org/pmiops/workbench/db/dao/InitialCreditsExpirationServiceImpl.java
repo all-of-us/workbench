@@ -46,7 +46,7 @@ public class InitialCreditsExpirationServiceImpl
       if (!isBypassed(userInitialCreditsExpiration)
           && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
         try {
-          mailService.alertUserInitialCreditsExpiration(user);
+          mailService.alertUserInitialCreditsExpired(user);
           userInitialCreditsExpiration.setNotificationStatus(
               InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
         } catch (MessagingException e) {
