@@ -12,6 +12,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   @Override
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
     return Optional.ofNullable(user.getUserInitialCreditsExpiration())
+        .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
+        // TODO filter on institutional bypass as well, maybe something like
+        // .filter(() -> institutionService.shouldBypassForCreditsExpiration(user))
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 }
