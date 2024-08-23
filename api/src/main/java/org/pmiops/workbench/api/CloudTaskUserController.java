@@ -178,8 +178,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   }
 
   /**
-   * Takes in batch of user Ids check whether users have incurred sufficient cost in their
-   * workspaces to trigger alerts due to passing thresholds or exceeding limits
+   * Takes in batch of user Ids check whether users have initial credits that have expired
    *
    * @param body : Batch of user IDs from cloud task queue:
    *     checkInitialCreditsExpirationForUserIDsQueue
