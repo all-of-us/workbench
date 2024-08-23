@@ -204,7 +204,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     request.setLiveCostByCreator(allBQCosts);
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(request);
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // check that we do not alert twice for 100%
     allDbCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
@@ -284,7 +284,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     allBQCosts.put(String.valueOf(user.getUserId()), costToTriggerExpiration);
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(request);
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // check that we do not alert twice for 100%
 
@@ -314,7 +314,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(request);
 
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
   }
 
@@ -337,7 +337,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(request);
 
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
   }
@@ -397,7 +397,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
 
@@ -431,7 +431,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
 
     freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0);
@@ -465,7 +465,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // confirm DB updates after handleInitialCreditsExpiry()
 
@@ -500,8 +500,8 @@ class CloudTaskInitialCreditsExpiryControllerTest {
             List.of(user1, user2),
             allBQCosts,
             Map.of(String.valueOf(user1.getUserId()), 0d, String.valueOf(user2.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user1));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user2));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user1));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user2));
 
     final DbWorkspace dbWorkspace1 = workspaceDao.findById(ws1.getWorkspaceId()).get();
     assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
@@ -524,7 +524,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
 
     // time elapses, and this project incurs additional cost
@@ -536,7 +536,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 100.01)));
-    verify(mailService, times(1)).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService, times(1)).alertUserInitialCreditsExhausted(eq(user));
 
     // retrieve from DB again to reflect update after cron
     DbWorkspace dbWorkspace = workspaceDao.findById(workspace.getWorkspaceId()).get();
@@ -557,7 +557,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     // Simulate the user attaching their own billing account to the previously free tier workspace.
     workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
@@ -593,7 +593,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 0d)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     assertSingleWorkspaceTestDbState(freeTierWorkspace, BillingStatus.INACTIVE);
 
@@ -626,7 +626,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
   }
 
   @Test
@@ -658,7 +658,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
         buildExpiredInitialCreditsEventRequest(
             List.of(user), allBQCosts, Map.of(String.valueOf(user.getUserId()), 50.0)));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user));
 
     assertSingleWorkspaceTestDbState(workspace, BillingStatus.INACTIVE);
     assertSingleWorkspaceTestDbState(anotherWorkspace, BillingStatus.INACTIVE);
@@ -698,7 +698,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
         .alertUserInitialCreditsDollarThreshold(eq(user3), eq(0.5d), eq(151.0d), eq(149.0d));
     verify(mailService)
         .alertUserInitialCreditsDollarThreshold(eq(user2), eq(0.75d), eq(250.0d), eq(50.0d));
-    verify(mailService).alertUserInitialCreditsExpiration(eq(user1));
+    verify(mailService).alertUserInitialCreditsExhausted(eq(user1));
     verifyNoMoreInteractions(mailService);
   }
 
