@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
@@ -138,9 +139,10 @@ public class ProfileServiceTest {
     AccessModuleService.class,
     AccessTierService.class,
     FreeTierBillingService.class,
+    InitialCreditsExpirationService.class,
+    NewUserSatisfactionSurveyService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
-    NewUserSatisfactionSurveyService.class,
   })
   static class Configuration {
     @Bean
