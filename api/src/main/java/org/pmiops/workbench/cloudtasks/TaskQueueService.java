@@ -20,7 +20,6 @@ import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
-import org.pmiops.workbench.model.CheckInitialCreditExpirationRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ExpiredInitialCreditsEventRequest;
@@ -45,8 +44,8 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
-  private static final String CHECK_INITIAL_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
-      BASE_PATH + "/checkInitialCreditsExpirationForUserIDs";
+  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
+      BASE_PATH + "/checkCreditsExpirationForUserIDs";
   private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
       BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
 
@@ -62,8 +61,8 @@ public class TaskQueueService {
       "deleteTestUserRawlsWorkspacesQueue";
   private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
   private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
-  private static final String CHECK_INITIAL_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
-      "checkInitialCreditsExpirationForUserIDsQueue";
+  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
+      "checkCreditsExpirationForUserIDsQueue";
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -229,9 +228,9 @@ public class TaskQueueService {
         .forEach(
             batch ->
                 createAndPushTask(
-                    CHECK_INITIAL_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME,
-                    CHECK_INITIAL_CREDITS_EXPIRATION_FOR_USER_IDS_PATH,
-                    new CheckInitialCreditExpirationRequest().userIds(batch)));
+                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME,
+                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH,
+                    batch));
   }
 
   private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {
