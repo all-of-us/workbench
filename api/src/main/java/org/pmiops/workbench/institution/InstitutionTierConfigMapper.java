@@ -2,7 +2,6 @@ package org.pmiops.workbench.institution;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -50,23 +49,9 @@ public interface InstitutionTierConfigMapper {
                 dbAccessTiers, source.getAccessTierShortName()));
   }
 
-  default Set<DbInstitutionEmailDomain> emailDomainsToDb(
-      Set<String> emailDomains, DbInstitution institution, DbAccessTier accessTier) {
-    return emailDomains.stream()
-        .map(emailDomain -> emailDomainToDb(emailDomain, institution, accessTier))
-        .collect(Collectors.toSet());
-  }
-
   @Mapping(target = "institutionEmailDomainId", ignore = true)
   DbInstitutionEmailDomain emailDomainToDb(
       String emailDomain, DbInstitution institution, DbAccessTier accessTier);
-
-  default Set<DbInstitutionEmailAddress> emailAddressesToDb(
-      Set<String> emailAddresses, DbInstitution institution, DbAccessTier accessTier) {
-    return emailAddresses.stream()
-        .map(emailAddress -> emailAddressToDb(emailAddress, institution, accessTier))
-        .collect(Collectors.toSet());
-  }
 
   @Mapping(target = "institutionEmailAddressId", ignore = true)
   DbInstitutionEmailAddress emailAddressToDb(
