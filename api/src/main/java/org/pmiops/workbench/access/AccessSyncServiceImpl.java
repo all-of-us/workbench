@@ -6,10 +6,13 @@ import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForContr
 import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
 import jakarta.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -19,6 +22,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final InstitutionService institutionService;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
+  private final Clock clock;
 
   @Autowired
   public AccessSyncServiceImpl(
@@ -43,13 +48,15 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       AccessModuleService accessModuleService,
       InstitutionService institutionService,
       UserDao userDao,
-      UserServiceAuditor userServiceAuditor) {
+      UserServiceAuditor userServiceAuditor,
+      Clock clock) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.accessTierService = accessTierService;
     this.accessModuleService = accessModuleService;
     this.institutionService = institutionService;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
+    this.clock = clock;
   }
 
   /**
@@ -60,10 +67,13 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
+
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
     }
+
+    addInitialCreditsExpirationIfAppropriate(dbUser, previousAccessTiers, newAccessTiers);
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
@@ -74,6 +84,34 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
     return userDao.save(dbUser);
+  }
+
+  private void addInitialCreditsExpirationIfAppropriate(
+      DbUser dbUser, List<DbAccessTier> previousAccessTiers, List<DbAccessTier> newAccessTiers) {
+    boolean enableInitialCreditsExpiration =
+        workbenchConfigProvider.get().featureFlags.enableInitialCreditsExpiration;
+    long initialCreditsValidityPeriodDays =
+        workbenchConfigProvider.get().billing.initialCreditsValidityPeriodDays;
+
+    if (enableInitialCreditsExpiration) {
+      DbUserInitialCreditsExpiration maybeCreditsExpiration =
+          dbUser.getUserInitialCreditsExpiration();
+
+      // A user's credits should begin to expire when they gain access to their first tier.
+      if (previousAccessTiers.isEmpty()
+          && !newAccessTiers.isEmpty()
+          && null == maybeCreditsExpiration) {
+
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        Timestamp expirationTime =
+            new Timestamp(now.getTime() + TimeUnit.DAYS.toMillis(initialCreditsValidityPeriodDays));
+        dbUser.setUserInitialCreditsExpiration(
+            new DbUserInitialCreditsExpiration()
+                .setUser(dbUser)
+                .setCreditStartTime(now)
+                .setExpirationTime(expirationTime));
+      }
+    }
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {

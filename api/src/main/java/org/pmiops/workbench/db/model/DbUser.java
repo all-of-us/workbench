@@ -79,6 +79,7 @@ public class DbUser {
   private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
   private DbDemographicSurveyV2 demographicSurveyV2;
+  private DbUserInitialCreditsExpiration userInitialCreditsExpiration;
   private DbAddress address;
 
   public enum DbGeneralDiscoverySource {
@@ -125,7 +126,6 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkUsername;
-  private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
   @Id
@@ -356,18 +356,6 @@ public class DbUser {
     return this;
   }
 
-  @Deprecated
-  @Column(name = "ras_link_login_gov_username")
-  public String getRasLinkLoginGovUsername() {
-    return rasLinkUsername;
-  }
-
-  @Deprecated
-  public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
-    this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
-    return this;
-  }
-
   @Column(name = "ras_link_username")
   public String getRasLinkUsername() {
     return rasLinkUsername;
@@ -403,6 +391,21 @@ public class DbUser {
 
   public DbUser setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
+    return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbUserInitialCreditsExpiration getUserInitialCreditsExpiration() {
+    return userInitialCreditsExpiration;
+  }
+
+  public DbUser setUserInitialCreditsExpiration(
+      DbUserInitialCreditsExpiration userInitialCreditsExpiration) {
+    this.userInitialCreditsExpiration = userInitialCreditsExpiration;
     return this;
   }
 

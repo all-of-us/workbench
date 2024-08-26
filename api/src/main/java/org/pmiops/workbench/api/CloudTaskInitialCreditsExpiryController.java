@@ -107,7 +107,7 @@ public class CloudTaskInitialCreditsExpiryController
           // delete apps and runtimes
           deleteAppsAndRuntimesInFreeTierWorkspaces(user);
           try {
-            mailService.alertUserInitialCreditsExpiration(user);
+            mailService.alertUserInitialCreditsExhausted(user);
           } catch (MessagingException e) {
             logger.warn("failed to send free tier expiration email to {}", user.getUsername(), e);
           }

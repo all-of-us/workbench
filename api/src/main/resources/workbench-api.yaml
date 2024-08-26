@@ -7144,6 +7144,10 @@ components:
           type: boolean
           default: false
           description: If true, show banner notifying users of login issue
+        enableInitialCreditsExpiration:
+          type: boolean
+          default: false
+          description: If true, allow for user's initial credits to expire.
     AccessModuleConfig:
       required:
       - expirable
@@ -7407,6 +7411,11 @@ components:
         googleProject:
           type: string
           description: the google project used by the workspace for compute and storage
+        initialCreditsExpirationEpochMillis:
+          type: integer
+          description: Timestamp indicating when the workspace creator's initial credits will expire, if applicable
+          format: int64
+
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
         billingStatus: ACTIVE
@@ -8646,10 +8655,6 @@ components:
           description: Timestamp when the user last acknowledged the terms of service.
             May be null if the user has never acknowledged the Terms of Service.
           format: int64
-        rasLinkLoginGovUsername:
-          type: string
-          description: The user's identity name in login.gov (deprecated in favor
-            of rasLinkUsername)
         rasLinkUsername:
           type: string
           description: The user's identity name in RAS.
@@ -8668,6 +8673,10 @@ components:
           type: string
           description: Timestamp indicating when the user is ineligible to take the
             new user survey in ISO 8601 format
+        initialCreditsExpirationEpochMillis:
+          type: integer
+          description: Timestamp indicating when the user's initial credits will expire, if applicable
+          format: int64
     AccessModuleStatus:
       required:
       - moduleName

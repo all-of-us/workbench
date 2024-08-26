@@ -60,10 +60,24 @@ export const currentCohortSearchContextStore = new BehaviorSubject<any>(
 export const sidebarActiveIconStore = new BehaviorSubject<SidebarIconId>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
-export const useNavigation = () => {
+export interface NavigateExtras {
+  queryParams?: object;
+  preventDefaultIfNoKeysPressed?: boolean;
+  event?: React.MouseEvent;
+}
+
+export type NavigateFn = (path: string[], extras?: NavigateExtras) => void;
+export type NavigateByUrlFn = (url: string, extras?: NavigateExtras) => void;
+
+export interface NavigationProps {
+  navigate: NavigateFn;
+  navigateByUrl: NavigateByUrlFn;
+}
+
+export const useNavigation = (): [NavigateFn, NavigateByUrlFn] => {
   const history = useHistory();
 
-  const navigateByUrl = (url, extras?: NavigateExtras) => {
+  const navigateByUrl = (url: string, extras?: NavigateExtras) => {
     url = '/' + url.replace(/^\//, '');
 
     const preventDefaultIfNoKeysPressed =
@@ -91,23 +105,12 @@ export const useNavigation = () => {
     });
   };
 
-  const navigate = (commands, extras?: NavigateExtras) => {
-    navigateByUrl(commands.join('/'), extras);
+  const navigate = (path: string[], extras?: NavigateExtras) => {
+    navigateByUrl(path.join('/'), extras);
   };
 
   return [navigate, navigateByUrl];
 };
-
-interface NavigateExtras {
-  queryParams?: object;
-  preventDefaultIfNoKeysPressed?: boolean;
-  event?: React.MouseEvent;
-}
-
-export interface NavigationProps {
-  navigate: (commands, extras?: NavigateExtras) => void;
-  navigateByUrl: (commands, extras?: NavigateExtras) => void;
-}
 
 /**
  * Strict variant of URI encoding to satisfy Angular routing, specifically for

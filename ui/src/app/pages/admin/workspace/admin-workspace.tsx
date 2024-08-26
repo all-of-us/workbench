@@ -148,7 +148,10 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             <ResearchPurposeSection {...{ researchPurpose }} />
             {activeStatus === WorkspaceActiveStatus.ACTIVE && (
               <>
-                <Collaborators {...{ collaborators }} />
+                <Collaborators
+                  {...{ collaborators }}
+                  creator={workspace.creator}
+                />
                 <CohortBuilder {...{ workspaceObjects }} />
                 <CloudStorageObjects
                   {...{ cloudStorage }}

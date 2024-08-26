@@ -39,6 +39,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -87,6 +88,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final FeaturedWorkspaceMapper featuredWorkspaceMapper;
   private final FeaturedWorkspaceDao featuredWorkspaceDao;
   private final FireCloudService fireCloudService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
@@ -112,6 +114,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       FeaturedWorkspaceMapper featuredWorkspaceMapper,
       FeaturedWorkspaceDao featuredWorkspaceDao,
       FireCloudService fireCloudService,
+      InitialCreditsExpirationService initialCreditsExpirationService,
       LeonardoMapper leonardoMapper,
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
@@ -135,6 +138,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.featuredWorkspaceMapper = featuredWorkspaceMapper;
     this.featuredWorkspaceDao = featuredWorkspaceDao;
     this.fireCloudService = fireCloudService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
@@ -242,7 +246,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
 
-    Workspace workspace = workspaceMapper.toApiWorkspace(dbWorkspace, firecloudWorkspace);
+    Workspace workspace =
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace, firecloudWorkspace, initialCreditsExpirationService);
 
     return new WorkspaceAdminView()
         .workspace(workspace)
@@ -254,7 +260,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private WorkspaceAdminView getDeletedWorkspaceAdminView(DbWorkspace dbWorkspace) {
     return new WorkspaceAdminView()
-        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace, new RawlsWorkspaceDetails()))
+        .workspace(
+            workspaceMapper.toApiWorkspace(
+                dbWorkspace, new RawlsWorkspaceDetails(), initialCreditsExpirationService))
         .workspaceDatabaseId(dbWorkspace.getWorkspaceId())
         .activeStatus(dbWorkspace.getWorkspaceActiveStatusEnum());
   }

@@ -79,8 +79,8 @@ public class MailServiceImpl implements MailService {
       "emails/file_lengths_egress_remediation_email/content.html";
   private static final String INITIAL_CREDITS_DOLLAR_THRESHOLD_RESOURCE =
       "emails/initial_credits_dollar_threshold/content.html";
-  private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
-      "emails/initial_credits_expiration/content.html";
+  private static final String INITIAL_CREDITS_EXHAUSTION_RESOURCE =
+      "emails/initial_credits_exhaustion/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
@@ -211,20 +211,21 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException {
+  public void alertUserInitialCreditsExhausted(final DbUser user) throws MessagingException {
     final String logMsg =
         String.format(
-            "Sending email because initial credits have expired for User %s", userForLogging(user));
+            "Sending email because initial credits have been exhausted for User %s",
+            userForLogging(user));
     log.info(logMsg);
 
     final String htmlMessage =
         buildHtml(
-            INITIAL_CREDITS_EXPIRATION_RESOURCE, initialCreditsExpirationSubstitutionMap(user));
+            INITIAL_CREDITS_EXHAUSTION_RESOURCE, initialCreditsExhaustionSubstitutionMap(user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Alert - Initial credit expiration in All of Us Researcher Workbench",
+        "Alert - Initial credit exhaustion in All of Us Researcher Workbench",
         logMsg,
         htmlMessage);
   }
@@ -574,7 +575,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExpirationSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String> initialCreditsExhaustionSubstitutionMap(
       DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()

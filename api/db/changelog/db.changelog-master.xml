@@ -239,6 +239,7 @@
   <include file="changelog/db.changelog-229-store-cost-per-googleproject.xml"/>
   <include file="changelog/db.changelog-230-create-featured-workspace-table.xml"/>
   <include file="changelog/db.changelog-231-drop-featured-workspace-description-col.xml"/>
+  <include file="changelog/db.changelog-232-add-user_initial_credits_expiration.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

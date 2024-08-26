@@ -390,7 +390,7 @@ export const ListOverview = fp.flow(
             wsid,
             'data',
             'cohorts',
-            cid,
+            cid.toString(),
             'actions',
           ]);
         })
@@ -425,7 +425,7 @@ export const ListOverview = fp.flow(
             wsid,
             'data',
             'cohorts',
-            c.id,
+            c.id?.toString(),
             'actions',
           ]);
         })

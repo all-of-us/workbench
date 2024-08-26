@@ -28,6 +28,7 @@
       0.5,
       0.75
     ],
+    "initialCreditsValidityPeriodDays": 120,
     "carahsoftEmail": "NIHStrides@Carahsoft.com",
     "freeTierCronUserBatchSize": 200,
     "minutesBeforeLastFreeTierJob": 60,
@@ -114,7 +115,8 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
-    "enableGcsFuseOnGke": false
+    "enableGcsFuseOnGke": false,
+    "enableInitialCreditsExpiration": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
