@@ -24,7 +24,10 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final MailService mailService;
 
   @Autowired
-  public InitialCreditsExpirationServiceImpl(UserDao userDao, UserInitialCreditsExpirationDao userInitialCreditsExpirationDao, MailService mailService) {
+  public InitialCreditsExpirationServiceImpl(
+      UserDao userDao,
+      UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
+      MailService mailService) {
     this.userDao = userDao;
     this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.mailService = mailService;
@@ -53,8 +56,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         user.getUserInitialCreditsExpiration();
     if (null != userInitialCreditsExpiration) {
       if (!userInitialCreditsExpiration.isBypassed()
-          && userInitialCreditsExpiration.getNotificationStatus().equals(
-              InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
+          && userInitialCreditsExpiration
+              .getNotificationStatus()
+              .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
           && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
         try {
           mailService.alertUserInitialCreditsExpired(user);
