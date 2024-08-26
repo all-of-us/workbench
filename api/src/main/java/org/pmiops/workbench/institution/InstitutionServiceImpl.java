@@ -462,10 +462,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
     for (DbAccessTier dbAccessTier : dbAccessTiers) {
       institutionEmailDomainDao.saveAll(
-          institutionTierConfigMapper.emailDomainsToDb(
-              getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
-              dbInstitution,
-              dbAccessTier));
+          getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()).stream()
+              .map(
+                  emailDomain ->
+                      institutionTierConfigMapper.emailDomainToDb(
+                          emailDomain, dbInstitution, dbAccessTier))
+              .toList());
     }
   }
 
@@ -477,10 +479,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
     for (DbAccessTier dbAccessTier : dbAccessTiers) {
       institutionEmailAddressDao.saveAll(
-          institutionTierConfigMapper.emailAddressesToDb(
-              getEmailAddressesByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
-              dbInstitution,
-              dbAccessTier));
+          getEmailAddressesByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()).stream()
+              .map(
+                  emailAddress ->
+                      institutionTierConfigMapper.emailAddressToDb(
+                          emailAddress, dbInstitution, dbAccessTier))
+              .toList());
     }
   }
 
