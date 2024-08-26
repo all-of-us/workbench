@@ -37,7 +37,7 @@ export const CohortReviewListItem = fp.flow(
     onSelect,
     existingNames,
   }) => {
-    const { ns, wsid, cid } = useParams<MatchParams>();
+    const { ns, terraName, cid } = useParams<MatchParams>();
     const [navigate] = useNavigation();
     const [showRenameModal, setShowRenameModal] = useState(false);
     const readOnly =
@@ -46,7 +46,7 @@ export const CohortReviewListItem = fp.flow(
 
     const deleteReview = async (reviewId) => {
       return cohortReviewApi()
-        .deleteCohortReview(ns, wsid, reviewId)
+        .deleteCohortReview(ns, terraName, reviewId)
         .then(() => onUpdate());
     };
 
@@ -57,7 +57,7 @@ export const CohortReviewListItem = fp.flow(
         description: description,
       };
       cohortReviewApi()
-        .updateCohortReview(ns, wsid, cohortReview.cohortReviewId, request)
+        .updateCohortReview(ns, terraName, cohortReview.cohortReviewId, request)
         .then(() => onUpdate())
         .catch((error) => console.error(error))
         .finally(() => setShowRenameModal(false));
@@ -126,7 +126,7 @@ export const CohortReviewListItem = fp.flow(
                 navigate([
                   'workspaces',
                   ns,
-                  wsid,
+                  terraName,
                   'data',
                   'cohorts',
                   cid,

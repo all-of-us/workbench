@@ -57,7 +57,7 @@ export const DetailPage = fp.flow(
       } = this.props;
       hideSpinner();
       let { cohortReview } = this.props;
-      const { ns, wsid, crid } = this.props.match.params;
+      const { ns, terraName, crid } = this.props.match.params;
       if (!cohortReview) {
         const request = {
           page: 0,
@@ -67,7 +67,7 @@ export const DetailPage = fp.flow(
         };
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
           ns,
-          wsid,
+          terraName,
           +crid,
           request
         );
@@ -98,11 +98,11 @@ export const DetailPage = fp.flow(
     }
 
     async updateParticipantStore() {
-      const { ns, wsid, pid, crid } = this.props.match.params;
+      const { ns, terraName, pid, crid } = this.props.match.params;
       const participantCohortStatus =
         await cohortReviewApi().getParticipantCohortStatus(
           ns,
-          wsid,
+          terraName,
           +crid,
           +pid
         );

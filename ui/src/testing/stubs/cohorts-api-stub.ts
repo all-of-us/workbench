@@ -60,7 +60,7 @@ class CohortStub implements Cohort {
 
   workspaceId: string;
 
-  constructor(cohort: Cohort, wsid: string) {
+  constructor(cohort: Cohort, terraName: string) {
     this.creationTime = cohort.creationTime;
     this.creator = cohort.creator;
     this.criteria = cohort.criteria;
@@ -69,7 +69,7 @@ class CohortStub implements Cohort {
     this.lastModifiedTime = cohort.lastModifiedTime;
     this.name = cohort.name;
     this.type = cohort.type;
-    this.workspaceId = wsid;
+    this.workspaceId = terraName;
   }
 }
 
@@ -97,7 +97,7 @@ export class CohortsApiStub extends CohortsApi {
 
   updateCohort(
     ns: string,
-    wsid: string,
+    terraName: string,
     cid: number,
     newCohort: Cohort
   ): Promise<Cohort> {
@@ -109,14 +109,14 @@ export class CohortsApiStub extends CohortsApi {
         return false;
       });
       if (index !== -1) {
-        const newCohortStub = new CohortStub(newCohort, wsid);
+        const newCohortStub = new CohortStub(newCohort, terraName);
         this.cohorts[index] = newCohortStub;
         resolve(newCohortStub);
       } else {
         reject(
           new Error(
             `Error updating. No cohort with id: ${cid} ` +
-              `exists in workspace ${ns}, ${wsid} ` +
+              `exists in workspace ${ns}, ${terraName} ` +
               'in cohort service stub'
           )
         );
@@ -124,7 +124,11 @@ export class CohortsApiStub extends CohortsApi {
     });
   }
 
-  deleteCohort(ns: string, wsid: string, id: number): Promise<EmptyResponse> {
+  deleteCohort(
+    ns: string,
+    terraName: string,
+    id: number
+  ): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
       const cohortIndex = this.cohorts.findIndex((cohort) => cohort.id === id);
       if (cohortIndex === -1) {
@@ -135,11 +139,14 @@ export class CohortsApiStub extends CohortsApi {
     });
   }
 
-  getCohortsInWorkspace(ns: string, wsid: string): Promise<CohortListResponse> {
+  getCohortsInWorkspace(
+    ns: string,
+    terraName: string
+  ): Promise<CohortListResponse> {
     return new Promise<CohortListResponse>((resolve, reject) => {
       const cohortsInWorkspace: Cohort[] = [];
       this.cohorts.forEach((cohort) => {
-        if (cohort.workspaceId === wsid) {
+        if (cohort.workspaceId === terraName) {
           cohortsInWorkspace.push(cohort);
         }
       });

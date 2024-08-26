@@ -252,14 +252,14 @@ export const EditAnnotationDefinitionsModal = withRouter(
         const { annotationDefinitions, onClose, setAnnotationDefinitions } =
           this.props;
         const {
-          params: { ns, wsid, cid },
+          params: { ns, terraName, cid },
         } = matchPath<MatchParams>(location.pathname, {
-          path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews/:crid',
+          path: '/workspaces/:ns/:terraName/data/cohorts/:cid/reviews/:crid',
         });
         this.setState({ busy: true });
         await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(
           ns,
-          wsid,
+          terraName,
           parseInt(cid, 10),
           id
         );
@@ -280,9 +280,9 @@ export const EditAnnotationDefinitionsModal = withRouter(
       try {
         const { annotationDefinitions, setAnnotationDefinitions } = this.props;
         const {
-          params: { ns, wsid, cid },
+          params: { ns, terraName, cid },
         } = matchPath<MatchParams>(location.pathname, {
-          path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews',
+          path: '/workspaces/:ns/:terraName/data/cohorts/:cid/reviews',
         });
         const { editId, editValue } = this.state;
         if (
@@ -297,7 +297,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
           const newDef =
             await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
               ns,
-              wsid,
+              terraName,
               parseInt(cid, 10),
               editId,
               {

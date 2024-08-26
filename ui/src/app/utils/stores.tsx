@@ -240,7 +240,7 @@ export interface MatchParams {
   sparkConsolePath?: string;
   username?: string;
   usernameWithoutGsuiteDomain?: string;
-  wsid?: string;
+  terraName?: string;
   appType?: string;
 }
 

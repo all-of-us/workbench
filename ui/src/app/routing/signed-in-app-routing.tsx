@@ -364,7 +364,7 @@ export const SignedInRoutes = () => {
         />
       </AppRoute>
       <AppRoute
-        path='/workspaces/:ns/:wsid'
+        path='/workspaces/:ns/:terraName'
         exact={false}
         guards={[getAccessModuleGuard()]}
       >

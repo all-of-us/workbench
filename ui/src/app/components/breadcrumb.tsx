@@ -68,7 +68,7 @@ export const getTrail = (
   conceptSet: ConceptSet,
   params: MatchParams
 ): Array<BreadcrumbData> => {
-  const { ns, wsid, cid, crid, csid, pid, nbName, appType } = params;
+  const { ns, terraName, cid, crid, csid, pid, nbName, appType } = params;
   switch (type) {
     case BreadcrumbType.UserApp:
       return [
@@ -82,9 +82,9 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, wsid)
+          analysisTabPath(ns, terraName)
         ),
-        new BreadcrumbData(appType, appDisplayPath(ns, wsid, appType)),
+        new BreadcrumbData(appType, appDisplayPath(ns, terraName, appType)),
       ];
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
@@ -100,7 +100,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          dataTabPath(ns, wsid)
+          dataTabPath(ns, terraName)
         ),
       ];
     case BreadcrumbType.WorkspaceEdit:
@@ -113,7 +113,10 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Edit Workspace', `${workspacePath(ns, wsid)}/edit`),
+        new BreadcrumbData(
+          'Edit Workspace',
+          `${workspacePath(ns, terraName)}/edit`
+        ),
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
@@ -127,7 +130,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           'Duplicate Workspace',
-          `${workspacePath(ns, wsid)}/duplicate`
+          `${workspacePath(ns, terraName)}/duplicate`
         ),
       ];
     case BreadcrumbType.Analysis:
@@ -142,11 +145,11 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, wsid)
+          analysisTabPath(ns, terraName)
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, wsid)}/${nbName}`
+          `${analysisTabPath(ns, terraName)}/${nbName}`
         ),
       ];
     case BreadcrumbType.AnalysisPreview:
@@ -161,11 +164,11 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           fp.upperFirst(analysisTabName),
-          analysisTabPath(ns, wsid)
+          analysisTabPath(ns, terraName)
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${analysisTabPath(ns, wsid)}/preview/${nbName}`
+          `${analysisTabPath(ns, terraName)}/preview/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -180,7 +183,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           conceptSet ? conceptSet.name : '...',
-          `${dataTabPath(ns, wsid)}/concepts/sets/${csid}`
+          `${dataTabPath(ns, terraName)}/concepts/sets/${csid}`
         ),
       ];
     case BreadcrumbType.Cohort:
@@ -195,7 +198,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohort ? cohort.name : '...',
-          `${dataTabPath(ns, wsid)}/cohorts/${cid}`
+          `${dataTabPath(ns, terraName)}/cohorts/${cid}`
         ),
       ];
     case BreadcrumbType.CohortReview:
@@ -210,7 +213,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           cohortReview ? cohortReview.cohortName : '...',
-          `${dataTabPath(ns, wsid)}/cohorts/${cid}/reviews/${crid}`
+          `${dataTabPath(ns, terraName)}/cohorts/${cid}/reviews/${crid}`
         ),
       ];
     case BreadcrumbType.Participant:
@@ -227,7 +230,7 @@ export const getTrail = (
           `Participant ${pid}`,
           `${dataTabPath(
             ns,
-            wsid
+            terraName
           )}/cohorts/${cid}/reviews/${crid}/participants/${pid}`
         ),
       ];
@@ -243,7 +246,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           'Build Cohort Criteria',
-          `${dataTabPath(ns, wsid)}/cohorts/build`
+          `${dataTabPath(ns, terraName)}/cohorts/build`
         ),
       ];
     case BreadcrumbType.SearchConcepts:
@@ -258,7 +261,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           'Search Concepts',
-          `${dataTabPath(ns, wsid)}/concepts`
+          `${dataTabPath(ns, terraName)}/concepts`
         ),
       ];
     case BreadcrumbType.Dataset:
@@ -271,7 +274,7 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Dataset', `${dataTabPath(ns, wsid)}/datasets`),
+        new BreadcrumbData('Dataset', `${dataTabPath(ns, terraName)}/datasets`),
       ];
     case BreadcrumbType.Data:
       return [
@@ -285,7 +288,7 @@ export const getTrail = (
         ),
         new BreadcrumbData(
           workspace ? workspace.name : '...',
-          `${dataTabPath(ns, wsid)}`
+          `${dataTabPath(ns, terraName)}`
         ),
       ];
     default:
@@ -353,39 +356,39 @@ export const Breadcrumb = fp.flow(
 
     trail(): Array<BreadcrumbData> {
       const workspaceMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid',
+        path: '/workspaces/:ns/:terraName',
       });
-      const { ns = '', wsid = '' } = workspaceMatch
+      const { ns = '', terraName = '' } = workspaceMatch
         ? workspaceMatch.params
         : {};
 
       const cohortMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/data/cohorts/:cid',
+        path: '/workspaces/:ns/:terraName/data/cohorts/:cid',
       });
       const { cid = '' } = cohortMatch ? cohortMatch.params : {};
 
       const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/data/concepts/sets/:csid',
+        path: '/workspaces/:ns/:terraName/data/concepts/sets/:csid',
       });
       const { csid = '' } = conceptSetMatch ? conceptSetMatch.params : {};
 
       const participantMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid',
+        path: '/workspaces/:ns/:terraName/data/cohorts/:cid/review/participants/:pid',
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
       // WARNING
       // because this pattern *also* matches previews and user apps, it must be checked AFTER those in the cond()
       const analysisMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
+        path: `/workspaces/:ns/:terraName/${analysisTabName}/:nbName`,
       });
 
       const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
+        path: `/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`,
       });
 
       const userAppMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
+        path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
       });
 
       const {
@@ -424,7 +427,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName, appType }
+        { ns, terraName, cid, csid, pid, nbName, appType }
       );
     }
 

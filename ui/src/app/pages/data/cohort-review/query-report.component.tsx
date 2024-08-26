@@ -266,7 +266,7 @@ export const QueryReport = fp.flow(
         hideSpinner,
       } = this.props;
       hideSpinner();
-      const { ns, wsid } = this.props.match.params;
+      const { ns, terraName } = this.props.match.params;
       const cohortDefinition = await this.getRequestFromCohort();
       const cdrName = findCdrVersion(
         cdrVersionId,
@@ -279,7 +279,7 @@ export const QueryReport = fp.flow(
           cohortBuilderApi()
             .findDemoChartInfo(
               ns,
-              wsid,
+              terraName,
               chartType.toString(),
               AgeType.AGE.toString(),
               cohortDefinition
@@ -289,7 +289,7 @@ export const QueryReport = fp.flow(
             })
         ),
         cohortBuilderApi()
-          .countParticipants(ns, wsid, cohortDefinition)
+          .countParticipants(ns, terraName, cohortDefinition)
           .then((participantCount) => this.setState({ participantCount })),
       ]);
       this.groupChartData(demoChartData);
@@ -302,7 +302,7 @@ export const QueryReport = fp.flow(
 
     async getRequestFromCohort() {
       const { cohort } = this.props;
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const { ns, terraName, cid, crid } = this.props.match.params;
       let request: CohortDefinition;
       if (cohort?.id === +cid) {
         this.setState({ cohortLoading: false });
@@ -316,7 +316,7 @@ export const QueryReport = fp.flow(
         }
       } else {
         await cohortsApi()
-          .getCohort(ns, wsid, +cid)
+          .getCohort(ns, terraName, +cid)
           .then(async (cohortResponse) => {
             currentCohortStore.next(cohortResponse);
             if (crid) {
@@ -339,13 +339,13 @@ export const QueryReport = fp.flow(
       const {
         cohort,
         match: {
-          params: { ns, wsid, crid },
+          params: { ns, terraName, crid },
         },
       } = this.props;
       const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.ASC };
       let request: CohortDefinition;
       await cohortReviewApi()
-        .getParticipantCohortStatuses(ns, wsid, +crid, filterRequest)
+        .getParticipantCohortStatuses(ns, terraName, +crid, filterRequest)
         .then(({ cohortReview }) => {
           request = JSON.parse(cohortReview.cohortDefinition);
           this.setState({
@@ -385,11 +385,11 @@ export const QueryReport = fp.flow(
     }
 
     goBack() {
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const { ns, terraName, cid, crid } = this.props.match.params;
       this.props.navigate([
         'workspaces',
         ns,
-        wsid,
+        terraName,
         'data',
         'cohorts',
         cid,
