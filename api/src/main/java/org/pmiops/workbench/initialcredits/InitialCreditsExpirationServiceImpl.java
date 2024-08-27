@@ -11,7 +11,9 @@ import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +26,20 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final MailService mailService;
   private final Clock clock;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   public InitialCreditsExpirationServiceImpl(
       UserDao userDao,
       UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
       MailService mailService,
+      WorkspaceService workspaceService,
       Clock clock) {
     this.userDao = userDao;
     this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.mailService = mailService;
     this.clock = clock;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -64,11 +69,13 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
             .getNotificationStatus()
             .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
         && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
+      workspaceService.updateFreeTierWorkspacesStatus(user, BillingStatus.EXPIRED);
       try {
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
             InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
         userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
+
       } catch (MessagingException e) {
         log.warning(
             String.format(

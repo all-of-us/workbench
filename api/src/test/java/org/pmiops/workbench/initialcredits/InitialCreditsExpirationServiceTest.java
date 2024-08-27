@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,6 +39,8 @@ public class InitialCreditsExpirationServiceTest {
   @MockBean private MailService mailService;
 
   @MockBean private UserDao userDao;
+
+  @MockBean private WorkspaceService workspaceService;
 
   @MockBean private UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
 
@@ -111,6 +114,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, never()).save(any());
+    verify(workspaceService, never()).updateFreeTierWorkspacesStatus(any(), any());
   }
 
   @Test
@@ -123,6 +127,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, never()).save(any());
+    verify(workspaceService, never()).updateFreeTierWorkspacesStatus(any(), any());
   }
 
   @Test
@@ -137,6 +142,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, never()).save(any());
+    verify(workspaceService, never()).updateFreeTierWorkspacesStatus(any(), any());
   }
 
   @Test
@@ -154,6 +160,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, never()).save(any());
+    verify(workspaceService, never()).updateFreeTierWorkspacesStatus(any(), any());
   }
 
   @Test
@@ -171,6 +178,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, times(1)).save(any());
+    verify(workspaceService, times(1)).updateFreeTierWorkspacesStatus(any(), any());
   }
 
   @Test
@@ -189,5 +197,6 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     verify(userInitialCreditsExpirationDao, never()).save(any());
+    verify(workspaceService, times(1)).updateFreeTierWorkspacesStatus(any(), any());
   }
 }
