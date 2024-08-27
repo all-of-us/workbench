@@ -17,6 +17,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -37,6 +39,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -86,7 +89,15 @@ public class WorkspaceMapperTest {
     InitialCreditsExpirationServiceImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
+  @MockBean({
+    UserDao.class,
+    WorkspaceDao.class,
+    ConceptSetService.class,
+    CohortService.class,
+    UserInitialCreditsExpirationDao.class,
+    MailService.class,
+    WorkspaceService.class
+  })
   static class Configuration {}
 
   @BeforeEach
