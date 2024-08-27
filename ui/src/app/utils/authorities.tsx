@@ -32,10 +32,7 @@ const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
   [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHER_DATA_VIEW],
   [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONS_ADMIN],
   [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTION_ADMIN],
-  [
-    AuthorityGuardedAction.PUBLISH_WORKSPACE,
-    Authority.FEATURED_WORKSPACE_ADMIN,
-  ],
+  [AuthorityGuardedAction.PUBLISH_WORKSPACE],
 ]);
 
 const hasAuthorityForAction = (
