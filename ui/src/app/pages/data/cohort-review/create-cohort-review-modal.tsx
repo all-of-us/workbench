@@ -58,7 +58,7 @@ export const CreateCohortReviewModal = ({
   existingNames,
   participantCount,
 }) => {
-  const { ns, wsid, cid } = useParams<MatchParams>();
+  const { ns, terraName, cid } = useParams<MatchParams>();
   const [createError, setCreateError] = useState(false);
   const [creating, setCreating] = useState(false);
   const [numberOfParticipants, setNumberOfParticipants] = useState(undefined);
@@ -105,7 +105,7 @@ export const CreateCohortReviewModal = ({
     };
 
     cohortReviewApi()
-      .createCohortReview(ns, wsid, +cid, request)
+      .createCohortReview(ns, terraName, +cid, request)
       .then((response) => {
         currentCohortReviewStore.next(response);
         setCreating(false);

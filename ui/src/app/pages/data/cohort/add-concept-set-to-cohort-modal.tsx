@@ -21,7 +21,7 @@ import { MatchParams } from 'app/utils/stores';
 const { useEffect, useState } = React;
 
 export const AddConceptSetToCohortModal = ({ onClose }) => {
-  const { ns, wsid } = useParams<MatchParams>();
+  const { ns, terraName } = useParams<MatchParams>();
   const [conceptSets, setConceptSets] = useState<ConceptSet[]>();
   const [selectedConceptSetIndex, setSelectedConceptSetIndex] =
     useState<number>(-1);
@@ -32,7 +32,7 @@ export const AddConceptSetToCohortModal = ({ onClose }) => {
   const getConceptSets = async () => {
     try {
       const conceptSetsResponse =
-        await conceptSetsApi().getConceptSetsInWorkspace(ns, wsid);
+        await conceptSetsApi().getConceptSetsInWorkspace(ns, terraName);
       setConceptSets(conceptSetsResponse.items);
       setLoading(false);
     } catch (error) {
@@ -52,7 +52,7 @@ export const AddConceptSetToCohortModal = ({ onClose }) => {
     setSaving(true);
     const selectedConceptSet = await conceptSetsApi().getConceptSet(
       ns,
-      wsid,
+      terraName,
       conceptSets[selectedConceptSetIndex].id
     );
     if (selectedConceptSet) {

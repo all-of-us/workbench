@@ -66,7 +66,7 @@ describe(WorkspaceWrapper.name, () => {
           workspacePath(workspaceDataStub.namespace, workspaceDataStub.id),
         ]}
       >
-        <Route path='/workspaces/:ns/:wsid'>
+        <Route path='/workspaces/:ns/:terraName'>
           <WorkspaceWrapper hideSpinner={() => {}} />
         </Route>
       </MemoryRouter>

@@ -287,11 +287,11 @@ export const DetailHeader = fp.flow(
     };
 
     backToTable() {
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const { ns, terraName, cid, crid } = this.props.match.params;
       this.props.navigate([
         'workspaces',
         ns,
-        wsid,
+        terraName,
         'data',
         'cohorts',
         cid,
@@ -321,7 +321,7 @@ export const DetailHeader = fp.flow(
           left ? statuses[statuses.length - 1] : statuses[0];
 
         const { page, pageSize } = reviewPaginationStore.getValue();
-        const { ns, wsid, crid } = this.props.match.params;
+        const { ns, terraName, crid } = this.props.match.params;
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
@@ -330,7 +330,7 @@ export const DetailHeader = fp.flow(
         } as PageFilterRequest;
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(
           ns,
-          wsid,
+          terraName,
           +crid,
           request
         );
@@ -345,11 +345,11 @@ export const DetailHeader = fp.flow(
     };
 
     navigateById = (id: number): void => {
-      const { ns, wsid, cid, crid } = this.props.match.params;
+      const { ns, terraName, cid, crid } = this.props.match.params;
       this.props.navigate([
         'workspaces',
         ns,
-        wsid,
+        terraName,
         'data',
         'cohorts',
         cid,

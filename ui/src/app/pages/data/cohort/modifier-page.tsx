@@ -227,7 +227,7 @@ export const ModifierPage = fp.flow(
     selections,
     workspace,
   }: Props) => {
-    const { ns, wsid } = useParams<MatchParams>();
+    const { ns, terraName } = useParams<MatchParams>();
     const [calculateError, setCalculateError] = useState(false);
     const [calculating, setCalculating] = useState(false);
     const [count, setCount] = useState(null);
@@ -357,7 +357,7 @@ export const ModifierPage = fp.flow(
           // get options for visit modifier from api
           const res = await cohortBuilderApi().findCriteriaBy(
             ns,
-            wsid,
+            terraName,
             Domain.VISIT.toString(),
             CriteriaType.VISIT.toString()
           );

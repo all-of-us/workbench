@@ -92,14 +92,17 @@ describe('DataSetPage', () => {
           )}/data-sets/${stubDataSet().id}`,
         ]}
       >
-        <Route exact path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'>
+        <Route
+          exact
+          path='/workspaces/:ns/:terraName/data/data-sets/:dataSetId'
+        >
           <DatasetPage
             hideSpinner={() => {}}
             showSpinner={() => {}}
             match={{
               params: {
                 ns: workspaceDataStub.namespace,
-                wsid: workspaceDataStub.id,
+                terraName: workspaceDataStub.id,
                 dataSetId: stubDataSet().id,
               },
             }}

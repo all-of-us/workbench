@@ -81,7 +81,7 @@ const domainTabs = [
 ];
 
 export const CohortReviewOverview = ({ cohortReview }) => {
-  const { ns, wsid } = useParams<MatchParams>();
+  const { ns, terraName } = useParams<MatchParams>();
   const [activeTab, setActiveTab] = useState(domainTabs[0].domain);
   const [demoChartData, setDemoChartData] = useState(undefined);
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ export const CohortReviewOverview = ({ cohortReview }) => {
   useEffect(() => {
     setLoading(true);
     cohortReviewApi()
-      .findCohortReviewDemoChartInfo(ns, wsid, cohortReview.cohortReviewId)
+      .findCohortReviewDemoChartInfo(ns, terraName, cohortReview.cohortReviewId)
       .then((demoChartInfo) => {
         setDemoChartData(demoChartInfo.items);
         setLoading(false);
