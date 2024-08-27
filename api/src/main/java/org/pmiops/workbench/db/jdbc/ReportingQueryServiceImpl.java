@@ -505,7 +505,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  disseminate_research_other,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
-                + "  published,\n"
                 + "  rp_additional_notes,\n"
                 + "  rp_ancestry,\n"
                 + "  rp_anticipated_findings,\n"
@@ -528,9 +527,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_scientific_approach,\n"
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
-                + "  workspace_id,\n"
+                + "  w.workspace_id as workspace_id,\n"
                 + "  workspace_namespace,\n"
-                + "  a.short_name AS access_tier_short_name\n"
+                + "  a.short_name AS access_tier_short_name,\n"
                 + "  fw.category AS featured_category\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
@@ -539,7 +538,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "WHERE active_status = "
                 + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
                 + "\n"
-                + "ORDER BY workspace_id\n"
+                + "ORDER BY w.workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
             limit,

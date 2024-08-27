@@ -185,7 +185,7 @@ public class WorkspaceMapperTest {
     assertResearchPurposeMatches(rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
-    assertThat(ws.getFeaturedCategory()).isNull();
+    assertThat(ws.getFeaturedCategory()).isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
   @Test
