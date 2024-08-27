@@ -58,7 +58,6 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       socialBehavioral: false,
       reasonForAllOfUs: '',
     },
-    published: false,
     billingAccountName: 'billing-account',
     billingStatus: BillingStatus.ACTIVE,
     adminLocked: false,

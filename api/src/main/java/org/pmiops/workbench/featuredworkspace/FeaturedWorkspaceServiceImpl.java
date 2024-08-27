@@ -9,7 +9,6 @@ import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
@@ -56,31 +55,6 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
             dbFeaturedWorkspace ->
                 featuredWorkspaceMapper.toFeaturedWorkspaceCategory(
                     dbFeaturedWorkspace.getCategory()));
-  }
-
-  @Override
-  public void backFillFeaturedWorkspaces() {
-    FeaturedWorkspacesConfig fwConfig = featuredWorkspacesConfigProvider.get();
-    // Get featured workspaces from the config
-    fwConfig.featuredWorkspaces.forEach(
-        fw -> {
-          String workspaceNamespace = fw.getNamespace();
-          String firecloudName = fw.getId();
-          try {
-            // Get Dbworkspace from workspaceNamesapce and firecloudname
-            DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-
-            System.out.println(
-                "workspace " + dbWorkspace.getFirecloudName() + " will be published");
-            fireCloudService.updateWorkspaceAclForPublishing(
-                workspaceNamespace, firecloudName, true);
-            featuredWorkspaceDao.save(
-                featuredWorkspaceMapper.toDbFeaturedWorkspace(fw.getCategory(), dbWorkspace));
-
-          } catch (NotFoundException e) {
-            System.out.println("workspace  " + fw.getNamespace() + " could not be found");
-          }
-        });
   }
 
   public List<WorkspaceResponse> getWorkspaceResponseByFeaturedCategory(

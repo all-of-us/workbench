@@ -90,23 +90,6 @@ public class DbWorkspace {
   private boolean adminLocked;
   private String adminLockedReason;
 
-  /*
-  We are in the process of changing how Published/Featured workspaces work.
-
-  Old Style:
-  This field "published" indicates that the workspace has been shared with the Registered Tier
-  Auth Domain as Reader (thus making it readable to all RT and CT users).  We use
-  FeaturedWorkspacesConfig to indicate that a workspace is "featured".  The UI only displays
-  workspaces which are both Published and Featured on the Featured Workspaces page.
-
-  New Style:
-  Going forward, Publishing and Featuring will happen in a single step, and we will indicate that
-  a workspace has been published/featured by adding a row to DbFeaturedWorkspace.  See also the
-  new FeaturedWorkspaceService.
-  */
-  @Deprecated(since = "July 2024", forRemoval = true)
-  private boolean published;
-
   private DbFeaturedCategory featuredCategory;
 
   public DbWorkspace() {
@@ -221,20 +204,6 @@ public class DbWorkspace {
 
   public DbWorkspace setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
-    return this;
-  }
-
-  // see note above, at the field definition
-  @Deprecated(since = "July 2024", forRemoval = true)
-  @Column(name = "published")
-  public boolean getPublished() {
-    return published;
-  }
-
-  // see note above, at the field definition
-  @Deprecated(since = "July 2024", forRemoval = true)
-  public DbWorkspace setPublished(boolean published) {
-    this.published = published;
     return this;
   }
 

@@ -263,7 +263,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   getPublishedWorkspaces(): Promise<WorkspaceResponseListResponse> {
     return new Promise<WorkspaceResponseListResponse>((resolve) => {
       const publishedWorkspaces = this.workspaces.filter(
-        (w) => w.published === true
+        (w) => w.featuredCategory !== null
       );
       resolve({
         items: publishedWorkspaces.map((workspace) => {

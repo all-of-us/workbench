@@ -175,16 +175,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
-        .stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
-        .toList();
-  }
-
-  @Override
   public List<WorkspaceResponse> getFeaturedWorkspaces() {
     return workspaceMapper
         .toApiWorkspaceResponseList(

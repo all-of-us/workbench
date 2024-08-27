@@ -9,8 +9,6 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 public interface FeaturedWorkspaceService {
   Optional<FeaturedWorkspaceCategory> getFeaturedCategory(DbWorkspace dbWorkspace);
 
-  void backFillFeaturedWorkspaces();
-
   List<WorkspaceResponse> getWorkspaceResponseByFeaturedCategory(
       FeaturedWorkspaceCategory featuredWorkspaceCategory);
 }

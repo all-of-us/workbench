@@ -89,7 +89,10 @@ public final class DbStorageEnums {
           // .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
           .put(Authority.DEVELOPER, (short) 1)
           .put(Authority.ACCESS_CONTROL_ADMIN, (short) 2)
-          .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
+
+          /* FEATURED_WORKSPACE_ADMIN Removed as obsolete. Admins can now mark a workspace as featured from the
+          Workspace Admin page using the RESEARCHER_DATA_VIEW authority. */
+          // .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
           .put(Authority.COMMUNICATIONS_ADMIN, (short) 4)
           .put(Authority.SECURITY_ADMIN, (short) 5)
           .put(Authority.INSTITUTION_ADMIN, (short) 6)

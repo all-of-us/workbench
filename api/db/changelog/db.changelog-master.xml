@@ -240,6 +240,7 @@
   <include file="changelog/db.changelog-230-create-featured-workspace-table.xml"/>
   <include file="changelog/db.changelog-231-drop-featured-workspace-description-col.xml"/>
   <include file="changelog/db.changelog-232-add-user_initial_credits_expiration.xml"/>
+  <include file="changelog/db.changelog-233-dropColumn-published-table-workspace.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

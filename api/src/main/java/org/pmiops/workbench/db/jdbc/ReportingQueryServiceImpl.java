@@ -531,9 +531,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  workspace_id,\n"
                 + "  workspace_namespace,\n"
                 + "  a.short_name AS access_tier_short_name\n"
+                + "  fw.category AS featured_category\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+                + "  JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
                 + "WHERE active_status = "
                 + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
                 + "\n"
@@ -555,7 +557,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .disseminateResearchOther(rs.getString("disseminate_research_other"))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
-                .published(rs.getBoolean("published"))
+                .published(rs.getString("featured_category") != null)
                 .rpAdditionalNotes(rs.getString("rp_additional_notes"))
                 .rpAncestry(rs.getBoolean("rp_ancestry"))
                 .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))

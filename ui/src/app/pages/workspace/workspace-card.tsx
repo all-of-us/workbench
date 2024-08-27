@@ -144,9 +144,10 @@ export const WorkspaceCard = fp.flow(withNavigation)(
 
     trackWorkspaceNavigation() {
       const {
-        workspace: { name, published },
+        workspace: { name },
+        useFeaturedWorkspacePageUi,
       } = this.props;
-      published
+      useFeaturedWorkspacePageUi
         ? AnalyticsTracker.Workspaces.NavigateToFeatured(name)
         : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
     }
@@ -176,7 +177,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                         onDuplicate={() => {
                           // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
                           // this on the workspace object once users are able to publish their own workspaces
-                          workspace.published
+                          useFeaturedWorkspacePageUi
                             ? AnalyticsTracker.Workspaces.DuplicateFeatured(
                                 workspace.name
                               )

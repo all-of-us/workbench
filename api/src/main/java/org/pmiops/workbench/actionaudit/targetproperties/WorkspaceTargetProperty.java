@@ -50,8 +50,7 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
   SOCIAL_BEHAVIORAL("social_behavioral", rpStringOrNull(ResearchPurpose::isSocialBehavioral)),
   TIME_REQUESTED("time_requested", rpStringOrNull(ResearchPurpose::getTimeRequested)),
   TIME_REVIEWED("time_reviewed", rpStringOrNull(ResearchPurpose::getTimeReviewed)),
-  PUBLISHED("published", PropertyUtils.stringOrNull(Workspace::isPublished));
-
+  PUBLISHED("published", workspace -> workspace.getFeaturedCategory() != null ? "true" : "false");
   private final String propertyName;
   private final Function<Workspace, String> extractor;
 
