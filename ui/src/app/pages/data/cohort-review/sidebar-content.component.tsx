@@ -423,10 +423,10 @@ export const SidebarContent = fp.flow(
       }
     }
 
-    async getAnnotations(ns, wsid, cohortReviewId, pid) {
+    async getAnnotations(ns, terraName, cohortReviewId, pid) {
       const { items } = await cohortReviewApi().getParticipantCohortAnnotations(
         ns,
-        wsid,
+        terraName,
         cohortReviewId,
         pid
       );

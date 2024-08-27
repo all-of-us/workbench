@@ -56,7 +56,7 @@ const createRoute = (appType: string) => (
       appDisplayPath(currentWorkspace.namespace, currentWorkspace.id, appType),
     ]}
   >
-    <Route path='/workspaces/:ns/:wsid/analysis/userApp/:appType'>
+    <Route path='/workspaces/:ns/:terraName/analysis/userApp/:appType'>
       <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
     </Route>
   </MemoryRouter>

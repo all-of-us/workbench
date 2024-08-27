@@ -153,10 +153,10 @@ export const InteractiveNotebook = fp.flow(
 
       const {
         match: {
-          params: { ns, wsid, nbName },
+          params: { ns, terraName, nbName },
         },
       } = this.props;
-      if (ns && wsid && nbName) {
+      if (ns && terraName && nbName) {
         this.loadNotebook();
       }
     }
@@ -165,7 +165,7 @@ export const InteractiveNotebook = fp.flow(
       if (
         hasNewValidProps(this.props, prevProps, [
           (p) => p.match.params.ns,
-          (p) => p.match.params.wsid,
+          (p) => p.match.params.terraName,
           (p) => p.match.params.nbName,
         ])
       ) {
@@ -181,11 +181,11 @@ export const InteractiveNotebook = fp.flow(
     }
 
     async loadNotebook() {
-      const { ns, wsid, nbName } = this.props.match.params;
+      const { ns, terraName, nbName } = this.props.match.params;
       try {
         const { html } = await notebooksApi().readOnlyNotebook(
           ns,
-          wsid,
+          terraName,
           nbName
         );
         const { canPlayground } = getAppInfoFromFileName(nbName);
@@ -195,7 +195,7 @@ export const InteractiveNotebook = fp.flow(
       }
 
       notebooksApi()
-        .getNotebookLockingMetadata(ns, wsid, nbName)
+        .getNotebookLockingMetadata(ns, terraName, nbName)
         .then((resp) => {
           this.setState({
             lastLockedBy: resp.lastLockedBy,
@@ -269,7 +269,7 @@ export const InteractiveNotebook = fp.flow(
         [
           'workspaces',
           this.props.match.params.ns,
-          this.props.match.params.wsid,
+          this.props.match.params.terraName,
           analysisTabName,
           this.props.match.params.nbName,
         ],
@@ -308,14 +308,14 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private cloneNotebook() {
-      const { ns, wsid, nbName } = this.props.match.params;
+      const { ns, terraName, nbName } = this.props.match.params;
       notebooksApi()
-        .cloneNotebook(ns, wsid, nbName)
+        .cloneNotebook(ns, terraName, nbName)
         .then((notebook) => {
           this.props.navigate([
             'workspaces',
             ns,
-            wsid,
+            terraName,
             analysisTabName,
             encodeURIComponent(notebook.name),
           ]);
@@ -535,7 +535,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private startEditMode() {
-      const { ns, wsid, nbName } = this.props.match.params;
+      const { ns, terraName, nbName } = this.props.match.params;
       const {
         userAppsStore: { userApps },
         navigate,
@@ -549,7 +549,7 @@ export const InteractiveNotebook = fp.flow(
               this.navigateEditMode();
             });
           } else {
-            openAppOrConfigPanel(ns, wsid, userApps, appType, navigate);
+            openAppOrConfigPanel(ns, terraName, userApps, appType, navigate);
           }
         } else {
           this.setState({

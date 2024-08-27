@@ -13,10 +13,10 @@ import { ConceptSetsApiStub } from 'testing/stubs/concept-sets-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-describe('ConceptNavigationBar', () => {
+describe(ConceptNavigationBar.name, () => {
   const component = () => {
     return render(
-      <ConceptNavigationBar ns='test' wsId='1' showConcepts={true} />
+      <ConceptNavigationBar ns='test' terraName='1' showConcepts={true} />
     );
   };
 

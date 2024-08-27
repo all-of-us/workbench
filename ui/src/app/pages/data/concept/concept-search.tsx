@@ -265,9 +265,9 @@ export const ConceptSearch = fp.flow(
     }
 
     async getConceptSet() {
-      const { ns, wsid, csid } = this.props.match.params;
+      const { ns, terraName, csid } = this.props.match.params;
       try {
-        const resp = await conceptSetsApi().getConceptSet(ns, wsid, +csid);
+        const resp = await conceptSetsApi().getConceptSet(ns, terraName, +csid);
         if (resp.domain === Domain.SURVEY) {
           resp.criteriums = resp.criteriums.filter(
             (survey) => survey.parentCount !== 0
@@ -289,17 +289,17 @@ export const ConceptSearch = fp.flow(
     }
 
     async copyConceptSet(copyRequest: CopyRequest) {
-      const { ns, wsid, csid } = this.props.match.params;
+      const { ns, terraName, csid } = this.props.match.params;
       this.setState({ copySaving: true });
-      return conceptSetsApi().copyConceptSet(ns, wsid, csid, copyRequest);
+      return conceptSetsApi().copyConceptSet(ns, terraName, csid, copyRequest);
     }
 
     async submitEdits() {
-      const { ns, wsid, csid } = this.props.match.params;
+      const { ns, terraName, csid } = this.props.match.params;
       const { conceptSet, editName, editDescription } = this.state;
       try {
         this.setState({ editSaving: true });
-        await conceptSetsApi().updateConceptSet(ns, wsid, +csid, {
+        await conceptSetsApi().updateConceptSet(ns, terraName, +csid, {
           ...conceptSet,
           name: editName.trim(),
           description: editDescription,
@@ -313,10 +313,10 @@ export const ConceptSearch = fp.flow(
     }
 
     async onDeleteConceptSet() {
-      const { ns, wsid, csid } = this.props.match.params;
+      const { ns, terraName, csid } = this.props.match.params;
       try {
-        await conceptSetsApi().deleteConceptSet(ns, wsid, +csid);
-        this.props.navigate(['workspaces', ns, wsid, 'data', 'concepts']);
+        await conceptSetsApi().deleteConceptSet(ns, terraName, +csid);
+        this.props.navigate(['workspaces', ns, terraName, 'data', 'concepts']);
       } catch (error) {
         console.error(error);
         this.setState({
@@ -336,9 +336,9 @@ export const ConceptSearch = fp.flow(
     }
 
     onEditOpen() {
-      const { ns, wsid, csid } = this.props.match.params;
+      const { ns, terraName, csid } = this.props.match.params;
       conceptSetsApi()
-        .getConceptSetsInWorkspace(ns, wsid)
+        .getConceptSetsInWorkspace(ns, terraName)
         .then((conceptSets) => {
           this.setState({
             editing: true,

@@ -371,7 +371,6 @@ public class WorkspaceServiceTest {
   @Test
   public void getWorkspaces_skipPublished() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
-    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
     addMockedPublishedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "published_reader",
@@ -386,7 +385,6 @@ public class WorkspaceServiceTest {
   @Test
   public void getWorkspaces_published_butOwner() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
-    workbenchConfig.featureFlags.enablePublishedWorkspacesViaDb = true;
     addMockedPublishedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "published_reader",

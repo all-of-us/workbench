@@ -103,7 +103,7 @@ const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
-  const { ns, wsid } = useParams<MatchParams>();
+  const { ns, terraName } = useParams<MatchParams>();
 
   return (
     <Switch>
@@ -121,7 +121,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/duplicate`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <WorkspaceEditPage
           routeData={{
@@ -146,7 +146,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/${analysisTabName}`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <AppsListPage
           routeData={{
@@ -160,7 +160,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/${analysisTabName}/preview/:nbName`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <InteractiveNotebookPage
           routeData={{
@@ -175,7 +175,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/${analysisTabName}/:nbName`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <LeonardoAppRedirectPage
           key='notebook'
@@ -196,7 +196,10 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/${analysisTabName}/userApp/:appType`}
-        guards={[adminLockedGuard(ns, wsid), appIsValidGuard(ns, wsid)]}
+        guards={[
+          adminLockedGuard(ns, terraName),
+          appIsValidGuard(ns, terraName),
+        ]}
       >
         <GKEAppRedirectPage
           key='app'
@@ -217,7 +220,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/terminals`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <LeonardoAppRedirectPage
           key='terminal'
@@ -234,7 +237,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/spark/:sparkConsolePath`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <LeonardoSparkConsoleRedirectPage
           routeData={{
@@ -250,7 +253,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <DataComponentPage
           routeData={{
@@ -264,7 +267,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/data-sets`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <DataSetComponentPage
           routeData={{
@@ -278,7 +281,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/data-sets/:dataSetId`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <DataSetComponentPage
           routeData={{
@@ -292,7 +295,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/build`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <CohortPagePage
           routeData={{
@@ -306,7 +309,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/actions`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <CohortActionsPage
           routeData={{
@@ -320,7 +323,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/cohort-description`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <QueryReportPage
           routeData={{
@@ -334,7 +337,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/:crid/cohort-description`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <QueryReportPage
           routeData={{
@@ -348,7 +351,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <CohortReviewPagePage
           routeData={{
@@ -362,7 +365,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/:crid`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <CohortReviewPagePage
           routeData={{
@@ -376,7 +379,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/:crid/participants/:pid`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <DetailPagePage
           routeData={{
@@ -390,7 +393,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/concepts`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <ConceptHomepagePage
           routeData={{
@@ -404,7 +407,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/concepts/sets/:csid`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <ConceptSearchPage
           routeData={{
@@ -418,7 +421,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/concepts/:domain`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <ConceptSearchPage
           routeData={{
@@ -432,7 +435,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/concepts/sets/:csid/actions`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <ConceptSetActionsPage
           routeData={{
@@ -446,7 +449,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data/tanagra/*`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <TanagraContainerPage
           routeData={{
@@ -460,7 +463,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/data-explorer`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <DataExplorerPage
           routeData={{
@@ -474,7 +477,7 @@ export const WorkspaceRoutes = () => {
       <AppRoute
         exact
         path={`${path}/tanagra`}
-        guards={[adminLockedGuard(ns, wsid)]}
+        guards={[adminLockedGuard(ns, terraName)]}
       >
         <TanagraDevPage
           routeData={{

@@ -373,21 +373,21 @@ export const ListOverview = fp.flow(
         cohort,
         updating,
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
       cohort.criteria = this.criteria;
       this.setState({ saving: true });
       const cid = cohort.id;
       cohortsApi()
-        .updateCohort(ns, wsid, cid, cohort)
+        .updateCohort(ns, terraName, cid, cohort)
         .then(() => {
           this.setState({ saving: false });
           updating(true);
           this.props.navigate([
             'workspaces',
             ns,
-            wsid,
+            terraName,
             'data',
             'cohorts',
             cid.toString(),
@@ -406,7 +406,7 @@ export const ListOverview = fp.flow(
       const {
         updating,
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
       const cohort = {
@@ -416,13 +416,13 @@ export const ListOverview = fp.flow(
         type: COHORT_TYPE,
       };
       return cohortsApi()
-        .createCohort(ns, wsid, cohort)
+        .createCohort(ns, terraName, cohort)
         .then((c) => {
           updating(true);
           this.props.navigate([
             'workspaces',
             ns,
-            wsid,
+            terraName,
             'data',
             'cohorts',
             c.id?.toString(),
@@ -438,14 +438,14 @@ export const ListOverview = fp.flow(
         cohort,
         updating,
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
       cohortsApi()
-        .deleteCohort(ns, wsid, cohort.id)
+        .deleteCohort(ns, terraName, cohort.id)
         .then(() => {
           updating();
-          this.props.navigate(['workspaces', ns, wsid, 'data']);
+          this.props.navigate(['workspaces', ns, terraName, 'data']);
         })
         .catch((error) => console.error(error));
     };
@@ -458,10 +458,10 @@ export const ListOverview = fp.flow(
       const {
         cohort,
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
-      let url = workspacePath(ns, wsid) + '/';
+      let url = workspacePath(ns, terraName) + '/';
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');
@@ -490,10 +490,10 @@ export const ListOverview = fp.flow(
     async getCohortNames() {
       const {
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
-      const response = await cohortsApi().getCohortsInWorkspace(ns, wsid);
+      const response = await cohortsApi().getCohortsInWorkspace(ns, terraName);
       return response.items.map((cohort) => cohort.name);
     }
 

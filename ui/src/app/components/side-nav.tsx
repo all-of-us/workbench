@@ -17,7 +17,6 @@ import {
 } from 'app/utils/authorities';
 import { useNavigation } from 'app/utils/navigation';
 import { getProfilePictureSrc } from 'app/utils/profile-utils';
-import { serverConfigStore } from 'app/utils/stores';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
 const styles = reactStyles({
@@ -140,14 +139,7 @@ const homeActive = () => {
 };
 
 const libraryActive = () => {
-  return serverConfigStore.get().config.enablePublishedWorkspacesViaDb
-    ? window.location.pathname === '/featured-workspaces'
-    : window.location.pathname === '/library';
-};
-const getLibraryPath = () => {
-  return serverConfigStore.get().config.enablePublishedWorkspacesViaDb
-    ? '/featured-workspaces'
-    : '/library';
+  return window.location.pathname === '/library';
 };
 
 const workspacesActive = () => {
@@ -345,7 +337,7 @@ export const SideNav = (props: SideNavProps) => {
         icon='star'
         content='Featured Workspaces'
         onToggleSideNav={() => onToggleSideNav()}
-        href={getLibraryPath()}
+        href={'/library'}
         active={libraryActive()}
         disabled={!hasRegisteredTierAccess(profile)}
       />

@@ -49,7 +49,7 @@ const infoTooltip = (
 
 export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
   ({ cohortContext, onClose }) => {
-    const { ns, wsid } = useParams<MatchParams>();
+    const { ns, terraName } = useParams<MatchParams>();
     const [conceptIdInput, setConceptIdInput] = useState<string>();
     const [matchedConcepts, setMatchedConcepts] = useState<Criteria[]>();
     const [selectedConcepts, setSelectedConcepts] = useState<number[]>();
@@ -69,7 +69,7 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
         const matchedConceptsResp =
           await cohortBuilderApi().findCriteriaByConceptIdsOrConceptCodes(
             ns,
-            wsid,
+            terraName,
             conceptsRequest
           );
         setSelectedConcepts(

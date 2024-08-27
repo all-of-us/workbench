@@ -7179,10 +7179,6 @@ components:
           type: boolean
           default: false
           description: Whether users are allowed to choose machine type when creating GKE applications.
-        enablePublishedWorkspacesViaDb:
-          type: boolean
-          default: false
-          description: Enable admin to publish workspace
         enableLoginIssueBanner:
           type: boolean
           default: false

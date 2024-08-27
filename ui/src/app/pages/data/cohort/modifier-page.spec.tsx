@@ -58,7 +58,7 @@ describe('ModifierPage', () => {
           )}/cohorts/build`,
         ]}
       >
-        <Route exact path='/workspaces/:ns/:wsid/data/cohorts/build'>
+        <Route exact path='/workspaces/:ns/:terraName/data/cohorts/build'>
           <ModifierPage closeModifiers={() => {}} selections={[]} />
         </Route>
       </MemoryRouter>

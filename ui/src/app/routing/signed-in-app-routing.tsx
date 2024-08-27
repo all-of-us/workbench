@@ -36,7 +36,6 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { WorkspaceLibrary } from 'app/pages/workspace/workspace-library';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import { WorkspaceWrapper } from 'app/pages/workspace/workspace-wrapper';
 import {
@@ -50,7 +49,6 @@ import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 
 import {
   authorityGuard,
-  dBPublishedFlagIsOnGuard,
   getAccessModuleGuard,
   restrictDemographicSurvey,
 } from './guards';
@@ -131,10 +129,6 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
-const WorkspaceLibraryPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(WorkspaceLibrary);
 const WorkspaceListPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -347,15 +341,6 @@ export const SignedInRoutes = () => {
         <RuntimesListPage routeData={{ title: 'Runtimes' }} />
       </AppRoute>
       <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
-        <WorkspaceLibraryPage
-          routeData={{ title: 'Workspace Library', minimizeChrome: false }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path='/featured-workspaces'
-        guards={[getAccessModuleGuard(), dBPublishedFlagIsOnGuard()]}
-      >
         <FeaturedWorkspacesPage
           routeData={{ title: 'Workspace Library', minimizeChrome: false }}
         />
@@ -379,7 +364,7 @@ export const SignedInRoutes = () => {
         />
       </AppRoute>
       <AppRoute
-        path='/workspaces/:ns/:wsid'
+        path='/workspaces/:ns/:terraName'
         exact={false}
         guards={[getAccessModuleGuard()]}
       >

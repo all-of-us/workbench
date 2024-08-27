@@ -75,7 +75,9 @@ const renderInteractiveNotebook = (pathParameters: { params: MatchParams }) =>
         }`,
       ]}
     >
-      <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>
+      <Route
+        path={`/workspaces/:ns/:terraName/${analysisTabName}/preview/:nbName`}
+      >
         <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
       </Route>
     </MemoryRouter>

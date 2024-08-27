@@ -4,7 +4,6 @@ import jakarta.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.featuredworkspace.FeaturedWorkspaceService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -39,13 +38,8 @@ public class FeaturedWorkspaceController implements FeaturedWorkspaceApiDelegate
    */
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getFeaturedWorkspaces() {
-    if (workbenchConfigProvider.get().featureFlags.enablePublishedWorkspacesViaDb) {
-      return ResponseEntity.ok(
-          new WorkspaceResponseListResponse().items(workspaceService.getFeaturedWorkspaces()));
-    } else {
-      throw new NotImplementedException(
-          "Not implemented in this environment: combine the results of getFeaturedWorkspacesConfig() and getPublishedWorkspaces() to generate the list of featured workspaces.");
-    }
+    return ResponseEntity.ok(
+        new WorkspaceResponseListResponse().items(workspaceService.getFeaturedWorkspaces()));
   }
 
   /**

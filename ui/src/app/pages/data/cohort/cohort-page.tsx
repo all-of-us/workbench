@@ -236,7 +236,7 @@ export const CohortPage = fp.flow(
         history,
         location: { search },
         match: {
-          params: { ns, wsid },
+          params: { ns, terraName },
         },
       } = this.props;
       clearCohort();
@@ -253,7 +253,7 @@ export const CohortPage = fp.flow(
         () => {
           // Clear cohortId query param if exists in url
           if (search.indexOf('cohortId') > -1) {
-            history.push(`${dataTabPath(ns, wsid)}/cohorts/build`);
+            history.push(`${dataTabPath(ns, terraName)}/cohorts/build`);
           }
         }
       );

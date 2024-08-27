@@ -445,7 +445,7 @@ export const DetailTabs = fp.flow(
     }
 
     loadParticipantChartData() {
-      const { ns, wsid, pid, crid } = this.props.match.params;
+      const { ns, terraName, pid, crid } = this.props.match.params;
       fp.map(async (domainName: string) => {
         this.setState((prevState) => ({
           chartData: {
@@ -459,7 +459,7 @@ export const DetailTabs = fp.flow(
         }));
         const { items } = await cohortReviewApi().getParticipantChartData(
           ns,
-          wsid,
+          terraName,
           +crid,
           +pid,
           domainName

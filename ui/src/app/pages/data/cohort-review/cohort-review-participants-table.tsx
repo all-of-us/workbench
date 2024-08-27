@@ -200,7 +200,7 @@ const mapData = (participant: ParticipantCohortStatus) => {
 };
 
 export const CohortReviewParticipantsTable = ({ cohortReview }) => {
-  const { ns, wsid, cid, crid } = useParams<MatchParams>();
+  const { ns, terraName, cid, crid } = useParams<MatchParams>();
   const [navigate] = useNavigation();
   const [apiError, setApiError] = useState(false);
   const [data, setData] = useState(null);
@@ -264,7 +264,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       } as Request;
       return cohortReviewApi().getParticipantCohortStatuses(
         ns,
-        wsid,
+        terraName,
         cohortReview.cohortReviewId,
         query
       );
@@ -281,7 +281,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
           ({ cohortReview: review, queryResultSize }) => {
             currentCohortReviewStore.next(review);
             if (!vocabOptions.getValue()) {
-              getVocabOptions(ns, wsid);
+              getVocabOptions(ns, terraName);
             }
             setData(review.participantCohortStatuses.map(mapData));
             setTotalCount(queryResultSize);
@@ -299,7 +299,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     }
     promises.push(
       cohortBuilderApi()
-        .findParticipantDemographics(ns, wsid)
+        .findParticipantDemographics(ns, terraName)
         .then(
           ({ ethnicityList, genderList, raceList, sexAtBirthList }) => {
             const extract = (arr, _type?) =>
@@ -451,7 +451,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     navigate([
       'workspaces',
       ns,
-      wsid,
+      terraName,
       'data',
       'cohorts',
       cid,

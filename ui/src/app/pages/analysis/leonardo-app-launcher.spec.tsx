@@ -95,7 +95,7 @@ describe('NotebookLauncher', () => {
   const notebookComponent = () => {
     return render(
       <Router history={history}>
-        <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
+        <Route path={`/workspaces/:ns/:terraName/${analysisTabName}/:nbName`}>
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
@@ -415,7 +415,7 @@ describe('TerminalLauncher', () => {
   const terminalComponent = async () => {
     const t = render(
       <Router history={history}>
-        <Route path='/workspaces/:ns/:wsid/terminals'>
+        <Route path='/workspaces/:ns/:terraName/terminals'>
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
@@ -544,7 +544,7 @@ describe('SparkConsoleLauncher', () => {
   const terminalComponent = async () => {
     const t = render(
       <Router history={history}>
-        <Route path='/workspaces/:ns/:wsid/spark/:sparkConsolePath'>
+        <Route path='/workspaces/:ns/:terraName/spark/:sparkConsolePath'>
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}

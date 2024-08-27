@@ -24,12 +24,7 @@ import {
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { shouldShowDemographicSurvey } from 'app/utils/profile-utils';
-import {
-  authStore,
-  MatchParams,
-  profileStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { authStore, MatchParams, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
 import { analysisTabName, analysisTabPath, workspacePath } from './utils';
@@ -96,34 +91,25 @@ export const getAccessModuleGuard = (): Guard => {
   };
 };
 
-// This is temporary until we switch on the flag to get Published workspace from DB rather than config
-export const dBPublishedFlagIsOnGuard = (): Guard => {
-  return {
-    allowed: (): boolean =>
-      serverConfigStore.get().config.enablePublishedWorkspacesViaDb,
-    redirectPath: '/library',
-  };
-};
-
-export const adminLockedGuard = (ns: string, wsid: string): Guard => {
+export const adminLockedGuard = (ns: string, terraName: string): Guard => {
   return {
     allowed: (): boolean => !currentWorkspaceStore.getValue().adminLocked,
-    redirectPath: `${workspacePath(ns, wsid)}/about`,
+    redirectPath: `${workspacePath(ns, terraName)}/about`,
   };
 };
 
 export const confirmAppIsValid = () => {
   const urlMatchParam = matchPath<MatchParams>(location.pathname, {
-    path: `/workspaces/:ns/:wsid/${analysisTabName}/userApp/:appType`,
+    path: `/workspaces/:ns/:terraName/${analysisTabName}/userApp/:appType`,
   });
   const appFromUrl = urlMatchParam.params.appType as UIAppType;
   return Object.values(UIAppType).includes(appFromUrl);
 };
 
-export const appIsValidGuard = (ns: string, wsid: string): Guard => {
+export const appIsValidGuard = (ns: string, terraName: string): Guard => {
   return {
     allowed: (): boolean => confirmAppIsValid(),
-    redirectPath: `${analysisTabPath(ns, wsid)}`,
+    redirectPath: `${analysisTabPath(ns, terraName)}`,
   };
 };
 

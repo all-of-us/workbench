@@ -26,8 +26,8 @@ describe('getTrail', () => {
   });
 
   it('works', () => {
-    const ns = 'testns';
-    const wsid = 'testwsid';
+    const ns = 'testNs';
+    const terraName = 'testTerraName';
     const cid = '123';
     const crid = '456';
     const pid = '789';
@@ -38,7 +38,7 @@ describe('getTrail', () => {
       exampleCohortStubs[0],
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
-      { ns, wsid, cid, crid, pid }
+      { ns, terraName, cid, crid, pid }
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
@@ -47,7 +47,7 @@ describe('getTrail', () => {
       `Participant ${pid}`,
     ]);
     expect(trail[3].url).toEqual(
-      dataTabPath('testns', 'testwsid') +
+      dataTabPath(ns, terraName) +
         `/cohorts/${cid}/reviews/${crid}/participants/${pid}`
     );
   });
@@ -56,13 +56,18 @@ describe('getTrail', () => {
   test.each(Object.keys(BreadcrumbType))(
     'handles breadcrumb type %s',
     (bType: string) => {
+      const ns = 'testNs';
+      const terraName = 'testTerraName';
+      const cid = '88';
+      const pid = '77';
+
       const trail = getTrail(
         BreadcrumbType[bType],
         workspaceDataStub,
         exampleCohortStubs[0],
         cohortReviewStubs[0],
         ConceptSetsApiStub.stubConceptSets()[0],
-        { ns: 'testns', wsid: 'testwsid', cid: '88', pid: '77' }
+        { ns, terraName, cid, pid }
       );
       expect(trail.length).toBeGreaterThan(0);
     }
@@ -73,8 +78,8 @@ describe('getTrail', () => {
     .toLowerCase()}`;
 
   it('Should display correct trail for Jupyter', () => {
-    const ns = 'testns';
-    const wsid = 'testwsid';
+    const ns = 'testNs';
+    const terraName = 'testTerraName';
     const nbName = 'myNotebook';
 
     const trail = getTrail(
@@ -83,7 +88,7 @@ describe('getTrail', () => {
       undefined,
       undefined,
       undefined,
-      { ns, wsid, nbName }
+      { ns, terraName, nbName }
     );
 
     expect(trail.map((item) => item.label)).toEqual([
@@ -93,13 +98,13 @@ describe('getTrail', () => {
       nbName,
     ]);
     expect(trail[trail.length - 1].url).toEqual(
-      `${analysisTabPath(ns, wsid)}/${nbName}`
+      `${analysisTabPath(ns, terraName)}/${nbName}`
     );
   });
 
   it('Should display correct trail for Jupyter preview', () => {
-    const ns = 'testns';
-    const wsid = 'testwsid';
+    const ns = 'testNs';
+    const terraName = 'testTerraName';
     const nbName = 'myNotebook';
 
     const trail = getTrail(
@@ -108,7 +113,7 @@ describe('getTrail', () => {
       undefined,
       undefined,
       undefined,
-      { ns, wsid, nbName }
+      { ns, terraName, nbName }
     );
 
     expect(trail.map((item) => item.label)).toEqual([
@@ -118,13 +123,13 @@ describe('getTrail', () => {
       nbName,
     ]);
     expect(trail[trail.length - 1].url).toEqual(
-      `${analysisTabPath(ns, wsid)}/preview/${nbName}`
+      `${analysisTabPath(ns, terraName)}/preview/${nbName}`
     );
   });
 
   it('Should display correct trail for User Apps', () => {
-    const ns = 'testns';
-    const wsid = 'testwsid';
+    const ns = 'testNs';
+    const terraName = 'testTerraName';
     const nbName = "don't display this!";
     const appType = UIAppType.RSTUDIO;
 
@@ -134,7 +139,7 @@ describe('getTrail', () => {
       undefined,
       undefined,
       undefined,
-      { ns, wsid, nbName, appType }
+      { ns, terraName, nbName, appType }
     );
 
     const trailLabels: string[] = trail.map((item) => item.label);
@@ -146,7 +151,7 @@ describe('getTrail', () => {
       UIAppType.RSTUDIO,
     ]);
     expect(trail[trail.length - 1].url).toEqual(
-      appDisplayPath(ns, wsid, appType)
+      appDisplayPath(ns, terraName, appType)
     );
   });
 });
