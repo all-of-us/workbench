@@ -2783,64 +2783,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testGetPublishedWorkspaces() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
-        .isEqualTo(1);
-  }
-
-  @Test
-  public void testGetWorkspacesGetsPublishedIfOwner() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
-  }
-
-  @Test
-  public void testGetWorkspacesGetsPublishedIfWriter() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
-  }
-
-  @Test
   public void testGetWorkspacesDoesNotGetsPublishedIfReader() {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();

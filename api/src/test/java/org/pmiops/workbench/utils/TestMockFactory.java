@@ -55,6 +55,7 @@ import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.GenderIdentityV2;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -73,6 +74,8 @@ public class TestMockFactory {
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
+  public static final FeaturedWorkspaceCategory DEFAULT_FEATURED_CATEGORY =
+      FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES;
 
   /**
    * Populate the list of expected Access Modules with appropriate properties. See
@@ -134,7 +137,7 @@ public class TestMockFactory {
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
-        .published(false)
+        .featuredCategory(DEFAULT_FEATURED_CATEGORY)
         .researchPurpose(
             new ResearchPurpose()
                 .additionalNotes(null)

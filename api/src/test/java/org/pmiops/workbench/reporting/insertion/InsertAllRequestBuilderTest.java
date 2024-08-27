@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__FEATURED_CATEGORY;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DISABLED;
@@ -130,6 +130,6 @@ public class InsertAllRequestBuilderTest {
         .hasSize(FIXED_VALUES.size() + WorkspaceColumnValueExtractor.values().length);
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
     assertThat(contentMap.get("name")).isEqualTo(WORKSPACE__NAME);
-    assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);
+    assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__FEATURED_CATEGORY != null);
   }
 }

@@ -13,6 +13,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +47,8 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
-  public static final Boolean WORKSPACE__PUBLISHED = false;
+  public static final DbFeaturedCategory WORKSPACE__FEATURED_CATEGORY =
+      DbFeaturedCategory.TUTORIAL_WORKSPACES;
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
   public static final Boolean WORKSPACE__RP_ANCESTRY = false;
   public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_14";
@@ -129,7 +131,7 @@ public class ReportingTestUtils {
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
-        .published(WORKSPACE__PUBLISHED)
+        .published(WORKSPACE__FEATURED_CATEGORY != null)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
         .rpAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS)
@@ -164,7 +166,7 @@ public class ReportingTestUtils {
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
-    workspace.setPublished(WORKSPACE__PUBLISHED);
+    workspace.setFeaturedCategory(WORKSPACE__FEATURED_CATEGORY);
     workspace.setAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES);
     workspace.setAncestry(WORKSPACE__RP_ANCESTRY);
     workspace.setAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS);

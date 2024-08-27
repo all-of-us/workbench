@@ -36,6 +36,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -128,7 +129,7 @@ public class WorkspaceAuditorTest {
             .billingStatus(BillingStatus.ACTIVE)
             .creationTime(now)
             .lastModifiedTime(now)
-            .published(false);
+            .featuredCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
@@ -289,7 +290,7 @@ public class WorkspaceAuditorTest {
             .name("a new name")
             .namespace("a new namespace")
             .creator("user10@fake-research-aou.org")
-            .published(!workspace1.isPublished());
+            .featuredCategory(workspace1.getFeaturedCategory());
     final int wsChanges = 4;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
@@ -314,7 +315,7 @@ public class WorkspaceAuditorTest {
         .billingStatus(in.getBillingStatus())
         .creationTime(in.getCreationTime())
         .lastModifiedTime(in.getLastModifiedTime())
-        .published(in.isPublished());
+        .featuredCategory(in.getFeaturedCategory());
   }
 
   private ResearchPurpose clone(ResearchPurpose in) {

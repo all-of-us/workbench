@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -67,6 +68,8 @@ public class WorkspaceMapperTest {
       Set.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
+  private static final DbFeaturedCategory DEFAULT_FEATURED_CATEGORY =
+      DbFeaturedCategory.TUTORIAL_WORKSPACES;
 
   private DbWorkspace sourceDbWorkspace;
   private RawlsWorkspaceDetails sourceFirecloudWorkspace;
@@ -128,7 +131,7 @@ public class WorkspaceMapperTest {
             .setConceptSets(Collections.emptySet())
             .setDataSets(Collections.emptySet())
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-            .setPublished(false)
+            .setFeaturedCategory(DEFAULT_FEATURED_CATEGORY)
             .setDiseaseFocusedResearch(true)
             .setDiseaseOfFocus("leukemia")
             .setMethodsDevelopment(false)
@@ -182,7 +185,6 @@ public class WorkspaceMapperTest {
     assertResearchPurposeMatches(rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
-    assertThat(ws.isPublished()).isEqualTo(sourceDbWorkspace.getPublished());
     assertThat(ws.getFeaturedCategory()).isNull();
   }
 

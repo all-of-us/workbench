@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 
@@ -32,7 +33,7 @@ class TargetPropertyExtractorTest {
             .lastModifiedTime(now)
             .etag("etag_1")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .published(false);
+            .featuredCategory(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
 
   @Test
