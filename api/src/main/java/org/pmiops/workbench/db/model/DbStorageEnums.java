@@ -110,6 +110,7 @@ public final class DbStorageEnums {
       ImmutableBiMap.<BillingStatus, Short>builder()
           .put(BillingStatus.ACTIVE, (short) 0)
           .put(BillingStatus.INACTIVE, (short) 1)
+          .put(BillingStatus.EXPIRED, (short) 2)
           .build();
 
   public static BillingStatus billingStatusFromStorage(Short s) {
