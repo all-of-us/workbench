@@ -58,23 +58,22 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private void checkCreditsExpirationForUser(DbUser user, Timestamp now) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
-    if (null != userInitialCreditsExpiration) {
-      if (!userInitialCreditsExpiration.isBypassed()
-          && userInitialCreditsExpiration
-              .getNotificationStatus()
-              .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
-          && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
-        try {
-          mailService.alertUserInitialCreditsExpired(user);
-          userInitialCreditsExpiration.setNotificationStatus(
-              InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-          userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
-        } catch (MessagingException e) {
-          log.warning(
-              String.format(
-                  "Failed to send initial credits expiration notification for user %s",
-                  user.getUserId()));
-        }
+    if (null != userInitialCreditsExpiration
+        && !userInitialCreditsExpiration.isBypassed()
+        && userInitialCreditsExpiration
+            .getNotificationStatus()
+            .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
+        && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
+      try {
+        mailService.alertUserInitialCreditsExpired(user);
+        userInitialCreditsExpiration.setNotificationStatus(
+            InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
+        userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
+      } catch (MessagingException e) {
+        log.warning(
+            String.format(
+                "Failed to send initial credits expiration notification for user %s",
+                user.getUserId()));
       }
     }
   }
