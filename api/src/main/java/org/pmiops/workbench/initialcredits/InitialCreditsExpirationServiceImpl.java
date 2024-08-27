@@ -2,6 +2,7 @@ package org.pmiops.workbench.initialcredits;
 
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -22,21 +23,24 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final UserDao userDao;
   private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final MailService mailService;
+  private final Clock clock;
 
   @Autowired
   public InitialCreditsExpirationServiceImpl(
       UserDao userDao,
       UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
-      MailService mailService) {
+      MailService mailService,
+      Clock clock) {
     this.userDao = userDao;
     this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.mailService = mailService;
+    this.clock = clock;
   }
 
   @Override
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
-      Timestamp now = new Timestamp(System.currentTimeMillis());
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       List<DbUser> users = (List<DbUser>) userDao.findAllById(userIdsList);
       users.forEach(user -> checkCreditsExpirationForUser(user, now));
     }
