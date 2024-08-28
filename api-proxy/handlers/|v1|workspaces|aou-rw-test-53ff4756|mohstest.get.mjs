@@ -5,10 +5,12 @@ const matchReq = req =>
 const body = JSON.stringify(
   {
     workspace:{
-      id:"testspace",
-      etag:"\"10\"",
-      name:"TestSpace",
       namespace:"aou-rw-local1-a312fa3d",
+      name:"TestSpace",
+      displayName:"TestSpace",
+      id:"testspace",
+      terraName:"testspace",
+      etag:"\"10\"",
       cdrVersionId:"3",
       creator:"evrii-local@fake-research-aou.org",
       billingAccountName:"billingAccounts/013713-75CFF6-1751E5",
