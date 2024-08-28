@@ -50,7 +50,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     if (userIdsList != null && !userIdsList.isEmpty()) {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(user -> checkCreditsExpirationForUser(user, now));
+      users.forEach(user -> checkExpiration(user, now));
     }
   }
 
@@ -63,7 +63,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
-  private void checkCreditsExpirationForUser(DbUser user, Timestamp now) {
+  private void checkExpiration(DbUser user, Timestamp now) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (null != userInitialCreditsExpiration
