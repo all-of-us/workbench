@@ -52,7 +52,10 @@ import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { ProxyApiStub } from 'testing/stubs/proxy-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import { workspaceStubs } from 'testing/stubs/workspaces';
+import {
+  workspaceStubs,
+  WorkspaceStubVariables,
+} from 'testing/stubs/workspaces';
 
 function currentCardText() {
   return screen.getByTestId('current-progress-card').textContent;
@@ -517,8 +520,8 @@ describe('TerminalLauncher', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith([
         'workspaces',
-        'defaultNamespace',
-        '1',
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
         analysisTabName,
       ]);
     });

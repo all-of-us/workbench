@@ -15,6 +15,7 @@ import { profileStore } from 'app/utils/stores';
 import { renderWithRouter } from 'testing/react-test-helpers';
 import { FeaturedWorkspacesApiStub } from 'testing/stubs/featured-workspaces-service-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 
 import { FeaturedWorkspaces } from './featured-workspaces';
 
@@ -89,7 +90,10 @@ describe('Featured Workspace List', () => {
         expect(screen.queryAllByTestId('workspace-card').length).toBe(2);
       });
       expect(
-        screen.queryByText('defaultWorkspace' + featuredCategory[index])
+        screen.queryByText(
+          WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME +
+            featuredCategory[index]
+        )
       ).toBeInTheDocument();
     });
   });

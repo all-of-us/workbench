@@ -14,7 +14,7 @@ import { CdrVersionsStubVariables } from './cdr-versions-api-stub';
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
-  static DEFAULT_WORKSPACE_TERRA_NAME = '1';
+  static DEFAULT_WORKSPACE_TERRA_NAME = 'one';
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
   static DEFAULT_GOOGLE_PROJECT_ID = 'terra-vpc-sc-test';
   static DEFAULT_GOOGLE_BUCKET_NAME = 'fc-secure-bucket';

@@ -34,7 +34,11 @@ import {
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import { userRolesStub, workspaceStubs } from 'testing/stubs/workspaces';
+import {
+  userRolesStub,
+  workspaceStubs,
+  WorkspaceStubVariables,
+} from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceAbout } from './workspace-about';
@@ -118,7 +122,7 @@ describe('WorkspaceAbout', () => {
         name: /share/i,
       })
     );
-    screen.getByText('Share defaultWorkspace');
+    screen.getByText('Share ' + WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME);
   });
 
   test.each([

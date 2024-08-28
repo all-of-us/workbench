@@ -101,7 +101,7 @@ describe(WorkspaceWrapper.name, () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       namespace: 'something else',
-      terraName: 'some other ID',
+      terraName: 'some other terraName',
     });
     nextWorkspaceWarmupStore.next({
       ...workspaceDataStub,
@@ -127,7 +127,7 @@ describe(WorkspaceWrapper.name, () => {
     const nextWs = {
       ...workspaceDataStub,
       namespace: 'something else',
-      terraName: 'some other ID',
+      terraName: 'some other terraName',
     };
     nextWorkspaceWarmupStore.next(nextWs);
 
@@ -161,7 +161,7 @@ describe(WorkspaceWrapper.name, () => {
       currentWorkspaceStore.next({
         ...workspaceDataStub,
         namespace: 'something else',
-        terraName: 'some other ID',
+        terraName: 'some other terraName',
       });
       nextWorkspaceWarmupStore.next(workspaceDataStub);
 
