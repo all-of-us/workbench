@@ -1,19 +1,23 @@
 package org.pmiops.workbench.initialcredits;
 
+import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,28 +30,32 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final MailService mailService;
   private final Clock clock;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public InitialCreditsExpirationServiceImpl(
       UserDao userDao,
       UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
       MailService mailService,
-      WorkspaceService workspaceService,
-      Clock clock) {
+      WorkspaceDao workspaceDao,
+      Clock clock,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userDao = userDao;
     this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.mailService = mailService;
     this.clock = clock;
-    this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      List<DbUser> users = (List<DbUser>) userDao.findAllById(userIdsList);
-      users.forEach(user -> checkCreditsExpirationForUser(user, now));
+      Iterable<DbUser> users = userDao.findAllById(userIdsList);
+      users.forEach(
+          user -> checkCreditsExpirationForUser(user, now));
     }
   }
 
@@ -69,12 +77,12 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
             .getNotificationStatus()
             .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
         && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
-      workspaceService.updateFreeTierWorkspacesStatus(user, BillingStatus.EXPIRED);
+      expireBillingStatusForUserWorkspaces(user);
       try {
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
             InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-        userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
+         userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
 
       } catch (MessagingException e) {
         log.warning(
@@ -83,5 +91,15 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                 user.getUserId()));
       }
     }
+  }
+
+  private void expireBillingStatusForUserWorkspaces(DbUser user) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                WorkspaceUtils.isFreeTier(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .map(DbWorkspace::getWorkspaceId)
+        .forEach(id -> workspaceDao.updateBillingStatus(id, BillingStatus.EXPIRED));
   }
 }

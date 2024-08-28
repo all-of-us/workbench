@@ -39,7 +39,6 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -96,7 +95,6 @@ public class WorkspaceMapperTest {
     CohortService.class,
     UserInitialCreditsExpirationDao.class,
     MailService.class,
-    WorkspaceService.class
   })
   static class Configuration {}
 
