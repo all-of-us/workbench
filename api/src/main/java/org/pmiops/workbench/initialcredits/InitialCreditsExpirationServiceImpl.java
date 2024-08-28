@@ -12,10 +12,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
 import org.pmiops.workbench.workspaces.WorkspaceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,13 +70,13 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         && !userInitialCreditsExpiration.isBypassed()
         && userInitialCreditsExpiration
             .getNotificationStatus()
-            .equals(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)
+            .equals(NotificationStatus.NO_NOTIFICATION_SENT)
         && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
       expireBillingStatusForUserWorkspaces(user);
       try {
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
-            InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
+            NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
         userDao.save(user);
 
       } catch (MessagingException e) {

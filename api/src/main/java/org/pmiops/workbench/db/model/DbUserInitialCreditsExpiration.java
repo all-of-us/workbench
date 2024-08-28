@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.sql.Timestamp;
-import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
 
 @Entity
 @Table(name = "user_initial_credits_expiration")
@@ -21,9 +20,7 @@ public class DbUserInitialCreditsExpiration {
   private Timestamp expirationTime;
   private boolean bypassed;
   private int extensionCount;
-  private Short notificationStatus =
-      DbStorageEnums.initialCreditExpirationNotificationStatusToStorage(
-          InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT);
+  private NotificationStatus notificationStatus;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,14 +86,18 @@ public class DbUserInitialCreditsExpiration {
   }
 
   @Column(name = "notification_status")
-  public InitialCreditExpirationNotificationStatus getNotificationStatus() {
-    return DbStorageEnums.initialCreditExpirationNotificationStatusFromStorage(notificationStatus);
+  public NotificationStatus getNotificationStatus() {
+    return notificationStatus;
   }
 
   public DbUserInitialCreditsExpiration setNotificationStatus(
-      InitialCreditExpirationNotificationStatus notificationStatus) {
-    this.notificationStatus =
-        DbStorageEnums.initialCreditExpirationNotificationStatusToStorage(notificationStatus);
+      NotificationStatus notificationStatus) {
+    this.notificationStatus = notificationStatus;
     return this;
+  }
+
+  public enum NotificationStatus {
+    NO_NOTIFICATION_SENT,
+    EXPIRATION_NOTIFICATION_SENT
   }
 }
