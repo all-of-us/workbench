@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,7 +72,6 @@ public class InitialCreditsExpirationServiceTest {
 
   @BeforeEach
   public void setUp() {
-    reset(userDao, mailService, workspaceDao);
     config = WorkbenchConfig.createEmptyConfig();
     config.billing.accountId = "billingAccountId";
     when(fakeClock.instant()).thenReturn(FakeClockConfiguration.NOW.toInstant());
