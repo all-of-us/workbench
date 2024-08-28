@@ -150,7 +150,7 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 
   @Test
@@ -167,7 +167,7 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 
   @Test
@@ -187,7 +187,7 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 
   @Test
@@ -208,7 +208,7 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 
   @Test
@@ -230,7 +230,7 @@ public class InitialCreditsExpirationServiceTest {
     // Called once during setup and once during the test
     verify(spyUserDao, times(2)).save(any());
     verify(spyWorkspaceDao, times(1))
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 
   @Test
@@ -252,6 +252,6 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, times(1))
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
+        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
   }
 }

@@ -9460,7 +9460,6 @@ components:
       enum:
       - ACTIVE
       - INACTIVE
-      - EXPIRED
     BillingAccountType:
       type: string
       description: Whether a billing project is provided by the Researcher Workbench

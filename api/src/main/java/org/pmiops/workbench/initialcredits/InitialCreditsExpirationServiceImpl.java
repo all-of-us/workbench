@@ -95,6 +95,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                 WorkspaceUtils.isFreeTier(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateBillingStatus(id, BillingStatus.EXPIRED));
+        .forEach(id -> workspaceDao.updateBillingStatus(id, BillingStatus.INACTIVE));
   }
 }

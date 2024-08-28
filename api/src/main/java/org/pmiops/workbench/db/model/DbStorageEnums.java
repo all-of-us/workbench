@@ -110,7 +110,6 @@ public final class DbStorageEnums {
       ImmutableBiMap.<BillingStatus, Short>builder()
           .put(BillingStatus.ACTIVE, (short) 0)
           .put(BillingStatus.INACTIVE, (short) 1)
-          .put(BillingStatus.EXPIRED, (short) 2)
           .build();
 
   public static BillingStatus billingStatusFromStorage(Short s) {
@@ -604,14 +603,4 @@ public final class DbStorageEnums {
               .put(
                   InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT, (short) 1)
               .build();
-
-  public static InitialCreditExpirationNotificationStatus
-      initialCreditExpirationNotificationStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS.inverse().get(s);
-  }
-
-  public static Short initialCreditExpirationNotificationStatusToStorage(
-      InitialCreditExpirationNotificationStatus s) {
-    return CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS.get(s);
-  }
 }
