@@ -289,7 +289,8 @@ public class WorkspaceAuditorTest {
             // changes
             .name("a new name")
             .namespace("a new namespace")
-            .creator("user10@fake-research-aou.org");
+            .creator("user10@fake-research-aou.org")
+            .featuredCategory(null);
     final int wsChanges = 3;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
