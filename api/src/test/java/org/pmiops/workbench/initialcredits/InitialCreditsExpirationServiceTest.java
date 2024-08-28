@@ -22,10 +22,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -179,7 +179,8 @@ public class InitialCreditsExpirationServiceTest {
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
-                        .setExpirationTime(NOW_PLUS_ONE_DAY)));
+                        .setExpirationTime(NOW_PLUS_ONE_DAY)
+                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
     when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
@@ -200,9 +201,7 @@ public class InitialCreditsExpirationServiceTest {
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(
-                            InitialCreditExpirationNotificationStatus
-                                .EXPIRATION_NOTIFICATION_SENT)));
+                        .setNotificationStatus(NotificationStatus.EXPIRATION_NOTIFICATION_SENT)));
     when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
@@ -223,8 +222,7 @@ public class InitialCreditsExpirationServiceTest {
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(
-                            InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)));
+                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
     when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
@@ -246,8 +244,7 @@ public class InitialCreditsExpirationServiceTest {
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
-                        .setNotificationStatus(
-                            InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT)));
+                        .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
     when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
     doThrow(new MessagingException()).when(mailService).alertUserInitialCreditsExpired(any());
 
