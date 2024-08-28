@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -52,8 +51,6 @@ public class InitialCreditsExpirationServiceTest {
 
   @SpyBean private WorkspaceDao workspaceDao;
 
-  @MockBean private UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
-
   @MockBean private FakeClock fakeClock;
 
   private static WorkbenchConfig config;
@@ -76,7 +73,7 @@ public class InitialCreditsExpirationServiceTest {
 
   @BeforeEach
   public void setUp() {
-    reset(userDao, mailService, userInitialCreditsExpirationDao, workspaceDao);
+    reset(userDao, mailService, workspaceDao);
     config = WorkbenchConfig.createEmptyConfig();
     config.billing.accountId = "billingAccountId";
     when(fakeClock.instant()).thenReturn(FakeClockConfiguration.NOW.toInstant());
@@ -87,6 +84,11 @@ public class InitialCreditsExpirationServiceTest {
                 .setBillingAccountName("billingAccounts/" + config.billing.accountId)
                 .setWorkspaceId(1L));
     when(workspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
+  }
+
+  private void verifyUserSaveOnlyDuringSetup() {
+    // Called once during setup but not during the test
+    verify(userDao, times(1)).save(any());
   }
 
   @Test
@@ -147,7 +149,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, never()).save(any());
+    verifyUserSaveOnlyDuringSetup();
     verify(workspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
@@ -164,7 +166,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, never()).save(any());
+    verifyUserSaveOnlyDuringSetup();
     verify(workspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
@@ -183,7 +185,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, never()).save(any());
+    verifyUserSaveOnlyDuringSetup();
     verify(workspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
@@ -206,7 +208,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, never()).save(any());
+    verifyUserSaveOnlyDuringSetup();
     verify(workspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
@@ -228,7 +230,8 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, times(1)).save(any());
+    // Called once during setup and once during the test
+    verify(userDao, times(2)).save(any());
     verify(workspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
@@ -251,7 +254,7 @@ public class InitialCreditsExpirationServiceTest {
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
-    verify(userInitialCreditsExpirationDao, never()).save(any());
+    verifyUserSaveOnlyDuringSetup();
     verify(workspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }

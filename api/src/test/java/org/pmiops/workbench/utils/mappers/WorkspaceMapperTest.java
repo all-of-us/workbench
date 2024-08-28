@@ -17,7 +17,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -93,7 +92,6 @@ public class WorkspaceMapperTest {
     WorkspaceDao.class,
     ConceptSetService.class,
     CohortService.class,
-    UserInitialCreditsExpirationDao.class,
     MailService.class,
   })
   static class Configuration {}

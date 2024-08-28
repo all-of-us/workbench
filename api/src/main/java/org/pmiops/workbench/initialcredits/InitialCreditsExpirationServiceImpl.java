@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserInitialCreditsExpirationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
@@ -27,7 +26,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private static final Logger log =
       Logger.getLogger(InitialCreditsExpirationServiceImpl.class.getName());
   private final UserDao userDao;
-  private final UserInitialCreditsExpirationDao userInitialCreditsExpirationDao;
   private final MailService mailService;
   private final Clock clock;
   private final WorkspaceDao workspaceDao;
@@ -36,13 +34,11 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   @Autowired
   public InitialCreditsExpirationServiceImpl(
       UserDao userDao,
-      UserInitialCreditsExpirationDao userInitialCreditsExpirationDao,
       MailService mailService,
       WorkspaceDao workspaceDao,
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userDao = userDao;
-    this.userInitialCreditsExpirationDao = userInitialCreditsExpirationDao;
     this.mailService = mailService;
     this.clock = clock;
     this.workspaceDao = workspaceDao;
@@ -81,7 +77,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
             InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-        userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
+        userDao.save(user);
 
       } catch (MessagingException e) {
         log.warning(
