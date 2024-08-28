@@ -11,6 +11,7 @@ query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMA
 where table_name='person' AND column_name = 'self_reported_category_concept_id'"
 selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 echo "Getting self_reported_category_concept_id column count: $selfReportedCategoryCount"
+echo "query for self_reported_category_concept_id column count: $query"
 
 echo "Creating demographic criteria"
 
