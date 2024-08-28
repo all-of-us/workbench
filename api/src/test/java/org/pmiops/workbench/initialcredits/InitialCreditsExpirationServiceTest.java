@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -51,6 +52,8 @@ public class InitialCreditsExpirationServiceTest {
   @MockBean private MailService mailService;
 
   @MockBean private FakeClock fakeClock;
+
+  @MockBean private LeonardoApiClient leonardoApiClient;
 
   private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
   private static final Timestamp NOW_PLUS_ONE_DAY =
@@ -151,6 +154,7 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
   @Test
@@ -168,6 +172,7 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
   @Test
@@ -188,6 +193,7 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
   @Test
@@ -209,6 +215,7 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
   @Test
@@ -231,6 +238,7 @@ public class InitialCreditsExpirationServiceTest {
     verify(spyUserDao, times(2)).save(any());
     verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
   @Test
@@ -253,5 +261,6 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 }
