@@ -54,8 +54,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     if (userIdsList != null && !userIdsList.isEmpty()) {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(
-          user -> checkCreditsExpirationForUser(user, now));
+      users.forEach(user -> checkCreditsExpirationForUser(user, now));
     }
   }
 
@@ -82,7 +81,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
             InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-         userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
+        userInitialCreditsExpirationDao.save(userInitialCreditsExpiration);
 
       } catch (MessagingException e) {
         log.warning(
