@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.Task;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -117,9 +116,9 @@ public class OfflineUserControllerTest {
 
     // We set a batch size of 3, so we expect two cloud tasks.
     List<SynchronizeUserAccessRequest> expectedRequests =
-        ImmutableList.of(
-            new SynchronizeUserAccessRequest().userIds(ImmutableList.of(1L, 2L, 3L)),
-            new SynchronizeUserAccessRequest().userIds(ImmutableList.of(4L)));
+        List.of(
+            new SynchronizeUserAccessRequest().userIds(List.of(1L, 2L, 3L)),
+            new SynchronizeUserAccessRequest().userIds(List.of(4L)));
     for (SynchronizeUserAccessRequest expected : expectedRequests) {
       verify(mockCloudTasksClient)
           .createTask(
@@ -142,9 +141,9 @@ public class OfflineUserControllerTest {
 
     // Batch size is 2, so we expect 2 groups.
     List<AuditProjectAccessRequest> expectedRequests =
-        ImmutableList.of(
-            new AuditProjectAccessRequest().userIds(ImmutableList.of(1L, 2L)),
-            new AuditProjectAccessRequest().userIds(ImmutableList.of(3L, 4L)));
+        List.of(
+            new AuditProjectAccessRequest().userIds(List.of(1L, 2L)),
+            new AuditProjectAccessRequest().userIds(List.of(3L, 4L)));
     for (AuditProjectAccessRequest expected : expectedRequests) {
       verify(mockCloudTasksClient)
           .createTask(
@@ -167,8 +166,7 @@ public class OfflineUserControllerTest {
     offlineUserController.checkInitialCreditsExpiration();
 
     // Batch size is 2, so we expect 2 groups.
-    List<List<Long>> expectedRequests =
-        ImmutableList.of(ImmutableList.of(1L, 2L), ImmutableList.of(3L, 4L));
+    List<List<Long>> expectedRequests = List.of(List.of(1L, 2L), List.of(3L, 4L));
     for (List<Long> expected : expectedRequests) {
       verify(mockCloudTasksClient)
           .createTask(
