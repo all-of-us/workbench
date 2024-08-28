@@ -44,20 +44,21 @@ public class InitialCreditsExpirationServiceTest {
 
   @Autowired private InitialCreditsExpirationService service;
 
+  @SpyBean private UserDao spyUserDao;
+
+  @SpyBean private WorkspaceDao spyWorkspaceDao;
+
   @MockBean private MailService mailService;
-
-  @SpyBean private UserDao userDao;
-
-  @SpyBean private WorkspaceDao workspaceDao;
 
   @MockBean private FakeClock fakeClock;
 
-  private static WorkbenchConfig config;
   private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
   private static final Timestamp NOW_PLUS_ONE_DAY =
       Timestamp.from(FakeClockConfiguration.NOW.toInstant().plusSeconds(24 * 60 * 60));
   private static final Timestamp NOW_MINUS_ONE_DAY =
       Timestamp.from(FakeClockConfiguration.NOW.toInstant().minusSeconds(24 * 60 * 60));
+
+  private static WorkbenchConfig config;
 
   private DbWorkspace workspace;
 
@@ -77,16 +78,16 @@ public class InitialCreditsExpirationServiceTest {
     when(fakeClock.instant()).thenReturn(FakeClockConfiguration.NOW.toInstant());
 
     workspace =
-        workspaceDao.save(
+        spyWorkspaceDao.save(
             new DbWorkspace()
                 .setBillingAccountName("billingAccounts/" + config.billing.accountId)
                 .setWorkspaceId(1L));
-    when(workspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
+    when(spyWorkspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
   }
 
   private void verifyUserSaveOnlyDuringSetup() {
     // Called once during setup but not during the test
-    verify(userDao, times(1)).save(any());
+    verify(spyUserDao, times(1)).save(any());
   }
 
   @Test
@@ -130,62 +131,62 @@ public class InitialCreditsExpirationServiceTest {
   @Test
   public void test_checkCreditsExpirationForUserIDs_null() {
     service.checkCreditsExpirationForUserIDs(null);
-    verify(userDao, never()).findAllById(any());
+    verify(spyUserDao, never()).findAllById(any());
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_emptyList() {
     service.checkCreditsExpirationForUserIDs(new ArrayList<>());
-    verify(userDao, never()).findAllById(any());
+    verify(spyUserDao, never()).findAllById(any());
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_noExpirationRecord() throws MessagingException {
-    DbUser user = userDao.save(new DbUser());
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    DbUser user = spyUserDao.save(new DbUser());
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(workspaceDao, never())
+    verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_bypassed() throws MessagingException {
     DbUser user =
-        userDao.save(
+        spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration().setBypassed(true).setExpirationTime(NOW)));
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(workspaceDao, never())
+    verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 
   @Test
   public void test_checkCreditsExpirationForUserIDs_unexpired() throws MessagingException {
     DbUser user =
-        userDao.save(
+        spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_PLUS_ONE_DAY)
                         .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(workspaceDao, never())
+    verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 
@@ -193,20 +194,20 @@ public class InitialCreditsExpirationServiceTest {
   public void test_checkCreditsExpirationForUserIDs_expiredPreviouslySentNotification()
       throws MessagingException {
     DbUser user =
-        userDao.save(
+        spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
                         .setNotificationStatus(NotificationStatus.EXPIRATION_NOTIFICATION_SENT)));
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(workspaceDao, never())
+    verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 
@@ -214,21 +215,21 @@ public class InitialCreditsExpirationServiceTest {
   public void test_checkCreditsExpirationForUserIDs_expiredUnsentNotification()
       throws MessagingException {
     DbUser user =
-        userDao.save(
+        spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
                         .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     // Called once during setup and once during the test
-    verify(userDao, times(2)).save(any());
-    verify(workspaceDao, times(1))
+    verify(spyUserDao, times(2)).save(any());
+    verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 
@@ -236,21 +237,21 @@ public class InitialCreditsExpirationServiceTest {
   public void test_checkCreditsExpirationForUserIDs_expiredUnsentNotificationWithMailException()
       throws MessagingException {
     DbUser user =
-        userDao.save(
+        spyUserDao.save(
             new DbUser()
                 .setUserInitialCreditsExpiration(
                     new DbUserInitialCreditsExpiration()
                         .setBypassed(false)
                         .setExpirationTime(NOW_MINUS_ONE_DAY)
                         .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT)));
-    when(userDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
+    when(spyUserDao.findAllById(List.of(user.getUserId()))).thenReturn(List.of(user));
     doThrow(new MessagingException()).when(mailService).alertUserInitialCreditsExpired(any());
 
     service.checkCreditsExpirationForUserIDs(List.of(user.getUserId()));
 
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(workspaceDao, times(1))
+    verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.EXPIRED);
   }
 }
