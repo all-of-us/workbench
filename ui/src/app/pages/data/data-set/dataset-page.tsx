@@ -332,7 +332,7 @@ interface ImmutableWorkspaceCohortListItemProps {
   checked: boolean;
   cohortId: number;
   namespace: string;
-  wid: string;
+  terraName: string;
   dataTestId?: string;
 }
 const ImmutableWorkspaceCohortListItem = ({
@@ -341,7 +341,7 @@ const ImmutableWorkspaceCohortListItem = ({
   checked,
   cohortId,
   namespace,
-  wid,
+  terraName,
   dataTestId,
 }: ImmutableWorkspaceCohortListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
@@ -376,7 +376,7 @@ const ImmutableWorkspaceCohortListItem = ({
           <StyledRouterLink
             path={`${dataTabPath(
               namespace,
-              wid
+              terraName
             )}/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
           >
@@ -1755,7 +1755,7 @@ export const DatasetPage = fp.flow(
                         checked={selectedCohortIds.includes(cohort.id)}
                         cohortId={cohort.id}
                         namespace={namespace}
-                        wid={terraName}
+                        terraName={terraName}
                         onChange={() => selectCohort(cohort)}
                       />
                     ))}
