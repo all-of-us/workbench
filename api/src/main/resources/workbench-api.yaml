@@ -2771,7 +2771,7 @@ paths:
       tags:
       - offlineUser
       - cron
-      description: Updates users if they their initial credits have recently expired
+      description: Updates users if their initial credits have recently expired
       operationId: checkInitialCreditsExpiration
       security: []
       responses:
