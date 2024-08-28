@@ -14,7 +14,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
-import org.pmiops.workbench.model.InitialCreditExpirationNotificationStatus;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -594,13 +593,4 @@ public final class DbStorageEnums {
   public static TierAccessStatus tierAccessStatusFromStorage(Short tierAccessStatus) {
     return CLIENT_TO_STORAGE_TIER_ACCESS_STATUS.inverse().get(tierAccessStatus);
   }
-
-  // InitialCreditExpirationNotificationStatus
-  private static final BiMap<InitialCreditExpirationNotificationStatus, Short>
-      CLIENT_TO_STORAGE_INITIAL_CREDIT_EXPIRATION_NOTIFICATION_STATUS =
-          ImmutableBiMap.<InitialCreditExpirationNotificationStatus, Short>builder()
-              .put(InitialCreditExpirationNotificationStatus.NO_NOTIFICATION_SENT, (short) 0)
-              .put(
-                  InitialCreditExpirationNotificationStatus.EXPIRATION_NOTIFICATION_SENT, (short) 1)
-              .build();
 }
