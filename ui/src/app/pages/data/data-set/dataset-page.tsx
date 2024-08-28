@@ -2187,7 +2187,7 @@ export const DatasetPage = fp.flow(
               <GenomicExtractionModal
                 dataSet={dataSet}
                 workspaceNamespace={namespace}
-                workspaceFirecloudName={terraName}
+                workspaceTerraName={terraName}
                 title={
                   'Would you like to extract genomic variant data as VCF files?'
                 }

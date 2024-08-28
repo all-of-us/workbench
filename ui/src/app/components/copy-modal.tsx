@@ -41,7 +41,7 @@ enum RequestState {
 
 export interface CopyModalProps {
   fromWorkspaceNamespace: string;
-  fromWorkspaceFirecloudName: string;
+  fromWorkspaceTerraName: string;
   fromResourceName: string;
   fromCdrVersionId: string;
   fromAccessTierShortName: string;
@@ -174,9 +174,9 @@ const CopyModal = withCdrVersions()(
     }
 
     isDestinationSameWorkspace(workspace: Workspace): boolean {
-      const { fromWorkspaceFirecloudName, fromWorkspaceNamespace } = this.props;
+      const { fromWorkspaceTerraName, fromWorkspaceNamespace } = this.props;
       return (
-        workspace.terraName === fromWorkspaceFirecloudName &&
+        workspace.terraName === fromWorkspaceTerraName &&
         workspace.namespace === fromWorkspaceNamespace
       );
     }

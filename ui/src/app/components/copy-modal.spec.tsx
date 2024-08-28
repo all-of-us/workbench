@@ -141,14 +141,14 @@ describe(CopyModal.name, () => {
   const controlledCdrWorkspace = workspaces[5];
 
   const fromWorkspaceNamespace = ownerWorkspace.namespace;
-  const fromWorkspaceFirecloudName = ownerWorkspace.terraName;
+  const fromWorkspaceTerraName = ownerWorkspace.terraName;
   const fromCdrVersionId = ownerWorkspace.cdrVersionId;
   const fromAccessTierShortName = ownerWorkspace.accessTierShortName;
   const fromResourceName = 'notebook';
   const notebookSaveFunction = (copyRequest) => {
     return notebooksApi().copyNotebook(
       fromWorkspaceNamespace,
-      fromWorkspaceFirecloudName,
+      fromWorkspaceTerraName,
       dropJupyterNotebookFileSuffix(fromResourceName),
       copyRequest
     );
@@ -160,7 +160,7 @@ describe(CopyModal.name, () => {
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
         props.fromWorkspaceNamespace,
-        props.fromWorkspaceFirecloudName,
+        props.fromWorkspaceTerraName,
         props.fromResourceName,
         copyRequest
       );
@@ -174,11 +174,11 @@ describe(CopyModal.name, () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
 
     props = {
-      fromWorkspaceNamespace: fromWorkspaceNamespace,
-      fromWorkspaceFirecloudName: fromWorkspaceFirecloudName,
-      fromResourceName: fromResourceName,
-      fromCdrVersionId: fromCdrVersionId,
-      fromAccessTierShortName: fromAccessTierShortName,
+      fromWorkspaceNamespace,
+      fromWorkspaceTerraName,
+      fromResourceName,
+      fromCdrVersionId,
+      fromAccessTierShortName,
       resourceType: ResourceType.NOTEBOOK,
       onClose: () => {},
       onCopy: () => {},
@@ -242,7 +242,7 @@ describe(CopyModal.name, () => {
   it('should list workspaces with the same CDR version first', async () => {
     // choose a workspace with an alternative CDR version instead of the default
     props.fromWorkspaceNamespace = altCdrWorkspace.namespace;
-    props.fromWorkspaceFirecloudName = altCdrWorkspace.terraName;
+    props.fromWorkspaceTerraName = altCdrWorkspace.terraName;
     props.fromCdrVersionId = altCdrWorkspace.cdrVersionId;
 
     component();
@@ -293,7 +293,7 @@ describe(CopyModal.name, () => {
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
-      props.fromWorkspaceFirecloudName,
+      props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
         toWorkspaceName: writerWorkspace.terraName,
@@ -332,7 +332,7 @@ describe(CopyModal.name, () => {
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
-      props.fromWorkspaceFirecloudName,
+      props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
         toWorkspaceName: altCdrWorkspace.terraName,
@@ -395,7 +395,7 @@ describe(CopyModal.name, () => {
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
-      props.fromWorkspaceFirecloudName,
+      props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
         toWorkspaceName: writerWorkspace.terraName,

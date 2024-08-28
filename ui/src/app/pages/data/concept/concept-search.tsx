@@ -661,7 +661,7 @@ export const ConceptSearch = fp.flow(
           {copying && (
             <CopyModal
               fromWorkspaceNamespace={namespace}
-              fromWorkspaceFirecloudName={terraName}
+              fromWorkspaceTerraName={terraName}
               fromResourceName={conceptSet.name}
               fromCdrVersionId={cdrVersionId}
               fromAccessTierShortName={accessTierShortName}

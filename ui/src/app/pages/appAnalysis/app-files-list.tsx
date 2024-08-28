@@ -273,7 +273,7 @@ export const AppFilesList = withCurrentWorkspace()(
         {showNotebookSizeWarningModal && (
           <NotebookSizeWarningModal
             namespace={workspace.namespace}
-            firecloudName={workspace.terraName}
+            terraName={workspace.terraName}
             notebookName={activeNotebookName}
             handleClose={() => {
               setShowNotebookSizeWarningModal(false);

@@ -175,7 +175,7 @@ export const ConceptSetActionMenu = fp.flow(
           {this.state.showCopyModal && (
             <CopyModal
               fromWorkspaceNamespace={resource.workspaceNamespace}
-              fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
+              fromWorkspaceTerraName={resource.workspaceFirecloudName}
               fromResourceName={resource.conceptSet.name}
               fromCdrVersionId={resource.cdrVersionId}
               fromAccessTierShortName={resource.accessTierShortName}

@@ -200,7 +200,7 @@ export const DatasetActionMenu = fp.flow(
             <GenomicExtractionModal
               dataSet={resource.dataSet}
               workspaceNamespace={resource.workspaceNamespace}
-              workspaceFirecloudName={resource.workspaceFirecloudName}
+              workspaceTerraName={resource.workspaceFirecloudName}
               closeFunction={() =>
                 this.setState({ showGenomicExtractionModal: false })
               }
