@@ -3,5 +3,10 @@ cron:
   schedule: every 24 hours
 - url: /v1/cron/checkFreeTierBillingUsage
   schedule: every 24 hours
+- description: Find and alert users whose initial credits have expired using cloud task
+  url: /v1/cron/checkInitialCreditsExpiration
+  schedule: every 30 minutes
+  timezone: UTC
+  target: api
 
 

@@ -80,9 +80,3 @@ cron:
   schedule: every day 21:00
   timezone: America/Chicago
   target: api
-- description: Find and alert users whose initial credits have expired using cloud task
-  url: /v1/cron/checkInitialCreditsExpiration
-  schedule: every 30 minutes
-  timezone: UTC
-  target: api
-
