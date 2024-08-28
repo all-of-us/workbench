@@ -171,10 +171,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceName) {
+      String workspaceNamespace, String workspaceTerraName) {
     String bucketName =
         fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
@@ -182,7 +182,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // Storage List results
     int notebookFilesCount =
         notebooksService
-            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
+            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName)
             .size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);

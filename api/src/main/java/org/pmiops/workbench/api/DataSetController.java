@@ -141,10 +141,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
-      String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
+      String workspaceNamespace, String terraName, DataSetPreviewRequest dataSetPreviewRequest) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
     dataSetService.validateDataSetPreviewRequestResources(
         dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
 
@@ -224,10 +224,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
-      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+      String workspaceNamespace, String terraName, DataSetExportRequest dataSetExportRequest) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
 
     List<String> codeCells = dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace);
 
@@ -262,7 +262,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
-      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+      String workspaceNamespace, String terraName, DataSetExportRequest dataSetExportRequest) {
     AnalysisLanguage analysisLanguage = dataSetExportRequest.getAnalysisLanguage();
     if (analysisLanguage == null) {
       throw new BadRequestException("Analysis language is required");
@@ -277,14 +277,11 @@ public class DataSetController implements DataSetApiDelegate {
 
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateInitialCreditUsage(workspaceNamespace, workspaceId);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateInitialCreditUsage(workspaceNamespace, terraName);
 
     String bucketName =
-        fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceId)
-            .getWorkspace()
-            .getBucketName();
+        fireCloudService.getWorkspace(workspaceNamespace, terraName).getWorkspace().getBucketName();
 
     JSONObject notebookFile;
 
@@ -352,10 +349,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<Boolean> markDirty(
-      String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
+      String workspaceNamespace, String terraName, MarkDataSetRequest markDataSetRequest) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
     dataSetService.markDirty(
         dbWorkspace.getWorkspaceId(),
         markDataSetRequest.getResourceType(),
@@ -365,10 +362,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId) {
+      String workspaceNamespace, String terraName, Long dataSetId) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
 
     dataSetService.deleteDataSet(dbWorkspace.getWorkspaceId(), dataSetId);
     return ResponseEntity.ok(new EmptyResponse());
@@ -376,13 +373,13 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSet> updateDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
+      String workspaceNamespace, String terraName, Long dataSetId, DataSetRequest request) {
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
     request.setWorkspaceId(dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(
         dataSetService.updateDataSet(dbWorkspace.getWorkspaceId(), dataSetId, request));
@@ -390,10 +387,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSet> getDataSet(
-      String workspaceNamespace, String workspaceId, Long dataSetId) {
+      String workspaceNamespace, String terraName, Long dataSetId) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
 
     DataSet dataSet =
         dataSetService
@@ -412,11 +409,11 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
-      Long id, String workspaceNamespace, String workspaceId, ResourceTypeRequest request) {
+      Long id, String workspaceNamespace, String terraName, ResourceTypeRequest request) {
     final ResourceType resourceType = ResourceType.fromValue(request.getResourceType().toString());
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
         new DataSetListResponse()
@@ -443,9 +440,9 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
-      String workspaceNamespace, String workspaceId, String domainValue, Long conceptSetId) {
+      String workspaceNamespace, String terraName, String domainValue, Long conceptSetId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+        workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
     if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
       response.addItemsItem(
@@ -461,10 +458,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<GenomicExtractionJob> extractGenomicData(
-      String workspaceNamespace, String workspaceId, Long dataSetId) {
+      String workspaceNamespace, String terraName, Long dataSetId) {
     DbWorkspace workspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
     if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
       throw new BadRequestException("Workspace CDR does not have access to WGS data");
     }
@@ -482,12 +479,11 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<GenomicExtractionJobListResponse> getGenomicExtractionJobs(
-      String workspaceNamespace, String workspaceId) {
+      String workspaceNamespace, String terraName) {
     return ResponseEntity.ok(
         new GenomicExtractionJobListResponse()
             .jobs(
-                genomicExtractionService.getGenomicExtractionJobs(
-                    workspaceNamespace, workspaceId)));
+                genomicExtractionService.getGenomicExtractionJobs(workspaceNamespace, terraName)));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,
@@ -503,10 +499,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> abortGenomicExtractionJob(
-      String workspaceNamespace, String workspaceId, String jobId) {
+      String workspaceNamespace, String terraName, String jobId) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
 
     try {
       genomicExtractionService.abortGenomicExtractionJob(dbWorkspace, jobId);

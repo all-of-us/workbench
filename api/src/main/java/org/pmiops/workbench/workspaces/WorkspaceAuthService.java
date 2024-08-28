@@ -56,9 +56,9 @@ public class WorkspaceAuthService {
    * This involves checking whether they have a free tier billing account
    * and that their initial credits have not been exhausted or expired.
    */
-  public void validateInitialCreditUsage(String workspaceNamespace, String workspaceId)
+  public void validateInitialCreditUsage(String workspaceNamespace, String terraName)
       throws ForbiddenException {
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, terraName);
     if (isInitialCredits(workspace.getBillingAccountName(), workbenchConfigProvider.get())
         && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
       throw new ForbiddenException(
@@ -68,10 +68,10 @@ public class WorkspaceAuthService {
     }
   }
 
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String terraName)
       throws IllegalArgumentException {
     String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel().toString();
+        fireCloudService.getWorkspace(workspaceNamespace, terraName).getAccessLevel().toString();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }
@@ -83,10 +83,10 @@ public class WorkspaceAuthService {
   }
 
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
+      String workspaceNamespace, String terraName, WorkspaceAccessLevel requiredAccess) {
     final WorkspaceAccessLevel access;
     try {
-      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      access = getWorkspaceAccessLevel(workspaceNamespace, terraName);
     } catch (IllegalArgumentException e) {
       throw new ServerErrorException(e);
     }
@@ -94,16 +94,16 @@ public class WorkspaceAuthService {
       throw new ForbiddenException(
           String.format(
               "You do not have sufficient permissions to access workspace %s/%s",
-              workspaceNamespace, workspaceId));
+              workspaceNamespace, terraName));
     } else {
       return access;
     }
   }
 
   public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+      String workspaceNamespace, String terraName, WorkspaceAccessLevel workspaceAccessLevel) {
+    enforceWorkspaceAccessLevel(workspaceNamespace, terraName, workspaceAccessLevel);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, terraName);
     // Because we've already checked that the user has access to the workspace in question,
     // we don't need to check their membership in the authorization domain for the CDR version
     // associated with the workspace.

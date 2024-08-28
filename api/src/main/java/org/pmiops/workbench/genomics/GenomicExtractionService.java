@@ -135,10 +135,10 @@ public class GenomicExtractionService {
   }
 
   public List<GenomicExtractionJob> getGenomicExtractionJobs(
-      String workspaceNamespace, String workspaceId) {
+      String workspaceNamespace, String terraName) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
 
     return wgsExtractCromwellSubmissionDao.findAllByWorkspace(dbWorkspace).stream()
         .map(

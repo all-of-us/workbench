@@ -103,21 +103,23 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName) {
+  public List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceTerraName) {
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
-    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceName);
+    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName);
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooksAsService(
-      String bucketName, String workspaceNamespace, String workspaceName) {
+      String bucketName, String workspaceNamespace, String workspaceTerraName) {
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService
+            .getFirecloudWorkspaceAcl(workspaceNamespace, workspaceTerraName)
+            .keySet();
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
@@ -128,9 +130,9 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public List<FileDetail> getAllNotebooksByAppType(
-      String bucketName, String workspaceNamespace, String workspaceName, AppType appType) {
+      String bucketName, String workspaceNamespace, String workspaceTerraName, AppType appType) {
     List<FileDetail> allNotebooks =
-        getNotebooksAsService(bucketName, workspaceNamespace, workspaceName);
+        getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName);
     if (appType.equals(AppType.RSTUDIO)) {
       return allNotebooks.stream()
           .filter(fileDetail -> NotebookUtils.isRStudioFile(fileDetail.getName()))
@@ -146,8 +148,8 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public List<FileDetail> getAllJupyterNotebooks(
-      String bucketName, String workspaceNamespace, String workspaceName) {
-    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceName).stream()
+      String bucketName, String workspaceNamespace, String workspaceTerraName) {
+    return getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName).stream()
         .filter(fileDetail -> NotebookUtils.isJupyterNotebook(fileDetail.getName()))
         .collect(Collectors.toList());
   }
@@ -216,29 +218,28 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String notebookNameWithExtension) {
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithExtension) {
     String newNameWithExtension = "Duplicate of " + notebookNameWithExtension;
-    final FileDetail copiedNotebookFileDetail =
-        copyNotebook(
-            workspaceNamespace,
-            workspaceName,
-            notebookNameWithExtension,
-            workspaceNamespace,
-            workspaceName,
-            newNameWithExtension);
-    return copiedNotebookFileDetail;
+    return copyNotebook(
+        workspaceNamespace,
+        workspaceTerraName,
+        notebookNameWithExtension,
+        workspaceNamespace,
+        workspaceTerraName,
+        newNameWithExtension);
   }
 
   @Override
-  public void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName) {
+  public void deleteNotebook(
+      String workspaceNamespace, String workspaceTerraName, String notebookName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceName, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
     GoogleCloudLocators notebookLocators =
-        getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
+        getNotebookLocators(workspaceNamespace, workspaceTerraName, notebookName);
     cloudStorageClient.deleteBlob(notebookLocators.blobId);
     userRecentResourceService.deleteNotebookEntry(
-        workspaceDao.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
+        workspaceDao.getRequired(workspaceNamespace, workspaceTerraName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
   }
@@ -246,18 +247,18 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail renameNotebook(
       String workspaceNamespace,
-      String workspaceName,
+      String workspaceTerraName,
       String originalNameWithExtension,
       String newNameWithExtension) {
     FileDetail fileDetail =
         copyNotebook(
             workspaceNamespace,
-            workspaceName,
+            workspaceTerraName,
             originalNameWithExtension,
             workspaceNamespace,
-            workspaceName,
+            workspaceTerraName,
             newNameWithExtension);
-    deleteNotebook(workspaceNamespace, workspaceName, originalNameWithExtension);
+    deleteNotebook(workspaceNamespace, workspaceTerraName, originalNameWithExtension);
 
     return fileDetail;
   }
@@ -290,10 +291,10 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public KernelTypeEnum getNotebookKernel(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceTerraName, String notebookName) {
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
@@ -338,10 +339,10 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public String getReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceTerraName, String notebookName) {
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
@@ -351,10 +352,10 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public String adminGetReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithFileExtension) {
     String bucketName =
         fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
