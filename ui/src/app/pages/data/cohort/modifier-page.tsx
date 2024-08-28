@@ -225,7 +225,7 @@ export const ModifierPage = fp.flow(
     closeModifiers,
     cohortContext,
     selections,
-    workspace,
+    workspace: { cdrVersionId },
   }: Props) => {
     const { ns, terraName } = useParams<MatchParams>();
     const [calculateError, setCalculateError] = useState(false);
@@ -296,7 +296,7 @@ export const ModifierPage = fp.flow(
       }
       if (cohortContext.domain === Domain.SURVEY) {
         const cdrVersion = findCdrVersion(
-          workspace.cdrVersionId,
+          cdrVersionId,
           cdrVersionTiersResponse
         );
         // Add CATI modifier for cdrs with hasSurveyConductData
@@ -514,7 +514,6 @@ export const ModifierPage = fp.flow(
 
     const calculate = async () => {
       const { domain, role } = cohortContext;
-      const { namespace, terraName } = workspace;
       AnalyticsTracker.CohortBuilder.ModifiersAction(
         `Calculate - ${domainToTitle(domain)}`
       );
@@ -539,7 +538,7 @@ export const ModifierPage = fp.flow(
           dataFilters: [],
         };
         await cohortBuilderApi()
-          .countParticipants(namespace, terraName, request)
+          .countParticipants(ns, terraName, request)
           .then((response) => {
             setCalculating(false);
             setCount(response);
