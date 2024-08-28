@@ -609,7 +609,7 @@ public class WorkspacesControllerTest {
   private Workspace createWorkspaceAndGrantAccess(WorkspaceAccessLevel accessLevel) {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), accessLevel);
+    stubGetWorkspace(ws.getNamespace(), ws.getTerraName(), ws.getCreator(), accessLevel);
     return ws;
   }
 

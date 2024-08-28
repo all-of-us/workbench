@@ -38,8 +38,6 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
     })
 public interface WorkspaceMapper {
 
-  // DEPRECATED and subject to deletion.  Use terraName instead.
-  @Mapping(target = "id", source = "fcWorkspace.name")
   // DEPRECATED and subject to deletion.
   // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
   @Mapping(target = "name", source = "dbWorkspace.name")
@@ -102,8 +100,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "otherDisseminateResearchFindings", source = "disseminateResearchOther")
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
 
-  // DEPRECATED and subject to deletion.  Use terraName instead.
-  @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
   @Mapping(
