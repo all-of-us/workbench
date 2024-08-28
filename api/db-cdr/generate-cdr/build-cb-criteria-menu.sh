@@ -41,7 +41,7 @@ wearConsentDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legac
 
 echo "Getting self_reported_category_concept_id column count"
 query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
-where table_name='person' AND column_name = 'self_reported_category_concept_id'"
+where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
 selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 ###############################
