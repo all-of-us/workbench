@@ -4527,7 +4527,7 @@ paths:
       - cloudTaskUser
       - cloudTask
       description: |
-        Run the business logic to handle users who have consumed or about to consume their free credits. Including disabling their workspaces and sending them notifications.
+        Run the business logic to handle users whose free credits have expired. Including disabling compute, deleting cloud environments, and sending them notifications.
       operationId: checkCreditsExpirationForUserIDs
       security: [ ]
       requestBody:
