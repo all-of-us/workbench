@@ -5,7 +5,7 @@ cron:
   schedule: every 24 hours
 - description: Find and alert users whose initial credits have expired using cloud task
   url: /v1/cron/checkInitialCreditsExpiration
-  schedule: every 30 minutes
+  schedule: every 24 hours
   timezone: UTC
   target: api
 
