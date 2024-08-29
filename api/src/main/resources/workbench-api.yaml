@@ -4493,7 +4493,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UseridList'
+              $ref: '#/components/schemas/UserIdList'
         required: true
       responses:
         200:
@@ -4535,7 +4535,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UseridList'
+              $ref: '#/components/schemas/UserIdList'
         required: true
       responses:
         200:
@@ -11797,7 +11797,7 @@ components:
           items:
             type: integer
             format: int64
-    UseridList:
+    UserIdList:
       type: array
       items:
         type: integer
