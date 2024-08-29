@@ -9,4 +9,6 @@ public interface InitialCreditsExpirationService {
   Optional<Timestamp> getCreditsExpiration(DbUser user);
 
   void checkCreditsExpirationForUserIDs(List<Long> userIdsList);
+
+  boolean haveCreditsExpired(DbUser user);
 }

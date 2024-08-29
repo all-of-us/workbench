@@ -67,7 +67,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
-  public boolean isCreditsExpired(DbUser user) {
+  @Override
+  public boolean haveCreditsExpired(DbUser user) {
     return getCreditsExpiration(user)
         .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
         .orElse(false);
@@ -77,11 +78,10 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (null != userInitialCreditsExpiration
-        && isCreditsExpired(user)
+        && haveCreditsExpired(user)
         && userInitialCreditsExpiration
             .getNotificationStatus()
-            .equals(NotificationStatus.NO_NOTIFICATION_SENT)
-        ) {
+            .equals(NotificationStatus.NO_NOTIFICATION_SENT)) {
       logger.info(
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
