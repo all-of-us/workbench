@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -82,20 +81,18 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
           userInitialCreditsExpiration.getExpirationTime());
-      Stream<DbWorkspace> expiringWorkspaces =
-          workspaceDao.findAllByCreator(user).stream()
-              .filter(
-                  ws ->
-                      WorkspaceUtils.isFreeTier(
-                          ws.getBillingAccountName(), workbenchConfigProvider.get()))
-              .filter(DbWorkspace::isActive)
-              .filter(ws -> ws.getBillingStatus().equals(BillingStatus.ACTIVE));
-      logger.info(
-          "Setting billing status to invalid for all workspaces owned by user {}",
-          user.getUsername());
-      expireBillingStatusForWorkspaces(expiringWorkspaces);
-      logger.info("Deleting apps and runtimes in workspaces owned by user {}", user.getUsername());
-      deleteAppsAndRuntimesInWorkspaces(expiringWorkspaces);
+      workspaceDao.findAllByCreator(user).stream()
+          .filter(
+              ws ->
+                  WorkspaceUtils.isFreeTier(
+                      ws.getBillingAccountName(), workbenchConfigProvider.get()))
+          .filter(DbWorkspace::isActive)
+          .filter(ws -> ws.getBillingStatus().equals(BillingStatus.ACTIVE))
+          .forEach(
+              ws -> {
+                workspaceDao.updateBillingStatus(ws.getWorkspaceId(), BillingStatus.INACTIVE);
+                deleteAppsAndRuntimesInWorkspace(ws);
+              });
       try {
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
@@ -111,22 +108,14 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     }
   }
 
-  private void expireBillingStatusForWorkspaces(Stream<DbWorkspace> workspaces) {
-    workspaces
-        .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateBillingStatus(id, BillingStatus.INACTIVE));
-  }
+  private void deleteAppsAndRuntimesInWorkspace(DbWorkspace workspace) {
 
-  private void deleteAppsAndRuntimesInWorkspaces(Stream<DbWorkspace> workspaces) {
-    workspaces.forEach(
-        dbWorkspace -> {
-          String namespace = dbWorkspace.getWorkspaceNamespace();
-          try {
-            leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-            logger.info("Deleted apps and runtimes for workspace {}", namespace);
-          } catch (WorkbenchException e) {
-            logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-          }
-        });
+    String namespace = workspace.getWorkspaceNamespace();
+    try {
+      leonardoApiClient.deleteAllResources(workspace.getGoogleProject(), false);
+      logger.info("Deleted apps and runtimes for workspace {}", namespace);
+    } catch (WorkbenchException e) {
+      logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+    }
   }
 }
