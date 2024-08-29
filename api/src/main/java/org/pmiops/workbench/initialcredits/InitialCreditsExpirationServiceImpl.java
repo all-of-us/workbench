@@ -53,9 +53,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   @Override
   public void checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
     if (userIdsList != null && !userIdsList.isEmpty()) {
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       Iterable<DbUser> users = userDao.findAllById(userIdsList);
-      users.forEach(user -> checkExpiration(user, now));
+      users.forEach(this::checkExpiration);
     }
   }
 
@@ -68,15 +67,21 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
-  private void checkExpiration(DbUser user, Timestamp now) {
+  public boolean isCreditsExpired(DbUser user) {
+    return getCreditsExpiration(user)
+        .map(expirationTime -> !expirationTime.after(new Timestamp(clock.instant().toEpochMilli())))
+        .orElse(false);
+  }
+
+  private void checkExpiration(DbUser user) {
     DbUserInitialCreditsExpiration userInitialCreditsExpiration =
         user.getUserInitialCreditsExpiration();
     if (null != userInitialCreditsExpiration
-        && !userInitialCreditsExpiration.isBypassed()
+        && isCreditsExpired(user)
         && userInitialCreditsExpiration
             .getNotificationStatus()
             .equals(NotificationStatus.NO_NOTIFICATION_SENT)
-        && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
+        ) {
       logger.info(
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
