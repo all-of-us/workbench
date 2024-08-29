@@ -77,6 +77,10 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
         .getNotificationStatus()
         .equals(NotificationStatus.NO_NOTIFICATION_SENT)
         && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
+      logger.info(
+          "Initial credits expired for user {}. Expiration time: {}",
+          user.getUsername(),
+          userInitialCreditsExpiration.getExpirationTime());
       expireBillingStatusForUserWorkspaces(user);
       deleteAppsAndRuntimesInFreeTierWorkspaces(user);
       try {
