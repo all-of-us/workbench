@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -74,15 +75,27 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     if (null != userInitialCreditsExpiration
         && !userInitialCreditsExpiration.isBypassed()
         && userInitialCreditsExpiration
-        .getNotificationStatus()
-        .equals(NotificationStatus.NO_NOTIFICATION_SENT)
+            .getNotificationStatus()
+            .equals(NotificationStatus.NO_NOTIFICATION_SENT)
         && !(userInitialCreditsExpiration.getExpirationTime().after(now))) {
       logger.info(
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
           userInitialCreditsExpiration.getExpirationTime());
-      expireBillingStatusForUserWorkspaces(user);
-      deleteAppsAndRuntimesInFreeTierWorkspaces(user);
+      Stream<DbWorkspace> expiringWorkspaces =
+          workspaceDao.findAllByCreator(user).stream()
+              .filter(
+                  ws ->
+                      WorkspaceUtils.isFreeTier(
+                          ws.getBillingAccountName(), workbenchConfigProvider.get()))
+              .filter(DbWorkspace::isActive)
+              .filter(ws -> ws.getBillingStatus().equals(BillingStatus.ACTIVE));
+      logger.info(
+          "Setting billing status to invalid for all workspaces owned by user {}",
+          user.getUsername());
+      expireBillingStatusForWorkspaces(expiringWorkspaces);
+      logger.info("Deleting apps and runtimes in workspaces owned by user {}", user.getUsername());
+      deleteAppsAndRuntimesInWorkspaces(expiringWorkspaces);
       try {
         mailService.alertUserInitialCreditsExpired(user);
         userInitialCreditsExpiration.setNotificationStatus(
@@ -98,39 +111,22 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
     }
   }
 
-  private void expireBillingStatusForUserWorkspaces(DbUser user) {
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                WorkspaceUtils.isFreeTier(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .filter(DbWorkspace::isActive)
-        .filter(ws -> ws.getBillingStatus().equals(BillingStatus.ACTIVE))
+  private void expireBillingStatusForWorkspaces(Stream<DbWorkspace> workspaces) {
+    workspaces
         .map(DbWorkspace::getWorkspaceId)
         .forEach(id -> workspaceDao.updateBillingStatus(id, BillingStatus.INACTIVE));
   }
 
-  private void deleteAppsAndRuntimesInFreeTierWorkspaces(DbUser user) {
-    logger.info("Deleting apps and runtimes for user {}", user.getUsername());
-
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            dbWorkspace ->
-                workbenchConfigProvider
-                    .get()
-                    .billing
-                    .freeTierBillingAccountNames()
-                    .contains(dbWorkspace.getBillingAccountName()))
-        .filter(DbWorkspace::isActive)
-        .forEach(
-            dbWorkspace -> {
-              String namespace = dbWorkspace.getWorkspaceNamespace();
-              try {
-                leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
-                logger.info("Deleted apps and runtimes for workspace {}", namespace);
-              } catch (WorkbenchException e) {
-                logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
-              }
-            });
+  private void deleteAppsAndRuntimesInWorkspaces(Stream<DbWorkspace> workspaces) {
+    workspaces.forEach(
+        dbWorkspace -> {
+          String namespace = dbWorkspace.getWorkspaceNamespace();
+          try {
+            leonardoApiClient.deleteAllResources(dbWorkspace.getGoogleProject(), false);
+            logger.info("Deleted apps and runtimes for workspace {}", namespace);
+          } catch (WorkbenchException e) {
+            logger.error("Failed to delete apps and runtimes for workspace {}", namespace, e);
+          }
+        });
   }
 }
