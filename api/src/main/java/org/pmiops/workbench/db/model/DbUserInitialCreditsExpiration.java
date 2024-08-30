@@ -20,6 +20,7 @@ public class DbUserInitialCreditsExpiration {
   private Timestamp expirationTime;
   private boolean bypassed;
   private int extensionCount;
+  private NotificationStatus notificationStatus;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,5 +83,21 @@ public class DbUserInitialCreditsExpiration {
   public DbUserInitialCreditsExpiration setExtensionCount(int extensionCount) {
     this.extensionCount = extensionCount;
     return this;
+  }
+
+  @Column(name = "notification_status")
+  public NotificationStatus getNotificationStatus() {
+    return notificationStatus;
+  }
+
+  public DbUserInitialCreditsExpiration setNotificationStatus(
+      NotificationStatus notificationStatus) {
+    this.notificationStatus = notificationStatus;
+    return this;
+  }
+
+  public enum NotificationStatus {
+    NO_NOTIFICATION_SENT,
+    EXPIRATION_NOTIFICATION_SENT
   }
 }

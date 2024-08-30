@@ -45,6 +45,7 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -67,6 +68,7 @@ public class FreeTierBillingServiceTest {
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockBean private InitialCreditsExpirationService initialCreditsExpirationService;
 
   @Autowired BigQueryService bigQueryService;
   @Autowired FreeTierBillingService freeTierBillingService;

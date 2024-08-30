@@ -40,4 +40,9 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     userService.getAllUsers().forEach(userService::maybeSendAccessTierExpirationEmails);
     return ResponseEntity.noContent().build();
   }
+
+  public ResponseEntity<Void> checkInitialCreditsExpiration() {
+    taskQueueService.groupAndPushCheckInitialCreditExpirationTasks(userService.getAllUserIds());
+    return ResponseEntity.noContent().build();
+  }
 }

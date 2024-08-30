@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
@@ -55,18 +56,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserService userService;
   private final AccessModuleService accessModuleService;
   private final FreeTierBillingBatchUpdateService freeTierBillingUpdateService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
       AccessModuleService accessModuleService,
-      FreeTierBillingBatchUpdateService freeTierBillingUpdateService) {
+      FreeTierBillingBatchUpdateService freeTierBillingUpdateService,
+      InitialCreditsExpirationService initialCreditsExpirationService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
     this.freeTierBillingUpdateService = freeTierBillingUpdateService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
   }
 
   @Override
@@ -170,6 +174,18 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     log.info(String.format("successfully synchronized %d users", request.getUserIds().size()));
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Takes in batch of user Ids check whether users have initial credits that have expired
+   *
+   * @param body : Batch of user IDs from cloud task queue: checkCreditsExpirationForUserIDsQueue
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> checkCreditsExpirationForUserIDs(List<Long> userIdsList) {
+    initialCreditsExpirationService.checkCreditsExpirationForUserIDs(userIdsList);
     return ResponseEntity.noContent().build();
   }
 

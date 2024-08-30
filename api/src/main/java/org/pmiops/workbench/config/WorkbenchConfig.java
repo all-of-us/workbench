@@ -400,6 +400,8 @@ public class WorkbenchConfig {
     public Integer usersPerAuditTask;
     // Number of users to process within a single access synchronization task.
     public Integer usersPerSynchronizeAccessTask;
+    // Number of users to process within a single check initial credits expiration task.
+    public Integer usersPerCheckInitialCreditsExpirationTask;
   }
 
   /**

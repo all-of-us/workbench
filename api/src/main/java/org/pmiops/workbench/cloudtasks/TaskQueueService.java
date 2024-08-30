@@ -44,7 +44,8 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
       BASE_PATH + "/deleteTestUserWorkspacesInRawls";
-
+  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH =
+      BASE_PATH + "/checkCreditsExpirationForUserIDs";
   private static final String CHECK_AND_ALERT_FREE_TIER_USAGE =
       BASE_PATH + "/checkAndAlertFreeTierBillingUsage";
 
@@ -58,16 +59,17 @@ public class TaskQueueService {
   private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
   private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
       "deleteTestUserRawlsWorkspacesQueue";
-
   private static final String FREE_TIER_BILLING_QUEUE = "freeTierBillingQueue";
-
   private static final String EXPIRED_FREE_CREDITS_QUEUE_NAME = "expiredFreeCreditsQueue";
+  private static final String CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME =
+      "checkCreditsExpirationForUserIDsQueue";
+
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
-  private WorkbenchLocationConfigService locationConfigService;
-  private Provider<CloudTasksClient> cloudTasksClientProvider;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private Provider<UserAuthentication> userAuthenticationProvider;
+  private final WorkbenchLocationConfigService locationConfigService;
+  private final Provider<CloudTasksClient> cloudTasksClientProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Provider<UserAuthentication> userAuthenticationProvider;
 
   public TaskQueueService(
       WorkbenchLocationConfigService locationConfigService,
@@ -217,6 +219,18 @@ public class TaskQueueService {
             .users(users)
             .dbCostByCreator(dbCostByCreator)
             .liveCostByCreator(liveCostByCreator));
+  }
+
+  public void groupAndPushCheckInitialCreditExpirationTasks(List<Long> userIds) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerCheckInitialCreditsExpirationTask)
+        .forEach(
+            batch ->
+                createAndPushTask(
+                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_QUEUE_NAME,
+                    CHECK_CREDITS_EXPIRATION_FOR_USER_IDS_PATH,
+                    batch));
   }
 
   private String createAndPushTask(String queueName, String taskUri, Object jsonBody) {

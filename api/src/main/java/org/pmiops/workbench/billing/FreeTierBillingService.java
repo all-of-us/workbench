@@ -8,8 +8,13 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
@@ -20,6 +25,7 @@ import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.utils.CostComparisonUtils;
 import org.pmiops.workbench.workspaces.WorkspaceUtils;
@@ -39,6 +45,7 @@ public class FreeTierBillingService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private final WorkspaceFreeTierUsageService workspaceFreeTierUsageService;
+  private final InitialCreditsExpirationService initialCreditsExpirationService;
 
   private static final Logger logger = LoggerFactory.getLogger(FreeTierBillingService.class);
 
@@ -50,7 +57,8 @@ public class FreeTierBillingService {
       UserServiceAuditor userServiceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      WorkspaceFreeTierUsageService workspaceFreeTierUsageService) {
+      WorkspaceFreeTierUsageService workspaceFreeTierUsageService,
+      InitialCreditsExpirationService initialCreditsExpirationService) {
     this.taskQueueService = taskQueueService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -58,6 +66,7 @@ public class FreeTierBillingService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workspaceFreeTierUsageService = workspaceFreeTierUsageService;
+    this.initialCreditsExpirationService = initialCreditsExpirationService;
   }
 
   public double getWorkspaceFreeTierBillingUsage(DbWorkspace dbWorkspace) {
@@ -193,9 +202,11 @@ public class FreeTierBillingService {
   public boolean maybeSetDollarLimitOverride(DbUser user, double newDollarLimit) {
     final Double previousLimitMaybe = user.getFreeTierCreditsLimitDollarsOverride();
 
-    if (previousLimitMaybe != null
-        || CostComparisonUtils.costsDiffer(
-            newDollarLimit, workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit)) {
+    if (!initialCreditsExpirationService.haveCreditsExpired(user)
+        && (previousLimitMaybe != null
+            || CostComparisonUtils.costsDiffer(
+                newDollarLimit,
+                workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit))) {
 
       // TODO: prevent setting this limit directly except in this method?
       user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);

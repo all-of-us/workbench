@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
@@ -52,6 +53,8 @@ public class CloudTaskUserControllerTest {
 
   @Autowired private FreeTierBillingBatchUpdateService mockFreeTierBillingUpdateService;
 
+  @Autowired private InitialCreditsExpirationService mockInitialCreditsExpirationService;
+
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({
@@ -59,6 +62,7 @@ public class CloudTaskUserControllerTest {
     CloudResourceManagerService.class,
     FreeTierBillingBatchUpdateService.class,
     UserService.class,
+    InitialCreditsExpirationService.class
   })
   static class Configuration {}
 
@@ -120,7 +124,7 @@ public class CloudTaskUserControllerTest {
 
   @Test
   public void testCheckAndAlertFreeTierBillingUsage() {
-    List<Long> userIdList = new ArrayList<Long>(Arrays.asList(1L, 2L, 3L));
+    List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
     controller.checkAndAlertFreeTierBillingUsage(userIdList);
     verify(mockFreeTierBillingUpdateService).checkAndAlertFreeTierBillingUsage(userIdList);
   }
@@ -130,5 +134,12 @@ public class CloudTaskUserControllerTest {
     List<Long> userIdList = new ArrayList<>();
     controller.checkAndAlertFreeTierBillingUsage(userIdList);
     verify(mockFreeTierBillingUpdateService, never()).checkAndAlertFreeTierBillingUsage(userIdList);
+  }
+
+  @Test
+  public void testCheckCreditsExpirationForUserIDs() {
+    List<Long> userIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L));
+    controller.checkCreditsExpirationForUserIDs(userIdList);
+    verify(mockInitialCreditsExpirationService).checkCreditsExpirationForUserIDs(userIdList);
   }
 }

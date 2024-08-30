@@ -146,7 +146,8 @@
   },
   "offlineBatch": {
     "usersPerAuditTask": 20,
-    "usersPerSynchronizeAccessTask": 50
+    "usersPerSynchronizeAccessTask": 50,
+    "usersPerCheckInitialCreditsExpirationTask": 50
   },
   "egressAlertRemediationPolicy": {
     "enableJiraTicketing": false,

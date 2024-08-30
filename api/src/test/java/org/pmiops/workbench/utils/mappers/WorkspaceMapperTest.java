@@ -26,6 +26,8 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
@@ -86,7 +88,14 @@ public class WorkspaceMapperTest {
     InitialCreditsExpirationServiceImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
+  @MockBean({
+    UserDao.class,
+    WorkspaceDao.class,
+    ConceptSetService.class,
+    CohortService.class,
+    MailService.class,
+    LeonardoApiClient.class
+  })
   static class Configuration {}
 
   @BeforeEach
