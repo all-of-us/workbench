@@ -19,6 +19,7 @@ public class DbInstitution {
   private Short organizationTypeEnum;
   private String organizationTypeOtherText;
   private String requestAccessUrl;
+  private boolean bypassInitialCreditsExpiration;
 
   public DbInstitution() {}
 
@@ -84,6 +85,16 @@ public class DbInstitution {
     return this;
   }
 
+  @Column(name = "bypass_initial_credits_expiration")
+  public boolean getBypassInitialCreditsExpiration() {
+    return bypassInitialCreditsExpiration;
+  }
+
+  public DbInstitution setBypassInitialCreditsExpiration(boolean bypassInitialCreditsExpiration) {
+    this.bypassInitialCreditsExpiration = bypassInitialCreditsExpiration;
+    return this;
+  }
+
   // omit ID field from equality so equivalent objects match regardless
   // of whether they are actually present in the DB
 
@@ -101,12 +112,18 @@ public class DbInstitution {
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(organizationTypeEnum, that.organizationTypeEnum)
         && Objects.equal(organizationTypeOtherText, that.organizationTypeOtherText)
-        && Objects.equal(requestAccessUrl, that.requestAccessUrl);
+        && Objects.equal(requestAccessUrl, that.requestAccessUrl)
+        && Objects.equal(bypassInitialCreditsExpiration, that.bypassInitialCreditsExpiration);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, organizationTypeEnum, organizationTypeOtherText, requestAccessUrl);
+        shortName,
+        displayName,
+        organizationTypeEnum,
+        organizationTypeOtherText,
+        requestAccessUrl,
+        bypassInitialCreditsExpiration);
   }
 }

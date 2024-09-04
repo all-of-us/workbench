@@ -9817,6 +9817,10 @@ components:
             tier.
           items:
             $ref: '#/components/schemas/InstitutionTierConfig'
+        bypassInitialCreditsExpiration:
+          type: boolean
+          description: Whether to bypass the expiration of initial credits for all researchers 
+            affiliated with this institution (meaning their initial credits do not expire)
       description: Represents an institution which has been approved to validate researchers
         who wish to use the system, including the email patterns which we use to validate
         users.
