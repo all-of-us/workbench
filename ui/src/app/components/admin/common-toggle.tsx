@@ -6,15 +6,14 @@ import colors from 'app/styles/colors';
 interface CommonToggleProps {
   name: string;
   checked: boolean;
-  dataTestId: string;
   onToggle: (boolean) => void;
   disabled?: boolean;
 }
 export const CommonToggle = (props: CommonToggleProps) => {
-  const { name, checked, dataTestId, disabled, onToggle } = props;
+  const { name, checked, disabled, onToggle } = props;
   return (
     <Toggle
-      {...{ checked, dataTestId, disabled, name, onToggle }}
+      {...{ checked, disabled, name, onToggle }}
       style={{
         color: colors.primary,
         fontWeight: 500,

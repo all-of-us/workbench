@@ -129,7 +129,6 @@ const EnableCtSwitch = (props: {
   return (
     <CommonToggle
       name='Controlled tier enabled'
-      dataTestId='controlled-enabled-switch'
       onToggle={(e) => onToggle(e)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
@@ -892,7 +891,6 @@ export const AdminInstitutionEdit = fp.flow(
                   <div style={{ marginTop: '2.25rem' }}>
                     <CommonToggle
                       name='Initial Credits Expiration Bypass'
-                      dataTestId='bypassInitialCreditsExpiration'
                       onToggle={(bypass) =>
                         this.setState(
                           fp.set(

@@ -38,7 +38,7 @@ const getCTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-domain-input');
 const getCTDropdown = () => screen.getByTestId('controlled-agreement-dropdown');
 const getCTEnabled = (): HTMLInputElement =>
-  screen.getByTestId('controlled-enabled-switch');
+  screen.getByRole('switch', { name: 'Controlled tier enabled' });
 
 const getRTAddress = () => screen.getByTestId('registered-email-address');
 const getRTAddressInput = (): HTMLInputElement =>
