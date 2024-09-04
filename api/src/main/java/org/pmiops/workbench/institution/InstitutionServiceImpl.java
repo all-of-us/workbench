@@ -58,7 +58,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
-  private static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
+  public static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   private final AccessTierDao accessTierDao;
 
