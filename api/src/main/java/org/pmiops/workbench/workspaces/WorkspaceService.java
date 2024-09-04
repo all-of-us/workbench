@@ -88,6 +88,8 @@ public interface WorkspaceService {
 
   void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status);
 
+  void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
+
   void publishCommunityWorkspace(DbWorkspace workspace);
 
   List<DbUser> getWorkspaceOwnerList(DbWorkspace dbWorkspace);

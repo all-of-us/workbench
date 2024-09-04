@@ -521,6 +521,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
+    workspaceDao.findAllByCreator(user).stream()
+        .filter(
+            ws ->
+                WorkspaceUtils.isFreeTier(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .map(DbWorkspace::getWorkspaceId)
+        .forEach(id -> workspaceDao.updateInitialCreditsExhaustion(id, exhausted));
+  }
+
+  @Override
   public void publishCommunityWorkspace(DbWorkspace dbWorkspace) {
     featuredWorkspaceDao
         .findByWorkspace(dbWorkspace)
