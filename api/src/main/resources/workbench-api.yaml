@@ -7370,7 +7370,6 @@ components:
     Workspace:
       required:
       - name
-      - initialCredits
       type: object
       properties:
         id:
