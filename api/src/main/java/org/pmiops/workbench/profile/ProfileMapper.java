@@ -42,10 +42,6 @@ public interface ProfileMapper {
   @Mapping(source = "dbUser.duccAgreement.userInitials", target = "duccSignedInitials")
   @Mapping(source = "dbUser.duccAgreement.completionTime", target = "duccCompletionTimeEpochMillis")
   @Mapping(source = "dbUser.demographicSurveyV2", target = "demographicSurveyV2")
-  @Mapping(
-      target = "initialCreditsExpirationEpochMillis",
-      source = "dbUser",
-      qualifiedByName = "getInitialCreditsExpiration")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsExpirationService expirationService,
