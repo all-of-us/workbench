@@ -352,6 +352,26 @@ const ApiErrorModal = (props: { errorMsg: string; onClose: Function }) => {
   );
 };
 
+const ExpirationBypassExplanation = (props: {
+  bypassInitialCreditsExpiration: boolean;
+}) => {
+  const bypassedText =
+    'Researchers affiliated with this institution are not subject to the expiration ' +
+    'of their initial credits after the standard time period. They remain subject to the exhaustion ' +
+    'of the dollar amount of their credits.';
+
+  const standardText =
+    'Researchers affiliated with this institution are subject to the expiration ' +
+    'of their initial credits after the standard time period as well as the exhaustion ' +
+    'of the dollar amount of their credits.';
+
+  return (
+    <p style={{ ...styles.explanation, width: '36rem' }}>
+      {props.bypassInitialCreditsExpiration ? bypassedText : standardText}
+    </p>
+  );
+};
+
 interface Props
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -900,19 +920,15 @@ export const AdminInstitutionEdit = fp.flow(
                         )
                       }
                       checked={institution.bypassInitialCreditsExpiration}
-                    />{' '}
+                    />
                   </div>
                 )}
                 {enableInitialCreditsExpiration && (
-                  <p style={{ ...styles.explanation, width: '36rem' }}>
-                    Researchers affiliated with this institution{' '}
-                    {institution.bypassInitialCreditsExpiration
-                      ? 'are not'
-                      : 'are'}{' '}
-                    subject to the expiration of their initial credits after the
-                    standard time period. They remain subject to the exhaustion
-                    of the dollar amount of their credits.
-                  </p>
+                  <ExpirationBypassExplanation
+                    bypassInitialCreditsExpiration={
+                      institution.bypassInitialCreditsExpiration
+                    }
+                  />
                 )}
               </FlexColumn>
             </FlexRow>
