@@ -30,10 +30,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { Scroll } from 'app/icons/scroll';
-import {
-  MembershipRequirements,
-  OrganizationTypeOptions,
-} from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -58,6 +54,11 @@ import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+
+import {
+  MembershipRequirements,
+  OrganizationTypeOptions,
+} from './admin-institution-options';
 
 const styles = reactStyles({
   label: {

@@ -13,7 +13,7 @@ import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
 
 import { AdminInstitution } from './admin-institution';
 
-describe('AdminInstitutionSpec', () => {
+describe(AdminInstitution.name, () => {
   const renderComponent = () => {
     render(<AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} />);
   };

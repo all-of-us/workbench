@@ -14,7 +14,6 @@ import { FadeBox } from 'app/components/containers';
 import { SemiBoldHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { OrganizationTypeOptions } from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { capStringWithEllipsis, reactStyles } from 'app/utils';
@@ -23,6 +22,8 @@ import { getAdminUrl, getTierConfig } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+
+import { OrganizationTypeOptions } from './admin-institution-options';
 
 const styles = reactStyles({
   pageHeader: {

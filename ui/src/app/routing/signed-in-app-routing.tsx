@@ -17,11 +17,11 @@ import { DataAccessRequirements } from 'app/pages/access/data-access-requirement
 import { AdminBanner } from 'app/pages/admin/admin-banner';
 import { AdminEgressAudit } from 'app/pages/admin/admin-egress-audit';
 import { AdminEgressEvents } from 'app/pages/admin/admin-egress-events';
-import { AdminInstitution } from 'app/pages/admin/admin-institution';
-import { AdminInstitutionEdit } from 'app/pages/admin/admin-institution-edit';
 import { AdminNotebookView } from 'app/pages/admin/admin-notebook-view';
 import { WorkspaceAudit } from 'app/pages/admin/admin-workspace-audit';
 import { BatchSyncUserAccess } from 'app/pages/admin/batch-sync-user-access';
+import { AdminInstitution } from 'app/pages/admin/institution/admin-institution';
+import { AdminInstitutionEdit } from 'app/pages/admin/institution/admin-institution-edit';
 import { AdminUserProfile } from 'app/pages/admin/user/admin-user-profile';
 import { AdminUserTable } from 'app/pages/admin/user/admin-user-table';
 import { UserAudit } from 'app/pages/admin/user-audit';
