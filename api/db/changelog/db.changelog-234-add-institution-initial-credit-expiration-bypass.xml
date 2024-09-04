@@ -16,7 +16,8 @@
 
     <sql>
       UPDATE institution
-      SET bypass_initial_credits_expiration = true WHERE short_name = 'AouOps'
+      SET bypass_initial_credits_expiration = true
+      WHERE short_name = 'AouOps'
     </sql>
 
   </changeSet>
