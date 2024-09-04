@@ -58,15 +58,17 @@ public class InstitutionServiceTest {
       new Institution()
           .shortName("test")
           .displayName("this is a test")
-          .organizationTypeEnum(OrganizationType.INDUSTRY);
+          .organizationTypeEnum(OrganizationType.INDUSTRY)
+          .bypassInitialCreditsExpiration(false);
 
   // the mapper converts null emails to empty lists
   private final Institution roundTrippedTestInst =
       new Institution()
           .shortName(testInst.getShortName())
           .displayName(testInst.getDisplayName())
-          .tierConfigs(Collections.emptyList())
-          .organizationTypeEnum(testInst.getOrganizationTypeEnum());
+          .organizationTypeEnum(testInst.getOrganizationTypeEnum())
+          .bypassInitialCreditsExpiration(false)
+          .tierConfigs(Collections.emptyList());
 
   private DbAccessTier registeredTier;
   private DbAccessTier controlledTier;
@@ -93,7 +95,8 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("An Institution for Testing")
             .tierConfigs(Collections.emptyList())
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
@@ -112,7 +115,8 @@ public class InstitutionServiceTest {
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                     .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
 
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
@@ -210,7 +214,8 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .tierConfigs(Collections.emptyList())
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(false);
     service.createInstitution(otherInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
 
@@ -248,7 +253,8 @@ public class InstitutionServiceTest {
             .shortName("otherInst")
             .displayName("The Institution of testing")
             .tierConfigs(Collections.emptyList())
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
   }
@@ -284,7 +290,8 @@ public class InstitutionServiceTest {
                     .accessTierShortName(registeredTier.getShortName())
                     .emailDomains(ImmutableList.of("broad.org", "google.com"))
                     .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com")))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
     final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
     assertThat(instWithEmailsRoundTrip).isEqualTo(instWithEmails);
 
@@ -330,7 +337,8 @@ public class InstitutionServiceTest {
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                     .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
     assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
 
     final Institution instWithNewTierRequirement =
@@ -367,7 +375,8 @@ public class InstitutionServiceTest {
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                     .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .bypassInitialCreditsExpiration(true);
     assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
 
     final Institution instWithNewTierRequirement =
@@ -865,34 +874,35 @@ public class InstitutionServiceTest {
                         .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.OTHER)
-            .organizationTypeOtherText("Some text");
+            .organizationTypeOtherText("Some text")
+            .bypassInitialCreditsExpiration(false);
     assertThat(service.createInstitution(institution_withOtherOrganizationType))
         .isEqualTo(institution_withOtherOrganizationType);
   }
 
   @Test
   public void test_updateInstitution_RemoveUserInstructionFromExistingInstitution() {
-    Institution institution_WithUserInstructions =
+    Institution institutionWithUserInstructions =
         new Institution()
             .displayName("No Organization")
             .tierConfigs(
-                ImmutableList.of(
+                List.of(
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                         .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
-            .userInstructions("Some user instructions");
-    Institution createdInstitution = service.createInstitution(institution_WithUserInstructions);
+            .userInstructions("Some user instructions")
+            .bypassInitialCreditsExpiration(true);
+    Institution createdInstitution = service.createInstitution(institutionWithUserInstructions);
     assertThat(createdInstitution.getUserInstructions()).isEqualTo("Some user instructions");
 
-    Institution institutionNoUserInstruction =
-        institution_WithUserInstructions.userInstructions("");
+    Institution institutionNoUserInstruction = institutionWithUserInstructions.userInstructions("");
 
-    Institution expectedUpdateInstitution = institution_WithUserInstructions.userInstructions(null);
+    Institution expectedUpdateInstitution = institutionWithUserInstructions.userInstructions(null);
     assertThat(
             service.updateInstitution(
-                institution_WithUserInstructions.getShortName(), institutionNoUserInstruction))
+                institutionWithUserInstructions.getShortName(), institutionNoUserInstruction))
         .hasValue(expectedUpdateInstitution);
   }
 
