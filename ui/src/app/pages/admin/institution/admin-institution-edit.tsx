@@ -352,9 +352,7 @@ const ApiErrorModal = (props: { errorMsg: string; onClose: Function }) => {
   );
 };
 
-const ExpirationBypassExplanation = (props: {
-  bypassInitialCreditsExpiration: boolean;
-}) => {
+const ExpirationBypassExplanation = (props: { bypassed: boolean }) => {
   const bypassedText =
     'Researchers affiliated with this institution are not subject to the expiration ' +
     'of their initial credits after the standard time period. They remain subject to the exhaustion ' +
@@ -367,7 +365,7 @@ const ExpirationBypassExplanation = (props: {
 
   return (
     <p style={{ ...styles.explanation, width: '36rem' }}>
-      {props.bypassInitialCreditsExpiration ? bypassedText : standardText}
+      {props.bypassed ? bypassedText : standardText}
     </p>
   );
 };
@@ -925,9 +923,7 @@ export const AdminInstitutionEdit = fp.flow(
                 )}
                 {enableInitialCreditsExpiration && (
                   <ExpirationBypassExplanation
-                    bypassInitialCreditsExpiration={
-                      institution.bypassInitialCreditsExpiration
-                    }
+                    bypassed={institution.bypassInitialCreditsExpiration}
                   />
                 )}
               </FlexColumn>
