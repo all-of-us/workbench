@@ -41,6 +41,7 @@ export const BROAD: Institution = {
       emailAddresses: [BROAD_ADDR_1, BROAD_ADDR_2],
     },
   ],
+  bypassInitialCreditsExpiration: true,
 };
 
 export const VERILY: Institution = {
@@ -62,6 +63,7 @@ export const VERILY: Institution = {
     },
   ],
   userInstructions: 'Verily User Instruction',
+  bypassInitialCreditsExpiration: false,
 };
 
 export const VERILY_WITHOUT_CT: Institution = {
