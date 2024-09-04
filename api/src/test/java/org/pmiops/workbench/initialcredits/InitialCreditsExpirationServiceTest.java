@@ -154,6 +154,8 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, never())
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -172,6 +174,8 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, never())
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -193,6 +197,8 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, never())
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -215,6 +221,8 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, never())
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, never())
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -238,6 +246,8 @@ public class InitialCreditsExpirationServiceTest {
     verify(spyUserDao, times(2)).save(any());
     verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, times(1))
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -261,6 +271,8 @@ public class InitialCreditsExpirationServiceTest {
     verifyUserSaveOnlyDuringSetup();
     verify(spyWorkspaceDao, times(1))
         .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    verify(spyWorkspaceDao, times(1))
+        .updateInitialCreditsExpiration(workspace.getWorkspaceId(), true);
     verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 }
