@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="evrii" id="changelog-233-add-user_initial_credits_expiration-notification">
+  <changeSet author="evrii" id="changelog-232-add-user_initial_credits_expiration">
     <addColumn tableName="user_initial_credits_expiration">
       <column name="notification_status" type="ENUM('NO_NOTIFICATION_SENT','EXPIRATION_NOTIFICATION_SENT')" defaultValue="NO_NOTIFICATION_SENT">
         <constraints nullable="false"/>
