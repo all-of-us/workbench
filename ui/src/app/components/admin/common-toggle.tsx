@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Toggle } from 'app/components/inputs';
+import colors from 'app/styles/colors';
 
 interface CommonToggleProps {
   name: string;
@@ -14,7 +15,12 @@ export const CommonToggle = (props: CommonToggleProps) => {
   return (
     <Toggle
       {...{ checked, dataTestId, disabled, name, onToggle }}
-      style={{ paddingBottom: 0, flexGrow: 0 }}
+      style={{
+        color: colors.primary,
+        fontWeight: 500,
+        paddingBottom: 0,
+        flexGrow: 0,
+      }}
       height={24}
       width={50}
     />

@@ -178,17 +178,6 @@ export function updateMembershipRequirement(
   });
 }
 
-export function updateRequireEra(
-  tierConfigs: Array<InstitutionTierConfig>,
-  accessTierShortName: string,
-  eraRequired: boolean
-): Array<InstitutionTierConfig> {
-  return mergeTierConfigs(tierConfigs, {
-    ...getTierConfigOrDefault(tierConfigs, accessTierShortName),
-    eraRequired,
-  });
-}
-
 // initialize a new CT config depending on the RT config:
 // RT = DOMAINS -> copy the DOMAINS list to CT
 // RT = ADDRESSES -> use ADDRESSES in CT but do not copy the list

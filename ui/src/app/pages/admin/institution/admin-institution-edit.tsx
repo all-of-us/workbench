@@ -46,12 +46,11 @@ import {
   getTierEmailDomains,
   updateEnableControlledTier,
   updateMembershipRequirement,
-  updateRequireEra,
   updateTierEmailAddresses,
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
@@ -94,6 +93,10 @@ const styles = reactStyles({
   },
   saveButton: {
     textTransform: 'uppercase',
+  },
+  explanation: {
+    color: colors.primary,
+    fontSize: 12,
   },
 });
 
@@ -481,13 +484,6 @@ export const AdminInstitutionEdit = fp.flow(
       );
     }
 
-    private setRequireEra(accessTierShortName: string, requireEra: boolean) {
-      const { tierConfigs } = this.state.institution;
-      this.setTierConfigs(
-        updateRequireEra(tierConfigs, accessTierShortName, requireEra)
-      );
-    }
-
     private setEnableControlledTier(enableControlled: boolean) {
       const { institution, institutionBeforeEdits } = this.state;
       this.setTierConfigs(
@@ -671,6 +667,9 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     render() {
+      const {
+        config: { enableInitialCreditsExpiration },
+      } = serverConfigStore.get();
       const { institution, showOtherInstitutionTextBox, title } = this.state;
       const {
         displayName,
@@ -865,13 +864,7 @@ export const AdminInstitutionEdit = fp.flow(
                   }
                 />
 
-                <p
-                  style={{
-                    color: colors.primary,
-                    fontSize: 12,
-                    width: '24rem',
-                  }}
-                >
+                <p style={{ ...styles.explanation, width: '24rem' }}>
                   If provided, users who select this institution but are not
                   allowed according to the data access tier requirements below
                   will be guided to the custom URL rather than the standard ones
@@ -895,6 +888,34 @@ export const AdminInstitutionEdit = fp.flow(
                     )
                   }
                 />
+                {enableInitialCreditsExpiration && (
+                  <div style={{ marginTop: '2.25rem' }}>
+                    <CommonToggle
+                      name='Initial Credits Expiration Bypass'
+                      dataTestId='bypassInitialCreditsExpiration'
+                      onToggle={(bypass) =>
+                        this.setState(
+                          fp.set(
+                            ['institution', 'bypassInitialCreditsExpiration'],
+                            bypass
+                          )
+                        )
+                      }
+                      checked={institution.bypassInitialCreditsExpiration}
+                    />{' '}
+                  </div>
+                )}
+                {enableInitialCreditsExpiration && (
+                  <p style={{ ...styles.explanation, width: '36rem' }}>
+                    Researchers affiliated with this institution{' '}
+                    {institution.bypassInitialCreditsExpiration
+                      ? 'are not'
+                      : 'are'}{' '}
+                    subject to the expiration of their initial credits after the
+                    standard time period. They remain subject to the exhaustion
+                    of the dollar amount of their credits.
+                  </p>
+                )}
               </FlexColumn>
             </FlexRow>
             <SemiBoldHeader
