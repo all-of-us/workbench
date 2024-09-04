@@ -520,7 +520,6 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace1.isInitialCreditsExhausted()).isEqualTo(true);
 
-
     final DbWorkspace dbWorkspace2 = workspaceDao.findById(ws2.getWorkspaceId()).get();
     assertThat(dbWorkspace2.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace2.isInitialCreditsExhausted()).isEqualTo(true);
@@ -605,7 +604,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
             .setGoogleProject("other project")
             .setBillingAccountName("some other account")
             .setBillingStatus(BillingStatus.ACTIVE)
-                .setInitialCreditsExhausted(false);
+            .setInitialCreditsExhausted(false);
     workspaceDao.save(userAccountWorkspace);
 
     Map<String, Double> allBQCosts = Map.of(String.valueOf(user.getUserId()), 100.01);
