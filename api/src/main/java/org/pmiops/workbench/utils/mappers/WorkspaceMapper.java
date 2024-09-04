@@ -108,12 +108,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
-  @Mapping(
-      target = "initialCredits.expired",
-      source = "dbWorkspace.initialCreditsExpired")
-  @Mapping(
-      target = "initialCredits.exhausted",
-      source = "dbWorkspace.initialCreditsExhausted")
+  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
+  @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(
       target = "googleBucketName",

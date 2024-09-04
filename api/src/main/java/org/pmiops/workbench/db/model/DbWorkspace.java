@@ -92,6 +92,7 @@ public class DbWorkspace {
 
   private boolean initialCreditsExhausted;
   private boolean initialCreditsExpired;
+
   /*
   We are in the process of changing how Published/Featured workspaces work.
 
