@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.institution.InstitutionServiceImpl.OPERATIONAL_USER_INSTITUTION_SHORT_NAME;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
@@ -780,7 +781,7 @@ public class InstitutionServiceTest {
   @Test
   public void validate_OperationalUser() {
     DbInstitution institution = new DbInstitution();
-    institution.setShortName("AouOps");
+    institution.setShortName(OPERATIONAL_USER_INSTITUTION_SHORT_NAME);
     assertThat(service.validateOperationalUser(institution)).isTrue();
   }
 

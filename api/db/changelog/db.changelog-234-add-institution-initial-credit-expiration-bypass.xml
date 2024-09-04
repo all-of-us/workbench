@@ -4,12 +4,20 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="evrii" id="changelog-233-add-user_initial_credits_expiration-notification">
-    <addColumn tableName="user_initial_credits_expiration">
-      <column name="notification_status" type="ENUM('NO_NOTIFICATION_SENT','EXPIRATION_NOTIFICATION_SENT')" defaultValue="NO_NOTIFICATION_SENT">
+  <changeSet author="thibault" id="changelog-234-add-institution-bypass_initial_credits_expiration">
+
+    <addColumn tableName="institution">
+      <column name="bypass_initial_credits_expiration" type="boolean" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
     </addColumn>
+
+    <!-- Enable bypass for the AouOps institution -->
+
+    <sql>
+      UPDATE institution
+      SET bypass_initial_credits_expiration = true WHERE short_name = 'AouOps'
+    </sql>
 
   </changeSet>
 </databaseChangeLog>
