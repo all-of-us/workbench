@@ -2,6 +2,8 @@ package org.pmiops.workbench.db.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -85,6 +87,7 @@ public class DbUserInitialCreditsExpiration {
     return this;
   }
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "notification_status")
   public NotificationStatus getNotificationStatus() {
     return notificationStatus;
