@@ -57,6 +57,7 @@
 	"displayName": "Legacy Research Accounts",
 	"organizationTypeEnum": "OTHER",
 	"organizationTypeOtherText": "Legacy dev accounts with backfilled contact emails",
+	"bypassInitialCreditsExpiration": true,
 	"tierConfigs": [
 		{
 			"accessTierShortName": "registered",
