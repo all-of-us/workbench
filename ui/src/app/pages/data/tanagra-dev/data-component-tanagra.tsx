@@ -18,7 +18,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { TanagraResourceList } from 'app/pages/data/tanagra-dev/tanagra-resource-list';
 import {
   cohortsApi,
-  conceptSetsApi,
+  featureSetsApi,
   reviewsApi,
 } from 'app/services/tanagra-swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -32,8 +32,8 @@ import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
 import {
   Cohort,
-  ConceptSet,
   CreateCohortRequest,
+  FeatureSet,
   Review,
 } from 'tanagra-generated';
 
@@ -96,20 +96,20 @@ const descriptions = {
 
 export interface TanagraWorkspaceResource extends WorkspaceResource {
   cohortTanagra?: Cohort;
-  conceptSetTanagra?: ConceptSet;
+  featureSetTanagra?: FeatureSet;
   reviewTanagra?: Review;
   createdBy?: string;
 }
 
 const mapTanagraWorkspaceResource = ({
   cohort,
-  conceptSet,
+  featureSet,
   review,
   lastModified,
   workspace,
 }: {
   cohort?: Cohort;
-  conceptSet?: ConceptSet;
+  featureSet?: FeatureSet;
   review?: Review;
   lastModified: Date;
   workspace: WorkspaceData;
@@ -121,7 +121,7 @@ const mapTanagraWorkspaceResource = ({
   accessTierShortName: workspace.accessTierShortName,
   permission: workspace.accessLevel.toString(),
   cohortTanagra: cohort,
-  conceptSetTanagra: conceptSet,
+  featureSetTanagra: featureSet,
   reviewTanagra: review,
   lastModifiedEpochMillis: lastModified.getTime(),
   adminLocked: workspace.adminLocked,
@@ -160,9 +160,9 @@ export const DataComponentTanagra = fp.flow(
   const loadResources = async () => {
     try {
       setIsLoading(true);
-      const [cohorts, conceptSets] = await Promise.all([
+      const [cohorts, featureSets] = await Promise.all([
         cohortsApi().listCohorts({ studyId: workspace.namespace }),
-        conceptSetsApi().listConceptSets({ studyId: workspace.namespace }),
+        featureSetsApi().listFeatureSets({ studyId: workspace.namespace }),
       ]);
       let reviews = [];
       if (cohorts.length > 0) {
@@ -186,10 +186,10 @@ export const DataComponentTanagra = fp.flow(
             workspace,
           })
         ),
-        ...conceptSets.map((conceptSet) =>
+        ...featureSets.map((featureSet) =>
           mapTanagraWorkspaceResource({
-            conceptSet,
-            lastModified: conceptSet.lastModified,
+            featureSet,
+            lastModified: featureSet.lastModified,
             workspace,
           })
         ),
@@ -225,7 +225,7 @@ export const DataComponentTanagra = fp.flow(
       case Tabs.COHORTREVIEWS:
         return resource.reviewTanagra;
       case Tabs.CONCEPTSETS:
-        return resource.conceptSetTanagra;
+        return resource.featureSetTanagra;
       case Tabs.DATASETS:
         return false; // Currently no saved datasets in Tanagra
     }

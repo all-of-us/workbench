@@ -23,8 +23,8 @@
 import {
   BaseAPI,
   CohortsApi,
-  ConceptSetsApi,
   Configuration as FetchConfiguration,
+  FeatureSetsApi,
   ReviewsApi,
 } from 'tanagra-generated';
 
@@ -70,7 +70,7 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
 export const cohortsApi = bindCtor(CohortsApi);
-export const conceptSetsApi = bindCtor(ConceptSetsApi);
+export const featureSetsApi = bindCtor(FeatureSetsApi);
 export const reviewsApi = bindCtor(ReviewsApi);
 
 /**

@@ -33,7 +33,7 @@ import {
 import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
-  conceptSetsApi,
+  featureSetsApi,
   reviewsApi,
 } from 'app/services/tanagra-swagger-fetch-clients';
 import { reactStyles, withCdrVersions } from 'app/utils';
@@ -133,10 +133,10 @@ export const TanagraResourceList = fp.flow(
           studyId: resource.workspaceNamespace,
           cohortId: resource.cohortTanagra.id,
         });
-      } else if (resource.conceptSetTanagra) {
-        await conceptSetsApi().deleteConceptSet({
+      } else if (resource.featureSetTanagra) {
+        await featureSetsApi().deleteFeatureSet({
           studyId: resource.workspaceNamespace,
-          conceptSetId: resource.conceptSetTanagra.id,
+          featureSetId: resource.featureSetTanagra.id,
         });
       } else if (resource.reviewTanagra) {
         await reviewsApi().deleteReview({
@@ -154,7 +154,7 @@ export const TanagraResourceList = fp.flow(
   const renameResource = async (displayName: string, description: string) => {
     const {
       cohortTanagra,
-      conceptSetTanagra,
+      featureSetTanagra,
       reviewTanagra,
       workspaceNamespace,
     } = resourceToRename;
@@ -169,14 +169,14 @@ export const TanagraResourceList = fp.flow(
             criteriaGroupSections: cohortTanagra.criteriaGroupSections,
           },
         });
-      } else if (conceptSetTanagra) {
-        await conceptSetsApi().updateConceptSet({
+      } else if (featureSetTanagra) {
+        await featureSetsApi().updateFeatureSet({
           studyId: workspaceNamespace,
-          conceptSetId: conceptSetTanagra.id,
-          conceptSetUpdateInfo: {
+          featureSetId: featureSetTanagra.id,
+          featureSetUpdateInfo: {
             displayName,
             description,
-            criteria: conceptSetTanagra.criteria,
+            criteria: featureSetTanagra.criteria,
           },
         });
       } else if (reviewTanagra) {
@@ -278,7 +278,7 @@ export const TanagraResourceList = fp.flow(
     const {
       resource: {
         cohortTanagra,
-        conceptSetTanagra,
+        featureSetTanagra,
         reviewTanagra,
         workspaceTerraName,
         workspaceNamespace,
@@ -298,9 +298,9 @@ export const TanagraResourceList = fp.flow(
         cohortTanagra.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ??
         'none'
       }`;
-    } else if (conceptSetTanagra) {
-      displayName = conceptSetTanagra.displayName;
-      url = `${urlPrefix}/featureSets/${conceptSetTanagra.id}`;
+    } else if (featureSetTanagra) {
+      displayName = featureSetTanagra.displayName;
+      url = `${urlPrefix}/featureSets/${featureSetTanagra.id}`;
     } else if (reviewTanagra) {
       displayName = reviewTanagra.displayName;
       url = `${urlPrefix}/reviews/${reviewTanagra.cohort.id}/${reviewTanagra.id}`;
