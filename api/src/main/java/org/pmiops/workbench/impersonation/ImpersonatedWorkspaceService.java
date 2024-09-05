@@ -19,12 +19,12 @@ public interface ImpersonatedWorkspaceService {
   List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username);
 
   void deleteWorkspace(
-      String username, String wsNamespace, String wsId, boolean deleteBillingProjects);
+      String username, String wsNamespace, String terraName, boolean deleteBillingProjects);
 
   void deleteOrphanedRawlsWorkspace(
       String username,
       String wsNamespace,
       String googleProject,
-      String wsId,
+      String terraName,
       boolean deleteBillingProjects);
 }

@@ -141,11 +141,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
   @Override
   public void deleteWorkspace(
-      String username, String wsNamespace, String wsId, boolean deleteBillingProjects) {
+      String username, String wsNamespace, String terraName, boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
     // also confirms that the workspace exists in the DB
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, wsId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, terraName);
 
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
@@ -166,7 +166,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, terraName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -194,7 +194,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       String username,
       String wsNamespace,
       String googleProject,
-      String wsId,
+      String terraName,
       boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
@@ -211,7 +211,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, terraName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
