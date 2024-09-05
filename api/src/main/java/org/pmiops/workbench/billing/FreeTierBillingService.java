@@ -214,8 +214,7 @@ public class FreeTierBillingService {
 
       if (userHasRemainingFreeTierCredits(user)) {
         // may be redundant: enable anyway
-        updateFreeTierWorkspacesStatus(user, BillingStatus.ACTIVE);
-        updateInitialCreditsExhaustion(user, false);
+        setAllToUnexhausted(user);
       }
 
       userServiceAuditor.fireSetFreeTierDollarLimitOverride(
@@ -252,24 +251,18 @@ public class FreeTierBillingService {
     return allCostsInDbForUsers;
   }
 
-  private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+  private void setAllToUnexhausted(final DbUser user) {
     workspaceDao.findAllByCreator(user).stream()
         .filter(
             ws ->
                 WorkspaceUtils.isFreeTier(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
-  }
-
-  private void updateInitialCreditsExhaustion(final DbUser user, final boolean exhausted) {
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                WorkspaceUtils.isFreeTier(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateInitialCreditsExhaustion(id, exhausted));
+        .forEach(
+            id -> {
+              workspaceDao.updateInitialCreditsExhaustion(id, false);
+              workspaceDao.updateBillingStatus(id, BillingStatus.ACTIVE);
+            });
   }
 
   /**

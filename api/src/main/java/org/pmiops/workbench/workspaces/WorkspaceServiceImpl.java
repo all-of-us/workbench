@@ -510,17 +510,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
-    workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                WorkspaceUtils.isFreeTier(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
-  }
-
-  @Override
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
     workspaceDao.findAllByCreator(user).stream()
         .filter(
@@ -528,7 +517,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 WorkspaceUtils.isFreeTier(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateInitialCreditsExhaustion(id, exhausted));
+        .forEach(
+            id -> {
+              workspaceDao.updateInitialCreditsExhaustion(id, exhausted);
+              workspaceDao.updateBillingStatus(
+                  id, exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+            });
   }
 
   @Override

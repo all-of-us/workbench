@@ -103,7 +103,6 @@ public class CloudTaskInitialCreditsExpiryController
           logger.info(
               "Free tier Billing Service: handling user with expired credits {}",
               user.getUsername());
-          workspaceService.updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
           workspaceService.updateInitialCreditsExhaustion(user, true);
           // delete apps and runtimes
           deleteAppsAndRuntimesInFreeTierWorkspaces(user);
