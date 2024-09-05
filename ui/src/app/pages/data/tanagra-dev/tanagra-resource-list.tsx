@@ -13,6 +13,7 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
+import { RenameModal } from 'app/components/rename-modal';
 import {
   ResourceAction,
   ResourceActionsMenu,
@@ -39,7 +40,7 @@ import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { canDelete } from 'app/utils/resources';
+import { canDelete, canWrite, getDescription } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -114,6 +115,8 @@ export const TanagraResourceList = fp.flow(
   withCdrVersions(),
   withConfirmDeleteModal()
 )((props: Props) => {
+  const [resourceToRename, setResourceToRename] =
+    useState<TanagraWorkspaceResource>();
   const [tableData, setTableData] = useState<TableData[]>();
 
   const getCdrVersionName = (r: WorkspaceResource) => {
@@ -148,8 +151,60 @@ export const TanagraResourceList = fp.flow(
     }
   };
 
+  const renameResource = async (displayName: string, description: string) => {
+    const {
+      cohortTanagra,
+      conceptSetTanagra,
+      reviewTanagra,
+      workspaceNamespace,
+    } = resourceToRename;
+    try {
+      if (cohortTanagra) {
+        await cohortsApi().updateCohort({
+          studyId: workspaceNamespace,
+          cohortId: cohortTanagra.id,
+          cohortUpdateInfo: {
+            displayName,
+            description,
+            criteriaGroupSections: cohortTanagra.criteriaGroupSections,
+          },
+        });
+      } else if (conceptSetTanagra) {
+        await conceptSetsApi().updateConceptSet({
+          studyId: workspaceNamespace,
+          conceptSetId: conceptSetTanagra.id,
+          conceptSetUpdateInfo: {
+            displayName,
+            description,
+            criteria: conceptSetTanagra.criteria,
+          },
+        });
+      } else if (reviewTanagra) {
+        await reviewsApi().updateReview({
+          studyId: workspaceNamespace,
+          cohortId: reviewTanagra.cohort.id,
+          reviewId: reviewTanagra.id,
+          reviewUpdateInfo: {
+            displayName,
+            description,
+          },
+        });
+      }
+      setResourceToRename(undefined);
+      props.onUpdate();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const actions = (resource): ResourceAction[] => {
     return [
+      {
+        icon: 'note',
+        displayName: 'Rename',
+        onClick: () => setResourceToRename(resource),
+        disabled: !canWrite(resource),
+      },
       {
         icon: 'trash',
         displayName: 'Delete',
@@ -261,6 +316,11 @@ export const TanagraResourceList = fp.flow(
     );
   };
 
+  const existingNameList = (resource: TanagraWorkspaceResource) =>
+    (tableData ?? [])
+      .filter((td) => td.resourceType === getTypeString(resource))
+      .map(({ resourceName }) => resourceName);
+
   return (
     <React.Fragment>
       <div data-test-id='resources-table' style={{ flex: 1 }}>
@@ -322,6 +382,16 @@ export const TanagraResourceList = fp.flow(
           </DataTable>
         )}
       </div>
+      {!!resourceToRename && (
+        <RenameModal
+          onRename={(name, description) => renameResource(name, description)}
+          resourceType={getType(resourceToRename)}
+          onCancel={() => setResourceToRename(undefined)}
+          oldDescription={getDescription(resourceToRename)}
+          oldName={getDisplayName(resourceToRename)}
+          existingNames={existingNameList(resourceToRename)}
+        />
+      )}
     </React.Fragment>
   );
 });
