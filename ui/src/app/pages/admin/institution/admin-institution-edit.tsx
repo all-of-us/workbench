@@ -30,10 +30,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { Scroll } from 'app/icons/scroll';
-import {
-  MembershipRequirements,
-  OrganizationTypeOptions,
-} from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -50,14 +46,18 @@ import {
   getTierEmailDomains,
   updateEnableControlledTier,
   updateMembershipRequirement,
-  updateRequireEra,
   updateTierEmailAddresses,
   updateTierEmailDomains,
 } from 'app/utils/institutions';
 import { NavigationProps } from 'app/utils/navigation';
-import { MatchParams } from 'app/utils/stores';
+import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+
+import {
+  MembershipRequirements,
+  OrganizationTypeOptions,
+} from './admin-institution-options';
 
 const styles = reactStyles({
   label: {
@@ -94,6 +94,10 @@ const styles = reactStyles({
   saveButton: {
     textTransform: 'uppercase',
   },
+  explanation: {
+    color: colors.primary,
+    fontSize: 12,
+  },
 });
 
 enum InstitutionMode {
@@ -125,7 +129,6 @@ const EnableCtSwitch = (props: {
   return (
     <CommonToggle
       name='Controlled tier enabled'
-      dataTestId='controlled-enabled-switch'
       onToggle={(e) => onToggle(e)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
@@ -349,6 +352,24 @@ const ApiErrorModal = (props: { errorMsg: string; onClose: Function }) => {
   );
 };
 
+const ExpirationBypassExplanation = (props: { bypassed: boolean }) => {
+  const bypassedText =
+    'Researchers affiliated with this institution are not subject to the expiration ' +
+    'of their initial credits after the standard time period. They remain subject to the exhaustion ' +
+    'of the dollar amount of their credits.';
+
+  const standardText =
+    'Researchers affiliated with this institution are subject to the expiration ' +
+    'of their initial credits after the standard time period as well as the exhaustion ' +
+    'of the dollar amount of their credits.';
+
+  return (
+    <p style={{ ...styles.explanation, width: '36rem' }}>
+      {props.bypassed ? bypassedText : standardText}
+    </p>
+  );
+};
+
 interface Props
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -477,13 +498,6 @@ export const AdminInstitutionEdit = fp.flow(
           accessTierShortName,
           membershipRequirement
         )
-      );
-    }
-
-    private setRequireEra(accessTierShortName: string, requireEra: boolean) {
-      const { tierConfigs } = this.state.institution;
-      this.setTierConfigs(
-        updateRequireEra(tierConfigs, accessTierShortName, requireEra)
       );
     }
 
@@ -670,6 +684,9 @@ export const AdminInstitutionEdit = fp.flow(
     }
 
     render() {
+      const {
+        config: { enableInitialCreditsExpiration },
+      } = serverConfigStore.get();
       const { institution, showOtherInstitutionTextBox, title } = this.state;
       const {
         displayName,
@@ -864,13 +881,7 @@ export const AdminInstitutionEdit = fp.flow(
                   }
                 />
 
-                <p
-                  style={{
-                    color: colors.primary,
-                    fontSize: 12,
-                    width: '24rem',
-                  }}
-                >
+                <p style={{ ...styles.explanation, width: '24rem' }}>
                   If provided, users who select this institution but are not
                   allowed according to the data access tier requirements below
                   will be guided to the custom URL rather than the standard ones
@@ -894,6 +905,27 @@ export const AdminInstitutionEdit = fp.flow(
                     )
                   }
                 />
+                {enableInitialCreditsExpiration && (
+                  <div style={{ marginTop: '2.25rem' }}>
+                    <CommonToggle
+                      name='Initial Credits Expiration Bypass'
+                      onToggle={(bypass) =>
+                        this.setState(
+                          fp.set(
+                            ['institution', 'bypassInitialCreditsExpiration'],
+                            bypass
+                          )
+                        )
+                      }
+                      checked={institution.bypassInitialCreditsExpiration}
+                    />
+                  </div>
+                )}
+                {enableInitialCreditsExpiration && (
+                  <ExpirationBypassExplanation
+                    bypassed={institution.bypassInitialCreditsExpiration}
+                  />
+                )}
               </FlexColumn>
             </FlexRow>
             <SemiBoldHeader

@@ -20,6 +20,7 @@ import {
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import {
+  BROAD,
   InstitutionApiStub,
   VERILY,
   VERILY_WITHOUT_CT,
@@ -37,7 +38,7 @@ const getCTDomainInput = (): HTMLInputElement =>
   screen.getByTestId('controlled-email-domain-input');
 const getCTDropdown = () => screen.getByTestId('controlled-agreement-dropdown');
 const getCTEnabled = (): HTMLInputElement =>
-  screen.getByTestId('controlled-enabled-switch');
+  screen.getByRole('switch', { name: 'Controlled tier enabled' });
 
 const getRTAddress = () => screen.getByTestId('registered-email-address');
 const getRTAddressInput = (): HTMLInputElement =>
@@ -63,14 +64,8 @@ const queryRTDomain = () => screen.queryByTestId('registered-email-domain');
 const queryRTDomainInput = (): HTMLInputElement =>
   screen.queryByTestId('registered-email-domain-input');
 
-const getAddButton = () =>
-  screen.getByRole('button', {
-    name: /add/i,
-  });
-const getSaveButton = () =>
-  screen.getByRole('button', {
-    name: /save/i,
-  });
+const getAddButton = () => screen.getByRole('button', { name: /add/i });
+const getSaveButton = () => screen.getByRole('button', { name: /save/i });
 
 const addressesRequirementLabel = MembershipRequirements.filter(
   (requirement) =>
@@ -584,6 +579,44 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     await expectTooltipAbsence(getSaveButton(), user);
   });
+
+  it('Should allow updating bypassInitialCreditsExpiration from false to true', async () => {
+    component();
+    await waitForNoSpinner();
+
+    // VERILY inst starts with bypassInitialCreditsExpiration = false
+
+    const bypassToggle = screen.getByRole('switch', {
+      name: 'Initial Credits Expiration Bypass',
+    });
+    expect(bypassToggle).toBeInTheDocument();
+    expect(bypassToggle).not.toBeChecked();
+
+    await user.click(bypassToggle);
+
+    expect(bypassToggle).toBeChecked();
+
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
+
+  it('Should allow updating bypassInitialCreditsExpiration from true to false', async () => {
+    component(BROAD.shortName);
+    await waitForNoSpinner();
+
+    // BROAD inst starts with bypassInitialCreditsExpiration = true
+
+    const bypassToggle = screen.getByRole('switch', {
+      name: 'Initial Credits Expiration Bypass',
+    });
+    expect(bypassToggle).toBeInTheDocument();
+    expect(bypassToggle).toBeChecked();
+
+    await user.click(bypassToggle);
+
+    expect(bypassToggle).not.toBeChecked();
+
+    await expectTooltipAbsence(getSaveButton(), user);
+  });
 });
 
 describe('AdminInstitutionEditSpec - add mode', () => {
@@ -759,5 +792,22 @@ describe('AdminInstitutionEditSpec - add mode', () => {
       screen.queryByText(/Controlled tier email domains/i)
     ).not.toBeInTheDocument();
     await user.unhover(getAddButton());
+  });
+
+  it('Should allow setting bypassInitialCreditsExpiration', async () => {
+    component();
+    await waitForNoSpinner();
+
+    // start with bypassInitialCreditsExpiration = false
+
+    const bypassToggle = screen.getByRole('switch', {
+      name: 'Initial Credits Expiration Bypass',
+    });
+    expect(bypassToggle).toBeInTheDocument();
+    expect(bypassToggle).not.toBeChecked();
+
+    await user.click(bypassToggle);
+
+    expect(bypassToggle).toBeChecked();
   });
 });

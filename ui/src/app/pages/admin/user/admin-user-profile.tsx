@@ -348,9 +348,8 @@ const ToggleForModule = (props: ToggleProps) => {
       }}
     >
       <CommonToggle
-        name=' '
+        name={`Bypass ${moduleName}`}
         checked={isModuleBypassed}
-        dataTestId={`${moduleName}-toggle`}
         onToggle={() =>
           bypassUpdate({ moduleName, bypassed: !isModuleBypassed })
         }
@@ -451,7 +450,6 @@ const DisabledToggle = (props: {
         <CommonToggle
           name={currentlyDisabled ? 'Account disabled' : 'Account enabled'}
           checked={!currentlyDisabled}
-          dataTestId='user-disabled-toggle'
           onToggle={() => toggleDisabled()}
           disabled={isLoggedInUser(profile)}
         />
