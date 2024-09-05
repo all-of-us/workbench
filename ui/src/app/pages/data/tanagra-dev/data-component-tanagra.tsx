@@ -379,7 +379,7 @@ export const DataComponentTanagra = fp.flow(
             onClick={() => setActiveTab(Tabs.CONCEPTSETS)}
             data-test-id='view-only-concept-sets'
           >
-            Concept Sets
+            Feature Sets
           </TabButton>
           <TabButton
             active={activeTab === Tabs.DATASETS}

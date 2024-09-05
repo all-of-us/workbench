@@ -17,7 +17,7 @@ export function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
     [(rt) => rt === ResourceType.COHORT, () => 'Cohort'],
     [(rt) => rt === ResourceType.COHORT_REVIEW, () => 'Cohort Review'],
-    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Concept Set'],
+    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Feature Set'],
     [(rt) => rt === ResourceType.DATASET, () => 'Dataset'],
     [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
 
