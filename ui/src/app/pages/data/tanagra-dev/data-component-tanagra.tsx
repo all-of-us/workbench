@@ -99,6 +99,7 @@ export interface TanagraWorkspaceResource extends WorkspaceResource {
   featureSetTanagra?: FeatureSet;
   reviewTanagra?: Review;
   createdBy?: string;
+  workspaceTerraName?: string;
 }
 
 const mapTanagraWorkspaceResource = ({
@@ -115,7 +116,8 @@ const mapTanagraWorkspaceResource = ({
   workspace: WorkspaceData;
 }): TanagraWorkspaceResource => ({
   workspaceNamespace: workspace.namespace,
-  workspaceFirecloudName: workspace.terraName, // TODO verify this is the correct value to set
+  workspaceFirecloudName: workspace.terraName, // Placeholder until workspaceFirecloudName is removed from WorkspaceResource
+  workspaceTerraName: workspace.terraName,
   workspaceBillingStatus: workspace.billingStatus,
   cdrVersionId: workspace.cdrVersionId,
   accessTierShortName: workspace.accessTierShortName,
