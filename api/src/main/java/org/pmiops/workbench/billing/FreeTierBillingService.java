@@ -257,11 +257,11 @@ public class FreeTierBillingService {
             ws ->
                 WorkspaceUtils.isFreeTier(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .map(DbWorkspace::getWorkspaceId)
         .forEach(
-            id -> {
-              workspaceDao.updateInitialCreditsExhaustion(id, false);
-              workspaceDao.updateBillingStatus(id, BillingStatus.ACTIVE);
+            ws -> {
+              ws.setInitialCreditsExhausted(false);
+              ws.setBillingStatus(BillingStatus.ACTIVE);
+              workspaceDao.save(ws);
             });
   }
 

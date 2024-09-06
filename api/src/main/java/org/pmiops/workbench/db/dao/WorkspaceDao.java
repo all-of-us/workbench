@@ -123,17 +123,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     save(toUpdate);
   }
 
-  default void updateInitialCreditsExhaustion(long workspaceId, boolean exhausted) {
-    DbWorkspace toUpdate =
-        findById(workspaceId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("DbWorkspace %s does not exist", workspaceId)));
-    toUpdate.setInitialCreditsExhausted(exhausted);
-    save(toUpdate);
-  }
-
   default void updateInitialCreditsExpiration(long workspaceId, boolean expired) {
     DbWorkspace toUpdate =
         findById(workspaceId)

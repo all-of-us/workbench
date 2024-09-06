@@ -516,12 +516,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             ws ->
                 WorkspaceUtils.isFreeTier(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .map(DbWorkspace::getWorkspaceId)
         .forEach(
-            id -> {
-              workspaceDao.updateInitialCreditsExhaustion(id, exhausted);
-              workspaceDao.updateBillingStatus(
-                  id, exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+            ws -> {
+              ws.setInitialCreditsExhausted(exhausted);
+              ws.setBillingStatus(exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+              workspaceDao.save(ws);
             });
   }
 
