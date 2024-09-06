@@ -62,7 +62,7 @@ describe('CreateBillingAccountModal', () => {
       'tester@mactesterson.edu><script>alert("hello");</script>'
     );
     expect(getHTMLInputElementValue(getByTestId('user-workbench-id'))).toEqual(
-      'tester@fake-research-aou.org'
+      ProfileStubVariables.PROFILE_STUB.username
     );
     expect(getHTMLInputElementValue(getByTestId('user-institution'))).toEqual(
       BROAD.displayName
@@ -96,7 +96,7 @@ describe('CreateBillingAccountModal', () => {
       'tester@mactesterson.edu><script>alert("hello");</script>'
     );
     expect(screen.getByTestId('user-workbench-id-text')).toHaveTextContent(
-      'tester@fake-research-aou.org'
+      ProfileStubVariables.PROFILE_STUB.username
     );
     expect(screen.getByTestId('user-institution-text')).toHaveTextContent(
       BROAD.displayName
