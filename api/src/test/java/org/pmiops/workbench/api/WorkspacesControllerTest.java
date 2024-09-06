@@ -690,7 +690,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() {
-    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+    doThrow(new RuntimeException()).when(workspaceDao).save(any(DbWorkspace.class));
     Workspace workspace = createWorkspace();
     TestMockFactory.stubCreateBillingProject(fireCloudService, workspace.getNamespace());
 
@@ -1404,7 +1404,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
-    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+    doThrow(new RuntimeException()).when(workspaceDao).save(any(DbWorkspace.class));
 
     try {
       workspacesController
