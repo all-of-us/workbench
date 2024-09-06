@@ -477,15 +477,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .billing
         .freeTierBillingAccountNames()
         .contains(newBillingAccountName)) {
+      boolean hasInitialCreditsRemaining =
+          freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator());
       workspace.setBillingStatus(
-          freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator())
+          hasInitialCreditsRemaining
               ? BillingStatus.ACTIVE
               : BillingStatus.INACTIVE);
+      workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
     }
+    workspaceDao.save(workspace);
   }
 
   @Override
