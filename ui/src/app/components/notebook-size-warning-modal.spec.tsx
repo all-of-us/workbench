@@ -33,7 +33,7 @@ describe('Notebook Size Warning Modal', () => {
   const defaultProps: NotebookSizeWarningModalProps = {
     handleClose: () => {},
     namespace: 'mockNamespace',
-    firecloudName: 'mockfirecloudName',
+    terraName: 'mockTerraName',
     notebookName: 'mockNotebookName',
   };
 
@@ -76,7 +76,7 @@ describe('Notebook Size Warning Modal', () => {
     const expectedNavigation = [
       'workspaces',
       defaultProps.namespace,
-      defaultProps.firecloudName,
+      defaultProps.terraName,
       analysisTabName,
       defaultProps.notebookName,
     ];
@@ -91,7 +91,7 @@ describe('Notebook Size Warning Modal', () => {
     const expectedNavigation = [
       'workspaces',
       defaultProps.namespace,
-      defaultProps.firecloudName,
+      defaultProps.terraName,
       analysisTabName,
       defaultProps.notebookName,
     ];

@@ -448,7 +448,10 @@ const DisplayIcon = (props: DisplayIconProps) => {
       'terminal',
       () => (
         <RouteLink
-          path={`${workspacePath(workspace.namespace, workspace.id)}/terminals`}
+          path={`${workspacePath(
+            workspace.namespace,
+            workspace.terraName
+          )}/terminals`}
         >
           <FontAwesomeIcon
             data-test-id={'help-sidebar-icon-' + icon.id}

@@ -425,7 +425,7 @@ export const ConceptSearch = fp.flow(
         workspace: {
           accessLevel,
           cdrVersionId,
-          id,
+          terraName,
           namespace,
           accessTierShortName,
         },
@@ -617,7 +617,7 @@ export const ConceptSearch = fp.flow(
                     this.props.navigate([
                       'workspaces',
                       namespace,
-                      id,
+                      terraName,
                       'data',
                       'concepts',
                     ])
@@ -661,7 +661,7 @@ export const ConceptSearch = fp.flow(
           {copying && (
             <CopyModal
               fromWorkspaceNamespace={namespace}
-              fromWorkspaceFirecloudName={id}
+              fromWorkspaceTerraName={terraName}
               fromResourceName={conceptSet.name}
               fromCdrVersionId={cdrVersionId}
               fromAccessTierShortName={accessTierShortName}

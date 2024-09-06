@@ -129,7 +129,7 @@ export class RuntimeApiStub extends RuntimeApi {
 
   localize(): Promise<RuntimeLocalizeResponse> {
     return new Promise<RuntimeLocalizeResponse>((resolve) => {
-      resolve({ runtimeLocalDirectory: 'workspaces/${req.workspaceId}' });
+      resolve({ runtimeLocalDirectory: 'workspaces-local-dir' });
     });
   }
 }

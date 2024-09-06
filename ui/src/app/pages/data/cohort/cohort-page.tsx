@@ -122,7 +122,7 @@ export const CohortPage = fp.flow(
 
     componentDidMount() {
       const {
-        workspace: { id },
+        workspace: { terraName },
         hideSpinner,
       } = this.props;
       hideSpinner();
@@ -141,7 +141,7 @@ export const CohortPage = fp.flow(
           updateGroupListsCount: this.state.updateGroupListsCount + 1,
         });
         const localStorageCohort = {
-          workspaceId: id,
+          workspaceId: terraName,
           cohortId: !!cohort ? cohort.id : null,
           searchRequest,
         };
@@ -168,7 +168,7 @@ export const CohortPage = fp.flow(
 
     initCohort() {
       const {
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
       } = this.props;
       const cid = parseQueryParams(this.props.location.search).get('cohortId');
       const existingCohort = JSON.parse(
@@ -181,13 +181,13 @@ export const CohortPage = fp.flow(
       if (cid) {
         this.setState({ loading: true });
         cohortsApi()
-          .getCohort(namespace, id, +cid)
+          .getCohort(namespace, terraName, +cid)
           .then((cohort) => {
             this.setState({ cohort, loading: false });
             currentCohortStore.next(cohort);
             if (
               existingCohort &&
-              existingCohort.workspaceId === id &&
+              existingCohort.workspaceId === terraName &&
               existingCohort.cohortId === +cid
             ) {
               searchRequestStore.next(existingCohort.searchRequest);
@@ -211,7 +211,7 @@ export const CohortPage = fp.flow(
           () => {
             if (
               existingCohort &&
-              existingCohort.workspaceId === id &&
+              existingCohort.workspaceId === terraName &&
               !existingCohort.cohortId
             ) {
               searchRequestStore.next(existingCohort.searchRequest);
@@ -223,7 +223,10 @@ export const CohortPage = fp.flow(
       }
       if (existingContext) {
         const { workspaceId, cohortId, cohortContext } = existingContext;
-        if (workspaceId === id && ((!cid && !cohortId) || +cid === cohortId)) {
+        if (
+          workspaceId === terraName &&
+          ((!cid && !cohortId) || +cid === cohortId)
+        ) {
           this.setSearchContext(cohortContext);
         } else {
           localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);

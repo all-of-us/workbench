@@ -40,7 +40,7 @@ export const ConfigurationPanel = fp.flow(
     workspace: WorkspaceData;
     profileState: ProfileStore;
   }) => {
-    const { namespace, id } = workspace;
+    const { namespace, terraName } = workspace;
     const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
       useState(null);
 
@@ -50,7 +50,7 @@ export const ConfigurationPanel = fp.flow(
         const { freeCreditsRemaining } =
           await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(
             namespace,
-            id,
+            terraName,
             { signal: aborter.signal }
           );
         setCreatorFreeCreditsRemaining(freeCreditsRemaining);

@@ -45,8 +45,8 @@ export class NotebooksApiStub extends NotebooksApi {
   }
 
   cloneNotebook(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     notebookName: string
   ): Promise<any> {
     return new Promise<any>((resolve) => {

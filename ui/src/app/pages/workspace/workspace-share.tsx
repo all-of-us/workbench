@@ -228,7 +228,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       try {
         const resp = await workspacesApi().getFirecloudWorkspaceUserRoles(
           this.props.workspace.namespace,
-          this.props.workspace.id
+          this.props.workspace.terraName
         );
         this.setState({
           userRoles: fp.sortBy('familyName', resp.items),
@@ -251,7 +251,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       workspacesApi()
         .shareWorkspacePatch(
           this.props.workspace.namespace,
-          this.props.workspace.id,
+          this.props.workspace.terraName,
           {
             workspaceEtag: this.props.workspace.etag,
             items: this.state.userRolesToChange,
@@ -724,7 +724,8 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           {!this.state.workspaceFound && (
             <div>
               <h3>
-                The workspace {this.props.workspace.id} could not be found
+                The workspace {this.props.workspace.terraName} could not be
+                found
               </h3>
             </div>
           )}

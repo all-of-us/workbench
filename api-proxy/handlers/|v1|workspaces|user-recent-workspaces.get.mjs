@@ -8,8 +8,10 @@ const body = JSON.stringify(
   {
     workspace: {
       id: 'mohstest',
+      terraName: 'mohstest',
       etag: '"4"',
       name: 'Mohs Test',
+      displayName: 'Mohs Test',
       namespace: 'aou-rw-test-53ff4756',
       cdrVersionId: '3',
       creator: 'dmohs@fake-research-aou.org',

@@ -8,8 +8,10 @@ const body = JSON.stringify(
   {
     workspace: {
       id: 'testwsshare202207311932',
+      terraName: 'testwsshare202207311932',
       etag: '"1"',
       name: 'test-ws-share-202207311932',
+      displayName: 'test-ws-share-202207311932',
       namespace: 'aou-rw-test-ca61ee0f',
       cdrVersionId: '3',
       creator: 'puppeteer-tester-7@fake-research-aou.org',

@@ -75,10 +75,10 @@ interface NavProps {
 
 const WorkspaceNavigation = (props: NavProps) => {
   const {
-    workspace: { name, namespace, id },
+    workspace: { name, namespace, terraName },
     style,
   } = props;
-  const url = dataTabPath(namespace, id);
+  const url = dataTabPath(namespace, terraName);
 
   return (
     <Clickable>
@@ -225,7 +225,7 @@ export const TanagraResourceList = fp.flow(
         cohortTanagra,
         conceptSetTanagra,
         reviewTanagra,
-        workspaceFirecloudName,
+        workspaceTerraName,
         workspaceNamespace,
       },
     } = rowData;
@@ -233,7 +233,7 @@ export const TanagraResourceList = fp.flow(
     let url = '';
     const urlPrefix = `${dataTabPath(
       workspaceNamespace,
-      workspaceFirecloudName
+      workspaceTerraName
     )}/tanagra`;
     if (cohortTanagra) {
       displayName = cohortTanagra.displayName;

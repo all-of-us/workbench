@@ -17,7 +17,7 @@ export const CustomFunnel = withCurrentWorkspace()(
   ({
     onExit,
     totalCount,
-    workspace: { namespace, id },
+    workspace: { namespace, terraName },
   }: {
     onExit: (e: Event) => void;
     totalCount: number;
@@ -131,7 +131,7 @@ export const CustomFunnel = withCurrentWorkspace()(
             }
             return cohortBuilderApi().countParticipants(
               namespace,
-              id,
+              terraName,
               searchRequest
             );
           })

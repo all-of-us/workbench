@@ -205,7 +205,10 @@ export const WorkspaceAbout = fp.flow(
 
     loadInitialCreditsUsage(workspace: WorkspaceData) {
       fetchWithErrorModal(() =>
-        workspacesApi().getBillingUsage(workspace.namespace, workspace.id)
+        workspacesApi().getBillingUsage(
+          workspace.namespace,
+          workspace.terraName
+        )
       ).then((usage: WorkspaceBillingUsageResponse) =>
         this.setState({ workspaceInitialCreditsUsage: usage.cost })
       );
@@ -238,7 +241,7 @@ export const WorkspaceAbout = fp.flow(
       fetchWithErrorModal(() =>
         workspacesApi().getFirecloudWorkspaceUserRoles(
           workspace.namespace,
-          workspace.id
+          workspace.terraName
         )
       ).then((resp: WorkspaceUserRolesResponse) =>
         this.setState({

@@ -54,7 +54,7 @@ describe('GenomicExtractionModal', () => {
     testProps = {
       dataSet: dataset,
       workspaceNamespace: workspace.namespace,
-      workspaceFirecloudName: workspace.id,
+      workspaceTerraName: workspace.terraName,
       closeFunction: () => {},
       title: "Top 10 Egregious Hacks Your Tech Lead Doesn't Want You To Know",
     };

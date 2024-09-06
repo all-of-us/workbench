@@ -15,7 +15,7 @@ import { WorkspaceStubVariables } from './workspaces';
 export const DEFAULT_COHORT_ID = 1;
 export const DEFAULT_COHORT_ID_2 = 2;
 
-export const exampleCohortStubs = [
+export const exampleCohortStubs: CohortStub[] = [
   {
     id: DEFAULT_COHORT_ID,
     name: 'sample name',
@@ -23,7 +23,7 @@ export const exampleCohortStubs = [
     criteria:
       '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[],"dataFilters":[]}',
     type: '',
-    workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime() - 1000,
   },
@@ -35,7 +35,7 @@ export const exampleCohortStubs = [
       '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],' +
       '"excludes":[{"temporal": false,"items":[]}],"dataFilters":[]}',
     type: '',
-    workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime() - 4000,
   },
@@ -58,7 +58,7 @@ class CohortStub implements Cohort {
 
   lastModifiedTime?: number;
 
-  workspaceId: string;
+  terraName: string;
 
   constructor(cohort: Cohort, terraName: string) {
     this.creationTime = cohort.creationTime;
@@ -69,7 +69,7 @@ class CohortStub implements Cohort {
     this.lastModifiedTime = cohort.lastModifiedTime;
     this.name = cohort.name;
     this.type = cohort.type;
-    this.workspaceId = terraName;
+    this.terraName = terraName;
   }
 }
 
@@ -83,7 +83,7 @@ export class CohortsApiStub extends CohortsApi {
 
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-      id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
     };
 
@@ -103,7 +103,7 @@ export class CohortsApiStub extends CohortsApi {
   ): Promise<Cohort> {
     return new Promise<Cohort>((resolve, reject) => {
       const index = this.cohorts.findIndex((cohort: CohortStub) => {
-        if (cohort.id === cid && cohort.workspaceId) {
+        if (cohort.id === cid && cohort.terraName) {
           return true;
         }
         return false;
@@ -146,7 +146,7 @@ export class CohortsApiStub extends CohortsApi {
     return new Promise<CohortListResponse>((resolve, reject) => {
       const cohortsInWorkspace: Cohort[] = [];
       this.cohorts.forEach((cohort) => {
-        if (cohort.workspaceId === terraName) {
+        if (cohort.terraName === terraName) {
           cohortsInWorkspace.push(cohort);
         }
       });
@@ -158,7 +158,11 @@ export class CohortsApiStub extends CohortsApi {
     });
   }
 
-  getCohort(namespace, id, cohortId): Promise<Cohort> {
+  getCohort(
+    _ns: string,
+    _terraName: string,
+    cohortId: number
+  ): Promise<Cohort> {
     const cohort =
       this.cohorts.find((c) => c.id === cohortId) || this.cohorts[0];
     return new Promise<Cohort>((resolve) => resolve(cohort));

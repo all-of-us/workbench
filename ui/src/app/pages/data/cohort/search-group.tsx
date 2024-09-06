@@ -313,7 +313,7 @@ export const SearchGroup = withCurrentWorkspace()(
         group,
         groupIndex,
         role,
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
       } = this.props;
       const mappedGroup = mapGroup(group);
       const request = {
@@ -323,7 +323,7 @@ export const SearchGroup = withCurrentWorkspace()(
         [role]: [mappedGroup],
       };
       cohortBuilderApi()
-        .countParticipants(namespace, id, request, {
+        .countParticipants(namespace, terraName, request, {
           signal: this.aborter.signal,
         })
         .then((count) => {

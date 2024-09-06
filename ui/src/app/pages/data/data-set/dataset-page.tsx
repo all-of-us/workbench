@@ -332,7 +332,7 @@ interface ImmutableWorkspaceCohortListItemProps {
   checked: boolean;
   cohortId: number;
   namespace: string;
-  wid: string;
+  terraName: string;
   dataTestId?: string;
 }
 const ImmutableWorkspaceCohortListItem = ({
@@ -341,7 +341,7 @@ const ImmutableWorkspaceCohortListItem = ({
   checked,
   cohortId,
   namespace,
-  wid,
+  terraName,
   dataTestId,
 }: ImmutableWorkspaceCohortListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
@@ -376,7 +376,7 @@ const ImmutableWorkspaceCohortListItem = ({
           <StyledRouterLink
             path={`${dataTabPath(
               namespace,
-              wid
+              terraName
             )}/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
           >
@@ -937,7 +937,7 @@ export const DatasetPage = fp.flow(
       // TODO(RW-4426): There is a lot of complexity here around loading domain
       // values which is static data for a given CDR version. Consider
       // refactoring this page to load all schema data before rendering.
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
       const updatedCrossDomainConceptSetList = crossDomainConceptSetList;
       const updatedSelectedDomainsWithConceptSetIds =
         selectedDomainsWithConceptSetIds;
@@ -947,7 +947,7 @@ export const DatasetPage = fp.flow(
       const newLookup = new Map(domainValueSetLookup);
       const values = await dataSetApi().getValuesFromDomain(
         namespace,
-        id,
+        terraName,
         domainWithConceptSetId.domain.toString(),
         domainWithConceptSetId.conceptSetId
       );
@@ -1021,7 +1021,7 @@ export const DatasetPage = fp.flow(
       // TODO(RW-4426): There is a lot of complexity here around loading domain
       // values which is static data for a given CDR version. Consider
       // refactoring this page to load all schema data before rendering.
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
       const newCrossDomainConceptSetList = new Set();
       const domainsWithConceptSetIds =
         getDomainsWithConceptSetIdsFromDataSet(loadedDataset);
@@ -1032,7 +1032,7 @@ export const DatasetPage = fp.flow(
         ({ conceptSetId, domain }) =>
           dataSetApi().getValuesFromDomain(
             namespace,
-            id,
+            terraName,
             domain.toString(),
             conceptSetId
           )
@@ -1103,14 +1103,14 @@ export const DatasetPage = fp.flow(
 
     const loadResources = async () => {
       try {
-        const { namespace, id } = workspace;
+        const { namespace, terraName } = workspace;
         const resourceCalls: Array<Promise<any>> = [
-          conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id),
+          conceptSetsApi().getConceptSetsInWorkspace(namespace, terraName),
+          cohortsApi().getCohortsInWorkspace(namespace, terraName),
         ];
         if (dataSetId) {
           resourceCalls.push(
-            dataSetApi().getDataSet(namespace, id, +dataSetId)
+            dataSetApi().getDataSet(namespace, terraName, +dataSetId)
           );
         }
         const [conceptSets, cohorts, dataset] = await Promise.all(
@@ -1463,7 +1463,7 @@ export const DatasetPage = fp.flow(
         );
         return;
       }
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
       const domainRequest: DataSetPreviewRequest = {
         domain: domain,
         conceptSetIds: selectedConceptSetIds,
@@ -1478,7 +1478,11 @@ export const DatasetPage = fp.flow(
       try {
         const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
           () =>
-            dataSetApi().previewDataSetByDomain(namespace, id, domainRequest)
+            dataSetApi().previewDataSetByDomain(
+              namespace,
+              terraName,
+              domainRequest
+            )
         );
         newPreviewInformation = {
           isLoading: false,
@@ -1535,10 +1539,14 @@ export const DatasetPage = fp.flow(
 
     const createDataset = async (datasetName, desc) => {
       AnalyticsTracker.DatasetBuilder.Create();
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
 
       dataSetApi()
-        .createDataSet(namespace, id, createDatasetRequest(datasetName, desc))
+        .createDataSet(
+          namespace,
+          terraName,
+          createDatasetRequest(datasetName, desc)
+        )
         .then((dataset) => loadDataset(dataset));
     };
 
@@ -1551,11 +1559,11 @@ export const DatasetPage = fp.flow(
 
     const saveDataset = async () => {
       AnalyticsTracker.DatasetBuilder.Save();
-      const { namespace, id } = workspace;
+      const { namespace, terraName } = workspace;
 
       setSavingDataset(true);
       dataSetApi()
-        .updateDataSet(namespace, id, dataSet.id, updateDatasetRequest())
+        .updateDataSet(namespace, terraName, dataSet.id, updateDatasetRequest())
         .then((dataset) => loadDataset(dataset))
         .catch((e) => {
           console.error(e);
@@ -1680,8 +1688,8 @@ export const DatasetPage = fp.flow(
       );
     };
 
-    const { namespace, id } = workspace;
-    const pathPrefix = dataTabPath(namespace, id);
+    const { namespace, terraName } = workspace;
+    const pathPrefix = dataTabPath(namespace, terraName);
     const cohortsPath = pathPrefix + '/cohorts/build';
     const conceptSetsPath = pathPrefix + '/concepts';
     const exportError = !canWrite()
@@ -1747,7 +1755,7 @@ export const DatasetPage = fp.flow(
                         checked={selectedCohortIds.includes(cohort.id)}
                         cohortId={cohort.id}
                         namespace={namespace}
-                        wid={id}
+                        terraName={terraName}
                         onChange={() => selectCohort(cohort)}
                       />
                     ))}
@@ -2153,7 +2161,7 @@ export const DatasetPage = fp.flow(
                   const resources =
                     await workspacesApi().getWorkspaceResourcesV2(
                       namespace,
-                      id,
+                      terraName,
                       [ResourceType.DATASET.toString()]
                     );
                   return resources.map((resource) => resource.dataSet.name);
@@ -2179,7 +2187,7 @@ export const DatasetPage = fp.flow(
               <GenomicExtractionModal
                 dataSet={dataSet}
                 workspaceNamespace={namespace}
-                workspaceFirecloudName={id}
+                workspaceTerraName={terraName}
                 title={
                   'Would you like to extract genomic variant data as VCF files?'
                 }

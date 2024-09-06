@@ -18,7 +18,7 @@ import { Spinner } from './spinners';
 export interface NotebookSizeWarningModalProps {
   handleClose: () => void;
   namespace: string;
-  firecloudName: string;
+  terraName: string;
   notebookName: string;
 }
 
@@ -27,14 +27,14 @@ const article =
 export const NotebookSizeWarningModal = ({
   handleClose,
   namespace,
-  firecloudName,
+  terraName,
   notebookName,
 }: NotebookSizeWarningModalProps) => {
   const [navigate] = useNavigation();
   const navigationPath = [
     'workspaces',
     namespace,
-    firecloudName,
+    terraName,
     analysisTabName,
     notebookName,
   ];

@@ -38,7 +38,7 @@ const TimeAgoWithVerboseTooltip = (epoch) => {
 interface Props {
   dataSet: DataSet;
   workspaceNamespace: string;
-  workspaceFirecloudName: string;
+  workspaceTerraName: string;
   closeFunction: Function;
   title?: string;
   cancelText?: string;
@@ -48,7 +48,7 @@ interface Props {
 export const GenomicExtractionModal = ({
   dataSet,
   workspaceNamespace,
-  workspaceFirecloudName,
+  workspaceTerraName,
   closeFunction,
   title,
   cancelText,
@@ -60,7 +60,7 @@ export const GenomicExtractionModal = ({
 
   const { data: jobs, mutate } = useGenomicExtractionJobs(
     workspaceNamespace,
-    workspaceFirecloudName
+    workspaceTerraName
   );
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter(
@@ -175,7 +175,7 @@ export const GenomicExtractionModal = ({
             try {
               const job = await dataSetApi().extractGenomicData(
                 workspaceNamespace,
-                workspaceFirecloudName,
+                workspaceTerraName,
                 dataSet.id
               );
               mutate(fp.concat(jobs, job));

@@ -48,7 +48,7 @@ describe('ConceptSearch', () => {
         initialEntries={[
           `${dataTabPath(
             workspaceDataStub.namespace,
-            workspaceDataStub.id
+            workspaceDataStub.terraName
           )}/concepts/sets/${conceptSet.id}`,
         ]}
       >

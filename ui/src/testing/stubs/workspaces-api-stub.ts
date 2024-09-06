@@ -54,7 +54,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
     this.workspaceUserRoles.set(
-      this.workspaces[0].id,
+      this.workspaces[0].terraName,
       fp.defaultTo(userRolesStub, workspaceUserRoles)
     );
     this.recentWorkspaces = recentWorkspaceStubs;
@@ -66,8 +66,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
         items: this.workspaces.map((workspace) => {
           let accessLevel: WorkspaceAccessLevel =
             WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
-          if (this.workspaceAccess.has(workspace.id)) {
-            accessLevel = this.workspaceAccess.get(workspace.id);
+          if (this.workspaceAccess.has(workspace.terraName)) {
+            accessLevel = this.workspaceAccess.get(workspace.terraName);
           }
           return {
             workspace: { ...workspace },
@@ -80,9 +80,9 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   createWorkspace(workspace?: Workspace): Promise<Workspace> {
     return new Promise((resolve) => {
-      workspace.id = `created-${++this.newWorkspaceCount}`;
+      workspace.terraName = `created-${++this.newWorkspaceCount}`;
       this.workspaces.push(workspace);
-      this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
+      this.workspaceAccess.set(workspace.terraName, WorkspaceAccessLevel.OWNER);
       resolve(workspace);
     });
   }
@@ -90,9 +90,9 @@ export class WorkspacesApiStub extends WorkspacesApi {
   // imitate sync version by returning with immediate success
   createWorkspaceAsync(workspace?: Workspace): Promise<WorkspaceOperation> {
     return new Promise((resolve) => {
-      workspace.id = `created-${++this.newWorkspaceCount}`;
+      workspace.terraName = `created-${++this.newWorkspaceCount}`;
       this.workspaces.push(workspace);
-      this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
+      this.workspaceAccess.set(workspace.terraName, WorkspaceAccessLevel.OWNER);
       const operation = {
         id: ++this.newWorkspaceOperationCount,
         status: WorkspaceOperationStatus.SUCCESS,
@@ -111,16 +111,16 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   updateWorkspace(
     workspaceNamespace: string,
-    workspaceId: string,
+    terraName: string,
     body?: UpdateWorkspaceRequest
   ): Promise<Workspace> {
     return new Promise((resolve) => {
       const originalItemIndex = this.workspaces.findIndex(
-        (w) => w.namespace === workspaceNamespace && w.id === workspaceId
+        (w) => w.namespace === workspaceNamespace && w.terraName === terraName
       );
       if (originalItemIndex === -1) {
         throw new Error(
-          `workspace ${workspaceNamespace}/${workspaceId} not found`
+          `workspace ${workspaceNamespace}/${terraName} not found`
         );
       }
       this.workspaces.splice(originalItemIndex, 1);
@@ -131,37 +131,35 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   private duplicateWorkspaceImpl(
     workspaceNamespace: string,
-    workspaceId: string,
+    terraName: string,
     body?: CloneWorkspaceRequest
   ): Workspace {
     const fromWorkspace = this.workspaces.find(
-      (w) => w.namespace === workspaceNamespace && w.id === workspaceId
+      (w) => w.namespace === workspaceNamespace && w.terraName === terraName
     );
     if (!fromWorkspace) {
-      throw new Error(
-        `workspace ${workspaceNamespace}/${workspaceId} not found`
-      );
+      throw new Error(`workspace ${workspaceNamespace}/${terraName} not found`);
     }
     const toWorkspace = {
       ...fromWorkspace,
       ...body.workspace,
-      id: `cloned-${++this.newWorkspaceCount}`,
+      terraName: `cloned-${++this.newWorkspaceCount}`,
     };
     this.workspaces.push(toWorkspace);
-    this.workspaceAccess.set(toWorkspace.id, WorkspaceAccessLevel.OWNER);
+    this.workspaceAccess.set(toWorkspace.terraName, WorkspaceAccessLevel.OWNER);
 
     return toWorkspace;
   }
 
   cloneWorkspace(
     workspaceNamespace: string,
-    workspaceId: string,
+    terraName: string,
     body?: CloneWorkspaceRequest
   ): Promise<CloneWorkspaceResponse> {
     return new Promise((resolve) => {
       const toWorkspace = this.duplicateWorkspaceImpl(
         workspaceNamespace,
-        workspaceId,
+        terraName,
         body
       );
       resolve({ workspace: toWorkspace });
@@ -171,13 +169,13 @@ export class WorkspacesApiStub extends WorkspacesApi {
   // imitate sync version by returning with immediate success
   duplicateWorkspaceAsync(
     workspaceNamespace: string,
-    workspaceId: string,
+    terraName: string,
     body?: CloneWorkspaceRequest
   ): Promise<WorkspaceOperation> {
     return new Promise((resolve) => {
       const toWorkspace = this.duplicateWorkspaceImpl(
         workspaceNamespace,
-        workspaceId,
+        terraName,
         body
       );
       const operation = {
@@ -191,8 +189,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   shareWorkspacePatch(
-    workspaceNamespace: string,
-    workspaceId: string,
+    _ns: string,
+    _terraName: string,
     body?: ShareWorkspaceRequest
   ): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>((resolve) => {
@@ -208,34 +206,30 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getWorkspace(
     workspaceNamespace: string,
-    workspaceId: string
+    terraName: string
   ): Promise<WorkspaceResponse> {
     return new Promise((resolve) => {
       const ws = this.workspaces.find(
-        (w) => w.namespace === workspaceNamespace && w.id === workspaceId
+        (w) => w.namespace === workspaceNamespace && w.terraName === terraName
       );
       if (!ws) {
         throw new Error(
-          `workspace ${workspaceNamespace}/${workspaceId} not found`
+          `workspace ${workspaceNamespace}/${terraName} not found`
         );
       }
       resolve({
         workspace: ws,
         accessLevel:
-          this.workspaceAccess.get(workspaceId) ||
-          WorkspaceAccessLevel.NO_ACCESS,
+          this.workspaceAccess.get(terraName) || WorkspaceAccessLevel.NO_ACCESS,
       });
     });
   }
 
-  deleteWorkspace(
-    workspaceNamespace: string,
-    workspaceId: string
-  ): Promise<EmptyResponse> {
+  deleteWorkspace(_ns: string, terraName: string): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>((resolve) => {
       const deletionIndex = this.workspaces.findIndex(
         (workspace: Workspace) => {
-          if (workspace.id === workspaceId) {
+          if (workspace.terraName === terraName) {
             return true;
           }
         }
@@ -243,7 +237,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
       if (deletionIndex === -1) {
         throw new Error(
           'Error deleting. Workspace with ' +
-            `id: ${workspaceId} does not exist.`
+            `terraName: ${terraName} does not exist.`
         );
       }
       this.workspaces.splice(deletionIndex, 1);
@@ -252,11 +246,11 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   getFirecloudWorkspaceUserRoles(
-    workspaceNamespace: string,
-    workspaceId: string
+    _ns: string,
+    terraName: string
   ): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>((resolve) => {
-      resolve({ items: this.workspaceUserRoles.get(workspaceId) });
+      resolve({ items: this.workspaceUserRoles.get(terraName) });
     });
   }
 
@@ -269,8 +263,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
         items: publishedWorkspaces.map((workspace) => {
           let accessLevel: WorkspaceAccessLevel =
             WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
-          if (this.workspaceAccess.has(workspace.id)) {
-            accessLevel = this.workspaceAccess.get(workspace.id);
+          if (this.workspaceAccess.has(workspace.terraName)) {
+            accessLevel = this.workspaceAccess.get(workspace.terraName);
           }
           return {
             workspace: { ...workspace },
@@ -315,12 +309,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getWorkspaceResourcesV2(
     workspaceNamespace: string,
-    workspaceId: string
+    terraName: string
   ): Promise<WorkspaceResourceResponse> {
     return new Promise<WorkspaceResourceResponse>((resolve) => {
       const workspace: WorkspaceData = {
         namespace: workspaceNamespace,
-        id: workspaceId,
+        terraName,
         name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
         accessLevel: WorkspaceAccessLevel.OWNER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,

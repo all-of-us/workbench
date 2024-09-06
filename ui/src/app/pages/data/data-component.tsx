@@ -107,7 +107,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
       setResourceList(
         await workspacesApi().getWorkspaceResourcesV2(
           workspace.namespace,
-          workspace.id,
+          workspace.terraName,
           resourceTypesToFetch
         )
       );
@@ -120,7 +120,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
 
   useEffect(() => {
     loadResources();
-  }, [workspace.namespace, workspace.id]);
+  }, [workspace.namespace, workspace.terraName]);
 
   const writePermission =
     workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
@@ -158,7 +158,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 navigate([
                   'workspaces',
                   workspace.namespace,
-                  workspace.id,
+                  workspace.terraName,
                   'data',
                   'cohorts',
                   'build',
@@ -205,7 +205,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 navigate([
                   'workspaces',
                   workspace.namespace,
-                  workspace.id,
+                  workspace.terraName,
                   'data',
                   'data-sets',
                 ]);

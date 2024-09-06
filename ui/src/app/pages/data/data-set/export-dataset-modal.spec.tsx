@@ -145,7 +145,7 @@ describe(ExportDatasetModal.name, () => {
     await clickExportButton();
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
@@ -174,7 +174,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
@@ -280,7 +280,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         newNotebook: false,
@@ -319,7 +319,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         analysisLanguage: AnalysisLanguage.PYTHON,
@@ -334,7 +334,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         analysisLanguage: AnalysisLanguage.R,
@@ -440,7 +440,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(exportSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
@@ -474,7 +474,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         analysisLanguage: AnalysisLanguage.PYTHON,
@@ -489,7 +489,7 @@ describe(ExportDatasetModal.name, () => {
 
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         analysisLanguage: AnalysisLanguage.PYTHON,
@@ -506,7 +506,7 @@ describe(ExportDatasetModal.name, () => {
     await user.click(otherRadioButton);
     expect(previewSpy).toHaveBeenCalledWith(
       workspace.namespace,
-      workspace.id,
+      workspace.terraName,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         analysisLanguage: AnalysisLanguage.PYTHON,

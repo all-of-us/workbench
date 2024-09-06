@@ -312,7 +312,7 @@ export const HelpSidebar = fp.flow(
         AnalyticsTracker.Workspaces.Delete();
         await workspacesApi().deleteWorkspace(
           this.props.workspace.namespace,
-          this.props.workspace.id
+          this.props.workspace.terraName
         );
         this.props.navigate(['workspaces']);
       }
@@ -728,7 +728,7 @@ export const HelpSidebar = fp.flow(
       } = this.state;
       const {
         workspace,
-        workspace: { namespace, id },
+        workspace: { namespace, terraName },
         pageKey,
         criteria,
       } = this.props;
@@ -771,7 +771,7 @@ export const HelpSidebar = fp.flow(
                         this.props.navigate([
                           'workspaces',
                           namespace,
-                          id,
+                          terraName,
                           'duplicate',
                         ]);
                       }}
@@ -780,7 +780,7 @@ export const HelpSidebar = fp.flow(
                         this.props.navigate([
                           'workspaces',
                           namespace,
-                          id,
+                          terraName,
                           'edit',
                         ]);
                       }}

@@ -41,7 +41,7 @@ const sparkLinkConfigs: {
   },
 ];
 
-export const SparkConsolePanel = ({ namespace, id }: WorkspaceData) => {
+export const SparkConsolePanel = ({ namespace, terraName }: WorkspaceData) => {
   return (
     <FlexColumn style={{ gap: '24px', paddingBottom: '10px' }}>
       <h3 style={{ ...styles.baseHeader, ...styles.bold }}>Spark Console</h3>
@@ -54,7 +54,7 @@ export const SparkConsolePanel = ({ namespace, id }: WorkspaceData) => {
           <div>{description}</div>
           <div>
             <RouteLink
-              path={`${workspacePath(namespace, id)}/spark/${path}`}
+              path={`${workspacePath(namespace, terraName)}/spark/${path}`}
               style={styles.sparkConsoleLaunchButton}
             >
               Launch

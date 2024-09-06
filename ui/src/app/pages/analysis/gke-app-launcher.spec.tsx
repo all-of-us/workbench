@@ -53,7 +53,11 @@ const currentWorkspace = workspaceStubs[0];
 const createRoute = (appType: string) => (
   <MemoryRouter
     initialEntries={[
-      appDisplayPath(currentWorkspace.namespace, currentWorkspace.id, appType),
+      appDisplayPath(
+        currentWorkspace.namespace,
+        currentWorkspace.terraName,
+        appType
+      ),
     ]}
   >
     <Route path='/workspaces/:ns/:terraName/analysis/userApp/:appType'>
@@ -64,7 +68,7 @@ const createRoute = (appType: string) => (
 
 const pathToCurrentWSAnalysisTab = analysisTabPath(
   currentWorkspace.namespace,
-  currentWorkspace.id
+  currentWorkspace.terraName
 );
 
 const setup = (queryParam, userApps: UserAppEnvironment[] = defaultApps()) => {

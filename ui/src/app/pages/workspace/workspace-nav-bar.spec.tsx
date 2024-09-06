@@ -29,7 +29,7 @@ describe('WorkspaceNavBar', () => {
     return render(
       <MemoryRouter
         initialEntries={[
-          `/${workspaceDataStub.namespace}/${workspaceDataStub.id}`,
+          `/${workspaceDataStub.namespace}/${workspaceDataStub.terraName}`,
         ]}
       >
         <Route path='/:ns/:terraName'>
@@ -72,7 +72,7 @@ describe('WorkspaceNavBar', () => {
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
-      workspaceDataStub.id,
+      workspaceDataStub.terraName,
       analysisTabName,
     ]);
 
@@ -80,7 +80,7 @@ describe('WorkspaceNavBar', () => {
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
-      workspaceDataStub.id,
+      workspaceDataStub.terraName,
       'data',
     ]);
 
@@ -88,7 +88,7 @@ describe('WorkspaceNavBar', () => {
     expect(mockNavigate).toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
-      workspaceDataStub.id,
+      workspaceDataStub.terraName,
       'about',
     ]);
   });
@@ -106,7 +106,7 @@ describe('WorkspaceNavBar', () => {
     expect(mockNavigate).not.toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
-      workspaceDataStub.id,
+      workspaceDataStub.terraName,
       'data',
     ]);
 
@@ -114,7 +114,7 @@ describe('WorkspaceNavBar', () => {
     expect(mockNavigate).not.toHaveBeenCalledWith([
       'workspaces',
       workspaceDataStub.namespace,
-      workspaceDataStub.id,
+      workspaceDataStub.terraName,
       analysisTabName,
     ]);
   });

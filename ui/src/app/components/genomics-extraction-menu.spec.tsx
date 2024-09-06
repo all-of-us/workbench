@@ -185,7 +185,7 @@ describe(GenomicsExtractionMenu.name, () => {
       expect(abortSpy).toHaveBeenCalledTimes(1);
       expect(abortSpy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
         genomicExtractionJobId.toString()
       );
     });

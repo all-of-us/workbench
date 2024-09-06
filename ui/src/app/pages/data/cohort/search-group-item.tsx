@@ -249,7 +249,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     componentDidMount(): void {
       const {
         item: { count, modifiers },
-        workspace: { id, namespace },
+        workspace: { namespace, terraName },
       } = this.props;
       const { encounters } = this.state;
       if (count !== undefined) {
@@ -265,7 +265,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         cohortBuilderApi()
           .findCriteriaBy(
             namespace,
-            id,
+            terraName,
             Domain[Domain.VISIT],
             CriteriaType[CriteriaType.VISIT]
           )
@@ -289,7 +289,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const { item, role, updateGroup } = this.props;
       try {
         updateGroup();
-        const { id, namespace } = currentWorkspaceStore.getValue();
+        const { namespace, terraName } = currentWorkspaceStore.getValue();
         const mappedItem = mapGroupItem(item, false);
         const request = {
           includes: [],
@@ -298,7 +298,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           [role]: [{ items: [mappedItem], temporal: false }],
         };
         await cohortBuilderApi()
-          .countParticipants(namespace, id, request)
+          .countParticipants(namespace, terraName, request)
           .then((count) => this.updateSearchRequest('count', count, false));
       } catch (error) {
         console.error(error);

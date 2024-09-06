@@ -306,11 +306,11 @@ export const ListOverview = fp.flow(
     callApi() {
       const { searchRequest } = this.props;
       const { ageType, chartType } = this.state;
-      const { id, namespace } = currentWorkspaceStore.getValue();
+      const { namespace, terraName } = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
       return cohortBuilderApi().findDemoChartInfo(
         namespace,
-        id,
+        terraName,
         chartType.toString(),
         ageType.toString(),
         request,

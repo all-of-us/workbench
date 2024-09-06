@@ -18,20 +18,14 @@ import {
   vocabOptions,
 } from 'app/services/review-state.service';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
-import {
-  hasNewValidProps,
-  withCurrentCohortReview,
-  withCurrentWorkspace,
-} from 'app/utils';
+import { hasNewValidProps, withCurrentCohortReview } from 'app/utils';
 import { currentCohortReviewStore } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import { WorkspaceData } from 'app/utils/workspace-data';
 
 interface Props
   extends WithSpinnerOverlayProps,
     RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
-  workspace: WorkspaceData;
 }
 
 interface State {
@@ -40,7 +34,6 @@ interface State {
 
 export const DetailPage = fp.flow(
   withCurrentCohortReview(),
-  withCurrentWorkspace(),
   withRouter
 )(
   class extends React.Component<Props, State> {
@@ -51,10 +44,7 @@ export const DetailPage = fp.flow(
     }
 
     async componentDidMount() {
-      const {
-        workspace: { id, namespace },
-        hideSpinner,
-      } = this.props;
+      const { hideSpinner } = this.props;
       hideSpinner();
       let { cohortReview } = this.props;
       const { ns, terraName, crid } = this.props.match.params;
@@ -77,7 +67,7 @@ export const DetailPage = fp.flow(
         });
       }
       if (!vocabOptions.getValue()) {
-        getVocabOptions(namespace, id);
+        getVocabOptions(ns, terraName);
       }
       this.updateParticipantStore();
       this.subscription = participantStore.subscribe((participant) =>

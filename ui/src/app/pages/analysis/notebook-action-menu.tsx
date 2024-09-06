@@ -186,7 +186,7 @@ export const NotebookActionMenu = fp.flow(
           {this.state.showCopyNotebookModal && (
             <CopyModal
               fromWorkspaceNamespace={resource.workspaceNamespace}
-              fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
+              fromWorkspaceTerraName={resource.workspaceFirecloudName}
               fromResourceName={getDisplayName(resource)}
               fromCdrVersionId={resource.cdrVersionId}
               fromAccessTierShortName={resource.accessTierShortName}
