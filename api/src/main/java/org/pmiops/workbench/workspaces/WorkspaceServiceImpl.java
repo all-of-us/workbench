@@ -487,7 +487,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       // throw a BadRequestException if a closed one is provided
       workspace.setBillingStatus(BillingStatus.ACTIVE);
     }
-    workspaceDao.save(workspace);
+//    workspaceDao.save(workspace);
   }
 
   @Override
