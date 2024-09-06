@@ -35,4 +35,4 @@ yarn
 npm install --prefix ../tanagra-aou-utils/tanagra/ui && npm run codegen --prefix ../tanagra-aou-utils/tanagra/ui
 
 #start workbench and tanagra ui
-concurrently "yarn && REACT_APP_ENVIRONMENT=local yarn start" "yarn run start-tanagra"
+concurrently "yarn && yarn run codegen && REACT_APP_ENVIRONMENT=local yarn start" "yarn run start-tanagra"

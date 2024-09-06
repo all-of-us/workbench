@@ -13,6 +13,7 @@ import {
 
 import { Clickable } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
+import { RenameModal } from 'app/components/rename-modal';
 import {
   ResourceAction,
   ResourceActionsMenu,
@@ -32,14 +33,14 @@ import {
 import { dataTabPath } from 'app/routing/utils';
 import {
   cohortsApi,
-  conceptSetsApi,
+  featureSetsApi,
   reviewsApi,
 } from 'app/services/tanagra-swagger-fetch-clients';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
-import { canDelete } from 'app/utils/resources';
+import { canDelete, canWrite, getDescription } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -114,6 +115,8 @@ export const TanagraResourceList = fp.flow(
   withCdrVersions(),
   withConfirmDeleteModal()
 )((props: Props) => {
+  const [resourceToRename, setResourceToRename] =
+    useState<TanagraWorkspaceResource>();
   const [tableData, setTableData] = useState<TableData[]>();
 
   const getCdrVersionName = (r: WorkspaceResource) => {
@@ -130,10 +133,10 @@ export const TanagraResourceList = fp.flow(
           studyId: resource.workspaceNamespace,
           cohortId: resource.cohortTanagra.id,
         });
-      } else if (resource.conceptSetTanagra) {
-        await conceptSetsApi().deleteConceptSet({
+      } else if (resource.featureSetTanagra) {
+        await featureSetsApi().deleteFeatureSet({
           studyId: resource.workspaceNamespace,
-          conceptSetId: resource.conceptSetTanagra.id,
+          featureSetId: resource.featureSetTanagra.id,
         });
       } else if (resource.reviewTanagra) {
         await reviewsApi().deleteReview({
@@ -148,8 +151,60 @@ export const TanagraResourceList = fp.flow(
     }
   };
 
+  const renameResource = async (displayName: string, description: string) => {
+    const {
+      cohortTanagra,
+      featureSetTanagra,
+      reviewTanagra,
+      workspaceNamespace,
+    } = resourceToRename;
+    try {
+      if (cohortTanagra) {
+        await cohortsApi().updateCohort({
+          studyId: workspaceNamespace,
+          cohortId: cohortTanagra.id,
+          cohortUpdateInfo: {
+            displayName,
+            description,
+            criteriaGroupSections: cohortTanagra.criteriaGroupSections,
+          },
+        });
+      } else if (featureSetTanagra) {
+        await featureSetsApi().updateFeatureSet({
+          studyId: workspaceNamespace,
+          featureSetId: featureSetTanagra.id,
+          featureSetUpdateInfo: {
+            displayName,
+            description,
+            criteria: featureSetTanagra.criteria,
+          },
+        });
+      } else if (reviewTanagra) {
+        await reviewsApi().updateReview({
+          studyId: workspaceNamespace,
+          cohortId: reviewTanagra.cohort.id,
+          reviewId: reviewTanagra.id,
+          reviewUpdateInfo: {
+            displayName,
+            description,
+          },
+        });
+      }
+      setResourceToRename(undefined);
+      props.onUpdate();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const actions = (resource): ResourceAction[] => {
     return [
+      {
+        icon: 'note',
+        displayName: 'Rename',
+        onClick: () => setResourceToRename(resource),
+        disabled: !canWrite(resource),
+      },
       {
         icon: 'trash',
         displayName: 'Delete',
@@ -223,7 +278,7 @@ export const TanagraResourceList = fp.flow(
     const {
       resource: {
         cohortTanagra,
-        conceptSetTanagra,
+        featureSetTanagra,
         reviewTanagra,
         workspaceTerraName,
         workspaceNamespace,
@@ -243,9 +298,9 @@ export const TanagraResourceList = fp.flow(
         cohortTanagra.criteriaGroupSections?.[0]?.criteriaGroups?.[0]?.id ??
         'none'
       }`;
-    } else if (conceptSetTanagra) {
-      displayName = conceptSetTanagra.displayName;
-      url = `${urlPrefix}/featureSets/${conceptSetTanagra.id}`;
+    } else if (featureSetTanagra) {
+      displayName = featureSetTanagra.displayName;
+      url = `${urlPrefix}/featureSets/${featureSetTanagra.id}`;
     } else if (reviewTanagra) {
       displayName = reviewTanagra.displayName;
       url = `${urlPrefix}/reviews/${reviewTanagra.cohort.id}/${reviewTanagra.id}`;
@@ -260,6 +315,11 @@ export const TanagraResourceList = fp.flow(
       </Clickable>
     );
   };
+
+  const existingNameList = (resource: TanagraWorkspaceResource) =>
+    (tableData ?? [])
+      .filter((td) => td.resourceType === getTypeString(resource))
+      .map(({ resourceName }) => resourceName);
 
   return (
     <React.Fragment>
@@ -322,6 +382,16 @@ export const TanagraResourceList = fp.flow(
           </DataTable>
         )}
       </div>
+      {!!resourceToRename && (
+        <RenameModal
+          onRename={(name, description) => renameResource(name, description)}
+          resourceType={getType(resourceToRename)}
+          onCancel={() => setResourceToRename(undefined)}
+          oldDescription={getDescription(resourceToRename)}
+          oldName={getDisplayName(resourceToRename)}
+          existingNames={existingNameList(resourceToRename)}
+        />
+      )}
     </React.Fragment>
   );
 });

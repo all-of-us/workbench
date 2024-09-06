@@ -10,14 +10,14 @@ export const isCohort = (resource: TanagraWorkspaceResource): boolean =>
   !!resource.cohortTanagra;
 export const isCohortReview = (resource: TanagraWorkspaceResource): boolean =>
   !!resource.reviewTanagra;
-export const isConceptSet = (resource: TanagraWorkspaceResource): boolean =>
-  !!resource.conceptSetTanagra;
+export const isFeatureSet = (resource: TanagraWorkspaceResource): boolean =>
+  !!resource.featureSetTanagra;
 
 export function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
     [(rt) => rt === ResourceType.COHORT, () => 'Cohort'],
     [(rt) => rt === ResourceType.COHORT_REVIEW, () => 'Cohort Review'],
-    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Concept Set'],
+    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Feature Set'],
     [(rt) => rt === ResourceType.DATASET, () => 'Dataset'],
     [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
 
@@ -31,7 +31,7 @@ export function getCreatedBy(resource: TanagraWorkspaceResource): string {
   return fp.cond([
     [isCohort, (r) => r.cohortTanagra.createdBy],
     [isCohortReview, (r) => r.reviewTanagra.createdBy],
-    [isConceptSet, (r) => r.conceptSetTanagra.createdBy],
+    [isFeatureSet, (r) => r.featureSetTanagra.createdBy],
   ])(resource);
 }
 
@@ -39,7 +39,7 @@ export function getDisplayName(resource: TanagraWorkspaceResource): string {
   return fp.cond([
     [isCohort, (r) => r.cohortTanagra.displayName],
     [isCohortReview, (r) => r.reviewTanagra.displayName],
-    [isConceptSet, (r) => r.conceptSetTanagra.displayName],
+    [isFeatureSet, (r) => r.featureSetTanagra.displayName],
   ])(resource);
 }
 
@@ -47,7 +47,7 @@ export function getType(resource: TanagraWorkspaceResource): ResourceType {
   return fp.cond([
     [isCohort, () => ResourceType.COHORT],
     [isCohortReview, () => ResourceType.COHORT_REVIEW],
-    [isConceptSet, () => ResourceType.CONCEPT_SET],
+    [isFeatureSet, () => ResourceType.CONCEPT_SET],
   ])(resource);
 }
 
@@ -63,7 +63,7 @@ export const StyledResourceType = (props: {
     return fp.cond([
       [isCohort, () => colors.resourceCardHighlights.cohort],
       [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
-      [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
+      [isFeatureSet, () => colors.resourceCardHighlights.conceptSet],
     ])(resource);
   }
   return (

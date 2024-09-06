@@ -172,7 +172,7 @@ export function useExitActionListener(callback: () => void) {
 
 export interface ExportResources {
   cohortIds: string[];
-  conceptSetIds: string[];
+  featureSetIds: string[];
 }
 
 export function useExportListener(
@@ -183,7 +183,7 @@ export function useExportListener(
     (event: { resources: { cohorts: string[]; featureSets: string[] } }) =>
       callback({
         cohortIds: event.resources.cohorts,
-        conceptSetIds: event.resources.featureSets,
+        featureSetIds: event.resources.featureSets,
       })
   );
 }

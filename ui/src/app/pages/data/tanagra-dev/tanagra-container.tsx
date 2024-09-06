@@ -62,7 +62,7 @@ export const TanagraContainer = fp.flow(
           {...{ workspace }}
           closeFunction={() => setExportIds(undefined)}
           tanagraCohortIds={exportIds.cohortIds}
-          tanagraConceptSetIds={exportIds.conceptSetIds}
+          tanagraFeatureSetIds={exportIds.featureSetIds}
         />
       )}
     </div>
