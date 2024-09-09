@@ -134,6 +134,7 @@ describe(WorkspaceEdit.name, () => {
         ],
         researchOutcomeList: [ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN],
       },
+      creator: ProfileStubVariables.PROFILE_STUB.username,
     };
 
     workspaceEditMode = WorkspaceEditMode.Create;

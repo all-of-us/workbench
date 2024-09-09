@@ -15,7 +15,6 @@ import {
   ResearchPurpose,
   SpecificPopulationEnum,
   Workspace,
-  WorkspaceAccessLevel,
   WorkspaceOperation,
   WorkspaceOperationStatus,
 } from 'generated/fetch';
@@ -1408,6 +1407,14 @@ export const WorkspaceEdit = fp.flow(
       }
     }
 
+    canSetBillingAccount(workspace?: Workspace, profile?: Profile): boolean {
+      return (
+        // can set billing account in Create and Duplicate modes
+        !this.isMode(WorkspaceEditMode.Edit) ||
+        workspace?.creator === profile?.username
+      );
+    }
+
     render() {
       const params = parseQueryParams(this.props.location.search);
       const highlightBilling = !!params.get('highlightBilling');
@@ -1622,26 +1629,30 @@ export const WorkspaceEdit = fp.flow(
                 />
               </WorkspaceEditSection>
             )}
-            {(!this.isMode(WorkspaceEditMode.Edit) ||
-              this.props.workspace.accessLevel ===
-                WorkspaceAccessLevel.OWNER) && (
-              <WorkspaceEditSection
-                header={
-                  <div>
-                    <AoU /> billing account
+            <WorkspaceEditSection
+              header={
+                <div>
+                  <AoU /> billing account
+                </div>
+              }
+              description={this.renderBillingDescription()}
+              descriptionStyle={{ marginLeft: '0rem' }}
+            >
+              {this.state.fetchBillingAccountLoading ? (
+                <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
+              ) : (
+                <div>
+                  <div style={styles.fieldHeader}>
+                    Select a current billing account
                   </div>
-                }
-                description={this.renderBillingDescription()}
-                descriptionStyle={{ marginLeft: '0rem' }}
-              >
-                {this.state.fetchBillingAccountLoading ? (
-                  <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
-                ) : (
-                  <div>
-                    <div style={styles.fieldHeader}>
-                      Select a current billing account
-                    </div>
-                    <FlexRow>
+                  <FlexRow>
+                    <TooltipTrigger
+                      content={`Only the workspace creator ${this.props.workspace?.creator} can change the billing account.`}
+                      disabled={this.canSetBillingAccount(
+                        this.props.workspace,
+                        profile
+                      )}
+                    >
                       <FlexColumn>
                         <div
                           id='billing-dropdown-container'
@@ -1653,7 +1664,13 @@ export const WorkspaceEdit = fp.flow(
                         >
                           <Dropdown
                             data-test-id='billing-dropdown'
-                            disabled={this.state.fetchBillingAccountError}
+                            disabled={
+                              this.state.fetchBillingAccountError ||
+                              !this.canSetBillingAccount(
+                                this.props.workspace,
+                                profile
+                              )
+                            }
                             style={
                               highlightBilling
                                 ? {
@@ -1675,39 +1692,45 @@ export const WorkspaceEdit = fp.flow(
                           />
                         </div>
                       </FlexColumn>
-                      <FlexColumn>
-                        <Button
-                          disabled={this.state.fetchBillingAccountError}
-                          type='primary'
-                          style={{
-                            marginLeft: '20px',
-                            fontWeight: 400,
-                            height: '38px',
-                            width: '220px',
-                          }}
-                          onClick={() =>
-                            this.setState({
-                              showCreateBillingAccountModal: true,
-                            })
-                          }
-                        >
-                          CREATE BILLING ACCOUNT
-                        </Button>
+                    </TooltipTrigger>
+                    <FlexColumn>
+                      <Button
+                        disabled={
+                          this.state.fetchBillingAccountError ||
+                          !this.canSetBillingAccount(
+                            this.props.workspace,
+                            profile
+                          )
+                        }
+                        type='primary'
+                        style={{
+                          marginLeft: '20px',
+                          fontWeight: 400,
+                          height: '38px',
+                          width: '220px',
+                        }}
+                        onClick={() =>
+                          this.setState({
+                            showCreateBillingAccountModal: true,
+                          })
+                        }
+                      >
+                        CREATE BILLING ACCOUNT
+                      </Button>
+                    </FlexColumn>
+                    {this.state.fetchBillingAccountError && (
+                      <FlexColumn
+                        style={{ alignSelf: 'center', marginLeft: '0.75rem' }}
+                      >
+                        <TooltipTrigger content={tooltipTextBillingWarning}>
+                          <WarningIcon style={styles.infoIcon} />
+                        </TooltipTrigger>
                       </FlexColumn>
-                      {this.state.fetchBillingAccountError && (
-                        <FlexColumn
-                          style={{ alignSelf: 'center', marginLeft: '0.75rem' }}
-                        >
-                          <TooltipTrigger content={tooltipTextBillingWarning}>
-                            <WarningIcon style={styles.infoIcon} />
-                          </TooltipTrigger>
-                        </FlexColumn>
-                      )}
-                    </FlexRow>
-                  </div>
-                )}
-              </WorkspaceEditSection>
-            )}
+                    )}
+                  </FlexRow>
+                </div>
+              )}
+            </WorkspaceEditSection>
             <hr style={{ marginTop: '1.5rem' }} />
             <WorkspaceEditSection
               header={

@@ -694,7 +694,7 @@ describe(getTwoFactorSetupUrl.name, () => {
       /https:\/\/accounts\.google\.com\/AccountChooser/
     );
     expect(getTwoFactorSetupUrl()).toMatch(
-      encodeURIComponent('tester@fake-research-aou.org')
+      encodeURIComponent(ProfileStubVariables.PROFILE_STUB.username)
     );
     expect(getTwoFactorSetupUrl()).toMatch(
       encodeURIComponent('https://myaccount.google.com/signinoptions/')
