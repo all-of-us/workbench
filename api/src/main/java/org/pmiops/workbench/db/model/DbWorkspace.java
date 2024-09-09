@@ -669,8 +669,9 @@ public class DbWorkspace {
   }
 
   public BillingStatus getBillingStatus() {
-    return
-        (initialCreditsExhausted || initialCreditsExpired ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+    return (initialCreditsExhausted || initialCreditsExpired
+        ? BillingStatus.INACTIVE
+        : BillingStatus.ACTIVE);
   }
 
   public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
