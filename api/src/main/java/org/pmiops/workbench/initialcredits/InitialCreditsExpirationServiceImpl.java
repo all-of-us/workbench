@@ -96,8 +96,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
           .filter(ws -> !ws.isInitialCreditsExpired())
           .forEach(
               ws -> {
-                workspaceDao.updateBillingStatus(ws.getWorkspaceId(), BillingStatus.INACTIVE);
-                workspaceDao.updateInitialCreditsExpiration(ws.getWorkspaceId(), true);
+                ws.setInitialCreditsExpired(true);
+                ws.setBillingStatus(BillingStatus.INACTIVE);
+                workspaceDao.save(ws);
                 deleteAppsAndRuntimesInWorkspace(ws);
               });
       try {
