@@ -105,7 +105,7 @@ public class AppsControllerTest {
   public void testCreateAppFail_validateActiveBilling() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceAuthService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID, config);
 
     assertThrows(
         ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));

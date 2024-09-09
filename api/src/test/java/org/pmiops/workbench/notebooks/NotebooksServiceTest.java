@@ -216,7 +216,7 @@ public class NotebooksServiceTest {
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.READER);
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
+    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME, any());
   }
 
   @Test
@@ -263,7 +263,7 @@ public class NotebooksServiceTest {
         .enforceWorkspaceAccessLevel(
             toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     verify(mockWorkspaceAuthService)
-        .validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
+        .validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName, any());
 
     FileDetail expectedFileDetail =
         new FileDetail()
@@ -817,7 +817,7 @@ public class NotebooksServiceTest {
     verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
     verify(mockWorkspaceAuthService, times(2))
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
+    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME, any());
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
         .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");

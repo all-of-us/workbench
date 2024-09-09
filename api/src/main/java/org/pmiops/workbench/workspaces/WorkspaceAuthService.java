@@ -1,5 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
+
 import jakarta.inject.Provider;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -16,7 +19,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -53,10 +55,12 @@ public class WorkspaceAuthService {
    * amount of Google Cloud computation costs (starting a notebook runtime) or increase the
    * monthly cost of the workspace (ex. creating GCS objects).
    */
-  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
+  public void validateActiveBilling(
+      String workspaceNamespace, String workspaceId, WorkbenchConfig workbenchConfig)
       throws ForbiddenException {
-    if (BillingStatus.INACTIVE.equals(
-        workspaceDao.getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    if (isFreeTier(workspace.getBillingAccountName(), workbenchConfig)
+        && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
       throw new ForbiddenException(
           String.format("Workspace (%s) is in an inactive billing state", workspaceNamespace));
     }

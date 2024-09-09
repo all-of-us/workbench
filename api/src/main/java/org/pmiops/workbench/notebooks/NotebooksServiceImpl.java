@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
@@ -82,6 +83,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public NotebooksServiceImpl(
@@ -91,7 +93,8 @@ public class NotebooksServiceImpl implements NotebooksService {
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceDao workspaceDao,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clock = clock;
     this.cloudStorageClient = cloudStorageClient;
     this.fireCloudService = fireCloudService;
@@ -99,6 +102,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceDao = workspaceDao;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
@@ -172,7 +176,8 @@ public class NotebooksServiceImpl implements NotebooksService {
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
+    workspaceAuthService.validateActiveBilling(
+        toWorkspaceNamespace, toWorkspaceFirecloudName, workbenchConfigProvider.get());
 
     final DbWorkspace fromWorkspace =
         workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);

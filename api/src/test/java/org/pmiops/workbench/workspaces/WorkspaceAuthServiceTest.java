@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -61,6 +62,8 @@ public class WorkspaceAuthServiceTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
 
+  private static WorkbenchConfig config;
+
   @TestConfiguration
   @Import({FakeClockConfiguration.class, WorkspaceAuthService.class})
   static class Configuration {
@@ -69,11 +72,18 @@ public class WorkspaceAuthServiceTest {
     DbUser user() {
       return currentUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig config() {
+      return config;
+    }
   }
 
   @BeforeEach
   public void setUp() {
     currentUser = new DbUser();
+    config = WorkbenchConfig.createEmptyConfig();
   }
 
   @Test
@@ -83,7 +93,7 @@ public class WorkspaceAuthServiceTest {
     stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
 
     // does not throw
-    workspaceAuthService.validateActiveBilling(namespace, fcName);
+    workspaceAuthService.validateActiveBilling(namespace, fcName, config);
   }
 
   @Test
@@ -94,7 +104,7 @@ public class WorkspaceAuthServiceTest {
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspaceAuthService.validateActiveBilling(namespace, fcName));
+        () -> workspaceAuthService.validateActiveBilling(namespace, fcName, config));
   }
 
   private static Stream<Arguments> accessLevels() {

@@ -278,7 +278,8 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
+    workspaceAuthService.validateActiveBilling(
+        workspaceNamespace, workspaceId, workbenchConfigProvider.get());
 
     String bucketName =
         fireCloudService
