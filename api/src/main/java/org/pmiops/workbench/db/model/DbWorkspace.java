@@ -668,9 +668,9 @@ public class DbWorkspace {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
-  @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
-    return DbStorageEnums.billingStatusFromStorage(billingStatus);
+    return DbStorageEnums.billingStatusFromStorage(
+        (short) (initialCreditsExhausted || initialCreditsExpired ? 0 : 1));
   }
 
   public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
