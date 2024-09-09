@@ -203,7 +203,7 @@ commands:
     description: "Activate CircleCI service account credential for the Stable environment"
     steps:
     - gcloud-auth-login-oidc:
-        project_id: " 56507752110"  # all-of-us-rw-stable
+        project_id: "56507752110"  # all-of-us-rw-stable
         wip_id: "circleci-wip-stable"
         wip_provider_id: "circleci-oidc-prv-stable"
         service_account: "deploy@all-of-us-rw-stable.iam.gserviceaccount.com"
