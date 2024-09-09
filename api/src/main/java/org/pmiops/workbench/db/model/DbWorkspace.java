@@ -669,8 +669,8 @@ public class DbWorkspace {
   }
 
   public BillingStatus getBillingStatus() {
-    return DbStorageEnums.billingStatusFromStorage(
-        (short) (initialCreditsExhausted || initialCreditsExpired ? 0 : 1));
+    return
+        (initialCreditsExhausted || initialCreditsExpired ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
   }
 
   public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
