@@ -289,7 +289,9 @@ public class RuntimeController implements RuntimeApiDelegate {
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), workbenchConfigProvider.get());
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        workbenchConfigProvider.get());
 
     AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
     return ResponseEntity.ok(
