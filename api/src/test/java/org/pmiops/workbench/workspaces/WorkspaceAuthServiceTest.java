@@ -265,7 +265,10 @@ public class WorkspaceAuthServiceTest {
   }
 
   private DbWorkspace stubDaoGetRequired(
-      String namespace, String fcName, boolean initialCreditsExhausted, boolean initialCreditsExpired) {
+      String namespace,
+      String fcName,
+      boolean initialCreditsExhausted,
+      boolean initialCreditsExpired) {
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)

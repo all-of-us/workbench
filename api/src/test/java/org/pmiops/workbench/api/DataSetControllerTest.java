@@ -104,7 +104,6 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnalysisLanguage;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
@@ -799,7 +798,7 @@ public class DataSetControllerTest {
             workspace.getNamespace(),
             workspace.getName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    dbWorkspace.setInitialCreditsExhausted(true).setBillingAccountName("billingAccounts/free-tier");
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request =
