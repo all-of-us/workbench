@@ -260,6 +260,7 @@ public class RuntimeControllerTest {
   @BeforeEach
   public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
+    config.billing.accountId = "free-tier";
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
     config.server.apiAssetsBaseUrl = API_BASE_URL;
@@ -334,7 +335,8 @@ public class RuntimeControllerTest {
             .setGoogleProject(GOOGLE_PROJECT_ID)
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
-            .setCdrVersion(cdrVersion);
+            .setCdrVersion(cdrVersion)
+            .setBillingAccountName("billingAccounts/free-tier");
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
 
@@ -1327,9 +1329,9 @@ public class RuntimeControllerTest {
 
   @Test
   public void localize_validateActiveBilling() {
-    doThrow(ForbiddenException.class)
+    doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
-        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID, config);
+        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID), any());
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     assertThrows(
@@ -1338,7 +1340,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void localize_validateActiveBilling_checkAccessFirst() {
-    doThrow(ForbiddenException.class)
+    doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
