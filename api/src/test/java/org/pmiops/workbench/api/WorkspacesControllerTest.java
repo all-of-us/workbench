@@ -1145,7 +1145,8 @@ public class WorkspacesControllerTest {
             .updateWorkspace(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
 
-    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assert response != null;
+    assertThat(response.getInitialCredits().isExhausted()).isEqualTo(true);
   }
 
   @Test
@@ -1173,7 +1174,8 @@ public class WorkspacesControllerTest {
             .updateWorkspace(workspace.getNamespace(), workspace.getTerraName(), request)
             .getBody();
 
-    assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assert response != null;
+    assertThat(response.getInitialCredits().isExhausted()).isEqualTo(false);
   }
 
   @Test
