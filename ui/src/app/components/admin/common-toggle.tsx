@@ -6,7 +6,7 @@ import colors from 'app/styles/colors';
 interface CommonToggleProps {
   name: string;
   checked: boolean;
-  onToggle: (boolean) => void;
+  onToggle: (value: boolean) => void;
   disabled?: boolean;
 }
 export const CommonToggle = (props: CommonToggleProps) => {

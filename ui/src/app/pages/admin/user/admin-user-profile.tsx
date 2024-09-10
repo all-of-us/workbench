@@ -348,7 +348,7 @@ const ToggleForModule = (props: ToggleProps) => {
       }}
     >
       <CommonToggle
-        name={`Bypass ${moduleName}`}
+        name=''
         checked={isModuleBypassed}
         onToggle={() =>
           bypassUpdate({ moduleName, bypassed: !isModuleBypassed })
