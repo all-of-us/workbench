@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
+import { Switch } from 'react-router';
+import { useMatch, useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { AppRoute, withRouteData } from 'app/components/app-router';
@@ -102,7 +103,7 @@ const AppsListPage = fp.flow(withRouteData)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {
-  const { path } = useRouteMatch();
+  const { path } = useMatch(undefined);
   const { ns, terraName } = useParams<MatchParams>();
 
   return (

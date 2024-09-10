@@ -106,7 +106,9 @@ const UserInput = ({
 
   return (
     <React.Fragment>
-      {subjectRequested && <Navigate to={getNextAuditPath(auditSubject)} />}
+      {subjectRequested && (
+        <NavigateWithLocation to={getNextAuditPath(auditSubject)} />
+      )}
       <TextInputWithLabel
         containerStyle={{ display: 'inline-block' }}
         style={{ width: '22.5rem', margin: '1.5rem' }}
