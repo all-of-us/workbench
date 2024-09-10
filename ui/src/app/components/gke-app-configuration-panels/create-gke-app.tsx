@@ -210,10 +210,14 @@ export const CreateGkeApp = ({
       Deleting the environment when not in use will help reduce costs.
       <br />
       Reset Timer: Open the application to reset the timer
-      <br />
-      Disable Auto-Delete: Uncheck the box if you do not want your app to be
-      deleted. Disabling the auto-delete feature of a running environment is not
-      currently possible
+      {appType !== AppType.SAS && (
+        <>
+          <br />
+          Disable Auto-Delete: Uncheck the box if you do not want your app to be
+          deleted. Disabling the auto-delete feature of a running environment is
+          not currently possible
+        </>
+      )}
     </div>
   );
 
