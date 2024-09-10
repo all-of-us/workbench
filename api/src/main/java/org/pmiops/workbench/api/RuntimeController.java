@@ -61,7 +61,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiHelper leonardoApiHelper;
   private final InteractiveAnalysisService interactiveAnalysisService;
-  private final WorkbenchConfig getWorkbenchConfig;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   RuntimeController(
@@ -72,7 +72,7 @@ public class RuntimeController implements RuntimeApiDelegate {
       LeonardoMapper leonardoMapper,
       LeonardoApiHelper leonardoApiHelper,
       InteractiveAnalysisService interactiveAnalysisService,
-      WorkbenchConfig getWorkbenchConfig) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -80,7 +80,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiHelper = leonardoApiHelper;
     this.interactiveAnalysisService = interactiveAnalysisService;
-    this.getWorkbenchConfig = getWorkbenchConfig;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -224,7 +224,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
-        workspaceNamespace, firecloudWorkspaceName, getWorkbenchConfig);
+        workspaceNamespace, firecloudWorkspaceName, workbenchConfigProvider.get());
 
     leonardoNotebooksClient.createRuntime(
         runtime.googleProject(dbWorkspace.getGoogleProject()).runtimeName(user.getRuntimeName()),
@@ -255,7 +255,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
-        workspaceNamespace, firecloudWorkspaceName, getWorkbenchConfig);
+        workspaceNamespace, firecloudWorkspaceName, workbenchConfigProvider.get());
 
     leonardoNotebooksClient.updateRuntime(
         runtimeRequest
@@ -289,7 +289,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(
-        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), getWorkbenchConfig);
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), workbenchConfigProvider.get());
 
     AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
     return ResponseEntity.ok(
