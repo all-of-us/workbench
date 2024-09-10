@@ -48,6 +48,7 @@ import {
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
+import { ALL_GKE_APP_TYPES, minus } from 'testing/utils';
 
 import {
   CommonCreateGkeAppProps,
@@ -134,19 +135,23 @@ describe(CreateGkeApp.name, () => {
   const startButtonText = (appType: AppType): string =>
     `${appTypeToString[appType]} cloud environment create button`;
 
+  // this indirection is because spyOn() can't be called here, since it requires the API to be registered first
+  const getCreateAppSpy = () =>
+    jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+
   const expectCreation = async (
     appType: AppType
   ): Promise<jest.SpyInstance> => {
-    const spyCreateApp = jest
-      .spyOn(appsApi(), 'createApp')
-      .mockImplementation((): Promise<any> => Promise.resolve());
+    const createAppSpy = getCreateAppSpy();
 
     const startButton = screen.getByLabelText(startButtonText(appType));
     expectButtonElementEnabled(startButton);
     startButton.click();
 
-    await waitFor(() => expect(spyCreateApp).toHaveBeenCalledTimes(1));
-    return spyCreateApp;
+    await waitFor(() => expect(createAppSpy).toHaveBeenCalledTimes(1));
+    return createAppSpy;
   };
 
   // note: update these if we add more app types
@@ -246,26 +251,6 @@ describe(CreateGkeApp.name, () => {
 
         const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
         expect(deleteButton).toBeNull();
-      });
-
-      it('should allow disabling autodelete', async () => {
-        await component(appType);
-
-        const autodeleteCheckbox = screen.getByRole('checkbox', {
-          name: 'Auto-deletion toggle',
-        });
-        expect(autodeleteCheckbox).toBeChecked(); // default = true
-        autodeleteCheckbox.click();
-        expect(autodeleteCheckbox).not.toBeChecked();
-
-        const spyCreateApp = await expectCreation(appType);
-        await waitFor(() => {
-          expect(spyCreateApp).toHaveBeenCalledWith(
-            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-            { ...defaultAppRequest[appType], autodeleteEnabled: false }
-          );
-          expect(onClose).toHaveBeenCalledTimes(1);
-        });
       });
 
       it('should allow setting the autodelete threshold', async () => {
@@ -624,11 +609,10 @@ describe(CreateGkeApp.name, () => {
       });
 
       it(`Should allow to create app request for valid disk size for ${appType}`, async () => {
+        const spyCreateApp = getCreateAppSpy();
+
         // Arrange
         await component(appType);
-        const spyCreateApp = jest
-          .spyOn(appsApi(), 'createApp')
-          .mockImplementation((): Promise<any> => Promise.resolve());
 
         const diskSize = 750;
 
@@ -763,4 +747,54 @@ describe(CreateGkeApp.name, () => {
       });
     }
   );
+
+  // disallow disabling Autodelete for SAS
+
+  describe(AppType.SAS, () => {
+    it('should disallow disabling autodelete', async () => {
+      const appType = AppType.SAS;
+      const createAppSpy = getCreateAppSpy();
+      await component(appType);
+
+      const autodeleteCheckbox = screen.getByRole('checkbox', {
+        name: 'Auto-deletion toggle',
+      });
+      expect(autodeleteCheckbox).toBeChecked(); // default = true
+      autodeleteCheckbox.click();
+
+      // can't wait for a thing not to happen, so we have to check for the rejection
+      await expect(
+        waitFor(() => expect(createAppSpy).toHaveBeenCalled())
+      ).rejects.toThrow();
+
+      expect(autodeleteCheckbox).toBeChecked();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  // allow disabling Autodelete for every type except SAS
+
+  const allExceptSAS: AppType[] = minus(ALL_GKE_APP_TYPES, [AppType.SAS]);
+
+  describe.each(allExceptSAS)('%s', (appType: AppType) => {
+    it('should allow disabling autodelete', async () => {
+      await component(appType);
+
+      const autodeleteCheckbox = screen.getByRole('checkbox', {
+        name: 'Auto-deletion toggle',
+      });
+      expect(autodeleteCheckbox).toBeChecked(); // default = true
+      autodeleteCheckbox.click();
+      expect(autodeleteCheckbox).not.toBeChecked();
+
+      const spyCreateApp = await expectCreation(appType);
+      await waitFor(() => {
+        expect(spyCreateApp).toHaveBeenCalledWith(
+          WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+          { ...defaultAppRequest[appType], autodeleteEnabled: false }
+        );
+        expect(onClose).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
 });

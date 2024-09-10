@@ -210,10 +210,14 @@ export const CreateGkeApp = ({
       Deleting the environment when not in use will help reduce costs.
       <br />
       Reset Timer: Open the application to reset the timer
-      <br />
-      Disable Auto-Delete: Uncheck the box if you do not want your app to be
-      deleted. Disabling the auto-delete feature of a running environment is not
-      currently possible
+      {appType !== AppType.SAS && (
+        <>
+          <br />
+          Disable Auto-Delete: Uncheck the box if you do not want your app to be
+          deleted. Disabling the auto-delete feature of a running environment is
+          not currently possible
+        </>
+      )}
     </div>
   );
 
@@ -355,18 +359,25 @@ export const CreateGkeApp = ({
             alignItems: 'center',
           }}
         >
-          <CheckBox
-            aria-label='Auto-deletion toggle'
-            disabled={isAppActive(app)}
-            checked={createAppRequest.autodeleteEnabled}
-            onChange={(autodeleteEnabled: boolean) => {
-              setCreateAppRequest((prevState) => ({
-                ...prevState,
-                autodeleteEnabled,
-              }));
-            }}
-            style={{ marginRight: '1rem', zoom: 1.5 }}
-          />
+          <TooltipTrigger
+            content='Autodeletion is required for SAS Environments'
+            disabled={appType !== AppType.SAS}
+          >
+            <div style={{ marginRight: '1rem' }}>
+              <CheckBox
+                aria-label='Auto-deletion toggle'
+                disabled={appType === AppType.SAS || isAppActive(app)}
+                checked={createAppRequest.autodeleteEnabled}
+                onChange={(autodeleteEnabled: boolean) => {
+                  setCreateAppRequest((prevState) => ({
+                    ...prevState,
+                    autodeleteEnabled,
+                  }));
+                }}
+                style={{ zoom: 1.5 }}
+              />
+            </div>
+          </TooltipTrigger>
           <FlexColumn>
             <label style={styles.label}>
               Automatically delete application after
