@@ -235,6 +235,8 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     // Called once during setup and once during the test
     verify(spyUserDao, times(2)).save(any());
+    // Once during test setup and once during test
+    verify(spyWorkspaceDao, times(2)).save(any());
     verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
