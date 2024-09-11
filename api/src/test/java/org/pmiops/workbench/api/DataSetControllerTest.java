@@ -813,7 +813,8 @@ public class DataSetControllerTest {
 
     assertThat(exception)
         .hasMessageThat()
-        .containsMatch("Workspace.*is using initial credits that have either expired or have been exhausted");
+        .containsMatch(
+            "Workspace.*is using initial credits that have either expired or have been exhausted");
   }
 
   @Test
