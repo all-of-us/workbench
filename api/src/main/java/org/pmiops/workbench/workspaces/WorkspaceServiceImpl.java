@@ -477,7 +477,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       workspace.setBillingStatus(
           hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
       workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
-      workspace.setInitialCreditsExpired(initialCreditsExpirationService.haveCreditsExpired(creator));
+      workspace.setInitialCreditsExpired(
+          initialCreditsExpirationService.haveCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided
