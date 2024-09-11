@@ -8,27 +8,6 @@ import { Navigate } from 'react-router-dom-v5-compat';
 import { render, screen } from '@testing-library/react';
 import { AppRoute, AppRouter, Guard } from 'app/components/app-router';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    __esModule: true,
-    ...originalModule,
-    BrowserRouter: ({ children }) => <div>{children}</div>,
-  };
-});
-
-// unsure if this is needed
-jest.mock('react-router-dom-v5-compat', () => {
-  const originalModule = jest.requireActual('react-router-dom-v5-compat');
-
-  return {
-    __esModule: true,
-    ...originalModule,
-    BrowserRouter: ({ children }) => <div>{children}</div>,
-  };
-});
-
 class TestComponent extends React.Component<{ text: String }> {
   render() {
     return <span>{this.props.text}</span>;

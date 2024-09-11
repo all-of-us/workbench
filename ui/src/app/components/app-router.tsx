@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import * as ReactDOM from 'react-dom';
-import { BrowserRouter, Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import {
   CompatRoute,
   CompatRouter,
@@ -12,9 +11,6 @@ import * as fp from 'lodash/fp';
 import { cond } from '@terra-ui-packages/core-utils';
 import { routeDataStore } from 'app/utils/stores';
 import { buildPageTitleForEnvironment } from 'app/utils/title';
-
-import { Button } from './buttons';
-import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
 
 export interface Guard {
   allowed: () => boolean;
@@ -69,43 +65,9 @@ export const withFullHeight =
     );
   };
 
-// This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
-// confirm navigating away from the page. The default behavior of <Prompt> is being overridden by this
-// getUserConfirmation function so we can provide a custom styled warning modal instead of the browser's default.
-const getUserConfirmation = (message, callback) => {
-  const modal = document.createElement('div');
-  document.body.appendChild(modal);
-
-  const withCleanup = (answer) => {
-    ReactDOM.unmountComponentAtNode(modal);
-    document.body.removeChild(modal);
-    callback(answer);
-  };
-
-  ReactDOM.render(
-    <Modal>
-      <ModalTitle>Warning!</ModalTitle>
-      <ModalBody>{message}</ModalBody>
-      <ModalFooter>
-        <Button type='link' onClick={() => withCleanup(false)}>
-          Cancel
-        </Button>
-        <Button type='primary' onClick={() => withCleanup(true)}>
-          Discard Changes
-        </Button>
-      </ModalFooter>
-    </Modal>,
-    modal
-  );
-};
-
-export const AppRouter = ({ children }): React.ReactElement => {
-  return (
-    <BrowserRouter getUserConfirmation={getUserConfirmation}>
-      <CompatRouter>{children}</CompatRouter>
-    </BrowserRouter>
-  );
-};
+export const AppRouter = ({ children }): React.ReactElement => (
+  <CompatRouter>{children}</CompatRouter>
+);
 
 // Most internal routing is done via custom styled Button, not via text, so we only want to use anchor styling
 // if we explicitly set it on the RouteLink
