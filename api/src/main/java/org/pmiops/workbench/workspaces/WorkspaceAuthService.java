@@ -41,7 +41,10 @@ public class WorkspaceAuthService {
 
   @Autowired
   public WorkspaceAuthService(
-      FireCloudService fireCloudService, Provider<DbUser> userProvider, WorkspaceDao workspaceDao, Provider<WorkbenchConfig> workbenchConfigProvider) {
+      FireCloudService fireCloudService,
+      Provider<DbUser> userProvider,
+      WorkspaceDao workspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.workspaceDao = workspaceDao;
