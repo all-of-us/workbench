@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -61,7 +60,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiHelper leonardoApiHelper;
   private final InteractiveAnalysisService interactiveAnalysisService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   RuntimeController(
@@ -71,8 +69,7 @@ public class RuntimeController implements RuntimeApiDelegate {
       WorkspaceService workspaceService,
       LeonardoMapper leonardoMapper,
       LeonardoApiHelper leonardoApiHelper,
-      InteractiveAnalysisService interactiveAnalysisService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      InteractiveAnalysisService interactiveAnalysisService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -80,7 +77,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiHelper = leonardoApiHelper;
     this.interactiveAnalysisService = interactiveAnalysisService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
