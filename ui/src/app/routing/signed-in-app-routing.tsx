@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
+import { Switch, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import {
@@ -204,7 +205,7 @@ export const SignedInRoutes = () => {
       <AppRoute exact path='/admin/user'>
         {' '}
         {/* included for backwards compatibility */}
-        <Redirect to={'/admin/users'} />
+        <Navigate to={'/admin/users'} />
       </AppRoute>
       <AppRoute
         exact
@@ -382,7 +383,7 @@ export const SignedInRoutes = () => {
         />
       </AppRoute>
       <AppRoute exact path='*'>
-        <Redirect to={'/not-found'} />
+        <Navigate to={'/not-found'} />
       </AppRoute>
     </Switch>
   );

@@ -1,15 +1,12 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import * as ReactDOM from 'react-dom';
+import { BrowserRouter, Link, useLocation, useParams } from 'react-router-dom';
 import {
-  BrowserRouter,
-  Link,
-  Redirect,
-  Route,
-  useLocation,
-  useParams,
-  useRouteMatch,
-} from 'react-router-dom';
+  CompatRoute,
+  CompatRouter,
+  Navigate,
+} from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import { cond } from '@terra-ui-packages/core-utils';
@@ -25,11 +22,6 @@ export interface Guard {
   redirectPath?: string;
   renderBlocked?: () => React.ReactElement;
 }
-
-export const usePath = () => {
-  const { path } = useRouteMatch();
-  return path;
-};
 
 export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
@@ -110,7 +102,7 @@ const getUserConfirmation = (message, callback) => {
 export const AppRouter = ({ children }): React.ReactElement => {
   return (
     <BrowserRouter getUserConfirmation={getUserConfirmation}>
-      {children}
+      <CompatRouter>{children}</CompatRouter>
     </BrowserRouter>
   );
 };
@@ -145,17 +137,12 @@ export const AppRoute = ({
     fp.find(({ allowed }) => !allowed(), guards) || {};
 
   return (
-    <Route exact={exact} path={path}>
+    <CompatRoute {...{ path, exact }}>
       {cond<React.ReactNode>(
-        [redirectPath, () => <Redirect to={redirectPath} />],
+        [redirectPath, () => <Navigate to={redirectPath} />],
         [renderBlocked, () => renderBlocked()],
         () => children
       )}
-    </Route>
+    </CompatRoute>
   );
-};
-
-export const Navigate = ({ to }): React.ReactElement => {
-  const location = useLocation();
-  return <Redirect to={{ pathname: to, state: { from: location } }} />;
 };
