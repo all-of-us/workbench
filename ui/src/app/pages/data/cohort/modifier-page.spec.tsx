@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 
 import {
   CohortBuilderApi,
@@ -58,9 +59,14 @@ describe('ModifierPage', () => {
           )}/cohorts/build`,
         ]}
       >
-        <Route exact path='/workspaces/:ns/:terraName/data/cohorts/build'>
-          <ModifierPage closeModifiers={() => {}} selections={[]} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute
+            exact
+            path='/workspaces/:ns/:terraName/data/cohorts/build'
+          >
+            <ModifierPage closeModifiers={() => {}} selections={[]} />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };

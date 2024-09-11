@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router';
+import { MemoryRouter } from 'react-router';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import * as fp from 'lodash/fp';
 
 import { ConceptSet, ConceptSetsApi, WorkspacesApi } from 'generated/fetch';
@@ -52,15 +53,17 @@ describe('ConceptSearch', () => {
           )}/concepts/sets/${conceptSet.id}`,
         ]}
       >
-        <Route path='/workspaces/:ns/:terraName/data/concepts/sets/:csid'>
-          <ConceptSearch
-            setConceptSetUpdating={() => {}}
-            setShowUnsavedModal={() => {}}
-            setUnsavedConceptChanges={() => {}}
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-          />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/workspaces/:ns/:terraName/data/concepts/sets/:csid'>
+            <ConceptSearch
+              setConceptSetUpdating={() => {}}
+              setShowUnsavedModal={() => {}}
+              setUnsavedConceptChanges={() => {}}
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
   };
