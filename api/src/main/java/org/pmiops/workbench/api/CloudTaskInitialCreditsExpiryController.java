@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDollarLimit;
+import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
 
 import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
@@ -20,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
@@ -240,13 +242,8 @@ public class CloudTaskInitialCreditsExpiryController
 
     workspaceDao.findAllByCreator(user).stream()
         .filter(
-            dbWorkspace ->
-                workbenchConfig
-                    .get()
-                    .billing
-                    .freeTierBillingAccountNames()
-                    .contains(dbWorkspace.getBillingAccountName()))
-        .filter(dbWorkspace -> dbWorkspace.isActive())
+            dbWorkspace -> isFreeTier(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
+        .filter(DbWorkspace::isActive)
         .forEach(
             dbWorkspace -> {
               String namespace = dbWorkspace.getWorkspaceNamespace();

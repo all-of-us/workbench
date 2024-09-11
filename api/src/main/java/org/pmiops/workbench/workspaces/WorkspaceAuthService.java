@@ -66,7 +66,9 @@ public class WorkspaceAuthService {
     if (isFreeTier(workspace.getBillingAccountName(), workbenchConfigProvider.get())
         && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
       throw new ForbiddenException(
-          String.format("Workspace (%s) is using initial credits that have either expired or have been exhausted.", workspaceNamespace));
+          String.format(
+              "Workspace (%s) is using initial credits that have either expired or have been exhausted.",
+              workspaceNamespace));
     }
   }
 
