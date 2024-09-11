@@ -36,14 +36,16 @@ public class WorkspaceAuthService {
 
   private final FireCloudService fireCloudService;
   private final Provider<DbUser> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceDao workspaceDao;
 
   @Autowired
   public WorkspaceAuthService(
-      FireCloudService fireCloudService, Provider<DbUser> userProvider, WorkspaceDao workspaceDao) {
+      FireCloudService fireCloudService, Provider<DbUser> userProvider, WorkspaceDao workspaceDao, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.workspaceDao = workspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /*
@@ -55,11 +57,10 @@ public class WorkspaceAuthService {
    * amount of Google Cloud computation costs (starting a notebook runtime) or increase the
    * monthly cost of the workspace (ex. creating GCS objects).
    */
-  public void validateActiveBilling(
-      String workspaceNamespace, String workspaceId, WorkbenchConfig workbenchConfig)
+  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    if (isFreeTier(workspace.getBillingAccountName(), workbenchConfig)
+    if (isFreeTier(workspace.getBillingAccountName(), workbenchConfigProvider.get())
         && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
       throw new ForbiddenException(
           String.format("Workspace (%s) is in an inactive billing state", workspaceNamespace));

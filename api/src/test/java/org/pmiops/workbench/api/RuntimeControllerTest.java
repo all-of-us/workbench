@@ -1331,7 +1331,7 @@ public class RuntimeControllerTest {
   public void localize_validateActiveBilling() {
     doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
-        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID), any());
+        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID));
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     assertThrows(
@@ -1348,8 +1348,7 @@ public class RuntimeControllerTest {
 
     assertThrows(
         ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, false, req));
-    verify(mockWorkspaceAuthService, never())
-        .validateActiveBilling(anyString(), anyString(), any());
+    verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   private void createUser(String email) {

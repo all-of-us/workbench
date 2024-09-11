@@ -176,8 +176,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(
-        toWorkspaceNamespace, toWorkspaceFirecloudName, workbenchConfigProvider.get());
+    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
 
     final DbWorkspace fromWorkspace =
         workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);

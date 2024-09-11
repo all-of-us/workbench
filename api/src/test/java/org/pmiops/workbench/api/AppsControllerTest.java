@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -107,7 +106,7 @@ public class AppsControllerTest {
   public void testCreateAppFail_validateActiveBilling() {
     doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
-        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID), any());
+        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID));
 
     assertThrows(
         ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));

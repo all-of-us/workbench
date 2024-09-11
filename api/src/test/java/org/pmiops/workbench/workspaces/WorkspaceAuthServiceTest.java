@@ -92,7 +92,7 @@ public class WorkspaceAuthServiceTest {
     stubDaoGetRequired(namespace, fcName, false, false);
 
     // does not throw
-    workspaceAuthService.validateActiveBilling(namespace, fcName, config);
+    workspaceAuthService.validateActiveBilling(namespace, fcName);
   }
 
   @Test
@@ -104,7 +104,7 @@ public class WorkspaceAuthServiceTest {
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspaceAuthService.validateActiveBilling(namespace, fcName, config));
+        () -> workspaceAuthService.validateActiveBilling(namespace, fcName));
   }
 
   private static Stream<Arguments> accessLevels() {
