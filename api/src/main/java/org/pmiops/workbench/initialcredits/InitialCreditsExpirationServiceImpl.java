@@ -86,6 +86,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
           userInitialCreditsExpiration.getExpirationTime());
+      boolean areInitialCreditsExhausted =
+          workspaceDao.findAllByCreator(user).parallelStream()
+              .anyMatch(DbWorkspace::isInitialCreditsExhausted);
       workspaceDao.findAllByCreator(user).stream()
           .filter(
               ws ->
@@ -93,7 +96,6 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                       ws.getBillingAccountName(), workbenchConfigProvider.get()))
           .filter(DbWorkspace::isActive)
           .filter(ws -> !ws.isInitialCreditsExpired())
-          .filter(ws -> !ws.isInitialCreditsExhausted())
           .forEach(
               ws -> {
                 ws.setInitialCreditsExpired(true);
@@ -102,10 +104,12 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                 deleteAppsAndRuntimesInWorkspace(ws);
               });
       try {
-        mailService.alertUserInitialCreditsExpired(user);
-        userInitialCreditsExpiration.setNotificationStatus(
-            NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-        userDao.save(user);
+        if (areInitialCreditsExhausted) {
+          mailService.alertUserInitialCreditsExpired(user);
+          userInitialCreditsExpiration.setNotificationStatus(
+              NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
+          userDao.save(user);
+        }
 
       } catch (MessagingException e) {
         logger.error(
