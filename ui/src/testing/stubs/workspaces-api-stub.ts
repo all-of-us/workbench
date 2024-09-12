@@ -13,7 +13,6 @@ import {
   WorkspaceAccessLevel,
   WorkspaceBillingUsageResponse,
   WorkspaceCreatorFreeCreditsRemainingResponse,
-  WorkspaceListResponse,
   WorkspaceOperation,
   WorkspaceOperationStatus,
   WorkspaceResourceResponse,
