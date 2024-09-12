@@ -104,7 +104,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                 deleteAppsAndRuntimesInWorkspace(ws);
               });
       try {
-        if (areInitialCreditsExhausted) {
+        if (!areInitialCreditsExhausted) {
           mailService.alertUserInitialCreditsExpired(user);
           userInitialCreditsExpiration.setNotificationStatus(
               NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
