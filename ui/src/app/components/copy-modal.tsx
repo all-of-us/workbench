@@ -214,8 +214,8 @@ const CopyModal = withCdrVersions()(
         options: workspacesByCdr[versionId].map((workspace) => ({
           value: workspace,
           label: this.isDestinationSameWorkspace(workspace)
-            ? `${workspace.name} (current workspace)`
-            : workspace.name,
+            ? `${workspace.displayName} (current workspace)`
+            : workspace.displayName,
         })),
       }));
     }
@@ -512,8 +512,8 @@ const CopyModal = withCdrVersions()(
           {' '}
           Successfully copied
           <b style={styles.bold}> {fromResourceName} </b> to
-          <b style={styles.bold}> {this.state.destination.name} </b>. Do you
-          want to view the copied {toDisplay(resourceType)}?
+          <b style={styles.bold}> {this.state.destination.displayName} </b>. Do
+          you want to view the copied {toDisplay(resourceType)}?
         </div>
       );
     }

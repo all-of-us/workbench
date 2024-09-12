@@ -42,7 +42,7 @@ describe('getTrail', () => {
     );
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
-      workspaceDataStub.name,
+      workspaceDataStub.displayName,
       cohortReviewStubs[0].cohortName,
       `Participant ${pid}`,
     ]);
@@ -93,7 +93,7 @@ describe('getTrail', () => {
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
-      workspaceDataStub.name,
+      workspaceDataStub.displayName,
       analysisTabDisplay,
       nbName,
     ]);
@@ -118,7 +118,7 @@ describe('getTrail', () => {
 
     expect(trail.map((item) => item.label)).toEqual([
       'Workspaces',
-      workspaceDataStub.name,
+      workspaceDataStub.displayName,
       analysisTabDisplay,
       nbName,
     ]);
@@ -146,7 +146,7 @@ describe('getTrail', () => {
     expect(trailLabels).not.toContain(nbName);
     expect(trailLabels).toEqual([
       'Workspaces',
-      workspaceDataStub.name,
+      workspaceDataStub.displayName,
       analysisTabDisplay,
       UIAppType.RSTUDIO,
     ]);

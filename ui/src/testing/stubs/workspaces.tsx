@@ -22,7 +22,7 @@ export class WorkspaceStubVariables {
 
 export function buildWorkspaceStub(suffix = ''): Workspace {
   return {
-    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
+    displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME + suffix,
     googleProject: WorkspaceStubVariables.DEFAULT_GOOGLE_PROJECT_ID + suffix,
     googleBucketName:

@@ -278,8 +278,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
     return new Promise<WorkspaceResourceResponse>((resolve) => {
       const workspace: WorkspaceData = {
         namespace: workspaceNamespace,
+        displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
         terraName,
-        name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
         accessLevel: WorkspaceAccessLevel.OWNER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       };

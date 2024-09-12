@@ -23,7 +23,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { WorkspaceList } from './workspace-list';
 
-describe('WorkspaceList', () => {
+describe(WorkspaceList.name, () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
   let user;
@@ -81,7 +81,7 @@ describe('WorkspaceList', () => {
   it('displays the correct number of workspaces', async () => {
     component();
     await waitForNoSpinner();
-    expect(getCardNames()).toEqual(workspaceStubs.map((w) => w.name));
+    expect(getCardNames()).toEqual(workspaceStubs.map((w) => w.displayName));
   });
 
   it('has the correct permissions classes', async () => {
@@ -122,13 +122,13 @@ describe('WorkspaceList', () => {
     );
 
     await pickAccessLevel(accessLevelDropdown, 'Reader');
-    expect(getCardNames()).toEqual([workspaceRead.name]);
+    expect(getCardNames()).toEqual([workspaceRead.displayName]);
 
     await pickAccessLevel(accessLevelDropdown, 'Owner');
-    expect(getCardNames()).toEqual([workspaceOwn.name]);
+    expect(getCardNames()).toEqual([workspaceOwn.displayName]);
 
     await pickAccessLevel(accessLevelDropdown, 'Writer');
-    expect(getCardNames()).toEqual([workspaceWrite.name]);
+    expect(getCardNames()).toEqual([workspaceWrite.displayName]);
 
     await pickAccessLevel(accessLevelDropdown, 'All');
     expect(getCardNames().length).toEqual(3);

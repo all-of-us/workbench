@@ -85,7 +85,7 @@ interface NavProps {
 
 const WorkspaceNavigation = (props: NavProps) => {
   const {
-    workspace: { name, namespace, terraName },
+    workspace: { displayName, namespace, terraName },
     style,
   } = props;
   const url = dataTabPath(namespace, terraName);
@@ -93,7 +93,7 @@ const WorkspaceNavigation = (props: NavProps) => {
   return (
     <Clickable>
       <Link to={url} style={style} data-test-id='workspace-navigation'>
-        {name}
+        {displayName}
       </Link>
     </Clickable>
   );

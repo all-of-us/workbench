@@ -438,7 +438,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                   }}
                 >
                   <div>
-                    <label>Share {this.props.workspace.name}</label>
+                    <label>Share {this.props.workspace.displayName}</label>
                   </div>
                   <TooltipTrigger
                     content={

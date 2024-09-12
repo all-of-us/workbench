@@ -102,7 +102,7 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          workspace ? workspace.name : '...',
+          workspace ? workspace.displayName : '...',
           dataTabPath(ns, terraName)
         ),
       ];
@@ -290,7 +290,7 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          workspace ? workspace.name : '...',
+          workspace ? workspace.displayName : '...',
           `${dataTabPath(ns, terraName)}`
         ),
       ];

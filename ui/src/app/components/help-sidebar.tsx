@@ -302,7 +302,7 @@ export const HelpSidebar = fp.flow(
     deleteWorkspace = withErrorModal(
       {
         title: 'Error Deleting Workspace',
-        message: `Could not delete workspace '${this.props.workspace.name}'.`,
+        message: `Could not delete workspace '${this.props.workspace.displayName}'.`,
         showBugReportLink: true,
         onDismiss: () => {
           this.setState({ currentModal: CurrentModal.None });
@@ -922,7 +922,7 @@ export const HelpSidebar = fp.flow(
                     this.setState({ currentModal: CurrentModal.None })
                   }
                   receiveDelete={() => this.deleteWorkspace()}
-                  workspaceName={this.props.workspace.name}
+                  workspaceName={this.props.workspace.displayName}
                 />
               ),
             ],
