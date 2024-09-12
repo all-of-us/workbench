@@ -7372,11 +7372,6 @@ components:
       - name
       type: object
       properties:
-        id:
-          type: string
-          description: DEPRECATED. This "id" refers to the name of the workspace in Terra.
-           Terra does not refer to this as an "id" and we should stop doing this.
-           Renamed to the more accurate "terraName" - use this instead.
         etag:
           type: string
           description: Entity tag for optimistic concurrency control. To be set during
