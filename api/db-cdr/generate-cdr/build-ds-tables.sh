@@ -8,12 +8,6 @@ export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 export DOMAIN=$3       # specific domain table to build
 
-echo "Getting self_reported_category_concept_id column count"
-#query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
-#where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
-#selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
-selfReportedCategoryDataCount=0
-
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
@@ -145,6 +139,17 @@ function do_ds_observation(){
 }
 
 function do_ds_person(){
+  # run this query to initializing our .bigqueryrc configuration file
+  # otherwise this will corrupt the output of the first call to find_info()
+  echo "Running a simple select to avoid problem with initializing our .bigqueryrc configuration file"
+  query="select count(*) from \`$BQ_PROJECT.$BQ_DATASET.concept\`"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query"
+  
+  echo "Getting self_reported_category_concept_id column count"
+  query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+  where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
+  selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+  
   if [[ $selfReportedCategoryDataCount > 0 ]];
   then
     echo "ds_person - inserting data"

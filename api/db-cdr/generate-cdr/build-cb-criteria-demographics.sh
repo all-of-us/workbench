@@ -7,13 +7,6 @@ export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
 
-#query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
-#where table_name = \"person\" AND column_name = \"self_reported_category_concept_id\""
-#selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
-#echo "Getting self_reported_category_concept_id column count: $selfReportedCategoryCount"
-#echo "query for self_reported_category_concept_id column count: $query"
-selfReportedCategoryCount=0
-
 echo "Creating demographic criteria"
 
 CB_CRITERIA_START_ID=5000000000
@@ -297,6 +290,12 @@ FROM
     ) a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
 WHERE b.concept_id is not null"
+
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name = \"person\" AND column_name = \"self_reported_category_concept_id\""
+selfReportedCategoryCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+echo "Getting self_reported_category_concept_id column count: $selfReportedCategoryCount"
+echo "query for self_reported_category_concept_id column count: $query"
 
 if [[ $selfReportedCategoryCount > 0 ]];
 then
