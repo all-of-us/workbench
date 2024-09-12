@@ -38,7 +38,7 @@ import { CopyModal, CopyModalProps } from './copy-modal';
 
 interface TestWorkspace {
   namespace: string;
-  name: string;
+  displayName: string;
   terraName: string;
   cdrVersionId: string;
   accessTierShortName: string;
@@ -55,7 +55,7 @@ const openWorkspaceSelection = async () => {
 const selectWorkspace = async (workspace: TestWorkspace) => {
   await openWorkspaceSelection();
 
-  const selectedOption = screen.queryByText(workspace.name);
+  const selectedOption = screen.queryByText(workspace.displayName);
   expect(selectedOption).toBeInTheDocument();
   return userEvent.click(selectedOption);
 };
@@ -92,42 +92,42 @@ describe(CopyModal.name, () => {
   const workspaces: TestWorkspace[] = [
     {
       namespace: defaultNamespace,
-      name: 'Freerider',
+      displayName: 'Freerider',
       terraName: 'freerider',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
-      name: 'Dawn Wall',
+      displayName: 'Dawn Wall',
       terraName: 'dawn wall',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
-      name: 'Zodiac',
+      displayName: 'Zodiac',
       terraName: 'zodiac',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: defaultNamespace,
-      name: 'The Nose',
+      displayName: 'The Nose',
       terraName: 'the nose',
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: altNamespace,
-      name: 'Sesame Street',
+      displayName: 'Sesame Street',
       terraName: 'sesame-street',
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Registered,
     },
     {
       namespace: controlledNamespace,
-      name: 'A tightly controlled workspace',
+      displayName: 'A tightly controlled workspace',
       terraName: 'controlled-ws-1',
       cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
       accessTierShortName: AccessTierShortNames.Controlled,
@@ -214,10 +214,10 @@ describe(CopyModal.name, () => {
   });
 
   it('should populate select options with writeable Workspaces from getWorkspaces()', async () => {
-    const currentWsOption = ownerWorkspace.name + ' (current workspace)';
-    const writerWsOption = writerWorkspace.name;
-    const writerAltCdrWsOption = altCdrWorkspace.name;
-    const writerControlledCdrWsOption = controlledCdrWorkspace.name;
+    const currentWsOption = ownerWorkspace.displayName + ' (current workspace)';
+    const writerWsOption = writerWorkspace.displayName;
+    const writerAltCdrWsOption = altCdrWorkspace.displayName;
+    const writerControlledCdrWsOption = controlledCdrWorkspace.displayName;
 
     const expectedOptions = [
       currentWsOption,
@@ -252,10 +252,11 @@ describe(CopyModal.name, () => {
 
     // this is ugly and fragile, but I haven't been able to do better yet
 
-    const currentWsOption = altCdrWorkspace.name + ' (current workspace)';
-    const controlledCdrWriterWsOption = controlledCdrWorkspace.name;
-    const otherCdrOwnerWsOption = ownerWorkspace.name;
-    const otherCdrWriterWsOption = writerWorkspace.name;
+    const currentWsOption =
+      altCdrWorkspace.displayName + ' (current workspace)';
+    const controlledCdrWriterWsOption = controlledCdrWorkspace.displayName;
+    const otherCdrOwnerWsOption = ownerWorkspace.displayName;
+    const otherCdrWriterWsOption = writerWorkspace.displayName;
 
     const optionAncestor =
       screen.queryByText(currentWsOption).parentNode.parentNode.parentNode;
