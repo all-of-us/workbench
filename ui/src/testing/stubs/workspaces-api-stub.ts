@@ -13,7 +13,6 @@ import {
   WorkspaceAccessLevel,
   WorkspaceBillingUsageResponse,
   WorkspaceCreatorFreeCreditsRemainingResponse,
-  WorkspaceListResponse,
   WorkspaceOperation,
   WorkspaceOperationStatus,
   WorkspaceResourceResponse,
@@ -251,41 +250,6 @@ export class WorkspacesApiStub extends WorkspacesApi {
   ): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>((resolve) => {
       resolve({ items: this.workspaceUserRoles.get(terraName) });
-    });
-  }
-
-  getPublishedWorkspaces(): Promise<WorkspaceResponseListResponse> {
-    return new Promise<WorkspaceResponseListResponse>((resolve) => {
-      const publishedWorkspaces = this.workspaces.filter(
-        (w) => w.published === true
-      );
-      resolve({
-        items: publishedWorkspaces.map((workspace) => {
-          let accessLevel: WorkspaceAccessLevel =
-            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
-          if (this.workspaceAccess.has(workspace.terraName)) {
-            accessLevel = this.workspaceAccess.get(workspace.terraName);
-          }
-          return {
-            workspace: { ...workspace },
-            accessLevel: accessLevel,
-          };
-        }),
-      });
-    });
-  }
-
-  getWorkspacesForReview(): Promise<WorkspaceListResponse> {
-    return new Promise<WorkspaceListResponse>((resolve) => {
-      resolve({
-        items: this.workspaces,
-      });
-    });
-  }
-
-  reviewWorkspace(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>((resolve) => {
-      resolve({});
     });
   }
 
