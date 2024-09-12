@@ -9,6 +9,12 @@ export BQ_DATASET=$2   # dataset
 
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
 
+# run this query to initializing our .bigqueryrc configuration file
+# otherwise this will corrupt the output of the first call to find_info()
+echo "Running a simple select to avoid problem with initializing our .bigqueryrc configuration file"
+query="select count(*) from \`$BQ_PROJECT.$BQ_DATASET.concept\`"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query"
+
 echo "Getting fitbit count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
 where has_fitbit = 1"
@@ -40,10 +46,10 @@ where has_wear_consent = 1"
 wearConsentDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 echo "Getting self_reported_category_concept_id column count"
-#query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
-#where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
-#selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
-selfReportedCategoryDataCount=0
+query="select count(column_name) as count from \`$BQ_PROJECT.$BQ_DATASET.INFORMATION_SCHEMA.COLUMNS\`
+where table_name=\"person\" AND column_name = \"self_reported_category_concept_id\""
+selfReportedCategoryDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+echo "self reported count: $selfReportedCategoryDataCount"
 
 ###############################
 # CREATE cb_criteria_menu TABLE
