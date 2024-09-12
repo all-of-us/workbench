@@ -2,7 +2,8 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Route, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import { createMemoryHistory } from 'history';
 import { mockNavigate } from 'setupTests';
 
@@ -95,19 +96,22 @@ describe('NotebookLauncher', () => {
   )}/${notebookName}`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
-  const notebookComponent = () => {
-    return render(
+  const notebookComponent = () =>
+    render(
       <Router history={history}>
-        <Route path={`/workspaces/:ns/:terraName/${analysisTabName}/:nbName`}>
-          <LeonardoAppLauncher
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            leoAppType={LeoApplicationType.JupyterNotebook}
-          />
-        </Route>
+        <CompatRouter>
+          <CompatRoute
+            path={`/workspaces/:ns/:terraName/${analysisTabName}/:nbName`}
+          >
+            <LeonardoAppLauncher
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+              leoAppType={LeoApplicationType.JupyterNotebook}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </Router>
     );
-  };
 
   async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
     await act(() => {
@@ -415,20 +419,20 @@ describe('TerminalLauncher', () => {
   const terminalInitialUrl = workspacePath('namespace', 'id') + '/terminals';
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
-  const terminalComponent = async () => {
-    const t = render(
+  const terminalComponent = async () =>
+    render(
       <Router history={history}>
-        <Route path='/workspaces/:ns/:terraName/terminals'>
-          <LeonardoAppLauncher
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            leoAppType={LeoApplicationType.JupyterTerminal}
-          />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/workspaces/:ns/:terraName/terminals'>
+            <LeonardoAppLauncher
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+              leoAppType={LeoApplicationType.JupyterTerminal}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </Router>
     );
-    return t;
-  };
 
   async function updateRuntime(updateFn: (r: Runtime) => Runtime) {
     await act(() => {
@@ -544,20 +548,20 @@ describe('SparkConsoleLauncher', () => {
     workspacePath('namespace', 'id') + '/spark/apphistory';
   const history = createMemoryHistory({ initialEntries: [terminalInitialUrl] });
 
-  const terminalComponent = async () => {
-    const t = render(
+  const terminalComponent = async () =>
+    render(
       <Router history={history}>
-        <Route path='/workspaces/:ns/:terraName/spark/:sparkConsolePath'>
-          <LeonardoAppLauncher
-            hideSpinner={() => {}}
-            showSpinner={() => {}}
-            leoAppType={LeoApplicationType.SparkConsole}
-          />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/workspaces/:ns/:terraName/spark/:sparkConsolePath'>
+            <LeonardoAppLauncher
+              hideSpinner={() => {}}
+              showSpinner={() => {}}
+              leoAppType={LeoApplicationType.SparkConsole}
+            />
+          </CompatRoute>
+        </CompatRouter>
       </Router>
     );
-    return t;
-  };
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();

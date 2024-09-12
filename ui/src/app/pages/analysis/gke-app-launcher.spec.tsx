@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { MemoryRouter } from 'react-router';
-import { Route } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 import { mockNavigate } from 'setupTests';
 
 import {
@@ -60,9 +60,11 @@ const createRoute = (appType: string) => (
       ),
     ]}
   >
-    <Route path='/workspaces/:ns/:terraName/analysis/userApp/:appType'>
-      <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
-    </Route>
+    <CompatRouter>
+      <CompatRoute path='/workspaces/:ns/:terraName/analysis/userApp/:appType'>
+        <GKEAppLauncher hideSpinner={() => {}} showSpinner={() => {}} />
+      </CompatRoute>
+    </CompatRouter>
   </MemoryRouter>
 );
 

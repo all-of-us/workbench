@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 import { MemoryRouter } from 'react-router';
-import { Route } from 'react-router-dom';
+import { CompatRoute, CompatRouter } from 'react-router-dom-v5-compat';
 
 import { AppsApi, RuntimeApi, WorkspacesApi } from 'generated/fetch';
 
@@ -69,9 +69,11 @@ describe(WorkspaceWrapper.name, () => {
           ),
         ]}
       >
-        <Route path='/workspaces/:ns/:terraName'>
-          <WorkspaceWrapper hideSpinner={() => {}} />
-        </Route>
+        <CompatRouter>
+          <CompatRoute path='/workspaces/:ns/:terraName'>
+            <WorkspaceWrapper hideSpinner={() => {}} />
+          </CompatRoute>
+        </CompatRouter>
       </MemoryRouter>
     );
 
