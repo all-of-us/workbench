@@ -1,13 +1,12 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.utils.BillingUtils.isFreeTier;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDollarLimit;
-import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
 
 import com.google.common.collect.Sets;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
 import jakarta.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -233,7 +232,7 @@ public class CloudTaskInitialCreditsExpiryController
   private Set<DbUser> getFreeTierActiveWorkspaceCreatorsIn(Set<DbUser> users) {
     return workspaceDao.findCreatorsByBillingStatusAndBillingAccountNameIn(
         BillingStatus.ACTIVE,
-        new ArrayList<>(workbenchConfig.get().billing.freeTierBillingAccountNames()),
+        List.of(workbenchConfig.get().billing.initialCreditsBillingAccountName()),
         users);
   }
 

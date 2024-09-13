@@ -141,7 +141,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
       log.info("Creating billing project");
       RawlsCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
           new RawlsCreateRawlsV2BillingProjectFullRequest()
-              .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
+              .billingAccount(workbenchConfig.billing.initialCreditsBillingAccountName())
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
       BillingV2Api billingV2Api = rawlsApiClientFactory.billingV2Api();
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);

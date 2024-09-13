@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Doubles;
@@ -563,7 +564,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
     workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
     workspaceDao.save(
         workspace
-            .setBillingAccountName("billingAccounts/byo-account")
+            .setBillingAccountName(fullBillingAccountName("byo-account"))
             .setBillingStatus(BillingStatus.ACTIVE));
 
     cloudTaskInitialCreditsExpiryController.handleInitialCreditsExpiry(
@@ -712,7 +713,7 @@ class CloudTaskInitialCreditsExpiryControllerTest {
             .setCreator(creator)
             .setWorkspaceNamespace(project + "-ns")
             .setGoogleProject(project)
-            .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName()));
+            .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName()));
   }
 
   @NotNull

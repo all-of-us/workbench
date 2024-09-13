@@ -701,7 +701,7 @@ public class WorkspacesControllerTest {
           .updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
       verify(fireCloudService)
           .updateBillingAccountAsService(
-              workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
+              workspace.getNamespace(), workbenchConfig.billing.initialCreditsBillingAccountName());
       return;
     }
     fail();
@@ -710,7 +710,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCreateWorkspace_doNotUpdateBillingForFreeTier() {
     Workspace workspace = createWorkspace();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
 
     workspacesController.createWorkspace(workspace);
 
@@ -1138,7 +1138,7 @@ public class WorkspacesControllerTest {
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     request.setWorkspace(workspace);
     Workspace response =
         workspacesController
@@ -1166,7 +1166,7 @@ public class WorkspacesControllerTest {
             argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     workspace.setEtag("\"1\"");
     request.setWorkspace(workspace);
     Workspace response =
@@ -1418,7 +1418,8 @@ public class WorkspacesControllerTest {
           .updateBillingAccount(modWorkspace.getNamespace(), modWorkspace.getBillingAccountName());
       verify(fireCloudService)
           .updateBillingAccountAsService(
-              modWorkspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
+              modWorkspace.getNamespace(),
+              workbenchConfig.billing.initialCreditsBillingAccountName());
       return;
     }
     fail();
@@ -1432,7 +1433,7 @@ public class WorkspacesControllerTest {
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    modWorkspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     modWorkspace.setResearchPurpose(new ResearchPurpose());
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -1467,7 +1468,8 @@ public class WorkspacesControllerTest {
           final Workspace modWorkspace = new Workspace();
           modWorkspace.setName("cloned");
           modWorkspace.setNamespace("cloned-ns");
-          modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+          modWorkspace.setBillingAccountName(
+              workbenchConfig.billing.initialCreditsBillingAccountName());
           modWorkspace.setResearchPurpose(new ResearchPurpose());
           modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
           final CloneWorkspaceRequest req = new CloneWorkspaceRequest();

@@ -275,7 +275,7 @@ public class WorkspaceAuthServiceTest {
             .setFirecloudName(fcName)
             .setInitialCreditsExhausted(initialCreditsExhausted)
             .setInitialCreditsExpired(initialCreditsExpired)
-            .setBillingAccountName("billingAccounts/free-tier");
+            .setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     when(mockWorkspaceDao.getRequired(namespace, fcName)).thenReturn(toReturn);
     return toReturn;
   }

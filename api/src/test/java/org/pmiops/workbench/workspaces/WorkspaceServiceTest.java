@@ -581,7 +581,7 @@ public class WorkspaceServiceTest {
   public void updateBillingAccount_freeTierToUserOwned() throws Exception {
     String newBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     ProjectBillingInfo projectBillingInfo =
         new ProjectBillingInfo()
             .setProjectId(workspace.getGoogleProject())
@@ -592,7 +592,7 @@ public class WorkspaceServiceTest {
         .thenReturn(projectBillingInfo);
 
     assertThat(workspace.getBillingAccountName())
-        .isEqualTo(workbenchConfig.billing.freeTierBillingAccountName());
+        .isEqualTo(workbenchConfig.billing.initialCreditsBillingAccountName());
 
     workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount);
 
@@ -613,21 +613,22 @@ public class WorkspaceServiceTest {
     ProjectBillingInfo projectBillingInfo =
         new ProjectBillingInfo()
             .setProjectId(workspace.getGoogleProject())
-            .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())
+            .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName())
             .setBillingEnabled(true);
     when(mockCloudBillingClient.pollUntilBillingAccountLinked(
-            workspace.getGoogleProject(), workbenchConfig.billing.freeTierBillingAccountName()))
+            workspace.getGoogleProject(),
+            workbenchConfig.billing.initialCreditsBillingAccountName()))
         .thenReturn(projectBillingInfo);
     workspaceService.updateWorkspaceBillingAccount(
-        workspace, workbenchConfig.billing.freeTierBillingAccountName());
+        workspace, workbenchConfig.billing.initialCreditsBillingAccountName());
 
     verify(mockFireCloudService)
         .updateBillingAccountAsService(
             workspace.getWorkspaceNamespace(),
-            workbenchConfig.billing.freeTierBillingAccountName());
+            workbenchConfig.billing.initialCreditsBillingAccountName());
     verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
     assertThat(workspace.getBillingAccountName())
-        .isEqualTo(workbenchConfig.billing.freeTierBillingAccountName());
+        .isEqualTo(workbenchConfig.billing.initialCreditsBillingAccountName());
   }
 
   @Test
@@ -646,7 +647,7 @@ public class WorkspaceServiceTest {
   public void updateBillingAccount_accountNotOpen() throws Exception {
     String newBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    workspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
 
     ProjectBillingInfo projectBillingInfo =
         new ProjectBillingInfo()

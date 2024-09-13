@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
+import static org.pmiops.workbench.utils.BillingUtils.isFreeTier;
 
 import jakarta.inject.Provider;
 import java.util.List;

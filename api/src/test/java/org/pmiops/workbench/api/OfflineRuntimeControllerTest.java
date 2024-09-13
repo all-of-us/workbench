@@ -83,10 +83,6 @@ public class OfflineRuntimeControllerTest {
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-      config.firecloud.notebookRuntimeMaxAgeDays = (int) RUNTIME_MAX_AGE.toDays();
-      config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) RUNTIME_IDLE_MAX_AGE.toDays();
-      config.billing.accountId = "free-tier";
       return config;
     }
   }
@@ -121,9 +117,15 @@ public class OfflineRuntimeControllerTest {
   private DbUser user2;
   private DbWorkspace workspace;
   private int runtimeProjectIdIndex = 0;
+  private static WorkbenchConfig config;
 
   @BeforeEach
   public void setUp() {
+    config = WorkbenchConfig.createEmptyConfig();
+    config.firecloud.notebookRuntimeMaxAgeDays = (int) RUNTIME_MAX_AGE.toDays();
+    config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) RUNTIME_IDLE_MAX_AGE.toDays();
+    config.billing.accountId = "free-tier";
+
     runtimeProjectIdIndex = 0;
     DbCdrVersion cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
@@ -415,7 +417,7 @@ public class OfflineRuntimeControllerTest {
     stubWorkspaceOwners(workspace, ImmutableList.of(user1));
     stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L))));
 
-    workspace.setBillingAccountName("billingAccounts/free-tier");
+    workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     when(mockFreeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
         .thenReturn(123.0);
 

@@ -268,7 +268,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
     RawlsCreateRawlsV2BillingProjectFullRequest request =
         new RawlsCreateRawlsV2BillingProjectFullRequest()
-            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+            .billingAccount(configProvider.get().billing.initialCreditsBillingAccountName())
             .projectName(billingProjectName)
             .servicePerimeter(servicePerimeter);
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();

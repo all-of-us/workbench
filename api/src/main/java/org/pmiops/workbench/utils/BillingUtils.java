@@ -1,15 +1,20 @@
-package org.pmiops.workbench.workspaces;
+package org.pmiops.workbench.utils;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.BillingAccountType;
 
-/** Utility methods for parsing the workspace. */
-public class WorkspaceUtils {
-  private WorkspaceUtils() {}
+public class BillingUtils {
+  private BillingUtils() {}
+
+  public static final String BILLING_ACCOUNT_PREFIX = "billingAccounts";
+
+  public static String fullBillingAccountName(String billingAccount) {
+    return BILLING_ACCOUNT_PREFIX + "/" + billingAccount;
+  }
 
   /** Returns {@code true} if the given billing account is workbench free tier billing account. */
   public static boolean isFreeTier(String billingAccountName, WorkbenchConfig workbenchConfig) {
-    return workbenchConfig.billing.freeTierBillingAccountNames().contains(billingAccountName);
+    return workbenchConfig.billing.initialCreditsBillingAccountName().equals(billingAccountName);
   }
 
   /** Returns {@code BillingAccountType} by given billing account name. */

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
+import static org.pmiops.workbench.utils.BillingUtils.isFreeTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;

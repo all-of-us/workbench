@@ -184,7 +184,6 @@ public class DataSetControllerTest {
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
-  private static final String BILLING_ACCOUNT_PREFIX = "billingAccounts";
   private static final String TEST_FREE_TIER = "free-tier";
 
   private static final Instant NOW = Instant.now();
@@ -802,7 +801,7 @@ public class DataSetControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace
         .setInitialCreditsExhausted(true)
-        .setBillingAccountName(BILLING_ACCOUNT_PREFIX + "/" + TEST_FREE_TIER);
+        .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request =

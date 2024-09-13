@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.billing.InitialCreditsExpiryTaskMatchers.*;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
@@ -574,7 +575,7 @@ public class FreeTierBillingServiceTest {
     workspace = workspaceDao.findDbWorkspaceByWorkspaceId(workspace.getWorkspaceId());
     workspaceDao.save(
         workspace
-            .setBillingAccountName("billingAccounts/byo-account")
+            .setBillingAccountName(fullBillingAccountName("byo-account"))
             .setBillingStatus(BillingStatus.ACTIVE));
 
     commitTransaction();
@@ -852,7 +853,7 @@ public class FreeTierBillingServiceTest {
             .setCreator(creator)
             .setWorkspaceNamespace(project + "-ns")
             .setGoogleProject(project)
-            .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName()));
+            .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName()));
   }
 
   private void assertWithinBillingTolerance(double actualValue, double expectedValue) {
