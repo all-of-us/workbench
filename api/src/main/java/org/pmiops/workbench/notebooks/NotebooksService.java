@@ -35,10 +35,10 @@ public interface NotebooksService {
 
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceName,
+      String fromWorkspaceTerraName,
       String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
-      String toWorkspaceName,
+      String toWorkspaceTerraName,
       String newNotebookNameWithExtension);
 
   FileDetail cloneNotebook(

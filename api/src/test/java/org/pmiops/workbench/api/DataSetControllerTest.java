@@ -349,7 +349,7 @@ public class DataSetControllerTest {
 
     workspace =
         new Workspace()
-            .name("name")
+            .displayName("name")
             .researchPurpose(new ResearchPurpose())
             .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
             .billingAccountName("billing-account");
@@ -359,7 +359,8 @@ public class DataSetControllerTest {
 
     noAccessWorkspace =
         new Workspace()
-            .name("other")
+            .displayName("other")
+            .terraName("other")
             .researchPurpose(new ResearchPurpose())
             .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
             .billingAccountName("billing-account");
@@ -373,7 +374,7 @@ public class DataSetControllerTest {
         cohortsController
             .createCohort(
                 noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
+                noAccessWorkspace.getTerraName(),
                 new Cohort()
                     .name("noAccessCohort")
                     .criteria(new Gson().toJson(CohortDefinitions.allGenders())))
@@ -383,7 +384,7 @@ public class DataSetControllerTest {
         cohortsController
             .createCohort(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new Cohort().name("cohort1").criteria(new Gson().toJson(CohortDefinitions.males())))
             .getBody();
 
@@ -419,7 +420,7 @@ public class DataSetControllerTest {
         conceptSetsController
             .createConceptSet(
                 noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
+                noAccessWorkspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(conceptSet)
                     .addedConceptSetConceptIds(conceptSetConceptIds))
@@ -429,7 +430,7 @@ public class DataSetControllerTest {
         conceptSetsController
             .createConceptSet(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new CreateConceptSetRequest()
                     .conceptSet(conceptSet)
                     .addedConceptSetConceptIds(conceptSetConceptIds))
@@ -439,7 +440,7 @@ public class DataSetControllerTest {
         dataSetController
             .createDataSet(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetRequest()
                     .name("dataset")
                     .addCohortIdsItem(cohort.getId())
@@ -467,7 +468,7 @@ public class DataSetControllerTest {
         dataSetController
             .createDataSet(
                 noAccessWorkspace.getNamespace(),
-                noAccessWorkspace.getName(),
+                noAccessWorkspace.getTerraName(),
                 buildEmptyDataSetRequest()
                     .name("no access ds")
                     .addCohortIdsItem(noAccessCohort.getId())
@@ -520,30 +521,31 @@ public class DataSetControllerTest {
 
   private void stubWorkspaceAccessLevel(
       Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
-    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
   }
 
-  private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
+  private void stubGetWorkspace(
+      String ns, String terraName, WorkspaceAccessLevel workspaceAccessLevel) {
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
+    fcWorkspace.setName(terraName);
     fcWorkspace.setCreatedBy(DataSetControllerTest.USER_EMAIL);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(workspaceAccessLevel));
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(ns, terraName)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(String ns, String name, WorkspaceAccessLevel accessLevel) {
+  private void stubGetWorkspaceAcl(String ns, String terraName, WorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
     RawlsWorkspaceAccessEntry accessLevelEntry =
         new RawlsWorkspaceAccessEntry().accessLevel(accessLevel.toString());
     Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+    when(fireCloudService.getWorkspaceAclAsService(ns, terraName))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -587,7 +589,9 @@ public class DataSetControllerTest {
     var response =
         dataSetController
             .previewExportToNotebook(
-                workspace.getNamespace(), workspace.getName(), setUpValidDataSetExportRequest())
+                workspace.getNamespace(),
+                workspace.getTerraName(),
+                setUpValidDataSetExportRequest())
             .getBody();
 
     assertThat(response.getText()).contains("import pandas"); // used by python
@@ -604,7 +608,7 @@ public class DataSetControllerTest {
         dataSetController
             .previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.R))
             .getBody();
 
@@ -622,7 +626,7 @@ public class DataSetControllerTest {
         dataSetController
             .previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 setUpValidDataSetExportRequest().analysisLanguage(AnalysisLanguage.SAS))
             .getBody();
 
@@ -649,7 +653,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
@@ -669,7 +673,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(finalDataSet)));
@@ -685,7 +689,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(dataSet)));
@@ -715,7 +719,8 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+            dataSetController.createDataSet(
+                workspace.getNamespace(), workspace.getTerraName(), dataSet),
         "Missing name");
 
     dataSet.setName("dataSet");
@@ -724,7 +729,8 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+            dataSetController.createDataSet(
+                workspace.getNamespace(), workspace.getTerraName(), dataSet),
         "Missing cohort ids");
 
     dataSet.setCohortIds(cohortIds);
@@ -733,7 +739,8 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+            dataSetController.createDataSet(
+                workspace.getNamespace(), workspace.getTerraName(), dataSet),
         "Missing concept set ids");
 
     dataSet.setConceptSetIds(conceptIds);
@@ -742,7 +749,8 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () ->
-            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+            dataSetController.createDataSet(
+                workspace.getNamespace(), workspace.getTerraName(), dataSet),
         "Missing values");
   }
 
@@ -752,7 +760,7 @@ public class DataSetControllerTest {
     DataSetExportRequest request = setUpValidDataSetExportRequest();
 
     dataSetController
-        .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
+        .exportToNotebook(workspace.getNamespace(), workspace.getTerraName(), request)
         .getBody();
     verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
@@ -770,7 +778,7 @@ public class DataSetControllerTest {
             () ->
                 dataSetController.exportToNotebook(
                     noAccessWorkspace.getNamespace(),
-                    noAccessWorkspace.getName(),
+                    noAccessWorkspace.getTerraName(),
                     new DataSetExportRequest()
                         .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
@@ -786,7 +794,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.exportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
@@ -797,7 +805,7 @@ public class DataSetControllerTest {
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
-            workspace.getName(),
+            workspace.getTerraName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
@@ -810,7 +818,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), workspace.getName(), request));
+                    workspace.getNamespace(), workspace.getTerraName(), request));
 
     assertThat(exception)
         .hasMessageThat()
@@ -824,7 +832,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.exportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
@@ -840,7 +848,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.exportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
@@ -859,7 +867,7 @@ public class DataSetControllerTest {
             BadRequestException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), workspace.getName(), request));
+                    workspace.getNamespace(), workspace.getTerraName(), request));
 
     assertThat(exception).hasMessageThat().isEqualTo("Analysis language is required");
   }
@@ -874,7 +882,7 @@ public class DataSetControllerTest {
             BadRequestException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), workspace.getName(), request));
+                    workspace.getNamespace(), workspace.getTerraName(), request));
 
     assertThat(exception).hasMessageThat().isEqualTo("Cannot export to notebook for SAS");
   }
@@ -887,7 +895,7 @@ public class DataSetControllerTest {
             () ->
                 dataSetController.previewExportToNotebook(
                     noAccessWorkspace.getNamespace(),
-                    noAccessWorkspace.getName(),
+                    noAccessWorkspace.getTerraName(),
                     new DataSetExportRequest()
                         .analysisLanguage(AnalysisLanguage.PYTHON)
                         .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
@@ -903,7 +911,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
@@ -916,7 +924,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
@@ -932,7 +940,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.previewExportToNotebook(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 new DataSetExportRequest()
                     .analysisLanguage(AnalysisLanguage.PYTHON)
                     .dataSetRequest(
@@ -975,7 +983,7 @@ public class DataSetControllerTest {
             .notebookName(notebookName);
 
     dataSetController
-        .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
+        .exportToNotebook(workspace.getNamespace(), workspace.getTerraName(), request)
         .getBody();
     verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
@@ -996,7 +1004,7 @@ public class DataSetControllerTest {
                 dataSetController
                     .getValuesFromDomain(
                         workspace.getNamespace(),
-                        workspace.getName(),
+                        workspace.getTerraName(),
                         Domain.MEASUREMENT.toString(),
                         1L)
                     .getBody())
@@ -1018,7 +1026,7 @@ public class DataSetControllerTest {
                 dataSetController
                     .getValuesFromDomain(
                         workspace.getNamespace(),
-                        workspace.getName(),
+                        workspace.getTerraName(),
                         Domain.WHOLE_GENOME_VARIANT.toString(),
                         1L)
                     .getBody())
@@ -1045,7 +1053,7 @@ public class DataSetControllerTest {
             FailedPreconditionException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), workspace.getName(), request));
+                    workspace.getNamespace(), workspace.getTerraName(), request));
     assertThat(e)
         .hasMessageThat()
         .contains("The workspace CDR version does not have whole genome data");
@@ -1063,7 +1071,7 @@ public class DataSetControllerTest {
             .generateGenomicsAnalysisCode(true)
             .analysisLanguage(AnalysisLanguage.R);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
+    dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getTerraName(), request);
     verify(mockNotebooksService)
         .saveNotebook(anyString(), anyString(), notebookContentsCaptor.capture());
 
@@ -1092,7 +1100,7 @@ public class DataSetControllerTest {
     DataSet dataSet =
         dataSetController
             .createDataSet(
-                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+                workspace.getNamespace(), workspace.getTerraName(), buildValidDataSetRequest())
             .getBody();
     // No_Access
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
@@ -1101,7 +1109,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () -> {
               dataSetController.extractGenomicData(
-                  workspace.getNamespace(), workspace.getName(), dataSet.getId());
+                  workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
             });
     assertForbiddenException(exception);
 
@@ -1112,25 +1120,25 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () -> {
               dataSetController.extractGenomicData(
-                  workspace.getNamespace(), workspace.getName(), dataSet.getId());
+                  workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
             });
     assertForbiddenException(exception1);
 
     // Writer
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
     dataSetController.extractGenomicData(
-        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
 
     // Owner
     stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
     dataSetController.extractGenomicData(
-        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
 
     // Project Owner ?
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getTerraName()))
         .thenReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.OWNER));
     dataSetController.extractGenomicData(
-        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
   }
 
   @Test
@@ -1138,7 +1146,8 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          dataSetController.extractGenomicData(workspace.getNamespace(), workspace.getName(), 404L);
+          dataSetController.extractGenomicData(
+              workspace.getNamespace(), workspace.getTerraName(), 404L);
         });
   }
 
@@ -1150,20 +1159,20 @@ public class DataSetControllerTest {
     DataSet dataSet =
         dataSetController
             .createDataSet(
-                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+                workspace.getNamespace(), workspace.getTerraName(), buildValidDataSetRequest())
             .getBody();
     assertThrows(
         BadRequestException.class,
         () -> {
           dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+              workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
         });
 
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
     dataSetController.extractGenomicData(
-        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
     verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
   }
 
@@ -1175,7 +1184,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () ->
                 dataSetController.abortGenomicExtractionJob(
-                    workspace.getNamespace(), workspace.getName(), "lol"));
+                    workspace.getNamespace(), workspace.getTerraName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
 
     assertForbiddenException(exception);
@@ -1190,7 +1199,7 @@ public class DataSetControllerTest {
             ForbiddenException.class,
             () ->
                 dataSetController.abortGenomicExtractionJob(
-                    workspace.getNamespace(), workspace.getName(), "lol"));
+                    workspace.getNamespace(), workspace.getTerraName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
 
     assertForbiddenException(exception);
@@ -1199,14 +1208,16 @@ public class DataSetControllerTest {
   @Test
   public void testGetDataset_wrongWorkspace() {
     Workspace otherWorkspace = new Workspace();
-    otherWorkspace.setName("Other Workspace");
+    otherWorkspace.setDisplayName("Other Workspace");
+    otherWorkspace.setTerraName("Other Workspace");
     otherWorkspace.setResearchPurpose(new ResearchPurpose());
     otherWorkspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     otherWorkspace.setBillingAccountName("billing-account");
 
     otherWorkspace = workspacesController.createWorkspace(otherWorkspace).getBody();
 
-    when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
+    when(fireCloudService.getWorkspace(
+            otherWorkspace.getNamespace(), otherWorkspace.getTerraName()))
         .thenReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.OWNER));
 
     Workspace finalOtherWorkspace = otherWorkspace;
@@ -1216,7 +1227,7 @@ public class DataSetControllerTest {
             dataSetController
                 .createDataSet(
                     finalOtherWorkspace.getNamespace(),
-                    finalOtherWorkspace.getName(),
+                    finalOtherWorkspace.getTerraName(),
                     buildValidDataSetRequest())
                 .getBody());
   }
@@ -1229,7 +1240,7 @@ public class DataSetControllerTest {
             () ->
                 dataSetController.getDataSet(
                     noAccessWorkspace.getNamespace(),
-                    noAccessWorkspace.getName(),
+                    noAccessWorkspace.getTerraName(),
                     noAccessDataSet.getId()));
 
     assertForbiddenException(exception);
@@ -1243,7 +1254,7 @@ public class DataSetControllerTest {
             () ->
                 dataSetController.updateDataSet(
                     noAccessWorkspace.getNamespace(),
-                    noAccessWorkspace.getName(),
+                    noAccessWorkspace.getTerraName(),
                     noAccessDataSet.getId(),
                     new DataSetRequest().etag("1")));
 
@@ -1257,7 +1268,7 @@ public class DataSetControllerTest {
         () ->
             dataSetController.updateDataSet(
                 workspace.getNamespace(),
-                workspace.getName(),
+                workspace.getTerraName(),
                 noAccessDataSet.getId(),
                 new DataSetRequest().etag("1")));
   }
@@ -1270,7 +1281,7 @@ public class DataSetControllerTest {
             () ->
                 dataSetController.deleteDataSet(
                     noAccessWorkspace.getNamespace(),
-                    noAccessWorkspace.getName(),
+                    noAccessWorkspace.getTerraName(),
                     noAccessDataSet.getId()));
 
     assertForbiddenException(exception);
@@ -1282,7 +1293,7 @@ public class DataSetControllerTest {
         NotFoundException.class,
         () ->
             dataSetController.deleteDataSet(
-                workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId()));
+                workspace.getNamespace(), workspace.getTerraName(), noAccessDataSet.getId()));
   }
 
   @Test
@@ -1294,18 +1305,19 @@ public class DataSetControllerTest {
       dataSet =
           dataSetController
               .createDataSet(
-                  workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+                  workspace.getNamespace(), workspace.getTerraName(), buildValidDataSetRequest())
               .getBody();
     }
 
-    dataSetController.deleteDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    dataSetController.deleteDataSet(
+        workspace.getNamespace(), workspace.getTerraName(), dataSet.getId());
 
     DataSet finalDataSet = dataSet;
     assertThrows(
         NotFoundException.class,
         () ->
             dataSetController.getDataSet(
-                workspace.getNamespace(), workspace.getName(), finalDataSet.getId()));
+                workspace.getNamespace(), workspace.getTerraName(), finalDataSet.getId()));
   }
 
   @Test

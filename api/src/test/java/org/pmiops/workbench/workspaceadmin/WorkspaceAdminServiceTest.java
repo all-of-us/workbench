@@ -293,7 +293,7 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName()).isEqualTo(WORKSPACE_NAME);
 
     // TODO(jaycarlton): instrument mocks such that we can see actual counts here.
     //   The goal for today is just to move this test case here from WorkspaceAdminControllerTest,
@@ -337,7 +337,7 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName()).isEqualTo(WORKSPACE_NAME);
 
     // this refers to the old-style "published" flag, not the new "featured category" field
     assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
