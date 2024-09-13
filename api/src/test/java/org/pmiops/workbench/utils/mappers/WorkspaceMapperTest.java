@@ -228,7 +228,7 @@ public class WorkspaceMapperTest {
             sourceDbWorkspace, sourceFirecloudWorkspace, initialCreditsService);
     assertThat(ws.getTerraName()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
     assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
-    assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
+    assertThat(ws.getDisplayName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
     assertThat(ws.getCreatorUser().getUserName()).isEqualTo(CREATOR_EMAIL);

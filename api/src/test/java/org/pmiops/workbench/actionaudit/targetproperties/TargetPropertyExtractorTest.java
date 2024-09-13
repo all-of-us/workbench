@@ -51,7 +51,7 @@ class TargetPropertyExtractorTest {
     workspace =
         new Workspace()
             .etag("etag_1")
-            .name("DbWorkspace 1")
+            .displayName("DbWorkspace 1")
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
@@ -65,7 +65,7 @@ class TargetPropertyExtractorTest {
     var propertyValuesByName =
         ModelBackedTargetProperty.getPropertyValuesByName(
             WorkspaceTargetProperty.values(), workspace);
-    assertThat(propertyValuesByName.get(WorkspaceTargetProperty.NAME.getPropertyName()))
+    assertThat(propertyValuesByName.get(WorkspaceTargetProperty.DISPLAY_NAME.getPropertyName()))
         .isEqualTo("DbWorkspace 1");
     assertThat(propertyValuesByName).hasSize(WorkspaceTargetProperty.values().length);
   }

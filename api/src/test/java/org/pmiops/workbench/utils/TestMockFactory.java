@@ -280,7 +280,7 @@ public class TestMockFactory {
   public static DbWorkspace createDbWorkspaceStub(Workspace workspace, long workspaceDbId) {
     DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceId(workspaceDbId);
-    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setName(workspace.getDisplayName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
     // a.k.a. RawlsWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getTerraName()); // DB_WORKSPACE_FIRECLOUD_NAME

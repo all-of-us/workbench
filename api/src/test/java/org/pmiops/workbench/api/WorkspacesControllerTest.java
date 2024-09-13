@@ -955,7 +955,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCreateWorkspaceAsync_and_process() {
-    Workspace workspace = createWorkspace().name("a new name for this test");
+    Workspace workspace = createWorkspace().displayName("a new name for this test");
 
     WorkspaceOperation operation = workspacesController.createWorkspaceAsync(workspace).getBody();
     WorkspaceOperation operation2 =
@@ -971,7 +971,7 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getId()).isEqualTo(operation.getId());
     assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
+    assertThat(operation3.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
   }
 
   @Test
@@ -1014,7 +1014,7 @@ public class WorkspacesControllerTest {
 
     Workspace workspace =
         createWorkspace()
-            .name("nospacesallowed")
+            .displayName("nospacesallowed")
             .terraName("nospacesallowed")
             .namespace("and finally a unique namespace");
     CloneWorkspaceRequest request =
@@ -1049,7 +1049,7 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getId()).isEqualTo(operation.getId());
     assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation3.getWorkspace()).isNotNull();
-    assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
+    assertThat(operation3.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
   }
 
   @Test
@@ -1109,8 +1109,8 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), ws.getBillingAccountName());
 
-    ws.setName("updated-name");
     ws.setDisplayName("updated-name");
+    ws.setTerraName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
@@ -1124,8 +1124,8 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, times(1))
         .updateBillingAccount(ws.getNamespace(), "update-billing-account");
 
-    ws.setName("updated-name2");
     ws.setDisplayName("updated-name2");
+    ws.setTerraName("updated-name2");
     updated =
         workspacesController
             .updateWorkspace(ws.getNamespace(), ws.getTerraName(), request)
@@ -1237,7 +1237,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
@@ -1256,7 +1256,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
           stubGetWorkspace(
@@ -1275,7 +1275,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace ws = createWorkspace();
           ws = workspacesController.createWorkspace(ws).getBody();
-          ws.setName("updated-name");
+          ws.setDisplayName("updated-name");
           ws.setAccessTierShortName("new tier");
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(ws);
@@ -1293,7 +1293,7 @@ public class WorkspacesControllerTest {
           UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
           request.setWorkspace(
               new Workspace()
-                  .name("updated-name")
+                  .displayName("updated-name")
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
@@ -1301,7 +1301,7 @@ public class WorkspacesControllerTest {
           // Still using the initial now-stale etag; this should throw.
           request.setWorkspace(
               new Workspace()
-                  .name("updated-name2")
+                  .displayName("updated-name2")
                   .billingAccountName("billing-account")
                   .accessTierShortName(ws.getAccessTierShortName())
                   .etag(ws.getEtag()));
@@ -1319,7 +1319,7 @@ public class WorkspacesControllerTest {
     for (String etag : cases) {
       try {
         UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-        request.setWorkspace(new Workspace().name("updated-name").etag(etag));
+        request.setWorkspace(new Workspace().displayName("updated-name").etag(etag));
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getTerraName(), request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch (BadRequestException e) {
@@ -1401,7 +1401,7 @@ public class WorkspacesControllerTest {
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);
 
-    assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
+    assertThat(clonedWorkspace.getDisplayName()).isEqualTo(modWorkspace.getDisplayName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
@@ -2224,7 +2224,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("bad-cdr-version-id");
@@ -2246,7 +2246,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("100");
@@ -2268,7 +2268,7 @@ public class WorkspacesControllerTest {
           Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
           Workspace modWorkspace =
               new Workspace()
-                  .name("cloned")
+                  .displayName("cloned")
                   .namespace("cloned-ns")
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId(archivedCdrVersionId);
@@ -2385,7 +2385,7 @@ public class WorkspacesControllerTest {
             .workspace(
                 new Workspace()
                     .namespace("cloned-ns")
-                    .name("cloned")
+                    .displayName("cloned")
                     .researchPurpose(originalWorkspace.getResearchPurpose())
                     .billingAccountName("billing-account")
                     .cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId())));
@@ -2507,15 +2507,16 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
 
     String namespace = "namespace";
-    String name = "name";
-    stubGetWorkspace(namespace, name, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
+    String terraName = "name";
+    stubGetWorkspace(namespace, terraName, currentUser.getUsername(), WorkspaceAccessLevel.WRITER);
 
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag("etag");
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspacesController.shareWorkspacePatch(namespace, name, shareWorkspaceRequest));
+        () ->
+            workspacesController.shareWorkspacePatch(namespace, terraName, shareWorkspaceRequest));
   }
 
   @Test
@@ -2897,7 +2898,7 @@ public class WorkspacesControllerTest {
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
     assertThat(recentWorkspace.getWorkspace().getNamespace())
         .isEqualTo(dbWorkspace.getWorkspaceNamespace());
-    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
+    assertThat(recentWorkspace.getWorkspace().getDisplayName()).isEqualTo(dbWorkspace.getName());
   }
 
   @Test

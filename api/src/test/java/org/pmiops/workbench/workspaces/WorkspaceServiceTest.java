@@ -773,7 +773,7 @@ public class WorkspaceServiceTest {
     var result = workspaceService.getFeaturedWorkspaces();
     assertThat(result).hasSize(1);
     var resultWorkspace = result.get(0).getWorkspace();
-    assertThat(resultWorkspace.getName()).isEqualTo(testWorkspace.getName());
+    assertThat(resultWorkspace.getDisplayName()).isEqualTo(testWorkspace.getName());
     assertThat(resultWorkspace.getNamespace()).isEqualTo(testWorkspace.getWorkspaceNamespace());
     assertThat(resultWorkspace.getTerraName()).isEqualTo(testWorkspace.getFirecloudName());
     assertThat(resultWorkspace.getFeaturedCategory())
