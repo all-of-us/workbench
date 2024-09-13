@@ -800,7 +800,9 @@ public class DataSetControllerTest {
             workspace.getNamespace(),
             workspace.getName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    dbWorkspace.setInitialCreditsExhausted(true).setBillingAccountName(BILLING_ACCOUNT_PREFIX + "/" + TEST_FREE_TIER);
+    dbWorkspace
+        .setInitialCreditsExhausted(true)
+        .setBillingAccountName(BILLING_ACCOUNT_PREFIX + "/" + TEST_FREE_TIER);
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request =
