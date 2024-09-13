@@ -184,7 +184,7 @@ public class DataSetControllerTest {
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
-  private static final String BILLING_ACCOUNT_PREFIX = "2, 5";
+  private static final String BILLING_ACCOUNT_PREFIX = "billingAccounts";
   private static final String TEST_FREE_TIER = "free-tier";
 
   private static final Instant NOW = Instant.now();
