@@ -89,6 +89,9 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       boolean areInitialCreditsExhausted =
           workspaceDao.findAllByCreator(user).parallelStream()
               .anyMatch(DbWorkspace::isInitialCreditsExhausted);
+
+      // Set initial credits expired for all workspaces regardless of whether
+      // they have exhausted their credits or not.
       workspaceDao.findAllByCreator(user).stream()
           .filter(
               ws ->
@@ -104,6 +107,8 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
                 deleteAppsAndRuntimesInWorkspace(ws);
               });
       try {
+        // If the user has already been notified about exhausting their initial credits,
+        // we do not need to notify them about expiration as well.
         if (!areInitialCreditsExhausted) {
           mailService.alertUserInitialCreditsExpired(user);
           userInitialCreditsExpiration.setNotificationStatus(
