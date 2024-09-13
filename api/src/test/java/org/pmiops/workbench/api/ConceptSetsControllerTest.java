@@ -1244,7 +1244,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceName(workspace2.getTerraName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     ConceptSet conceptSetCopy =
@@ -1281,7 +1281,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceName(workspace2.getTerraName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     ConceptSet conceptSetCopy =
@@ -1310,7 +1310,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceName(workspace2.getTerraName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     Throwable exception =
@@ -1335,7 +1335,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceName(workspace2.getTerraName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     Throwable exception =
@@ -1580,31 +1580,31 @@ public class ConceptSetsControllerTest {
 
   private void stubWorkspaceAccessLevel(
       Workspace workspace, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
-    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
+    stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getTerraName(), workspaceAccessLevel);
   }
 
   private void stubGetWorkspace(
-      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+      String ns, String terraName, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
+    fcWorkspace.setName(terraName);
     fcWorkspace.setCreatedBy(USER_EMAIL);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(workspaceAccessLevel);
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(ns, terraName)).thenReturn(fcResponse);
   }
 
   private void stubGetWorkspaceAcl(
-      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+      String ns, String terraName, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
     RawlsWorkspaceAccessEntry accessLevelEntry =
         new RawlsWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
     Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, name))
+    when(fireCloudService.getWorkspaceAclAsService(ns, terraName))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -1614,7 +1614,7 @@ public class ConceptSetsControllerTest {
       long cdrVersionId,
       RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     Workspace tmpWorkspace = new Workspace();
-    tmpWorkspace.setName(workspaceName);
+    tmpWorkspace.setDisplayName(workspaceName);
     tmpWorkspace.setNamespace(workspaceNamespace);
     tmpWorkspace.setResearchPurpose(new ResearchPurpose());
     tmpWorkspace.setCdrVersionId(String.valueOf(cdrVersionId));
