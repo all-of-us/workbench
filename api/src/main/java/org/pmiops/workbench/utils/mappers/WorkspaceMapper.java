@@ -38,9 +38,6 @@ import org.pmiops.workbench.workspaces.resources.WorkspaceResourceMapper;
     })
 public interface WorkspaceMapper {
 
-  // DEPRECATED and subject to deletion.
-  // Make an explicit choice to use either displayName for UI or terraName for Terra calls.
-  @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "versionToEtag")
   @Mapping(target = "namespace", source = "dbWorkspace.workspaceNamespace")
