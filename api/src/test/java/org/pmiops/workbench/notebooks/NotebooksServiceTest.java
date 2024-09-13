@@ -227,7 +227,8 @@ public class NotebooksServiceTest {
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.READER);
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
+    verify(mockWorkspaceAuthService)
+        .validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
   }
 
   @Test
@@ -828,7 +829,8 @@ public class NotebooksServiceTest {
     verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
     verify(mockWorkspaceAuthService, times(2))
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
+    verify(mockWorkspaceAuthService)
+        .validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
         .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");
