@@ -207,7 +207,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (dbWorkspace.isCDRAndWorkspaceTanagraEnabled()) {
       workspaceService.createTanagraStudy(
-          createdWorkspace.getNamespace(), createdWorkspace.getName());
+          createdWorkspace.getNamespace(), createdWorkspace.getDisplayName());
     }
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -384,7 +384,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
 
-    dbWorkspace.setName(workspace.getName());
+    // TODO use WorkspaceMapper for this
+    dbWorkspace.setName(workspace.getDisplayName());
     dbWorkspace.setCreator(user);
     dbWorkspace.setFirecloudName(fcWorkspace.getName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspace.getNamespace());
@@ -425,12 +426,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
-      throw new BadRequestException("missing required field 'name'");
+    if (Strings.isNullOrEmpty(workspace.getDisplayName())) {
+      throw new BadRequestException("missing required field 'displayName'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("workspace name must be 80 characters or less");
+    } else if (workspace.getDisplayName().length() > 80) {
+      throw new BadRequestException("workspace displayName must be 80 characters or less");
     }
   }
 
@@ -518,8 +519,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .equals(workspace.getAccessTierShortName())) {
       throw new BadRequestException("Attempted to change data access tier");
     }
-    if (workspace.getName() != null) {
-      dbWorkspace.setName(workspace.getName());
+    if (workspace.getDisplayName() != null) {
+      dbWorkspace.setName(workspace.getDisplayName());
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {

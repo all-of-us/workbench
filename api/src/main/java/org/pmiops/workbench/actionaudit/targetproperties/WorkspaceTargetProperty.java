@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.Workspace;
 public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspace> {
   ETAG("etag", Workspace::getEtag),
   NAME("name", Workspace::getName),
+  DISPLAY_NAME("display_name", Workspace::getDisplayName),
   TERRA_NAME("terra_name", Workspace::getTerraName),
   NAMESPACE("namespace", Workspace::getNamespace),
   CDR_VERSION_ID("cdr_version_id", Workspace::getCdrVersionId),
