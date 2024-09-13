@@ -255,7 +255,8 @@ public class FreeTierBillingService {
     workspaceDao.findAllByCreator(user).stream()
         .filter(
             ws ->
-                BillingUtils.isFreeTier(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+                BillingUtils.isInitialCredits(
+                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(false);

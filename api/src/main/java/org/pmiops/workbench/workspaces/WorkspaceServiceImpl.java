@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.utils.BillingUtils.isFreeTier;
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;
@@ -447,7 +447,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       return;
     }
 
-    if (isFreeTier(newBillingAccountName, workbenchConfigProvider.get())) {
+    if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       fireCloudService.updateBillingAccountAsService(
           workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
@@ -470,7 +470,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspace.setBillingAccountName(newBillingAccountName);
 
-    if (isFreeTier(newBillingAccountName, workbenchConfigProvider.get())) {
+    if (isInitialCredits(newBillingAccountName, workbenchConfigProvider.get())) {
       DbUser creator = workspace.getCreator();
       boolean hasInitialCreditsRemaining =
           freeTierBillingService.userHasRemainingFreeTierCredits(creator);
@@ -510,7 +510,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
     workspaceDao.findAllByCreator(user).stream()
-        .filter(ws -> isFreeTier(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .filter(ws -> isInitialCredits(ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(
             ws -> {
               ws.setInitialCreditsExhausted(exhausted);

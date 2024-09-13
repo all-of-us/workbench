@@ -95,7 +95,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       workspaceDao.findAllByCreator(user).stream()
           .filter(
               ws ->
-                  BillingUtils.isFreeTier(
+                  BillingUtils.isInitialCredits(
                       ws.getBillingAccountName(), workbenchConfigProvider.get()))
           .filter(DbWorkspace::isActive)
           .filter(ws -> !ws.isInitialCreditsExpired())

@@ -351,7 +351,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     Double initialCreditsRemaining = null;
-    if (BillingUtils.isFreeTier(workspace.get().getBillingAccountName(), configProvider.get())) {
+    if (BillingUtils.isInitialCredits(
+        workspace.get().getBillingAccountName(), configProvider.get())) {
       initialCreditsRemaining =
           freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace.get());
     }

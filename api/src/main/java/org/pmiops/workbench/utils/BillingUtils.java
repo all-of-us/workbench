@@ -12,15 +12,18 @@ public class BillingUtils {
     return BILLING_ACCOUNT_PREFIX + "/" + billingAccount;
   }
 
-  /** Returns {@code true} if the given billing account is workbench free tier billing account. */
-  public static boolean isFreeTier(String billingAccountName, WorkbenchConfig workbenchConfig) {
+  /**
+   * Returns {@code true} if the given billing account is workbench initial credits billing account.
+   */
+  public static boolean isInitialCredits(
+      String billingAccountName, WorkbenchConfig workbenchConfig) {
     return workbenchConfig.billing.initialCreditsBillingAccountName().equals(billingAccountName);
   }
 
   /** Returns {@code BillingAccountType} by given billing account name. */
   public static BillingAccountType getBillingAccountType(
       String billingAccountName, WorkbenchConfig workbenchConfig) {
-    return isFreeTier(billingAccountName, workbenchConfig)
+    return isInitialCredits(billingAccountName, workbenchConfig)
         ? BillingAccountType.FREE_TIER
         : BillingAccountType.USER_PROVIDED;
   }

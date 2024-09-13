@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.utils.BillingUtils.isFreeTier;
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 import static org.pmiops.workbench.utils.CostComparisonUtils.getUserFreeTierDollarLimit;
 
 import com.google.common.collect.Sets;
@@ -241,7 +241,8 @@ public class CloudTaskInitialCreditsExpiryController
 
     workspaceDao.findAllByCreator(user).stream()
         .filter(
-            dbWorkspace -> isFreeTier(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
+            dbWorkspace ->
+                isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig.get()))
         .filter(DbWorkspace::isActive)
         .forEach(
             dbWorkspace -> {
