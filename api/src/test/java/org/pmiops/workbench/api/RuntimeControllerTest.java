@@ -1328,10 +1328,10 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void localize_validateActiveBilling() {
+  public void localize_validateInitialCreditUsage() {
     doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
-        .validateActiveBilling(eq(WORKSPACE_NS), eq(WORKSPACE_ID));
+        .validateInitialCreditUsage(eq(WORKSPACE_NS), eq(WORKSPACE_ID));
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     assertThrows(
@@ -1339,7 +1339,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void localize_validateActiveBilling_checkAccessFirst() {
+  public void localize_validateInitialCreditUsage_checkAccessFirst() {
     doThrow(new ForbiddenException())
         .when(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
@@ -1348,7 +1348,7 @@ public class RuntimeControllerTest {
 
     assertThrows(
         ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, false, req));
-    verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
+    verify(mockWorkspaceAuthService, never()).validateInitialCreditUsage(anyString(), anyString());
   }
 
   private void createUser(String email) {

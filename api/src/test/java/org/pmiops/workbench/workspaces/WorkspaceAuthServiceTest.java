@@ -86,17 +86,17 @@ public class WorkspaceAuthServiceTest {
   }
 
   @Test
-  public void test_validateActiveBilling_active() {
+  public void test_validateInitialCreditUsage_valid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubDaoGetRequired(namespace, fcName, false, false);
 
     // does not throw
-    workspaceAuthService.validateActiveBilling(namespace, fcName);
+    workspaceAuthService.validateInitialCreditUsage(namespace, fcName);
   }
 
   @Test
-  public void test_validateActiveBilling_inactive() {
+  public void test_validateInitialCreditUsage_invalid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubDaoGetRequired(namespace, fcName, true, true);
@@ -104,7 +104,7 @@ public class WorkspaceAuthServiceTest {
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspaceAuthService.validateActiveBilling(namespace, fcName));
+        () -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
   }
 
   private static Stream<Arguments> accessLevels() {

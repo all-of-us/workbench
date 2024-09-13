@@ -51,7 +51,7 @@ public class AppsController implements AppsApiDelegate {
   public ResponseEntity<EmptyResponse> createApp(
       String workspaceNamespace, CreateAppRequest createAppRequest) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
+    workspaceAuthService.validateInitialCreditUsage(workspaceNamespace, dbWorkspace.getFirecloudName());
     leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
     leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
