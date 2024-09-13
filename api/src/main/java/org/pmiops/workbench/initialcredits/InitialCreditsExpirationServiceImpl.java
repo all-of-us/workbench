@@ -86,7 +86,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
           userInitialCreditsExpiration.getExpirationTime());
-      boolean areInitialCreditsExhausted =
+      boolean hasExhaustedWorkspace =
           workspaceDao.findAllByCreator(user).parallelStream()
               .anyMatch(DbWorkspace::isInitialCreditsExhausted);
 
@@ -109,7 +109,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       try {
         // If the user has already been notified about exhausting their initial credits,
         // we do not need to notify them about expiration as well.
-        if (!areInitialCreditsExhausted) {
+        if (!hasExhaustedWorkspace) {
           mailService.alertUserInitialCreditsExpired(user);
           userInitialCreditsExpiration.setNotificationStatus(
               NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
