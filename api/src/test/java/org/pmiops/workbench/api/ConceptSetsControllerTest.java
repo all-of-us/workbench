@@ -1244,7 +1244,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceTerraName(workspace2.getName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     ConceptSet conceptSetCopy =
@@ -1281,7 +1281,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceTerraName(workspace2.getName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     ConceptSet conceptSetCopy =
@@ -1310,7 +1310,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceTerraName(workspace2.getName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     Throwable exception =
@@ -1335,7 +1335,7 @@ public class ConceptSetsControllerTest {
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
-            .toWorkspaceName(workspace2.getName())
+            .toWorkspaceTerraName(workspace2.getName())
             .toWorkspaceNamespace(workspace2.getNamespace());
 
     Throwable exception =

@@ -298,7 +298,6 @@ describe(CopyModal.name, () => {
       props.fromResourceName,
       {
         toWorkspaceNamespace: writerWorkspace.namespace,
-        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceTerraName: writerWorkspace.terraName,
         newName,
       }
@@ -338,7 +337,6 @@ describe(CopyModal.name, () => {
       props.fromResourceName,
       {
         toWorkspaceNamespace: altCdrWorkspace.namespace,
-        toWorkspaceName: altCdrWorkspace.terraName,
         toWorkspaceTerraName: altCdrWorkspace.terraName,
         newName,
       }
@@ -402,7 +400,6 @@ describe(CopyModal.name, () => {
       props.fromResourceName,
       {
         toWorkspaceNamespace: writerWorkspace.namespace,
-        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceTerraName: writerWorkspace.terraName,
         newName,
       }
