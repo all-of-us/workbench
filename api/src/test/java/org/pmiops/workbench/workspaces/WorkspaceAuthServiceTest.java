@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -91,8 +92,7 @@ public class WorkspaceAuthServiceTest {
     final String fcName = "firecloudname";
     stubDaoGetRequired(namespace, fcName, false, false);
 
-    // does not throw
-    workspaceAuthService.validateInitialCreditUsage(namespace, fcName);
+    assertDoesNotThrow(() -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
   }
 
   @Test
