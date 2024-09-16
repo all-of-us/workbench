@@ -89,6 +89,7 @@ export const getTrail = (
     case BreadcrumbType.Workspaces:
       return [new BreadcrumbData('Workspaces', '/workspaces')];
     case BreadcrumbType.Workspace:
+    case BreadcrumbType.Data:
       return [
         ...getTrail(
           BreadcrumbType.Workspaces,
@@ -99,7 +100,7 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          workspace ? workspace.displayName : '...',
+          workspace?.displayName ?? '...',
           dataTabPath(ns, terraName)
         ),
       ];
@@ -275,21 +276,6 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData('Dataset', `${dataTabPath(ns, terraName)}/datasets`),
-      ];
-    case BreadcrumbType.Data:
-      return [
-        ...getTrail(
-          BreadcrumbType.Workspaces,
-          workspace,
-          cohort,
-          cohortReview,
-          conceptSet,
-          params
-        ),
-        new BreadcrumbData(
-          workspace ? workspace.displayName : '...',
-          `${dataTabPath(ns, terraName)}`
-        ),
       ];
     default:
       return [];
