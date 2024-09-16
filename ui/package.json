@@ -111,8 +111,7 @@
     "@nestjs/core": "^10.4.2",
     "node-fetch": "^2",
     "nth-check": "^2.0.1",
-    "postcss": "^8",
-    "semver": "^7"
+    "postcss": "^8"
   },
   "jest": {
     "collectCoverage": true,
