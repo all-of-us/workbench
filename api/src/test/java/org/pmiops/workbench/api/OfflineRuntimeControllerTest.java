@@ -117,11 +117,10 @@ public class OfflineRuntimeControllerTest {
   private DbUser user2;
   private DbWorkspace workspace;
   private int runtimeProjectIdIndex = 0;
-  private static WorkbenchConfig config;
+  private static WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
 
   @BeforeEach
   public void setUp() {
-    config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.notebookRuntimeMaxAgeDays = (int) RUNTIME_MAX_AGE.toDays();
     config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) RUNTIME_IDLE_MAX_AGE.toDays();
     config.billing.accountId = "free-tier";

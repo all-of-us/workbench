@@ -99,8 +99,8 @@ public class WorkspaceAuthServiceTest {
   public void test_validateInitialCreditUsage_invalid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
-    stubDaoGetRequired(namespace, fcName, true, true);
     config.billing.accountId = "free-tier";
+    stubDaoGetRequired(namespace, fcName, true, true);
 
     assertThrows(
         ForbiddenException.class,
