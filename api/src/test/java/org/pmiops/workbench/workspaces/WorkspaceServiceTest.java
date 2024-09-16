@@ -165,7 +165,6 @@ public class WorkspaceServiceTest {
   private static final long USER_ID = 1L;
   private static final String DEFAULT_USERNAME = "mock@mock.com";
   private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
-  private static final String FREE_TIER_BILLING_ACCOUNT_ID = "free-tier-account";
 
   private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
 
@@ -216,7 +215,7 @@ public class WorkspaceServiceTest {
     currentUser.setDisabled(false);
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_ID;
+    workbenchConfig.billing.accountId = "free-tier-account";
   }
 
   private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
