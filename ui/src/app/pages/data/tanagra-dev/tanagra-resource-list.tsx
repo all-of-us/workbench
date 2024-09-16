@@ -76,7 +76,7 @@ interface NavProps {
 
 const WorkspaceNavigation = (props: NavProps) => {
   const {
-    workspace: { displayName, namespace, terraName },
+    workspace: { namespace, displayName, terraName },
     style,
   } = props;
   const url = dataTabPath(namespace, terraName);

@@ -82,7 +82,7 @@ export class CohortsApiStub extends CohortsApi {
     super(undefined);
 
     const stubWorkspace: Workspace = {
-      displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+      displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_DISPLAY_NAME,
       terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
     };
