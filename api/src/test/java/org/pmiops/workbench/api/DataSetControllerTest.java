@@ -229,7 +229,8 @@ public class DataSetControllerTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
+    AccessTierServiceImpl.class,
+    AnalysisLanguageMapperImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
@@ -243,7 +244,9 @@ public class DataSetControllerTest {
     DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
+    ObjectNameLengthServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
@@ -253,15 +256,12 @@ public class DataSetControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    AccessTierServiceImpl.class,
-    ObjectNameLengthServiceImpl.class,
-    BucketAuditQueryService.class,
-    AnalysisLanguageMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
+    BucketAuditQueryService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
