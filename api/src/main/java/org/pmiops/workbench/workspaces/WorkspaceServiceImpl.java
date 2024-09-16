@@ -1,5 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
+
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import jakarta.inject.Provider;
 import jakarta.mail.MessagingException;
@@ -445,11 +447,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       return;
     }
 
-    if (workbenchConfigProvider
-        .get()
-        .billing
-        .freeTierBillingAccountNames()
-        .contains(newBillingAccountName)) {
+    if (isFreeTier(newBillingAccountName, workbenchConfigProvider.get())) {
       fireCloudService.updateBillingAccountAsService(
           workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
@@ -472,15 +470,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     workspace.setBillingAccountName(newBillingAccountName);
 
-    if (workbenchConfigProvider
-        .get()
-        .billing
-        .freeTierBillingAccountNames()
-        .contains(newBillingAccountName)) {
+    if (isFreeTier(newBillingAccountName, workbenchConfigProvider.get())) {
+      DbUser creator = workspace.getCreator();
+      boolean hasInitialCreditsRemaining =
+          freeTierBillingService.userHasRemainingFreeTierCredits(creator);
       workspace.setBillingStatus(
-          freeTierBillingService.userHasRemainingFreeTierCredits(workspace.getCreator())
-              ? BillingStatus.ACTIVE
-              : BillingStatus.INACTIVE);
+          hasInitialCreditsRemaining ? BillingStatus.ACTIVE : BillingStatus.INACTIVE);
+      workspace.setInitialCreditsExhausted(!hasInitialCreditsRemaining);
+      workspace.setInitialCreditsExpired(
+          initialCreditsExpirationService.haveCreditsExpired(creator));
     } else {
       // At this point, we can assume that a user provided billing account is open since we
       // throw a BadRequestException if a closed one is provided
@@ -510,14 +508,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
+  public void updateInitialCreditsExhaustion(DbUser user, boolean exhausted) {
     workspaceDao.findAllByCreator(user).stream()
-        .filter(
-            ws ->
-                WorkspaceUtils.isFreeTier(
-                    ws.getBillingAccountName(), workbenchConfigProvider.get()))
-        .map(DbWorkspace::getWorkspaceId)
-        .forEach(id -> workspaceDao.updateBillingStatus(id, status));
+        .filter(ws -> isFreeTier(ws.getBillingAccountName(), workbenchConfigProvider.get()))
+        .forEach(
+            ws -> {
+              ws.setInitialCreditsExhausted(exhausted);
+              ws.setBillingStatus(exhausted ? BillingStatus.INACTIVE : BillingStatus.ACTIVE);
+              workspaceDao.save(ws);
+            });
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -31,7 +33,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
@@ -61,6 +62,8 @@ public class WorkspaceAuthServiceTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
 
+  private static WorkbenchConfig config;
+
   @TestConfiguration
   @Import({FakeClockConfiguration.class, WorkspaceAuthService.class})
   static class Configuration {
@@ -69,32 +72,39 @@ public class WorkspaceAuthServiceTest {
     DbUser user() {
       return currentUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig config() {
+      return config;
+    }
   }
 
   @BeforeEach
   public void setUp() {
     currentUser = new DbUser();
+    config = WorkbenchConfig.createEmptyConfig();
   }
 
   @Test
-  public void test_validateActiveBilling_active() {
+  public void test_validateInitialCreditUsage_valid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
-    stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
+    stubDaoGetRequired(namespace, fcName, false, false);
 
-    // does not throw
-    workspaceAuthService.validateActiveBilling(namespace, fcName);
+    assertDoesNotThrow(() -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
   }
 
   @Test
-  public void test_validateActiveBilling_inactive() {
+  public void test_validateInitialCreditUsage_invalid() {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
-    stubDaoGetRequired(namespace, fcName, BillingStatus.INACTIVE);
+    stubDaoGetRequired(namespace, fcName, true, true);
+    config.billing.accountId = "free-tier";
 
     assertThrows(
         ForbiddenException.class,
-        () -> workspaceAuthService.validateActiveBilling(namespace, fcName));
+        () -> workspaceAuthService.validateInitialCreditUsage(namespace, fcName));
   }
 
   private static Stream<Arguments> accessLevels() {
@@ -243,7 +253,7 @@ public class WorkspaceAuthServiceTest {
     stubRegisteredTier();
     stubUpdateAcl(namespace, fcName);
     stubFcGetAcl(namespace, fcName, originalAcl);
-    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, BillingStatus.ACTIVE);
+    DbWorkspace workspace = stubDaoGetRequired(namespace, fcName, false, false);
 
     workspaceAuthService.patchWorkspaceAcl(workspace, updates);
     verify(mockFireCloudService)
@@ -255,12 +265,17 @@ public class WorkspaceAuthServiceTest {
   }
 
   private DbWorkspace stubDaoGetRequired(
-      String namespace, String fcName, BillingStatus billingStatus) {
+      String namespace,
+      String fcName,
+      boolean initialCreditsExhausted,
+      boolean initialCreditsExpired) {
     final DbWorkspace toReturn =
         new DbWorkspace()
             .setWorkspaceNamespace(namespace)
             .setFirecloudName(fcName)
-            .setBillingStatus(billingStatus);
+            .setInitialCreditsExhausted(initialCreditsExhausted)
+            .setInitialCreditsExpired(initialCreditsExpired)
+            .setBillingAccountName("billingAccounts/free-tier");
     when(mockWorkspaceDao.getRequired(namespace, fcName)).thenReturn(toReturn);
     return toReturn;
   }

@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.Notification
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -152,8 +151,8 @@ public class InitialCreditsExpirationServiceTest {
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Only run during setup
+    verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -170,8 +169,8 @@ public class InitialCreditsExpirationServiceTest {
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Only run during setup
+    verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -191,8 +190,8 @@ public class InitialCreditsExpirationServiceTest {
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Only run during setup
+    verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -213,8 +212,8 @@ public class InitialCreditsExpirationServiceTest {
 
     verify(mailService, never()).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(spyWorkspaceDao, never())
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Only run during setup
+    verify(spyWorkspaceDao, times(1)).save(any());
     verify(leonardoApiClient, never()).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -236,8 +235,8 @@ public class InitialCreditsExpirationServiceTest {
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     // Called once during setup and once during the test
     verify(spyUserDao, times(2)).save(any());
-    verify(spyWorkspaceDao, times(1))
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Once during test setup and once during test
+    verify(spyWorkspaceDao, times(2)).save(any());
     verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 
@@ -259,8 +258,8 @@ public class InitialCreditsExpirationServiceTest {
 
     verify(mailService, times(1)).alertUserInitialCreditsExpired(any());
     verifyUserSaveOnlyDuringSetup();
-    verify(spyWorkspaceDao, times(1))
-        .updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    // Once during test setup and once during test
+    verify(spyWorkspaceDao, times(2)).save(any());
     verify(leonardoApiClient, times(1)).deleteAllResources(workspace.getGoogleProject(), false);
   }
 }

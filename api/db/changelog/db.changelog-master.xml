@@ -242,6 +242,7 @@
   <include file="changelog/db.changelog-232-add-user_initial_credits_expiration.xml"/>
   <include file="changelog/db.changelog-233-add-user-initial-credit-expiration-notification-column.xml"/>
   <include file="changelog/db.changelog-234-add-institution-initial-credit-expiration-bypass.xml"/>
+  <include file="changelog/db.changelog-235-replace-workspace-billing-status.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

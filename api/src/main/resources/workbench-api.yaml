@@ -7445,10 +7445,8 @@ components:
         googleProject:
           type: string
           description: the google project used by the workspace for compute and storage
-        initialCreditsExpirationEpochMillis:
-          type: integer
-          description: Timestamp indicating when the workspace creator's initial credits will expire, if applicable
-          format: int64
+        initialCredits:
+          $ref: '#/components/schemas/InitialCreditResponse'
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
@@ -13220,6 +13218,16 @@ components:
       enum:
       - NO_NOTIFICATION_SENT
       - EXPIRATION_NOTIFICATION_SENT
+    InitialCreditResponse:
+      type: object
+      properties:
+        exhausted:
+          type: boolean
+        expired:
+          type: boolean
+        expirationEpochMillis:
+          type: integer
+          format: int64
   parameters:
     userId:
       name: userId

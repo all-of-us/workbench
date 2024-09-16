@@ -86,23 +86,35 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
           "Initial credits expired for user {}. Expiration time: {}",
           user.getUsername(),
           userInitialCreditsExpiration.getExpirationTime());
+      boolean hasExhaustedWorkspace =
+          workspaceDao.findAllByCreator(user).parallelStream()
+              .anyMatch(DbWorkspace::isInitialCreditsExhausted);
+
+      // Set initial credits expired for all workspaces regardless of whether
+      // they have exhausted their credits or not.
       workspaceDao.findAllByCreator(user).stream()
           .filter(
               ws ->
                   WorkspaceUtils.isFreeTier(
                       ws.getBillingAccountName(), workbenchConfigProvider.get()))
           .filter(DbWorkspace::isActive)
-          .filter(ws -> ws.getBillingStatus().equals(BillingStatus.ACTIVE))
+          .filter(ws -> !ws.isInitialCreditsExpired())
           .forEach(
               ws -> {
-                workspaceDao.updateBillingStatus(ws.getWorkspaceId(), BillingStatus.INACTIVE);
+                ws.setInitialCreditsExpired(true);
+                ws.setBillingStatus(BillingStatus.INACTIVE);
+                workspaceDao.save(ws);
                 deleteAppsAndRuntimesInWorkspace(ws);
               });
       try {
-        mailService.alertUserInitialCreditsExpired(user);
-        userInitialCreditsExpiration.setNotificationStatus(
-            NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
-        userDao.save(user);
+        // If the user has already been notified about exhausting their initial credits,
+        // we do not need to notify them about expiration as well.
+        if (!hasExhaustedWorkspace) {
+          mailService.alertUserInitialCreditsExpired(user);
+          userInitialCreditsExpiration.setNotificationStatus(
+              NotificationStatus.EXPIRATION_NOTIFICATION_SENT);
+          userDao.save(user);
+        }
 
       } catch (MessagingException e) {
         logger.error(

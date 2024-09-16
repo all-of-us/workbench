@@ -732,7 +732,8 @@ public class FreeTierBillingServiceTest {
 
     final DbWorkspace retrievedWorkspace =
         workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
-    assertThat(retrievedWorkspace.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
+    assertThat(retrievedWorkspace.isInitialCreditsExhausted()).isEqualTo(false);
+    assertThat(retrievedWorkspace.isInitialCreditsExpired()).isEqualTo(false);
   }
 
   @Test

@@ -49,12 +49,14 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "dbWorkspace.creator.username")
   @Mapping(
-      target = "initialCreditsExpirationEpochMillis",
+      target = "initialCredits.expirationEpochMillis",
       source = "dbWorkspace.creator",
       qualifiedByName = "getInitialCreditsExpiration")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
+  @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
+  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,
@@ -102,10 +104,12 @@ public interface WorkspaceMapper {
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
+  @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
   @Mapping(
-      target = "initialCreditsExpirationEpochMillis",
-      source = "dbWorkspace.creator",
+      target = "initialCredits.expirationEpochMillis",
+      source = "creator",
       qualifiedByName = "getInitialCreditsExpiration")
+  @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "etag", source = "version", qualifiedByName = "versionToEtag")
   @Mapping(
       target = "googleBucketName",
@@ -177,6 +181,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
   @Mapping(target = "featuredCategory", ignore = true)
+  @Mapping(target = "initialCreditsExpired", ignore = true)
+  @Mapping(target = "initialCreditsExhausted", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

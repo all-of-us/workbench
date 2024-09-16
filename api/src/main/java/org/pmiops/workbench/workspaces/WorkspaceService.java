@@ -7,7 +7,6 @@ import org.pmiops.workbench.api.FeaturedWorkspacesController;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.tanagra.ApiException;
@@ -86,7 +85,7 @@ public interface WorkspaceService {
    */
   Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException;
 
-  void updateFreeTierWorkspacesStatus(DbUser user, BillingStatus status);
+  void updateInitialCreditsExhaustion(DbUser user, boolean exhausted);
 
   void publishCommunityWorkspace(DbWorkspace workspace);
 

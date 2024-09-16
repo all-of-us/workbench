@@ -112,17 +112,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
-  default void updateBillingStatus(long workspaceId, BillingStatus status) {
-    DbWorkspace toUpdate =
-        findById(workspaceId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("DbWorkspace %s does not exist", workspaceId)));
-    toUpdate.setBillingStatus(status);
-    save(toUpdate);
-  }
-
   @Query(
       "SELECT w.creator FROM DbWorkspace w "
           + "WHERE w.billingStatus = (:status) AND w.billingAccountName in (:billingAccountNames) AND w.creator in (:creators)")

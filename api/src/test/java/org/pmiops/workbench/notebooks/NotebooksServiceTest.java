@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -77,6 +79,7 @@ public class NotebooksServiceTest {
   private DbCdrVersion toCDRVersion;
   private DbAccessTier fromAccessTier;
   private DbAccessTier toAccessTier;
+  private static WorkbenchConfig workbenchConfig;
 
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
@@ -105,6 +108,12 @@ public class NotebooksServiceTest {
     DbUser getDbUser() {
       return dbUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      return workbenchConfig;
+    }
   }
 
   @BeforeEach
@@ -125,6 +134,8 @@ public class NotebooksServiceTest {
     toCDRVersion = new DbCdrVersion();
     fromAccessTier = new DbAccessTier();
     toAccessTier = new DbAccessTier();
+
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
   }
 
   @Mock private Blob mockBlob;
@@ -216,7 +227,8 @@ public class NotebooksServiceTest {
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.READER);
     verify(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
+    verify(mockWorkspaceAuthService)
+        .validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
   }
 
   @Test
@@ -263,7 +275,7 @@ public class NotebooksServiceTest {
         .enforceWorkspaceAccessLevel(
             toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     verify(mockWorkspaceAuthService)
-        .validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
+        .validateInitialCreditUsage(eq(toWorkspaceNamespace), eq(toWorkspaceFirecloudName));
 
     FileDetail expectedFileDetail =
         new FileDetail()
@@ -817,7 +829,8 @@ public class NotebooksServiceTest {
     verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
     verify(mockWorkspaceAuthService, times(2))
         .enforceWorkspaceAccessLevel(NAMESPACE_NAME, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER);
-    verify(mockWorkspaceAuthService).validateActiveBilling(NAMESPACE_NAME, WORKSPACE_NAME);
+    verify(mockWorkspaceAuthService)
+        .validateInitialCreditUsage(eq(NAMESPACE_NAME), eq(WORKSPACE_NAME));
     assertThat(actualResult.getName()).isEqualTo("newName.ipynb");
     assertThat(actualResult.getPath())
         .isEqualTo("gs://" + BUCKET_NAME + "/notebooks/newName.ipynb");

@@ -90,6 +90,9 @@ public class DbWorkspace {
   private boolean adminLocked;
   private String adminLockedReason;
 
+  private boolean initialCreditsExhausted;
+  private boolean initialCreditsExpired;
+
   /*
   We are in the process of changing how Published/Featured workspaces work.
 
@@ -665,9 +668,12 @@ public class DbWorkspace {
     return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
+  @Deprecated(since = "September 2024", forRemoval = true)
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
-    return DbStorageEnums.billingStatusFromStorage(billingStatus);
+    return (initialCreditsExhausted || initialCreditsExpired
+        ? BillingStatus.INACTIVE
+        : BillingStatus.ACTIVE);
   }
 
   public DbWorkspace setBillingStatus(BillingStatus billingStatus) {
@@ -778,5 +784,25 @@ public class DbWorkspace {
   @Deprecated // do not use; only retained for Hibernate compatibility
   private void setBillingMigrationStatus(Short status) {
     this.billingMigrationStatus = status;
+  }
+
+  @Column(name = "initial_credits_exhausted")
+  public boolean isInitialCreditsExhausted() {
+    return initialCreditsExhausted;
+  }
+
+  public DbWorkspace setInitialCreditsExhausted(boolean initialCreditsExhausted) {
+    this.initialCreditsExhausted = initialCreditsExhausted;
+    return this;
+  }
+
+  @Column(name = "initial_credits_expired")
+  public boolean isInitialCreditsExpired() {
+    return initialCreditsExpired;
+  }
+
+  public DbWorkspace setInitialCreditsExpired(boolean initialCreditsExpired) {
+    this.initialCreditsExpired = initialCreditsExpired;
+    return this;
   }
 }

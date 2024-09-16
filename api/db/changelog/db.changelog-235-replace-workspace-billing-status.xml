@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="evrii" id="db.changelog-235-replace-workspace-billing-status">
+    <addColumn tableName="workspace">
+      <column name="initial_credits_exhausted" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="initial_credits_expired" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <sql>
+      UPDATE workspace
+      SET initial_credits_exhausted = CASE
+      WHEN billing_status = 1 THEN TRUE
+      ELSE FALSE
+      END;
+    </sql>
+  </changeSet>
+</databaseChangeLog>
