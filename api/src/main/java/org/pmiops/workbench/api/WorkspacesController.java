@@ -518,7 +518,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .equals(workspace.getAccessTierShortName())) {
       throw new BadRequestException("Attempted to change data access tier");
     }
-    if (workspace.getName() != null) {
+    if (workspace.getDisplayName() != null) {
+      dbWorkspace.setName(workspace.getDisplayName());
+    } else if (workspace.getName() != null) {
       dbWorkspace.setName(workspace.getName());
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();

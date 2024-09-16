@@ -1226,6 +1226,7 @@ export const WorkspaceEdit = fp.flow(
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           workspace = await this.apiDuplicateWorkspaceAsync();
         } else {
+          // this does NOT update displayname
           workspace = await workspacesApi().updateWorkspace(
             this.state.workspace.namespace,
             this.state.workspace.terraName,
