@@ -193,7 +193,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // There might be a refactoring opportunity here to separate out the Google Cloud
       // API calls so we can call just that instead of this which does that and a little more.
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
       throw e;
     }
     final Workspace createdWorkspace =
@@ -413,7 +413,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // code to skip an unnecessary GCP API call if the billing account is being kept at the free
     // tier
     dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+        workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
 
     try {
       workspaceService.updateWorkspaceBillingAccount(
@@ -617,7 +617,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+          dbWorkspace, workbenchConfigProvider.get().billing.initialCreditsBillingAccountName());
       throw e;
     }
 

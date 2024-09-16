@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -348,11 +349,12 @@ public class UserControllerTest {
   // free tier available vs. expired
   // cloud accounts available vs. none
 
-  static final BillingAccount freeTierBillingAccount =
+  static final String INITIAL_CREDITS_ID = "free-tier";
+  static final BillingAccount INITIAL_CREDITS_BILLING_ACCOUNT =
       new BillingAccount()
           .freeTier(true)
           .displayName("Use All of Us initial credits")
-          .name("billingAccounts/free-tier")
+          .name(fullBillingAccountName(INITIAL_CREDITS_ID))
           .open(true);
 
   static final List<com.google.api.services.cloudbilling.model.BillingAccount>
@@ -383,7 +385,7 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
-    config.billing.accountId = "free-tier";
+    config.billing.accountId = INITIAL_CREDITS_ID;
 
     when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
@@ -392,7 +394,7 @@ public class UserControllerTest {
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
         ListUtils.union(
-            Lists.newArrayList(freeTierBillingAccount), cloudbillingAccountsInWorkbench);
+            Lists.newArrayList(INITIAL_CREDITS_BILLING_ACCOUNT), cloudbillingAccountsInWorkbench);
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
@@ -403,7 +405,7 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
-    config.billing.accountId = "free-tier";
+    config.billing.accountId = INITIAL_CREDITS_ID;
 
     when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(true);
 
@@ -411,7 +413,7 @@ public class UserControllerTest {
         .thenReturn(new ListBillingAccountsResponse().setBillingAccounts(null));
 
     final List<BillingAccount> expectedWorkbenchBillingAccounts =
-        Lists.newArrayList(freeTierBillingAccount);
+        Lists.newArrayList(INITIAL_CREDITS_BILLING_ACCOUNT);
 
     final WorkbenchListBillingAccountsResponse response =
         userController.listBillingAccounts().getBody();
@@ -422,7 +424,7 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
-    config.billing.accountId = "free-tier";
+    config.billing.accountId = INITIAL_CREDITS_ID;
 
     when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 
@@ -440,7 +442,7 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
-    config.billing.accountId = "free-tier";
+    config.billing.accountId = INITIAL_CREDITS_ID;
 
     when(mockFreeTierBillingService.userHasRemainingFreeTierCredits(any())).thenReturn(false);
 

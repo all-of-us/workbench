@@ -1,6 +1,7 @@
 package org.pmiops.workbench.testconfig;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -189,7 +190,7 @@ public class ReportingTestUtils {
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
-    workspace.setBillingAccountName("billingAccounts/" + WORKSPACE__BILLING_ACCOUNT_ID);
+    workspace.setBillingAccountName(fullBillingAccountName(WORKSPACE__BILLING_ACCOUNT_ID));
     return workspace;
   }
 

@@ -17,7 +17,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.workspaces.WorkspaceUtils;
+import org.pmiops.workbench.utils.BillingUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,7 +95,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       workspaceDao.findAllByCreator(user).stream()
           .filter(
               ws ->
-                  WorkspaceUtils.isFreeTier(
+                  BillingUtils.isInitialCredits(
                       ws.getBillingAccountName(), workbenchConfigProvider.get()))
           .filter(DbWorkspace::isActive)
           .filter(ws -> !ws.isInitialCreditsExpired())

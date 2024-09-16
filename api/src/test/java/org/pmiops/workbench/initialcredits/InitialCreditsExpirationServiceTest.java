@@ -82,7 +82,7 @@ public class InitialCreditsExpirationServiceTest {
     workspace =
         spyWorkspaceDao.save(
             new DbWorkspace()
-                .setBillingAccountName("billingAccounts/" + config.billing.accountId)
+                .setBillingAccountName(config.billing.initialCreditsBillingAccountName())
                 .setWorkspaceId(1L));
     when(spyWorkspaceDao.findAllByCreator(any())).thenReturn(Set.of(workspace));
   }
