@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { FlexColumn, FlexSpacer } from 'app/components/flex';
 import { PageHeader } from 'app/components/headers';
 import logo from 'assets/images/all-of-us-logo.svg';
 
