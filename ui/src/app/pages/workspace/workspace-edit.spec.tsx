@@ -669,14 +669,14 @@ describe(WorkspaceEdit.name, () => {
 
     const numBefore = workspacesApi.workspaceOperations.length;
     await userEvent.click(
-      await screen.findByRole('button', {
-        name: /Duplicate Workspace/i,
-      })
+      await screen.findByRole('button', { name: /Duplicate Workspace/i })
     );
 
     const confirmSaveButton = await screen.findByRole('button', {
       name: 'Confirm',
     });
+
+    // multiple clicks
 
     await user.click(confirmSaveButton);
     await user.click(confirmSaveButton);

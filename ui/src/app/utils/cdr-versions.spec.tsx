@@ -16,7 +16,7 @@ import {
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 
 const stubWorkspace: Workspace = {
-  displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+  displayName: WorkspaceStubVariables.DEFAULT_WORKSPACE_DISPLAY_NAME,
   terraName: WorkspaceStubVariables.DEFAULT_WORKSPACE_TERRA_NAME,
   namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
 };
