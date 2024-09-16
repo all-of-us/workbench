@@ -103,6 +103,8 @@ const css =
         display: none !important
     }`;
 
+const stringToSlug = (s: string) => s.toLowerCase().replace(/\s+/g, '');
+
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -137,9 +139,12 @@ export const RuntimesList = fp.flow(
                 nav: {
                   // called from, for example:
                   // https://github.com/DataBiosphere/terra-ui/blob/4333c7b94d6ce10a6fe079361e98c2b6cc71f83a/src/pages/Environments.js#L420
-                  getLink: (_, { namespace, terraName }) =>
-                    analysisTabPath(namespace, terraName),
-                  // TODO JOEL does this even work ???
+                  getLink: (_, { namespace, name, terraName }) =>
+                    analysisTabPath(
+                      namespace,
+                      // TODO why: this backup is necessary for Cloud Environments but not Disks
+                      terraName ?? stringToSlug(name)
+                    ),
                 },
               }}
             />
