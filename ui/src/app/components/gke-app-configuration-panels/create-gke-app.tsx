@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
@@ -172,26 +172,25 @@ export const CreateGkeApp = ({
   // there may or may not be an existing `app` and/or `disk`
   // start with the default config, but override with the existing app and disk configs
 
-  const [createAppRequest, setCreateAppRequest] =
-    React.useState<CreateAppRequest>({
-      ...defaultCreateRequest,
-      kubernetesRuntimeConfig: {
-        ...defaultCreateRequest.kubernetesRuntimeConfig,
-        machineType:
-          // if there is an active app, use its machineType for display
-          app?.kubernetesRuntimeConfig.machineType ??
-          // otherwise, if there is an active app of a different type, use its machine type to configure this one
-          maybeGetOtherMachineType(userApps, appType) ??
-          // use the default if neither of these cases apply
-          defaultCreateRequest.kubernetesRuntimeConfig.machineType,
-      },
+  const [createAppRequest, setCreateAppRequest] = useState<CreateAppRequest>({
+    ...defaultCreateRequest,
+    kubernetesRuntimeConfig: {
+      ...defaultCreateRequest.kubernetesRuntimeConfig,
+      machineType:
+        // if there is an active app, use its machineType for display
+        app?.kubernetesRuntimeConfig.machineType ??
+        // otherwise, if there is an active app of a different type, use its machine type to configure this one
+        maybeGetOtherMachineType(userApps, appType) ??
+        // use the default if neither of these cases apply
+        defaultCreateRequest.kubernetesRuntimeConfig.machineType,
+    },
 
-      persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
-      autodeleteEnabled:
-        app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
-      autodeleteThreshold:
-        app?.autodeleteThreshold ?? defaultCreateRequest.autodeleteThreshold,
-    });
+    persistentDiskRequest: disk ?? defaultCreateRequest.persistentDiskRequest,
+    autodeleteEnabled:
+      app?.autodeleteEnabled ?? defaultCreateRequest.autodeleteEnabled,
+    autodeleteThreshold:
+      app?.autodeleteThreshold ?? defaultCreateRequest.autodeleteThreshold,
+  });
 
   const autodeleteRemainingDays: number = (() => {
     if (app?.autodeleteEnabled && app.dateAccessed && app.autodeleteThreshold) {
@@ -224,21 +223,30 @@ export const CreateGkeApp = ({
   const showDeleteDiskButton = unattachedDiskExists(app, disk);
   const showDeleteAppButton = canDeleteApp(app);
 
-  const canModifyDiskSize = !app && !unattachedDiskExists(app, disk);
+  // TODO: running app requires Leo support, RW-11634
+  const canModifyDiskSize = !app;
 
-  const disableDiskSizeContent = cond(
-    [
-      !!app,
-      `Disk size cannot be updated because the ${
-        toUIAppType[appType]
-      } environment is in ${fromUserAppStatusWithFallback(app?.status)} state. 
-      To make changes, please delete the disk and recreate the environment.`,
-    ],
-    [
-      unattachedDiskExists(app, disk),
-      `Cannot modify existing disk. To update the disk size please delete the disk and create a new environment.`,
-    ]
+  const disableDiskSizeContent = (
+    <>
+      Disk size cannot be updated because the disk is attached to the{' '}
+      {toUIAppType[appType]} environment, which is in{' '}
+      {fromUserAppStatusWithFallback(app?.status)} state.
+      <br />
+      To make changes to the disk, please delete the environment. If you choose
+      to retain the disk, you will be able to increase its size while retaining
+      the existing data when creating a new environment.
+    </>
   );
+
+  const updateDiskSize = (size: number) => {
+    setCreateAppRequest((prevState) => ({
+      ...prevState,
+      persistentDiskRequest: {
+        ...prevState.persistentDiskRequest,
+        size,
+      },
+    }));
+  };
 
   const showErrorBanner =
     createAppRequest && !isDiskSizeValid(createAppRequest);
@@ -432,22 +440,20 @@ export const CreateGkeApp = ({
         </FlexRow>
       </div>
       <div style={{ ...styles.controlSection }}>
-        <FlexRow>
+        <FlexRow
+          style={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '2rem',
+          }}
+        >
           <TooltipTrigger
             disabled={canModifyDiskSize}
             content={disableDiskSizeContent}
           >
             <div>
               <DiskSizeSelector
-                onChange={(size: number) =>
-                  setCreateAppRequest((prevState) => ({
-                    ...prevState,
-                    persistentDiskRequest: {
-                      ...prevState.persistentDiskRequest,
-                      size: size,
-                    },
-                  }))
-                }
+                onChange={updateDiskSize}
                 disabled={!canModifyDiskSize}
                 diskSize={createAppRequest.persistentDiskRequest.size}
                 idPrefix={'gke-app'}
@@ -499,6 +505,7 @@ export const CreateGkeApp = ({
           <CreateGkeAppButton
             {...{ billingStatus, createAppRequest }}
             existingApp={app}
+            existingDisk={disk}
             workspaceNamespace={workspace.namespace}
             username={profile.username}
             style={openOrCreateButtonStyle}
