@@ -112,9 +112,6 @@ export function CreateGkeAppButton({
           unattachedDiskExists(existingApp, existingDisk) &&
           createAppRequest.persistentDiskRequest.size > existingDisk.size
         ) {
-          // confirm not called in unit test:
-          // - no unattached disk
-          // - disk size is not increasing
           await disksApi().updateDisk(
             workspaceNamespace,
             existingDisk.name,
