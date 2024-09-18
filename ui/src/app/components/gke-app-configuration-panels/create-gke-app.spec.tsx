@@ -12,7 +12,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   appMaxDiskSize,
