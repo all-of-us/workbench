@@ -232,9 +232,9 @@ export const CreateGkeApp = ({
       {toUIAppType[appType]} environment, which is in{' '}
       {fromUserAppStatusWithFallback(app?.status)} state.
       <br />
-      To make changes to the disk, please delete the environment. If you choose
-      to retain the disk, you will be able to increase its size while retaining
-      the existing data when creating a new environment.
+      To make changes to the disk, please delete the environment and choose the
+      option to retain the disk. When re-creating your environment, you will be
+      able to increase the disk size.
     </>
   );
 
