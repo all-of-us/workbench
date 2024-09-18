@@ -26,6 +26,7 @@ import {
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
 } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
@@ -125,15 +126,18 @@ describe(CreateGkeAppButton.name, () => {
         createAppRequest: defaultCromwellCreateRequest,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
+
       const button = await waitFor(() => {
         const createButton = findCreateButton();
         expectButtonElementDisabled(createButton);
         return createButton;
       });
 
-      await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-      await screen.findByText(`A Cromwell app exists or is being created`);
+      await expectTooltip(
+        button,
+        'A Cromwell app exists or is being created',
+        user
+      );
     });
   });
 
@@ -142,16 +146,17 @@ describe(CreateGkeAppButton.name, () => {
       createAppRequest: defaultCromwellCreateRequest,
       billingStatus: BillingStatus.INACTIVE,
     });
+
     const button = await waitFor(() => {
       const createButton = findCreateButton();
       expectButtonElementDisabled(createButton);
       return createButton;
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-    await screen.findByText(
-      'You have either run out of initial credits or have an inactive billing account.'
+    await expectTooltip(
+      button,
+      'You have either run out of initial credits or have an inactive billing account.',
+      user
     );
   });
 
@@ -167,16 +172,17 @@ describe(CreateGkeAppButton.name, () => {
         },
       },
     });
+
     const button = await waitFor(() => {
       const createButton = findCreateButton();
       expectButtonElementDisabled(createButton);
       return createButton;
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-    await screen.findByText(
-      /Disk cannot be more than 1000 GB or less than 50 GB/
+    await expectTooltip(
+      button,
+      'Disk cannot be more than 1000 GB or less than 50 GB',
+      user
     );
   });
 
@@ -191,16 +197,17 @@ describe(CreateGkeAppButton.name, () => {
         },
       },
     });
+
     const button = await waitFor(() => {
       const createButton = findCreateButton();
       expectButtonElementDisabled(createButton);
       return createButton;
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-    await screen.findByText(
-      /Disk cannot be more than 1000 GB or less than 50 GB/
+    await expectTooltip(
+      button,
+      'Disk cannot be more than 1000 GB or less than 50 GB',
+      user
     );
   });
 
@@ -264,16 +271,17 @@ describe(CreateGkeAppButton.name, () => {
         },
       },
     });
+
     const button = await waitFor(() => {
       const createButton = findCreateButton();
       expectButtonElementDisabled(createButton);
       return createButton;
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-    await screen.findByText(
-      /Preventing creation because this would cause data loss./
+    await expectTooltip(
+      button,
+      /Preventing creation because this would cause data loss./,
+      user
     );
   });
 
