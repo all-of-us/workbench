@@ -75,7 +75,9 @@ const localizeUserApp = (
     appType,
   });
 
-const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
+const appJustTurnedRunningFromProvisioning = (
+  listAppsResponse: ListAppsResponse
+) => {
   // Note: We do not call localize for CROMWELL
   // We want app that are transitioning from PROVISIONING to RUNNING
   const appsJustStartedRunning = userAppsStore
@@ -96,7 +98,7 @@ const appJustTurnedRunningFromProvisioning = (listAppsResponse) => {
   return appsJustStartedRunning;
 };
 
-const callLocalizeIfApplicable = (listAppsResponse) => {
+const callLocalizeIfApplicable = (listAppsResponse: ListAppsResponse) => {
   // If userAppsStore is not updated lets wait for it to be updated before checking
   if (!!userAppsStore.get() && userAppsStore.get().userApps === undefined) {
     return null;
@@ -241,7 +243,7 @@ export const openAppInIframe = (
   ]);
 };
 
-export const isDiskSizeValid = (appRequest) =>
+export const isDiskSizeValid = (appRequest: CreateAppRequest) =>
   appRequest.persistentDiskRequest.size <= appMaxDiskSize &&
   appRequest.persistentDiskRequest.size >= appMinDiskSize[appRequest.appType];
 
