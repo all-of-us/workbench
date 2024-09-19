@@ -3,7 +3,6 @@ package org.pmiops.workbench.workspaces;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.pmiops.workbench.api.FeaturedWorkspacesController;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;

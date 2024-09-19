@@ -3,10 +3,9 @@ package org.pmiops.workbench.tools;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.diff.JsonDiff;
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
-import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.FileConfigs;
 import org.pmiops.workbench.config.FileConfigs.ConfigFormatException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -28,14 +27,12 @@ public class ConfigLoader extends Tool {
 
   private static final Logger log = Logger.getLogger(ConfigLoader.class.getName());
 
-  private static final ImmutableMap<String, Class<?>> CONFIG_CLASS_MAP =
-      ImmutableMap.of(
+  private static final Map<String, Class<?>> CONFIG_CLASS_MAP =
+      Map.of(
           DbConfig.MAIN_CONFIG_ID,
           WorkbenchConfig.class,
           DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID,
-          CdrBigQuerySchemaConfig.class,
-          DbConfig.FEATURED_WORKSPACES_CONFIG_ID,
-          FeaturedWorkspacesConfig.class);
+          CdrBigQuerySchemaConfig.class);
 
   @Bean
   public CommandLineRunner run(ConfigDao configDao) {
