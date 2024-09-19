@@ -78,6 +78,7 @@ const defaultServerConfig: ConfigResponse = {
   enableGKEAppPausing: false,
   enableGKEAppMachineTypeChoice: false,
   enableInitialCreditsExpiration: true,
+  blockComplianceTraining: false,
 };
 
 export default defaultServerConfig;
