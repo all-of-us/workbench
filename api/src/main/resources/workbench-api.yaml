@@ -6970,20 +6970,6 @@ components:
           type: integer
           description: survey release order number
           format: int32
-    FeaturedWorkspace:
-      type: object
-      properties:
-        name:
-          type: string
-          description: the name of the workspace
-        namespace:
-          type: string
-          description: the namespace of the workspace
-        id:
-          type: string
-          description: the Firecloud id of the workspace
-        category:
-          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
     SecuritySuspendedErrorParameters:
       type: object
       properties:
@@ -7170,13 +7156,6 @@ components:
           type: boolean
         requiredForCTAccess:
           type: boolean
-    FeaturedWorkspacesConfigResponse:
-      type: object
-      properties:
-        featuredWorkspacesList:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturedWorkspace'
     BillingProjectMembership:
       required:
       - projectName
