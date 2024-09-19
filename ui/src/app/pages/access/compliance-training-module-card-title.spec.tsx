@@ -143,7 +143,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     expectHelpTextToNotExist();
   });
 
-  it('shows help text if absorb is used and module is expiring', async () => {
+  it('shows help text if compliance training is complete and module is expiring', async () => {
     setup(
       {
         ...createProps(),
@@ -163,7 +163,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     expectMaintenanceTextToNotExist();
   });
 
-  it('shows help text if absorb is used and module is expiring and training is in a maintenance window', async () => {
+  it('shows help text if compliance training is complete and module is expiring and training is in a maintenance window', async () => {
     setup(
       {
         ...createProps(),
@@ -241,7 +241,11 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToNotExist();
-    await expectMaintenanceTextToNotExist();
+    await screen.findByText(
+      /complete responsible conduct of research training/i
+    );
+
+    expectHelpTextToNotExist();
+    expectMaintenanceTextToNotExist();
   });
 });
