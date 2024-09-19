@@ -15,7 +15,12 @@ import {
   ComplianceTrainingModuleCardProps,
   ComplianceTrainingModuleCardTitle,
 } from 'app/pages/access/compliance-training-module-card-title';
-import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
+import {
+  findCTTitle,
+  findRTTitle,
+  queryForCTTitle,
+  queryForRTTitle,
+} from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
@@ -56,6 +61,15 @@ const expectMaintenanceTextToExist = () => {
 
 const expectMaintenanceTextToNotExist = () => {
   expect(queryMaintenanceText()).not.toBeInTheDocument();
+};
+
+// Ensures that the component is rendered so that the test can check for the abcense of other text
+const expectComponentToHaveRendered = async (
+  accessTier: AccessTierShortNames
+) => {
+  await (accessTier === AccessTierShortNames.Registered
+    ? findRTTitle()
+    : findCTTitle());
 };
 
 const createProfileWithComplianceTraining = (
@@ -200,6 +214,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
+    expectComponentToHaveRendered(AccessTierShortNames.Registered);
+
     expectHelpTextToNotExist();
     expectMaintenanceTextToNotExist();
   });
@@ -220,6 +236,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
         complianceTrainingRenewalLookback: 30,
       }
     );
+    expectComponentToHaveRendered(AccessTierShortNames.Registered);
 
     expectHelpTextToNotExist();
     expectMaintenanceTextToNotExist();
