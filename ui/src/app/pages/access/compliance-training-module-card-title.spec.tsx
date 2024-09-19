@@ -31,12 +31,26 @@ const queryHelpText = () => {
   );
 };
 
+const queryMaintenanceText = () => {
+  return screen.queryByText(
+    /our training system is conducting scheduled maintenance from october 15th through october 18th\. please return after our maintenance window in order to complete your training\./i
+  );
+};
+
 const expectHelpTextToExist = async () => {
   expect(queryHelpText()).toBeInTheDocument();
 };
 
 const expectHelpTextToNotExist = async () => {
   expect(queryHelpText()).not.toBeInTheDocument();
+};
+
+const expectMaintenanceTextToExist = async () => {
+  expect(queryMaintenanceText()).toBeInTheDocument();
+};
+
+const expectMaintenanceTextToNotExist = async () => {
+  expect(queryMaintenanceText()).not.toBeInTheDocument();
 };
 
 const createProfileWithComplianceTraining = (
@@ -107,6 +121,21 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToExist();
+    await expectMaintenanceTextToNotExist();
+  });
+
+  it('shows help text if module is incomplete and training is in a maintenance window', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      { ...defaultServerConfig, blockComplianceTraining: true }
+    );
+
+    await expectHelpTextToNotExist();
+    await expectMaintenanceTextToExist();
   });
 
   it('shows help text if absorb is used and module is expiring', async () => {
@@ -126,6 +155,28 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToExist();
+    await expectMaintenanceTextToNotExist();
+  });
+
+  it('shows help text if absorb is used and module is expiring and training is in a maintenance window', async () => {
+    setup(
+      {
+        ...createProps(),
+        profile: createProfileWithComplianceTraining(
+          nowPlusDays(-1),
+          nowPlusDays(29),
+          null
+        ),
+      },
+      {
+        ...defaultServerConfig,
+        blockComplianceTraining: true,
+        complianceTrainingRenewalLookback: 30,
+      }
+    );
+
+    await expectHelpTextToNotExist();
+    await expectMaintenanceTextToExist();
   });
 
   it('does not show help text if module is bypassed', async () => {
@@ -145,6 +196,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToNotExist();
+    await expectMaintenanceTextToNotExist();
   });
 
   it('does not show help text if absorb is not used', async () => {
@@ -164,6 +216,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToNotExist();
+    await expectMaintenanceTextToNotExist();
   });
 
   it('does not show help text if module is complete and not expiring', async () => {
@@ -184,5 +237,6 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     );
 
     await expectHelpTextToNotExist();
+    await expectMaintenanceTextToNotExist();
   });
 });

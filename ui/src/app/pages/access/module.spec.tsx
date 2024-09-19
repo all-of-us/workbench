@@ -54,4 +54,17 @@ describe(Module.name, () => {
     );
     expect(screen.queryByRole('button')).toBeInTheDocument();
   });
+
+  it('RT training should be disabled during service window ', () => {
+    setup(
+      {
+        ...createProps(),
+        moduleName: AccessModule.COMPLIANCE_TRAINING,
+      },
+      { ...defaultServerConfig, blockComplianceTraining: true }
+    );
+
+    // Not clickable
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
 });
