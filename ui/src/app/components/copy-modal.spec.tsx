@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {
   ConceptSetsApi,
+  CopyRequest,
   NotebooksApi,
   ResourceType,
   WorkspaceAccessLevel,
@@ -145,7 +146,7 @@ describe(CopyModal.name, () => {
   const fromCdrVersionId = ownerWorkspace.cdrVersionId;
   const fromAccessTierShortName = ownerWorkspace.accessTierShortName;
   const fromResourceName = 'notebook';
-  const notebookSaveFunction = (copyRequest) => {
+  const notebookSaveFunction = (copyRequest: CopyRequest) => {
     return notebooksApi().copyNotebook(
       fromWorkspaceNamespace,
       fromWorkspaceTerraName,
@@ -296,8 +297,9 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
-        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceNamespace: writerWorkspace.namespace,
+        toWorkspaceName: writerWorkspace.terraName,
+        toWorkspaceTerraName: writerWorkspace.terraName,
         newName,
       }
     );
@@ -335,8 +337,9 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
-        toWorkspaceName: altCdrWorkspace.terraName,
         toWorkspaceNamespace: altCdrWorkspace.namespace,
+        toWorkspaceName: altCdrWorkspace.terraName,
+        toWorkspaceTerraName: altCdrWorkspace.terraName,
         newName,
       }
     );
@@ -398,8 +401,9 @@ describe(CopyModal.name, () => {
       props.fromWorkspaceTerraName,
       props.fromResourceName,
       {
-        toWorkspaceName: writerWorkspace.terraName,
         toWorkspaceNamespace: writerWorkspace.namespace,
+        toWorkspaceName: writerWorkspace.terraName,
+        toWorkspaceTerraName: writerWorkspace.terraName,
         newName,
       }
     );
