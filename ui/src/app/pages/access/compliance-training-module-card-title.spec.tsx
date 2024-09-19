@@ -129,7 +129,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     await expectMaintenanceTextToNotExist();
   });
 
-  it('shows help text if module is incomplete and training is in a maintenance window', async () => {
+  it('shows maintenance text if module is incomplete and training is in a maintenance window', async () => {
     setup(
       {
         ...createProps(),
@@ -163,7 +163,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     expectMaintenanceTextToNotExist();
   });
 
-  it('shows help text if compliance training is complete and module is expiring and training is in a maintenance window', async () => {
+  it('shows maintenance text if compliance training is complete and module is expiring and training is in a maintenance window', async () => {
     setup(
       {
         ...createProps(),
