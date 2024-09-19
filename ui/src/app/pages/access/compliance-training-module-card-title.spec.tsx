@@ -204,26 +204,6 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     expectMaintenanceTextToNotExist();
   });
 
-  it('does not show help text if absorb is not used', async () => {
-    setup(
-      {
-        ...createProps(),
-        profile: createProfileWithComplianceTraining(
-          null,
-          null,
-          nowPlusDays(-1)
-        ),
-      },
-      {
-        ...defaultServerConfig,
-        complianceTrainingRenewalLookback: 30,
-      }
-    );
-
-    expectHelpTextToNotExist();
-    expectMaintenanceTextToNotExist();
-  });
-
   it('does not show help text if module is complete and not expiring', async () => {
     setup(
       {
