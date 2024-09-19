@@ -7187,6 +7187,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        blockComplianceTraining:
+          type: boolean
+          description: Whether users are prevented from accessing the Compliance Training
+          default: false
     AccessModuleConfig:
       required:
       - expirable

@@ -116,7 +116,8 @@
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
-    "enableInitialCreditsExpiration": true
+    "enableInitialCreditsExpiration": true,
+    "blockComplianceTraining": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

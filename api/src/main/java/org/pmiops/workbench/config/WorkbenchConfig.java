@@ -304,6 +304,8 @@ public class WorkbenchConfig {
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
     public boolean enableInitialCreditsExpiration;
+    // If true, prevents users from taking compliance training
+    public boolean blockComplianceTraining;
   }
 
   public static class ActionAuditConfig {
