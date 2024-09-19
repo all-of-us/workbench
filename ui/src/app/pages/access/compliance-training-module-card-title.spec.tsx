@@ -26,24 +26,17 @@ import defaultServerConfig from 'testing/default-server-config';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
 const findHelpText = () => {
-  return screen.findByText(
+  return screen.queryByText(
     /navigate to "my courses" and select "responsible conduct of research"/i
   );
 };
 
 const expectHelpTextToExist = async () => {
-  expect(await findHelpText()).not.toBeNull();
+  expect(findHelpText()).toBeInTheDocument();
 };
 
 const expectHelpTextToNotExist = async () => {
-  try {
-    await findHelpText();
-    // The above throws an error if the element is not found
-  } catch (e) {
-    // Expected behavior, do nothing
-    return;
-  }
-  expect(true).toBeFalsy();
+  expect(findHelpText()).not.toBeInTheDocument();
 };
 
 const createProfileWithComplianceTraining = (
