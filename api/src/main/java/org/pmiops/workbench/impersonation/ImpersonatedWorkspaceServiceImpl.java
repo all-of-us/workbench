@@ -141,11 +141,14 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
   @Override
   public void deleteWorkspace(
-      String username, String wsNamespace, String terraName, boolean deleteBillingProjects) {
+      String username,
+      String workspaceNamespace,
+      String workspaceTerraName,
+      boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
     // also confirms that the workspace exists in the DB
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, terraName);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
 
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
@@ -161,12 +164,13 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       logger.log(
           Level.WARNING,
           String.format(
-              "An error occurred while deleting k8s resources for workspace %s", wsNamespace),
+              "An error occurred while deleting k8s resources for workspace %s",
+              workspaceNamespace),
           e);
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, terraName);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, workspaceNamespace, workspaceTerraName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -179,11 +183,12 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       try {
         // use the real FirecloudService here because impersonation is not needed;
         // billing projects are owned by the App SA
-        firecloudService.deleteBillingProject(wsNamespace);
-        billingProjectAuditor.fireDeleteAction(wsNamespace);
+        firecloudService.deleteBillingProject(workspaceNamespace);
+        billingProjectAuditor.fireDeleteAction(workspaceNamespace);
       } catch (Exception e) {
         String msg =
-            String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
+            String.format(
+                "Error deleting billing project %s: %s", workspaceNamespace, e.getMessage());
         logger.warning(msg);
       }
     }

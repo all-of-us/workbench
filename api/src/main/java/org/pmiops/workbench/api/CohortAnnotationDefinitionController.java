@@ -43,13 +43,13 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   @Override
   public ResponseEntity<CohortAnnotationDefinition> createCohortAnnotationDefinition(
       String workspaceNamespace,
-      String terraName,
+      String workspaceTerraName,
       Long cohortId,
       CohortAnnotationDefinition cohortAnnotationDefinition) {
     // This also enforces registered auth domain.
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(cohortAnnotationDefinition.getColumnName());
     validateCohortExist(dbWorkspace, cohortId);
@@ -63,11 +63,14 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(
-      String workspaceNamespace, String terraName, Long cohortId, Long annotationDefinitionId) {
+      String workspaceNamespace,
+      String workspaceTerraName,
+      Long cohortId,
+      Long annotationDefinitionId) {
     // This also enforces registered auth domain.
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
     validateCohortExist(dbWorkspace, cohortId);
     // Validate that CohortAnnotationDefinition exist
@@ -79,11 +82,14 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
   @Override
   public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(
-      String workspaceNamespace, String terraName, Long cohortId, Long annotationDefinitionId) {
+      String workspaceNamespace,
+      String workspaceTerraName,
+      Long cohortId,
+      Long annotationDefinitionId) {
     // This also enforces registered auth domain.
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
 
     validateCohortExist(dbWorkspace, cohortId);
 
@@ -92,11 +98,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
   @Override
   public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(
-      String workspaceNamespace, String terraName, Long cohortId) {
+      String workspaceNamespace, String workspaceTerraName, Long cohortId) {
     // This also enforces registered auth domain.
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
 
     validateCohortExist(dbWorkspace, cohortId);
 
@@ -109,7 +115,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   @Override
   public ResponseEntity<CohortAnnotationDefinition> updateCohortAnnotationDefinition(
       String workspaceNamespace,
-      String terraName,
+      String workspaceTerraName,
       Long cohortId,
       Long annotationDefinitionId,
       CohortAnnotationDefinition cohortAnnotationDefinitionRequest) {
@@ -118,7 +124,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     // This also enforces registered auth domain.
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+            workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(columnName);
     validateCohortExist(dbWorkspace, cohortId);

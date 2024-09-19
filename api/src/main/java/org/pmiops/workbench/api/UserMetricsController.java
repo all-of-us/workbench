@@ -94,12 +94,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResource> updateRecentResource(
-      String workspaceNamespace, String terraName, RecentResourceRequest recentResourceRequest) {
+      String workspaceNamespace,
+      String workspaceTerraName,
+      RecentResourceRequest recentResourceRequest) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
     final RawlsWorkspaceResponse fcWorkspace =
-        fireCloudService.getWorkspace(workspaceNamespace, terraName);
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceTerraName);
 
     final String notebookPath;
     if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
@@ -112,7 +114,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // this is only ever used for Notebooks because we update/add to the cache for the other
     // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, terraName);
+    final DbWorkspace dbWorkspace =
+        workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     final DbUserRecentlyModifiedResource recentResource =
         userRecentResourceService.updateNotebookEntry(
             dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);

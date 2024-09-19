@@ -82,11 +82,11 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> createCohort(
-      String workspaceNamespace, String terraName, Cohort cohort) {
+      String workspaceNamespace, String workspaceTerraName, Cohort cohort) {
     // This also enforces registered auth domain.
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, terraName);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
 
     try {
       // validate the cohort definition
@@ -122,15 +122,15 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> duplicateCohort(
-      String workspaceNamespace, String terraName, DuplicateCohortRequest params) {
+      String workspaceNamespace, String workspaceTerraName, DuplicateCohortRequest params) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, terraName);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
 
     checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
     DbCohort originalCohort =
-        getDbCohort(workspaceNamespace, terraName, params.getOriginalCohortId());
+        getDbCohort(workspaceNamespace, workspaceTerraName, params.getOriginalCohortId());
     DbCohort newCohort =
         cohortFactory.duplicateCohort(
             params.getNewName(), userProvider.get(), workspace, originalCohort);
@@ -151,12 +151,12 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(
-      String workspaceNamespace, String terraName, Long cohortId) {
+      String workspaceNamespace, String workspaceTerraName, Long cohortId) {
     // This also enforces registered auth domain.
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, terraName, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceTerraName, cohortId);
     userRecentResourceService.deleteCohortEntry(
         dbCohort.getWorkspaceId(), userProvider.get().getUserId(), dbCohort.getCohortId());
     cohortDao.delete(dbCohort);
@@ -165,23 +165,24 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> getCohort(
-      String workspaceNamespace, String terraName, Long cohortId) {
+      String workspaceNamespace, String workspaceTerraName, Long cohortId) {
     // This also enforces registered auth domain.
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, terraName, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceTerraName, cohortId);
     return ResponseEntity.ok(cohortMapper.dbModelToClient(dbCohort));
   }
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
-      String workspaceNamespace, String terraName) {
+      String workspaceNamespace, String workspaceTerraName) {
     // This also enforces registered auth domain.
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.READER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
 
-    DbWorkspace workspace = workspaceDao.getRequiredWithCohorts(workspaceNamespace, terraName);
+    DbWorkspace workspace =
+        workspaceDao.getRequiredWithCohorts(workspaceNamespace, workspaceTerraName);
     CohortListResponse response = new CohortListResponse();
     Set<DbCohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
@@ -196,12 +197,12 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> updateCohort(
-      String workspaceNamespace, String terraName, Long cohortId, Cohort cohort) {
+      String workspaceNamespace, String workspaceTerraName, Long cohortId, Cohort cohort) {
     // This also enforces registered auth domain.
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, terraName, WorkspaceAccessLevel.WRITER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, terraName, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceTerraName, cohortId);
     if (Strings.isNullOrEmpty(cohort.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
@@ -235,8 +236,9 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(cohortMapper.dbModelToClient(dbCohort));
   }
 
-  private DbCohort getDbCohort(String workspaceNamespace, String terraName, Long cohortId) {
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, terraName);
+  private DbCohort getDbCohort(
+      String workspaceNamespace, String workspaceTerraName, Long cohortId) {
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
 
     DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
     if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
