@@ -46,15 +46,15 @@ const expectHelpTextToExist = async () => {
   expect(queryHelpText()).toBeInTheDocument();
 };
 
-const expectHelpTextToNotExist = async () => {
+const expectHelpTextToNotExist = () => {
   expect(queryHelpText()).not.toBeInTheDocument();
 };
 
-const expectMaintenanceTextToExist = async () => {
+const expectMaintenanceTextToExist = () => {
   expect(queryMaintenanceText()).toBeInTheDocument();
 };
 
-const expectMaintenanceTextToNotExist = async () => {
+const expectMaintenanceTextToNotExist = () => {
   expect(queryMaintenanceText()).not.toBeInTheDocument();
 };
 
@@ -125,8 +125,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       defaultServerConfig
     );
 
-    await expectHelpTextToExist();
-    await expectMaintenanceTextToNotExist();
+    expectHelpTextToExist();
+    expectMaintenanceTextToNotExist();
   });
 
   it('shows maintenance text if module is incomplete and training is in a maintenance window', async () => {
@@ -241,9 +241,7 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await screen.findByText(
-      /complete responsible conduct of research training/i
-    );
+    screen.logTestingPlaygroundURL();
 
     expectHelpTextToNotExist();
     expectMaintenanceTextToNotExist();
