@@ -9,6 +9,7 @@ import {
   isCompliant,
   isExpiringOrExpired,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 export interface ComplianceTrainingModuleCardProps {
   tier: AccessTierShortNames;
@@ -19,6 +20,7 @@ export const ComplianceTrainingModuleCardTitle = ({
   tier,
   profile,
 }: ComplianceTrainingModuleCardProps) => {
+  const { blockComplianceTraining } = serverConfigStore.get().config;
   const { accessModule, trainingTitle, courseTitle } =
     tier === AccessTierShortNames.Registered
       ? {
@@ -43,7 +45,17 @@ export const ComplianceTrainingModuleCardTitle = ({
         Complete <AoU /> {trainingTitle}
       </div>
       {showHelpText && (
-        <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+        <>
+          {blockComplianceTraining ? (
+            <p>
+              Our training system is conducting scheduled maintenance from
+              October 15th through October 18th. Please return after our
+              maintenance window in order to complete your training.
+            </p>
+          ) : (
+            <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+          )}
+        </>
       )}
     </>
   );
