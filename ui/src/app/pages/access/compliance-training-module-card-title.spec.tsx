@@ -221,8 +221,6 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    screen.logTestingPlaygroundURL();
-
     expectHelpTextToNotExist();
     expectMaintenanceTextToNotExist();
   });
