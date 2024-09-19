@@ -33,7 +33,12 @@ const queryHelpText = () => {
 
 const queryMaintenanceText = () => {
   return screen.queryByText(
-    /our training system is conducting scheduled maintenance from october 15th through october 18th\. please return after our maintenance window in order to complete your training\./i
+    new RegExp(
+      'our training system is conducting scheduled maintenance from ' +
+        'october 15th through october 18th. please return after our ' +
+        'maintenance window in order to complete your training.',
+      'i'
+    )
   );
 };
 
