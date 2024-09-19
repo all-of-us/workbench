@@ -25,18 +25,18 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
-const findHelpText = () => {
+const queryHelpText = () => {
   return screen.queryByText(
     /navigate to "my courses" and select "responsible conduct of research"/i
   );
 };
 
 const expectHelpTextToExist = async () => {
-  expect(findHelpText()).toBeInTheDocument();
+  expect(queryHelpText()).toBeInTheDocument();
 };
 
 const expectHelpTextToNotExist = async () => {
-  expect(findHelpText()).not.toBeInTheDocument();
+  expect(queryHelpText()).not.toBeInTheDocument();
 };
 
 const createProfileWithComplianceTraining = (
