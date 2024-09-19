@@ -139,8 +139,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       { ...defaultServerConfig, blockComplianceTraining: true }
     );
 
-    await expectHelpTextToNotExist();
-    await expectMaintenanceTextToExist();
+    expectMaintenanceTextToExist();
+    expectHelpTextToNotExist();
   });
 
   it('shows help text if absorb is used and module is expiring', async () => {
@@ -159,8 +159,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToExist();
-    await expectMaintenanceTextToNotExist();
+    expectHelpTextToExist();
+    expectMaintenanceTextToNotExist();
   });
 
   it('shows help text if absorb is used and module is expiring and training is in a maintenance window', async () => {
@@ -180,8 +180,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToNotExist();
-    await expectMaintenanceTextToExist();
+    expectMaintenanceTextToExist();
+    expectHelpTextToNotExist();
   });
 
   it('does not show help text if module is bypassed', async () => {
@@ -200,8 +200,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToNotExist();
-    await expectMaintenanceTextToNotExist();
+    expectHelpTextToNotExist();
+    expectMaintenanceTextToNotExist();
   });
 
   it('does not show help text if absorb is not used', async () => {
@@ -220,8 +220,8 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToNotExist();
-    await expectMaintenanceTextToNotExist();
+    expectHelpTextToNotExist();
+    expectMaintenanceTextToNotExist();
   });
 
   it('does not show help text if module is complete and not expiring', async () => {
