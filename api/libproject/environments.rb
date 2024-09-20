@@ -13,7 +13,6 @@ def env_with_defaults(env, config)
     :env_name => env,
     :config_json => "config_#{env}.json",
     :cdr_config_json => "cdr_config_#{env}.json",
-    :featured_workspaces_json => "featured_workspaces_#{env}.json",
     :gae_vars => make_gae_vars,
   }.merge(config)
 end

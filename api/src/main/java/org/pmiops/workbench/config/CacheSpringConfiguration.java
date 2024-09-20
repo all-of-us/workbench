@@ -24,7 +24,6 @@ public class CacheSpringConfiguration {
   static {
     CONFIG_CLASS_MAP.put(DbConfig.MAIN_CONFIG_ID, WorkbenchConfig.class);
     CONFIG_CLASS_MAP.put(DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
-    CONFIG_CLASS_MAP.put(DbConfig.FEATURED_WORKSPACES_CONFIG_ID, FeaturedWorkspacesConfig.class);
   }
 
   @Bean
@@ -61,25 +60,12 @@ public class CacheSpringConfiguration {
     return (CdrBigQuerySchemaConfig) configCache.get(DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
   }
 
-  public static FeaturedWorkspacesConfig lookupFeaturedWorkspacesConfig(
-      LoadingCache<String, Object> configCache) throws ExecutionException {
-    return (FeaturedWorkspacesConfig) configCache.get(DbConfig.FEATURED_WORKSPACES_CONFIG_ID);
-  }
-
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   WorkbenchConfig getWorkbenchConfig(
       @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupWorkbenchConfig(configCache);
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  FeaturedWorkspacesConfig getFeaturedWorkspacesConfig(
-      @Qualifier("configCache") LoadingCache<String, Object> configCache)
-      throws ExecutionException {
-    return lookupFeaturedWorkspacesConfig(configCache);
   }
 
   @Bean

@@ -16,6 +16,5 @@ DRY_RUN=false
 
 ./gradlew --daemon loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
 ./gradlew --daemon loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
-./gradlew --daemon loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
 
 ./gradlew --daemon loadInstitutions -PappArgs="['--import-filename=config/institutions_local.json']"
