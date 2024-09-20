@@ -49,7 +49,7 @@ export const ComplianceTrainingModuleCardTitle = ({
           {blockComplianceTraining ? (
             <p>
               Our training system is conducting scheduled maintenance from
-              October 15th through October 18th. Please return after our
+              October 9th through October 11th. Please return after our
               maintenance window in order to complete your training.
             </p>
           ) : (
