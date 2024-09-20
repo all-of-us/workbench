@@ -115,7 +115,7 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
-    "enableGcsFuseOnGke": false,
+    "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false
   },
   "actionAudit": {
