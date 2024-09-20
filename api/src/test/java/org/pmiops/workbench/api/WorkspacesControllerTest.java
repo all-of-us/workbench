@@ -115,7 +115,6 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbFeaturedWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -2824,88 +2823,6 @@ public class WorkspacesControllerTest {
             workspacesController
                 .getFirecloudWorkspaceUserRoles(workspace.getNamespace(), workspace.getTerraName())
                 .getBody());
-  }
-
-  @Test
-  public void testGetPublishedWorkspaces() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createTerraWorkspace(
-            workspace.getNamespace(), workspace.getTerraName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
-        .isEqualTo(1);
-  }
-
-  @Test
-  public void testGetWorkspacesGetsPublishedIfOwner() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createTerraWorkspace(
-            workspace.getNamespace(), workspace.getTerraName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
-  }
-
-  @Test
-  public void testGetWorkspacesGetsPublishedIfWriter() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getTerraName(), true);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createTerraWorkspace(
-            workspace.getNamespace(), workspace.getTerraName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
-  }
-
-  @Test
-  public void testGetWorkspacesDoesNotGetsPublishedIfReader() {
-    stubFcGetGroup();
-    stubFcUpdateWorkspaceACL();
-
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    DbFeaturedWorkspace featuredWorkspace = new DbFeaturedWorkspace();
-    featuredWorkspace.setCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
-    featuredWorkspace.setWorkspace(
-        workspaceDao.getRequired(workspace.getNamespace(), workspace.getTerraName()));
-    featuredWorkspaceDao.save(featuredWorkspace);
-
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
-    fcResponse.setWorkspace(
-        TestMockFactory.createTerraWorkspace(
-            workspace.getNamespace(), workspace.getTerraName(), null));
-    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.READER);
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
-
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
 
   @Test

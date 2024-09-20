@@ -646,9 +646,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, toAcl);
     }
 
-    // RW-9501: cloned workspaces should not be published
-    dbWorkspace = dbWorkspace.setPublished(false);
-
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
     final Workspace savedWorkspace =
         workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace, initialCreditsExpirationService);
@@ -780,13 +777,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<UserRole> userRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     return ResponseEntity.ok(new WorkspaceUserRolesResponse().items(userRoles));
-  }
-
-  @Override
-  public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
-    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(workspaceService.getPublishedWorkspaces());
-    return ResponseEntity.ok(response);
   }
 
   @Override

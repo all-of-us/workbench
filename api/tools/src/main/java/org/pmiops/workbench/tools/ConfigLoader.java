@@ -70,7 +70,7 @@ public class ConfigLoader extends Tool {
         ObjectMapper jackson = new ObjectMapper();
         JsonNode existingJson = jackson.readTree(existingConfig.getConfiguration());
         JsonNode diff = JsonDiff.asJson(existingJson, newJson);
-        if (diff.size() == 0) {
+        if (diff.isEmpty()) {
           log.info("No change in configuration; exiting.");
         } else {
           log.info("Updating configuration:");

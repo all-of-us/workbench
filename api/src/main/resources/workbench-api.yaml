@@ -1327,19 +1327,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceOperation'
-  /v1/workspaces/published:
-    get:
-      tags:
-      - workspaces
-      description: Returns a list of published workspaces
-      operationId: getPublishedWorkspaces
-      responses:
-        200:
-          description: A list of workspace definitions.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WorkspaceResponseListResponse'
   /v1/workspaces/featuredWorkspacesByCategory:
     get:
       tags:
@@ -1799,62 +1786,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/workspaces/{workspaceNamespace}/{terraName}/publish:
-    post:
-      tags:
-      - workspaceAdmin
-      description: Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
-      operationId: publishWorkspace
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: terraName
-        in: path
-        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
-         due to confusion with DB IDs, which it is not)
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
-  /v1/workspaces/{workspaceNamespace}/{terraName}/unpublish:
-    post:
-      tags:
-      - workspaceAdmin
-      description: Makes a workspace public to all AoU registered users. Requires
-        FEATURED_WORKSPACE_ADMIN authority.
-      operationId: unpublishWorkspace
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: terraName
-        in: path
-        description: The Workspace's name in Terra (formerly called "ID" in some contexts - renamed 
-         due to confusion with DB IDs, which it is not)
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
   /v1/admin/workspaces/{workspaceNamespace}/publish:
     post:
       tags:
@@ -7377,13 +7308,6 @@ components:
           type: integer
           description: Milliseconds since the UNIX epoch.
           format: int64
-        published:
-          type: boolean
-          default: false
-          description: indicates whether the workspace has been shared as READER to all Registered
-            Tier users.  Used in conjunction with FeaturedWorkspacesConfig to show Featured
-            Workspaces in the UI.  DEPRECATED in favor of featuredCategory when the Feature Flag
-            enablePublishedWorkspacesViaDb is set.
         featuredCategory:
           $ref: '#/components/schemas/FeaturedWorkspaceCategory'
           description: The name of the category in which the workspace is published
@@ -7416,7 +7340,6 @@ components:
         name: my newest workspace
         namespace: aou-rw-test-11112222
         googleProject: aou-rw-test-11112222
-        published: true
         featuredCategory: DEMO_PROJECTS
         adminLocked: true
         adminLockedReason: locked by admin

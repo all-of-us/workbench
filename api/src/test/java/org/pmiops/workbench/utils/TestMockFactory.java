@@ -134,7 +134,6 @@ public class TestMockFactory {
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
         .googleProject(DEFAULT_GOOGLE_PROJECT)
-        .published(false)
         .researchPurpose(
             new ResearchPurpose()
                 .additionalNotes(null)

@@ -34,17 +34,6 @@ public interface WorkspaceService {
   List<WorkspaceResponse> getWorkspaces();
 
   /**
-   * @deprecated Get all Published workspaces, as we defined this term before July 2024. Use this in
-   *     conjunction with {@link FeaturedWorkspacesController#getFeaturedWorkspacesConfig()} to
-   *     construct the list of (pre-July-2024) Featured workspaces.
-   *     <p>Use {@link WorkspaceService#getFeaturedWorkspaces()} to retrieve the Featured/Published
-   *     workspaces from July 2024 onward.
-   * @return List of all Published workspaces
-   */
-  @Deprecated(since = "July 2024", forRemoval = true)
-  List<WorkspaceResponse> getPublishedWorkspaces();
-
-  /**
    * Get all Featured workspaces from the DB.
    *
    * @return List of all Featured workspaces

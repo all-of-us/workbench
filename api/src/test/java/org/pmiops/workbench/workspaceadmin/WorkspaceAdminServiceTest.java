@@ -317,24 +317,6 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testGetWorkspaceAdminView_published_false() {
-    workspaceDao.save(dbWorkspace.setPublished(false).setFeaturedCategory(null));
-    WorkspaceAdminView workspaceDetailsResponse =
-        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
-  }
-
-  @Test
-  public void testGetWorkspaceAdminView_published_true() {
-    workspaceDao.save(dbWorkspace.setPublished(true).setFeaturedCategory(null));
-    WorkspaceAdminView workspaceDetailsResponse =
-        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
-  }
-
-  @Test
   public void testGetWorkspaceAdminView_featuredCategory() {
 
     WorkspaceAdminView workspaceDetailsResponse =
@@ -345,8 +327,6 @@ public class WorkspaceAdminServiceTest {
     assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
         .isEqualTo(WORKSPACE_DISPLAY_NAME);
 
-    // this refers to the old-style "published" flag, not the new "featured category" field
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
     assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
@@ -550,16 +530,6 @@ public class WorkspaceAdminServiceTest {
   public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
     verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Test
-  public void testDeprecatedPublishUnpublishWorkspace() {
-    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
-    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), true);
-    assertThat(mustGetDbWorkspace(w).getPublished()).isTrue();
-
-    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), false);
-    assertThat(mustGetDbWorkspace(w).getPublished()).isFalse();
   }
 
   @Test

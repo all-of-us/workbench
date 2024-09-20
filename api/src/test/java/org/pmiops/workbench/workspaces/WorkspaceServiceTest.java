@@ -326,7 +326,6 @@ public class WorkspaceServiceTest {
     DbWorkspace dbWorkspace =
         workspaceDao
             .save(buildDbWorkspace(workspaceId, workspaceName, workspaceNamespace, activeStatus))
-            .setPublished(false)
             .setFeaturedCategory(featuredCategory);
 
     dbWorkspaces.add(dbWorkspace);
@@ -742,7 +741,6 @@ public class WorkspaceServiceTest {
         workspaceService.getWorkspace(DEFAULT_WORKSPACE_NAMESPACE, dbWorkspace.getFirecloudName());
 
     // Assert
-    assertThat(response.getWorkspace().isPublished()).isFalse();
     assertThat(response.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }

@@ -51,8 +51,6 @@ public interface WorkspaceAdminService {
 
   void setAdminUnlockedState(String workspaceNamespace);
 
-  DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
-
   void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);
 
