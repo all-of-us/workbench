@@ -177,26 +177,30 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
     expectMaintenanceTextToNotExist();
   });
 
-  it('shows maintenance text if compliance training is complete and module is expiring and training is in a maintenance window', async () => {
-    setup(
-      {
-        ...createProps(),
-        profile: createProfileWithComplianceTraining(
-          nowPlusDays(-1),
-          nowPlusDays(29),
-          null
-        ),
-      },
-      {
-        ...defaultServerConfig,
-        blockComplianceTraining: true,
-        complianceTrainingRenewalLookback: 30,
-      }
-    );
+  it(
+    'shows maintenance text if compliance training is complete and' +
+      'module is expiring and training is in a maintenance window',
+    async () => {
+      setup(
+        {
+          ...createProps(),
+          profile: createProfileWithComplianceTraining(
+            nowPlusDays(-1),
+            nowPlusDays(29),
+            null
+          ),
+        },
+        {
+          ...defaultServerConfig,
+          blockComplianceTraining: true,
+          complianceTrainingRenewalLookback: 30,
+        }
+      );
 
-    expectMaintenanceTextToExist();
-    expectHelpTextToNotExist();
-  });
+      expectMaintenanceTextToExist();
+      expectHelpTextToNotExist();
+    }
+  );
 
   it('does not show help text if module is bypassed', async () => {
     setup(
