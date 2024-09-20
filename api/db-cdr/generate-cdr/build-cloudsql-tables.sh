@@ -16,7 +16,7 @@ then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
-re=\\b$BQ_DATASET\\b
+re=$BQ_DATASET
 if [[ $datasets =~ $re ]]; then
   echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
 else
@@ -26,7 +26,7 @@ fi
 
 # Make dataset for cdr cloudsql tables
 datasets=$(bq --project_id="$OUTPUT_PROJECT" ls --max_results=1000)
-re=\\b$OUTPUT_DATASET\\b
+re=$OUTPUT_DATASET
 if [[ $datasets =~ $re ]]; then
   echo "$OUTPUT_DATASET exists"
 else
@@ -35,11 +35,13 @@ else
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-tables=$(bq --project_id="$BQ_PROJECT" --dataset="$BQ_DATASET" ls --max_results=1000)
-cb_cri_table_check=\\bcb_criteria\\b
-cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
-cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
-cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
+echo "here"
+tables=$(bq --project_id="$BQ_PROJECT" --dataset_id="$BQ_DATASET" ls --max_results=1000)
+echo "here"
+cb_cri_table_check=cb_criteria
+cb_cri_attr_table_check=cb_criteria_attribute
+cb_cri_rel_table_check=cb_criteria_relationship
+cb_cri_anc_table_check=cb_criteria_ancestor
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas

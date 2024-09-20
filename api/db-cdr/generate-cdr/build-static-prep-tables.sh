@@ -10,7 +10,7 @@ export BQ_DATASET=$2        # dataset
 # CREATE STATIC PREP TABLES
 ################################################
 BUCKET="all-of-us-workbench-private-cloudsql"
-FOLDER="static_prep_tables"
+FOLDER="static_prep_tables_temp"
 SCHEMA_PATH="generate-cdr/bq-schemas"
 
 BUCKET_FILES=( $(gsutil ls gs://$BUCKET/$FOLDER/*.csv* 2> /dev/null || true) )
