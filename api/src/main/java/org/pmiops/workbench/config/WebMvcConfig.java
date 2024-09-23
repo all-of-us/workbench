@@ -75,7 +75,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    //Blocks traffic if isDownForMaintenance is true in environment config
+    // Blocks traffic if isDownForMaintenance is true in environment config
     registry.addInterceptor(blockAllTrafficInterceptor);
     registry.addInterceptor(authInterceptor);
     registry.addInterceptor(tracingInterceptor);
