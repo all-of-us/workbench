@@ -91,17 +91,7 @@ const css =
     /* hides a warning banner which is only appropriate for Terra UI */
     div[style*="z-index: 2"]:has(>div>svg) {
         display: none !important
-    }
-    
-    /* hides the "Hide resources you did not create" checkbox, which does not do anything */
-    [role=checkbox] {
-        display: none !important
-    }
-
-    /* hides the text after the checkbox above */
-    [role=checkbox] ~ span {
-        display: none !important
-    }`;
+    } `;
 
 const stringToSlug = (s) => s.toLowerCase().replace(/\s+/g, '');
 
