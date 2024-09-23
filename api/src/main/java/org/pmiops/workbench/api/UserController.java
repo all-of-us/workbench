@@ -222,7 +222,7 @@ public class UserController implements UserApiDelegate {
         new BillingAccount()
             .freeTier(true)
             .displayName("Use All of Us initial credits")
-            .name(configProvider.get().billing.freeTierBillingAccountName())
+            .name(configProvider.get().billing.initialCreditsBillingAccountName())
             .open(true));
   }
 

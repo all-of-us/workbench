@@ -12,7 +12,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import {
   appMaxDiskSize,
@@ -96,7 +96,7 @@ const otherAppType: Record<AppType, AppType> = {
   [AppType.SAS]: AppType.CROMWELL,
 };
 
-// tests for behavior common to all GKE Apps.  For app-specific tests, see e.g. create-cromwell-spec
+// tests for behavior common to all GKE Apps.  For app-type-specific tests, see e.g. create-cromwell-spec
 describe(CreateGkeApp.name, () => {
   let disksApiStub: DisksApiStub;
   let user: UserEvent;
@@ -652,7 +652,7 @@ describe(CreateGkeApp.name, () => {
         });
       });
 
-      it(`Should not not allow disk size less than minimum for ${appType}`, async () => {
+      it(`Should not allow disk size less than minimum for ${appType}`, async () => {
         // Arrange
         await component(appType);
         const minAppSize = appMinDiskSize[appType];
@@ -680,7 +680,7 @@ describe(CreateGkeApp.name, () => {
         );
       });
 
-      it(`Should not not allow disk size more than maximum for ${appType}`, async () => {
+      it(`Should not allow disk size more than maximum for ${appType}`, async () => {
         // Arrange
         await component(appType);
         const createButton = `${appTypeToString[appType]} cloud environment create button`;
@@ -713,7 +713,7 @@ describe(CreateGkeApp.name, () => {
         expectButtonElementDisabled(screen.queryByLabelText(createButton));
       });
 
-      it('Should disable disk size input if App exist', async () => {
+      it('Should disable disk size input if App exists', async () => {
         // Arrange
         const disk = stubDisk();
 
@@ -728,7 +728,7 @@ describe(CreateGkeApp.name, () => {
         ).toBeTruthy();
       });
 
-      it('Should disable disk size input if App does not exist but PD is present', async () => {
+      it('Should enable disk size input if App does not exist but PD is present', async () => {
         // Arrange
         const disk = stubDisk();
         await component(appType, { disk });
@@ -736,14 +736,7 @@ describe(CreateGkeApp.name, () => {
         // Assert
         expect(
           spinDiskElement('gke-app-disk').attributes.getNamedItem('disabled')
-        ).toBeTruthy();
-        fireEvent.mouseOver(spinDiskElement('gke-app-disk'));
-        expect(
-          screen.getByText(
-            'Cannot modify existing disk. To update the disk size please delete the disk and ' +
-              'create a new environment.'
-          )
-        ).toBeInTheDocument();
+        ).toBeFalsy();
       });
     }
   );

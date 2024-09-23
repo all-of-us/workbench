@@ -5,6 +5,7 @@ import {
   AppType,
   BillingStatus,
   CreateAppRequest,
+  Disk,
   UserAppEnvironment,
 } from 'generated/fetch';
 
@@ -17,12 +18,14 @@ import {
 import { Button } from 'app/components/buttons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SUPPORT_EMAIL } from 'app/components/support';
+import { disksApi } from 'app/services/swagger-fetch-clients';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { NotificationStore } from 'app/utils/stores';
 import {
   appTypeToString,
   createUserApp,
   isDiskSizeValid,
+  unattachedDiskExists,
 } from 'app/utils/user-apps-utils';
 
 export interface CreateGKEAppButtonProps {
@@ -32,6 +35,7 @@ export interface CreateGKEAppButtonProps {
   onDismiss: () => void;
   username: string;
   billingStatus: BillingStatus;
+  existingDisk?: Disk;
   style?: CSSProperties;
 }
 
@@ -42,14 +46,21 @@ export function CreateGkeAppButton({
   onDismiss,
   username,
   billingStatus,
+  existingDisk,
   style,
 }: CreateGKEAppButtonProps) {
   const [creatingApp, setCreatingApp] = useState(false);
+
+  const wouldDecreaseDiskSize =
+    !!existingDisk &&
+    createAppRequest.persistentDiskRequest.size < existingDisk.size;
+
   const createEnabled =
     !creatingApp &&
     !isAppActive(existingApp) &&
     billingStatus === BillingStatus.ACTIVE &&
-    isDiskSizeValid(createAppRequest);
+    isDiskSizeValid(createAppRequest) &&
+    !wouldDecreaseDiskSize;
 
   const appTypeString = appTypeToString[createAppRequest.appType];
 
@@ -76,6 +87,13 @@ export function CreateGkeAppButton({
         } GB`,
     ],
     [
+      wouldDecreaseDiskSize,
+      () =>
+        `The specified disk size (${createAppRequest.persistentDiskRequest.size} GB) is smaller than ` +
+        `the existing unattached persistent disk size of ${existingDisk.size} GB. ` +
+        'Preventing creation because this would cause data loss.',
+    ],
+    [
       billingStatus !== BillingStatus.ACTIVE,
       () =>
         'You have either run out of initial credits or have an inactive billing account.',
@@ -87,7 +105,21 @@ export function CreateGkeAppButton({
   const onCreate = () => {
     setCreatingApp(true);
     fetchWithErrorModal(
-      () => createUserApp(workspaceNamespace, createAppRequest),
+      async () => {
+        // if we need to update the disk before creation, wait for that to finish.
+        // TODO: can we remove this after RW-11634 ?
+        if (
+          unattachedDiskExists(existingApp, existingDisk) &&
+          createAppRequest.persistentDiskRequest.size > existingDisk.size
+        ) {
+          await disksApi().updateDisk(
+            workspaceNamespace,
+            existingDisk.name,
+            createAppRequest.persistentDiskRequest.size
+          );
+        }
+        return createUserApp(workspaceNamespace, createAppRequest);
+      },
       {
         customErrorResponseFormatter: (error: ApiErrorResponse) =>
           (error?.originalResponse?.status === 409 && conflictError) ||

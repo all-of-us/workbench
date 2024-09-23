@@ -27,8 +27,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.utils.BillingUtils;
 import org.pmiops.workbench.utils.CostComparisonUtils;
-import org.pmiops.workbench.workspaces.WorkspaceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,7 +255,7 @@ public class FreeTierBillingService {
     workspaceDao.findAllByCreator(user).stream()
         .filter(
             ws ->
-                WorkspaceUtils.isFreeTier(
+                BillingUtils.isInitialCredits(
                     ws.getBillingAccountName(), workbenchConfigProvider.get()))
         .forEach(
             ws -> {

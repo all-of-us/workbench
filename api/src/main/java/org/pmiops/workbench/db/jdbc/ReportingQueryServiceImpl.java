@@ -13,8 +13,8 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage
 import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
 import static org.pmiops.workbench.db.model.DbUser.USER_APP_NAME_PREFIX;
 import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
+import static org.pmiops.workbench.utils.BillingUtils.getBillingAccountType;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
-import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;

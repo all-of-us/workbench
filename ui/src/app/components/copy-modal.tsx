@@ -5,6 +5,7 @@ import { validate } from 'validate.js';
 import {
   CdrVersionTiersResponse,
   ConceptSet,
+  CopyRequest,
   FileDetail,
   ResourceType,
   Workspace,
@@ -48,7 +49,7 @@ export interface CopyModalProps {
   onClose: Function;
   onCopy: Function;
   resourceType: ResourceType;
-  saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
+  saveFunction: (cr: CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
 interface HocProps extends CopyModalProps, NavigationProps {
@@ -255,8 +256,9 @@ const CopyModal = withCdrVersions()(
       const { saveFunction, resourceType } = this.props;
 
       saveFunction({
-        toWorkspaceName: this.state.destination.terraName,
         toWorkspaceNamespace: this.state.destination.namespace,
+        toWorkspaceName: this.state.destination.terraName,
+        toWorkspaceTerraName: this.state.destination.terraName,
         newName: this.state.newName,
       })
         .then((response) => {

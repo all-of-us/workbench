@@ -1,11 +1,9 @@
 package org.pmiops.workbench.config;
 
-import jakarta.annotation.Nullable;
+import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
+
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -82,28 +80,11 @@ public class WorkbenchConfig {
     // The environment-driven prefix to apply to Terra billing projects we create. Example:
     // "aou-rw-stable-" causes us to create projects named like "aou-rw-stable-8aec175b".
     public String projectNamePrefix;
-    // The free tier GCP billing account ID to associate with Terra / GCP projects.
+    // The initial credits GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
 
-    // The legacy free tier billing account id that is migrating away. This value helps to make
-    // migration process smooth.
-    // Null if not set in Config.
-    @Nullable public String legacyAccountId;
-
-    public String freeTierBillingAccountName() {
-      return "billingAccounts/" + accountId;
-    }
-
-    public Optional<String> legacyFreeTierBillingAccountName() {
-      return Optional.ofNullable(legacyAccountId).map(a -> "billingAccounts/" + a);
-    }
-
-    /// All valid free tier billing accounts, including accountId and legacyAccountId(if present).
-    public Set<String> freeTierBillingAccountNames() {
-      Set<String> billingAccountNames = new HashSet<>();
-      billingAccountNames.add(freeTierBillingAccountName());
-      legacyFreeTierBillingAccountName().ifPresent(billingAccountNames::add);
-      return billingAccountNames;
+    public String initialCreditsBillingAccountName() {
+      return fullBillingAccountName(accountId);
     }
 
     // The full table name for the BigQuery billing export, which is read from by the free-tier
@@ -324,6 +305,9 @@ public class WorkbenchConfig {
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
     public boolean enableInitialCreditsExpiration;
+    // If true, prevents users from taking compliance training, however
+    // the training is still required if enableComplianceTraining is true.
+    public boolean blockComplianceTraining;
   }
 
   public static class ActionAuditConfig {

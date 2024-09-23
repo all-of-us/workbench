@@ -184,8 +184,6 @@ public class DataSetControllerTest {
   private static final String NAMED_PARAMETER_ARRAY_NAME = "p2_1";
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
-  private static final String BILLING_ACCOUNT_PREFIX = "billingAccounts";
-  private static final String TEST_FREE_TIER = "free-tier";
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -214,7 +212,6 @@ public class DataSetControllerTest {
   @Autowired private FirecloudMapper firecloudMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private BucketAuditQueryService bucketAuditQueryService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CloudBillingClient cloudBillingClient;
@@ -232,7 +229,8 @@ public class DataSetControllerTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
+    AccessTierServiceImpl.class,
+    AnalysisLanguageMapperImpl.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
@@ -246,7 +244,9 @@ public class DataSetControllerTest {
     DataSetController.class,
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
+    ObjectNameLengthServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
@@ -256,15 +256,12 @@ public class DataSetControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
-    AccessTierServiceImpl.class,
-    ObjectNameLengthServiceImpl.class,
-    BucketAuditQueryService.class,
-    AnalysisLanguageMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
+    BucketAuditQueryService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
@@ -335,7 +332,7 @@ public class DataSetControllerTest {
     doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
 
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.accountId = TEST_FREE_TIER;
+    workbenchConfig.billing.accountId = "free-tier";
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -802,7 +799,7 @@ public class DataSetControllerTest {
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace
         .setInitialCreditsExhausted(true)
-        .setBillingAccountName(BILLING_ACCOUNT_PREFIX + "/" + TEST_FREE_TIER);
+        .setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request =

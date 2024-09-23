@@ -15,7 +15,12 @@ import {
   ComplianceTrainingModuleCardProps,
   ComplianceTrainingModuleCardTitle,
 } from 'app/pages/access/compliance-training-module-card-title';
-import { queryForCTTitle, queryForRTTitle } from 'app/pages/access/test-utils';
+import {
+  findCTTitle,
+  findRTTitle,
+  queryForCTTitle,
+  queryForRTTitle,
+} from 'app/pages/access/test-utils';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
@@ -25,25 +30,46 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 
-const findHelpText = () => {
-  return screen.findByText(
+const queryHelpText = () => {
+  return screen.queryByText(
     /navigate to "my courses" and select "responsible conduct of research"/i
   );
 };
 
-const expectHelpTextToExist = async () => {
-  expect(await findHelpText()).not.toBeNull();
+const queryMaintenanceText = () => {
+  return screen.queryByText(
+    new RegExp(
+      'our training system is conducting scheduled maintenance from ' +
+        'october 9th through october 11th. please return after our ' +
+        'maintenance window in order to complete your training.',
+      'i'
+    )
+  );
 };
 
-const expectHelpTextToNotExist = async () => {
-  try {
-    await findHelpText();
-    // The above throws an error if the element is not found
-  } catch (e) {
-    // Expected behavior, do nothing
-    return;
-  }
-  expect(true).toBeFalsy();
+const expectHelpTextToExist = async () => {
+  expect(queryHelpText()).toBeInTheDocument();
+};
+
+const expectHelpTextToNotExist = () => {
+  expect(queryHelpText()).not.toBeInTheDocument();
+};
+
+const expectMaintenanceTextToExist = () => {
+  expect(queryMaintenanceText()).toBeInTheDocument();
+};
+
+const expectMaintenanceTextToNotExist = () => {
+  expect(queryMaintenanceText()).not.toBeInTheDocument();
+};
+
+// Ensures that the component is rendered so that the test can check for the abcense of other text
+const expectComponentToHaveRendered = async (
+  accessTier: AccessTierShortNames
+) => {
+  await (accessTier === AccessTierShortNames.Registered
+    ? findRTTitle()
+    : findCTTitle());
 };
 
 const createProfileWithComplianceTraining = (
@@ -113,10 +139,25 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       defaultServerConfig
     );
 
-    await expectHelpTextToExist();
+    expectHelpTextToExist();
+    expectMaintenanceTextToNotExist();
   });
 
-  it('shows help text if absorb is used and module is expiring', async () => {
+  it('shows maintenance text if module is incomplete and training is in a maintenance window', async () => {
+    setup(
+      {
+        ...createProps(),
+        tier: AccessTierShortNames.Registered,
+        profile: createProfileWithComplianceTraining(null, null, null),
+      },
+      { ...defaultServerConfig, blockComplianceTraining: true }
+    );
+
+    expectMaintenanceTextToExist();
+    expectHelpTextToNotExist();
+  });
+
+  it('shows help text if compliance training is complete and module is expiring', async () => {
     setup(
       {
         ...createProps(),
@@ -132,8 +173,34 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToExist();
+    expectHelpTextToExist();
+    expectMaintenanceTextToNotExist();
   });
+
+  it(
+    'shows maintenance text if compliance training is complete and' +
+      'module is expiring and training is in a maintenance window',
+    async () => {
+      setup(
+        {
+          ...createProps(),
+          profile: createProfileWithComplianceTraining(
+            nowPlusDays(-1),
+            nowPlusDays(29),
+            null
+          ),
+        },
+        {
+          ...defaultServerConfig,
+          blockComplianceTraining: true,
+          complianceTrainingRenewalLookback: 30,
+        }
+      );
+
+      expectMaintenanceTextToExist();
+      expectHelpTextToNotExist();
+    }
+  );
 
   it('does not show help text if module is bypassed', async () => {
     setup(
@@ -151,26 +218,10 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
       }
     );
 
-    await expectHelpTextToNotExist();
-  });
+    expectComponentToHaveRendered(AccessTierShortNames.Registered);
 
-  it('does not show help text if absorb is not used', async () => {
-    setup(
-      {
-        ...createProps(),
-        profile: createProfileWithComplianceTraining(
-          null,
-          null,
-          nowPlusDays(-1)
-        ),
-      },
-      {
-        ...defaultServerConfig,
-        complianceTrainingRenewalLookback: 30,
-      }
-    );
-
-    await expectHelpTextToNotExist();
+    expectHelpTextToNotExist();
+    expectMaintenanceTextToNotExist();
   });
 
   it('does not show help text if module is complete and not expiring', async () => {
@@ -189,7 +240,9 @@ describe(ComplianceTrainingModuleCardTitle.name, () => {
         complianceTrainingRenewalLookback: 30,
       }
     );
+    expectComponentToHaveRendered(AccessTierShortNames.Registered);
 
-    await expectHelpTextToNotExist();
+    expectHelpTextToNotExist();
+    expectMaintenanceTextToNotExist();
   });
 });

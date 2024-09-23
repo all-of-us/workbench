@@ -51,20 +51,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfigResponse'
-  /v1/featured-workspace-config:
-    get:
-      tags:
-      - featured-workspaces-config
-      description: Returns the featured workspaces config
-      operationId: getFeaturedWorkspacesConfig
-      security: []
-      responses:
-        200:
-          description: List of featured workspaces
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeaturedWorkspacesConfigResponse'
   /v1/cdrVersionsByTier:
     get:
       tags:
@@ -1397,25 +1383,6 @@ paths:
         501:
           description: This endpoint is not available in this environment because
            enablePublishedWorkspacesViaDb is not set.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /v1/workspaces/backfillfeatured:
-    post:
-      tags:
-        - Featured Workspace
-      description: Saves featured workspace from config to database. This is TEMP and will be removed once we run it
-      operationId: backFillFeaturedWorkspaces
-      responses:
-        200:
-          description: success workspace from featured_workspaces have been saved to the database
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
-        403:
-          description: User doesnt have access to the backfill data
           content:
             application/json:
               schema:
@@ -7003,20 +6970,6 @@ components:
           type: integer
           description: survey release order number
           format: int32
-    FeaturedWorkspace:
-      type: object
-      properties:
-        name:
-          type: string
-          description: the name of the workspace
-        namespace:
-          type: string
-          description: the namespace of the workspace
-        id:
-          type: string
-          description: the Firecloud id of the workspace
-        category:
-          $ref: '#/components/schemas/FeaturedWorkspaceCategory'
     SecuritySuspendedErrorParameters:
       type: object
       properties:
@@ -7187,6 +7140,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+        blockComplianceTraining:
+          type: boolean
+          description: Whether users are prevented from accessing the Compliance Training
+          default: false
         isDownForMaintenance:
           type: boolean
           default: false
@@ -7207,13 +7164,6 @@ components:
           type: boolean
         requiredForCTAccess:
           type: boolean
-    FeaturedWorkspacesConfigResponse:
-      type: object
-      properties:
-        featuredWorkspacesList:
-          type: array
-          items:
-            $ref: '#/components/schemas/FeaturedWorkspace'
     BillingProjectMembership:
       required:
       - projectName
@@ -7572,13 +7522,16 @@ components:
     CopyRequest:
       required:
       - newName
-      - toWorkspaceName
       - toWorkspaceNamespace
+      - toWorkspaceTerraName
       type: object
       properties:
         toWorkspaceName:
           type: string
+          description: DEPRECATED due to ambiguity about which workspace name is required here
         toWorkspaceNamespace:
+          type: string
+        toWorkspaceTerraName:
           type: string
         newName:
           type: string

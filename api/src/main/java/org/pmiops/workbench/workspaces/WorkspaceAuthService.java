@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.workspaces.WorkspaceUtils.isFreeTier;
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import jakarta.inject.Provider;
 import java.util.List;
@@ -59,7 +59,7 @@ public class WorkspaceAuthService {
   public void validateInitialCreditUsage(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    if (isFreeTier(workspace.getBillingAccountName(), workbenchConfigProvider.get())
+    if (isInitialCredits(workspace.getBillingAccountName(), workbenchConfigProvider.get())
         && (workspace.isInitialCreditsExhausted() || workspace.isInitialCreditsExpired())) {
       throw new ForbiddenException(
           String.format(

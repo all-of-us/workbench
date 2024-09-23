@@ -1,20 +1,38 @@
 import * as React from 'react';
 
-import { AppsApi, AppStatus, BillingStatus } from 'generated/fetch';
+import {
+  AppsApi,
+  AppStatus,
+  AppType,
+  BillingStatus,
+  CreateAppRequest,
+  Disk,
+  DisksApi,
+} from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { defaultCromwellCreateRequest } from 'app/components/apps-panel/utils';
-import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import {
+  appMaxDiskSize,
+  appMinDiskSize,
+  defaultCromwellCreateRequest,
+} from 'app/components/apps-panel/utils';
+import {
+  appsApi,
+  disksApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
 
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
+  expectTooltip,
 } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
 } from 'testing/stubs/apps-api-stub';
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
@@ -24,10 +42,11 @@ import {
 } from './create-gke-app-button';
 
 describe(CreateGkeAppButton.name, () => {
+  const workspaceNamespace = 'aou-rw-test-1';
   const defaultProps: CreateGKEAppButtonProps = {
     createAppRequest: defaultCromwellCreateRequest,
     existingApp: null,
-    workspaceNamespace: 'aou-rw-test-1',
+    workspaceNamespace,
     onDismiss: () => {},
     username: ProfileStubVariables.PROFILE_STUB.username,
     billingStatus: BillingStatus.ACTIVE,
@@ -53,8 +72,21 @@ describe(CreateGkeAppButton.name, () => {
     createEnabledStatuses
   );
 
+  // can't declare spies yet because the API is not registered
+
+  const getCreateSpy = () =>
+    jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+
+  const getUpdateDiskSpy = () =>
+    jest
+      .spyOn(disksApi(), 'updateDisk')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+
   beforeEach(() => {
     registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(DisksApi, new DisksApiStub());
     user = userEvent.setup();
   });
   afterEach(() => {
@@ -63,9 +95,8 @@ describe(CreateGkeAppButton.name, () => {
 
   describe('should allow creating a GKE app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
-      const createSpy = jest
-        .spyOn(appsApi(), 'createApp')
-        .mockImplementation((): Promise<any> => Promise.resolve());
+      const createSpy = getCreateSpy();
+      const updateDiskSpy = getUpdateDiskSpy();
 
       await component({
         createAppRequest: defaultCromwellCreateRequest,
@@ -80,8 +111,12 @@ describe(CreateGkeAppButton.name, () => {
 
       button.click();
       await waitFor(() => {
-        expect(createSpy).toHaveBeenCalled();
+        expect(createSpy).toHaveBeenCalledWith(
+          workspaceNamespace,
+          defaultCromwellCreateRequest
+        );
       });
+      expect(updateDiskSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -91,15 +126,18 @@ describe(CreateGkeAppButton.name, () => {
         createAppRequest: defaultCromwellCreateRequest,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
+
       const button = await waitFor(() => {
         const createButton = findCreateButton();
         expectButtonElementDisabled(createButton);
         return createButton;
       });
 
-      await user.pointer([{ pointerName: 'mouse', target: button }]);
-
-      await screen.findByText(`A Cromwell app exists or is being created`);
+      await expectTooltip(
+        button,
+        'A Cromwell app exists or is being created',
+        user
+      );
     });
   });
 
@@ -108,16 +146,185 @@ describe(CreateGkeAppButton.name, () => {
       createAppRequest: defaultCromwellCreateRequest,
       billingStatus: BillingStatus.INACTIVE,
     });
+
     const button = await waitFor(() => {
       const createButton = findCreateButton();
       expectButtonElementDisabled(createButton);
       return createButton;
     });
 
-    await user.pointer([{ pointerName: 'mouse', target: button }]);
+    await expectTooltip(
+      button,
+      'You have either run out of initial credits or have an inactive billing account.',
+      user
+    );
+  });
 
-    await screen.findByText(
-      'You have either run out of initial credits or have an inactive billing account.'
+  it('should not allow creating a GKE app with a disk that is too small.', async () => {
+    // Cromwell chosen arbitrarily
+    const tooSmall = appMinDiskSize[AppType.CROMWELL] - 1;
+    await component({
+      createAppRequest: {
+        ...defaultCromwellCreateRequest,
+        persistentDiskRequest: {
+          ...defaultCromwellCreateRequest.persistentDiskRequest,
+          size: tooSmall,
+        },
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
+    });
+
+    await expectTooltip(
+      button,
+      'Disk cannot be more than 1000 GB or less than 50 GB',
+      user
+    );
+  });
+
+  it('should not allow creating a GKE app with a disk that is too large.', async () => {
+    const tooLarge = appMaxDiskSize + 1;
+    await component({
+      createAppRequest: {
+        ...defaultCromwellCreateRequest,
+        persistentDiskRequest: {
+          ...defaultCromwellCreateRequest.persistentDiskRequest,
+          size: tooLarge,
+        },
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
+    });
+
+    await expectTooltip(
+      button,
+      'Disk cannot be more than 1000 GB or less than 50 GB',
+      user
+    );
+  });
+
+  it('should allow creating a GKE app with an existing disk.', async () => {
+    const createSpy = getCreateSpy();
+    const updateDiskSpy = getUpdateDiskSpy();
+
+    const existingDiskSize = appMinDiskSize[AppType.CROMWELL] + 10;
+    const diskName = 'arbitrary';
+
+    const existingDisk: Disk = {
+      size: existingDiskSize,
+      name: diskName,
+      blockSize: 1000,
+      diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
+    };
+    const createAppRequest: CreateAppRequest = {
+      ...defaultCromwellCreateRequest,
+      persistentDiskRequest: {
+        ...defaultCromwellCreateRequest.persistentDiskRequest,
+        name: diskName,
+        size: existingDiskSize,
+      },
+    };
+    await component({ existingDisk, createAppRequest });
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementEnabled(createButton);
+      return createButton;
+    });
+
+    button.click();
+    await waitFor(() => {
+      expect(createSpy).toHaveBeenCalledWith(
+        workspaceNamespace,
+        createAppRequest
+      );
+    });
+    expect(updateDiskSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not allow creating a GKE app with a smaller disk.', async () => {
+    const existingDiskSize = appMinDiskSize[AppType.CROMWELL] + 10;
+    const smallerDiskSize = existingDiskSize - 1;
+    const diskName = 'arbitrary';
+
+    const existingDisk: Disk = {
+      size: existingDiskSize,
+      name: diskName,
+      blockSize: 1000,
+      diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
+    };
+    await component({
+      existingDisk,
+      createAppRequest: {
+        ...defaultCromwellCreateRequest,
+        persistentDiskRequest: {
+          ...defaultCromwellCreateRequest.persistentDiskRequest,
+          name: diskName,
+          size: smallerDiskSize,
+        },
+      },
+    });
+
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementDisabled(createButton);
+      return createButton;
+    });
+
+    await expectTooltip(
+      button,
+      /Preventing creation because this would cause data loss./,
+      user
+    );
+  });
+
+  it('should allow creating a GKE app with a larger disk.', async () => {
+    const createSpy = getCreateSpy();
+    const updateDiskSpy = getUpdateDiskSpy();
+
+    const existingDiskSize = appMinDiskSize[AppType.CROMWELL] + 10;
+    const largerDiskSize = existingDiskSize + 10;
+    const diskName = 'arbitrary';
+
+    const existingDisk: Disk = {
+      size: existingDiskSize,
+      name: diskName,
+      blockSize: 1000,
+      diskType: defaultCromwellCreateRequest.persistentDiskRequest.diskType,
+    };
+    const createAppRequest: CreateAppRequest = {
+      ...defaultCromwellCreateRequest,
+      persistentDiskRequest: {
+        ...defaultCromwellCreateRequest.persistentDiskRequest,
+        name: diskName,
+        size: largerDiskSize,
+      },
+    };
+    await component({ existingDisk, createAppRequest });
+    const button = await waitFor(() => {
+      const createButton = findCreateButton();
+      expectButtonElementEnabled(createButton);
+      return createButton;
+    });
+
+    button.click();
+    await waitFor(() => {
+      expect(createSpy).toHaveBeenCalledWith(
+        workspaceNamespace,
+        createAppRequest
+      );
+    });
+    expect(updateDiskSpy).toHaveBeenCalledWith(
+      workspaceNamespace,
+      diskName,
+      largerDiskSize
     );
   });
 });

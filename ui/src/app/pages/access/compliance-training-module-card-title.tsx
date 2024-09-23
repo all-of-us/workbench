@@ -3,12 +3,15 @@ import * as React from 'react';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { AoU } from 'app/components/text-wrappers';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   getAccessModuleStatusByName,
   isCompliant,
   isExpiringOrExpired,
 } from 'app/utils/access-utils';
+import { COMPLIANCE_TRAINIING_OUTAGE_MESSAGE } from 'app/utils/constants';
+import { serverConfigStore } from 'app/utils/stores';
 
 export interface ComplianceTrainingModuleCardProps {
   tier: AccessTierShortNames;
@@ -19,6 +22,7 @@ export const ComplianceTrainingModuleCardTitle = ({
   tier,
   profile,
 }: ComplianceTrainingModuleCardProps) => {
+  const { blockComplianceTraining } = serverConfigStore.get().config;
   const { accessModule, trainingTitle, courseTitle } =
     tier === AccessTierShortNames.Registered
       ? {
@@ -43,7 +47,15 @@ export const ComplianceTrainingModuleCardTitle = ({
         Complete <AoU /> {trainingTitle}
       </div>
       {showHelpText && (
-        <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+        <>
+          {blockComplianceTraining ? (
+            <p style={{ color: colors.primary }}>
+              {COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
+            </p>
+          ) : (
+            <p>Navigate to "My Courses" and select "{courseTitle}"</p>
+          )}
+        </>
       )}
     </>
   );

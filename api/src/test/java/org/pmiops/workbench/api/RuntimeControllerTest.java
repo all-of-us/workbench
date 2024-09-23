@@ -336,7 +336,7 @@ public class RuntimeControllerTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion)
-            .setBillingAccountName("billingAccounts/free-tier");
+            .setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
 
