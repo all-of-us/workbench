@@ -3,12 +3,14 @@ import * as React from 'react';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { AoU } from 'app/components/text-wrappers';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   getAccessModuleStatusByName,
   isCompliant,
   isExpiringOrExpired,
 } from 'app/utils/access-utils';
+import { COMPLIANCE_TRAINIING_OUTAGE_MESSAGE } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 
 export interface ComplianceTrainingModuleCardProps {
@@ -47,10 +49,8 @@ export const ComplianceTrainingModuleCardTitle = ({
       {showHelpText && (
         <>
           {blockComplianceTraining ? (
-            <p>
-              Our training system is conducting scheduled maintenance from
-              October 9th through October 11th. Please return after our
-              maintenance window in order to complete your training.
+            <p style={{ color: colors.primary }}>
+              {COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
             </p>
           ) : (
             <p>Navigate to "My Courses" and select "{courseTitle}"</p>
