@@ -22,7 +22,6 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByNameOrEmpty,
   isBypassed,
-  isExpiringOrExpired,
   isRenewalCompleteForModule,
   redirectToControlledTraining,
   redirectToRegisteredTraining,
