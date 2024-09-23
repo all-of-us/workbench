@@ -239,6 +239,7 @@ public class WorkbenchConfig {
     public String shortName;
     public String oauthClientId;
     public String appEngineLocationId;
+    public boolean isDownForMaintenance;
   }
 
   public static class AdminConfig {

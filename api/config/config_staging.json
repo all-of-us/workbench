@@ -75,7 +75,8 @@
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
     "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
-    "appEngineLocationId": "us-central"
+    "appEngineLocationId": "us-central",
+    "isDownForMaintenance": false
   },
   "admin": {
     "loginUrl": "https:\/\/staging.fake-research-aou.org/login"

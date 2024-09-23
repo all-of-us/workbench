@@ -7187,6 +7187,10 @@ components:
           type: boolean
           default: false
           description: If true, allow for user's initial credits to expire.
+      isDownForMaintenance:
+        type: boolean
+        default: false
+        description: If true, the api is down for maintenance and will block all requests.
     AccessModuleConfig:
       required:
       - expirable
