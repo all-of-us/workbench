@@ -76,7 +76,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(blockAllTrafficInterceptor);
-    //    }
     registry.addInterceptor(authInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
