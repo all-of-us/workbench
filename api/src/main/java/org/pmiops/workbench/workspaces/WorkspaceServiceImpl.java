@@ -52,12 +52,10 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.tanagra.ApiException;
 import org.pmiops.workbench.tanagra.api.TanagraApi;
@@ -215,26 +213,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     validateWorkspaceTierAccess(dbWorkspace);
 
-    RawlsWorkspaceResponse fcResponse;
-    RawlsWorkspaceDetails fcWorkspace;
-    WorkspaceResponse workspaceResponse = new WorkspaceResponse();
-
-    // This enforces access controls.
-    fcResponse =
+    final RawlsWorkspaceResponse fcResponse =
         fireCloudService.getWorkspace(
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    fcWorkspace = fcResponse.getWorkspace();
 
-    workspaceResponse.setAccessLevel(
-        firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
-    Workspace workspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
-    workspaceResponse.setWorkspace(workspace);
-
-    return workspaceResponse;
+    return workspaceMapper.toApiWorkspaceResponse(
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace, fcResponse.getWorkspace(), initialCreditsExpirationService),
+        fcResponse.getAccessLevel());
   }
 
   @Transactional

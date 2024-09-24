@@ -110,6 +110,7 @@ public class DbWorkspace {
   @Deprecated(since = "July 2024", forRemoval = true)
   private boolean published;
 
+  // referenced by featured_workspace table
   private DbFeaturedCategory featuredCategory;
 
   public DbWorkspace() {
