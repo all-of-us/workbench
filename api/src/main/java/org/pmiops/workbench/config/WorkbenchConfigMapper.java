@@ -58,5 +58,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "blockComplianceTraining",
       source = "config.featureFlags.blockComplianceTraining")
+  @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

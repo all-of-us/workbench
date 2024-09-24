@@ -6,11 +6,14 @@ import java.util.Optional;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
+import org.pmiops.workbench.interceptors.BlockAllTrafficInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -32,6 +35,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @ComponentScan(basePackages = {"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig implements WebMvcConfigurer {
+
+  private static final Logger log = LoggerFactory.getLogger(WebMvcConfig.class);
   @Autowired private AuthInterceptor authInterceptor;
 
   @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
@@ -43,6 +48,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
 
   @Autowired private TracingInterceptor tracingInterceptor;
+
+  @Autowired private BlockAllTrafficInterceptor blockAllTrafficInterceptor;
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -68,6 +75,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
+    // Blocks traffic if isDownForMaintenance is true in environment config
+    registry.addInterceptor(blockAllTrafficInterceptor);
     registry.addInterceptor(authInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);

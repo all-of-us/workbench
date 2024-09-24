@@ -219,6 +219,7 @@ export const stackdriverErrorReporterStore =
 
 export interface ServerConfigStore {
   config?: ConfigResponse;
+  isDown?: boolean;
 }
 
 export const serverConfigStore = atom<ServerConfigStore>({});
