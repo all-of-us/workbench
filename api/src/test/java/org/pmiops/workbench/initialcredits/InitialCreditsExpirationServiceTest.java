@@ -110,10 +110,12 @@ public class InitialCreditsExpirationServiceTest {
     assertThat(service.getCreditsExpiration(user)).isEmpty();
   }
 
-  // TODO RW-13502
-  //  @Test
-  //  public void test_institutionBypassed() {
-  //  }
+  @Test
+  public void test_institutionBypassed() {
+    DbUser user = spyUserDao.save(new DbUser());
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
+    assertThat(service.getCreditsExpiration(user)).isEmpty();
+  }
 
   @Test
   public void test_nullTimestamp() {
