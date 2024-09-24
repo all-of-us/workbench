@@ -193,7 +193,8 @@ public class ReportingTestUtils {
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     workspace.setBillingAccountName(fullBillingAccountName(WORKSPACE__BILLING_ACCOUNT_ID));
-    workspace.setFeaturedCategory(DbFeaturedCategory.valueOf(WORKSPACE__FEATURED_WORKSPACE_CATEGORY));
+    workspace.setFeaturedCategory(
+        DbFeaturedCategory.valueOf(WORKSPACE__FEATURED_WORKSPACE_CATEGORY));
     return workspace;
   }
 
