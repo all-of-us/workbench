@@ -38,10 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-@MockBeans({
-    @MockBean(InstitutionService.class)
-})
-
+@MockBeans({@MockBean(InstitutionService.class)})
 @DataJpaTest
 @Import({
   InitialCreditsExpirationServiceImpl.class,
