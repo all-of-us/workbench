@@ -133,6 +133,6 @@ public interface InstitutionService {
    */
   List<UserTierEligibility> getUserTierEligibilities(DbUser user);
 
-  /** Should the user be allowed to bypass the expiration of their initial credits? */
+  /** If true, this institution's users are exempt from credit expiration. */
   boolean shouldBypassForCreditsExpiration(DbUser user);
 }
