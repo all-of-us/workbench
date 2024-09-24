@@ -529,16 +529,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_scientific_approach,\n"
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
-                + "  workspace_id,\n"
+                + "  w.workspace_id,\n"
                 + "  workspace_namespace\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
-                + "  OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
+                + "  LEFT OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
                 + "WHERE active_status = "
                 + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
                 + "\n"
-                + "ORDER BY workspace_id\n"
+                + "ORDER BY w.workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
             limit,
