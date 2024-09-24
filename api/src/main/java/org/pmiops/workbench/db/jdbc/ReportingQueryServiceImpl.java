@@ -497,15 +497,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
+                + "  a.short_name AS access_tier_short_name,\n"
                 + "  billing_account_name,\n"
                 + "  billing_status,\n"
                 + "  w.cdr_version_id AS cdr_version_id,\n"
                 + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
+                + "  fw.category AS featured_workspace_category,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
-                + "  published,\n"
                 + "  rp_additional_notes,\n"
                 + "  rp_ancestry,\n"
                 + "  rp_anticipated_findings,\n"
@@ -529,11 +530,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
                 + "  workspace_id,\n"
-                + "  workspace_namespace,\n"
-                + "  a.short_name AS access_tier_short_name\n"
+                + "  workspace_namespace\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+                + "  OUTER JOIN featured_workspace fw ON w.workspace_id = fw.workspace_id\n"
                 + "WHERE active_status = "
                 + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
                 + "\n"
@@ -553,9 +554,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .creatorId(rs.getLong("creator_id"))
                 .disseminateResearchOther(rs.getString("disseminate_research_other"))
+                .featuredWorkspaceCategory(rs.getString("featured_workspace_category"))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
-                .published(rs.getBoolean("published"))
                 .rpAdditionalNotes(rs.getString("rp_additional_notes"))
                 .rpAncestry(rs.getBoolean("rp_ancestry"))
                 .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))

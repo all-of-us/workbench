@@ -14,12 +14,14 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.FeaturedWorkspaceCategory;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.OrganizationType;
@@ -47,7 +49,6 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
-  public static final Boolean WORKSPACE__PUBLISHED = false;
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
   public static final Boolean WORKSPACE__RP_ANCESTRY = false;
   public static final String WORKSPACE__RP_ANTICIPATED_FINDINGS = "foo_14";
@@ -73,6 +74,8 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
   public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
+  public static final String WORKSPACE__FEATURED_WORKSPACE_CATEGORY =
+      FeaturedWorkspaceCategory.COMMUNITY.toString();
 
   public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
   public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
@@ -128,9 +131,9 @@ public class ReportingTestUtils {
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
+        .featuredWorkspaceCategory(WORKSPACE__FEATURED_WORKSPACE_CATEGORY)
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
-        .published(WORKSPACE__PUBLISHED)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
         .rpAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS)
@@ -165,7 +168,6 @@ public class ReportingTestUtils {
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
-    workspace.setPublished(WORKSPACE__PUBLISHED);
     workspace.setAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES);
     workspace.setAncestry(WORKSPACE__RP_ANCESTRY);
     workspace.setAnticipatedFindings(WORKSPACE__RP_ANTICIPATED_FINDINGS);
@@ -191,6 +193,7 @@ public class ReportingTestUtils {
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     workspace.setBillingAccountName(fullBillingAccountName(WORKSPACE__BILLING_ACCOUNT_ID));
+    workspace.setFeaturedCategory(DbFeaturedCategory.valueOf(WORKSPACE__FEATURED_WORKSPACE_CATEGORY));
     return workspace;
   }
 

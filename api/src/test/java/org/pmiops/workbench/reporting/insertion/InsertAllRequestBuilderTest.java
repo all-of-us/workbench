@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DISABLED;
@@ -119,7 +118,7 @@ public class InsertAllRequestBuilderTest {
   public void testWorkspace_allFields() {
     final ReportingWorkspace workspace = createDtoWorkspace();
     final InsertAllRequest request =
-        WORKSPACE_REQUEST_BUILDER.build(TABLE_ID, ImmutableList.of(workspace), FIXED_VALUES);
+        WORKSPACE_REQUEST_BUILDER.build(TABLE_ID, List.of(workspace), FIXED_VALUES);
     assertThat(request.getRows()).hasSize(1);
     final RowToInsert rowToInsert = request.getRows().get(0);
     assertThat(rowToInsert.getId()).isNotNull();
@@ -130,6 +129,5 @@ public class InsertAllRequestBuilderTest {
         .hasSize(FIXED_VALUES.size() + WorkspaceColumnValueExtractor.values().length);
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
     assertThat(contentMap.get("name")).isEqualTo(WORKSPACE__NAME);
-    assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);
   }
 }
