@@ -80,13 +80,13 @@ def start_local_db_service()
   deadlineSec = 40
 
   bm = Benchmark.measure {
-    common.run_inline %W{docker-compose up -d db}
+    common.run_inline %W{docker compose up -d db}
 
     root_pass = "root-notasecret"
 
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
-    until (common.run "docker-compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
+    until (common.run "docker compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
       if Time.now - start >= deadlineSec
         raise("mysql docker service did not become available after #{deadlineSec}s")
       end
@@ -170,7 +170,7 @@ def dev_up(cmd_name, args)
       "--nostart-db",
       ->(opts, _) { opts.start_db = false },
       "If specified, don't start the DB service. This is useful when running " +
-      "within docker, i.e. on CircleCI, as the DB service runs via docker-compose")
+      "within docker, i.e. on CircleCI, as the DB service runs via docker compose")
   op.parse.validate
 
   common = Common.new
@@ -181,7 +181,7 @@ def dev_up(cmd_name, args)
   end
 
   at_exit do
-    common.run_inline %W{docker-compose down} if op.opts.start_db
+    common.run_inline %W{docker compose down} if op.opts.start_db
   end
 
   setup_local_environment()
@@ -263,7 +263,7 @@ def run_api_and_db()
   setup_local_environment
 
   common = Common.new
-  at_exit { common.run_inline %W{docker-compose down} }
+  at_exit { common.run_inline %W{docker compose down} }
   start_local_db_service()
 
   run_api_incremental()
@@ -342,7 +342,7 @@ def connect_to_db()
   common.status "Starting database if necessary..."
   start_local_db_service()
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
-  common.run_inline %W{docker-compose exec db sh -c #{cmd}}
+  common.run_inline %W{docker compose exec db sh -c #{cmd}}
 end
 
 Common.register_command({
@@ -356,7 +356,7 @@ def docker_clean()
   common = Common.new
 
   # --volumes clears out any cached data between runs, e.g. the MySQL database
-  common.run_inline %W{docker-compose down --volumes}
+  common.run_inline %W{docker compose down --volumes}
 
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
@@ -365,7 +365,7 @@ def docker_clean()
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
-  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
+  common.status "Cleaning complete. docker compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
@@ -2704,7 +2704,7 @@ Common.register_command({
 })
 
 def docker_run(args)
-  Common.new.run_inline %W{docker-compose run --rm scripts} + args
+  Common.new.run_inline %W{docker compose run --rm scripts} + args
 end
 
 Common.register_command({
