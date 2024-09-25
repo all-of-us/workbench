@@ -37,7 +37,7 @@ import { AnalysisConfig } from 'app/utils/analysis-config';
 import { getWholeDaysFromNow } from 'app/utils/dates';
 import {
   allMachineTypes,
-  AutodeleteDaysThresholds,
+  autodeleteOptions,
   ComputeType,
   findMachineByName,
   Machine,
@@ -413,10 +413,7 @@ export const CreateGkeApp = ({
               id={`${appTypeToString[appType]}-autodelete-threshold-dropdown`}
               appendTo='self'
               disabled={isAppActive(app) || !createAppRequest.autodeleteEnabled}
-              options={AutodeleteDaysThresholds.map((days) => ({
-                value: days * 24 * 60,
-                label: `Idle for ${days} days`,
-              }))}
+              options={autodeleteOptions}
               value={createAppRequest.autodeleteThreshold}
               onChange={(e) => {
                 setCreateAppRequest((prevState) => ({
