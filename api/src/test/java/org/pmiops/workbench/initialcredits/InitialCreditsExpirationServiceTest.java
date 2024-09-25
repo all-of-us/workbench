@@ -32,13 +32,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-@MockBeans({@MockBean(InstitutionService.class)})
 @DataJpaTest
 @Import({
   InitialCreditsExpirationServiceImpl.class,
@@ -56,6 +54,8 @@ public class InitialCreditsExpirationServiceTest {
   @MockBean private FakeClock fakeClock;
 
   @MockBean private LeonardoApiClient leonardoApiClient;
+
+  @MockBean private InstitutionService institutionService;
 
   private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
   private static final Timestamp NOW_PLUS_ONE_DAY =
@@ -112,7 +112,14 @@ public class InitialCreditsExpirationServiceTest {
 
   @Test
   public void test_institutionBypassed() {
-    DbUser user = spyUserDao.save(new DbUser());
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setBypassed(false)
+                        .setExpirationTime(NOW)));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
     assertThat(service.getCreditsExpiration(user)).isEmpty();
   }
 
