@@ -16,17 +16,11 @@ import {
   AccessTierDisplayNames,
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
-import {
-  DARPageMode,
-  getAccessModuleStatusByName,
-  isCompliant,
-  redirectToNiH,
-} from 'app/utils/access-utils';
+import { DARPageMode } from 'app/utils/access-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { DataDetail, styles } from './data-access-requirements';
-import { Module } from './module';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
@@ -36,29 +30,6 @@ const handleRequestAccessButton = (url) => () => {
 };
 
 const ctModule = AccessModule.CT_COMPLIANCE_TRAINING;
-
-const ControlledTierEraModule = (props: {
-  profile: Profile;
-  eligible: boolean;
-  spinnerProps: WithSpinnerOverlayProps;
-}): JSX.Element => {
-  const { profile, eligible, spinnerProps } = props;
-
-  const moduleName = AccessModule.ERA_COMMONS;
-
-  const status = getAccessModuleStatusByName(profile, moduleName);
-
-  // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const active = eligible && !isCompliant(status, profile.duccSignedVersion);
-
-  return (
-    <Module
-      {...{ active, eligible, moduleName, profile, spinnerProps, status }}
-      focused={false}
-      moduleAction={redirectToNiH}
-    />
-  );
-};
 
 const ControlledTierStep = (props: {
   enabled: boolean;
@@ -106,9 +77,6 @@ export const ControlledTierCard = (props: {
   const controlledTierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
   );
-  const registeredTierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === AccessTierShortNames.Registered
-  );
   const isSigned = !!controlledTierEligibility;
   const isEligible = isSigned && controlledTierEligibility.eligible;
   const {
@@ -117,14 +85,6 @@ export const ControlledTierCard = (props: {
       institutionRequestAccessUrl,
     },
   } = profile;
-  // Display era in CT if:
-  // 1) Institution has signed the CT institution agreement,
-  // 2) Registered Tier DOES NOT require era
-  // 3) CT Requirement DOES require era
-  const displayEraCommons =
-    isSigned &&
-    !registeredTierEligibility?.eraRequired &&
-    controlledTierEligibility.eraRequired;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
@@ -182,12 +142,6 @@ export const ControlledTierCard = (props: {
           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
           style={{ marginTop: '1.9em' }}
         />
-        {displayEraCommons && (
-          <ControlledTierEraModule
-            {...{ profile, spinnerProps }}
-            eligible={isEligible}
-          />
-        )}
 
         {enableComplianceTraining &&
           pageMode === DARPageMode.INITIAL_REGISTRATION && (

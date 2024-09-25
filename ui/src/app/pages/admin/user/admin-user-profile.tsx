@@ -57,7 +57,6 @@ import {
   displayModuleExpirationDate,
   displayModuleStatus,
   ErrorsTooltip,
-  getEraNote,
   getInitialCreditsUsage,
   getPublicInstitutionDetails,
   InitialCreditsDropdown,
@@ -407,14 +406,6 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       breakpoint='0px'
       style={{ paddingTop: '1em' }}
       value={tableData}
-      footer={
-        getAccessModuleConfig(AccessModule.ERA_COMMONS)
-          .isEnabledInEnvironment && (
-          <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
-            {getEraNote(updatedProfile)}
-          </div>
-        )
-      }
     >
       <Column field='moduleName' header='Access module' />
       <Column field='moduleStatus' header='Status' />
