@@ -278,20 +278,6 @@ export const TierBadgesMaybe = (props: {
   );
 };
 
-export const getEraNote = (profile: Profile): string => {
-  const accessText = 'does not require eRA Commons';
-
-  const institutionName =
-    profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
-  const note = '* eRA Commons requirements vary by institution.';
-  return (
-    note +
-    (isBlank(institutionName)
-      ? ` We don't have any institutional information for this user.`
-      : ` This user's institution (${institutionName}) ${accessText}.`)
-  );
-};
-
 // would this AccessBypassRequest actually change the profile state?
 // allows un-toggling of bypass for a module
 export const wouldUpdateBypassState = (
