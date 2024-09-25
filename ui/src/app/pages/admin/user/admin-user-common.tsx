@@ -38,11 +38,6 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import {
-  AccessTierShortNames,
-  displayNameForTier,
-  orderedAccessTierShortNames,
-} from 'app/utils/access-tiers';
-import {
   AccessRenewalStatus,
   computeRenewalDisplayDates,
   getAccessModuleConfig,
@@ -259,34 +254,15 @@ export const displayModuleExpirationDate = (
     )
   );
 
-const isEraRequiredForTier = (
-  profile: Profile,
-  accessTierShortName: AccessTierShortNames
-): boolean => {
-  const tierEligibility = profile.tierEligibilities.find(
-    (tier) => tier.accessTierShortName === accessTierShortName
-  );
-  return (
-    getAccessModuleConfig(AccessModule.ERA_COMMONS).isEnabledInEnvironment &&
-    tierEligibility?.eraRequired
-  );
-};
-
 export const TierBadgesMaybe = (props: {
   profile: Profile;
   moduleName: AccessModule;
 }) => {
-  const { profile, moduleName } = props;
+  const { moduleName } = props;
 
-  const rtRequired =
-    moduleName === AccessModule.ERA_COMMONS
-      ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
-      : getAccessModuleConfig(moduleName)?.requiredForRTAccess;
+  const rtRequired = getAccessModuleConfig(moduleName)?.requiredForRTAccess;
 
-  const ctRequired =
-    moduleName === AccessModule.ERA_COMMONS
-      ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
-      : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
+  const ctRequired = getAccessModuleConfig(moduleName)?.requiredForCTAccess;
 
   // fake a sub-table to keep RTs aligned with RTs
   return (
@@ -303,15 +279,8 @@ export const TierBadgesMaybe = (props: {
 };
 
 export const getEraNote = (profile: Profile): string => {
-  const requiredTierNames = orderedAccessTierShortNames
-    .filter((name) => isEraRequiredForTier(profile, name))
-    .map(displayNameForTier);
+  const accessText = 'does not require eRA Commons';
 
-  const accessText =
-    requiredTierNames.length === 0
-      ? 'does not require eRA Commons'
-      : 'requires eRA Commons for ' +
-        (requiredTierNames.join(' and ') + ' access');
   const institutionName =
     profile.verifiedInstitutionalAffiliation?.institutionDisplayName;
   const note = '* eRA Commons requirements vary by institution.';
