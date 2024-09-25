@@ -36,7 +36,7 @@ import {
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, reactStyles } from 'app/utils';
 import {
   AccessRenewalStatus,
   computeRenewalDisplayDates,
