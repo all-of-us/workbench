@@ -10,7 +10,6 @@ import {
   InstitutionApi,
   Profile,
   UserAdminApi,
-  UserTierEligibility,
 } from 'generated/fetch';
 
 import { render, screen, within } from '@testing-library/react';
