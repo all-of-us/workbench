@@ -15,9 +15,7 @@ public interface MailService {
   void sendWelcomeEmail(
       final DbUser user,
       final String password,
-      final String institutionName,
-      final Boolean showEraStepInRt,
-      final Boolean showEraStepInCt)
+      final String institutionName)
       throws MessagingException;
 
   void sendInstitutionUserInstructions(

@@ -95,7 +95,6 @@ export const defaultTierConfig = (
 ): InstitutionTierConfig => ({
   accessTierShortName: accessTier,
   membershipRequirement: InstitutionMembershipRequirement.NO_ACCESS,
-  eraRequired: false,
   emailAddresses: [],
   emailDomains: [],
 });

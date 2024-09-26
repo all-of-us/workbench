@@ -122,10 +122,6 @@ public interface InstitutionService {
    * @return the list of {@link InstitutionTierConfig} for each tier.
    */
   List<InstitutionTierConfig> getTierConfigs(String institutionShortName);
-
-  /** Returns {@code true} if eRA commons is required for given tier. */
-  boolean eRaRequiredForTier(Institution institution, String accessTierShortName);
-
   /**
    * Returns the access tiers that the user's institution allow the user to join.
    *

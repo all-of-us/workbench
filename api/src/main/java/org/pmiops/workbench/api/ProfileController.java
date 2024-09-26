@@ -326,27 +326,14 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      boolean showEraStepInRT =
-          eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
-
-      boolean showEraStepInCT =
-          !showEraStepInRT
-              && eraRequiredForTier(userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
-
       mail.sendWelcomeEmail(
           user,
           googleUser.getPassword(),
-          userInstitution.getDisplayName(),
-          showEraStepInRT,
-          showEraStepInCT);
+          userInstitution.getDisplayName());
 
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
-  }
-
-  private boolean eraRequiredForTier(Institution institution, String tierShortName) {
-    return institutionService.eRaRequiredForTier(institution, tierShortName);
   }
 
   @Override

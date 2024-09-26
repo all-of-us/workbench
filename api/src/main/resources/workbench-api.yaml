@@ -9911,10 +9911,6 @@ components:
           description: The short unique name for the access tier.
         membershipRequirement:
           $ref: '#/components/schemas/InstitutionMembershipRequirement'
-        eraRequired:
-          type: boolean
-          description: Whether eRA commons is required for members in the institution
-            for this tier.
         emailDomains:
           type: array
           items:
@@ -12905,9 +12901,6 @@ components:
             User eligibility for tiers is based on their contact emails and their institution's tier
             requirements. This does not mean the user has access to these tiers; to gain
             access, the user must still complete all the necessary access requirement steps for each tier.
-        eraRequired:
-          type: boolean
-          description: If eRA Commons linking is required for this access tier.
     DemographicSurveyV2:
       type: object
       properties:

@@ -25,7 +25,6 @@ public class DbInstitutionTierRequirement {
   private long institutionTierRequirementId;
   private DbInstitution institution;
   private DbAccessTier accessTier;
-  private boolean eraRequired;
   private MembershipRequirement membershipRequirement;
 
   @Id
@@ -60,16 +59,6 @@ public class DbInstitutionTierRequirement {
 
   public DbInstitutionTierRequirement setAccessTier(DbAccessTier accessTier) {
     this.accessTier = accessTier;
-    return this;
-  }
-
-  @Column(name = "era_required")
-  public boolean getEraRequired() {
-    return eraRequired;
-  }
-
-  public DbInstitutionTierRequirement setEraRequired(boolean eraRequired) {
-    this.eraRequired = eraRequired;
     return this;
   }
 

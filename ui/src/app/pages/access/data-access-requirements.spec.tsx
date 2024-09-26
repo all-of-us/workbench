@@ -875,12 +875,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: true,
           },
         ],
@@ -955,7 +953,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
           },
         ],
       },
@@ -967,18 +964,15 @@ describe('DataAccessRequirements', () => {
 
     expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
 
-    // Ignore eraRequired if the accessTier is Controlled
     profileStore.set({
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: false,
           },
         ],
       },
@@ -1000,7 +994,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
           },
         ],
       },
@@ -1027,7 +1020,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
           },
         ],
       },
@@ -1054,7 +1046,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1081,7 +1072,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1109,7 +1099,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1146,7 +1135,6 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
           ],
@@ -1178,12 +1166,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: true,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: false,
               // User not eligible for CT i.e user email doesnt match
               // Institution's Controlled Tier email list
               eligible: false,
@@ -1221,12 +1207,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
               eligible: true,
             },
           ],
@@ -1294,12 +1278,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
               eligible: true,
             },
           ],
@@ -1328,12 +1310,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1358,7 +1338,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
         ],
@@ -1383,12 +1362,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1428,12 +1405,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1479,12 +1454,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1520,12 +1493,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
