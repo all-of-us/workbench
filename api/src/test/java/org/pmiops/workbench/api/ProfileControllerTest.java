@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1008,8 +1007,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1017,17 +1015,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void resendWelcomeEmail_OK() throws MessagingException {
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing()
-        .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any());
+    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 

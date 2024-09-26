@@ -942,9 +942,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     updateUserWithRetries(this::registerUser);
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution);
+    institutionService.updateInstitution(institution.getShortName(), institution);
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
@@ -963,9 +961,7 @@ public class UserServiceAccessTest {
     updateUserWithRetries(this::registerUser);
     providedWorkbenchConfig.access.enableEraCommons = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution);
+    institutionService.updateInstitution(institution.getShortName(), institution);
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
