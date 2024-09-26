@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.absorb.ApiException;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -326,10 +325,7 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      mail.sendWelcomeEmail(
-          user,
-          googleUser.getPassword(),
-          userInstitution.getDisplayName());
+      mail.sendWelcomeEmail(user, googleUser.getPassword(), userInstitution.getDisplayName());
 
     } catch (MessagingException e) {
       throw new WorkbenchException(e);

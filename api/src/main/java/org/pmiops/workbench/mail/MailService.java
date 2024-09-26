@@ -12,10 +12,7 @@ import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
 
-  void sendWelcomeEmail(
-      final DbUser user,
-      final String password,
-      final String institutionName)
+  void sendWelcomeEmail(final DbUser user, final String password, final String institutionName)
       throws MessagingException;
 
   void sendInstitutionUserInstructions(

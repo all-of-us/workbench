@@ -144,15 +144,10 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendWelcomeEmail(
-      final DbUser user,
-      final String password,
-      final String institutionName)
+      final DbUser user, final String password, final String institutionName)
       throws MessagingException {
     final String htmlMessage =
-        buildHtml(
-            WELCOME_RESOURCE,
-            welcomeMessageSubstitutionMap(
-                password, user.getUsername()));
+        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -516,8 +511,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password,
-      final String username) {
+      final String password, final String username) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
