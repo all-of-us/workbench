@@ -103,16 +103,18 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
 
   return runtime;
 };
+
 export const canUseExistingDisk = (
   { detachableType, size }: Partial<DiskConfig>,
   existingDisk: Disk | null
 ) => {
   return (
     !!existingDisk &&
-    detachableType === existingDisk.diskType &&
+    (!detachableType || detachableType === existingDisk.diskType) &&
     size >= existingDisk.size
   );
 };
+
 export const maybeWithExistingDiskName = (
   c: Omit<DiskConfig, 'existingDiskName'>,
   existingDisk: Disk | null
@@ -122,6 +124,7 @@ export const maybeWithExistingDiskName = (
   }
   return { ...c, existingDiskName: null };
 };
+
 export const maybeWithPersistentDisk = (
   runtime: Runtime,
   persistentDisk: Disk | PersistentDiskRequest | null | undefined
@@ -140,6 +143,7 @@ export const maybeWithPersistentDisk = (
     },
   };
 };
+
 // TODO - this is way more complex than it needs to be, and likely has some errors
 export const withAnalysisConfigDefaults = (
   r: AnalysisConfig,
@@ -206,6 +210,7 @@ export const withAnalysisConfigDefaults = (
       r.autopauseThreshold ?? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   };
 };
+
 export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
@@ -227,6 +232,7 @@ export const toAnalysisConfig = (
       gpuConfig,
     };
   };
+
   const toGceWithPdConfig = () => {
     const {
       machineType,
@@ -250,6 +256,7 @@ export const toAnalysisConfig = (
       gpuConfig,
     };
   };
+
   const toDataprocConfig = () => {
     const { dataprocConfig, autopauseThreshold } = runtime;
     const { masterMachineType, masterDiskSize } = dataprocConfig;
@@ -268,6 +275,7 @@ export const toAnalysisConfig = (
       gpuConfig: null,
     };
   };
+
   const toEmptyConfig = () => ({
     computeType: null,
     machine: null,
