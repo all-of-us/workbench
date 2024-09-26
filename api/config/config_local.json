@@ -17,7 +17,7 @@
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "workspaceLogsProject": "fc-aou-logs-test",
     "workspaceBucketLocation": "us-central1",
-    "gceVmZone": "us-central1-c"
+    "gceVmZones": ["us-central1-c"]
   },
   "billing": {
     "accountId": "013713-75CFF6-1751E5",
