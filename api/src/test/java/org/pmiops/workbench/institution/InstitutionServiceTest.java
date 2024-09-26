@@ -115,7 +115,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .bypassInitialCreditsExpiration(true);
@@ -136,7 +135,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName("non exist tier"))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
@@ -152,7 +150,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
-                    .eraRequired(false)
                     .accessTierShortName("non exist tier"))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
@@ -167,7 +164,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
@@ -288,7 +284,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName())
                     .emailDomains(ImmutableList.of("broad.org", "google.com"))
                     .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com")))
@@ -305,7 +300,6 @@ public class InstitutionServiceTest {
                 ImmutableList.of(
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                        .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())
                         .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                         .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"))))
@@ -320,7 +314,6 @@ public class InstitutionServiceTest {
             ImmutableList.of(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName())
                     .emailAddresses(ImmutableList.of())));
     final Institution instWithoutEmailsRoundTrip =
@@ -337,7 +330,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .bypassInitialCreditsExpiration(true);
@@ -348,7 +340,6 @@ public class InstitutionServiceTest {
             ImmutableList.of(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName())));
     assertThat(
             service
@@ -375,7 +366,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .bypassInitialCreditsExpiration(true);
@@ -386,7 +376,6 @@ public class InstitutionServiceTest {
             ImmutableList.of(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName())));
     assertThat(
             service
@@ -406,7 +395,6 @@ public class InstitutionServiceTest {
             .addTierConfigsItem(
                 rtTierConfig
                     .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(false)
                     .accessTierShortName(registeredTier.getShortName())
                     .emailDomains(ImmutableList.of("broad.org", "broad.org", "google.com"))
                     .emailAddresses(
@@ -442,7 +430,6 @@ public class InstitutionServiceTest {
                 ImmutableList.of(
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                        .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())
                         .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                         .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"))))
@@ -523,7 +510,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                             .emailAddresses(
@@ -551,7 +537,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                             .emailAddresses(
@@ -579,7 +564,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                             .emailAddresses(
@@ -601,7 +585,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                             .emailAddresses(
@@ -635,7 +618,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                             .emailAddresses(
@@ -664,7 +646,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("BROAD.org", "verily.COM"))
                             .emailAddresses(
@@ -835,7 +816,6 @@ public class InstitutionServiceTest {
                       ImmutableList.of(
                           rtTierConfig
                               .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                              .eraRequired(false)
                               .accessTierShortName(registeredTier.getShortName())
                               .emailAddresses(
                                   ImmutableList.of(
@@ -857,7 +837,6 @@ public class InstitutionServiceTest {
                       ImmutableList.of(
                           rtTierConfig
                               .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                              .eraRequired(false)
                               .accessTierShortName(registeredTier.getShortName())))
                   .organizationTypeEnum(OrganizationType.OTHER);
           service.createInstitution(institution_withOtherOrganizationType);
@@ -873,7 +852,6 @@ public class InstitutionServiceTest {
                 ImmutableList.of(
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                        .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.OTHER)
             .organizationTypeOtherText("Some text")
@@ -891,7 +869,6 @@ public class InstitutionServiceTest {
                 List.of(
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                        .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .userInstructions("Some user instructions")
@@ -906,51 +883,6 @@ public class InstitutionServiceTest {
             service.updateInstitution(
                 institutionWithUserInstructions.getShortName(), institutionNoUserInstruction))
         .hasValue(expectedUpdateInstitution);
-  }
-
-  @Test
-  public void testERARequired_tierRequirementNotExist() {
-    final Institution existingInst =
-        new Institution()
-            .shortName("existingInst")
-            .displayName("existingInst")
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
-
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
-        .isEqualTo(false);
-  }
-
-  @Test
-  public void testERARequired_booleanIsNull() {
-    final Institution existingInst =
-        new Institution()
-            .shortName("existingInst")
-            .displayName("existingInst")
-            .addTierConfigsItem(
-                rtTierConfig
-                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .accessTierShortName(registeredTier.getShortName()))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
-
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
-        .isEqualTo(false);
-  }
-
-  @Test
-  public void testERARequired() {
-    final Institution existingInst =
-        new Institution()
-            .shortName("existingInst")
-            .displayName("existingInst")
-            .addTierConfigsItem(
-                rtTierConfig
-                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .eraRequired(true)
-                    .accessTierShortName(registeredTier.getShortName()))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
-
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
-        .isEqualTo(true);
   }
 
   @Test
@@ -971,7 +903,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
     final DbUser user = createUser("user@broad.org");
@@ -980,7 +911,6 @@ public class InstitutionServiceTest {
         .containsExactly(
             new UserTierEligibility()
                 .accessTierShortName(registeredTier.getShortName())
-                .eraRequired(false)
                 .eligible(true));
   }
 
@@ -996,12 +926,10 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")),
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(true)
                             .accessTierShortName(controlledTier.getShortName())
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user@broad.org");
@@ -1010,11 +938,9 @@ public class InstitutionServiceTest {
         .containsExactly(
             new UserTierEligibility()
                 .accessTierShortName(registeredTier.getShortName())
-                .eraRequired(false)
                 .eligible(true),
             new UserTierEligibility()
                 .accessTierShortName(controlledTier.getShortName())
-                .eraRequired(true)
                 .eligible(true));
   }
 
@@ -1030,12 +956,10 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")),
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
                             .accessTierShortName(controlledTier.getShortName())
                             .emailAddresses(ImmutableList.of("user2@broad.org")))));
     final DbUser user = createUser("user@broad.org");
@@ -1044,11 +968,9 @@ public class InstitutionServiceTest {
         .containsExactly(
             new UserTierEligibility()
                 .accessTierShortName(registeredTier.getShortName())
-                .eraRequired(false)
                 .eligible(true),
             new UserTierEligibility()
                 .accessTierShortName(controlledTier.getShortName())
-                .eraRequired(false)
                 .eligible(false));
   }
 
@@ -1064,12 +986,10 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")),
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName()))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
@@ -1077,7 +997,6 @@ public class InstitutionServiceTest {
         .containsExactly(
             new UserTierEligibility()
                 .accessTierShortName(registeredTier.getShortName())
-                .eraRequired(false)
                 .eligible(true));
   }
 
@@ -1093,7 +1012,6 @@ public class InstitutionServiceTest {
                     ImmutableList.of(
                         rtTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user2@broad.org");
@@ -1102,7 +1020,6 @@ public class InstitutionServiceTest {
         .containsExactly(
             new UserTierEligibility()
                 .accessTierShortName(registeredTier.getShortName())
-                .eraRequired(false)
                 .eligible(false));
   }
 

@@ -98,7 +98,7 @@ public class MailServiceImplTest {
     when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
     verify(mockMandrillApi, times(1)).send(any());
   }
 
@@ -107,7 +107,7 @@ public class MailServiceImplTest {
     doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
     verify(mockMandrillApi, times(3)).send(any());
   }
 
@@ -117,7 +117,7 @@ public class MailServiceImplTest {
     ServerErrorException exception =
         assertThrows(
             ServerErrorException.class,
-            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, true));
+            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
     assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
   }
 
@@ -126,7 +126,7 @@ public class MailServiceImplTest {
     DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
   }
 
   @Test
@@ -134,24 +134,24 @@ public class MailServiceImplTest {
     DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, false, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
   }
 
   @Test
   public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, false, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 

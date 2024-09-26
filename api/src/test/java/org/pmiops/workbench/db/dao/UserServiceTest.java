@@ -151,8 +151,6 @@ public class UserServiceTest {
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
     when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
-    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(false);
     when(mockInstitutionService.validateInstitutionalEmail(
             institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
         .thenReturn(true);
