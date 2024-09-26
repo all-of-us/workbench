@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -60,6 +62,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiHelper leonardoApiHelper;
   private final InteractiveAnalysisService interactiveAnalysisService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   RuntimeController(
@@ -69,7 +72,8 @@ public class RuntimeController implements RuntimeApiDelegate {
       WorkspaceService workspaceService,
       LeonardoMapper leonardoMapper,
       LeonardoApiHelper leonardoApiHelper,
-      InteractiveAnalysisService interactiveAnalysisService) {
+      InteractiveAnalysisService interactiveAnalysisService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -77,6 +81,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiHelper = leonardoApiHelper;
     this.interactiveAnalysisService = interactiveAnalysisService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -138,9 +143,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
+        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.containsValue(
+            runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
@@ -150,9 +154,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         }
         return runtime.status(RuntimeStatus.DELETED);
       } catch (RuntimeException e) {
-        log.warning(
-            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
-                + e.toString());
+        log.warning("RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping " + e);
       }
     }
 
@@ -161,6 +163,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
+
     long configCount =
         Stream.ofNullable(runtime)
             .flatMap(
@@ -171,11 +174,28 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException(
           "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
+    GceConfig gceConfig = runtime.getGceConfig();
+    GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
+
+    List<String> gceVmZones = workbenchConfigProvider.get().firecloud.gceVmZones;
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    if (gceConfig != null) {
+      if (Strings.isNullOrEmpty(gceConfig.getZone())) {
+        throw new BadRequestException("GceConfig must contain a zone");
+      }
+      if (!gceVmZones.contains(gceConfig.getZone())) {
+        throw new BadRequestException("Invalid zone");
+      }
+    }
 
-    GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
     if (gceWithPdConfig != null) {
+      if (Strings.isNullOrEmpty(gceWithPdConfig.getZone())) {
+        throw new BadRequestException("GceWithPdConfig must contain a zone");
+      }
+      if (!gceVmZones.contains(gceWithPdConfig.getZone())) {
+        throw new BadRequestException("Invalid zone");
+      }
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest == null) {
         throw new BadRequestException("GceWithPdConfig must contain a PersistentDiskRequest");

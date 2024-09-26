@@ -262,6 +262,7 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.billing.accountId = "free-tier";
     config.firecloud.leoBaseUrl = LEONARDO_URL;
+    config.firecloud.gceVmZones = ImmutableList.of("us-central1-a", "us-central1-b");
     config.server.apiBaseUrl = API_BASE_URL;
     config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
@@ -880,8 +881,7 @@ public class RuntimeControllerTest {
     runtimeController.createRuntime(
         WORKSPACE_NS,
         new Runtime()
-            .gceConfig(
-                new GceConfig().diskSize(50).machineType("standard").zone("us-central-1-a")));
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -903,7 +903,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
-    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1-a");
+    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central1-a");
   }
 
   @Test
@@ -923,7 +923,7 @@ public class RuntimeControllerTest {
                             .diskType(DiskType.SSD)
                             .name(getPdName())
                             .size(500))
-                    .zone("us-central-1-a")));
+                    .zone("us-central1-a")));
 
     Map<String, String> diskLabels = new HashMap<>();
     diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
@@ -954,7 +954,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
-    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1-a");
+    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central1-a");
   }
 
   @Test
@@ -1101,7 +1101,8 @@ public class RuntimeControllerTest {
                 new GceConfig()
                     .diskSize(50)
                     .machineType("standard")
-                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))
+                    .zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1143,7 +1144,8 @@ public class RuntimeControllerTest {
                             .diskType(DiskType.SSD)
                             .name(getPdName())
                             .size(500))
-                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))
+                    .zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1177,7 +1179,12 @@ public class RuntimeControllerTest {
         () ->
             runtimeController.createRuntime(
                 WORKSPACE_NS,
-                new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+                new Runtime()
+                    .gceConfig(
+                        new GceConfig()
+                            .diskSize(50)
+                            .machineType("standard")
+                            .zone("us-central1-a"))));
   }
 
   @Test
@@ -1189,7 +1196,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1213,7 +1221,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1238,7 +1247,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1263,7 +1273,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
