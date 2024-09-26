@@ -265,7 +265,6 @@ public class RuntimeControllerTest {
     config.server.apiBaseUrl = API_BASE_URL;
     config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
-    config.firecloud.gceVmZone = "us-central-1";
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
@@ -880,7 +879,9 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(
+                new GceConfig().diskSize(50).machineType("standard").zone("us-central-1-a")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -902,7 +903,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
-    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1");
+    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1-a");
   }
 
   @Test
@@ -921,7 +922,8 @@ public class RuntimeControllerTest {
                         new PersistentDiskRequest()
                             .diskType(DiskType.SSD)
                             .name(getPdName())
-                            .size(500))));
+                            .size(500))
+                    .zone("us-central-1-a")));
 
     Map<String, String> diskLabels = new HashMap<>();
     diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
@@ -952,7 +954,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
-    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
+    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1-a");
   }
 
   @Test
