@@ -979,6 +979,15 @@ describe(canUseExistingDisk.name, () => {
     ).toBeFalsy();
   });
 
+  it('returns true when the detachableType is missing (i.e. if it was previously DataProc)', () => {
+    const existingDisk = { ...stubDisk(), diskType: DiskType.STANDARD };
+    const { size } = existingDisk;
+    const detachableType = undefined;
+    expect(
+      canUseExistingDisk({ detachableType, size }, existingDisk)
+    ).toBeTruthy();
+  });
+
   it('returns false when existingDisk is undefined', () => {
     expect(
       canUseExistingDisk({ detachableType: DiskType.SSD, size: 5 }, undefined)
