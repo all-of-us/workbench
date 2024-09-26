@@ -152,7 +152,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     DbWorkspace toWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             copyRequest.getToWorkspaceNamespace(),
-            copyRequest.getToWorkspaceName(),
+            copyRequest.getToWorkspaceTerraName(),
             WorkspaceAccessLevel.WRITER);
     if (toWorkspace.getCdrVersion().getCdrVersionId()
         != fromWorkspace.getCdrVersion().getCdrVersionId()) {

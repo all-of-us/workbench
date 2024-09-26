@@ -7526,9 +7526,6 @@ components:
       - toWorkspaceTerraName
       type: object
       properties:
-        toWorkspaceName:
-          type: string
-          description: DEPRECATED due to ambiguity about which workspace name is required here
         toWorkspaceNamespace:
           type: string
         toWorkspaceTerraName:
