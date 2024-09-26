@@ -197,9 +197,9 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   @Override
   public void deleteOrphanedRawlsWorkspace(
       String username,
-      String wsNamespace,
+      String workspaceNamespace,
       String googleProject,
-      String terraName,
+      String workspaceTerraName,
       boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
@@ -211,12 +211,13 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       logger.log(
           Level.WARNING,
           String.format(
-              "An error occurred while deleting k8s resources for workspace %s", wsNamespace),
+              "An error occurred while deleting k8s resources for workspace %s",
+              workspaceNamespace),
           e);
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, terraName);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, workspaceNamespace, workspaceTerraName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -225,10 +226,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       try {
         // use the real FirecloudService here because impersonation is not needed;
         // billing projects are owned by the App SA
-        firecloudService.deleteBillingProject(wsNamespace);
+        firecloudService.deleteBillingProject(workspaceNamespace);
       } catch (Exception e) {
         String msg =
-            String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
+            String.format(
+                "Error deleting billing project %s: %s", workspaceNamespace, e.getMessage());
         logger.warning(msg);
       }
     }
