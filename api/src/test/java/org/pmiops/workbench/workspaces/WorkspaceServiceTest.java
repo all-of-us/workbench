@@ -272,7 +272,7 @@ public class WorkspaceServiceTest {
   }
 
   private DbWorkspace addMockedWorkspace(
-      long workspaceId,
+      Long workspaceId,
       String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel,
