@@ -274,18 +274,6 @@ public class UserServiceAccessTest {
         });
   }
 
-  // ERA Commons is not subject to annual renewal.
-
-  @Test
-  public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
-    testUnregistration(
-        user -> {
-          accessModuleService.updateBypassTime(
-              dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
-          return userDao.save(user);
-        });
-  }
-
   // Two Factor Auth (2FA) is not subject to annual renewal.
 
   @Test
@@ -936,25 +924,6 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void testInstitutionRequirement_loginGovFlagDisabled() {
-    // User not complete eRA, but it is optional for that institution
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    updateUserWithRetries(this::registerUser);
-    institutionService.updateInstitution(institution.getShortName(), institution);
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
-    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierEnabled(dbUser);
-
-    // Now login.gov flag disabled, eRA is always required.
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierDisabled(dbUser);
-  }
-
-  @Test
   public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
@@ -1047,7 +1016,7 @@ public class UserServiceAccessTest {
 
     updateInstitutionTier(ctTierConfig);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
