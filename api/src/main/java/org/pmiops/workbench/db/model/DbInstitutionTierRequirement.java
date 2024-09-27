@@ -81,6 +81,11 @@ public class DbInstitutionTierRequirement {
     return this;
   }
 
+  // remove when we remove the field from DB
+  @Column(name = "era_required")
+  public boolean getEraRequired() {
+    return eraRequired;
+  }
   /**
    * Omits ID field from equality so equivalent objects match regardless of whether they are
    * actually present in the DB.

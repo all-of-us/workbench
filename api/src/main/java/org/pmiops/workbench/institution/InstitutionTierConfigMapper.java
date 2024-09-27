@@ -44,6 +44,7 @@ public interface InstitutionTierConfigMapper {
       @Context List<DbAccessTier> dbAccessTiers) {
     dbInstitutionTierRequirement
         .setInstitution(dbInstitution)
+        .setEraRequired(false)
         .setAccessTier(
             AccessUtils.getAccessTierByShortNameOrThrow(
                 dbAccessTiers, source.getAccessTierShortName()));
