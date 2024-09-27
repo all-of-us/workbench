@@ -1043,8 +1043,6 @@ public class UserServiceAccessTest {
 
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
-    // bypassing era
     updateInstitutionTier(rtTierConfig);
 
     updateInstitutionTier(ctTierConfig);
