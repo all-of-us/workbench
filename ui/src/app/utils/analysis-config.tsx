@@ -11,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 import {
   ComputeType,
@@ -37,6 +38,7 @@ export interface AnalysisConfig {
   gpuConfig: GpuConfig;
   autopauseThreshold: number;
   numNodes?: number;
+  zone?: string;
 }
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
@@ -61,6 +63,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
     diskConfig,
     gpuConfig,
     machine: { name: machineType },
+    zone,
   } = analysisConfig;
 
   const runtime: Runtime = {
@@ -82,12 +85,14 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
         labels: {},
         name: diskConfig.existingDiskName,
       },
+      zone,
     };
   } else {
     runtime.gceConfig = {
       machineType,
       gpuConfig,
       diskSize: diskConfig.size,
+      zone,
     };
   }
 
@@ -149,6 +154,7 @@ export const withAnalysisConfigDefaults = (
     diskConfig: { size, detachable, detachableType },
     gpuConfig,
     dataprocConfig,
+    zone,
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
@@ -156,6 +162,7 @@ export const withAnalysisConfigDefaults = (
   // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
+    zone = zone ?? serverConfigStore.get().config.defaultGceVmZone;
     if (existingPersistentDisk) {
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
@@ -173,6 +180,7 @@ export const withAnalysisConfigDefaults = (
     detachable = false;
     detachableType = null;
     gpuConfig = null;
+    zone = null;
 
     const defaults = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
     dataprocConfig = {
@@ -204,6 +212,7 @@ export const withAnalysisConfigDefaults = (
     gpuConfig,
     autopauseThreshold:
       r.autopauseThreshold ?? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+    zone,
   };
 };
 export const toAnalysisConfig = (

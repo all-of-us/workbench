@@ -38,6 +38,7 @@ import {
   RuntimeStatusRequest,
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
@@ -120,6 +121,7 @@ export const CustomizePanel = ({
   }, [analysisConfig.computeType]);
 
   const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
+  const { gceVmZones } = serverConfigStore.get().config;
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -166,7 +168,7 @@ export const CustomizePanel = ({
         <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
           Cloud compute profile
         </h3>
-        <div style={styles.formGrid3}>
+        <div style={{ display: 'flex', gap: '1.5rem' }}>
           <MachineSelector
             idPrefix='runtime'
             disabled={disableControls}
@@ -191,7 +193,7 @@ export const CustomizePanel = ({
         <FlexRow
           style={{
             marginTop: '1.5rem',
-            justifyContent: 'space-between',
+            gap: '1rem',
           }}
         >
           <FlexColumn>
@@ -216,6 +218,31 @@ export const CustomizePanel = ({
                   )
                 }
               />
+            </FlexRow>
+          </FlexColumn>
+          <FlexColumn>
+            <label style={styles.label} htmlFor='runtime-compute'>
+              Zone
+            </label>
+            <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
+              <Dropdown
+                id='runtime-compute'
+                appendTo='self'
+                disabled={disableControls}
+                style={{ width: '15rem' }}
+                options={gceVmZones}
+                value={analysisConfig.zone}
+                onChange={({ value: zone }) => {
+                  // When the compute type changes, we need to normalize the config and potentially restore defaults.
+                  setAnalysisConfig(
+                    withAnalysisConfigDefaults(
+                      { ...analysisConfig, zone },
+                      gcePersistentDisk
+                    )
+                  );
+                }}
+              />
+
               {analysisConfig.computeType === ComputeType.Dataproc && (
                 <TooltipTrigger
                   content={
