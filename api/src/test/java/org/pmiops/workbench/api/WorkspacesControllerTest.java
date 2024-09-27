@@ -234,8 +234,10 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
+
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
+  private static final String WORKSPACE_TERRA_UUID = "ws-uuid";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()

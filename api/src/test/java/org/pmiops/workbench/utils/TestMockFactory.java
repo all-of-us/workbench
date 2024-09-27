@@ -69,12 +69,11 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
 public class TestMockFactory {
   public static final String WORKSPACE_BUCKET_NAME = "fc-secure-111111-2222-AAAA-BBBB-000000000000";
-  private static final String CDR_VERSION_ID = "1";
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME =
       fullBillingAccountName("00000-AAAAA-BBBBB");
-  private static final String WORKSPACE_FIRECLOUD_NAME =
-      "gonewiththewind"; // should match workspace name w/o spaces
+  private static final String CDR_VERSION_ID = "1";
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
+  public static final String WORKSPACE_TERRA_UUID = "ws-uuid-123";
 
   /**
    * Populate the list of expected Access Modules with appropriate properties. See
@@ -112,7 +111,7 @@ public class TestMockFactory {
               .setExpirable(true));
 
   public static Workspace createWorkspace(
-      String workspaceNameSpace, String workspaceDisplayName, String workspaceTerraName) {
+      String workspaceNamespace, String workspaceDisplayName, String workspaceTerraName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
@@ -121,12 +120,11 @@ public class TestMockFactory {
     ResearchOutcomeEnumsList.add(ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT);
 
     return new Workspace()
-        .terraName(WORKSPACE_FIRECLOUD_NAME)
         .etag("\"1\"")
         .name(workspaceDisplayName)
         .displayName(workspaceDisplayName)
         .terraName(workspaceTerraName)
-        .namespace(workspaceNameSpace)
+        .namespace(workspaceNamespace)
         .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
@@ -163,12 +161,13 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public static RawlsWorkspaceDetails createTerraWorkspace(String ns, String name, String creator) {
+  public static RawlsWorkspaceDetails createTerraWorkspace(
+      String namespace, String terraName, String creator) {
     return new RawlsWorkspaceDetails()
-        .namespace(ns)
-        .workspaceId(ns)
-        .name(name)
+        .namespace(namespace)
+        .name(terraName)
         .createdBy(creator)
+        .workspaceId(WORKSPACE_TERRA_UUID)
         .bucketName(WORKSPACE_BUCKET_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
@@ -186,10 +185,11 @@ public class TestMockFactory {
   public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
     doAnswer(
             invocation -> {
-              String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
+              String capturedWorkspaceTerraName = (String) invocation.getArguments()[1];
               RawlsWorkspaceDetails fcWorkspace =
-                  createTerraWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
+                  createTerraWorkspace(
+                      capturedWorkspaceNamespace, capturedWorkspaceTerraName, null);
 
               RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
@@ -197,7 +197,7 @@ public class TestMockFactory {
 
               doReturn(fcResponse)
                   .when(fireCloudService)
-                  .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
+                  .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceTerraName);
               return fcWorkspace;
             })
         .when(fireCloudService)
