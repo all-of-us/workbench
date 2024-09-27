@@ -142,9 +142,8 @@ public class RuntimeControllerTest {
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String WORKSPACE_DISPLAY_NAME = "My First Workspace";
   // The Terra Name (or Firecloud Name) identifier is generated based on the display name of the
-  // workspace
-  // upon first creation, removing whitespace and punctuation, and lowercasing everything. Note that
-  // when a workspace name changes, the Terra Name stays the same.
+  // workspace upon first creation, removing whitespace and punctuation, and lowercasing everything.
+  // Note that when a workspace name changes, the Terra Name stays the same.
   private static final String WORKSPACE_TERRA_NAME = "myfirstworkspace";
   private static final String WORKSPACE_CREATOR = "test-user@whatever.com";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";

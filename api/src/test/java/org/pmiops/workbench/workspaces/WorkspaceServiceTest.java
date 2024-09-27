@@ -279,7 +279,7 @@ public class WorkspaceServiceTest {
       WorkspaceActiveStatus activeStatus) {
 
     // in reality, these will NOT match
-        String workspaceTerraUuid = Long.toString(workspaceId);
+    String workspaceTerraUuid = Long.toString(workspaceId);
 
     RawlsWorkspaceResponse mockWorkspaceResponse =
         mockRawlsWorkspaceResponse(
