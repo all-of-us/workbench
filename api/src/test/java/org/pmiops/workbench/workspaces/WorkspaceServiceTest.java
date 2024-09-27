@@ -218,6 +218,27 @@ public class WorkspaceServiceTest {
     workbenchConfig.billing.accountId = "free-tier-account";
   }
 
+  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
+      String workspaceTerraUuid,
+      String workspaceTerraName,
+      String workspaceNamespace,
+      RawlsWorkspaceAccessLevel accessLevel) {
+    RawlsWorkspaceDetails mockWorkspace =
+        new RawlsWorkspaceDetails()
+            .workspaceId(workspaceTerraUuid)
+            .name(workspaceTerraName)
+            .namespace(workspaceNamespace);
+
+    RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
+    mockWorkspaceResponse.workspace(mockWorkspace);
+    mockWorkspaceResponse.accessLevel(accessLevel);
+
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(workspaceNamespace, workspaceTerraName);
+    return mockWorkspaceResponse;
+  }
+
   private RawlsWorkspaceListResponse mockRawlsWorkspaceListResponse(
       String workspaceTerraUuid,
       String workspaceTerraName,
@@ -251,14 +272,14 @@ public class WorkspaceServiceTest {
   }
 
   private DbWorkspace addMockedWorkspace(
-      Long workspaceId,
+      long workspaceId,
       String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
     // in reality, these will NOT match
-    String workspaceTerraUuid = Long.toString(workspaceId);
+        String workspaceTerraUuid = Long.toString(workspaceId);
 
     RawlsWorkspaceResponse mockWorkspaceResponse =
         mockRawlsWorkspaceResponse(
@@ -320,27 +341,6 @@ public class WorkspaceServiceTest {
     when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
 
     return dbWorkspace;
-  }
-
-  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
-      String workspaceTerraUuid,
-      String workspaceTerraName,
-      String workspaceNamespace,
-      RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceDetails mockWorkspace =
-        new RawlsWorkspaceDetails()
-            .workspaceId(workspaceTerraUuid)
-            .name(workspaceTerraName)
-            .namespace(workspaceNamespace);
-
-    RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
-    mockWorkspaceResponse.workspace(mockWorkspace);
-    mockWorkspaceResponse.accessLevel(accessLevel);
-
-    doReturn(mockWorkspaceResponse)
-        .when(mockFireCloudService)
-        .getWorkspace(workspaceNamespace, workspaceTerraName);
-    return mockWorkspaceResponse;
   }
 
   @Test
