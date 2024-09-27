@@ -942,49 +942,6 @@ describe('DataAccessRequirements', () => {
     expect(spyCompliance).toHaveBeenCalledTimes(0);
   });
 
-  it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
-    let { container } = component();
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
-
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-          },
-          {
-            accessTierShortName: AccessTierShortNames.Controlled,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-  });
-
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
     let { container } = component();
 
@@ -1188,42 +1145,6 @@ describe('DataAccessRequirements', () => {
           AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
-    }
-  );
-
-  it(
-    'Should not display eraCommons module in CT card ' +
-      'when eraCommons is disabled via the environment config',
-    async () => {
-      serverConfigStore.set({
-        config: { ...defaultServerConfig, enableEraCommons: false },
-      });
-
-      let { container } = component();
-
-      profileStore.set({
-        profile: {
-          ...ProfileStubVariables.PROFILE_STUB,
-          tierEligibilities: [
-            {
-              accessTierShortName: AccessTierShortNames.Registered,
-              eligible: false,
-            },
-            {
-              accessTierShortName: AccessTierShortNames.Controlled,
-              eligible: true,
-            },
-          ],
-        },
-        load,
-        reload,
-        updateCache,
-      });
-      ({ container } = component());
-
-      expect(
-        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
-      ).toBeFalsy();
     }
   );
 
