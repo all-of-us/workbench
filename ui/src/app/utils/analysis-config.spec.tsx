@@ -125,6 +125,7 @@ const defaultAnalysisConfig: AnalysisConfig = {
     numOfGpus: 1,
   },
   numNodes: dataprocConfig.numberOfWorkers + 1, // +1 for the master node
+  zone: 'us-central1-a',
 };
 
 describe(fromAnalysisConfig.name, () => {
