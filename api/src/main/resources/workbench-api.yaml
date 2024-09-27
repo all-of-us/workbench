@@ -7148,6 +7148,14 @@ components:
           type: boolean
           default: false
           description: If true, the api is down for maintenance and will block all requests.
+        gceVmZones:
+          type: array
+          items:
+            type: string
+            description: List of GCE VM zones
+        defaultGceVmZone:
+          type: string
+          description: The zone that is selected by default when creating a GCE VM. This must be one of the values specified in gceVmZones.
     AccessModuleConfig:
       required:
       - expirable
