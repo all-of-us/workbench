@@ -1121,6 +1121,43 @@ Common.register_command({
   :fn => ->(*args) { import_cdr_indices_build_to_cloudsql("import-cdr-indices-build-to-cloudsql", *args) }
 })
 
+def set_grants(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project - Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version - Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.cdr_version }
+  op.parse.validate
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  ENV.update(read_db_vars(gcc))
+  ENV.update(must_get_env_value(gcc.project, :gae_vars))
+  ENV["DB_HOST"] = "127.0.0.1" # Temporary fix until we decide on how to handle this correctly.
+  ENV["DB_PORT"] = "3307" # Temporary fix until we decide on how to handle this correctly.
+
+  common = Common.new
+  CloudSqlProxyContext.new(gcc.project).run do
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/set-grants.sh #{op.opts.cdr_version}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "set-grants",
+  :description => "Set grants on new cdr database.",
+  :fn => ->(*args) { set_grants("set-grants", *args) }
+})
+
 def copy_bq_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
