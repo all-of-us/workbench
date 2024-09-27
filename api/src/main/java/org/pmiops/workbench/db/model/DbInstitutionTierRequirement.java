@@ -26,6 +26,7 @@ public class DbInstitutionTierRequirement {
   private DbInstitution institution;
   private DbAccessTier accessTier;
   private MembershipRequirement membershipRequirement;
+  private boolean eraRequired; //remove when we remove the field from DB
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,6 +75,11 @@ public class DbInstitutionTierRequirement {
     return this;
   }
 
+  //remove when we remove the field from DB
+  public DbInstitutionTierRequirement setEraRequired(boolean eraRequired) {
+    this.eraRequired = false;
+    return this;
+  }
   /**
    * Omits ID field from equality so equivalent objects match regardless of whether they are
    * actually present in the DB.
