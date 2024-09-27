@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import { SelectItem } from 'primereact/selectitem';
 
 import { Disk, DiskType } from 'generated/fetch';
 
@@ -20,16 +21,35 @@ export enum ComputeType {
   Dataproc = 'Dataproc Cluster',
 }
 
+export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
 export const AutopauseMinuteThresholds = new Map([
-  [30, '30 minutes (default)'],
+  [
+    DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+    `${DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} minutes (default)`,
+  ],
   [60 * 8, '8 hours'],
   [5 * 24 * 60, '5 days'],
   [10 * 24 * 60, '10 days'],
 ]);
 
-export const AutodeleteDaysThresholds = [1, 3, 7, 8, 15, 30];
-
-export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
+export const autodeleteOptions: SelectItem[] = [
+  {
+    value: 60, // minutes
+    label: 'Idle for 1 hour',
+  },
+  {
+    value: 8 * 60,
+    label: 'Idle for 8 hours',
+  },
+  {
+    value: 24 * 60,
+    label: 'Idle for 1 day',
+  },
+  ...[3, 7, 15, 30].map((days) => ({
+    value: days * 24 * 60,
+    label: `Idle for ${days} days`,
+  })),
+];
 
 export interface Machine {
   name: string;

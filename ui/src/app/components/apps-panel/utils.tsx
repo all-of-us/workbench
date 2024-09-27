@@ -119,7 +119,7 @@ export const defaultSASCreateRequest: CreateAppRequest = {
     diskType: DiskType.STANDARD,
   },
   autodeleteEnabled: true,
-  autodeleteThreshold: 24 * 60, // in minutes, so this is 1 day
+  autodeleteThreshold: 8 * 60, // in minutes, so this is 8 hours
 };
 
 export const defaultAppRequest: Record<AppType, CreateAppRequest> = {
