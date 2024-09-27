@@ -237,7 +237,6 @@ public class WorkspacesControllerTest {
 
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
-  private static final String WORKSPACE_TERRA_UUID = "ws-uuid";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
@@ -595,8 +594,13 @@ public class WorkspacesControllerTest {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);
   }
 
+  private static String testWorkspaceNamespace = "namespace";
+  private static String testWorkspaceDisplayName = "Workspace Name";
+  private static String testWorkspaceTerraName = "workspacename";
+
   private Workspace createWorkspace() {
-    return TestMockFactory.createWorkspace("namespace", "Workspace Name", "workspacename");
+    return TestMockFactory.createWorkspace(
+        testWorkspaceNamespace, testWorkspaceDisplayName, testWorkspaceTerraName);
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -659,8 +663,9 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(retrievedWorkspace.getTerraName()).isEqualTo("name");
-    assertThat(retrievedWorkspace.getName()).isEqualTo("name");
+    assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
+    assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
+    assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
     assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
     assertThat(retrievedWorkspace.getResearchPurpose().isMethodsDevelopment()).isTrue();
@@ -1439,7 +1444,9 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     modWorkspace.setResearchPurpose(new ResearchPurpose());
@@ -1475,7 +1482,9 @@ public class WorkspacesControllerTest {
           altCdrVersion.setAccessTier(altAccessTier);
           altCdrVersion = cdrVersionDao.save(altCdrVersion);
           final Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           modWorkspace.setBillingAccountName(
               workbenchConfig.billing.initialCreditsBillingAccountName());
