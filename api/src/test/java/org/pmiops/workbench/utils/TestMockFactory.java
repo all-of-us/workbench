@@ -111,10 +111,8 @@ public class TestMockFactory {
               .setName(DbAccessModuleName.PUBLICATION_CONFIRMATION)
               .setExpirable(true));
 
-  // TODO there's something off about how "workspaceName" here works.  Investigate.
-  // For best results, use a lowercase-only workspaceName.
-  // To me, this hints at a firecloudName/aouName discrepancy somewhere in here.
-  public static Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
+  public static Workspace createWorkspace(
+      String workspaceNameSpace, String workspaceDisplayName, String workspaceTerraName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS);
@@ -125,7 +123,9 @@ public class TestMockFactory {
     return new Workspace()
         .terraName(WORKSPACE_FIRECLOUD_NAME)
         .etag("\"1\"")
-        .name(workspaceName)
+        .name(workspaceDisplayName)
+        .displayName(workspaceDisplayName)
+        .terraName(workspaceTerraName)
         .namespace(workspaceNameSpace)
         .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(WORKSPACE_BUCKET_NAME)
@@ -163,8 +163,7 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public static RawlsWorkspaceDetails createFirecloudWorkspace(
-      String ns, String name, String creator) {
+  public static RawlsWorkspaceDetails createTerraWorkspace(String ns, String name, String creator) {
     return new RawlsWorkspaceDetails()
         .namespace(ns)
         .workspaceId(ns)
@@ -190,7 +189,7 @@ public class TestMockFactory {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
               RawlsWorkspaceDetails fcWorkspace =
-                  createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
+                  createTerraWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);

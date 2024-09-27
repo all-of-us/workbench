@@ -595,7 +595,7 @@ public class NotebooksControllerTest {
     final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
     RawlsWorkspaceDetails fcWorkspace =
-        TestMockFactory.createFirecloudWorkspace(
+        TestMockFactory.createTerraWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);

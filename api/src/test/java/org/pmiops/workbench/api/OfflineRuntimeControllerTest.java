@@ -142,7 +142,9 @@ public class OfflineRuntimeControllerTest {
 
     workspace =
         workspaceDao.save(
-            TestMockFactory.createDbWorkspaceStub(TestMockFactory.createWorkspace("ns1", "ws1"), 0L)
+            TestMockFactory.createDbWorkspaceStub(
+                    TestMockFactory.createWorkspace("ns1", "Workspace Name 1", "workspacename1"),
+                    0L)
                 .setCdrVersion(cdrVersion)
                 .setGoogleProject("proj1"));
   }

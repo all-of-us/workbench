@@ -55,8 +55,8 @@ public class WorkspaceAdminControllerTest {
 
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
-  private static final String WORKSPACE_NAME = "Gone with the Wind";
-  private static final String DB_WORKSPACE_FIRECLOUD_NAME = "gonewiththewind";
+  private static final String WORKSPACE_DISPLAY_NAME = "Work It !";
+  private static final String WORKSPACE_TERRA_NAME = "workit";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
   private static final String NONSENSE_NAMESPACE = "wharrgarbl_wharrgarbl";
   private static final String BAD_EXCEPTION_NULL_REQUEST_DATE_REASON =
@@ -99,7 +99,8 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(Optional.empty());
 
     final Workspace workspace =
-        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+        TestMockFactory.createWorkspace(
+            WORKSPACE_NAMESPACE, WORKSPACE_DISPLAY_NAME, WORKSPACE_TERRA_NAME);
     final DbWorkspace dbWorkspace =
         TestMockFactory.createDbWorkspaceStub(workspace, DB_WORKSPACE_ID);
     when(mockWorkspaceAdminService.getFirstWorkspaceByNamespace(WORKSPACE_NAMESPACE))
@@ -108,8 +109,7 @@ public class WorkspaceAdminControllerTest {
     final UserRole collaborator =
         new UserRole().email("test@test.test").role(WorkspaceAccessLevel.WRITER);
     final List<UserRole> collaborators = List.of(collaborator);
-    when(mockWorkspaceService.getFirecloudUserRoles(
-            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
+    when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME))
         .thenReturn(collaborators);
 
     final AdminWorkspaceObjectsCounts adminWorkspaceObjectsCounts =
@@ -133,12 +133,11 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(runtimes);
 
     RawlsWorkspaceDetails fcWorkspace =
-        TestMockFactory.createFirecloudWorkspace(
-            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
+        TestMockFactory.createTerraWorkspace(
+            WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
     RawlsWorkspaceResponse fcWorkspaceResponse =
         new RawlsWorkspaceResponse().workspace(fcWorkspace);
-    when(mockFirecloudService.getWorkspaceAsService(
-            WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
+    when(mockFirecloudService.getWorkspaceAsService(WORKSPACE_NAMESPACE, WORKSPACE_TERRA_NAME))
         .thenReturn(fcWorkspaceResponse);
   }
 

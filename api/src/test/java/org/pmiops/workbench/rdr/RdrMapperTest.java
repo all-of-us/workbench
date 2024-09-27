@@ -105,7 +105,7 @@ public class RdrMapperTest {
     assertThat(
             rdrMapper.toRdrWorkspace(
                 TestMockFactory.createDbWorkspaceStub(
-                    TestMockFactory.createWorkspace("ns", "name"), 1L)))
+                    TestMockFactory.createWorkspace("ns", "Name", "name"), 1L)))
         .isEqualTo(
             new RdrWorkspace()
                 .workspaceId(1)
@@ -145,7 +145,8 @@ public class RdrMapperTest {
   public void testMapRdrWorkspace_otherPopulations() {
     RdrWorkspace got =
         rdrMapper.toRdrWorkspace(
-            TestMockFactory.createDbWorkspaceStub(TestMockFactory.createWorkspace("ns", "name"), 1L)
+            TestMockFactory.createDbWorkspaceStub(
+                    TestMockFactory.createWorkspace("ns", "Name", "name"), 1L)
                 .setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.OTHER))
                 .setOtherPopulationDetails("reptilians"));
     assertThat(got.getWorkspaceDemographic().getOthers()).isEqualTo("reptilians");

@@ -55,9 +55,9 @@ import org.springframework.test.annotation.DirtiesContext;
 public class CohortAnnotationDefinitionControllerTest {
 
   private static final String NAMESPACE = "aou-test";
-  private static final String NAME = "test";
+  private static final String TERRA_NAME = "test";
   private static final String NAMESPACE2 = "aou-test";
-  private static final String NAME2 = "test2";
+  private static final String TERRA_NAME2 = "test2";
   private static final String EXISTING_COLUMN_NAME = "testing";
   private static final String NEW_COLUMN_NAME = "new_column";
   private DbCohort cohort;
@@ -119,13 +119,13 @@ public class CohortAnnotationDefinitionControllerTest {
 
     workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
-    workspace.setFirecloudName(NAME);
+    workspace.setFirecloudName(TERRA_NAME);
     workspace.setWorkspaceId(1L);
     workspaceDao.save(workspace);
 
     workspace2 = new DbWorkspace();
     workspace2.setWorkspaceNamespace(NAMESPACE2);
-    workspace2.setFirecloudName(NAME2);
+    workspace2.setFirecloudName(TERRA_NAME2);
     workspace2.setWorkspaceId(2L);
     workspaceDao.save(workspace2);
 
@@ -148,7 +148,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-          NAMESPACE, NAME, 0L, new CohortAnnotationDefinition().columnName("column_name"));
+          NAMESPACE, TERRA_NAME, 0L, new CohortAnnotationDefinition().columnName("column_name"));
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 0L);
@@ -171,7 +171,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-          NAMESPACE, NAME, cohort.getCohortId(), request);
+          NAMESPACE, TERRA_NAME, cohort.getCohortId(), request);
       fail("Should have thrown a ConflictException!");
     } catch (ConflictException e) {
       assertThat(e.getMessage())
@@ -195,7 +195,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     CohortAnnotationDefinition response =
         cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(NAMESPACE, NAME, cohort.getCohortId(), request)
+            .createCohortAnnotationDefinition(NAMESPACE, TERRA_NAME, cohort.getCohortId(), request)
             .getBody();
     CohortAnnotationDefinition expectedResponse =
         new CohortAnnotationDefinition()
@@ -222,7 +222,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     CohortAnnotationDefinition response =
         cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(NAMESPACE, NAME, cohort.getCohortId(), request)
+            .createCohortAnnotationDefinition(NAMESPACE, TERRA_NAME, cohort.getCohortId(), request)
             .getBody();
     CohortAnnotationDefinition expectedResponse =
         new CohortAnnotationDefinition()
@@ -244,7 +244,7 @@ public class CohortAnnotationDefinitionControllerTest {
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
           NAMESPACE,
-          NAME,
+          TERRA_NAME,
           99L,
           dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
           request);
@@ -262,7 +262,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-          NAMESPACE, NAME, cohort.getCohortId(), 99L, request);
+          NAMESPACE, TERRA_NAME, cohort.getCohortId(), 99L, request);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage())
@@ -284,7 +284,7 @@ public class CohortAnnotationDefinitionControllerTest {
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
           NAMESPACE,
-          NAME,
+          TERRA_NAME,
           cohort.getCohortId(),
           dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
           request);
@@ -322,7 +322,7 @@ public class CohortAnnotationDefinitionControllerTest {
         cohortAnnotationDefinitionController
             .updateCohortAnnotationDefinition(
                 NAMESPACE,
-                NAME,
+                TERRA_NAME,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
                 request)
@@ -337,7 +337,10 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-          NAMESPACE, NAME, 99L, dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+          NAMESPACE,
+          TERRA_NAME,
+          99L,
+          dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
@@ -350,7 +353,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-          NAMESPACE, NAME, cohort.getCohortId(), 99L);
+          NAMESPACE, TERRA_NAME, cohort.getCohortId(), 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage())
@@ -369,7 +372,7 @@ public class CohortAnnotationDefinitionControllerTest {
         () ->
             cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
                 NAMESPACE2,
-                NAME2,
+                TERRA_NAME2,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
@@ -383,7 +386,7 @@ public class CohortAnnotationDefinitionControllerTest {
         () ->
             cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
                 NAMESPACE2,
-                NAME2,
+                TERRA_NAME2,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
@@ -405,7 +408,7 @@ public class CohortAnnotationDefinitionControllerTest {
         () ->
             cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
                 NAMESPACE2,
-                NAME2,
+                TERRA_NAME2,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
                 request));
@@ -419,7 +422,7 @@ public class CohortAnnotationDefinitionControllerTest {
         cohortAnnotationDefinitionController
             .deleteCohortAnnotationDefinition(
                 NAMESPACE,
-                NAME,
+                TERRA_NAME,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .getBody();
@@ -433,7 +436,10 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-          NAMESPACE, NAME, 99L, dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+          NAMESPACE,
+          TERRA_NAME,
+          99L,
+          dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
@@ -446,7 +452,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-          NAMESPACE, NAME, cohort.getCohortId(), 99L);
+          NAMESPACE, TERRA_NAME, cohort.getCohortId(), 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage())
@@ -464,7 +470,7 @@ public class CohortAnnotationDefinitionControllerTest {
         cohortAnnotationDefinitionController
             .getCohortAnnotationDefinition(
                 NAMESPACE,
-                NAME,
+                TERRA_NAME,
                 cohort.getCohortId(),
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .getBody();
@@ -487,7 +493,8 @@ public class CohortAnnotationDefinitionControllerTest {
     setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     try {
-      cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(NAMESPACE, NAME, 99L);
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
+          NAMESPACE, TERRA_NAME, 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
       assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
@@ -500,7 +507,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     CohortAnnotationDefinitionListResponse responseDefinition =
         cohortAnnotationDefinitionController
-            .getCohortAnnotationDefinitions(NAMESPACE, NAME, cohort.getCohortId())
+            .getCohortAnnotationDefinitions(NAMESPACE, TERRA_NAME, cohort.getCohortId())
             .getBody();
 
     CohortAnnotationDefinition expectedResponse =
@@ -519,13 +526,13 @@ public class CohortAnnotationDefinitionControllerTest {
 
   private void setupWorkspaceServiceMock(WorkspaceAccessLevel workspaceAccessLevel) {
     when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            NAMESPACE, NAME, workspaceAccessLevel))
+            NAMESPACE, TERRA_NAME, workspaceAccessLevel))
         .thenReturn(workspace);
   }
 
   private void setupWorkspace2ServiceMock(WorkspaceAccessLevel workspaceAccessLevel) {
     when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            NAMESPACE2, NAME2, workspaceAccessLevel))
+            NAMESPACE2, TERRA_NAME2, workspaceAccessLevel))
         .thenReturn(workspace2);
   }
 }
