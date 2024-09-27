@@ -1353,7 +1353,9 @@ public class WorkspacesControllerTest {
         ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setResearchPurpose(modPurpose);
     modWorkspace.setBillingAccountName(newBillingAccountName);
@@ -1409,7 +1411,9 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("cloned-billing-account");
     modWorkspace.setResearchPurpose(new ResearchPurpose());
@@ -1725,7 +1729,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
 
@@ -1906,7 +1912,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
@@ -2005,7 +2013,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
@@ -2143,12 +2153,16 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
+
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
+
     req.setWorkspace(modWorkspace);
     stubCloneWorkspace(
         modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
@@ -2175,7 +2189,9 @@ public class WorkspacesControllerTest {
 
     Workspace modWorkspace =
         new Workspace()
-            .name("cloned")
+            .name("Cloned")
+            .displayName("Cloned")
+            .terraName("cloned")
             .namespace("cloned-ns")
             .billingAccountName("billing-account")
             .researchPurpose(workspace.getResearchPurpose())
@@ -2395,7 +2411,9 @@ public class WorkspacesControllerTest {
           workspace = workspacesController.createWorkspace(workspace).getBody();
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           req.setWorkspace(modWorkspace);
           // Missing research purpose.
@@ -2422,7 +2440,9 @@ public class WorkspacesControllerTest {
               .thenThrow(new NotFoundException());
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           req.setWorkspace(modWorkspace);
           ResearchPurpose modPurpose = new ResearchPurpose();
