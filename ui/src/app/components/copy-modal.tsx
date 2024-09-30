@@ -257,7 +257,6 @@ const CopyModal = withCdrVersions()(
 
       saveFunction({
         toWorkspaceNamespace: this.state.destination.namespace,
-        toWorkspaceName: this.state.destination.terraName,
         toWorkspaceTerraName: this.state.destination.terraName,
         newName: this.state.newName,
       })

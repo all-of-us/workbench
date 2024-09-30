@@ -7534,9 +7534,6 @@ components:
       - toWorkspaceTerraName
       type: object
       properties:
-        toWorkspaceName:
-          type: string
-          description: DEPRECATED due to ambiguity about which workspace name is required here
         toWorkspaceNamespace:
           type: string
         toWorkspaceTerraName:
@@ -12437,6 +12434,10 @@ components:
           type: string
           description: Description of user-defined research dissemination option (when
             "Other" is selected).
+        featuredWorkspaceCategory:
+          type: string
+          description: If the workspace is featured or a community workspace, this is its category.
+            See FeaturedWorkspaceCategory for the available options.
         lastModifiedTime:
           type: string
           description: |-
@@ -12451,9 +12452,6 @@ components:
           type: integer
           description: ""
           format: int32
-        published:
-          type: boolean
-          description: If true, this workspace has been published.
         rpAdditionalNotes:
           type: string
           description: Research purpose additional notes input.

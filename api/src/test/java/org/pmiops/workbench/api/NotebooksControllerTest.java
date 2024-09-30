@@ -168,14 +168,14 @@ public class NotebooksControllerTest {
   @Test
   public void testCopyNotebook() {
     String toWorkspaceNamespace = "fromProject";
-    String toWorkspaceName = "fromWorkspace_001";
+    String toWorkspaceTerraName = "fromWorkspace_001";
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
     FileDetail expectedFileDetail = createFileDetail(TO_NOTEBOOK_NAME, toPath, toLastModifiedTime);
     copyRequest.setNewName(TO_NOTEBOOK_NAME);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
-    copyRequest.setToWorkspaceName(toWorkspaceName);
+    copyRequest.setToWorkspaceTerraName(toWorkspaceTerraName);
 
     when(mockNotebookService.copyNotebook(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
@@ -193,7 +193,7 @@ public class NotebooksControllerTest {
             FROM_WORKSPACE_NAME,
             FROM_NOTEBOOK_NAME,
             toWorkspaceNamespace,
-            toWorkspaceName,
+            toWorkspaceTerraName,
             TO_NOTEBOOK_NAME);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
@@ -203,7 +203,7 @@ public class NotebooksControllerTest {
   public void testCopyNotebook_rmd() {
     String fromNotebookName = "test.Rmd";
     String toWorkspaceNamespace = "fromProject";
-    String toWorkspaceName = "fromWorkspace_001";
+    String toWorkspaceTerraName = "fromWorkspace_001";
     String newName = "toName";
     String newNameWithExtension = newName + ".Rmd";
     String toPath = "/path/to/" + newName;
@@ -213,7 +213,7 @@ public class NotebooksControllerTest {
         createFileDetail(newNameWithExtension, toPath, toLastModifiedTime);
     copyRequest.setNewName(newName);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
-    copyRequest.setToWorkspaceName(toWorkspaceName);
+    copyRequest.setToWorkspaceTerraName(toWorkspaceTerraName);
 
     when(mockNotebookService.copyNotebook(
             anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
@@ -231,7 +231,7 @@ public class NotebooksControllerTest {
             FROM_WORKSPACE_NAME,
             fromNotebookName,
             toWorkspaceNamespace,
-            toWorkspaceName,
+            toWorkspaceTerraName,
             newNameWithExtension);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
@@ -239,11 +239,11 @@ public class NotebooksControllerTest {
 
   @Test
   public void testCopyNotebook_alreadyExists() {
-    String toWorkspaceNamespace = "fromProject";
-    String toWorkspaceName = "fromWorkspace_001";
+    String toWorkspaceNamespace = "toProject";
+    String toWorkspaceTerraName = "toWorkspace_001";
     CopyRequest copyRequest = new CopyRequest();
     copyRequest.setNewName(TO_NOTEBOOK_NAME);
-    copyRequest.setToWorkspaceName(toWorkspaceName);
+    copyRequest.setToWorkspaceTerraName(toWorkspaceTerraName);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
 
     when(mockNotebookService.copyNotebook(
@@ -266,7 +266,7 @@ public class NotebooksControllerTest {
             FROM_WORKSPACE_NAME,
             FROM_NOTEBOOK_NAME,
             toWorkspaceNamespace,
-            toWorkspaceName,
+            toWorkspaceTerraName,
             TO_NOTEBOOK_NAME);
     assertThat(exception.getMessage()).isEqualTo("File already exists at copy destination");
   }
@@ -591,12 +591,12 @@ public class NotebooksControllerTest {
       RawlsWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
-    final String testWorkspaceName = "test-ws";
+    final String testWorkspaceTerraName = "test-ws";
     final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
     RawlsWorkspaceDetails fcWorkspace =
-        TestMockFactory.createFirecloudWorkspace(
-            testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+        TestMockFactory.createTerraWorkspace(
+            testWorkspaceNamespace, testWorkspaceTerraName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
@@ -611,7 +611,8 @@ public class NotebooksControllerTest {
 
     assertThat(
             notebooksController
-                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getNotebookLockingMetadata(
+                    testWorkspaceNamespace, testWorkspaceTerraName, testNotebook)
                 .getBody())
         .isEqualTo(expectedResponse);
   }

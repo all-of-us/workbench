@@ -102,14 +102,17 @@ public class RdrMapperTest {
 
   @Test
   public void testMapRdrWorkspace() {
+    String namespace = "ns";
+    String displayName = "Name";
+    String terraName = "name";
     assertThat(
             rdrMapper.toRdrWorkspace(
                 TestMockFactory.createDbWorkspaceStub(
-                    TestMockFactory.createWorkspace("ns", "name"), 1L)))
+                    TestMockFactory.createWorkspace(namespace, displayName, terraName), 1L)))
         .isEqualTo(
             new RdrWorkspace()
                 .workspaceId(1)
-                .name("name")
+                .name(displayName)
                 .status(StatusEnum.ACTIVE)
                 .diseaseFocusedResearch(true)
                 .diseaseFocusedResearchName("cancer")
@@ -145,7 +148,8 @@ public class RdrMapperTest {
   public void testMapRdrWorkspace_otherPopulations() {
     RdrWorkspace got =
         rdrMapper.toRdrWorkspace(
-            TestMockFactory.createDbWorkspaceStub(TestMockFactory.createWorkspace("ns", "name"), 1L)
+            TestMockFactory.createDbWorkspaceStub(
+                    TestMockFactory.createWorkspace("ns", "Name", "name"), 1L)
                 .setSpecificPopulationsEnum(ImmutableSet.of(SpecificPopulationEnum.OTHER))
                 .setOtherPopulationDetails("reptilians"));
     assertThat(got.getWorkspaceDemographic().getOthers()).isEqualTo("reptilians");

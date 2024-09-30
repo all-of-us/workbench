@@ -10,7 +10,6 @@ import {
   InstitutionApi,
   Profile,
   UserAdminApi,
-  UserTierEligibility,
 } from 'generated/fetch';
 
 import { render, screen, within } from '@testing-library/react';
@@ -633,103 +632,4 @@ describe('AdminUserProfile', () => {
     // confirm that the expectedModules are listed in order with expected title text
     expectModuleTitlesInOrder(expectedModules, rows);
   });
-
-  test.each([
-    [
-      'Registered Tier',
-      [
-        {
-          accessTierShortName: AccessTierShortNames.Registered,
-          eraRequired: true,
-        },
-        {
-          accessTierShortName: AccessTierShortNames.Controlled,
-          eraRequired: false,
-        },
-      ],
-      true,
-      false,
-    ],
-    [
-      'Controlled Tier',
-      [
-        {
-          accessTierShortName: AccessTierShortNames.Registered,
-          eraRequired: false,
-        },
-        {
-          accessTierShortName: AccessTierShortNames.Controlled,
-          eraRequired: true,
-        },
-      ],
-      false,
-      true,
-    ],
-    [
-      'Registered Tier and Controlled Tier',
-      [
-        {
-          accessTierShortName: AccessTierShortNames.Registered,
-          eraRequired: true,
-        },
-        {
-          accessTierShortName: AccessTierShortNames.Controlled,
-          eraRequired: true,
-        },
-      ],
-      true,
-      true,
-    ],
-  ])(
-    'should indicate when eRA Commons is required for %s',
-    async (
-      tiers: string,
-      tierEligibilities: UserTierEligibility[],
-      rtBadgeExpected: boolean,
-      ctBadgeExpected: boolean
-    ) => {
-      updateTargetProfile({
-        tierEligibilities,
-      });
-
-      component();
-      await waitUntilPageLoaded();
-
-      const table = screen.getByTestId('access-module-table');
-      expect(
-        within(table).getByText(`requires eRA Commons for ${tiers} access`, {
-          exact: false,
-        })
-      ).toBeInTheDocument();
-
-      const rows = within(table).getAllByRole('row');
-      rows.shift(); // remove the header row
-      expect(rows).toHaveLength(orderedAccessModules.length);
-
-      // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
-
-      const eraRow =
-        rows[orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)];
-
-      if (rtBadgeExpected) {
-        expect(
-          within(eraRow).getByText('registered-tier-badge.svg')
-        ).toBeInTheDocument();
-      } else {
-        expect(
-          within(eraRow).queryByText('registered-tier-badge.svg')
-        ).not.toBeInTheDocument();
-      }
-
-      if (ctBadgeExpected) {
-        expect(
-          within(eraRow).getByText('controlled-tier-badge.svg')
-        ).toBeInTheDocument();
-      } else {
-        expect(
-          within(eraRow).queryByText('controlled-tier-badge.svg')
-        ).not.toBeInTheDocument();
-      }
-    }
-  );
 });

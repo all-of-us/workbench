@@ -234,6 +234,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
+
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String CLONE_GOOGLE_PROJECT_ID = "clone-project-id";
 
@@ -496,8 +497,13 @@ public class WorkspacesControllerTest {
   }
 
   private void stubGetWorkspace(
-      String ns, String firecloudName, String creator, WorkspaceAccessLevel access) {
-    stubGetWorkspace(TestMockFactory.createFirecloudWorkspace(ns, firecloudName, creator), access);
+      String workspaceNamespace,
+      String workspaceTerraName,
+      String creator,
+      WorkspaceAccessLevel access) {
+    stubGetWorkspace(
+        TestMockFactory.createTerraWorkspace(workspaceNamespace, workspaceTerraName, creator),
+        access);
   }
 
   private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
@@ -588,8 +594,13 @@ public class WorkspacesControllerTest {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null)).thenReturn(result, result2);
   }
 
+  private static String testWorkspaceNamespace = "namespace";
+  private static String testWorkspaceDisplayName = "Workspace Name";
+  private static String testWorkspaceTerraName = "workspacename";
+
   private Workspace createWorkspace() {
-    return TestMockFactory.createWorkspace("namespace", "name");
+    return TestMockFactory.createWorkspace(
+        testWorkspaceNamespace, testWorkspaceDisplayName, testWorkspaceTerraName);
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -621,8 +632,8 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+        TestMockFactory.createTerraWorkspace(
+            workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -635,10 +646,10 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
-            workspace.getNamespace(), workspace.getName(), registeredTier.getAuthDomainName());
+            workspace.getNamespace(), workspace.getTerraName(), registeredTier.getAuthDomainName());
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getName(),
+        workspace.getTerraName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     Workspace retrievedWorkspace =
@@ -652,8 +663,9 @@ public class WorkspacesControllerTest {
     assertThat(retrievedWorkspace.getAccessTierShortName())
         .isEqualTo(registeredTier.getShortName());
     assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(retrievedWorkspace.getTerraName()).isEqualTo("name");
-    assertThat(retrievedWorkspace.getName()).isEqualTo("name");
+    assertThat(retrievedWorkspace.getName()).isEqualTo(testWorkspaceDisplayName);
+    assertThat(retrievedWorkspace.getDisplayName()).isEqualTo(testWorkspaceDisplayName);
+    assertThat(retrievedWorkspace.getTerraName()).isEqualTo(testWorkspaceTerraName);
     assertThat(retrievedWorkspace.getResearchPurpose().isDiseaseFocusedResearch()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
     assertThat(retrievedWorkspace.getResearchPurpose().isMethodsDevelopment()).isTrue();
@@ -741,7 +753,7 @@ public class WorkspacesControllerTest {
       workspace = workspacesController.createWorkspace(workspace).getBody();
       uniqueIds.add(workspace.getTerraName());
 
-      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
     }
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
@@ -870,7 +882,7 @@ public class WorkspacesControllerTest {
         workspaceDao.save(
             new DbWorkspace()
                 .setWorkspaceNamespace(workspace.getNamespace())
-                .setName(workspace.getName())
+                .setName(workspace.getDisplayName())
                 .setFirecloudName(workspace.getTerraName()));
     DbWorkspaceOperation dbOperation =
         workspaceOperationDao.save(
@@ -895,7 +907,7 @@ public class WorkspacesControllerTest {
     assertThat(operation.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation.getWorkspace()).isNotNull();
     assertThat(operation.getWorkspace().getNamespace()).isEqualTo(workspace.getNamespace());
-    assertThat(operation.getWorkspace().getName()).isEqualTo(workspace.getName());
+    assertThat(operation.getWorkspace().getDisplayName()).isEqualTo(workspace.getDisplayName());
     assertThat(operation.getWorkspace().getTerraName()).isEqualTo(workspace.getTerraName());
   }
 
@@ -1079,10 +1091,10 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
     verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
     try {
-      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getTerraName());
       fail("NotFoundException expected");
     } catch (NotFoundException e) {
       // expected
@@ -1328,7 +1340,7 @@ public class WorkspacesControllerTest {
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
-        originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
+        originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), shareWorkspaceRequest);
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
@@ -1341,7 +1353,9 @@ public class WorkspacesControllerTest {
         ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setResearchPurpose(modPurpose);
     modWorkspace.setBillingAccountName(newBillingAccountName);
@@ -1350,7 +1364,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     final RawlsWorkspaceDetails clonedFirecloudWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
@@ -1397,14 +1411,17 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("cloned-billing-account");
     modWorkspace.setResearchPurpose(new ResearchPurpose());
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    stubCloneWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     doThrow(new RuntimeException()).when(workspaceDao).save(any(DbWorkspace.class));
 
@@ -1431,14 +1448,17 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName(workbenchConfig.billing.initialCreditsBillingAccountName());
     modWorkspace.setResearchPurpose(new ResearchPurpose());
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    stubCloneWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
@@ -1466,7 +1486,9 @@ public class WorkspacesControllerTest {
           altCdrVersion.setAccessTier(altAccessTier);
           altCdrVersion = cdrVersionDao.save(altCdrVersion);
           final Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           modWorkspace.setBillingAccountName(
               workbenchConfig.billing.initialCreditsBillingAccountName());
@@ -1475,7 +1497,7 @@ public class WorkspacesControllerTest {
           final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           req.setWorkspace(modWorkspace);
           stubCloneWorkspace(
-              modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+              modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
           workspacesController.cloneWorkspace(
               originalWorkspace.getNamespace(), originalWorkspace.getTerraName(), req);
         });
@@ -1707,7 +1729,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
 
@@ -1718,7 +1742,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     final RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
@@ -1834,7 +1858,7 @@ public class WorkspacesControllerTest {
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getTerraName());
     try {
-      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getTerraName());
       fail("NotFoundException expected");
     } catch (NotFoundException e) {
       // expected
@@ -1888,7 +1912,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
@@ -1900,7 +1926,7 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
@@ -1987,7 +2013,9 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
@@ -1999,13 +2027,13 @@ public class WorkspacesControllerTest {
 
     stubGetWorkspace(
         modWorkspace.getNamespace(),
-        modWorkspace.getName(),
+        modWorkspace.getTerraName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
     RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            modWorkspace.getNamespace(), modWorkspace.getTerraName(), LOGGED_IN_USER_EMAIL);
 
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
@@ -2125,14 +2153,19 @@ public class WorkspacesControllerTest {
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
+    modWorkspace.setName("Cloned");
+    modWorkspace.setDisplayName("Cloned");
+    modWorkspace.setTerraName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setBillingAccountName("billing-account");
+
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
+
     req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+    stubCloneWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
 
     Workspace workspace2 =
         workspacesController
@@ -2156,12 +2189,15 @@ public class WorkspacesControllerTest {
 
     Workspace modWorkspace =
         new Workspace()
-            .name("cloned")
+            .name("Cloned")
+            .displayName("Cloned")
+            .terraName("cloned")
             .namespace("cloned-ns")
             .billingAccountName("billing-account")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId(cdrVersionId2);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+    stubCloneWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
     Workspace workspace2 =
@@ -2186,7 +2222,7 @@ public class WorkspacesControllerTest {
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("bad-cdr-version-id");
           stubCloneWorkspace(
-              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+              modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
 
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
@@ -2208,7 +2244,7 @@ public class WorkspacesControllerTest {
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId("100");
           stubCloneWorkspace(
-              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+              modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
 
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
@@ -2230,7 +2266,7 @@ public class WorkspacesControllerTest {
                   .researchPurpose(workspace.getResearchPurpose())
                   .cdrVersionId(archivedCdrVersionId);
           stubCloneWorkspace(
-              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+              modWorkspace.getNamespace(), modWorkspace.getTerraName(), "cloner@gmail.com");
           workspacesController.cloneWorkspace(
               workspace.getNamespace(),
               workspace.getTerraName(),
@@ -2315,7 +2351,7 @@ public class WorkspacesControllerTest {
                         .put("canShare", true)));
 
     when(fireCloudService.getWorkspaceAclAsService(
-            originalWorkspace.getNamespace(), originalWorkspace.getName()))
+            originalWorkspace.getNamespace(), originalWorkspace.getTerraName()))
         .thenReturn(originalAcl);
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(clonedAclBeforeUpdate);
@@ -2375,7 +2411,9 @@ public class WorkspacesControllerTest {
           workspace = workspacesController.createWorkspace(workspace).getBody();
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           req.setWorkspace(modWorkspace);
           // Missing research purpose.
@@ -2398,11 +2436,13 @@ public class WorkspacesControllerTest {
           cloner.setDisabled(false);
           currentUser = userDao.save(cloner);
           // Permission denied manifests as a 404 in Firecloud.
-          when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+          when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getTerraName()))
               .thenThrow(new NotFoundException());
           CloneWorkspaceRequest req = new CloneWorkspaceRequest();
           Workspace modWorkspace = new Workspace();
-          modWorkspace.setName("cloned");
+          modWorkspace.setName("Cloned");
+          modWorkspace.setDisplayName("Cloned");
+          modWorkspace.setTerraName("cloned");
           modWorkspace.setNamespace("cloned-ns");
           req.setWorkspace(modWorkspace);
           ResearchPurpose modPurpose = new ResearchPurpose();
@@ -2436,14 +2476,14 @@ public class WorkspacesControllerTest {
     WorkspaceUserRolesResponse shareResp =
         workspacesController
             .shareWorkspacePatch(
-                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+                workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest)
             .getBody();
 
     verify(mockWorkspaceAuditor).fireCollaborateAction(anyLong(), anyMap());
 
     Workspace workspace2 =
         workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getName())
+            .getWorkspace(workspace.getNamespace(), workspace.getTerraName())
             .getBody()
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
@@ -2490,7 +2530,7 @@ public class WorkspacesControllerTest {
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest);
 
     verify(fireCloudService, times(1))
         .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
@@ -2543,7 +2583,7 @@ public class WorkspacesControllerTest {
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest);
 
     verify(fireCloudService, times(1))
         .removeOwnerFromBillingProjectAsService(ownerUser.getUsername(), workspace.getNamespace());
@@ -2600,7 +2640,7 @@ public class WorkspacesControllerTest {
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspacePatch(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest);
 
     verify(fireCloudService)
         .updateWorkspaceACL(
@@ -2633,7 +2673,7 @@ public class WorkspacesControllerTest {
         BadRequestException.class,
         () ->
             workspacesController.shareWorkspacePatch(
-                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest));
+                workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest));
   }
 
   @Test
@@ -2682,7 +2722,7 @@ public class WorkspacesControllerTest {
     WorkspaceUserRolesResponse shareResp =
         workspacesController
             .shareWorkspacePatch(
-                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+                workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest)
             .getBody();
     Workspace workspace2 =
         workspacesController
@@ -2715,7 +2755,7 @@ public class WorkspacesControllerTest {
     stubFcUpdateWorkspaceACL();
     stubFcGetWorkspaceACL();
     workspacesController.shareWorkspacePatch(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest1);
+        workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest1);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
@@ -2726,7 +2766,7 @@ public class WorkspacesControllerTest {
         ConflictException.class,
         () ->
             workspacesController.shareWorkspacePatch(
-                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest2));
+                workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest2));
   }
 
   @Test
@@ -2741,7 +2781,7 @@ public class WorkspacesControllerTest {
         BadRequestException.class,
         () ->
             workspacesController.shareWorkspacePatch(
-                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest));
+                workspace.getNamespace(), workspace.getTerraName(), shareWorkspaceRequest));
   }
 
   @Test
@@ -2797,8 +2837,8 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+        TestMockFactory.createTerraWorkspace(
+            workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2817,8 +2857,8 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+        TestMockFactory.createTerraWorkspace(
+            workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2836,8 +2876,8 @@ public class WorkspacesControllerTest {
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+        TestMockFactory.createTerraWorkspace(
+            workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2855,13 +2895,13 @@ public class WorkspacesControllerTest {
     DbFeaturedWorkspace featuredWorkspace = new DbFeaturedWorkspace();
     featuredWorkspace.setCategory(DbFeaturedWorkspace.DbFeaturedCategory.COMMUNITY);
     featuredWorkspace.setWorkspace(
-        workspaceDao.getRequired(workspace.getNamespace(), workspace.getName()));
+        workspaceDao.getRequired(workspace.getNamespace(), workspace.getTerraName()));
     featuredWorkspaceDao.save(featuredWorkspace);
 
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
-        TestMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+        TestMockFactory.createTerraWorkspace(
+            workspace.getNamespace(), workspace.getTerraName(), null));
     fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.READER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2912,7 +2952,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(
         workspace.getNamespace(),
-        workspace.getName(),
+        workspace.getTerraName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getTerraName());
