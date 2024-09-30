@@ -52,26 +52,22 @@ public class InstitutionTierConfigMapperTest {
     InstitutionTierConfig rtTierConfig =
         new InstitutionTierConfig()
             .accessTierShortName(RT_ACCESS_TIER_SHORT_NAME)
-            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-            .eraRequired(true);
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS);
     InstitutionTierConfig ctTierConfig =
         new InstitutionTierConfig()
             .accessTierShortName(CT_ACCESS_TIER_SHORT_NAME)
-            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
-            .eraRequired(false);
+            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS);
 
     final List<DbInstitutionTierRequirement> expectedResult =
         ImmutableList.of(
             new DbInstitutionTierRequirement()
                 .setAccessTier(RT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setMembershipRequirement(MembershipRequirement.DOMAINS)
-                .setEraRequired(true),
+                .setMembershipRequirement(MembershipRequirement.DOMAINS),
             new DbInstitutionTierRequirement()
                 .setAccessTier(CT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setMembershipRequirement(MembershipRequirement.NO_ACCESS)
-                .setEraRequired(false));
+                .setMembershipRequirement(MembershipRequirement.NO_ACCESS));
 
     assertThat(
             mapper.tierConfigsToDbTierRequirements(
@@ -198,14 +194,12 @@ public class InstitutionTierConfigMapperTest {
         new DbInstitutionTierRequirement()
             .setAccessTier(RT_ACCESS_TIER)
             .setInstitution(dbInst)
-            .setMembershipRequirement(MembershipRequirement.DOMAINS)
-            .setEraRequired(true);
+            .setMembershipRequirement(MembershipRequirement.DOMAINS);
 
     InstitutionTierConfig expectedTierConfig =
         new InstitutionTierConfig()
             .accessTierShortName(RT_ACCESS_TIER_SHORT_NAME)
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-            .eraRequired(true)
             .emailAddresses(emailAddresses);
     assertThat(mapper.dbToTierConfigModel(tierRequirement, new TreeSet<>(emailAddresses), null))
         .isEqualTo(expectedTierConfig);

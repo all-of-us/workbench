@@ -53,15 +53,13 @@ public class InstitutionTierRequirementDaoTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(registeredTier)
                 .setInstitution(testInst)
-                .setMembershipRequirement(MembershipRequirement.DOMAINS)
-                .setEraRequired(true));
+                .setMembershipRequirement(MembershipRequirement.DOMAINS));
     final DbInstitutionTierRequirement ctRequirement =
         institutionTierRequirementDao.save(
             new DbInstitutionTierRequirement()
                 .setAccessTier(controlledTier)
                 .setInstitution(testInst)
-                .setMembershipRequirement(MembershipRequirement.ADDRESSES)
-                .setEraRequired(true));
+                .setMembershipRequirement(MembershipRequirement.ADDRESSES));
 
     assertThat(institutionTierRequirementDao.getByInstitution(testInst))
         .containsExactly(rtRequirement, ctRequirement);

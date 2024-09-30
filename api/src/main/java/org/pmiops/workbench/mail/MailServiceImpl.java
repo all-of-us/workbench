@@ -143,17 +143,10 @@ public class MailServiceImpl implements MailService {
 
   @Override
   public void sendWelcomeEmail(
-      final DbUser user,
-      final String password,
-      final String institutionName,
-      final Boolean showEraStepInRt,
-      final Boolean showEraStepInCt)
+      final DbUser user, final String password, final String institutionName)
       throws MessagingException {
     final String htmlMessage =
-        buildHtml(
-            WELCOME_RESOURCE,
-            welcomeMessageSubstitutionMap(
-                password, user.getUsername(), institutionName, showEraStepInRt, showEraStepInCt));
+        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -513,11 +506,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password,
-      final String username,
-      final String institutionName,
-      final Boolean showEraStepInRT,
-      final Boolean showEraStepInCT) {
+      final String password, final String username) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
@@ -529,8 +518,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
-        .put(EmailSubstitutionField.RT_STEPS, getRTSteps(showEraStepInRT))
-        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(showEraStepInCT, institutionName))
         .build();
   }
 

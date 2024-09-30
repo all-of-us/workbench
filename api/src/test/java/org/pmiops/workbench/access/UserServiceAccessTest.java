@@ -188,7 +188,6 @@ public class UserServiceAccessTest {
                     rtTierConfig
                         .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                         .addEmailDomainsItem("domain.com")
-                        .eraRequired(true)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .userInstructions("Some user instructions");
@@ -271,18 +270,6 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           user.setDisabled(true);
-          return userDao.save(user);
-        });
-  }
-
-  // ERA Commons is not subject to annual renewal.
-
-  @Test
-  public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
-    testUnregistration(
-        user -> {
-          accessModuleService.updateBypassTime(
-              dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
           return userDao.save(user);
         });
   }
@@ -937,62 +924,13 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void testInstitutionRequirement_optionalEra() {
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
-    dbUser = updateUserWithRetries(this::registerUser);
-    assertRegisteredTierEnabled(dbUser);
-
-    // Now make user eRA not complete, expect user removed from Registered tier;
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
-    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierDisabled(dbUser);
-
-    // Make eRA is optional for that institution, verify user become registered
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierEnabled(dbUser);
-  }
-
-  @Test
-  public void testInstitutionRequirement_optionalEra_loginGovFlagDisabled() {
-    // User not complete eRA, but it is optional for that institution
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    updateUserWithRetries(this::registerUser);
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
-    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierEnabled(dbUser);
-
-    // Now login.gov flag disabled, eRA is always required.
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierDisabled(dbUser);
-  }
-
-  @Test
   public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
     updateUserWithRetries(this::registerUser);
     providedWorkbenchConfig.access.enableEraCommons = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    institutionService.updateInstitution(
-        institution.getShortName(),
-        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    institutionService.updateInstitution(institution.getShortName(), institution);
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, null);
     dbUser = updateUserAccessTiers();
@@ -1069,20 +1007,17 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_inCompleteCTRequirements_eraRequired() {
+  public void test_updateUserWithRetries_inCompleteCTRequirements() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    // Setting eraRequired to false for RT just so user can still have access to RT even after NOT
-    // bypassing era
-    rtTierConfig.setEraRequired(false);
     updateInstitutionTier(rtTierConfig);
 
-    ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
@@ -1090,13 +1025,11 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_eraNotRequiredForTiers() {
+  public void test_updateUserWithRetries() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);
-    rtTierConfig.setEraRequired(false);
     updateInstitutionTier(rtTierConfig);
-    ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
 
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
@@ -1107,20 +1040,17 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void testInstitutionRequirement_rtEraDoesNotAffectCTEra() {
+  public void testInstitutionRequirement() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
 
     dbUser = completeRTAndCTRequirements(dbUser);
-    ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
     assertControlledTierEnabled(dbUser);
 
-    ctTierConfig.setEraRequired(false);
     updateInstitutionTier(ctTierConfig);
     dbUser = updateUserAccessTiers();
 
@@ -1180,7 +1110,6 @@ public class UserServiceAccessTest {
 
     dbUser = completeRTAndCTRequirements(dbUser);
 
-    ctTierConfig.setEraRequired(true);
     updateInstitutionTier(ctTierConfig);
 
     dbUser = updateUserAccessTiers();
@@ -1372,7 +1301,6 @@ public class UserServiceAccessTest {
   private void addCTConfigToInstitution(Institution institution) {
     institution.addTierConfigsItem(
         ctTierConfig
-            .eraRequired(true)
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
             .addEmailDomainsItem("domain.com"));
     institutionService.updateInstitution(institution.getShortName(), institution);

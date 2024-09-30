@@ -30,6 +30,7 @@ public interface InstitutionTierConfigMapper {
   @Mapping(target = "institution", ignore = true)
   @Mapping(target = "accessTier", ignore = true)
   @Mapping(target = "institutionTierRequirementId", ignore = true)
+  @Mapping(target = "eraRequired", ignore = true)
   DbInstitutionTierRequirement tierConfigToDbTierRequirement(
       InstitutionTierConfig source,
       @Context DbInstitution dbInstitution,
@@ -43,6 +44,7 @@ public interface InstitutionTierConfigMapper {
       @Context List<DbAccessTier> dbAccessTiers) {
     dbInstitutionTierRequirement
         .setInstitution(dbInstitution)
+        .setEraRequired(false)
         .setAccessTier(
             AccessUtils.getAccessTierByShortNameOrThrow(
                 dbAccessTiers, source.getAccessTierShortName()));

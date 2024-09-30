@@ -860,13 +860,11 @@ public class ReportingQueryServiceTest {
         new DbInstitutionTierRequirement()
             .setAccessTier(registeredTier)
             .setInstitution(institution)
-            .setMembershipRequirement(MembershipRequirement.ADDRESSES)
-            .setEraRequired(true));
+            .setMembershipRequirement(MembershipRequirement.ADDRESSES));
     institutionTierRequirementDao.save(
         new DbInstitutionTierRequirement()
             .setAccessTier(controlledTier)
             .setInstitution(institution)
-            .setMembershipRequirement(MembershipRequirement.DOMAINS)
-            .setEraRequired(false));
+            .setMembershipRequirement(MembershipRequirement.DOMAINS));
   }
 }
