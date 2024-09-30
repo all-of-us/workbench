@@ -420,7 +420,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it(
-    'should return the second enabled module (ERA, not RAS) from getFocusedModule' +
+    'should return the second enabled module (COMPLIANCE_TRAINING, not RAS) from getFocusedModule' +
       ' when the first module (2FA) has been completed and RAS is disabled',
     () => {
       serverConfigStore.set({
@@ -453,7 +453,7 @@ describe('DataAccessRequirements', () => {
       );
 
       // update this if the order changes
-      expect(activeModule).toEqual(AccessModule.ERA_COMMONS);
+      expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
 
       // 2FA (module 0) is complete, so enabled #1 is active
       expect(activeModule).toEqual(enabledModules[1]);
@@ -472,7 +472,6 @@ describe('DataAccessRequirements', () => {
             moduleName: AccessModule.TWO_FACTOR_AUTH,
             completionEpochMillis: 1,
           },
-          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
@@ -491,8 +490,8 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(initialRequiredModules[3]);
-    expect(activeModule).toEqual(enabledModules[3]);
+    expect(activeModule).toEqual(initialRequiredModules[2]);
+    expect(activeModule).toEqual(enabledModules[2]);
 
     // update this if the order changes
     expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
@@ -899,7 +898,6 @@ describe('DataAccessRequirements', () => {
   it('should sync incomplete external modules', async () => {
     // profile contains no completed modules, so we sync all (2FA, ERA, Compliance)
     const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
-    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
     const spyCompliance = jest.spyOn(
       profileApi(),
       'syncComplianceTrainingStatus'
@@ -908,7 +906,6 @@ describe('DataAccessRequirements', () => {
     component();
 
     expect(spy2FA).toHaveBeenCalledTimes(1);
-    expect(spyERA).toHaveBeenCalledTimes(1);
     expect(spyCompliance).toHaveBeenCalledTimes(1);
   });
 

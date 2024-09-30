@@ -304,7 +304,6 @@ const RenewalRequirementsText = () => (
 export const initialRtModules = [
   AccessModule.TWO_FACTOR_AUTH,
   AccessModule.IDENTITY,
-  AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [

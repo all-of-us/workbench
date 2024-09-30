@@ -46,7 +46,6 @@ describe('AdminUserBypassSpec', () => {
         'rt-compliance-training-toggle',
         'ct-compliance-training-toggle',
         'ducc-toggle',
-        'era-commons-toggle',
         'two-factor-auth-toggle',
         'identity-toggle',
         'profile-confirmation-toggle',
