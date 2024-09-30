@@ -30,7 +30,7 @@ describe('AdminUserBypassSpec', () => {
     serverConfigStore.set({
       config: {
         ...serverConfigStore.get().config,
-        enableEraCommons: true,
+        enableEraCommons: false,
         enableRasLoginGovLinking: true,
         enableComplianceTraining: true,
       },
