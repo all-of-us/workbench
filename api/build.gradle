@@ -918,7 +918,8 @@ task backfillGSuiteUserData(type: JavaExec) {
 
 // example run:
 // ./project.rb list-disks \
-// --project all-of-us-workbench-test
+// --project all-of-us-workbench-test \
+// --output test-disks.csv
 task listDisks(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.ListDisks"

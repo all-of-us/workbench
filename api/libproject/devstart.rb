@@ -3090,7 +3090,16 @@ def list_disks(cmd_name, *args)
     'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
   op.opts.project = TEST_PROJECT
 
+  op.add_typed_option(
+    '--output [output file name]',
+    String,
+    ->(opts, v) { opts.output = v },
+    'Output file name.')
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.output}
+
   op.parse.validate
+
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -3098,15 +3107,14 @@ def list_disks(cmd_name, *args)
   gcc.validate()
 
   gradle_args = ([
-    ["--project", op.opts.project],
+    ["--output", op.opts.output],
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
   CloudSqlProxyContext.new(gcc.project).run do
-#     common.run_inline %W{./gradlew listDisks -PappArgs=[#{gradle_args.join(',')}]}
-    common.run_inline "./gradlew listDisks"
+    common.run_inline %W{./gradlew listDisks -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 

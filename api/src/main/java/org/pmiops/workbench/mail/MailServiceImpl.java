@@ -40,7 +40,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -311,12 +310,6 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private String getEnvironmentType(Object labels) {
-    return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(labels)
-        .map(LeonardoAppUtils::appDisplayName)
-        .orElse("Jupyter");
-  }
-
   @Override
   public void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
@@ -348,7 +341,9 @@ public class MailServiceImpl implements MailService {
                 .put(
                     EmailSubstitutionField.DISK_STATUS,
                     isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
-                .put(EmailSubstitutionField.ENVIRONMENT_TYPE, getEnvironmentType(disk.getLabels()))
+                .put(
+                    EmailSubstitutionField.ENVIRONMENT_TYPE,
+                    LeonardoLabelHelper.getEnvironmentType(disk.getLabels()))
                 .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
