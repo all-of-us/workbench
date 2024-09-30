@@ -81,6 +81,10 @@ gsutil rm gs://"$PROJECT_PROD".appspot.com/"$CDR_DB_NAME"_export.sql
 echo "7a. Querying row counts for tables in $CDR_DB_NAME for preprod and prod"
 echo "$(./project.rb verify-cloud-cdr-counts --cdr-db-name "$CDR_DB_NAME")"
 echo -e "7b. \033[0;31m**Manually check row counts for tables match between preprod and prod**\033[0m"
+
+# Set grants for database that was just imported to prod
+echo "8. Setting grants from $CDR_DB_NAME in prod"
+echo "$(./project.rb set-grants --project all-of-us-rw-prod --cdr-version "$CDR_DB_NAME")"
 echo "done!"
 
 
