@@ -86,6 +86,7 @@ public class DbInstitutionTierRequirement {
   public boolean getEraRequired() {
     return eraRequired;
   }
+
   /**
    * Omits ID field from equality so equivalent objects match regardless of whether they are
    * actually present in the DB.

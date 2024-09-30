@@ -1016,7 +1016,8 @@ public class UserServiceAccessTest {
 
     updateInstitutionTier(ctTierConfig);
 
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.CT_COMPLIANCE_TRAINING, false);
     dbUser = updateUserAccessTiers();
 
     assertRegisteredTierEnabled(dbUser);
