@@ -591,12 +591,12 @@ public class NotebooksControllerTest {
       RawlsWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
-    final String testWorkspaceName = "test-ws";
+    final String testWorkspaceTerraName = "test-ws";
     final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
     RawlsWorkspaceDetails fcWorkspace =
-        TestMockFactory.createFirecloudWorkspace(
-            testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+        TestMockFactory.createTerraWorkspace(
+            testWorkspaceNamespace, testWorkspaceTerraName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
@@ -611,7 +611,8 @@ public class NotebooksControllerTest {
 
     assertThat(
             notebooksController
-                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getNotebookLockingMetadata(
+                    testWorkspaceNamespace, testWorkspaceTerraName, testNotebook)
                 .getBody())
         .isEqualTo(expectedResponse);
   }

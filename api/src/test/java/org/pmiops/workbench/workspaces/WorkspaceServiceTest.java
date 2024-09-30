@@ -219,31 +219,35 @@ public class WorkspaceServiceTest {
   }
 
   private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
-      String workspaceId,
-      String workspaceName,
+      String workspaceTerraUuid,
+      String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceDetails mockWorkspace =
         new RawlsWorkspaceDetails()
-            .workspaceId(workspaceId)
-            .name(workspaceName)
+            .workspaceId(workspaceTerraUuid)
+            .name(workspaceTerraName)
             .namespace(workspaceNamespace);
 
     RawlsWorkspaceResponse mockWorkspaceResponse = new RawlsWorkspaceResponse();
     mockWorkspaceResponse.workspace(mockWorkspace);
     mockWorkspaceResponse.accessLevel(accessLevel);
+
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(workspaceNamespace, workspaceTerraName);
     return mockWorkspaceResponse;
   }
 
   private RawlsWorkspaceListResponse mockRawlsWorkspaceListResponse(
-      String workspaceId,
-      String workspaceName,
+      String workspaceTerraUuid,
+      String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceDetails mockWorkspace =
         new RawlsWorkspaceDetails()
-            .workspaceId(workspaceId)
-            .name(workspaceName)
+            .workspaceId(workspaceTerraUuid)
+            .name(workspaceTerraName)
             .namespace(workspaceNamespace);
 
     RawlsWorkspaceListResponse mockWorkspaceListResponse = new RawlsWorkspaceListResponse();
@@ -269,17 +273,21 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace addMockedWorkspace(
       long workspaceId,
-      String workspaceName,
+      String workspaceTerraName,
       String workspaceNamespace,
       RawlsWorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
+    // in reality, these will NOT match
+    String workspaceTerraUuid = Long.toString(workspaceId);
+
     RawlsWorkspaceResponse mockWorkspaceResponse =
-        mockRawlsWorkspaceResponse(workspaceId, workspaceName, workspaceNamespace, accessLevel);
+        mockRawlsWorkspaceResponse(
+            workspaceTerraUuid, workspaceTerraName, workspaceNamespace, accessLevel);
 
     RawlsWorkspaceListResponse mockWorkspaceListResponse =
         mockRawlsWorkspaceListResponse(
-            Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
+            workspaceTerraUuid, workspaceTerraName, workspaceNamespace, accessLevel);
 
     firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
 
@@ -298,7 +306,7 @@ public class WorkspaceServiceTest {
   private DbWorkspace addMockedWorkspace(DbWorkspace dbWorkspace) {
 
     mockRawlsWorkspaceResponse(
-        dbWorkspace.getWorkspaceId(),
+        dbWorkspace.getFirecloudUuid(),
         dbWorkspace.getName(),
         dbWorkspace.getWorkspaceNamespace(),
         RawlsWorkspaceAccessLevel.OWNER);
@@ -333,20 +341,6 @@ public class WorkspaceServiceTest {
     when(mockFireCloudService.getWorkspaces()).thenReturn(firecloudWorkspaceResponses);
 
     return dbWorkspace;
-  }
-
-  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
-      long workspaceId,
-      String workspaceName,
-      String workspaceNamespace,
-      RawlsWorkspaceAccessLevel accessLevel) {
-    RawlsWorkspaceResponse mockWorkspaceResponse =
-        mockRawlsWorkspaceResponse(
-            Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    doReturn(mockWorkspaceResponse)
-        .when(mockFireCloudService)
-        .getWorkspace(workspaceNamespace, workspaceName);
-    return mockWorkspaceResponse;
   }
 
   @Test
