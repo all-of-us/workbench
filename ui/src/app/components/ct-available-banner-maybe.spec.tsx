@@ -66,12 +66,10 @@ describe('CTAvailableBannerMaybe', () => {
     const newTierEligibilities: UserTierEligibility[] = [
       {
         accessTierShortName: AccessTierShortNames.Registered,
-        eraRequired: false,
         eligible: true,
       },
       {
         accessTierShortName: AccessTierShortNames.Controlled,
-        eraRequired: false,
         eligible: true,
       },
     ];
@@ -113,7 +111,6 @@ describe('CTAvailableBannerMaybe', () => {
     const newTierEligibilities: UserTierEligibility[] = [
       {
         accessTierShortName: AccessTierShortNames.Registered,
-        eraRequired: false,
         eligible: true,
       },
     ];

@@ -875,12 +875,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: true,
           },
         ],
@@ -944,53 +942,6 @@ describe('DataAccessRequirements', () => {
     expect(spyCompliance).toHaveBeenCalledTimes(0);
   });
 
-  it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
-    let { container } = component();
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
-
-    // Ignore eraRequired if the accessTier is Controlled
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
-          },
-          {
-            accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: false,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-  });
-
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
     let { container } = component();
 
@@ -1000,7 +951,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
           },
         ],
       },
@@ -1027,7 +977,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
           },
         ],
       },
@@ -1054,7 +1003,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1081,7 +1029,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1109,7 +1056,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1146,7 +1092,6 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
           ],
@@ -1178,12 +1123,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: true,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: false,
               // User not eligible for CT i.e user email doesnt match
               // Institution's Controlled Tier email list
               eligible: false,
@@ -1202,44 +1145,6 @@ describe('DataAccessRequirements', () => {
           AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
-    }
-  );
-
-  it(
-    'Should not display eraCommons module in CT card ' +
-      'when eraCommons is disabled via the environment config',
-    async () => {
-      serverConfigStore.set({
-        config: { ...defaultServerConfig, enableEraCommons: false },
-      });
-
-      let { container } = component();
-
-      profileStore.set({
-        profile: {
-          ...ProfileStubVariables.PROFILE_STUB,
-          tierEligibilities: [
-            {
-              accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
-              eligible: false,
-            },
-            {
-              accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
-              eligible: true,
-            },
-          ],
-        },
-        load,
-        reload,
-        updateCache,
-      });
-      ({ container } = component());
-
-      expect(
-        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
-      ).toBeFalsy();
     }
   );
 
@@ -1294,12 +1199,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
               eligible: true,
             },
           ],
@@ -1328,12 +1231,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1358,7 +1259,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
         ],
@@ -1383,12 +1283,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1428,12 +1326,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1479,12 +1375,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1520,12 +1414,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
