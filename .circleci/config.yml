@@ -506,62 +506,6 @@ jobs:
           coverage-reports: /tmp/workspace/ui/coverage/lcov.info
           project-token: $CODACY_PROJECT_TOKEN
 
-# Uses basic auth via PACT_BROKER_USERNAME and
-# PACT_BROKER_PASSWORD environment variables that are
-# stored in Circle CI environment variables. These values must
-# be updated monthly.
-# https://broadworkbench.atlassian.net/wiki/spaces/IRT/pages/2681143308/Pact+Broker+Infrastructure
-  api-contract-upload:
-    executor: pact-executor
-    steps:
-    - attach_workspace:
-        at: /tmp/workspace
-    - halt-directory-check:
-        dir_name: "/tmp/workspace/pacts"
-    - run:
-        name: Pact Broker Publish
-        working_directory: ~
-        command: |
-          pact-broker publish /tmp/workspace/pacts --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --consumer-app-version ${CIRCLE_SHA1} --branch ${CIRCLE_BRANCH} --consumer-app-version --tag-with-git-branch
-
-  api-contract-can-i-deploy:
-    executor: pact-executor
-    steps:
-    - attach_workspace:
-        at: /tmp/workspace
-    - halt-directory-check:
-        dir_name: "/tmp/workspace/pacts"
-    - run:
-        name: Pact Broker, can I deploy?
-        working_directory: ~
-        command: |
-          pact-broker can-i-deploy --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --to-environment dev --retry-while-unknown 10 --retry-interval 30
-
-  #Updates the pacticipant version in the pact broker for our test environment which is referred to as dev in Pact Broker
-  api-contract-update-test:
-    executor: pact-executor
-    steps:
-    - run:
-        name: Pact Broker, update test.
-        working_directory: ~
-        command: |
-          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment dev
-
-  #Updates the pacticipant version in the pact broker for our staging and production environment.
-  api-contract-update-staging:
-    executor: pact-executor
-    steps:
-    - run:
-        name: Pact Broker, update staging.
-        working_directory: ~
-        command: |
-          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment staging
-    - run:
-        name: Pact Broker, update production.
-        working_directory: ~
-        command: |
-          pact-broker record-deployment --broker-base-url "https://pact-broker.dsp-eng-tools.broadinstitute.org/" --pacticipant aou-rwb-api --version ${CIRCLE_SHA1} --environment production
-
   api-test-coverage:
     #Jacoco runs against test results to get test coverage
     executor: workbench-executor
@@ -636,21 +580,6 @@ jobs:
                 name: Run BigQuery tests
                 working_directory: ~/workbench/api
                 command: ./project.rb bigquerytest
-
-  api-contract-test:
-    executor: workbench-executor
-    steps:
-    - run-api-test:
-        additional_steps:
-        - gcloud-auth-login-oidc-test  # required to access GCS
-        - run:
-            name: Run Contract tests
-            working_directory: ~/workbench/api
-            command: ./project.rb contracttest
-    - persist_to_workspace:
-        root: ~/workbench/api/build
-        paths:
-        - pacts
 
   ui-unit-test:
     executor: workbench-executor
@@ -1013,7 +942,6 @@ workflows:
       - ui-lint
       - ui-unit-test
       - api-bigquery-test
-      - api-contract-test
       - api-integration-test
       - api-test-coverage:
           requires:
@@ -1021,18 +949,11 @@ workflows:
       - ui-test-coverage:
           requires:
           - ui-unit-test
-      - api-contract-upload:
-          requires:
-          - api-contract-test
-#      - api-contract-can-i-deploy:
-#          requires:
-#          - api-contract-upload
       # Deploy to "test" on main branch merges
       - api-deploy-to-test:
           <<: *filter-main-branch
           requires:
             - api-unit-test
-            - api-contract-upload
       - ui-deploy-to-test:
           <<: *filter-main-branch
           requires:
@@ -1064,11 +985,6 @@ workflows:
             - ui-deploy-to-test
           post-steps:
             - gcs-load-test-results
-    # On main branch merges, update Pact Broker with the version of the Workbench repo
-      - api-contract-update-test:
-          <<: *filter-main-branch
-          requires:
-            - api-deploy-to-test
 
   playground:
     jobs:
@@ -1118,10 +1034,6 @@ workflows:
             - deploy-to-staging
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
-      - api-contract-update-staging:
-          <<: *filter-release-tags
-          requires:
-            - deploy-to-staging
       - deploy-to-stable:
           <<: *filter-release-tags
           requires:
