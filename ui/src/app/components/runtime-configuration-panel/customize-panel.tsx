@@ -230,7 +230,7 @@ export const CustomizePanel = ({
                 appendTo='self'
                 disabled={disableControls}
                 style={{ width: '15rem' }}
-                options={gceVmZones}
+                options={gceVmZones.sort()}
                 value={analysisConfig.zone}
                 onChange={({ value: zone }) => {
                   // When the compute type changes, we need to normalize the config and potentially restore defaults.
