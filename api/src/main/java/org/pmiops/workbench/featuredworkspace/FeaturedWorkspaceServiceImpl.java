@@ -2,7 +2,6 @@ package org.pmiops.workbench.featuredworkspace;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.FeaturedWorkspaceDao;
 import org.pmiops.workbench.db.model.DbFeaturedWorkspace.DbFeaturedCategory;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -67,6 +66,6 @@ public class FeaturedWorkspaceServiceImpl implements FeaturedWorkspaceService {
                       initialCreditsExpirationService),
                   rawlsWorkspaceResponse.getAccessLevel());
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 }

@@ -166,7 +166,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .toApiWorkspaceResponseList(
             workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
         .stream()
-        .filter((workspaceResponse) -> WorkspaceServiceImpl.filterToNonPublished(workspaceResponse))
+        .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
   }
 
@@ -174,16 +174,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
         || response.getWorkspace().getFeaturedCategory() == null;
-  }
-
-  @Override
-  public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
-        .stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
-        .toList();
   }
 
   @Override

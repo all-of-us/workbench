@@ -2,10 +2,12 @@ package org.pmiops.workbench.actionaudit.targetproperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 
 class TargetPropertyExtractorTest {
@@ -13,26 +15,46 @@ class TargetPropertyExtractorTest {
 
   @BeforeEach
   void setUp() {
+    long now = System.currentTimeMillis();
+
     var researchPurpose1 =
         new ResearchPurpose()
             .intendedStudy("stubbed toes")
-            .additionalNotes("I really like the cloud.");
-
-    long now = System.currentTimeMillis();
+            .additionalNotes("I really like the cloud.")
+            .approved(true)
+            .ancestry(true)
+            .anticipatedFindings("I expect to find a lot of stubbed toes.")
+            .commercialPurpose(true)
+            .controlSet(true)
+            .diseaseFocusedResearch(true)
+            .diseaseOfFocus("toes")
+            .drugDevelopment(true)
+            .educational(true)
+            .intendedStudy("stubbed toes")
+            .methodsDevelopment(true)
+            .otherPopulationDetails("Something about toes I guess")
+            .populationDetails(
+                List.of(
+                    SpecificPopulationEnum.DISABILITY_STATUS,
+                    SpecificPopulationEnum.SEXUAL_ORIENTATION,
+                    SpecificPopulationEnum.SEXUAL_ORIENTATION))
+            .populationHealth(true)
+            .reasonForAllOfUs("I like it.")
+            .reviewRequested(true)
+            .socialBehavioral(true)
+            .timeRequested(now)
+            .timeReviewed(now);
 
     workspace =
         new Workspace()
+            .etag("etag_1")
             .name("DbWorkspace 1")
             .terraName("dbworkspace1")
             .namespace("aou-rw-local1-c4be869a")
-            .creator("user@fake-research-aou.org")
             .cdrVersionId("1")
-            .researchPurpose(researchPurpose1)
-            .creationTime(now)
-            .lastModifiedTime(now)
-            .etag("etag_1")
+            .creator("user@fake-research-aou.org")
             .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .published(false);
+            .researchPurpose(researchPurpose1);
   }
 
   @Test
@@ -42,6 +64,6 @@ class TargetPropertyExtractorTest {
             WorkspaceTargetProperty.values(), workspace);
     assertThat(propertyValuesByName.get(WorkspaceTargetProperty.NAME.getPropertyName()))
         .isEqualTo("DbWorkspace 1");
-    assertThat(propertyValuesByName).hasSize(19);
+    assertThat(propertyValuesByName).hasSize(WorkspaceTargetProperty.values().length);
   }
 }

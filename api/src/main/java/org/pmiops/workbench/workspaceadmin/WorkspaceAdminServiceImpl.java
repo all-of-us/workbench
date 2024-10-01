@@ -416,17 +416,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public DbWorkspace setPublished(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-
-    fireCloudService.updateWorkspaceAclForPublishing(workspaceNamespace, firecloudName, publish);
-
-    dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
-  }
-
-  @Override
   public void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest) {
     final DbWorkspace dbWorkspace =

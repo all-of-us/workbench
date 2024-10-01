@@ -134,14 +134,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
-  public ResponseEntity<EmptyResponse> publishWorkspace(
-      String workspaceNamespace, String workspaceId) {
-    workspaceAdminService.setPublished(workspaceNamespace, workspaceId, true);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<EmptyResponse> publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest body) {
@@ -153,14 +145,6 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<EmptyResponse> unpublishWorkspaceViaDB(String workspaceNamespace) {
     workspaceAdminService.unpublishWorkspaceViaDB(workspaceNamespace);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
-  public ResponseEntity<EmptyResponse> unpublishWorkspace(
-      String workspaceNamespace, String workspaceId) {
-    workspaceAdminService.setPublished(workspaceNamespace, workspaceId, false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 }
