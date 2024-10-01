@@ -9049,7 +9049,7 @@ components:
         zone:
           type: string
           description: >
-            Optional, the deployment area of the GCE VM. For example, us-east1-a or europe-west2-c.
+            The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
             Defaults to us-central1-a.
         gpuConfig:
           $ref: '#/components/schemas/GpuConfig'
