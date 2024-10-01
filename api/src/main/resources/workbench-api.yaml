@@ -7156,7 +7156,6 @@ components:
       enum:
       - DEVELOPER
       - ACCESS_CONTROL_ADMIN
-      - FEATURED_WORKSPACE_ADMIN
       - COMMUNICATIONS_ADMIN
       - SECURITY_ADMIN
       - INSTITUTION_ADMIN
@@ -7169,7 +7168,6 @@ components:
             management. Intended to be granted for devops needs, e.g. for oncall.
           * ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
             to perform actions on a user's enabled status and manual verification.
-          * FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
           * COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
           * SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all runtimes in a project
           * INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
@@ -7178,6 +7176,7 @@ components:
 
         The following authorities are deprecated and should no longer be used:
           * REVIEW_RESEARCH_PURPOSE (0)
+          * FEATURED_WORKSPACE_ADMIN (3)
 
         Note on enum names: Swagger trims any common prefix from enum values' corresponding
         Java fields by default; this has no side-effect currently as there is
