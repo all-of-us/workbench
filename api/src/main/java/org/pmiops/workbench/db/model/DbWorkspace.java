@@ -60,8 +60,6 @@ public class DbWorkspace {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
-  private Set<DbConceptSet> conceptSets = new HashSet<>();
-  private Set<DbDataset> dataSets = new HashSet<>();
   private Short activeStatus;
 
   private boolean diseaseFocusedResearch;
@@ -589,30 +587,6 @@ public class DbWorkspace {
 
   public void addCohort(DbCohort cohort) {
     this.cohorts.add(cohort);
-  }
-
-  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<DbConceptSet> getConceptSets() {
-    return conceptSets;
-  }
-
-  public DbWorkspace setConceptSets(Set<DbConceptSet> conceptSets) {
-    this.conceptSets = conceptSets;
-    return this;
-  }
-
-  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<DbDataset> getDataSets() {
-    return dataSets;
-  }
-
-  public DbWorkspace setDataSets(Set<DbDataset> dataSets) {
-    this.dataSets = dataSets;
-    return this;
-  }
-
-  public void addDataSet(DbDataset dataSet) {
-    this.dataSets.add(dataSet);
   }
 
   @Column(name = "firecloud_uuid")
