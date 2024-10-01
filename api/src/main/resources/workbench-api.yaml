@@ -1367,13 +1367,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceResponseListResponse'
-        501:
-          description: This endpoint is not available in this environment because
-           enablePublishedWorkspacesViaDb is not set.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/{terraName}/isNotebookTransferComplete:
     get:
       tags:
@@ -1790,8 +1783,8 @@ paths:
     post:
       tags:
         - workspaceAdmin
-      description: Publish the workspace so it features in the Featured Workspaces tab under requested category.Requires
-        RESEARCHER_DATA_VIEW authority.
+      description: Publish the workspace so it features in the Featured Workspaces tab under requested 
+        category.  Requires RESEARCHER_DATA_VIEW authority.
       operationId: publishWorkspaceViaDB
       parameters:
         - name: workspaceNamespace
