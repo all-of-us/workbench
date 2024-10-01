@@ -2,14 +2,15 @@ package org.pmiops.workbench.tools;
 
 import static org.pmiops.workbench.leonardo.LeonardoConfig.SERVICE_DISKS_API;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import com.opencsv.CSVWriter;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -18,8 +19,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.GoogleConfig;
@@ -47,6 +48,8 @@ public class ListDisks extends Tool {
 
   private static final Logger log = Logger.getLogger(ListDisks.class.getName());
 
+  private static final String MISSING = "[missing workspace]";
+
   private static Option outputFileOpt =
       Option.builder().longOpt("output").desc("Output file name").required().hasArg().build();
 
@@ -58,7 +61,13 @@ public class ListDisks extends Tool {
   }
 
   private ListDisksRow toDiskRow(
-      LeonardoListPersistentDiskResponse response, Optional<DbWorkspace> dbWorkspace) {
+      LeonardoListPersistentDiskResponse response,
+      String workspaceNamespace,
+      String workspaceDisplayName,
+      String workspaceTerraName,
+      String workspaceCreator,
+      String billingAccountType) {
+
     String name = response.getName();
     String environmentType = LeonardoLabelHelper.getEnvironmentType(response.getLabels());
     String sizeInGb = response.getSize().toString();
@@ -67,18 +76,6 @@ public class ListDisks extends Tool {
     String creator = response.getAuditInfo().getCreator();
     String createdDate = response.getAuditInfo().getCreatedDate();
     String dateAccessed = response.getAuditInfo().getDateAccessed();
-
-    String workspaceNamespace =
-        dbWorkspace.map(DbWorkspace::getWorkspaceNamespace).orElse("[missing workspace]");
-    String workspaceDisplayName =
-        dbWorkspace.map(DbWorkspace::getName).orElse("[missing workspace]");
-    String workspaceTerraName =
-        dbWorkspace.map(DbWorkspace::getFirecloudName).orElse("[missing workspace]");
-    String workspaceCreator =
-        dbWorkspace
-            .map(DbWorkspace::getCreator)
-            .map(DbUser::getUsername)
-            .orElse("[missing workspace]");
 
     return new ListDisksRow(
         name,
@@ -92,10 +89,15 @@ public class ListDisks extends Tool {
         workspaceNamespace,
         workspaceDisplayName,
         workspaceTerraName,
-        workspaceCreator);
+        workspaceCreator,
+        billingAccountType);
   }
 
-  private void listDisks(DisksApi disksApi, WorkspaceDao workspaceDao, CommandLine opts)
+  private void listDisks(
+      DisksApi disksApi,
+      WorkspaceDao workspaceDao,
+      WorkbenchConfig workbenchConfig,
+      CommandLine opts)
       throws ApiException, IOException {
     String outputFile = opts.getOptionValue(outputFileOpt.getLongOpt());
 
@@ -117,9 +119,22 @@ public class ListDisks extends Tool {
     List<ListDisksRow> diskRows =
         disks.stream()
             .map(
-                resp ->
-                    toDiskRow(
-                        resp, Optional.ofNullable(workspacesByProject.get(getGoogleProject(resp)))))
+                resp -> {
+                  String googleProject = getGoogleProject(resp);
+                  @Nullable DbWorkspace dbWorkspace = workspacesByProject.get(googleProject);
+
+                  return dbWorkspace == null
+                      ? toDiskRow(resp, MISSING, MISSING, MISSING, MISSING, MISSING)
+                      : toDiskRow(
+                          resp,
+                          dbWorkspace.getWorkspaceNamespace(),
+                          dbWorkspace.getName(),
+                          dbWorkspace.getFirecloudName(),
+                          dbWorkspace.getCreator().getUsername(),
+                          isInitialCredits(dbWorkspace.getBillingAccountName(), workbenchConfig)
+                              ? "initial credits"
+                              : "user provided");
+                })
             .toList();
 
     log.info("Step 3 of 3: Saving the disk list to " + outputFile);
@@ -137,7 +152,8 @@ public class ListDisks extends Tool {
             "Workspace Namespace",
             "Workspace Display Name",
             "Workspace Terra Name",
-            "Workspace Creator");
+            "Workspace Creator",
+            "Billing Account Type");
 
     try (CSVWriter writer = new CSVWriter(new FileWriter(outputFile))) {
       writer.writeNext(header.toArray());
@@ -149,11 +165,25 @@ public class ListDisks extends Tool {
   @Bean
   public CommandLineRunner run(
       @Qualifier(SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     return args -> {
       // project.rb swallows exceptions, so we need to catch and log them here
       try {
-        listDisks(disksApiProvider.get(), workspaceDao, new DefaultParser().parse(options, args));
+        WorkbenchConfig config = workbenchConfigProvider.get();
+        DisksApi disksApi = disksApiProvider.get();
+
+        // this call is slow, so let a long timeout
+        disksApiProvider
+            .get()
+            .getApiClient()
+            .setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
+
+        listDisks(
+            disksApi,
+            workspaceDao,
+            workbenchConfigProvider.get(),
+            new DefaultParser().parse(options, args));
       } catch (Exception e) {
         log.severe("Error: " + e.getMessage());
         e.printStackTrace();

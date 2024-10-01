@@ -12,7 +12,8 @@ public record ListDisksRow(
     String workspaceNamespace,
     String workspaceDisplayName,
     String workspaceTerraName,
-    String workspaceCreator) {
+    String workspaceCreator,
+    String billingAccountType) {
 
   public String[] toArray() {
     return new String[] {
@@ -27,7 +28,8 @@ public record ListDisksRow(
       workspaceNamespace,
       workspaceDisplayName,
       workspaceTerraName,
-      workspaceCreator
+      workspaceCreator,
+      billingAccountType
     };
   }
 }
