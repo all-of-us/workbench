@@ -50,7 +50,7 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
     // should have persistent disk
     fp.pick(['gceWithPdConfig', 'dataprocConfig']),
     // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
-    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs', 'gceWithPdConfig.zone'])
+    fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
   );
   return fp.isEqual(strip(a), strip(b));
 };
