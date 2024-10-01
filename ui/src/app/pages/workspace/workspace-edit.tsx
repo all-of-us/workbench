@@ -19,6 +19,7 @@ import {
   WorkspaceOperationStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -227,7 +228,7 @@ export const styles = reactStyles({
     width: '11em',
   },
   cdrVersionSpacing: {
-    width: '30em',
+    width: environment.showDataAppsVersionSelect ? '23em' : '30em',
   },
 });
 
@@ -296,6 +297,11 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   );
 };
 
+enum DataAppsVersions {
+  DataAppsV1 = 'Data Apps V1',
+  DataAppsV2 = 'Data Apps V2',
+}
+
 export interface WorkspaceEditProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -329,6 +335,7 @@ export interface WorkspaceEditState {
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
   workspaceCreationErrorMessage: string;
+  dataAppsVersion: DataAppsVersions;
   unavailableTier?: string;
 }
 
@@ -365,6 +372,7 @@ export const WorkspaceEdit = fp.flow(
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
+        dataAppsVersion: this.initializeDataAppsVersion(props),
       };
     }
 
@@ -373,6 +381,16 @@ export const WorkspaceEdit = fp.flow(
         return this.getCdrVersions(DEFAULT_ACCESS_TIER);
       }
       return this.getCdrVersions(props.workspace.accessTierShortName);
+    }
+
+    initializeDataAppsVersion(props: WorkspaceEditProps) {
+      if (this.isMode(WorkspaceEditMode.Create) || !props.workspace) {
+        return DataAppsVersions.DataAppsV1;
+      }
+      return getCdrVersion(props.workspace, props.cdrVersionTiersResponse)
+        .tanagraEnabled
+        ? DataAppsVersions.DataAppsV2
+        : DataAppsVersions.DataAppsV1;
     }
 
     initializePopulationChecked(props: WorkspaceEditProps) {
@@ -1407,12 +1425,31 @@ export const WorkspaceEdit = fp.flow(
       }
     }
 
+    onDataAppsVersionChange(e: React.FormEvent<HTMLSelectElement>) {
+      this.setState({
+        dataAppsVersion: e.currentTarget.value as DataAppsVersions,
+      });
+    }
+
     canSetBillingAccount(workspace?: Workspace, profile?: Profile): boolean {
       return (
         // can set billing account in Create and Duplicate modes
         !this.isMode(WorkspaceEditMode.Edit) ||
         workspace?.creator === profile?.username
       );
+    }
+
+    displayCdrVersions() {
+      const { cdrVersions, dataAppsVersion } = this.state;
+      return environment.showDataAppsVersionSelect
+        ? cdrVersions.filter(
+            ({ tanagraEnabled }) =>
+              (dataAppsVersion === DataAppsVersions.DataAppsV1 &&
+                !tanagraEnabled) ||
+              (dataAppsVersion === DataAppsVersions.DataAppsV2 &&
+                tanagraEnabled)
+          )
+        : cdrVersions;
     }
 
     render() {
@@ -1434,7 +1471,7 @@ export const WorkspaceEdit = fp.flow(
             reviewRequested,
           },
         },
-        cdrVersions,
+        dataAppsVersion,
         loading,
         populationChecked,
         showCdrVersionModal,
@@ -1564,6 +1601,52 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                   </TooltipTrigger>
                 </FlexColumn>
+                {environment.showDataAppsVersionSelect && (
+                  <FlexColumn>
+                    <div style={styles.fieldHeader}>
+                      Data Apps version
+                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
+                        <InfoIcon style={styles.infoIcon} />
+                      </TooltipTrigger>
+                    </div>
+                    <TooltipTrigger
+                      content='To use a different version of Data Apps, create a new workspace.'
+                      disabled={this.isMode(WorkspaceEditMode.Create)}
+                    >
+                      <div
+                        data-test-id='select-data-apps-version'
+                        style={{
+                          ...styles.select,
+                          ...styles.accessTierSpacing,
+                        }}
+                      >
+                        <select
+                          style={{
+                            ...styles.selectInput,
+                            ...styles.accessTierSpacing,
+                          }}
+                          aria-label='data apps dropdown'
+                          value={dataAppsVersion}
+                          onChange={(e) =>
+                            this.setState({
+                              dataAppsVersion: e.target
+                                .value as DataAppsVersions,
+                            })
+                          }
+                          disabled={!this.isMode(WorkspaceEditMode.Create)}
+                        >
+                          {Object.entries(DataAppsVersions).map(
+                            ([key, version]) => (
+                              <option key={key} value={version}>
+                                {version}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </TooltipTrigger>
+                  </FlexColumn>
+                )}
                 <FlexColumn>
                   <div style={styles.fieldHeader}>
                     Dataset version
@@ -1605,7 +1688,7 @@ export const WorkspaceEdit = fp.flow(
                         }}
                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                       >
-                        {cdrVersions.map((version) => (
+                        {this.displayCdrVersions().map((version) => (
                           <option
                             key={version.cdrVersionId}
                             value={version.cdrVersionId}
