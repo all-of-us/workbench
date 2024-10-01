@@ -204,8 +204,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Transactional
   @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     validateWorkspaceTierAccess(dbWorkspace);
 
     RawlsWorkspaceResponse fcResponse;
@@ -477,8 +477,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
-    return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceId);
+  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceTerraName) {
+    return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceTerraName);
   }
 
   @Override

@@ -27,9 +27,9 @@ import org.pmiops.workbench.tanagra.model.Study;
  */
 public interface WorkspaceService {
 
-  WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
+  WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName);
 
-  boolean notebookTransferComplete(String workspaceNamespace, String workspaceId);
+  boolean notebookTransferComplete(String workspaceNamespace, String workspaceTerraName);
 
   List<WorkspaceResponse> getWorkspaces();
 

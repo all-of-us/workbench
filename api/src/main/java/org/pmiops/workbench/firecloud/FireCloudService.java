@@ -16,7 +16,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /**
- * Encapsulate Firecloud API interaction details and provide a simple/mockable interface for
+ * Encapsulate Firecloud (Terra) API interaction details and provide a simple/mockable interface for
  * internal use.
  */
 public interface FireCloudService {
@@ -73,7 +73,7 @@ public interface FireCloudService {
 
   /** Creates a new FC workspace. */
   RawlsWorkspaceDetails createWorkspace(
-      String workspaceNamespace, String workspaceName, String authDomainName);
+      String workspaceNamespace, String workspaceFirecloudName, String authDomainName);
 
   RawlsWorkspaceDetails cloneWorkspace(
       String fromWorkspaceNamespace,

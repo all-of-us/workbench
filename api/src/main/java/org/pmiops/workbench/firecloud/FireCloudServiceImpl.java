@@ -348,12 +348,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public RawlsWorkspaceDetails createWorkspace(
-      String workspaceNamespace, String workspaceName, String authDomainName) {
+      String workspaceNamespace, String workspaceFirecloudName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserLenientTimeoutWorkspacesApiProvider.get();
     RawlsWorkspaceRequest workspaceRequest =
         new RawlsWorkspaceRequest()
             .namespace(workspaceNamespace)
-            .name(workspaceName)
+            .name(workspaceFirecloudName)
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
             .authorizationDomain(
                 ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
