@@ -248,7 +248,8 @@ export const toolTipText = {
   ),
   dataAppsSelect: (
     <div>
-      Choose which versions of Cohort Builder, Concept Search and Dataset Builder to use.
+      Choose which versions of Cohort Builder, Concept Search and Dataset
+      Builder to use.
     </div>
   ),
   tierSelect: (
