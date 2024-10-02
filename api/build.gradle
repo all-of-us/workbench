@@ -388,7 +388,7 @@ clean.doFirst {
 
 repositories {
     maven {
-        // for Terra service clients (currently sam-client)
+        // for Terra service clients (currently sam-client and leonardo-client)
         url 'https://broadinstitute.jfrog.io/artifactory/libs-release-local'
     }
     mavenCentral()
@@ -529,6 +529,10 @@ dependencies {
     implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-c0263cf") {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
+
+    // updated 2 Oct 2024 to most recent develop
+    // see https://github.com/DataBiosphere/leonardo/actions/workflows/publish_java_client.yml
+    implementation("org.broadinstitute.dsde.workbench:leonardo-client_2.13:1.3.6-3fbffee")
 
     implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '4.0.5'
 
