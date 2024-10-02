@@ -129,8 +129,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       final String runtimeId =
           String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
 
-      // Refetch the runtime to ensure freshness as this iteration may take
-      // some time.
+      // Refetch the runtime to ensure freshness,
+      // as this iteration may take some time.
       final LeonardoGetRuntimeResponse runtime =
           leonardoApiClient.getRuntimeAsService(
               googleProject, listRuntimeResponse.getRuntimeName());
