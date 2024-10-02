@@ -31,6 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -171,6 +175,7 @@ public class RuntimeControllerTest {
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,
     LeonardoRetryHandler.class,
+    LeonardoRetryHandler2.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
     PublicInstitutionDetailsMapperImpl.class,
@@ -218,6 +223,10 @@ public class RuntimeControllerTest {
   @MockBean
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   DisksApi mockUserDisksApi;
+
+  @MockBean
+  @Qualifier(LeonardoConfig.USER_DISKS_API_2)
+  org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
 
   @MockBean FireCloudService mockFireCloudService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
@@ -327,6 +336,9 @@ public class RuntimeControllerTest {
     doReturn(Optional.of(testWorkspace)).when(mockWorkspaceDao).getByNamespace(WORKSPACE_NS);
 
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(Collections.emptyList());
+
+    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());
   }
 
@@ -971,18 +983,19 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntimeFail_newPdp_pdAlreadyExists() throws ApiException {
+  public void testCreateRuntimeFail_newPdp_pdAlreadyExist()
+      throws ApiException, org.broadinstitute.dsde.workbench.client.leonardo.ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    LeonardoListPersistentDiskResponse gceDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse gceDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY);
-    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+            .status(DiskStatus.READY);
+    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(gceDisk));
 
     stubGetWorkspace();

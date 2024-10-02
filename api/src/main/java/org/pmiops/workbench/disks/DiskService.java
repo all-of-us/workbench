@@ -55,8 +55,8 @@ public class DiskService {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
+    List<ListPersistentDiskResponse> responseList =
+        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator2(googleProject);
 
     return PersistentDiskUtils.findTheMostRecentActiveDisks(
         responseList.stream()

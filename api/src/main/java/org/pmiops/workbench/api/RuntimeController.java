@@ -187,7 +187,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         List<Disk> diskList =
             PersistentDiskUtils.findTheMostRecentActiveDisks(
                 leonardoNotebooksClient
-                    .listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
+                    .listPersistentDiskByProjectCreatedByCreator2(dbWorkspace.getGoogleProject())
                     .stream()
                     .map(leonardoMapper::toApiListDisksResponse)
                     .collect(Collectors.toList()));

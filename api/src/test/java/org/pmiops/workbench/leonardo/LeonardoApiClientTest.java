@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -82,6 +86,7 @@ public class LeonardoApiClientTest {
     FirecloudMapperImpl.class,
     LeonardoApiClientImpl.class,
     LeonardoRetryHandler.class,
+    LeonardoRetryHandler2.class,
     LeonardoApiClientImpl.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
@@ -108,6 +113,10 @@ public class LeonardoApiClientTest {
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   @MockBean
   DisksApi mockUserDisksApi;
+
+  @Qualifier(LeonardoConfig.USER_DISKS_API_2)
+  @MockBean
+  org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
 
   @Qualifier("userRuntimesApi")
   @MockBean
@@ -210,6 +219,8 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.putAll(LeonardoCustomEnvVarUtils.FASTA_REFERENCE_ENV_VAR_MAP);
 
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(Collections.emptyList());
+    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());
   }
 
@@ -337,16 +348,16 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse rstudioDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY)
+            .status(DiskStatus.READY)
             .labels(diskLabels);
-    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(rstudioDisk));
 
     assertThrows(

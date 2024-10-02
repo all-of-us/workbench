@@ -3,7 +3,14 @@ package org.pmiops.workbench.leonardo;
 import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
 import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
 import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
@@ -183,10 +190,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     Map<String, String> runtimeLabels =
         new ImmutableMap.Builder<String, String>()
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userEmail)
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace)
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, workspaceName)
+            .put(LEONARDO_LABEL_AOU, "true")
+            .put(LEONARDO_LABEL_CREATED_BY, userEmail)
+            .put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, workspaceNamespace)
+            .put(LEONARDO_LABEL_WORKSPACE_NAME, workspaceName)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
@@ -314,7 +321,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       RuntimeConfigurationType runtimeConfigurationType) {
     if (runtimeConfigurationType != null) {
       return Collections.singletonMap(
-          LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG,
+          LEONARDO_LABEL_AOU_CONFIG,
           LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
               runtimeConfigurationType));
     } else {
@@ -392,7 +399,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 runtimesApiAsService.listRuntimes(
-                    LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
+                    LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false));
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
@@ -564,9 +571,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) ->
             disksApi.listDisksByProject(
                 googleProject,
-                null,
+                /* labels */ null,
                 /* includeDeleted */ false,
-                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
   }
 
@@ -615,27 +622,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
-            .put(
-                LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
-                dbWorkspace.getWorkspaceNamespace())
-            .put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName())
+            .put(LEONARDO_LABEL_AOU, "true")
+            .put(LEONARDO_LABEL_CREATED_BY, userProvider.get().getUsername())
+            .put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType))
+            .put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, dbWorkspace.getWorkspaceNamespace())
+            .put(LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName())
             .build();
 
     var pdLabels = persistentDiskRequest.getLabels();
+    pdLabels = upsertLeonardoLabel(pdLabels, LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
     pdLabels =
         upsertLeonardoLabel(
-            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
-    pdLabels =
-        upsertLeonardoLabel(
-            pdLabels,
-            LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE,
-            dbWorkspace.getWorkspaceNamespace());
-    pdLabels =
-        upsertLeonardoLabel(
-            pdLabels, LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
+            pdLabels, LEONARDO_LABEL_WORKSPACE_NAMESPACE, dbWorkspace.getWorkspaceNamespace());
+    pdLabels = upsertLeonardoLabel(pdLabels, LEONARDO_LABEL_WORKSPACE_NAME, dbWorkspace.getName());
     LeonardoPersistentDiskRequest diskRequest =
         leonardoMapper.toLeonardoPersistentDiskRequest(persistentDiskRequest).labels(pdLabels);
     // If no disk name in field name from request, that means creating new disk.
@@ -647,7 +646,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       // that may have a null 'appType', as these disks are associated with Jupyter
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
-              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject()).stream()
+              listPersistentDiskByProjectCreatedByCreator2(dbWorkspace.getGoogleProject()).stream()
                   .map(leonardoMapper::toApiListDisksResponse)
                   .filter(disk -> disk.getAppType() != null)
                   .collect(Collectors.toList()));
@@ -740,7 +739,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     googleProjectId,
                     /* labels= */ null,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* includeLabels= */ LEONARDO_APP_LABEL_KEYS,
                     leonardoAppRole));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
@@ -778,9 +777,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 appsApiAsService.listApp(
-                    /* labels= */ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    /* labels= */ LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* includeLabels= */ LEONARDO_APP_LABEL_KEYS,
                     /* role= */ null));
 
     List<Boolean> results =
