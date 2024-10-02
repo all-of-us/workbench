@@ -43,31 +43,34 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
-      String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(notebooksService.getNotebooks(workspaceNamespace, workspaceId));
+      String workspaceNamespace, String workspaceTerraName) {
+    return ResponseEntity.ok(notebooksService.getNotebooks(workspaceNamespace, workspaceTerraName));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
-      String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+      String workspaceNamespace, String workspaceTerraName, String notebookName) {
+    notebooksService.deleteNotebook(workspaceNamespace, workspaceTerraName, notebookName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<FileDetail> copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceId,
+      String fromWorkspaceTerraName,
       String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     return ResponseEntity.ok(
         copyNotebookImpl(
-            fromWorkspaceNamespace, fromWorkspaceId, fromNotebookNameWithExtension, copyRequest));
+            fromWorkspaceNamespace,
+            fromWorkspaceTerraName,
+            fromNotebookNameWithExtension,
+            copyRequest));
   }
 
   private FileDetail copyNotebookImpl(
       String fromWorkspaceNamespace,
-      String fromWorkspaceId,
+      String fromWorkspaceTerraName,
       String fromNotebookNameWithExtension,
       CopyRequest copyRequest) {
     FileDetail fileDetail;
@@ -81,10 +84,10 @@ public class NotebooksController implements NotebooksApiDelegate {
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
-              fromWorkspaceId,
+              fromWorkspaceTerraName,
               fromNotebookNameWithExtension,
               copyRequest.getToWorkspaceNamespace(),
-              copyRequest.getToWorkspaceName(),
+              copyRequest.getToWorkspaceTerraName(),
               newNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
@@ -94,11 +97,12 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
-      String workspace, String workspaceName, String notebookNameWithExtension) {
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithExtension) {
     FileDetail fileDetail;
     try {
       fileDetail =
-          notebooksService.cloneNotebook(workspace, workspaceName, notebookNameWithExtension);
+          notebooksService.cloneNotebook(
+              workspaceNamespace, workspaceTerraName, notebookNameWithExtension);
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -108,23 +112,23 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithFileExtension) {
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
                 notebooksService.getReadOnlyHtml(
-                    workspaceNamespace, workspaceName, notebookNameWithFileExtension));
+                    workspaceNamespace, workspaceTerraName, notebookNameWithFileExtension));
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<FileDetail> renameNotebook(
-      String workspace, String workspaceName, NotebookRename rename) {
+      String workspaceNamespace, String workspaceTerraName, NotebookRename rename) {
     FileDetail fileDetail;
     try {
       fileDetail =
           notebooksService.renameNotebook(
-              workspace, workspaceName, rename.getName(), rename.getNewName());
+              workspaceNamespace, workspaceTerraName, rename.getName(), rename.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -134,30 +138,30 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
-      String workspace, String workspaceName, String notebookNameWithFileExtension) {
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithFileExtension) {
     if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
       throw new BadRequestException(
           String.format("%s is not a Jupyter notebook file", notebookNameWithFileExtension));
     }
 
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspace, workspaceName, WorkspaceAccessLevel.READER);
+        workspaceNamespace, workspaceTerraName, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
                 notebooksService.getNotebookKernel(
-                    workspace, workspaceName, notebookNameWithFileExtension)));
+                    workspaceNamespace, workspaceTerraName, notebookNameWithFileExtension)));
   }
 
   @Override
   public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceTerraName, String notebookName) {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String bucketName =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
@@ -188,7 +192,7 @@ public class NotebooksController implements NotebooksApiDelegate {
 
         Set<String> workspaceUsers =
             workspaceAuthService
-                .getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName)
+                .getFirecloudWorkspaceAcl(workspaceNamespace, workspaceTerraName)
                 .keySet();
 
         response.lastLockedBy(

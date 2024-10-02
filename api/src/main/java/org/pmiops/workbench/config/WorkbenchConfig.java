@@ -220,6 +220,7 @@ public class WorkbenchConfig {
     public String shortName;
     public String oauthClientId;
     public String appEngineLocationId;
+    public boolean isDownForMaintenance;
   }
 
   public static class AdminConfig {
@@ -304,6 +305,9 @@ public class WorkbenchConfig {
     // If true, enable mounting GCS buckets on GKE apps
     public boolean enableGcsFuseOnGke;
     public boolean enableInitialCreditsExpiration;
+    // If true, prevents users from taking compliance training, however
+    // the training is still required if enableComplianceTraining is true.
+    public boolean blockComplianceTraining;
   }
 
   public static class ActionAuditConfig {

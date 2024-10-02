@@ -10,6 +10,7 @@ import { FlexColumn } from 'app/components/flex';
 import { CheckCircle, Circle, Clock, ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { AARTitle } from 'app/pages/access/aar-title';
@@ -25,8 +26,9 @@ import {
   redirectToControlledTraining,
   redirectToRegisteredTraining,
 } from 'app/utils/access-utils';
+import { COMPLIANCE_TRAINIING_OUTAGE_MESSAGE } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
-import { profileStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import { styles } from './data-access-requirements';
 
@@ -229,7 +231,9 @@ export const RenewalCardBody = ({
   const [trainingRefreshButtonDisabled, setTrainingRefreshButtonDisabled] =
     useState(true);
 
-  const [disabled, setDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(
+    serverConfigStore.get().config.blockComplianceTraining
+  );
 
   const { duccSignedVersion } = profile;
 
@@ -240,6 +244,16 @@ export const RenewalCardBody = ({
     moduleStatus,
     duccSignedVersion
   );
+
+  const { blockComplianceTraining } = serverConfigStore.get().config;
+
+  const showRefreshText =
+    !blockComplianceTraining &&
+    !isRenewalCompleteForModule(moduleStatus, duccSignedVersion);
+  const disableComplianceTrainingTooltip =
+    !blockComplianceTraining ||
+    isRenewalCompleteForModule(moduleStatus, duccSignedVersion);
+
   const TimeEstimate = () =>
     showTimeEstimate ? (
       <FlexColumn style={{ alignItems: 'center' }}>
@@ -389,7 +403,7 @@ export const RenewalCardBody = ({
               to understand the privacy safeguards and the compliance
               requirements for using the <AoU /> Registered Tier Dataset.
             </div>
-            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
+            {showRefreshText && (
               <div
                 style={{
                   ...renewalStyle.complianceTrainingExpiring,
@@ -409,22 +423,30 @@ export const RenewalCardBody = ({
             }}
           >
             <TimeEstimate />
-            <ActionButton
-              {...{ moduleStatus, duccSignedVersion }}
-              actionButtonText='Complete Training'
-              completedButtonText='Completed'
-              disabled={disabled}
-              onClick={() => {
-                // disable action to prevent double-clicking
-                setDisabled(true);
-                setTrainingRefreshButtonDisabled(false);
-                redirectToRegisteredTraining();
-                // re-enable after a wait
-                setInterval(() => {
-                  setDisabled(false);
-                }, 3000);
-              }}
-            />
+            <TooltipTrigger
+              content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
+              disabled={disableComplianceTrainingTooltip}
+            >
+              {/* This is needed because TooltipTrigger needs a DOM level element to attach to */}
+              <span>
+                <ActionButton
+                  {...{ moduleStatus, duccSignedVersion }}
+                  actionButtonText='Complete Training'
+                  completedButtonText='Completed'
+                  disabled={disabled}
+                  onClick={() => {
+                    // disable action to prevent double-clicking
+                    setDisabled(true);
+                    setTrainingRefreshButtonDisabled(false);
+                    redirectToRegisteredTraining();
+                    // re-enable after a wait
+                    setInterval(() => {
+                      setDisabled(false);
+                    }, 3000);
+                  }}
+                />
+              </span>
+            </TooltipTrigger>
             {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <Button
                 disabled={trainingRefreshButtonDisabled}
@@ -457,7 +479,7 @@ export const RenewalCardBody = ({
               to understand the privacy safeguards and the compliance
               requirements for using the <AoU /> Controlled Tier Dataset.
             </div>
-            {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
+            {showRefreshText && (
               <div
                 style={{
                   ...renewalStyle.complianceTrainingExpiring,
@@ -477,15 +499,23 @@ export const RenewalCardBody = ({
             }}
           >
             <TimeEstimate />
-            <ActionButton
-              {...{ moduleStatus, duccSignedVersion }}
-              actionButtonText='Complete Training'
-              completedButtonText='Completed'
-              onClick={() => {
-                setTrainingRefreshButtonDisabled(false);
-                redirectToControlledTraining();
-              }}
-            />
+            <TooltipTrigger
+              content={COMPLIANCE_TRAINIING_OUTAGE_MESSAGE}
+              disabled={disableComplianceTrainingTooltip}
+            >
+              <span>
+                {/* This is needed because TooltipTrigger needs a DOM level element to attach to */}
+                <ActionButton
+                  {...{ disabled, moduleStatus, duccSignedVersion }}
+                  actionButtonText='Complete Training'
+                  completedButtonText='Completed'
+                  onClick={() => {
+                    setTrainingRefreshButtonDisabled(false);
+                    redirectToControlledTraining();
+                  }}
+                />
+              </span>
+            </TooltipTrigger>
             {!isRenewalCompleteForModule(moduleStatus, duccSignedVersion) && (
               <Button
                 disabled={trainingRefreshButtonDisabled}

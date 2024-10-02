@@ -54,8 +54,7 @@ public class WorkspaceTargetPropertyTest {
             .creationTime(now)
             .lastModifiedTime(now)
             .etag("etag_1")
-            .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .published(false);
+            .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
     workspace2 =
         new Workspace()
@@ -68,8 +67,7 @@ public class WorkspaceTargetPropertyTest {
             .creationTime(now)
             .lastModifiedTime(now)
             .etag("etag_1")
-            .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .published(false);
+            .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
   }
 
   @Test

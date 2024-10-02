@@ -74,7 +74,8 @@
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
     "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
-    "appEngineLocationId": "us-central"
+    "appEngineLocationId": "us-central",
+    "isDownForMaintenance": false
   },
   "admin": {
     "loginUrl": "https:\/\/stable.fake-research-aou.org/login"
@@ -116,7 +117,8 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
-    "enableInitialCreditsExpiration": false
+    "enableInitialCreditsExpiration": false,
+    "blockComplianceTraining": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

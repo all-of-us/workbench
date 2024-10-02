@@ -70,7 +70,8 @@ export const Module = (props: ModuleProps) => {
     status,
     style,
   } = props;
-  const { enableRasIdMeLinking } = serverConfigStore.get().config;
+  const { enableRasIdMeLinking, blockComplianceTraining } =
+    serverConfigStore.get().config;
 
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
@@ -98,7 +99,12 @@ export const Module = (props: ModuleProps) => {
         clickable={
           active &&
           !disabled &&
-          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY) &&
+          !(
+            blockComplianceTraining &&
+            (moduleName === AccessModule.COMPLIANCE_TRAINING ||
+              moduleName === AccessModule.CT_COMPLIANCE_TRAINING)
+          )
         }
         action={() => {
           // disable action to prevent double-clicking

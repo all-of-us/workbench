@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -1104,6 +1106,20 @@ public class InstitutionServiceTest {
                 .eligible(false));
   }
 
+  @Test
+  public void testShouldBypassForCreditsExpiration_noInstitution() {
+    final DbUser user = createUser("user@broad.org");
+    assertThat(service.shouldBypassForCreditsExpiration(user)).isFalse();
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testShouldBypassForCreditsExpiration_withInstitution(boolean bypass) {
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, testInst.getShortName(), bypass);
+    assertThat(service.shouldBypassForCreditsExpiration(user)).isEqualTo(bypass);
+  }
+
   private DbUser createUser(String contactEmail) {
     DbUser user = new DbUser();
     user.setContactEmail(contactEmail);
@@ -1113,7 +1129,13 @@ public class InstitutionServiceTest {
 
   private DbVerifiedInstitutionalAffiliation createAffiliation(
       final DbUser user, final String instName) {
+    return createAffiliation(user, instName, false);
+  }
+
+  private DbVerifiedInstitutionalAffiliation createAffiliation(
+      final DbUser user, final String instName, boolean bypassInitialCreditsExpiration) {
     final DbInstitution inst = service.getDbInstitutionOrThrow(instName);
+    inst.setBypassInitialCreditsExpiration(bypassInitialCreditsExpiration);
     final DbVerifiedInstitutionalAffiliation affiliation =
         new DbVerifiedInstitutionalAffiliation()
             .setUser(user)

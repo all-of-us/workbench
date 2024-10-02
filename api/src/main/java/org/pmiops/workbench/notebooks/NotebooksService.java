@@ -9,7 +9,7 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 
 public interface NotebooksService {
 
-  List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
+  List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceTerraName);
 
   /**
    * Retrieve all notebooks in the given cloud storage bucket. This method is authenticated as the
@@ -17,13 +17,13 @@ public interface NotebooksService {
    * input value should be trusted.
    */
   List<FileDetail> getNotebooksAsService(
-      String bucketName, String workspaceNamespace, String workspaceName);
+      String bucketName, String workspaceNamespace, String workspaceTerraName);
 
   List<FileDetail> getAllNotebooksByAppType(
-      String bucketName, String workspaceNamespace, String workspaceName, AppType appType);
+      String bucketName, String workspaceNamespace, String workspaceTerraName, AppType appType);
 
   List<FileDetail> getAllJupyterNotebooks(
-      String bucketName, String workspaceNamespace, String workspaceName);
+      String bucketName, String workspaceNamespace, String workspaceTerraName);
 
   /**
    * Is this a notebook file which is managed (localized and delocalized) by the Workbench?
@@ -35,20 +35,20 @@ public interface NotebooksService {
 
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceName,
+      String fromWorkspaceTerraName,
       String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
-      String toWorkspaceName,
+      String toWorkspaceTerraName,
       String newNotebookNameWithExtension);
 
   FileDetail cloneNotebook(
-      String workspaceNamespace, String workspaceName, String notebookNameWithExtension);
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithExtension);
 
-  void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+  void deleteNotebook(String workspaceNamespace, String workspaceTerraName, String notebookName);
 
   FileDetail renameNotebook(
       String workspaceNamespace,
-      String workspaceName,
+      String workspaceTerraName,
       String originalNameWithExtension,
       String newNameWithExtension);
 
@@ -57,15 +57,15 @@ public interface NotebooksService {
   KernelTypeEnum getNotebookKernel(JSONObject notebookFile);
 
   KernelTypeEnum getNotebookKernel(
-      String workspaceNamespace, String workspaceName, String notebookName);
+      String workspaceNamespace, String workspaceTerraName, String notebookName);
 
   void saveNotebook(
       String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
   String convertJupyterNotebookToHtml(byte[] notebook);
 
-  String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String getReadOnlyHtml(String workspaceNamespace, String workspaceTerraName, String notebookName);
 
   String adminGetReadOnlyHtml(
-      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension);
+      String workspaceNamespace, String workspaceTerraName, String notebookNameWithFileExtension);
 }

@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
@@ -53,6 +54,8 @@ public class InitialCreditsExpirationServiceTest {
   @MockBean private FakeClock fakeClock;
 
   @MockBean private LeonardoApiClient leonardoApiClient;
+
+  @MockBean private InstitutionService institutionService;
 
   private static final Timestamp NOW = Timestamp.from(FakeClockConfiguration.NOW.toInstant());
   private static final Timestamp NOW_PLUS_ONE_DAY =
@@ -107,10 +110,18 @@ public class InitialCreditsExpirationServiceTest {
     assertThat(service.getCreditsExpiration(user)).isEmpty();
   }
 
-  // TODO RW-13502
-  //  @Test
-  //  public void test_institutionBypassed() {
-  //  }
+  @Test
+  public void test_institutionBypassed() {
+    DbUser user =
+        spyUserDao.save(
+            new DbUser()
+                .setUserInitialCreditsExpiration(
+                    new DbUserInitialCreditsExpiration()
+                        .setBypassed(false)
+                        .setExpirationTime(NOW)));
+    when(institutionService.shouldBypassForCreditsExpiration(user)).thenReturn(true);
+    assertThat(service.getCreditsExpiration(user)).isEmpty();
+  }
 
   @Test
   public void test_nullTimestamp() {

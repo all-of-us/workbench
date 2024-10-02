@@ -107,7 +107,8 @@ public class WorkspaceAdminServiceTest {
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
   private static final String WORKSPACE_NAMESPACE = "aou-rw-12345";
-  private static final String WORKSPACE_NAME = "Gone with the Wind";
+  private static final String WORKSPACE_DISPLAY_NAME = "Work It !";
+  private static final String WORKSPACE_TERRA_NAME = "workit";
   private static final String CREATED_DATE = Date.fromYearMonthDay(1988, 12, 26).toString();
   private static final String RUNTIME_NAME = "all-of-us-runtime";
   private static final String RUNTIME_NAME_2 = "all-of-us-runtime-2";
@@ -196,7 +197,8 @@ public class WorkspaceAdminServiceTest {
                         .namespace(WORKSPACE_NAMESPACE)));
 
     final Workspace workspace =
-        TestMockFactory.createWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME);
+        TestMockFactory.createWorkspace(
+            WORKSPACE_NAMESPACE, WORKSPACE_DISPLAY_NAME, WORKSPACE_TERRA_NAME);
     dbWorkspace = workspaceDao.save(TestMockFactory.createDbWorkspaceStub(workspace, 1L));
 
     when(mockFirecloudService.getGroup(anyString()))
@@ -293,7 +295,9 @@ public class WorkspaceAdminServiceTest {
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
+        .isEqualTo(WORKSPACE_DISPLAY_NAME);
 
     // TODO(jaycarlton): instrument mocks such that we can see actual counts here.
     //   The goal for today is just to move this test case here from WorkspaceAdminControllerTest,
@@ -313,34 +317,16 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testGetWorkspaceAdminView_published_false() {
-    workspaceDao.save(dbWorkspace.setPublished(false).setFeaturedCategory(null));
-    WorkspaceAdminView workspaceDetailsResponse =
-        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
-  }
-
-  @Test
-  public void testGetWorkspaceAdminView_published_true() {
-    workspaceDao.save(dbWorkspace.setPublished(true).setFeaturedCategory(null));
-    WorkspaceAdminView workspaceDetailsResponse =
-        workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isTrue();
-    assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory()).isNull();
-  }
-
-  @Test
   public void testGetWorkspaceAdminView_featuredCategory() {
 
     WorkspaceAdminView workspaceDetailsResponse =
         workspaceAdminService.getWorkspaceAdminView(WORKSPACE_NAMESPACE);
     assertThat(workspaceDetailsResponse.getWorkspace().getNamespace())
         .isEqualTo(WORKSPACE_NAMESPACE);
-    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getName()).isEqualTo(WORKSPACE_DISPLAY_NAME);
+    assertThat(workspaceDetailsResponse.getWorkspace().getDisplayName())
+        .isEqualTo(WORKSPACE_DISPLAY_NAME);
 
-    // this refers to the old-style "published" flag, not the new "featured category" field
-    assertThat(workspaceDetailsResponse.getWorkspace().isPublished()).isFalse();
     assertThat(workspaceDetailsResponse.getWorkspace().getFeaturedCategory())
         .isEqualTo(FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES);
   }
@@ -544,16 +530,6 @@ public class WorkspaceAdminServiceTest {
   public void testSetAdminUnlockedStateCallsAuditor() {
     workspaceAdminService.setAdminUnlockedState(WORKSPACE_NAMESPACE);
     verify(mockAdminAuditor).fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Test
-  public void testDeprecatedPublishUnpublishWorkspace() {
-    DbWorkspace w = workspaceDao.save(stubWorkspace("ns", "n"));
-    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), true);
-    assertThat(mustGetDbWorkspace(w).getPublished()).isTrue();
-
-    workspaceAdminService.setPublished(w.getWorkspaceNamespace(), w.getFirecloudName(), false);
-    assertThat(mustGetDbWorkspace(w).getPublished()).isFalse();
   }
 
   @Test

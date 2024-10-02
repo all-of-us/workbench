@@ -572,6 +572,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         .findFirst();
   }
 
+  @Override
+  public boolean shouldBypassForCreditsExpiration(DbUser user) {
+    return getByUser(user).map(Institution::isBypassInitialCreditsExpiration).orElse(false);
+  }
+
   /** Validates list of email addresses, and throw {@link BadRequestException} if not valid. */
   private static void validateEmailAddressOrThrow(Set<String> emailAddresses) {
     emailAddresses.forEach(

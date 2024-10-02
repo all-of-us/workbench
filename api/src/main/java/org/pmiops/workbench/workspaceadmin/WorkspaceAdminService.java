@@ -23,7 +23,7 @@ public interface WorkspaceAdminService {
   AdminWorkspaceObjectsCounts getAdminWorkspaceObjects(long workspaceId);
 
   AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceName);
+      String workspaceNamespace, String workspaceTerraName);
 
   CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace);
 
@@ -50,8 +50,6 @@ public interface WorkspaceAdminService {
   void setAdminLockedState(String workspaceNamespace, AdminLockingRequest adminLockingRequest);
 
   void setAdminUnlockedState(String workspaceNamespace);
-
-  DbWorkspace setPublished(String workspaceNamespace, String firecloudName, boolean publish);
 
   void publishWorkspaceViaDB(
       String workspaceNamespace, PublishWorkspaceRequest publishWorkspaceRequest);

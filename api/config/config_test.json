@@ -74,7 +74,8 @@
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
     "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
-    "appEngineLocationId": "us-central"
+    "appEngineLocationId": "us-central",
+    "isDownForMaintenance": false
   },
   "admin": {
     "loginUrl": "https:\/\/test.fake-research-aou.org/login"
@@ -116,7 +117,8 @@
     "enableGKEAppPausing": true,
     "enableGKEAppMachineTypeChoice": true,
     "enableGcsFuseOnGke": true,
-    "enableInitialCreditsExpiration": true
+    "enableInitialCreditsExpiration": true,
+    "blockComplianceTraining": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

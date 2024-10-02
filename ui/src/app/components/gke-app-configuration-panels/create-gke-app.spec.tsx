@@ -20,10 +20,7 @@ import {
   defaultAppRequest,
 } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import {
-  AutodeleteDaysThresholds,
-  findMachineByName,
-} from 'app/utils/machines';
+import { autodeleteOptions, findMachineByName } from 'app/utils/machines';
 import { serverConfigStore } from 'app/utils/stores';
 import { appTypeToString } from 'app/utils/user-apps-utils';
 
@@ -257,11 +254,10 @@ describe(CreateGkeApp.name, () => {
         const { container } = await component(appType);
 
         // must match one of the choices
-        const autodeleteDays = AutodeleteDaysThresholds[1];
-        const autodeleteThreshold = autodeleteDays * 24 * 60;
+        const autodeleteChoice = autodeleteOptions[0];
 
         // sanity check: does not match default
-        expect(autodeleteThreshold).not.toEqual(
+        expect(autodeleteChoice.value).not.toEqual(
           defaultAppRequest[appType].autodeleteThreshold
         );
 
@@ -269,7 +265,7 @@ describe(CreateGkeApp.name, () => {
         const autodeleteOption = await getDropdownOption(
           container,
           autodeleteId,
-          `Idle for ${autodeleteDays} days`
+          autodeleteChoice.label
         );
         await userEvent.click(autodeleteOption);
 
@@ -277,7 +273,10 @@ describe(CreateGkeApp.name, () => {
         await waitFor(() => {
           expect(spyCreateApp).toHaveBeenCalledWith(
             WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-            { ...defaultAppRequest[appType], autodeleteThreshold }
+            {
+              ...defaultAppRequest[appType],
+              autodeleteThreshold: autodeleteChoice.value,
+            }
           );
           expect(onClose).toHaveBeenCalledTimes(1);
         });

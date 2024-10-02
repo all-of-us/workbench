@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationServiceImpl;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -94,7 +95,8 @@ public class WorkspaceMapperTest {
     ConceptSetService.class,
     CohortService.class,
     MailService.class,
-    LeonardoApiClient.class
+    LeonardoApiClient.class,
+    InstitutionService.class
   })
   static class Configuration {}
 
@@ -137,7 +139,6 @@ public class WorkspaceMapperTest {
             .setConceptSets(Collections.emptySet())
             .setDataSets(Collections.emptySet())
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-            .setPublished(false)
             .setDiseaseFocusedResearch(true)
             .setDiseaseOfFocus("leukemia")
             .setMethodsDevelopment(false)
@@ -191,7 +192,6 @@ public class WorkspaceMapperTest {
     assertResearchPurposeMatches(rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
-    assertThat(ws.isPublished()).isEqualTo(sourceDbWorkspace.getPublished());
     assertThat(ws.getFeaturedCategory()).isNull();
   }
 

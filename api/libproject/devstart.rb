@@ -80,13 +80,13 @@ def start_local_db_service()
   deadlineSec = 40
 
   bm = Benchmark.measure {
-    common.run_inline %W{docker-compose up -d db}
+    common.run_inline %W{docker compose up -d db}
 
     root_pass = "root-notasecret"
 
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
-    until (common.run "docker-compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
+    until (common.run "docker compose exec -T db mysql -p#{root_pass} --silent -e 'SELECT 1;'").success?
       if Time.now - start >= deadlineSec
         raise("mysql docker service did not become available after #{deadlineSec}s")
       end
@@ -170,7 +170,7 @@ def dev_up(cmd_name, args)
       "--nostart-db",
       ->(opts, _) { opts.start_db = false },
       "If specified, don't start the DB service. This is useful when running " +
-      "within docker, i.e. on CircleCI, as the DB service runs via docker-compose")
+      "within docker, i.e. on CircleCI, as the DB service runs via docker compose")
   op.parse.validate
 
   common = Common.new
@@ -181,7 +181,7 @@ def dev_up(cmd_name, args)
   end
 
   at_exit do
-    common.run_inline %W{docker-compose down} if op.opts.start_db
+    common.run_inline %W{docker compose down} if op.opts.start_db
   end
 
   setup_local_environment()
@@ -263,7 +263,7 @@ def run_api_and_db()
   setup_local_environment
 
   common = Common.new
-  at_exit { common.run_inline %W{docker-compose down} }
+  at_exit { common.run_inline %W{docker compose down} }
   start_local_db_service()
 
   run_api_incremental()
@@ -342,7 +342,7 @@ def connect_to_db()
   common.status "Starting database if necessary..."
   start_local_db_service()
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
-  common.run_inline %W{docker-compose exec db sh -c #{cmd}}
+  common.run_inline %W{docker compose exec db sh -c #{cmd}}
 end
 
 Common.register_command({
@@ -356,7 +356,7 @@ def docker_clean()
   common = Common.new
 
   # --volumes clears out any cached data between runs, e.g. the MySQL database
-  common.run_inline %W{docker-compose down --volumes}
+  common.run_inline %W{docker compose down --volumes}
 
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
@@ -365,7 +365,7 @@ def docker_clean()
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
-  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
+  common.status "Cleaning complete. docker compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
@@ -780,6 +780,34 @@ Common.register_command({
   :fn => ->(*args) { create_tanagra_tables("create-tanagra-tables", *args) }
 })
 
+def create_fitbit_tables_with_id_column(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--bq-project [bq-project]",
+      ->(opts, v) { opts.bq_project = v},
+      "BQ Project - Required."
+  )
+  op.add_option(
+      "--bq-dataset [bq-dataset]",
+      ->(opts, v) { opts.bq_dataset = v},
+      "BQ Dataset - Required."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-fitbit-tables-with-id-column.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-fitbit-tables-with-id-column",
+  :description => "Create all fitbit tables with id column.",
+  :fn => ->(*args) { create_fitbit_tables_with_id_column("create-fitbit-tables-with-id-column", *args) }
+})
+
 def build_tanagra_pfhh_table(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1119,6 +1147,43 @@ Common.register_command({
   :invocation => "import-cdr-indices-build-to-cloudsql",
   :description => "Imports CB related tables to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { import_cdr_indices_build_to_cloudsql("import-cdr-indices-build-to-cloudsql", *args) }
+})
+
+def set_grants(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project - Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version - Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.cdr_version }
+  op.parse.validate
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  ENV.update(read_db_vars(gcc))
+  ENV.update(must_get_env_value(gcc.project, :gae_vars))
+  ENV["DB_HOST"] = "127.0.0.1" # Temporary fix until we decide on how to handle this correctly.
+  ENV["DB_PORT"] = "3307" # Temporary fix until we decide on how to handle this correctly.
+
+  common = Common.new
+  CloudSqlProxyContext.new(gcc.project).run do
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/set-grants.sh #{op.opts.cdr_version}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "set-grants",
+  :description => "Set grants on new cdr database.",
+  :fn => ->(*args) { set_grants("set-grants", *args) }
 })
 
 def copy_bq_tables(cmd_name, *args)
@@ -2704,7 +2769,7 @@ Common.register_command({
 })
 
 def docker_run(args)
-  Common.new.run_inline %W{docker-compose run --rm scripts} + args
+  Common.new.run_inline %W{docker compose run --rm scripts} + args
 end
 
 Common.register_command({

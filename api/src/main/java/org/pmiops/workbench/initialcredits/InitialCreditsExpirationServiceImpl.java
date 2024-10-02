@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
 import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -33,6 +34,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   private final WorkspaceDao workspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final LeonardoApiClient leonardoApiClient;
+  private final InstitutionService institutionService;
 
   @Autowired
   public InitialCreditsExpirationServiceImpl(
@@ -41,13 +43,15 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
       WorkspaceDao workspaceDao,
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      LeonardoApiClient leonardoApiClient) {
+      LeonardoApiClient leonardoApiClient,
+      InstitutionService institutionService) {
     this.userDao = userDao;
     this.mailService = mailService;
     this.clock = clock;
     this.workspaceDao = workspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.leonardoApiClient = leonardoApiClient;
+    this.institutionService = institutionService;
   }
 
   @Override
@@ -62,8 +66,7 @@ public class InitialCreditsExpirationServiceImpl implements InitialCreditsExpira
   public Optional<Timestamp> getCreditsExpiration(DbUser user) {
     return Optional.ofNullable(user.getUserInitialCreditsExpiration())
         .filter(exp -> !exp.isBypassed()) // If the expiration is bypassed, return empty.
-        // TODO RW-13502 filter on institutional bypass as well, maybe something like
-        // .filter(() -> institutionService.shouldBypassForCreditsExpiration(user))
+        .filter(exp -> !institutionService.shouldBypassForCreditsExpiration(user))
         .map(DbUserInitialCreditsExpiration::getExpirationTime);
   }
 
