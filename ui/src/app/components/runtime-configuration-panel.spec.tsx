@@ -698,6 +698,7 @@ describe(RuntimeConfigurationPanel.name, () => {
           labels: {},
         },
         gpuConfig: null,
+        zone: 'us-central1-a',
       },
       gceConfig: null,
       dataprocConfig: null,

@@ -34,7 +34,7 @@ export const runtimePresets = (): {
           },
           machineType: DEFAULT_MACHINE_NAME,
           gpuConfig: null, // TODO: why not undefined or simply missing?
-          zone: serverConfigStore.get().config.defaultGceVmZone,
+          zone: serverConfigStore.get().config?.defaultGceVmZone,
         },
       },
     },
