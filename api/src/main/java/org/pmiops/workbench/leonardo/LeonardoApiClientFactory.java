@@ -60,6 +60,18 @@ public class LeonardoApiClientFactory {
     return apiClient;
   }
 
+  public org.broadinstitute.dsde.workbench.client.leonardo.ApiClient newApiClient2() {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    final org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient =
+        new org.broadinstitute.dsde.workbench.client.leonardo.ApiClient()
+            .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
+            .setDebugging(workbenchConfig.firecloud.debugEndpoints)
+            .addDefaultHeader(
+                FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
+    return apiClient;
+  }
+
   /**
    * Creates a Leonardo notebooks API client, unauthenticated. Most clients should use an
    * authenticated, request scoped bean instead of calling this directly.

@@ -27,6 +27,7 @@ public class LeonardoConfig {
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
   public static final String USER_DISKS_API = "userDisksApi";
+  public static final String USER_DISKS_API_2 = "userDisksApi2";
   public static final String SERVICE_DISKS_API = "svcDisksApi";
 
   public static final String USER_APPS_API = "userAppsApi";
@@ -38,6 +39,7 @@ public class LeonardoConfig {
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
+  private static final String USER_LEONARDO_CLIENT_2 = "leonardoApiClient2";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
 
   public static final String SERVICE_RESOURCE_API = "serviceResourceApi";
@@ -93,6 +95,15 @@ public class LeonardoConfig {
     return apiClient;
   }
 
+  @Bean(name = USER_LEONARDO_CLIENT_2)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public org.broadinstitute.dsde.workbench.client.leonardo.ApiClient leoUserApiClient2(
+      UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
+    org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient = factory.newApiClient2();
+    apiClient.setAccessToken(userAuthentication.getCredentials());
+    return apiClient;
+  }
+
   @Bean(name = SERVICE_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.notebooks.ApiClient workbenchServiceAccountClient(
@@ -122,6 +133,17 @@ public class LeonardoConfig {
       @Qualifier(USER_LEONARDO_CLIENT)
           org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
     DisksApi api = new DisksApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = USER_DISKS_API_2)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi disksApi2(
+      @Qualifier(USER_LEONARDO_CLIENT_2)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+    org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi api =
+        new org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi();
     api.setApiClient(apiClient);
     return api;
   }

@@ -74,6 +74,14 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static WorkbenchException convertLeonardoException2(
+      org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
   public static WorkbenchException convertShibbolethException(
       org.pmiops.workbench.shibboleth.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {

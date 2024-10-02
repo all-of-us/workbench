@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -104,6 +105,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> disksApiProvider;
+  private final Provider<org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi>
+      disksApiProvider2;
   private final Provider<DisksApi> serviceDisksApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final Provider<AppsApi> serviceAppsApiProvider;
@@ -111,6 +114,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
+  private final LeonardoRetryHandler2 leonardoRetryHandler2;
   private final WorkspaceDao workspaceDao;
 
   @Autowired
@@ -125,6 +129,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> disksApiProvider,
+      @Qualifier(LeonardoConfig.USER_DISKS_API_2)
+          Provider<org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi>
+              disksApiProvider2,
       @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDisksApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
@@ -132,6 +139,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
+      LeonardoRetryHandler2 leonardoRetryHandler2,
       WorkspaceDao workspaceDao) {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
@@ -142,6 +150,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.disksApiProvider = disksApiProvider;
+    this.disksApiProvider2 = disksApiProvider2;
     this.serviceDisksApiProvider = serviceDisksApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
@@ -149,6 +158,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
+    this.leonardoRetryHandler2 = leonardoRetryHandler2;
     this.workspaceDao = workspaceDao;
   }
 
@@ -541,6 +551,22 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 /* labels */ null,
                 /* includeDeleted */ false,
                 LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_CREATOR_ROLE));
+  }
+
+  @Override
+  public List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator2(
+      String googleProject) {
+
+    org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi disksApi =
+        disksApiProvider2.get();
+    return leonardoRetryHandler2.run(
+        (context) ->
+            disksApi.listDisksByProject(
+                googleProject,
+                null,
+                /* includeDeleted */ false,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
   }
 
