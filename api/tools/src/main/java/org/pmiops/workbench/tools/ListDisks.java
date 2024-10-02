@@ -1,7 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import static org.pmiops.workbench.leonardo.LeonardoConfig.SERVICE_DISKS_API;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
 import static org.pmiops.workbench.utils.BillingUtils.isInitialCredits;
 
 import com.opencsv.CSVWriter;
@@ -24,13 +22,11 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.GoogleConfig;
-import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
-import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,18 +90,16 @@ public class ListDisks extends Tool {
   }
 
   private void listDisks(
-      DisksApi disksApi,
+      LeonardoApiClient leonardoApiClient,
       WorkspaceDao workspaceDao,
       WorkbenchConfig workbenchConfig,
       CommandLine opts)
-      throws ApiException, IOException {
+      throws IOException {
     String outputFile = opts.getOptionValue(outputFileOpt.getLongOpt());
 
     log.info("Step 1 of 3: Retrieving disk information from Leonardo");
 
-    List<LeonardoListPersistentDiskResponse> disks =
-        disksApi.listDisks(
-            /* labels */ null, /* includeDeleted */ false, LEONARDO_DISK_LABEL_KEYS, null);
+    List<LeonardoListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
 
     log.info("Step 2 of 3: Associating disk information with RWB workspaces");
 
@@ -164,23 +158,14 @@ public class ListDisks extends Tool {
 
   @Bean
   public CommandLineRunner run(
-      @Qualifier(SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
+      LeonardoApiClient leonardoApiClient,
       WorkspaceDao workspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     return args -> {
       // project.rb swallows exceptions, so we need to catch and log them here
       try {
-        WorkbenchConfig config = workbenchConfigProvider.get();
-        DisksApi disksApi = disksApiProvider.get();
-
-        // this call is slow, so let a long timeout
-        disksApiProvider
-            .get()
-            .getApiClient()
-            .setReadTimeout(config.firecloud.lenientTimeoutInSeconds * 1000);
-
         listDisks(
-            disksApi,
+            leonardoApiClient,
             workspaceDao,
             workbenchConfigProvider.get(),
             new DefaultParser().parse(options, args));
