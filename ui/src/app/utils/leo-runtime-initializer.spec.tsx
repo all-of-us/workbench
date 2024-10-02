@@ -183,7 +183,7 @@ describe('RuntimeInitializer', () => {
       { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers({
-      targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate,
+      targetRuntime: runtimePresets().generalAnalysis.runtimeTemplate,
     });
 
     expect(mockCreateRuntime).toHaveBeenCalled();
@@ -214,7 +214,7 @@ describe('RuntimeInitializer', () => {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
       // these are the specific fields added to the runtime
       const { name, size, diskType } =
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .persistentDisk;
       expect(e.defaultRuntime).toMatchObject({
         gceWithPdConfig: {
@@ -253,11 +253,11 @@ describe('RuntimeInitializer', () => {
       expect(e.defaultRuntime).toMatchObject({
         gceWithPdConfig: {
           persistentDisk: {
-            size: runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-              .persistentDisk.size,
+            size: runtimePresets().generalAnalysis.runtimeTemplate
+              .gceWithPdConfig.persistentDisk.size,
           },
           machineType:
-            runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
               .machineType,
         },
       });
@@ -351,7 +351,7 @@ describe('RuntimeInitializer', () => {
     try {
       await runInitializerAndTimers({
         maxCreateCount: 0,
-        targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate,
+        targetRuntime: runtimePresets().generalAnalysis.runtimeTemplate,
       });
     } catch (error) {
       expect(error.message).toMatch(/max runtime create count/i);
@@ -391,7 +391,7 @@ describe(throwRuntimeNotFound.name, () => {
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
       expect(e.defaultRuntime).toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate
+        runtimePresets().generalAnalysis.runtimeTemplate
       );
     }
   });
@@ -415,16 +415,17 @@ describe(throwRuntimeNotFound.name, () => {
 
     // an arbitrary non-PD field - later we see that this has been overridden by the preset
     expect(currentRuntime.gceWithPdConfig.machineType).not.toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
+        .machineType
     );
     // an arbitrary PD field besides name differs - later we see that this has been overridden by the preset
     expect(currentRuntime.gceWithPdConfig.persistentDisk.size).not.toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
         .persistentDisk.size
     );
     // later we see that the name field has NOT been overridden by the preset
     expect(currentRuntime.gceWithPdConfig.persistentDisk.name).not.toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
         .persistentDisk.name
     );
 
@@ -438,9 +439,9 @@ describe(throwRuntimeNotFound.name, () => {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
 
       const runtimePresetConfigWithOriginalName = {
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
         persistentDisk: {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: currentRuntime.gceWithPdConfig.persistentDisk.name,
         },
@@ -472,7 +473,7 @@ describe(throwRuntimeNotFound.name, () => {
 
       // an arbitrary field - later we see that this DataProc field has been overridden by the preset GCE With PD field
       expect(currentRuntime.dataprocConfig.masterMachineType).not.toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
           .masterMachineType
       );
 
@@ -489,7 +490,7 @@ describe(throwRuntimeNotFound.name, () => {
         expect(e.defaultRuntime.gceConfig).toBeFalsy();
         expect(e.defaultRuntime.gceWithPdConfig).toBeFalsy();
         expect(e.defaultRuntime.dataprocConfig).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
         );
       }
     }
@@ -516,13 +517,13 @@ describe(throwRuntimeNotFound.name, () => {
       expect(currentRuntime.gceWithPdConfig).toBeFalsy();
 
       expect(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .persistentDisk.name
       ).not.toEqual(gcePersistentDisk.name);
 
       // an arbitrary field - later we see that this GCE field has been overridden by the preset GCE With PD field
       expect(currentRuntime.gceConfig.machineType).not.toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .machineType
       );
 
@@ -536,7 +537,7 @@ describe(throwRuntimeNotFound.name, () => {
         expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
 
         const runtimePresetPdWithExistingPdName: PersistentDiskRequest = {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: gcePersistentDisk.name,
         };
@@ -545,7 +546,7 @@ describe(throwRuntimeNotFound.name, () => {
         expect(e.defaultRuntime.gceConfig).toBeFalsy(); // transformed by attaching the PD
         expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
         expect(e.defaultRuntime.gceWithPdConfig.machineType).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .machineType
         );
         expect(e.defaultRuntime.gceWithPdConfig.persistentDisk).toEqual(
@@ -578,7 +579,7 @@ describe(throwRuntimeNotFound.name, () => {
 
       // an arbitrary field - later we see that this GCE field has been overridden by the preset GCE With PD field
       expect(currentRuntime.gceConfig.machineType).not.toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .machineType
       );
 
@@ -595,11 +596,11 @@ describe(throwRuntimeNotFound.name, () => {
         expect(e.defaultRuntime.gceConfig).toBeFalsy(); // transformed by attaching the PD
         expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
         expect(e.defaultRuntime.gceWithPdConfig.machineType).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .machineType
         );
         expect(e.defaultRuntime.gceWithPdConfig.persistentDisk).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk
         );
         expect(
@@ -632,7 +633,7 @@ describe(throwRuntimeNotFound.name, () => {
 
       // an arbitrary field - later we see that this GCE field has been NOT overridden by the preset GCE With PD field
       expect(currentRuntime.gceConfig.machineType).not.toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
           .machineType
       );
 
@@ -650,17 +651,17 @@ describe(throwRuntimeNotFound.name, () => {
         expect(e.defaultRuntime.gceWithPdConfig).toBeTruthy();
 
         expect(e.defaultRuntime.gceWithPdConfig.persistentDisk.name).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk.name
         );
         expect(e.defaultRuntime.gceWithPdConfig.persistentDisk.size).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk.size
         );
         expect(
           e.defaultRuntime.gceWithPdConfig.persistentDisk.diskType
         ).toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk.diskType
         );
 
@@ -670,7 +671,7 @@ describe(throwRuntimeNotFound.name, () => {
 
         // the preset is NOT applied to the main configuration
         expect(e.defaultRuntime.gceWithPdConfig.machineType).not.toEqual(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .machineType
         );
       }

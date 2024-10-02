@@ -58,12 +58,16 @@ describe(CreatePanel.name, () => {
     [
       ComputeType.Dataproc,
       toAnalysisConfig(defaultDataProcRuntime(), undefined),
-      `Recommended Environment for ${runtimePresets.hailAnalysis.displayName}`,
+      `Recommended Environment for ${
+        runtimePresets().hailAnalysis.displayName
+      }`,
     ],
     [
       ComputeType.Standard,
       toAnalysisConfig(defaultGceRuntimeWithPd(), stubDisk()),
-      `Recommended Environment for ${runtimePresets.generalAnalysis.displayName}`,
+      `Recommended Environment for ${
+        runtimePresets().generalAnalysis.displayName
+      }`,
     ],
   ])(
     'should recommend an appropriate preset for the %s computeType',

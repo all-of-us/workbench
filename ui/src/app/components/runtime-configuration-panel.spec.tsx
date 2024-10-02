@@ -75,7 +75,14 @@ import {
 } from './runtime-configuration-panel';
 import { PanelContent } from './runtime-configuration-panel/utils';
 
+const setup = () => {
+  serverConfigStore.set({ config: defaultServerConfig });
+};
+
 describe(deriveCurrentRuntime.name, () => {
+  beforeEach(() => {
+    setup();
+  });
   it('returns an undefined runtime if the inputs are undefined', () => {
     const expected = undefined;
 
@@ -92,6 +99,9 @@ describe(deriveCurrentRuntime.name, () => {
     ['GCE with PD', defaultGceRuntimeWithPd()],
     ['DataProc', defaultDataProcRuntime()],
   ])('%s', (desc, runtime) => {
+    beforeEach(() => {
+      setup();
+    });
     it(`returns a ${desc} runtime from the hook if it is not DELETED`, () => {
       // sanity check
       expect(runtime.status).not.toEqual(RuntimeStatus.DELETED);
@@ -131,9 +141,9 @@ describe(deriveCurrentRuntime.name, () => {
       };
 
       const expectedGceWithPdConfig = {
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
         persistentDisk: {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: undefined, // cleared by applyPresetOverride()
         },
@@ -164,9 +174,9 @@ describe(deriveCurrentRuntime.name, () => {
       const disk = { ...stubDisk(), name: 'whatever' };
 
       const expectedGceWithPdConfig = {
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
         persistentDisk: {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: disk.name,
         },
@@ -208,9 +218,9 @@ describe(deriveCurrentRuntime.name, () => {
 
       const expectedGceWithPdConfig = {
         ...runtime.gceWithPdConfig,
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
         persistentDisk: {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: runtimeDiskName, // keeps original disk, does NOT attach a different one
         },
@@ -240,9 +250,9 @@ describe(deriveCurrentRuntime.name, () => {
 
       const expectedGceWithPdConfig = {
         ...runtime.gceWithPdConfig,
-        ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig,
+        ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig,
         persistentDisk: {
-          ...runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          ...runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
             .persistentDisk,
           name: runtime.gceWithPdConfig.persistentDisk.name,
         },
@@ -274,12 +284,15 @@ describe(deriveCurrentRuntime.name, () => {
     expect(currentRuntime.gceConfig).toBeFalsy();
     expect(currentRuntime.gceWithPdConfig).toBeFalsy();
     expect(currentRuntime.dataprocConfig).toEqual(
-      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
     );
   });
 });
 
 describe(createOrCustomize.name, () => {
+  beforeEach(() => {
+    setup();
+  });
   it('returns Customize when a pendingRuntime exists', () => {
     expect(
       createOrCustomize({
@@ -328,7 +341,7 @@ describe(createOrCustomize.name, () => {
 
 describe(getErrorsAndWarnings.name, () => {
   beforeEach(() => {
-    serverConfigStore.set({ config: defaultServerConfig });
+    setup();
   });
   it('should show no errors or warnings by default', () => {
     const { errorMessageContent, warningMessageContent } = getErrorsAndWarnings(
@@ -628,6 +641,10 @@ describe(RuntimeConfigurationPanel.name, () => {
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let user: UserEvent;
+
+  beforeEach(() => {
+    setup();
+  });
 
   const onClose = jest.fn();
   const defaultProps: RuntimeConfigurationPanelProps = {
@@ -1012,14 +1029,15 @@ describe(RuntimeConfigurationPanel.name, () => {
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .gceWithPdConfig.machineType
     ).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
+        .machineType
     );
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .gceWithPdConfig.persistentDisk.size
     ).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+      runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
         .persistentDisk.size
     );
   });
@@ -1066,7 +1084,7 @@ describe(RuntimeConfigurationPanel.name, () => {
           .dataprocConfig;
 
       expect(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
+        runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig
       ).toMatchObject({
         masterMachineType,
         masterDiskSize,
@@ -1151,6 +1169,7 @@ describe(RuntimeConfigurationPanel.name, () => {
         name: null,
         size: MIN_DISK_SIZE_GB + 10,
       },
+      zone: serverConfigStore.get().config.defaultGceVmZone,
     });
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -1336,7 +1355,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickStandardDiskSize(MIN_DISK_SIZE_GB + 10);
 
     // GPU
-    await pickPresets(container, runtimePresets.generalAnalysis.displayName);
+    await pickPresets(container, runtimePresets().generalAnalysis.displayName);
 
     clickExpectedButton('Create');
     await waitFor(async () => {
@@ -1374,7 +1393,7 @@ describe(RuntimeConfigurationPanel.name, () => {
 
     await user.click(customizeButton);
 
-    await pickPresets(container, runtimePresets.hailAnalysis.displayName);
+    await pickPresets(container, runtimePresets().hailAnalysis.displayName);
 
     await clickExpectedButton('Create');
     await waitFor(async () => {
@@ -1387,7 +1406,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
-    ).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig);
+    ).toEqual(runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig);
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .gceConfig
@@ -1417,7 +1436,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       // show that the preset values do not match the existing runtime
 
       const { machineType, persistentDisk } =
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig;
+        runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig;
 
       expect(customMachineType).not.toEqual(machineType);
       expect(customDiskSize).not.toEqual(persistentDisk.size);
@@ -1467,7 +1486,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickWorkerDiskSize(300);
     await pickNumWorkers(10);
     await pickNumPreemptibleWorkers(20);
-    await pickPresets(container, runtimePresets.hailAnalysis.displayName);
+    await pickPresets(container, runtimePresets().hailAnalysis.displayName);
     await clickExpectedButton('Create');
 
     expect(
@@ -1478,7 +1497,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
         .dataprocConfig
-    ).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig);
+    ).toEqual(runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig);
 
     expect(
       mockSetRuntimeRequest.mock.calls[firstCall][firstParameter].runtime
@@ -1495,7 +1514,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Customize');
 
     // Take the preset but make a solitary modification.
-    await pickPresets(container, runtimePresets.hailAnalysis.displayName);
+    await pickPresets(container, runtimePresets().hailAnalysis.displayName);
     await pickNumPreemptibleWorkers(20);
 
     await clickExpectedButton('Create');
@@ -1517,7 +1536,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await clickExpectedButton('Customize');
 
     // Take the preset, make a change, then revert.
-    await pickPresets(container, runtimePresets.generalAnalysis.displayName);
+    await pickPresets(container, runtimePresets().generalAnalysis.displayName);
     await pickComputeType(container, ComputeType.Dataproc);
     await pickWorkerCpu(container, 2);
     await pickComputeType(container, ComputeType.Standard);
@@ -1607,7 +1626,7 @@ describe(RuntimeConfigurationPanel.name, () => {
         masterDiskSize,
         workerDiskSize,
         numberOfWorkers,
-      } = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+      } = runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig;
 
       expect(customMasterMachineType).not.toEqual(masterMachineType);
       expect(customMasterDiskSize).not.toEqual(masterDiskSize);
@@ -1970,7 +1989,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     expect(getRunningCost()).toEqual('$0.40 per hour');
     expect(getPausedCost()).toEqual('$0.02 per hour');
 
-    await pickPresets(container, runtimePresets.generalAnalysis.displayName);
+    await pickPresets(container, runtimePresets().generalAnalysis.displayName);
     expect(getRunningCost()).toEqual('$0.20 per hour');
     expect(getPausedCost()).toEqual('< $0.01 per hour');
 

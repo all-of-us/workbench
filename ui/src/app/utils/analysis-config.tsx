@@ -102,7 +102,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       'runtimeTemplate.configurationType',
       fp.find(
         ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
-        runtimePresets
+        runtimePresets()
       )
     ) || RuntimeConfigurationType.USER_OVERRIDE;
 
@@ -186,7 +186,8 @@ export const withAnalysisConfigDefaults = (
     gpuConfig = null;
     zone = null;
 
-    const defaults = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+    const defaults =
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig;
     dataprocConfig = {
       numberOfWorkers:
         dataprocConfig?.numberOfWorkers ?? defaults.numberOfWorkers,
@@ -225,7 +226,7 @@ export const toAnalysisConfig = (
   existingDisk: Disk | null
 ): AnalysisConfig => {
   const toGceConfig = () => {
-    const { machineType, diskSize, gpuConfig } = runtime.gceConfig;
+    const { machineType, diskSize, gpuConfig, zone } = runtime.gceConfig;
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(machineType),
@@ -239,6 +240,7 @@ export const toAnalysisConfig = (
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
+      zone,
     };
   };
 
@@ -247,6 +249,7 @@ export const toAnalysisConfig = (
       machineType,
       persistentDisk: { size, diskType: detachableType },
       gpuConfig,
+      zone,
     } = runtime.gceWithPdConfig;
     return {
       computeType: ComputeType.Standard,
@@ -263,6 +266,7 @@ export const toAnalysisConfig = (
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
+      zone,
     };
   };
 

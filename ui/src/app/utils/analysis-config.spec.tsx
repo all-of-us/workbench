@@ -264,7 +264,7 @@ describe(fromAnalysisConfig.name, () => {
     expect(runtime.gceConfig.gpuConfig).toEqual(testConfig.gpuConfig);
   });
 
-  const generalTemplate = runtimePresets.generalAnalysis.runtimeTemplate;
+  const generalTemplate = runtimePresets().generalAnalysis.runtimeTemplate;
   const testConfigForGeneralPreset = {
     ...defaultAnalysisConfig,
 
@@ -303,7 +303,7 @@ describe(fromAnalysisConfig.name, () => {
     );
   });
 
-  const hailTemplate = runtimePresets.hailAnalysis.runtimeTemplate;
+  const hailTemplate = runtimePresets().hailAnalysis.runtimeTemplate;
   const testConfigForHailPreset = {
     ...defaultAnalysisConfig,
 
@@ -833,7 +833,7 @@ describe(withAnalysisConfigDefaults.name, () => {
 
       replaceableFields.forEach((field: string) =>
         expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
         )
       );
     });
@@ -853,7 +853,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
 
         expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
         );
       }
     );

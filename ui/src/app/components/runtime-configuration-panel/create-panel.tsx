@@ -41,8 +41,8 @@ export const CreatePanel = ({
 }: CreatePanelProps) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
-      ? runtimePresets.hailAnalysis.displayName
-      : runtimePresets.generalAnalysis.displayName;
+      ? runtimePresets().hailAnalysis.displayName
+      : runtimePresets().generalAnalysis.displayName;
 
   return (
     <>
