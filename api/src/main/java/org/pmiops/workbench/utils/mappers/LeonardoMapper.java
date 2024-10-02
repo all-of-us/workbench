@@ -26,7 +26,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
@@ -114,20 +113,7 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
-  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
-
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
-
-  @AfterMapping
-  default void getDiskAfterMapper(
-      @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
-    setDiskEnvironmentType(disk, leoGetDiskResponse.getLabels());
-  }
 
   @AfterMapping
   default void listDisksAfterMapper(

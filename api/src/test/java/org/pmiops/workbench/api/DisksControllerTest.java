@@ -26,18 +26,12 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,69 +101,6 @@ public class DisksControllerTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID);
     doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace((WORKSPACE_NS));
-  }
-
-  @Test
-  public void test_getDisk() {
-    String createDate = "2021-08-06T16:57:29.827954Z";
-    String pdName = "pdName";
-    LeonardoGetPersistentDiskResponse getResponse =
-        new LeonardoGetPersistentDiskResponse()
-            .name(pdName)
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.READY)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT_ID));
-
-    Disk disk =
-        new Disk()
-            .name(pdName)
-            .size(300)
-            .diskType(DiskType.STANDARD)
-            .status(DiskStatus.READY)
-            .createdDate(createDate)
-            .creator(user.getUsername())
-            .gceRuntime(true);
-
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
-        .thenReturn(getResponse);
-    assertThat(disksController.getDisk(WORKSPACE_NS, pdName).getBody()).isEqualTo(disk);
-  }
-
-  @Test
-  public void test_getDisk_nullProject() {
-    String createDate = "2021-08-06T16:57:29.827954Z";
-    String pdName = "pdName";
-    LeonardoGetPersistentDiskResponse getResponse =
-        new LeonardoGetPersistentDiskResponse()
-            .name(pdName)
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.READY)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT_ID));
-
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
-        .thenReturn(getResponse);
-
-    when(mockWorkspaceService.lookupWorkspaceByNamespace(null)).thenThrow(new NotFoundException());
-
-    assertThrows(NotFoundException.class, () -> disksController.getDisk(null, pdName));
-  }
-
-  @Test
-  public void test_getDisk_nullDisk() {
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, null))
-        .thenThrow(new NotFoundException());
-
-    assertThrows(NotFoundException.class, () -> disksController.getDisk(WORKSPACE_NS, null));
   }
 
   @Test
