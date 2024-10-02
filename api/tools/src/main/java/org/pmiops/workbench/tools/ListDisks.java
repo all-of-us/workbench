@@ -20,13 +20,17 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.GoogleConfig;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
+import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.sam.SamRetryHandler;
+import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +39,14 @@ import org.springframework.context.annotation.Import;
 /** Retrieve details about all persistent disks in an environment. */
 @Configuration
 @Import({
+  FireCloudServiceImpl.class,
   FirecloudApiClientFactory.class,
   GoogleConfig.class, // injects com.google.cloud.iam.credentials.v1.IamCredentialsClient
-  LeonardoConfig.class,
   LeonardoApiClientFactory.class,
+  LeonardoApiClientImpl.class,
+  LeonardoConfig.class,
+  LeonardoMapperImpl.class,
+  SamRetryHandler.class,
 })
 public class ListDisks extends Tool {
 
