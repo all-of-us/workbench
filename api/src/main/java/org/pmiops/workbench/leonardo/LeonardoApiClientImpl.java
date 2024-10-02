@@ -314,14 +314,17 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesAsService() {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
-    return leonardoRetryHandler.run((context) -> runtimesApi.listRuntimes(null, false));
+    return leonardoRetryHandler.run(
+        (context) -> runtimesApi.listRuntimes(/* labels */ null, /* includeDeleted */ false));
   }
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
+        (context) ->
+            runtimesApi.listRuntimesByProject(
+                googleProject, /* labels */ null, /* includeDeleted */ false));
   }
 
   @Override
@@ -329,7 +332,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       String googleProject, boolean includeDeleted) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> runtimesApi.listRuntimesByProject(googleProject, null, includeDeleted));
+        (context) ->
+            runtimesApi.listRuntimesByProject(googleProject, /* labels */ null, includeDeleted));
   }
 
   @Override
@@ -533,7 +537,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) ->
             disksApi.listDisksByProject(
                 googleProject,
-                null,
+                /* labels */ null,
                 /* includeDeleted */ false,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
@@ -551,10 +555,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisks(
-                /* labels */ null, /* includeDeleted */
-                false,
-                LEONARDO_DISK_LABEL_KEYS, /* Leonardo Role */
-                null));
+                /* labels */ null,
+                /* includeDeleted */ false,
+                LEONARDO_DISK_LABEL_KEYS,
+                /* Leonardo Role */ null));
   }
 
   @Override
@@ -566,8 +570,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) ->
             disksApi.listDisksByProject(
                 googleProject,
-                null,
-                /*includeDeleted*/ false,
+                /* labels */ null,
+                /* includeDeleted */ false,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 /* Leonardo Role */ null));
   }
