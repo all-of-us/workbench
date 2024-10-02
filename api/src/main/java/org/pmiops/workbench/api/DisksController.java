@@ -20,11 +20,6 @@ public class DisksController implements DisksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Disk> getDisk(String workspaceNamespace, String diskName) {
-    return ResponseEntity.ok(diskService.getDisk(workspaceNamespace, diskName));
-  }
-
-  @Override
   public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace, String diskName) {
     diskService.deleteDisk(workspaceNamespace, diskName);
     return ResponseEntity.ok(new EmptyResponse());

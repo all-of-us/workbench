@@ -7,7 +7,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,20 +49,6 @@ public class DiskService {
     return responseList.stream()
         .map(leonardoMapper::toApiListDisksResponse)
         .collect(Collectors.toList());
-  }
-
-  public Disk getDisk(String workspaceNamespace, String diskName) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    Disk disk =
-        leonardoMapper.toApiGetDiskResponse(
-            leonardoNotebooksClient.getPersistentDisk(googleProject, diskName));
-
-    if (DiskStatus.FAILED.equals(disk.getStatus())) {
-      log.warning(
-          String.format("Observed failed PD %s in workspace %s", diskName, workspaceNamespace));
-    }
-    return disk;
   }
 
   public List<Disk> getOwnedDisksInWorkspace(String workspaceNamespace) {

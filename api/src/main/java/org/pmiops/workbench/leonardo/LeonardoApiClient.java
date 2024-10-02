@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
@@ -69,10 +68,6 @@ public interface LeonardoApiClient {
   /** Create a new data synchronization Welder storage link on a Gke APP. */
   StorageLink createStorageLinkForApp(
       String googleProject, String appName, StorageLink storageLink);
-
-  /** Gets information about a persistent disk */
-  LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
-      throws WorkbenchException;
 
   /** Deletes a persistent disk */
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;

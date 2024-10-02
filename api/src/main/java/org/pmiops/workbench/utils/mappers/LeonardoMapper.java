@@ -114,13 +114,6 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
-  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
-
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
 
   @AfterMapping

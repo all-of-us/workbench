@@ -40,7 +40,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -475,18 +474,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     ProxyApi proxyApi = proxyApiProvider.get();
     return notebooksRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(storageLink, googleProject, runtime));
-  }
-
-  @Override
-  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
-      throws WorkbenchException {
-    DisksApi disksApi = disksApiProvider.get();
-    try {
-      return leonardoRetryHandler.runAndThrowChecked(
-          (context) -> disksApi.getDisk(googleProject, diskName));
-    } catch (ApiException e) {
-      throw ExceptionUtils.convertLeonardoException(e);
-    }
   }
 
   @Override

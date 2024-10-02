@@ -1149,37 +1149,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /v1/workspaces/{workspaceNamespace}/disks/{diskName}:
-    get:
-      tags:
-      - disks
-      summary: Get the user's workspace persistent disk by name.
-      operationId: getDisk
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: diskName
-        in: path
-        description: diskName
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: The persistent disk for this user and workspace.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Disk'
-        404:
-          description: No persistent disk exists for this user and workspace.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
       - disks
