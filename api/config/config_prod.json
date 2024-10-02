@@ -117,7 +117,7 @@
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
     "enableGcsFuseOnGke": true,
-    "enableInitialCreditsExpiration": false
+    "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false
   },
   "actionAudit": {
