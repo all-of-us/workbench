@@ -987,6 +987,8 @@ workflows:
             - gcs-load-test-results
 
   playground:
+    -hold:
+      type: approval
     jobs:
       - playground:
           <<: *filter-pr-branch
