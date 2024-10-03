@@ -991,6 +991,8 @@ workflows:
       - hold:
           type: approval
       - playground:
+          requires:
+              - hold
           <<: *filter-pr-branch
   e2ev2:
     jobs:
