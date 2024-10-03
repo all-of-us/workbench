@@ -24,6 +24,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -138,9 +139,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
+        && LeonardoLabelHelper.isValidRuntimeConfigurationLabel(
+            runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {

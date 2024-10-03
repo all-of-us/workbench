@@ -1,7 +1,5 @@
 package org.pmiops.workbench.utils.mappers;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import jakarta.annotation.Nullable;
 import java.util.List;
@@ -57,11 +55,15 @@ import org.pmiops.workbench.model.UserAppEnvironment;
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
 
-  BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-      ImmutableBiMap.of(
-          RuntimeConfigurationType.USEROVERRIDE, "user-override",
-          RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
-          RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
+  @ValueMapping(source = "user-override", target = "USEROVERRIDE")
+  @ValueMapping(source = "preset-general-analysis", target = "GENERALANALYSIS")
+  @ValueMapping(source = "preset-hail-genomic-analysis", target = "HAILGENOMICANALYSIS")
+  RuntimeConfigurationType toConfigurationType(String runtimeConfigurationLabel);
+
+  @ValueMapping(source = "USEROVERRIDE", target = "user-override")
+  @ValueMapping(source = "GENERALANALYSIS", target = "preset-general-analysis")
+  @ValueMapping(source = "HAILGENOMICANALYSIS", target = "preset-hail-genomic-analysis")
+  String toConfigurationLabel(RuntimeConfigurationType runtimeConfigurationType);
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
@@ -267,9 +269,7 @@ public interface LeonardoMapper {
       runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
     } else {
       runtime.setConfigurationType(
-          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-              .inverse()
-              .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
+          toConfigurationType(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
     }
   }
 
