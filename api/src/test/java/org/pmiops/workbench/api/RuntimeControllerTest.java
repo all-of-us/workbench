@@ -18,6 +18,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_I
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.USER_OVERRIDE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.getRuntimeConfigurationLabel;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.cloud.Date;
@@ -1050,8 +1051,7 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(
-            ((Map<String, String>) createRuntimeRequest.getLabels()).get(LEONARDO_LABEL_AOU_CONFIG))
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
         .isEqualTo(HAIL_GENOMIC_ANALYSIS);
   }
 
@@ -1071,8 +1071,7 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(
-            ((Map<String, String>) createRuntimeRequest.getLabels()).get(LEONARDO_LABEL_AOU_CONFIG))
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
         .isEqualTo(GENERAL_ANALYSIS);
   }
 
@@ -1092,8 +1091,7 @@ public class RuntimeControllerTest {
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
-    assertThat(
-            ((Map<String, String>) createRuntimeRequest.getLabels()).get(LEONARDO_LABEL_AOU_CONFIG))
+    assertThat(getRuntimeConfigurationLabel(createRuntimeRequest.getLabels()))
         .isEqualTo(USER_OVERRIDE);
   }
 

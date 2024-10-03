@@ -34,7 +34,30 @@ public class LeonardoLabelHelper {
   public static String GENERAL_ANALYSIS = "preset-general-analysis";
   public static String HAIL_GENOMIC_ANALYSIS = "preset-hail-genomic-analysis";
 
-  public static boolean isValidRuntimeConfigurationLabel(String s) {
+  @Nullable
+  public static String getRuntimeConfigurationLabel(@Nullable Map<String, String> labels) {
+    if (labels == null) {
+      return null;
+    }
+    return labels.get(LEONARDO_LABEL_AOU_CONFIG);
+  }
+
+  @Nullable
+  @SuppressWarnings("unchecked")
+  public static String getRuntimeConfigurationLabel(@Nullable Object labels) {
+    if (labels == null) {
+      return null;
+    }
+
+    return getRuntimeConfigurationLabel((Map<String, String>) labels);
+  }
+
+  public static boolean hasValidRuntimeConfigurationLabel(@Nullable Map<String, String> labels) {
+    String s = getRuntimeConfigurationLabel(labels);
+    if (s == null) {
+      return false;
+    }
+
     return Set.of(USER_OVERRIDE, GENERAL_ANALYSIS, HAIL_GENOMIC_ANALYSIS).contains(s);
   }
 
