@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -23,7 +24,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -140,7 +140,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
             .values()
-            .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
+            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
