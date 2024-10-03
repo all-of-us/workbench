@@ -17,6 +17,11 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * for internal use.
  */
 public interface LeonardoApiClient {
+  /**
+   * lists all runtimes in the environment as the appengine SA, to be used only for admin operations
+   */
+  List<LeonardoListRuntimeResponse> listRuntimesAsService();
+
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
@@ -38,6 +43,10 @@ public interface LeonardoApiClient {
 
   /** Deletes a notebook runtime */
   void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk)
+      throws WorkbenchException;
+
+  /** Retrieves a notebook runtime as the appengine SA, to be used only for admin operations */
+  LeonardoGetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName)
       throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
@@ -126,6 +135,9 @@ public interface LeonardoApiClient {
   boolean getLeonardoStatus();
 
   int deleteUserAppsAsService(String userEmail);
+
+  /** List all persistent disks */
+  List<LeonardoListPersistentDiskResponse> listDisksAsService();
 
   /** List all persistent disks in google project */
   List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
