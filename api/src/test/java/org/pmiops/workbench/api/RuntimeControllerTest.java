@@ -492,9 +492,6 @@ public class RuntimeControllerTest {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime);
-
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
         .isEqualTo(RuntimeConfigurationType.GENERALANALYSIS);
   }
