@@ -925,6 +925,20 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testCreateRuntime_gce_invalidZone() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace();
+
+    BadRequestException exception = assertThrows(BadRequestException.class, () -> runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-x"))));
+
+    assertThat(exception.getMessage()).contains("Invalid zone");
+  }
+
+  @Test
   public void testCreateRuntime_gceWithPD() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
