@@ -8,8 +8,8 @@ import {
   RuntimeConfigurationType,
 } from 'generated/fetch';
 
-import defaultServerConfig from '../../testing/default-server-config';
-
+import defaultServerConfig from 'testing/default-server-config';
+import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataprocConfig,
