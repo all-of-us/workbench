@@ -1,10 +1,10 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeConfigurationLabel;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
@@ -29,7 +29,6 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResp
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -143,9 +142,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     Map<String, String> runtimeLabels =
         LeonardoLabelHelper.toLabelMap(mostRecentRuntime.getLabels());
 
-    if (runtimeLabels != null
-        && LeonardoLabelHelper.isValidRuntimeConfigurationLabel(
-            runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
+    if (hasValidRuntimeConfigurationLabel(runtimeLabels)) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntimeWithoutDisk(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
