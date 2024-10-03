@@ -1,9 +1,11 @@
 package org.pmiops.workbench.utils.mappers;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.getRuntimeConfigurationLabel;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeConfigurationLabel;
+
 import com.google.gson.Gson;
 import jakarta.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
@@ -264,16 +266,14 @@ public interface LeonardoMapper {
   }
 
   @Named("mapRuntimeConfigurationLabels")
-  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
-    final Map<String, String> runtimeLabels = LeonardoLabelHelper.toLabelMap(runtimeLabelsObj);
-    if (runtimeLabels == null
-        || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
-      // If there's no label, fall back onto the old behavior where every Runtime was created with a
-      // default Dataproc config
-      return RuntimeConfigurationType.HAILGENOMICANALYSIS;
-    } else {
+  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Runtime runtime, Object runtimeLabelsObj) {
+    if (hasValidRuntimeConfigurationLabel(runtimeLabelsObj)) {
       runtime.setConfigurationType(
-          toConfigurationType(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
+          toConfigurationType(getRuntimeConfigurationLabel(runtimeLabelsObj)));
+    } else {
+      // If there's no valid label, fall back onto the old behavior where every Runtime was created
+      // with a default Dataproc config
+      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
     }
   }
 

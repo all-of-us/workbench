@@ -52,7 +52,7 @@ public class LeonardoLabelHelper {
     return getRuntimeConfigurationLabel((Map<String, String>) labels);
   }
 
-  public static boolean hasValidRuntimeConfigurationLabel(@Nullable Map<String, String> labels) {
+  public static boolean hasValidRuntimeConfigurationLabel(@Nullable Object labels) {
     String s = getRuntimeConfigurationLabel(labels);
     if (s == null) {
       return false;
