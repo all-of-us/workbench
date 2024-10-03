@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -24,9 +25,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -37,7 +38,6 @@ import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -47,7 +47,6 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -67,7 +66,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -105,7 +103,6 @@ import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -118,7 +115,6 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -163,31 +159,34 @@ public class RuntimeControllerTest {
 
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
-    RuntimeController.class,
+    AccessTierServiceImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
+    CommonMappers.class,
     ConceptSetMapperImpl.class,
     DataSetMapperImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
-    WorkspaceMapperImpl.class,
-    CommonMappers.class,
-    PublicInstitutionDetailsMapperImpl.class,
-    UserServiceTestConfiguration.class,
-    LeonardoMapperImpl.class,
     LeonardoApiClientImpl.class,
-    NotebooksRetryHandler.class,
+    LeonardoApiHelper.class,
+    LeonardoMapperImpl.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
-    AccessTierServiceImpl.class,
-    LeonardoApiHelper.class,
+    NotebooksRetryHandler.class,
+    PublicInstitutionDetailsMapperImpl.class,
+    RuntimeController.class,
+    UserServiceTestConfiguration.class,
+    WorkspaceMapperImpl.class,
   })
   @MockBean({
     AccessModuleService.class,
-    ConceptSetService.class,
     CohortService.class,
-    MailService.class,
+    ConceptSetService.class,
+    DirectoryService.class,
     InteractiveAnalysisService.class,
+    LeonardoApiClientFactory.class,
+    MailService.class,
+    UserServiceAuditor.class,
   })
   static class Configuration {
 
@@ -212,37 +211,25 @@ public class RuntimeControllerTest {
   @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
   @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
-  @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean DirectoryService mockDirectoryService;
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean UserRecentResourceService mockUserRecentResourceService;
-  @MockBean UserServiceAuditor mockUserServiceAuditor;
-  @MockBean WorkspaceAuthService mockWorkspaceAuthService;
-  @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
-
   @Qualifier(LeonardoConfig.USER_RUNTIMES_API)
   @MockBean
-  RuntimesApi userRuntimesApi;
-
-  @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
-  @MockBean
-  RuntimesApi serviceRuntimesApi;
-
-  @MockBean ProxyApi proxyApi;
+  RuntimesApi mockUserRuntimesApi;
 
   @MockBean
   @Qualifier(LeonardoConfig.USER_DISKS_API)
-  DisksApi userDisksApi;
+  DisksApi mockUserDisksApi;
 
-  @MockBean WorkspaceDao workspaceDao;
-  @MockBean WorkspaceService workspaceService;
+  @MockBean FireCloudService mockFireCloudService;
+  @MockBean WorkspaceAuthService mockWorkspaceAuthService;
+  @MockBean WorkspaceDao mockWorkspaceDao;
+  @MockBean WorkspaceService mockWorkspaceService;
 
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired UserDao userDao;
   @Autowired AccessTierDao accessTierDao;
-  @Autowired RuntimeController runtimeController;
-  @Autowired LeonardoMapper leonardoMapper;
   @Autowired FirecloudMapper firecloudMapper;
+  @Autowired LeonardoMapper leonardoMapper;
+  @Autowired UserDao userDao;
+
+  @Autowired RuntimeController runtimeController;
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -336,11 +323,11 @@ public class RuntimeControllerTest {
             .setFirecloudName(WORKSPACE_TERRA_NAME)
             .setCdrVersion(cdrVersion)
             .setBillingAccountName(config.billing.initialCreditsBillingAccountName());
-    doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
-    doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
+    doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
+    doReturn(Optional.of(testWorkspace)).when(mockWorkspaceDao).getByNamespace(WORKSPACE_NS);
 
-    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(new ArrayList<>());
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(Collections.emptyList());
   }
 
   private static RawlsWorkspaceDetails createFcWorkspace(
@@ -390,8 +377,8 @@ public class RuntimeControllerTest {
     w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
     w.setGoogleProject(googleProject);
-    when(workspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
-    when(workspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
+    when(mockWorkspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
+    when(mockWorkspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
     stubGetFcWorkspace(
         createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator), accessLevel);
   }
@@ -416,7 +403,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody()).isEqualTo(testRuntime);
@@ -424,7 +411,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_error() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
                 .status(LeonardoRuntimeStatus.ERROR)
@@ -445,7 +432,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_errorNoMessages() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
@@ -456,7 +443,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_securitySuspended() throws ApiException {
     user.setComputeSecuritySuspendedUntil(
         Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThrows(
@@ -467,7 +454,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_securitySuspendedElapsed() throws ApiException {
     user.setComputeSecuritySuspendedUntil(
         Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(Duration.ofMinutes(20))));
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     runtimeController.getRuntime(WORKSPACE_NS);
@@ -477,7 +464,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_noLabel() throws ApiException {
     testLeoRuntime.setLabels(ImmutableMap.of());
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
@@ -488,7 +475,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_defaultLabel_hail() throws ApiException {
     testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-hail-genomic-analysis"));
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
@@ -499,7 +486,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_defaultLabel_generalAnalysis() throws ApiException {
     testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"));
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
@@ -510,7 +497,7 @@ public class RuntimeControllerTest {
   public void testGetRuntime_overrideLabel() throws ApiException {
     testLeoRuntime.setLabels(ImmutableMap.of("all-of-us-config", "user-override"));
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
@@ -519,9 +506,9 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_noGetRuntime_emptyListRuntimes() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(Collections.emptyList());
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -531,9 +518,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -558,9 +545,9 @@ public class RuntimeControllerTest {
   @Test
   public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
     dataprocConfigObj.put("cloudService", "notACloudService");
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -574,9 +561,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_gceConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -604,9 +591,9 @@ public class RuntimeControllerTest {
     dataProcConfigObj.put("workerDiskSize", 30);
     dataProcConfigObj.put("workerMachineType", "n1-standard-2");
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -631,9 +618,9 @@ public class RuntimeControllerTest {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -653,9 +640,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_checkMostRecent_nullAuditInfo() throws ApiException {
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -674,9 +661,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_checkMostRecent_nullTimestamp() throws ApiException {
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -696,9 +683,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_checkMostRecent_emptyTimestamp() throws ApiException {
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -719,9 +706,9 @@ public class RuntimeControllerTest {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -741,9 +728,9 @@ public class RuntimeControllerTest {
     String olderTimestamp = "2020-09-13T19:19:57.347Z";
     String newerTimestamp = "2020-09-14T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -761,9 +748,9 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntime_returnPresets() throws ApiException {
     String timestamp = "2020-11-30T19:19:57.347Z";
 
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
+    when(mockUserRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
@@ -777,7 +764,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_gceConfig() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
@@ -786,7 +773,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_diskConfig() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
                 .runtimeConfig(gceConfigObj)
@@ -805,7 +792,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_UnknownStatus() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(null));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getStatus())
@@ -814,13 +801,13 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_NullBillingProject() {
-    doThrow(new NotFoundException()).when(workspaceService).lookupWorkspaceByNamespace("123");
+    doThrow(new NotFoundException()).when(mockWorkspaceService).lookupWorkspaceByNamespace("123");
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime("123"));
   }
 
   @Test
   public void testCreateRuntime_customRuntimeEnabled_noRuntimes() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -831,7 +818,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_customRuntimeEnabled_twoRuntimes() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -847,7 +834,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_dataproc() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -864,7 +851,7 @@ public class RuntimeControllerTest {
                     .masterDiskSize(100)
                     .masterMachineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -892,7 +879,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_gce() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -900,7 +887,7 @@ public class RuntimeControllerTest {
         WORKSPACE_NS,
         new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -925,7 +912,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_gceWithPD() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -946,7 +933,7 @@ public class RuntimeControllerTest {
     diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
     diskLabels.put(LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_DISPLAY_NAME);
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -984,8 +971,8 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+  public void testCreateRuntimeFail_newPdp_pdAlreadyExists() throws ApiException {
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     LeonardoListPersistentDiskResponse gceDisk =
         new LeonardoListPersistentDiskResponse()
@@ -995,8 +982,8 @@ public class RuntimeControllerTest {
                     .cloudProvider(LeonardoCloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoDiskStatus.READY);
-    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(ImmutableList.of(gceDisk));
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(List.of(gceDisk));
 
     stubGetWorkspace();
 
@@ -1015,7 +1002,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_nullRuntime() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1030,7 +1017,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_emptyRuntime() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1046,7 +1033,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_defaultLabel_hail() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1055,7 +1042,7 @@ public class RuntimeControllerTest {
         new Runtime()
             .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
             .dataprocConfig(testRuntime.getDataprocConfig()));
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1066,7 +1053,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_defaultLabel_generalAnalysis() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1075,7 +1062,7 @@ public class RuntimeControllerTest {
         new Runtime()
             .configurationType(RuntimeConfigurationType.GENERALANALYSIS)
             .dataprocConfig(dataprocConfig));
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1086,7 +1073,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_overrideLabel() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1095,7 +1082,7 @@ public class RuntimeControllerTest {
         new Runtime()
             .configurationType(RuntimeConfigurationType.USEROVERRIDE)
             .dataprocConfig(dataprocConfig));
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1106,7 +1093,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_gceWithGpu() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1119,7 +1106,7 @@ public class RuntimeControllerTest {
                     .machineType("standard")
                     .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1144,7 +1131,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_gceWithPD_wihGpu() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
@@ -1161,7 +1148,7 @@ public class RuntimeControllerTest {
                             .size(500))
                     .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1198,7 +1185,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_terraWorkspaceV1() throws ApiException {
-    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetV1Workspace(WorkspaceAccessLevel.WRITER);
 
@@ -1206,7 +1193,7 @@ public class RuntimeControllerTest {
         WORKSPACE_NS,
         new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1221,7 +1208,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_terraWorkspaceV1Owner() throws ApiException {
-    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetV1Workspace(WorkspaceAccessLevel.OWNER);
 
@@ -1229,7 +1216,7 @@ public class RuntimeControllerTest {
         WORKSPACE_NS,
         new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1245,7 +1232,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_terraWorkspaceV2() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WorkspaceAccessLevel.WRITER);
 
@@ -1253,7 +1240,7 @@ public class RuntimeControllerTest {
         WORKSPACE_NS,
         new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1269,7 +1256,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_cdrEnvVars() throws ApiException {
-    when(userRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(WORKSPACE_NS, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetV1Workspace(WorkspaceAccessLevel.WRITER);
 
@@ -1277,7 +1264,7 @@ public class RuntimeControllerTest {
         WORKSPACE_NS,
         new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
@@ -1303,7 +1290,7 @@ public class RuntimeControllerTest {
                 new Runtime()
                     .configurationType(RuntimeConfigurationType.USEROVERRIDE)
                     .dataprocConfig(dataprocConfig)));
-    verify(userRuntimesApi)
+    verify(mockUserRuntimesApi)
         .updateRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), updateRuntimeRequestCaptor.capture());
 
@@ -1320,7 +1307,7 @@ public class RuntimeControllerTest {
     assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
         .isEqualTo(
             Collections.singletonMap(
-                LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG,
+                LEONARDO_LABEL_AOU_CONFIG,
                 LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
                     RuntimeConfigurationType.USEROVERRIDE)));
   }
@@ -1328,7 +1315,7 @@ public class RuntimeControllerTest {
   @Test
   public void testDeleteRuntime() throws ApiException {
     runtimeController.deleteRuntime(WORKSPACE_NS, false);
-    verify(userRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
+    verify(mockUserRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
   }
 
   @Test
