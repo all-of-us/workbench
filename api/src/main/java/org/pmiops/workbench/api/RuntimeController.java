@@ -11,7 +11,6 @@ import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -134,10 +133,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     LeonardoListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
-    @SuppressWarnings("unchecked")
-    Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
-
-    if (hasValidRuntimeConfigurationLabel(runtimeLabels)) {
+    if (hasValidRuntimeConfigurationLabel(mostRecentRuntime.getLabels())) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
