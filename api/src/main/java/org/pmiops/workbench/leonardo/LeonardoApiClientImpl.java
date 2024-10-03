@@ -539,7 +539,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 googleProject,
                 /* labels */ null,
                 /* includeDeleted */ false,
-                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
   }
 
@@ -572,7 +572,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 googleProject,
                 /* labels */ null,
                 /* includeDeleted */ false,
-                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_DISK_LABEL_KEYS,
                 /* Leonardo Role */ null));
   }
 
