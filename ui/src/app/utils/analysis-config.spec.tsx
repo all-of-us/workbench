@@ -8,6 +8,8 @@ import {
   RuntimeConfigurationType,
 } from 'generated/fetch';
 
+import defaultServerConfig from '../../testing/default-server-config';
+
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataprocConfig,
@@ -34,6 +36,7 @@ import {
 } from './machines';
 import { runtimePresets } from './runtime-presets';
 import { DiskConfig } from './runtime-utils';
+import { serverConfigStore } from './stores';
 
 describe(maybeWithPersistentDisk.name, () => {
   it('returns the existing runtime when dataproc', () => {
@@ -282,6 +285,7 @@ describe(fromAnalysisConfig.name, () => {
   };
 
   it('should populate the configuration type for the generalAnalysis preset', () => {
+    serverConfigStore.set({ config: defaultServerConfig });
     const runtime = fromAnalysisConfig(testConfigForGeneralPreset);
     expect(runtime.configurationType).toEqual(
       generalTemplate.configurationType
