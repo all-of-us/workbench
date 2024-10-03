@@ -218,31 +218,6 @@ export const CustomizePanel = ({
                   )
                 }
               />
-            </FlexRow>
-          </FlexColumn>
-          <FlexColumn>
-            <label style={styles.label} htmlFor='runtime-compute'>
-              Zone
-            </label>
-            <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
-              <Dropdown
-                id='runtime-compute'
-                appendTo='self'
-                disabled={disableControls}
-                style={{ width: '15rem' }}
-                options={gceVmZones?.sort()}
-                value={analysisConfig.zone}
-                onChange={({ value: zone }) => {
-                  // When the compute type changes, we need to normalize the config and potentially restore defaults.
-                  setAnalysisConfig(
-                    withAnalysisConfigDefaults(
-                      { ...analysisConfig, zone },
-                      gcePersistentDisk
-                    )
-                  );
-                }}
-              />
-
               {analysisConfig.computeType === ComputeType.Dataproc && (
                 <TooltipTrigger
                   content={
@@ -266,6 +241,33 @@ export const CustomizePanel = ({
               )}
             </FlexRow>
           </FlexColumn>
+
+          {analysisConfig.computeType === ComputeType.Standard &&
+            gceVmZones &&
+            gceVmZones.length > 1 && (
+              <FlexColumn>
+                <label style={styles.label} htmlFor='runtime-compute'>
+                  Zone
+                </label>
+                <Dropdown
+                  id='runtime-zone'
+                  appendTo='self'
+                  disabled={disableControls}
+                  style={{ width: '15rem' }}
+                  options={gceVmZones?.sort()}
+                  value={analysisConfig.zone}
+                  onChange={({ value: zone }) => {
+                    // When the compute type changes, we need to normalize the config and potentially restore defaults.
+                    setAnalysisConfig(
+                      withAnalysisConfigDefaults(
+                        { ...analysisConfig, zone },
+                        gcePersistentDisk
+                      )
+                    );
+                  }}
+                />
+              </FlexColumn>
+            )}
         </FlexRow>
         {analysisConfig.computeType === ComputeType.Dataproc && (
           <DataProcConfigSelector
