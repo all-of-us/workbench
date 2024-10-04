@@ -117,6 +117,7 @@ const defaultAnalysisConfig: AnalysisConfig = {
     diskType: defaultDiskType,
     gceRuntime: true,
     blockSize: 1,
+    zone: 'us-central1-a',
   },
   dataprocConfig,
   autopauseThreshold: 100,
@@ -432,6 +433,7 @@ describe(toAnalysisConfig.name, () => {
       size: persistentDisk.size - 1, // equal or smaller will match
       name: 'my favorite disk',
       blockSize: undefined, // not important here, but required
+      zone: 'us-central1-a',
     };
 
     const expectedDiskConfig = {
@@ -468,6 +470,7 @@ describe(toAnalysisConfig.name, () => {
       size: persistentDisk.size + 1, // too big, will not match
       name: 'my favorite disk',
       blockSize: undefined, // not important here, but required
+      zone: 'us-central1-a',
     };
 
     const expectedDiskConfig = {
@@ -504,6 +507,7 @@ describe(toAnalysisConfig.name, () => {
       size: persistentDisk.size,
       name: 'my favorite disk',
       blockSize: undefined, // not important here, but required
+      zone: 'us-central1-a',
     };
 
     const expectedDiskConfig = {
@@ -691,6 +695,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
@@ -708,6 +713,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
@@ -728,6 +734,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
@@ -748,6 +755,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: undefined,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
@@ -870,6 +878,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);
@@ -889,6 +898,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         diskType: defaultAnalysisConfig.detachedDisk.diskType,
         blockSize: 0,
         name: 'whatever',
+        zone: 'us-central1-a',
       };
 
       const outConfig = withAnalysisConfigDefaults(inputConfig, inputDisk);

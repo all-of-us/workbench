@@ -226,6 +226,7 @@ describe(useCustomRuntime.name, () => {
       name: 'my-existing-disk',
       blockSize: 1,
       gceRuntime: true,
+      zone: 'us-central1-a',
     };
     setCurrentDisk(existingDisk);
     const newRuntime = defaultGceRuntimeWithPd();

@@ -14,6 +14,7 @@ export const stubDisk = (): Disk => ({
   gceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
+  zone: 'us-central1-a',
 });
 
 export const mockJupyterDisk = (): Disk => ({
@@ -26,6 +27,7 @@ export const mockJupyterDisk = (): Disk => ({
   appType: null,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  zone: 'us-central1-a',
 });
 
 export const mockCromwellDisk = (): Disk => ({
@@ -38,6 +40,7 @@ export const mockCromwellDisk = (): Disk => ({
   appType: AppType.CROMWELL,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  zone: 'us-central1-a',
 });
 
 export const mockRStudioDisk = (): Disk => ({
@@ -50,6 +53,7 @@ export const mockRStudioDisk = (): Disk => ({
   appType: AppType.RSTUDIO,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
+  zone: 'us-central1-a',
 });
 
 export class DisksApiStub extends DisksApi {

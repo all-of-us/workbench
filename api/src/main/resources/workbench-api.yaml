@@ -7162,6 +7162,7 @@ components:
       - diskType
       - name
       - size
+      - zone
       type: object
       properties:
         name:
@@ -7194,6 +7195,10 @@ components:
           type: string
           description: timestamp for the date this runtime was last accessed in ISO
             8601 format. This is null if it has not been deleted yet.
+        zone:
+          type: string
+          description: >
+            The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
       description: The configuration of a persistent disk, returned in disk responses
     WorkspaceListResponse:
       required:
