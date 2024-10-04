@@ -896,7 +896,7 @@ describe('DataAccessRequirements', () => {
   // regression tests for RW-7384: sync external modules to gain access
 
   it('should sync incomplete external modules', async () => {
-    // profile contains no completed modules, so we sync all (2FA, ERA, Compliance)
+    // profile contains no completed modules, so we sync all (2FA, Compliance)
     const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
     const spyCompliance = jest.spyOn(
       profileApi(),

@@ -1548,7 +1548,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // this is now unbypassed
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
-    // these 3 are now bypassed
+    // these 2 are now bypassed
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.COMPLIANCE_TRAINING)).isNotNull();
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
@@ -1571,7 +1571,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             any(),
             any());
 
-    // ERA and 2FA once in request 2
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH), any(), any());
