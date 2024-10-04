@@ -20,7 +20,6 @@ export const VUMC: Institution = {
     {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
-      eraRequired: true,
       emailDomains: ['vumc.org'],
     },
   ],
@@ -37,7 +36,6 @@ export const BROAD: Institution = {
     {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
-      eraRequired: true,
       emailAddresses: [BROAD_ADDR_1, BROAD_ADDR_2],
     },
   ],
@@ -52,13 +50,11 @@ export const VERILY: Institution = {
     {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
-      eraRequired: true,
       emailDomains: ['verily.com', 'google.com'],
     },
     {
       accessTierShortName: 'controlled',
       membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
-      eraRequired: true,
       emailAddresses: ['foo@verily.com'],
     },
   ],
@@ -74,7 +70,6 @@ export const VERILY_WITHOUT_CT: Institution = {
     {
       accessTierShortName: 'registered',
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
-      eraRequired: true,
       emailDomains: ['verily.com', 'google.com'],
     },
   ],

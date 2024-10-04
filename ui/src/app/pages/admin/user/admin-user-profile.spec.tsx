@@ -550,14 +550,6 @@ describe('AdminUserProfile', () => {
       },
     ],
     [
-      AccessRenewalStatus.BYPASSED,
-      AccessModule.ERA_COMMONS,
-      {
-        moduleName: AccessModule.ERA_COMMONS,
-        bypassEpochMillis: 1,
-      },
-    ],
-    [
       AccessRenewalStatus.EXPIRING_SOON,
       AccessModule.PROFILE_CONFIRMATION,
       {
