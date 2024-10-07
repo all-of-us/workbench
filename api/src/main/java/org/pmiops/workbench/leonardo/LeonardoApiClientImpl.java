@@ -4,6 +4,7 @@ import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PRO
 import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
 import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
@@ -303,9 +304,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       RuntimeConfigurationType runtimeConfigurationType) {
     if (runtimeConfigurationType != null) {
       return Collections.singletonMap(
-          LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-              runtimeConfigurationType));
+          LEONARDO_LABEL_AOU_CONFIG, leonardoMapper.toConfigurationLabel(runtimeConfigurationType));
     } else {
       return new HashMap<>();
     }

@@ -1,11 +1,11 @@
 package org.pmiops.workbench.utils.mappers;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.getRuntimeConfigurationLabel;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeConfigurationLabel;
+
 import com.google.gson.Gson;
 import jakarta.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -57,11 +57,15 @@ import org.pmiops.workbench.model.UserAppEnvironment;
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
 
-  BiMap<RuntimeConfigurationType, String> RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP =
-      ImmutableBiMap.of(
-          RuntimeConfigurationType.USEROVERRIDE, "user-override",
-          RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
-          RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
+  @ValueMapping(source = "user-override", target = "USEROVERRIDE")
+  @ValueMapping(source = "preset-general-analysis", target = "GENERALANALYSIS")
+  @ValueMapping(source = "preset-hail-genomic-analysis", target = "HAILGENOMICANALYSIS")
+  RuntimeConfigurationType toConfigurationType(String runtimeConfigurationLabel);
+
+  @ValueMapping(source = "USEROVERRIDE", target = "user-override")
+  @ValueMapping(source = "GENERALANALYSIS", target = "preset-general-analysis")
+  @ValueMapping(source = "HAILGENOMICANALYSIS", target = "preset-hail-genomic-analysis")
+  String toConfigurationLabel(RuntimeConfigurationType runtimeConfigurationType);
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
@@ -258,18 +262,13 @@ public interface LeonardoMapper {
   }
 
   default void mapRuntimeLabels(Runtime runtime, Object runtimeLabelsObj) {
-    @SuppressWarnings("unchecked")
-    final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
-    if (runtimeLabels == null
-        || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
-      // If there's no label, fall back onto the old behavior where every Runtime was created with a
-      // default Dataproc config
-      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
-    } else {
+    if (hasValidRuntimeConfigurationLabel(runtimeLabelsObj)) {
       runtime.setConfigurationType(
-          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-              .inverse()
-              .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
+          toConfigurationType(getRuntimeConfigurationLabel(runtimeLabelsObj)));
+    } else {
+      // If there's no valid label, fall back onto the old behavior where every Runtime was created
+      // with a default Dataproc config
+      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
     }
   }
 

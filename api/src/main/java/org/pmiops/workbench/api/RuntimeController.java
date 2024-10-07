@@ -1,17 +1,16 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.hasValidRuntimeConfigurationLabel;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Provider;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -134,13 +133,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     LeonardoListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
-    @SuppressWarnings("unchecked")
-    Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
-
-    if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
+    if (hasValidRuntimeConfigurationLabel(mostRecentRuntime.getLabels())) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
