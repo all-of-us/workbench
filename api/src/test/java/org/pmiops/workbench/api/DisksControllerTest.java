@@ -25,8 +25,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;

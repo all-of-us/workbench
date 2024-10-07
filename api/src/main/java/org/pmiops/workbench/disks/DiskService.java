@@ -3,6 +3,7 @@ package org.pmiops.workbench.disks;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
