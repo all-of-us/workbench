@@ -622,6 +622,7 @@ export const WorkspaceEdit = fp.flow(
 
     createWorkspace(): Workspace {
       return {
+        name: '',
         displayName: '',
         accessTierShortName: DEFAULT_ACCESS_TIER,
         cdrVersionId: '',
@@ -684,8 +685,9 @@ export const WorkspaceEdit = fp.flow(
       }
 
       if (this.isMode(WorkspaceEditMode.Duplicate)) {
-        // This is the only field which is not automatically handled/differentiated
+        // name/displayName is the only field which is not automatically handled/differentiated
         // on the API level.
+        workspace.name = 'Duplicate of ' + workspace.name;
         workspace.displayName = 'Duplicate of ' + workspace.displayName;
         // unselect to prevent unneeded re-review
         workspace.researchPurpose.reviewRequested = undefined;
@@ -1226,7 +1228,6 @@ export const WorkspaceEdit = fp.flow(
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           workspace = await this.apiDuplicateWorkspaceAsync();
         } else {
-          // this does NOT update displayname
           workspace = await workspacesApi().updateWorkspace(
             this.state.workspace.namespace,
             this.state.workspace.terraName,
@@ -1352,6 +1353,7 @@ export const WorkspaceEdit = fp.flow(
       const {
         populationChecked,
         workspace: {
+          name,
           displayName,
           billingAccountName,
           researchPurpose: {
@@ -1376,6 +1378,7 @@ export const WorkspaceEdit = fp.flow(
       const values: object = {
         aianResearchDetails,
         aianResearchType,
+          name,
           displayName,
         billingAccountName,
         anticipatedFindings,
@@ -1411,6 +1414,7 @@ export const WorkspaceEdit = fp.flow(
       // surfaced directly. Currently these constraints are entirely separate
       // from the user facing error strings we render.
       const constraints: object = {
+        // name is not included, in order to avoid duplicate error messages
         displayName: requiredStringWithMaxLength(80, 'Name'),
         // The prefix for these lengthMessages require HTML formatting
         // The prefix string is omitted here and included in the React template below
@@ -1526,12 +1530,18 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
+    setWorkspaceName(value: string) {
+      this.setState(fp.set(['workspace', 'name'], value.trim()));
+      this.setState(fp.set(['workspace', 'displayName'], value.trim()));
+    }
+
     render() {
       const params = parseQueryParams(this.props.location.search);
       const highlightBilling = !!params.get('highlightBilling');
 
       const {
         workspace: {
+          name,
           displayName,
           billingAccountName,
           cdrVersionId,
@@ -1665,14 +1675,8 @@ export const WorkspaceEdit = fp.flow(
                     autoFocus
                     placeholder='Workspace Name'
                     value={displayName}
-                    onBlur={(v) =>
-                      this.setState(
-                        fp.set(['workspace', 'displayName'], v.trim())
-                      )
-                    }
-                    onChange={(v) =>
-                      this.setState(fp.set(['workspace', 'displayName'], v))
-                    }
+                    onBlur={(v: string) => this.setWorkspaceName(v)}
+                    onChange={(v: string) => this.setWorkspaceName(v)}
                   />
                 </FlexColumn>
                 <FlexColumn>
