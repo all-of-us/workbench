@@ -1420,9 +1420,9 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
-    setWorkspaceName(value: string) {
-      this.setState(fp.set(['workspace', 'name'], value.trim()));
-      this.setState(fp.set(['workspace', 'displayName'], value.trim()));
+    setWorkspaceName(name: string) {
+      this.setState(fp.set(['workspace', 'name'], name));
+      this.setState(fp.set(['workspace', 'displayName'], name));
     }
 
     render() {
@@ -1524,8 +1524,12 @@ export const WorkspaceEdit = fp.flow(
                     autoFocus
                     placeholder='Workspace Name'
                     value={displayName}
-                    onBlur={(v: string) => this.setWorkspaceName(v)}
-                    onChange={(v: string) => this.setWorkspaceName(v)}
+                    onBlur={(v: string) => this.setWorkspaceName(v.trim())}
+                    onChange={(v: string) =>
+                      // do not trim, because it would prevent inner spaces
+                      // e.g. it would turn "My Workspace" into "MyWorkspace"
+                      this.setWorkspaceName(v)
+                    }
                   />
                 </FlexColumn>
                 <FlexColumn>
