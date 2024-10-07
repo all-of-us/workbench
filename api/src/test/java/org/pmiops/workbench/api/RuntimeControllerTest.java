@@ -913,7 +913,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_gce_invalidZone() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace();
 
