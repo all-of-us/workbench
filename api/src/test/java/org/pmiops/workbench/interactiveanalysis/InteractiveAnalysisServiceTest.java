@@ -21,7 +21,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.StorageLink;

@@ -1,7 +1,7 @@
 package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoAppUtils.appServiceNameToAppType;
+import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import com.google.common.base.Strings;
 import jakarta.inject.Provider;
@@ -20,8 +20,8 @@ import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoApiClient;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoAppUtils;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.SumologicEgressEvent;

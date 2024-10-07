@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.utils.BillingUtils.fullBillingAccountName;
 
 import com.google.api.services.cloudbilling.Cloudbilling;

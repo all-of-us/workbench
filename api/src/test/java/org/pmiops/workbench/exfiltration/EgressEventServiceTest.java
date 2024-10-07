@@ -31,7 +31,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;

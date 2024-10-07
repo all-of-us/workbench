@@ -1,11 +1,11 @@
-package org.pmiops.workbench.legacy_leonardo_client;
+package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.upsertLeonardoLabel;
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +31,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
 import org.pmiops.workbench.legacy_leonardo_client.api.AppsApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;

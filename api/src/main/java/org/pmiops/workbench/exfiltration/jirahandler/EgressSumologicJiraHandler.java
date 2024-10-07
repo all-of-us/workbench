@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoAppUtils.appServiceNameToAppType;
+import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
 
 import jakarta.inject.Provider;
 import java.time.Instant;
@@ -19,7 +19,7 @@ import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoAppUtils;
+import org.pmiops.workbench.leonardo.LeonardoAppUtils;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;

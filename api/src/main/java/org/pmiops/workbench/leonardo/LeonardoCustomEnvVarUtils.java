@@ -1,4 +1,4 @@
-package org.pmiops.workbench.legacy_leonardo_client;
+package org.pmiops.workbench.leonardo;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;

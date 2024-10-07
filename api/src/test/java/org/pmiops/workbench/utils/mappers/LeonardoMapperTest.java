@@ -1,8 +1,8 @@
 package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
@@ -28,6 +27,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRunti
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;

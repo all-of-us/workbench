@@ -1,4 +1,4 @@
-package org.pmiops.workbench.legacy_leonardo_client;
+package org.pmiops.workbench.leonardo;
 
 import java.sql.Timestamp;
 import java.time.Clock;
