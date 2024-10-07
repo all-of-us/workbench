@@ -736,7 +736,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
-    } catch (org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
+    } catch (ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;
