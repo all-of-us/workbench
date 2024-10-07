@@ -193,7 +193,9 @@ export const FeaturedWorkspaces = (props) => {
         );
       setWorkspaceList(
         workspacesReceived.items
-          .sort((a, b) => a.workspace.name.localeCompare(b.workspace.name))
+          .sort((a, b) =>
+            a.workspace.displayName.localeCompare(b.workspace.displayName)
+          )
           .map((w) => new WorkspacePermissions(w))
       );
       setPendingWorkspaceRequests(false);
@@ -290,7 +292,7 @@ export const FeaturedWorkspaces = (props) => {
                   return (
                     <WorkspaceCard
                       useFeaturedWorkspacePageUi
-                      key={wp.workspace.name}
+                      key={wp.workspace.displayName}
                       workspace={wp.workspace}
                       accessLevel={wp.accessLevel}
                       reload={() => getAllPublishedWorkspaces()}

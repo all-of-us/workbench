@@ -7219,7 +7219,7 @@ components:
             $ref: '#/components/schemas/WorkspaceResponse'
     Workspace:
       required:
-      - name
+      - displayName
       type: object
       properties:
         etag:
