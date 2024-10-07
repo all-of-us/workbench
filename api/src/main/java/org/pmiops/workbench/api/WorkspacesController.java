@@ -384,7 +384,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
 
-    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setName(workspace.getDisplayName());
     dbWorkspace.setCreator(user);
     dbWorkspace.setFirecloudName(fcWorkspace.getName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspace.getNamespace());
@@ -425,8 +425,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
-      throw new BadRequestException("missing required field 'name'");
+    if (Strings.isNullOrEmpty(workspace.getDisplayName())) {
+      throw new BadRequestException("missing required field 'displayName'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
     } else if (workspace.getName().length() > 80) {
@@ -520,8 +520,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     if (workspace.getDisplayName() != null) {
       dbWorkspace.setName(workspace.getDisplayName());
-    } else if (workspace.getName() != null) {
-      dbWorkspace.setName(workspace.getName());
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
