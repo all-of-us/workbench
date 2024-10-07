@@ -1437,7 +1437,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .name(DATASET_NAME)
         .includesAllParticipants(allParticipants)
         .tanagraCohortIds(ImmutableList.of("tanagraCohortId"))
-        .tanagraConceptSetIds(ImmutableList.of("tanagraConceptSetId"))
+        .tanagraFeatureSetIds(ImmutableList.of("tanagraConceptSetId"))
         .prePackagedConceptSet(prePackagedConceptSetEnumList)
         .domainValuePairs(
             domains.stream()

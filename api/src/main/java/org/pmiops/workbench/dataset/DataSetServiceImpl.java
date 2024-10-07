@@ -536,10 +536,10 @@ public class DataSetServiceImpl implements DataSetService {
   @org.jetbrains.annotations.NotNull
   private String replaceProjectIdAndDataSet(EntityOutputPreview p, DbCdrVersion dbCdrVersion) {
     String regexToFixTicks = "`([^`]+)`\\.([^\\s]+)";
-    String query = p.getIndexSql();
+    String query = p.getSourceSql();
     String cdrProject =
         query.contains(LOCAL_CDR_STRING) ? LOCAL_CDR_STRING : dbCdrVersion.getBigqueryProject();
-    return p.getIndexSql()
+    return p.getSourceSql()
         .replaceAll(regexToFixTicks, "`$1.$2`")
         .replace(cdrProject + "." + dbCdrVersion.getBigqueryDataset(), "${projectId}.${dataSetId}");
   }
@@ -550,7 +550,7 @@ public class DataSetServiceImpl implements DataSetService {
         new ExportPreviewRequest()
             .study(dbWorkspace.getWorkspaceNamespace())
             .cohorts(dataSetRequest.getTanagraCohortIds())
-            .conceptSets(dataSetRequest.getTanagraConceptSetIds());
+            .featureSets(dataSetRequest.getTanagraFeatureSetIds());
     return exportPreviewRequest;
   }
 
@@ -1437,7 +1437,7 @@ public class DataSetServiceImpl implements DataSetService {
       long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
     if (dbCdrVersion.getTanagraEnabled()) {
       tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
-      tanagraValidateConceptSetsInWorkspace(request.getTanagraConceptSetIds());
+      tanagraValidateConceptSetsInWorkspace(request.getTanagraFeatureSetIds());
     } else {
       if (request.getDataSetId() == null) {
         throw new BadRequestException("DataSetRequest.dataSetId can not be null.");

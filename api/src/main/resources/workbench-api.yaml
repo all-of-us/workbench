@@ -7897,9 +7897,9 @@ components:
           description: All the selected domain/value pairs in the data set
           items:
             $ref: '#/components/schemas/DomainValuePair'
-        tanagraConceptSetIds:
+        tanagraFeatureSetIds:
           type: array
-          description: The ids of all concept sets in the data set
+          description: The ids of all feature sets in the data set
           items:
             type: string
         tanagraCohortIds:

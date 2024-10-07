@@ -112,8 +112,8 @@ components:
           type: array
           items:
             type: string
-        conceptSets:
-          description: List of concept set ids
+        featureSets:
+          description: List of feature set ids
           type: array
           items:
             type: string
@@ -128,7 +128,7 @@ components:
       required:
         - study
         - cohorts
-        - conceptSets
+        - featureSets
     EntityOutputPreview:
       type: object
       properties:
