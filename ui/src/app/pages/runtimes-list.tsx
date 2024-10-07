@@ -37,12 +37,12 @@ const ajax = (signal) => {
           .then((res) => res.items),
     },
     Runtimes: {
-      listV2: () => jsonLeoFetch('/api/v2/runtimes?role=creator'),
+      listV2: () => jsonLeoFetch('/api/v2/runtimes'),
     },
     Apps: {
       listWithoutProject: () =>
         jsonLeoFetch(
-          '/api/google/v1/apps?role=creator&includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+          '/api/google/v1/apps?includeDeleted=false&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
         ),
     },
     Metrics: { captureEvent: () => undefined },
@@ -50,7 +50,7 @@ const ajax = (signal) => {
       disksV1: () => ({
         list: () =>
           jsonLeoFetch(
-            '/api/google/v1/disks?role=creator&includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
+            '/api/google/v1/disks?includeLabels=saturnWorkspaceNamespace,saturnWorkspaceName'
           ),
         disk: (googleProject, name) => ({
           delete: () =>
@@ -91,17 +91,7 @@ const css =
     /* hides a warning banner which is only appropriate for Terra UI */
     div[style*="z-index: 2"]:has(>div>svg) {
         display: none !important
-    }
-    
-    /* hides the "Hide resources you did not create" checkbox, which does not do anything */
-    [role=checkbox] {
-        display: none !important
-    }
-
-    /* hides the text after the checkbox above */
-    [role=checkbox] ~ span {
-        display: none !important
-    }`;
+    } `;
 
 const stringToSlug = (s) => s.toLowerCase().replace(/\s+/g, '');
 
