@@ -121,6 +121,7 @@ export const CustomizePanel = ({
   }, [analysisConfig.computeType]);
 
   const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
+  const canChangeZone = !currentRuntime || !gcePersistentDisk;
   const { gceVmZones } = serverConfigStore.get().config;
 
   return (
@@ -249,23 +250,31 @@ export const CustomizePanel = ({
                 <label style={styles.label} htmlFor='runtime-compute'>
                   Zone
                 </label>
-                <Dropdown
-                  id='runtime-zone'
-                  appendTo='self'
-                  disabled={disableControls}
-                  style={{ width: '15rem' }}
-                  options={gceVmZones?.sort()}
-                  value={analysisConfig.zone}
-                  onChange={({ value: zone }) => {
-                    // When the compute type changes, we need to normalize the config and potentially restore defaults.
-                    setAnalysisConfig(
-                      withAnalysisConfigDefaults(
-                        { ...analysisConfig, zone },
-                        gcePersistentDisk
-                      )
-                    );
-                  }}
-                />
+                <TooltipTrigger
+                  content={`Cannot change the zone when an environment or persistent disk exists. 
+                If you would like to change zones, please make sure that you first delete both your environment and your persistent disk`}
+                  disabled={canChangeZone}
+                >
+                  <div>
+                    <Dropdown
+                      id='runtime-zone'
+                      appendTo='self'
+                      disabled={disableControls || !canChangeZone}
+                      style={{ width: '15rem' }}
+                      options={gceVmZones?.sort()}
+                      value={analysisConfig.zone}
+                      onChange={({ value: zone }) => {
+                        // When the compute type changes, we need to normalize the config and potentially restore defaults.
+                        setAnalysisConfig(
+                          withAnalysisConfigDefaults(
+                            { ...analysisConfig, zone },
+                            gcePersistentDisk
+                          )
+                        );
+                      }}
+                    />
+                  </div>
+                </TooltipTrigger>
               </FlexColumn>
             )}
         </FlexRow>
