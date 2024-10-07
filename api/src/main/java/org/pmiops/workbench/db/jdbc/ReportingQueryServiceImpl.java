@@ -12,7 +12,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
 import static org.pmiops.workbench.db.model.DbUser.USER_APP_NAME_PREFIX;
-import static org.pmiops.workbench.leonardo.LeonardoAppUtils.appServiceNameToAppType;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoAppUtils.appServiceNameToAppType;
 import static org.pmiops.workbench.utils.BillingUtils.getBillingAccountType;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 

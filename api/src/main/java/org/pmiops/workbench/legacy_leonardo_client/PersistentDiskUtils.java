@@ -1,4 +1,4 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.legacy_leonardo_client;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -13,8 +13,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;

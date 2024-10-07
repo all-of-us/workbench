@@ -1,12 +1,12 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.legacy_leonardo_client;
 
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;

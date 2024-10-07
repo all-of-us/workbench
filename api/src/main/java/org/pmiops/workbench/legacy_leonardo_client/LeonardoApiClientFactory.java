@@ -1,4 +1,4 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.legacy_leonardo_client;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import jakarta.inject.Provider;

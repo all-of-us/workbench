@@ -1,4 +1,4 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.legacy_leonardo_client;
 
 import static com.google.common.truth.Truth.assertThat;
 

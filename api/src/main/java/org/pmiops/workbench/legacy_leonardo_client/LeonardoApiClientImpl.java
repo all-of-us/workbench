@@ -1,11 +1,11 @@
-package org.pmiops.workbench.leonardo;
+package org.pmiops.workbench.legacy_leonardo_client;
 
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.legacy_leonardo_client.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -31,28 +31,28 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.ResourcesApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDataprocConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
+import org.pmiops.workbench.legacy_leonardo_client.api.AppsApi;
+import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
+import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;
+import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
+import org.pmiops.workbench.legacy_leonardo_client.api.ServiceInfoApi;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppStatus;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateAppRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDiskRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Disk;
@@ -735,7 +735,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
-    } catch (org.pmiops.workbench.leonardo.ApiException e) {
+    } catch (org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;

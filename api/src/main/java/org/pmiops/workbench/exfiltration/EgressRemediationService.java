@@ -28,7 +28,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.legacy_leonardo_client.LeonardoApiClient;
 import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 

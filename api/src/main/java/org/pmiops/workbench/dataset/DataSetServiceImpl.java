@@ -69,7 +69,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
+import org.pmiops.workbench.legacy_leonardo_client.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.model.AnalysisLanguage;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
