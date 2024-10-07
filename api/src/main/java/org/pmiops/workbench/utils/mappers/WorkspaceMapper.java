@@ -172,7 +172,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "lastModifiedBy", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
-  @Mapping(target = "published", ignore = true)
   @Mapping(target = "researchOutcomeSet", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
   @Mapping(target = "timeRequested", ignore = true)

@@ -187,10 +187,10 @@ public class DeleteWorkspaces extends Tool {
 
   private void deleteRawlsWorkspace(RawlsWorkspaceListResponse response, String username) {
     String namespace = response.getWorkspace().getNamespace();
-    String fcName = response.getWorkspace().getName();
+    String terraName = response.getWorkspace().getName();
     String googleProject = response.getWorkspace().getGoogleProject();
-    LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
+    LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, terraName));
     workspaceService.deleteOrphanedRawlsWorkspace(
-        username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
+        username, namespace, googleProject, terraName, DELETE_BILLING_PROJECTS);
   }
 }

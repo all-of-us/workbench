@@ -680,6 +680,7 @@ describe(RuntimeConfigurationPanel.name, () => {
       name: 'my-existing-disk',
       blockSize: 1,
       gceRuntime: true,
+      zone: 'us-central1-a',
     };
   };
 

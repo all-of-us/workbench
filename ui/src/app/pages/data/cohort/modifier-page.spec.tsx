@@ -42,7 +42,7 @@ describe('ModifierPage', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
-        enableEraCommons: true,
+        enableEraCommons: false,
       },
     });
     cdrVersionStore.set(cdrVersionTiersResponse);

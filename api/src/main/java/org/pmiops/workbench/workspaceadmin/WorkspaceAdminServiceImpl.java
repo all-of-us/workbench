@@ -171,10 +171,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Override
   public AdminWorkspaceCloudStorageCounts getAdminWorkspaceCloudStorageCounts(
-      String workspaceNamespace, String workspaceName) {
+      String workspaceNamespace, String workspaceTerraName) {
     String bucketName =
         fireCloudService
-            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspaceAsService(workspaceNamespace, workspaceTerraName)
             .getWorkspace()
             .getBucketName();
 
@@ -182,7 +182,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // Storage List results
     int notebookFilesCount =
         notebooksService
-            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
+            .getNotebooksAsService(bucketName, workspaceNamespace, workspaceTerraName)
             .size();
     int nonNotebookFilesCount = getNonNotebookFileCount(bucketName);
     long storageSizeBytes = getStorageSizeBytes(bucketName);
@@ -413,17 +413,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     DbWorkspace dbWorkspace = getWorkspaceByNamespaceOrThrow(workspaceNamespace);
     workspaceDao.save(dbWorkspace.setAdminLocked(false));
     adminAuditor.fireUnlockWorkspaceAction(dbWorkspace.getWorkspaceId());
-  }
-
-  @Override
-  public DbWorkspace setPublished(
-      String workspaceNamespace, String firecloudName, boolean publish) {
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
-
-    fireCloudService.updateWorkspaceAclForPublishing(workspaceNamespace, firecloudName, publish);
-
-    dbWorkspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
   }
 
   @Override

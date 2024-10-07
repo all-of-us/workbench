@@ -11,10 +11,14 @@ import org.pmiops.workbench.model.Workspace;
 public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspace> {
   ETAG("etag", Workspace::getEtag),
   NAME("name", Workspace::getName),
+  TERRA_NAME("terra_name", Workspace::getTerraName),
   NAMESPACE("namespace", Workspace::getNamespace),
   CDR_VERSION_ID("cdr_version_id", Workspace::getCdrVersionId),
   CREATOR("creator", Workspace::getCreator),
   ACCESS_TIER_SHORT_NAME("access_tier_short_name", Workspace::getAccessTierShortName),
+
+  // all fields below here relate to research purpose
+
   ADDITIONAL_NOTES(
       "additional_notes", workspace -> workspace.getResearchPurpose().getAdditionalNotes()),
   APPROVED("approved", rpStringOrNull(ResearchPurpose::isApproved)),
@@ -49,8 +53,7 @@ public enum WorkspaceTargetProperty implements ModelBackedTargetProperty<Workspa
   REVIEW_REQUESTED("review_requested", rpStringOrNull(ResearchPurpose::isReviewRequested)),
   SOCIAL_BEHAVIORAL("social_behavioral", rpStringOrNull(ResearchPurpose::isSocialBehavioral)),
   TIME_REQUESTED("time_requested", rpStringOrNull(ResearchPurpose::getTimeRequested)),
-  TIME_REVIEWED("time_reviewed", rpStringOrNull(ResearchPurpose::getTimeReviewed)),
-  PUBLISHED("published", PropertyUtils.stringOrNull(Workspace::isPublished));
+  TIME_REVIEWED("time_reviewed", rpStringOrNull(ResearchPurpose::getTimeReviewed));
 
   private final String propertyName;
   private final Function<Workspace, String> extractor;

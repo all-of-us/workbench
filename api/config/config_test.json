@@ -95,7 +95,7 @@
   },
   "access": {
     "enableComplianceTraining": true,
-    "enableEraCommons": true,
+    "enableEraCommons": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasIdMeLinking": true,
@@ -144,8 +144,8 @@
     "dataset": "reporting_test",
     "maxRowsPerInsert": 500,
     "exportTerraDataWarehouse": true,
-    "terraWarehouseLeoAppTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app_dev",
-    "terraWarehouseLeoAppUsageTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app_usage_dev"
+    "terraWarehouseLeoAppTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app",
+    "terraWarehouseLeoAppUsageTableId": "broad-dsde-dev-analytics-dev.warehouse.leonardo_app_usage"
   },
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",

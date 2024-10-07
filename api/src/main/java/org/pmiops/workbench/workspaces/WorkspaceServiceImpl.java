@@ -166,7 +166,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .toApiWorkspaceResponseList(
             workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
         .stream()
-        .filter((workspaceResponse) -> WorkspaceServiceImpl.filterToNonPublished(workspaceResponse))
+        .filter(WorkspaceServiceImpl::filterToNonPublished)
         .toList();
   }
 
@@ -174,16 +174,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
         || response.getWorkspace().getFeaturedCategory() == null;
-  }
-
-  @Override
-  public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return workspaceMapper
-        .toApiWorkspaceResponseList(
-            workspaceDao, fireCloudService.getWorkspaces(), initialCreditsExpirationService)
-        .stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
-        .toList();
   }
 
   @Override
@@ -214,8 +204,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Transactional
   @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceTerraName) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceTerraName);
     validateWorkspaceTierAccess(dbWorkspace);
 
     RawlsWorkspaceResponse fcResponse;
@@ -487,8 +477,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceId) {
-    return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceId);
+  public boolean notebookTransferComplete(String workspaceNamespace, String workspaceTerraName) {
+    return fireCloudService.workspaceFileTransferComplete(workspaceNamespace, workspaceTerraName);
   }
 
   @Override

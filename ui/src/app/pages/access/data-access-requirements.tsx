@@ -18,7 +18,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,
   DARPageMode,
@@ -305,7 +304,6 @@ const RenewalRequirementsText = () => (
 export const initialRtModules = [
   AccessModule.TWO_FACTOR_AUTH,
   AccessModule.IDENTITY,
-  AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [
@@ -393,27 +391,6 @@ const selfBypass = async (
   reloadProfile();
 };
 
-const isEraCommonsModuleRequiredByInstitution = (
-  profile: Profile,
-  moduleNames: AccessModule
-): boolean => {
-  // Remove the eRA Commons module when the flag to enable RAS is set and the user's
-  // institution does not require eRA Commons for RT.
-
-  if (moduleNames !== AccessModule.ERA_COMMONS) {
-    return true;
-  }
-  const { enableRasLoginGovLinking } = serverConfigStore.get().config;
-  if (!enableRasLoginGovLinking) {
-    return true;
-  }
-
-  return fp.flow(
-    fp.filter({ accessTierShortName: AccessTierShortNames.Registered }),
-    fp.some('eraRequired')
-  )(profile.tierEligibilities);
-};
-
 // exported for test
 export const getEligibleModules = (
   modules: AccessModule[],
@@ -423,9 +400,6 @@ export const getEligibleModules = (
     fp.filter((module: AccessModule) => isEligibleModule(module, profile)),
     fp.map(getAccessModuleConfig),
     fp.filter((moduleConfig) => moduleConfig.isEnabledInEnvironment),
-    fp.filter((moduleConfig) =>
-      isEraCommonsModuleRequiredByInstitution(profile, moduleConfig.name)
-    ),
     fp.map((moduleConfig) => moduleConfig.name)
   )(modules);
 

@@ -18,10 +18,6 @@ const devAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
   authorities: [Authority.DEVELOPER],
 };
-const featuredWsAuth = {
-  ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
-};
 
 describe('authorities', () => {
   it('should correctly authorize INSTITUTION_ADMIN', async () => {
@@ -47,14 +43,7 @@ describe('authorities', () => {
     expect(
       hasAuthorityForAction(noAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)
     ).toBeFalsy();
-    // FEATUREDWORKSPACEADMIN does not guard anything in the admin menu
-    expect(
-      hasAuthorityForAction(
-        featuredWsAuth,
-        AuthorityGuardedAction.SHOW_ADMIN_MENU
-      )
-    ).toBeFalsy();
-    // ACCESSCONTROLADMIN does
+    // ACCESS_CONTROL_ADMIN is one of the Authorities that enables showing the admin menu
     expect(
       hasAuthorityForAction(accessAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)
     ).toBeTruthy();

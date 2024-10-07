@@ -31,7 +31,7 @@ describe('AdminUserTable', () => {
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',
-        enableEraCommons: true,
+        enableEraCommons: false,
       },
     });
     props = {

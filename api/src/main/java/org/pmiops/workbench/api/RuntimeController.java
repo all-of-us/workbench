@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME;
@@ -143,8 +144,9 @@ public class RuntimeController implements RuntimeApiDelegate {
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.containsValue(
-            runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
+        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+            .values()
+            .contains(runtimeLabels.get(LEONARDO_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
@@ -154,7 +156,9 @@ public class RuntimeController implements RuntimeApiDelegate {
         }
         return runtime.status(RuntimeStatus.DELETED);
       } catch (RuntimeException e) {
-        log.warning("RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping " + e);
+        log.warning(
+            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
+                + e.toString());
       }
     }
 
@@ -163,7 +167,6 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
-
     long configCount =
         Stream.ofNullable(runtime)
             .flatMap(

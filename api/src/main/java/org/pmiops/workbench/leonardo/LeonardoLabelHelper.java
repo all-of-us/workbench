@@ -53,4 +53,10 @@ public class LeonardoLabelHelper {
     labels.put(labelKey, labelValue);
     return labels;
   }
+
+  public static String getEnvironmentType(@Nullable Object labels) {
+    return maybeMapLeonardoLabelsToGkeApp(labels)
+        .map(LeonardoAppUtils::appDisplayName)
+        .orElse("Jupyter");
+  }
 }

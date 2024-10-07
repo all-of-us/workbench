@@ -420,7 +420,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it(
-    'should return the second enabled module (ERA, not RAS) from getFocusedModule' +
+    'should return the second enabled module (COMPLIANCE_TRAINING, not RAS) from getFocusedModule' +
       ' when the first module (2FA) has been completed and RAS is disabled',
     () => {
       serverConfigStore.set({
@@ -453,7 +453,7 @@ describe('DataAccessRequirements', () => {
       );
 
       // update this if the order changes
-      expect(activeModule).toEqual(AccessModule.ERA_COMMONS);
+      expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
 
       // 2FA (module 0) is complete, so enabled #1 is active
       expect(activeModule).toEqual(enabledModules[1]);
@@ -472,7 +472,6 @@ describe('DataAccessRequirements', () => {
             moduleName: AccessModule.TWO_FACTOR_AUTH,
             completionEpochMillis: 1,
           },
-          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
@@ -491,8 +490,8 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(initialRequiredModules[3]);
-    expect(activeModule).toEqual(enabledModules[3]);
+    expect(activeModule).toEqual(initialRequiredModules[2]);
+    expect(activeModule).toEqual(enabledModules[2]);
 
     // update this if the order changes
     expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
@@ -875,12 +874,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: true,
           },
         ],
@@ -899,9 +896,8 @@ describe('DataAccessRequirements', () => {
   // regression tests for RW-7384: sync external modules to gain access
 
   it('should sync incomplete external modules', async () => {
-    // profile contains no completed modules, so we sync all (2FA, ERA, Compliance)
+    // profile contains no completed modules, so we sync all (2FA, Compliance)
     const spy2FA = jest.spyOn(profileApi(), 'syncTwoFactorAuthStatus');
-    const spyERA = jest.spyOn(profileApi(), 'syncEraCommonsStatus');
     const spyCompliance = jest.spyOn(
       profileApi(),
       'syncComplianceTrainingStatus'
@@ -910,7 +906,6 @@ describe('DataAccessRequirements', () => {
     component();
 
     expect(spy2FA).toHaveBeenCalledTimes(1);
-    expect(spyERA).toHaveBeenCalledTimes(1);
     expect(spyCompliance).toHaveBeenCalledTimes(1);
   });
 
@@ -944,53 +939,6 @@ describe('DataAccessRequirements', () => {
     expect(spyCompliance).toHaveBeenCalledTimes(0);
   });
 
-  it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
-    let { container } = component();
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
-
-    // Ignore eraRequired if the accessTier is Controlled
-    profileStore.set({
-      profile: {
-        ...ProfileStubVariables.PROFILE_STUB,
-        tierEligibilities: [
-          {
-            accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
-          },
-          {
-            accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: false,
-          },
-        ],
-      },
-      load,
-      reload,
-      updateCache,
-    });
-    ({ container } = component());
-
-    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
-  });
-
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
     let { container } = component();
 
@@ -1000,7 +948,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
           },
         ],
       },
@@ -1027,7 +974,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
           },
         ],
       },
@@ -1054,7 +1000,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1081,7 +1026,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1109,7 +1053,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1146,7 +1089,6 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
           ],
@@ -1178,12 +1120,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: true,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: false,
               // User not eligible for CT i.e user email doesnt match
               // Institution's Controlled Tier email list
               eligible: false,
@@ -1202,44 +1142,6 @@ describe('DataAccessRequirements', () => {
           AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
-    }
-  );
-
-  it(
-    'Should not display eraCommons module in CT card ' +
-      'when eraCommons is disabled via the environment config',
-    async () => {
-      serverConfigStore.set({
-        config: { ...defaultServerConfig, enableEraCommons: false },
-      });
-
-      let { container } = component();
-
-      profileStore.set({
-        profile: {
-          ...ProfileStubVariables.PROFILE_STUB,
-          tierEligibilities: [
-            {
-              accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
-              eligible: false,
-            },
-            {
-              accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
-              eligible: true,
-            },
-          ],
-        },
-        load,
-        reload,
-        updateCache,
-      });
-      ({ container } = component());
-
-      expect(
-        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
-      ).toBeFalsy();
     }
   );
 
@@ -1294,12 +1196,10 @@ describe('DataAccessRequirements', () => {
           tierEligibilities: [
             {
               accessTierShortName: AccessTierShortNames.Registered,
-              eraRequired: false,
               eligible: false,
             },
             {
               accessTierShortName: AccessTierShortNames.Controlled,
-              eraRequired: true,
               eligible: true,
             },
           ],
@@ -1328,12 +1228,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: false,
           },
         ],
@@ -1358,7 +1256,6 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
         ],
@@ -1383,12 +1280,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1428,12 +1323,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1479,12 +1372,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],
@@ -1520,12 +1411,10 @@ describe('DataAccessRequirements', () => {
         tierEligibilities: [
           {
             accessTierShortName: AccessTierShortNames.Registered,
-            eraRequired: false,
             eligible: false,
           },
           {
             accessTierShortName: AccessTierShortNames.Controlled,
-            eraRequired: true,
             eligible: true,
           },
         ],

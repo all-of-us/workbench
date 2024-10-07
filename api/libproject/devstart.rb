@@ -780,6 +780,34 @@ Common.register_command({
   :fn => ->(*args) { create_tanagra_tables("create-tanagra-tables", *args) }
 })
 
+def create_fitbit_tables_with_id_column(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--bq-project [bq-project]",
+      ->(opts, v) { opts.bq_project = v},
+      "BQ Project - Required."
+  )
+  op.add_option(
+      "--bq-dataset [bq-dataset]",
+      ->(opts, v) { opts.bq_dataset = v},
+      "BQ Dataset - Required."
+  )
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/create-fitbit-tables-with-id-column.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-fitbit-tables-with-id-column",
+  :description => "Create all fitbit tables with id column.",
+  :fn => ->(*args) { create_fitbit_tables_with_id_column("create-fitbit-tables-with-id-column", *args) }
+})
+
 def build_tanagra_pfhh_table(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -3048,4 +3076,52 @@ Common.register_command({
     :invocation => "backfill-absorb",
     :description => "Backfills the Absorb External Department ID field in GSuite.\n",
     :fn => ->(*args) {backfill_gsuite_user_data("backfill_gsuite_user_data", *args)}
+})
+
+def list_disks(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+    '--project [project]',
+    String,
+    ->(opts, v) { opts.project = v },
+    'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+    '--output [output file name]',
+    String,
+    ->(opts, v) { opts.output = v },
+    'Output file name.')
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.output}
+
+  op.parse.validate
+
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+    ["--output", op.opts.output],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  ENV.update(read_db_vars(gcc))
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew listDisks -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+LIST_DISKS_CMD = "list-disks"
+
+Common.register_command({
+    :invocation => LIST_DISKS_CMD,
+    :description => "Creates a CSV report of all persistent disks in the environment.",
+    :fn => ->(*args) {list_disks(LIST_DISKS_CMD, *args)}
 })

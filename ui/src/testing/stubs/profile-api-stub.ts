@@ -66,11 +66,9 @@ export class ProfileStubVariables {
     tierEligibilities: [
       {
         accessTierShortName: AccessTierShortNames.Registered,
-        eraRequired: true,
       },
       {
         accessTierShortName: AccessTierShortNames.Controlled,
-        eraRequired: false,
       },
     ],
   };

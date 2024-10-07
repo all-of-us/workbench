@@ -139,7 +139,6 @@ public class WorkspaceMapperTest {
             .setConceptSets(Collections.emptySet())
             .setDataSets(Collections.emptySet())
             .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
-            .setPublished(false)
             .setDiseaseFocusedResearch(true)
             .setDiseaseOfFocus("leukemia")
             .setMethodsDevelopment(false)
@@ -193,7 +192,6 @@ public class WorkspaceMapperTest {
     assertResearchPurposeMatches(rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
-    assertThat(ws.isPublished()).isEqualTo(sourceDbWorkspace.getPublished());
     assertThat(ws.getFeaturedCategory()).isNull();
   }
 

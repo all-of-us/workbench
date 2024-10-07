@@ -10,9 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,8 +22,6 @@ import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -88,8 +86,8 @@ public class LeonardoApiClientTest {
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
   })
+  @MockBean(LeonardoApiClientFactory.class)
   static class Configuration {
-
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig workbenchConfig() {
@@ -105,26 +103,25 @@ public class LeonardoApiClientTest {
 
   @Qualifier(LeonardoConfig.USER_APPS_API)
   @MockBean
-  AppsApi userAppsApi;
+  AppsApi mockUserAppsApi;
 
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   @MockBean
-  DisksApi userDisksApi;
-
-  @MockBean WorkspaceDao workspaceDao;
-  @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
-  @MockBean FireCloudService mockFireCloudService;
+  DisksApi mockUserDisksApi;
 
   @Qualifier("userRuntimesApi")
   @MockBean
   RuntimesApi userRuntimesApi;
 
-  @Autowired AccessTierDao accessTierDao;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired UserDao userDao;
+  @MockBean FireCloudService mockFireCloudService;
+  @MockBean WorkspaceDao mockWorkspaceDao;
+
   @SpyBean LeonardoMapper leonardoMapper;
-  @Autowired LeonardoApiClient leonardoApiClient;
+
+  @Autowired AccessTierDao accessTierDao;
   @Autowired FirecloudMapper firecloudMapper;
+
+  @Autowired LeonardoApiClient leonardoApiClient;
 
   @Captor private ArgumentCaptor<LeonardoCreateAppRequest> createAppRequestArgumentCaptor;
 
@@ -197,7 +194,7 @@ public class LeonardoApiClientTest {
             .setName(WORKSPACE_NAME)
             .setFirecloudName(WORKSPACE_ID)
             .setCdrVersion(cdrVersion);
-    doReturn(testWorkspace).when(workspaceDao).getRequired(WORKSPACE_NS, WORKSPACE_NAME);
+    doReturn(testWorkspace).when(mockWorkspaceDao).getRequired(WORKSPACE_NS, WORKSPACE_NAME);
 
     appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true");
     appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
@@ -213,8 +210,8 @@ public class LeonardoApiClientTest {
         "WGS_CRAM_MANIFEST_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH + "/" + WGS_PATH);
     customEnvironmentVariables.putAll(LeonardoCustomEnvVarUtils.FASTA_REFERENCE_ENV_VAR_MAP);
 
-    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(new ArrayList<>());
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(Collections.emptyList());
   }
 
   @Test
@@ -223,7 +220,7 @@ public class LeonardoApiClientTest {
     leonardoApiClient.createApp(
         createAppRequest.persistentDiskRequest(persistentDiskRequest.name("pd-name")),
         testWorkspace);
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
             startsWith(getAppName(AppType.RSTUDIO)),
@@ -267,7 +264,7 @@ public class LeonardoApiClientTest {
             .autodeleteEnabled(true)
             .autodeleteThreshold(10),
         testWorkspace);
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
             startsWith(getAppName(AppType.RSTUDIO)),
@@ -284,7 +281,7 @@ public class LeonardoApiClientTest {
     config.featureFlags.enableGcsFuseOnGke = false;
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
     leonardoApiClient.createApp(createAppRequest, testWorkspace);
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
             startsWith(getAppName(AppType.RSTUDIO)),
@@ -304,7 +301,7 @@ public class LeonardoApiClientTest {
             .autodeleteEnabled(false)
             .autodeleteThreshold(10),
         testWorkspace);
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
             startsWith(getAppName(AppType.RSTUDIO)),
@@ -322,7 +319,7 @@ public class LeonardoApiClientTest {
     leonardoApiClient.createApp(
         createAppRequest.persistentDiskRequest(persistentDiskRequest), testWorkspace);
 
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .createApp(
             eq(GOOGLE_PROJECT_ID),
             startsWith(getAppName(AppType.RSTUDIO)),
@@ -350,8 +347,8 @@ public class LeonardoApiClientTest {
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoDiskStatus.READY)
             .labels(diskLabels);
-    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(ImmutableList.of(rstudioDisk));
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(List.of(rstudioDisk));
 
     assertThrows(
         BadRequestException.class,
@@ -363,13 +360,13 @@ public class LeonardoApiClientTest {
   @Test
   public void testGetAppSuccess() throws Exception {
     leonardoApiClient.getAppByNameByProjectId(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
-    verify(userAppsApi).getApp(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
+    verify(mockUserAppsApi).getApp(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
   }
 
   @Test
   public void testListAppSuccess() throws Exception {
     leonardoApiClient.listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
-    verify(userAppsApi)
+    verify(mockUserAppsApi)
         .listAppByProject(
             GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS, "creator");
   }
@@ -379,7 +376,7 @@ public class LeonardoApiClientTest {
     String appName = "app-name";
     boolean deleteDisk = true;
     leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
-    verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+    verify(mockUserAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
   }
 
   @Test

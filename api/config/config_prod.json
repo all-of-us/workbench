@@ -95,7 +95,7 @@
   },
   "access": {
     "enableComplianceTraining": true,
-    "enableEraCommons": true,
+    "enableEraCommons": false,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasIdMeLinking": true,
@@ -117,7 +117,7 @@
     "enableDataExplorer": false,
     "enableGKEAppPausing": false,
     "enableGKEAppMachineTypeChoice": false,
-    "enableGcsFuseOnGke": false,
+    "enableGcsFuseOnGke": true,
     "enableInitialCreditsExpiration": false,
     "blockComplianceTraining": false
   },

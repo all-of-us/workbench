@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -37,9 +36,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
@@ -58,7 +54,6 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -73,13 +68,12 @@ public class OfflineRuntimeControllerTest {
   private static final Duration RUNTIME_IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @MockBean({
-    FireCloudService.class,
-    FreeTierBillingService.class,
-    WorkspaceService.class,
-    MailService.class,
+  @MockBean(WorkspaceService.class)
+  @Import({
+    FakeClockConfiguration.class,
+    LeonardoMapperImpl.class,
+    OfflineRuntimeController.class,
   })
-  @Import({FakeClockConfiguration.class, OfflineRuntimeController.class, LeonardoMapperImpl.class})
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
@@ -87,29 +81,16 @@ public class OfflineRuntimeControllerTest {
     }
   }
 
-  @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
-  @MockBean
-  private RuntimesApi mockRuntimesApi;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private FreeTierBillingService mockFreeTierBillingService;
+  @MockBean private LeonardoApiClient mockLeonardoApiClient;
+  @MockBean private MailService mockMailService;
 
-  @Qualifier(LeonardoConfig.SERVICE_DISKS_API)
-  @MockBean
-  private DisksApi mockDisksApi;
-
-  @Qualifier(LeonardoConfig.SERVICE_DISKS_API)
-  @MockBean
-  private LeonardoApiClient leonardoApiClient;
-
-  @Autowired private FireCloudService mockFireCloudService;
-  @Autowired private FreeTierBillingService mockFreeTierBillingService;
-
-  @Autowired private WorkspaceService mockWorkspaceService;
-  @Autowired private MailService mockMailService;
-
-  @Autowired private LeonardoMapper leonardoMapper;
   @Autowired private OfflineRuntimeController controller;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private LeonardoMapper leonardoMapper;
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
@@ -183,13 +164,15 @@ public class OfflineRuntimeControllerTest {
         .collect(Collectors.toList());
   }
 
-  private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) throws Exception {
-    when(mockRuntimesApi.listRuntimes(any(), any()))
+  private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) {
+    when(mockLeonardoApiClient.listRuntimesAsService())
         .thenReturn(toListRuntimeResponseList(runtimes));
 
     for (LeonardoGetRuntimeResponse runtime : runtimes) {
-      when(mockRuntimesApi.getRuntime(
-              leonardoMapper.toGoogleProject(runtime.getCloudContext()), runtime.getRuntimeName()))
+      String googleProject = leonardoMapper.toGoogleProject(runtime.getCloudContext());
+      String runtimeName = runtime.getRuntimeName();
+
+      when(mockLeonardoApiClient.getRuntimeAsService(googleProject, runtimeName))
           .thenReturn(runtime);
     }
   }
@@ -217,8 +200,8 @@ public class OfflineRuntimeControllerTest {
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) throws Exception {
-    when(mockDisksApi.listDisks(any(), any(), anyString(), any())).thenReturn(disks);
+  private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) {
+    when(mockLeonardoApiClient.listDisksAsService()).thenReturn(disks);
   }
 
   private void stubWorkspaceOwners(DbWorkspace w, List<DbUser> users) {
@@ -241,7 +224,7 @@ public class OfflineRuntimeControllerTest {
     stubRuntimes(ImmutableList.of());
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -249,7 +232,7 @@ public class OfflineRuntimeControllerTest {
     stubRuntimes(ImmutableList.of(runtimeWithAge(Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -257,7 +240,7 @@ public class OfflineRuntimeControllerTest {
     stubRuntimes(ImmutableList.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -268,7 +251,7 @@ public class OfflineRuntimeControllerTest {
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -279,7 +262,7 @@ public class OfflineRuntimeControllerTest {
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -290,7 +273,7 @@ public class OfflineRuntimeControllerTest {
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
   }
 
   @Test
@@ -300,7 +283,7 @@ public class OfflineRuntimeControllerTest {
             runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
+    verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
   }
 
   @Test

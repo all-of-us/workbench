@@ -69,7 +69,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.initialcredits.InitialCreditsExpirationService;
@@ -1122,25 +1121,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testSyncEraCommons() {
-    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
-    String linkedUsername = "linked";
-    nihStatus.setLinkedNihUsername(linkedUsername);
-    nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
-    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
-
-    createAccountAndDbUserWithAffiliation();
-
-    profileController.syncEraCommonsStatus();
-    final DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
-    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
-    assertThat(user.getEraCommonsLinkExpireTime()).isNotNull();
-    assertThat(
-            getCompletionEpochMillis(profileController.getMe().getBody(), AccessModule.ERA_COMMONS))
-        .isNotNull();
-  }
-
-  @Test
   public void testDeleteProfile() {
     createAccountAndDbUserWithAffiliation();
 
@@ -1531,7 +1511,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // user has no bypasses at test start
     assertThat(getBypassEpochMillis(original, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
     assertThat(getBypassEpochMillis(original, AccessModule.COMPLIANCE_TRAINING)).isNull();
-    assertThat(getBypassEpochMillis(original, AccessModule.ERA_COMMONS)).isNull();
     assertThat(getBypassEpochMillis(original, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
@@ -1552,7 +1531,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // remains unbypassed because the flag was set to false
     assertThat(getBypassEpochMillis(retrieved1, AccessModule.COMPLIANCE_TRAINING)).isNull();
     // unchanged: unbypassed
-    assertThat(getBypassEpochMillis(retrieved1, AccessModule.ERA_COMMONS)).isNull();
     assertThat(getBypassEpochMillis(retrieved1, AccessModule.TWO_FACTOR_AUTH)).isNull();
 
     final List<AccessBypassRequest> bypasses2 =
@@ -1563,7 +1541,6 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .bypassed(false),
             // bypass
             new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).bypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).bypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).bypassed(true));
 
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
@@ -1571,9 +1548,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // this is now unbypassed
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.DATA_USER_CODE_OF_CONDUCT)).isNull();
-    // these 3 are now bypassed
+    // these 2 are now bypassed
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.COMPLIANCE_TRAINING)).isNotNull();
-    assertThat(getBypassEpochMillis(retrieved2, AccessModule.ERA_COMMONS)).isNotNull();
     assertThat(getBypassEpochMillis(retrieved2, AccessModule.TWO_FACTOR_AUTH)).isNotNull();
 
     // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
@@ -1595,10 +1571,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             any(),
             any());
 
-    // ERA and 2FA once in request 2
-    verify(mockUserServiceAuditor)
-        .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.ERA_COMMONS), any(), any());
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()), eq(BypassTimeTargetProperty.TWO_FACTOR_AUTH), any(), any());

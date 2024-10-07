@@ -916,6 +916,18 @@ task backfillGSuiteUserData(type: JavaExec) {
     }
 }
 
+// example run:
+// ./project.rb list-disks \
+// --project all-of-us-workbench-test \
+// --output test-disks.csv
+task listDisks(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.ListDisks"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
 dependencies {
     testImplementation 'au.com.dius:pact-jvm-consumer-java8:4.0.10'
     testImplementation 'au.com.dius:pact-jvm-consumer-junit5:4.0.10'
