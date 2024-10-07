@@ -168,6 +168,7 @@ export const withAnalysisConfigDefaults = (
   if (computeType === ComputeType.Standard) {
     zone = zone ?? serverConfigStore.get().config.defaultGceVmZone;
     if (existingPersistentDisk) {
+      zone = existingPersistentDisk.zone;
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
