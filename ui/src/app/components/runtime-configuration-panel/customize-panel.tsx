@@ -264,13 +264,7 @@ export const CustomizePanel = ({
                       options={gceVmZones?.sort()}
                       value={analysisConfig.zone}
                       onChange={({ value: zone }) => {
-                        // When the compute type changes, we need to normalize the config and potentially restore defaults.
-                        setAnalysisConfig(
-                          withAnalysisConfigDefaults(
-                            { ...analysisConfig, zone },
-                            gcePersistentDisk
-                          )
-                        );
+                        setAnalysisConfig({ ...analysisConfig, zone });
                       }}
                     />
                   </div>
