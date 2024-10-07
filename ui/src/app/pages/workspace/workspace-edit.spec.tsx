@@ -1097,7 +1097,7 @@ describe(WorkspaceEdit.name, () => {
     ).toBeInTheDocument();
   });
 
-  it('Should trim workspace name', async () => {
+  it('Should trim workspace name appropriately', async () => {
     renderComponent();
     const workspaceNameTextBox = await screen.findByTestId('workspace-name');
     await userEvent.type(
