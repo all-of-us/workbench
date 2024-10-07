@@ -99,9 +99,6 @@ describe(deriveCurrentRuntime.name, () => {
     ['GCE with PD', defaultGceRuntimeWithPd()],
     ['DataProc', defaultDataProcRuntime()],
   ])('%s', (desc, runtime) => {
-    beforeEach(() => {
-      setup();
-    });
     it(`returns a ${desc} runtime from the hook if it is not DELETED`, () => {
       // sanity check
       expect(runtime.status).not.toEqual(RuntimeStatus.DELETED);
