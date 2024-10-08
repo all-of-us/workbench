@@ -166,7 +166,7 @@ export const withAnalysisConfigDefaults = (
   // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
-    zone = zone ?? serverConfigStore.get().config.defaultGceVmZone;
+    zone ??= serverConfigStore.get().config.defaultGceVmZone;
     if (existingPersistentDisk) {
       zone = existingPersistentDisk.zone;
       detachable = true;
