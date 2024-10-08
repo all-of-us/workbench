@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
@@ -65,7 +66,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
@@ -221,11 +221,11 @@ public class RuntimeControllerTest {
 
   @MockBean
   @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
-  DisksApi mockUserDisksApi;
+  org.pmiops.workbench.legacy_leonardo_client.api.DisksApi mockLegacyUserDisksApi;
 
   @MockBean
   @Qualifier(LeonardoConfig.USER_DISKS_API)
-  org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
+  DisksApi mockUserDisksApi;
 
   @MockBean FireCloudService mockFireCloudService;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
@@ -334,10 +334,10 @@ public class RuntimeControllerTest {
     doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(mockWorkspaceDao).getByNamespace(WORKSPACE_NS);
 
-    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+    when(mockLegacyUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());
 
-    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());
   }
 
@@ -994,7 +994,7 @@ public class RuntimeControllerTest {
                     .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(DiskStatus.READY);
-    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(gceDisk));
 
     stubGetWorkspace();

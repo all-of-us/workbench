@@ -40,7 +40,7 @@ public class LeonardoApiClientFactory {
       String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds =
         firecloudApiClientFactory.getDelegatedUserCredentials(userEmail);
-    org.pmiops.workbench.legacy_leonardo_client.ApiClient client = newLegacyApiClient();
+    var client = newLegacyApiClient();
     client.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return client;
   }
@@ -51,7 +51,7 @@ public class LeonardoApiClientFactory {
    */
   public org.pmiops.workbench.legacy_leonardo_client.ApiClient newLegacyApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient =
+    final var apiClient =
         new org.pmiops.workbench.legacy_leonardo_client.ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)

@@ -78,7 +78,7 @@ public class LeonardoConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyServiceApiClient(
       LeonardoApiClientFactory factory) {
-    org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient = factory.newLegacyApiClient();
+    var apiClient = factory.newLegacyApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
@@ -91,16 +91,16 @@ public class LeonardoConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.legacy_leonardo_client.ApiClient legacyUserApiClient(
       UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
-    org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient = factory.newLegacyApiClient();
+    var apiClient = factory.newLegacyApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 
   @Bean(name = USER_LEONARDO_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.broadinstitute.dsde.workbench.client.leonardo.ApiClient leoUserApiClient(
+  public ApiClient leoUserApiClient(
       UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
-    org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient = factory.newApiClient();
+    ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
