@@ -8,10 +8,3 @@ cron:
   schedule: every 24 hours
   timezone: UTC
   target: api
-- description: TEMP DISABLED. Re-enqueues any egress events which have been pending for too long.
-  url: /v1/cron/checkPendingEgressEvents
-  schedule: 1 of jan 00:00
-  timezone: UTC
-  target: api
-
-
