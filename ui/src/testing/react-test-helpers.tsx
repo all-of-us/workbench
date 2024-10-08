@@ -174,3 +174,13 @@ export const expectTooltip = async (
   await user.unhover(element);
   expect(screen.queryByText(message)).not.toBeInTheDocument();
 };
+
+export const expectTooltipAbsence = async (
+  element: HTMLElement,
+  message: Matcher,
+  user: UserEvent
+) => {
+  await user.hover(element);
+  expect(screen.queryByText(message)).not.toBeInTheDocument();
+  await user.unhover(element);
+};

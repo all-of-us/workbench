@@ -2,9 +2,12 @@
 
 import { Authority, Profile } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
+
 // Admin actions guarded by a particular Authority
-enum AuthorityGuardedAction {
+export enum AuthorityGuardedAction {
   EGRESS_EVENTS,
+  EGRESS_BYPASS,
   SHOW_ADMIN_MENU,
   USER_ADMIN,
   USER_AUDIT,
@@ -25,6 +28,7 @@ const adminMenuAuthorities: Set<Authority> = new Set([
 
 const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
   [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITY_ADMIN],
+  [AuthorityGuardedAction.EGRESS_BYPASS, Authority.SECURITY_ADMIN],
   [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESS_CONTROL_ADMIN],
   [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESS_CONTROL_ADMIN],
   [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHER_DATA_VIEW],
@@ -33,7 +37,7 @@ const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
   [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTION_ADMIN],
 ]);
 
-const hasAuthorityForAction = (
+export const hasAuthorityForAction = (
   profile: Profile,
   action: AuthorityGuardedAction
 ): boolean => {
@@ -50,4 +54,25 @@ const hasAuthorityForAction = (
   return profile.authorities.includes(authorityByPage.get(action));
 };
 
-export { AuthorityGuardedAction, hasAuthorityForAction };
+// incomplete.  please add as needed.
+export const noAccessText = (action: AuthorityGuardedAction) => {
+  const actionDescription = switchCase(
+    action,
+    [AuthorityGuardedAction.EGRESS_BYPASS, () => 'make egress bypass requests'],
+    [AuthorityGuardedAction.EGRESS_EVENTS, () => 'view egress events']
+  );
+  return `You do not have permission to ${actionDescription}. ${authorityByPage.get(
+    action
+  )} authority is required.`;
+};
+
+export const renderIfAuthorized = (
+  profile: Profile,
+  action: AuthorityGuardedAction,
+  render: () => JSX.Element
+): JSX.Element =>
+  hasAuthorityForAction(profile, action) ? (
+    render()
+  ) : (
+    <div>{noAccessText(action)}</div>
+  );

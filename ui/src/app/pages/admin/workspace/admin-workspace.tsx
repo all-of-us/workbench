@@ -16,7 +16,11 @@ import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { hasNewValidProps } from 'app/utils';
-import { MatchParams } from 'app/utils/stores';
+import {
+  AuthorityGuardedAction,
+  renderIfAuthorized,
+} from 'app/utils/authorities';
+import { MatchParams, profileStore } from 'app/utils/stores';
 
 import { AdminLockWorkspace } from './admin-lock-workspace';
 import { BasicInformation } from './basic-information';
@@ -112,6 +116,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   render() {
+    const { profile } = profileStore.get();
     const {
       cloudStorageTraffic,
       loadingWorkspace,
@@ -167,10 +172,16 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                   onDelete={() => this.populateFederatedWorkspaceInformation()}
                 />
                 <h2>Egress event history</h2>
-                <EgressEventsTable
-                  displayPageSize={10}
-                  sourceWorkspaceNamespace={workspace.namespace}
-                />
+                {renderIfAuthorized(
+                  profile,
+                  AuthorityGuardedAction.EGRESS_EVENTS,
+                  () => (
+                    <EgressEventsTable
+                      displayPageSize={10}
+                      sourceWorkspaceNamespace={workspace.namespace}
+                    />
+                  )
+                )}
                 <h2>Disks</h2>
                 <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
               </>
