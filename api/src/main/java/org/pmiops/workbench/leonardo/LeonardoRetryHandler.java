@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -67,7 +67,7 @@ public class ExceptionUtils {
   }
 
   public static WorkbenchException convertLeonardoException(
-      org.pmiops.workbench.leonardo.ApiException e) {
+      org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

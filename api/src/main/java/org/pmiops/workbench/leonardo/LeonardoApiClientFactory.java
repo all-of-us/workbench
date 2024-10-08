@@ -5,6 +5,7 @@ import jakarta.inject.Provider;
 import java.io.IOException;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

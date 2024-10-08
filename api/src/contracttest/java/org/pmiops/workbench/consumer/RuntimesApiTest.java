@@ -19,13 +19,13 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.pmiops.workbench.leonardo.ApiClient;
-import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateGceConfig.CloudServiceEnum;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
+import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig.CloudServiceEnum;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
 class RuntimesApiTest {
