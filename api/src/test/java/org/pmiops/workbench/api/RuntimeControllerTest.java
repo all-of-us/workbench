@@ -220,10 +220,6 @@ public class RuntimeControllerTest {
   RuntimesApi mockUserRuntimesApi;
 
   @MockBean
-  @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
-  org.pmiops.workbench.legacy_leonardo_client.api.DisksApi mockLegacyUserDisksApi;
-
-  @MockBean
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   DisksApi mockUserDisksApi;
 
@@ -333,9 +329,6 @@ public class RuntimeControllerTest {
             .setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     doReturn(testWorkspace).when(mockWorkspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(mockWorkspaceDao).getByNamespace(WORKSPACE_NS);
-
-    when(mockLegacyUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(Collections.emptyList());
 
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
@@ -33,7 +34,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.legacy_leonardo_client.api.AppsApi;
-import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
@@ -76,14 +76,14 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 public class LeonardoApiClientTest {
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CommonMappers.class,
-    LeonardoMapperImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
-    LeonardoApiClientImpl.class,
     LegacyLeonardoRetryHandler.class,
-    LeonardoRetryHandler.class,
     LeonardoApiClientImpl.class,
+    LeonardoApiClientImpl.class,
+    LeonardoMapperImpl.class,
+    LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
   })
@@ -106,13 +106,9 @@ public class LeonardoApiClientTest {
   @MockBean
   AppsApi mockUserAppsApi;
 
-  @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
-  @MockBean
-  DisksApi mockUserDisksApi;
-
   @Qualifier(LeonardoConfig.USER_DISKS_API)
   @MockBean
-  org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
+  DisksApi mockUserDisksApi;
 
   @Qualifier("userRuntimesApi")
   @MockBean
@@ -215,8 +211,6 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.putAll(LeonardoCustomEnvVarUtils.FASTA_REFERENCE_ENV_VAR_MAP);
 
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
-        .thenReturn(Collections.emptyList());
-    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(Collections.emptyList());
   }
 
@@ -353,7 +347,7 @@ public class LeonardoApiClientTest {
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(DiskStatus.READY)
             .labels(diskLabels);
-    when(mockUserDisksApi2.listDisksByProject(any(), any(), any(), any(), any()))
+    when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(rstudioDisk));
 
     assertThrows(
