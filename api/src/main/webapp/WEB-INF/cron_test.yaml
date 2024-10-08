@@ -8,5 +8,10 @@ cron:
   schedule: every 24 hours
   timezone: UTC
   target: api
+- description: Re-enqueues any egress events which have been pending for too long.
+  url: /v1/cron/checkPendingEgressEvents
+  schedule: 31 dec 2024 23:59
+  timezone: UTC
+  target: api
 
 
