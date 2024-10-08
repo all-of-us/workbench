@@ -81,8 +81,8 @@ public class LeonardoApiClientTest {
     LeonardoMapperImpl.class,
     FirecloudMapperImpl.class,
     LeonardoApiClientImpl.class,
+    LegacyLeonardoRetryHandler.class,
     LeonardoRetryHandler.class,
-    LeonardoRetryHandler2.class,
     LeonardoApiClientImpl.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
@@ -106,11 +106,11 @@ public class LeonardoApiClientTest {
   @MockBean
   AppsApi mockUserAppsApi;
 
-  @Qualifier(LeonardoConfig.USER_DISKS_API)
+  @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
   @MockBean
   DisksApi mockUserDisksApi;
 
-  @Qualifier(LeonardoConfig.USER_DISKS_API_2)
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
   @MockBean
   org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
 

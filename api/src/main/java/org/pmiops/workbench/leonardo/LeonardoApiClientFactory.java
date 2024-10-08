@@ -3,9 +3,9 @@ package org.pmiops.workbench.leonardo;
 import com.google.auth.oauth2.OAuth2Credentials;
 import jakarta.inject.Provider;
 import java.io.IOException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +36,11 @@ public class LeonardoApiClientFactory {
    * including access tier membership and eventually Terra ToS enforcement (all Terra requests will
    * fail for accounts that have not completed the latest ToS).
    */
-  public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
+  public org.pmiops.workbench.legacy_leonardo_client.ApiClient newImpersonatedLegacyApiClient(
+      String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds =
         firecloudApiClientFactory.getDelegatedUserCredentials(userEmail);
-    ApiClient client = newApiClient();
+    org.pmiops.workbench.legacy_leonardo_client.ApiClient client = newLegacyApiClient();
     client.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return client;
   }
@@ -48,10 +49,10 @@ public class LeonardoApiClientFactory {
    * Creates a Leonardo API client, unauthenticated. Most clients should use an authenticated,
    * request scoped bean instead of calling this directly.
    */
-  public ApiClient newApiClient() {
+  public org.pmiops.workbench.legacy_leonardo_client.ApiClient newLegacyApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final ApiClient apiClient =
-        new ApiClient()
+    final org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient =
+        new org.pmiops.workbench.legacy_leonardo_client.ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
@@ -60,10 +61,10 @@ public class LeonardoApiClientFactory {
     return apiClient;
   }
 
-  public org.broadinstitute.dsde.workbench.client.leonardo.ApiClient newApiClient2() {
+  public ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient =
-        new org.broadinstitute.dsde.workbench.client.leonardo.ApiClient()
+    final ApiClient apiClient =
+        new ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(

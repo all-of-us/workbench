@@ -4,10 +4,10 @@ import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.broadinstitute.dsde.workbench.client.sam.api.TermsOfServiceApi;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
 import org.pmiops.workbench.terra.TerraServiceRetryHandler;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +15,9 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoRetryHandler2 extends TerraServiceRetryHandler<ApiException> {
+public class LegacyLeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
-  private static final Logger logger = Logger.getLogger(LeonardoRetryHandler2.class.getName());
+  private static final Logger logger = Logger.getLogger(LegacyLeonardoRetryHandler.class.getName());
 
   private static class LeonardoRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -61,13 +61,13 @@ public class LeonardoRetryHandler2 extends TerraServiceRetryHandler<ApiException
   }
 
   @Autowired
-  public LeonardoRetryHandler2(
+  public LegacyLeonardoRetryHandler(
       BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(
         backoffPolicy,
         new LeonardoRetryPolicy(),
         termsOfServiceApiProvider,
-        ExceptionUtils::convertLeonardoException2);
+        ExceptionUtils::convertLegacyLeonardoException);
   }
 
   @Override

@@ -84,13 +84,13 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler2;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
@@ -173,8 +173,8 @@ public class RuntimeControllerTest {
     LeonardoApiClientImpl.class,
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,
+    LegacyLeonardoRetryHandler.class,
     LeonardoRetryHandler.class,
-    LeonardoRetryHandler2.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
     PublicInstitutionDetailsMapperImpl.class,
@@ -220,11 +220,11 @@ public class RuntimeControllerTest {
   RuntimesApi mockUserRuntimesApi;
 
   @MockBean
-  @Qualifier(LeonardoConfig.USER_DISKS_API)
+  @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
   DisksApi mockUserDisksApi;
 
   @MockBean
-  @Qualifier(LeonardoConfig.USER_DISKS_API_2)
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
   org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi mockUserDisksApi2;
 
   @MockBean FireCloudService mockFireCloudService;

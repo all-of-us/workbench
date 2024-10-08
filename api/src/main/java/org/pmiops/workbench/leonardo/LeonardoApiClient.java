@@ -91,11 +91,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks owned by authenticated user in google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject);
-
-  /** List all persistent disks owned by authenticated user in google project */
-  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator2(
+  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject);
 
   /**
