@@ -8559,6 +8559,8 @@ components:
           type: integer
           description: Timestamp indicating when the user's initial credits will expire, if applicable
           format: int64
+        initialCreditsExpirationBypassed:
+          type: boolean
     AccessModuleStatus:
       required:
       - moduleName
