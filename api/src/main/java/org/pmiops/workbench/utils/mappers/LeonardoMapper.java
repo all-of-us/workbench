@@ -31,7 +31,6 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
@@ -100,9 +99,6 @@ public interface LeonardoMapper {
   @Mapping(target = "labels", ignore = true)
   PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
 
-  PersistentDiskRequest toPersistentDiskRequest(
-      LeonardoPersistentDiskRequest leonardoPersistentDiskRequest);
-
   LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(
       PersistentDiskRequest persistentDiskRequest);
 
@@ -116,21 +112,7 @@ public interface LeonardoMapper {
   // these 2 values are set by listDisksAfterMapper()
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
-  Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
-
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  // these 2 values are set by listDisksAfterMapper()
-  @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
-
-  @AfterMapping
-  default void listDisksAfterMapper(
-      @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
-    setDiskEnvironmentType(disk, leoListDisksResponse.getLabels());
-  }
 
   @AfterMapping
   default void listDisksAfterMapper(
@@ -347,11 +329,12 @@ public interface LeonardoMapper {
     return DiskStatus.fromValue(leonardoDiskStatus.toString());
   }
 
-  default String getJupyterImage(List<LeonardoRuntimeImage> images) {
-    return images.stream()
-        .filter(image -> "Jupyter".equals(image.getImageType()))
-        .findFirst()
-        .get()
-        .getImageUrl();
+  @Nullable
+  default String getJupyterImage(@Nullable List<LeonardoRuntimeImage> images) {
+    return Optional.ofNullable(images)
+        .flatMap(
+            i -> i.stream().filter(image -> "Jupyter".equals(image.getImageType())).findFirst())
+        .map(LeonardoRuntimeImage::getImageUrl)
+        .orElse(null);
   }
 }

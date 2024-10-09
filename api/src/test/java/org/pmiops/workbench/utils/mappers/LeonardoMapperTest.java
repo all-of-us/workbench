@@ -21,12 +21,10 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
@@ -55,8 +53,9 @@ public class LeonardoMapperTest {
   private KubernetesRuntimeConfig kubernetesRuntimeConfig;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private PersistentDiskRequest persistentDiskRequest;
-  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
-  private AuditInfo leonardoAuditInfo;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo leonardoAuditInfo;
   private LeonardoAuditInfo legacyLeonardoAuditInfo;
   private List<KubernetesError> kubernetesErrors = new ArrayList<>();
   private List<LeonardoKubernetesError> leonardoKubernetesErrors = new ArrayList<>();
@@ -78,14 +77,16 @@ public class LeonardoMapperTest {
         new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
-    legacyLeonardoAuditInfo =
-        new LeonardoAuditInfo()
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
+    leonardoAuditInfo =
+        new AuditInfo()
             .createdDate("2022-10-10")
             .creator("bob@gmail.com")
             .dateAccessed("2022-10-10");
-    leonardoAuditInfo =
-        new AuditInfo()
+    legacyLeonardoAuditInfo =
+        new LeonardoAuditInfo()
             .createdDate("2022-10-10")
             .creator("bob@gmail.com")
             .dateAccessed("2022-10-10");
@@ -132,12 +133,6 @@ public class LeonardoMapperTest {
   }
 
   @Test
-  public void testToPersistentDiskRequest() {
-    assertThat(mapper.toPersistentDiskRequest(leonardoPersistentDiskRequest))
-        .isEqualTo(persistentDiskRequest);
-  }
-
-  @Test
   public void testToLeoPersistentDiskRequest() {
     assertThat(mapper.toLeonardoPersistentDiskRequest(persistentDiskRequest))
         .isEqualTo(leonardoPersistentDiskRequest);
@@ -161,8 +156,7 @@ public class LeonardoMapperTest {
 
   @ParameterizedTest(name = "appType {0} can be mapped for getApp call")
   @MethodSource("allAppTypesMap")
-  public void testToAppFromGetResponse(Map.Entry<AppType, LeonardoAppType> appTypeMapEntry)
-      throws Exception {
+  public void testToAppFromGetResponse(Map.Entry<AppType, LeonardoAppType> appTypeMapEntry) {
     labels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
     LeonardoGetAppResponse getAppResponse =
