@@ -2079,6 +2079,7 @@ describe(RuntimeConfigurationPanel.name, () => {
     await pickDetachableDiskSize(MIN_DISK_SIZE_GB);
   });
 
+  // parameterize for STANDARD, SSD, BALANCED
   it('should prevent runtime update when PD disk size is invalid', async () => {
     mockUseCustomRuntime();
     const { container } = component();

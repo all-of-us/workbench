@@ -427,7 +427,7 @@ describe(toAnalysisConfig.name, () => {
     const gpuConfig: GpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const persistentDisk: PersistentDiskRequest = {
       size: 123,
-      diskType: DiskType.SSD,
+      diskType: DiskType.BALANCED,
       name: 'the disk associated with the runtime',
     };
     const testRuntime: Runtime = {
