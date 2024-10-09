@@ -121,6 +121,11 @@ export const CustomizePanel = ({
   }, [analysisConfig.computeType]);
 
   const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
+  /* If the user has a persistent disk attached (gcePersistentDisk), they cannot change the zone.
+      Runtime existence is not relevant, because whenever there is a runtime, there is a persistent disk
+      except in the case of Dataproce which cannot change zone anyways.
+      This variable is here to make some of the conditions below more readable.*/
+  const canChangeZone = !gcePersistentDisk;
   const { gceVmZones } = serverConfigStore.get().config;
 
   return (
@@ -252,13 +257,13 @@ export const CustomizePanel = ({
                 <TooltipTrigger
                   content={`Cannot change the zone when an environment or persistent disk exists. 
                 If you would like to change zones, please make sure that you first delete both your environment and your persistent disk`}
-                  disabled={!gcePersistentDisk}
+                  disabled={canChangeZone}
                 >
                   <div>
                     <Dropdown
                       id='runtime-zone'
                       appendTo='self'
-                      disabled={disableControls || !!gcePersistentDisk}
+                      disabled={disableControls || !canChangeZone}
                       style={{ width: '15rem' }}
                       options={gceVmZones?.sort()}
                       value={analysisConfig.zone}
