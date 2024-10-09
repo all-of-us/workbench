@@ -122,8 +122,8 @@ export const CustomizePanel = ({
 
   const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
   /* If the user has a persistent disk attached (gcePersistentDisk), they cannot change the zone.
-      Runtime existence is not relevant, because whenever there is a runtime, there is a persistent disk
-      except in the case of Dataproce which cannot change zone anyways.
+      Runtime existence is not relevant, because whenever there is a runtime, there is a persistent
+      disk except in the case of Dataproce which cannot change zone anyways.
       This variable is here to make some of the conditions below more readable.*/
   const canChangeZone = !gcePersistentDisk;
   const { gceVmZones } = serverConfigStore.get().config;
