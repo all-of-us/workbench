@@ -8,5 +8,3 @@ cron:
   schedule: every 24 hours
   timezone: UTC
   target: api
-
-

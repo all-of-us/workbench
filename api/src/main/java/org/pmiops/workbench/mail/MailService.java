@@ -7,7 +7,7 @@ import java.util.List;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {

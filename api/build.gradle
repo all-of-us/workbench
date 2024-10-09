@@ -186,7 +186,7 @@ swaggerSources {
     captcha swagger3JavaClient("captcha.yaml", "captcha")
     shibboleth swagger3JavaClient("shibboleth.yaml", "shibboleth")
 
-    leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
+    leonardo swagger3JavaClient("leonardo.yaml", "legacy_leonardo_client", [
             '--model-name-prefix', 'Leonardo'
     ])
 

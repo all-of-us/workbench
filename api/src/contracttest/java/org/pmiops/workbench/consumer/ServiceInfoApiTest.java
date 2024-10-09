@@ -12,9 +12,9 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.pmiops.workbench.leonardo.ApiClient;
-import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
+import org.pmiops.workbench.legacy_leonardo_client.api.ServiceInfoApi;
 
 @ExtendWith(PactConsumerTestExt.class)
 class ServiceInfoApiTest {

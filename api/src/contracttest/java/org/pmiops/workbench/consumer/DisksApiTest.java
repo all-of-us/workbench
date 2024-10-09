@@ -17,11 +17,11 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.pmiops.workbench.leonardo.ApiClient;
-import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
+import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
+import org.pmiops.workbench.legacy_leonardo_client.ApiException;
+import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDiskRequest;
 
 @ExtendWith(PactConsumerTestExt.class)
 class DisksApiTest {
