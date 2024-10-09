@@ -7,6 +7,8 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -145,7 +147,7 @@ public interface LeonardoMapper {
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
   @Nullable
-  @Named("cloudContextToGoogleProject")
+  @Named("legacy_cloudContextToGoogleProject")
   default String toGoogleProject(@Nullable LeonardoCloudContext lcc) {
     return Optional.ofNullable(lcc)
         // we don't support LeonardoCloudProvider.AZURE so don't attempt to map it
@@ -154,12 +156,22 @@ public interface LeonardoMapper {
         .orElse(null);
   }
 
+  @Nullable
+  @Named("cloudContextToGoogleProject")
+  default String toGoogleProject(@Nullable CloudContext lcc) {
+    return Optional.ofNullable(lcc)
+        // we don't support LeonardoCloudProvider.AZURE so don't attempt to map it
+        .filter(c -> c.getCloudProvider() == CloudProvider.GCP)
+        .map(CloudContext::getCloudResource)
+        .orElse(null);
+  }
+
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
+      qualifiedByName = "legacy_cloudContextToGoogleProject")
   ListRuntimeResponse toApiListRuntimeResponse(
       LeonardoListRuntimeResponse leonardoListRuntimeResponse);
 
@@ -172,7 +184,7 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
+      qualifiedByName = "legacy_cloudContextToGoogleProject")
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -186,7 +198,7 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
+      qualifiedByName = "legacy_cloudContextToGoogleProject")
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
@@ -218,7 +230,7 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
+      qualifiedByName = "legacy_cloudContextToGoogleProject")
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(LeonardoGetAppResponse app);
@@ -230,7 +242,7 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
+      qualifiedByName = "legacy_cloudContextToGoogleProject")
   @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(LeonardoListAppResponse app);
 

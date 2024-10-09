@@ -6,7 +6,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDis
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -138,10 +137,10 @@ public interface LeonardoApiClient {
   int deleteUserAppsAsService(String userEmail);
 
   /** List all persistent disks */
-  List<LeonardoListPersistentDiskResponse> listDisksAsService();
+  List<ListPersistentDiskResponse> listDisksAsService();
 
   /** List all persistent disks in google project */
-  List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
 
   void deleteAllResources(String googleProject, boolean deleteDisk);
 }

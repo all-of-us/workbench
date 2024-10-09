@@ -13,9 +13,13 @@ import static org.pmiops.workbench.mail.MailServiceImpl.DETACHED_DISK_STATUS;
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,9 +32,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -272,14 +273,14 @@ public class MailServiceImplTest {
     Map<String, String> labelsMap = new HashMap<String, String>();
     labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
-        ImmutableList.of(user),
+        Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+        new ListPersistentDiskResponse()
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()
@@ -314,14 +315,14 @@ public class MailServiceImplTest {
     Map<String, String> labelsMap = new HashMap<String, String>();
     labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
-        ImmutableList.of(user),
+        Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+        new ListPersistentDiskResponse()
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()

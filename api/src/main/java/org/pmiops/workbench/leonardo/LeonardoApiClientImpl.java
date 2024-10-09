@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -52,13 +53,11 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRe
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUserJupyterExtensionConfig;
@@ -111,11 +110,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
-  private final Provider<org.pmiops.workbench.legacy_leonardo_client.api.DisksApi>
-      legacyDisksApiProvider;
   private final Provider<DisksApi> disksApiProvider;
-  private final Provider<org.pmiops.workbench.legacy_leonardo_client.api.DisksApi>
-      legacyServiceDisksApiProvider;
+  private final Provider<DisksApi> serviceDisksApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
@@ -137,11 +133,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> disksApiProvider,
-      @Qualifier(LeonardoConfig.LEGACY_USER_DISKS_API)
-          Provider<org.pmiops.workbench.legacy_leonardo_client.api.DisksApi> legacyDisksApiProvider,
-      @Qualifier(LeonardoConfig.LEGACY_SERVICE_DISKS_API)
-          Provider<org.pmiops.workbench.legacy_leonardo_client.api.DisksApi>
-              legacyServiceDisksApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDisksApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
@@ -159,8 +151,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.disksApiProvider = disksApiProvider;
-    this.legacyDisksApiProvider = legacyDisksApiProvider;
-    this.legacyServiceDisksApiProvider = legacyServiceDisksApiProvider;
+    this.serviceDisksApiProvider = serviceDisksApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
@@ -513,8 +504,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void deletePersistentDisk(String googleProject, String diskName)
       throws WorkbenchException {
-    var disksApi = legacyDisksApiProvider.get();
-    legacyLeonardoRetryHandler.run(
+    DisksApi disksApi = disksApiProvider.get();
+    leonardoRetryHandler.run(
         (context) -> {
           disksApi.deleteDisk(googleProject, diskName);
           return null;
@@ -524,8 +515,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void deletePersistentDiskAsService(String googleProject, String diskName)
       throws WorkbenchException {
-    var disksApi = legacyServiceDisksApiProvider.get();
-    legacyLeonardoRetryHandler.run(
+    DisksApi disksApi = serviceDisksApiProvider.get();
+    leonardoRetryHandler.run(
         (context) -> {
           disksApi.deleteDisk(googleProject, diskName);
           return null;
@@ -535,11 +526,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
       throws WorkbenchException {
-    var disksApi = legacyDisksApiProvider.get();
-    legacyLeonardoRetryHandler.run(
+    DisksApi disksApi = disksApiProvider.get();
+    leonardoRetryHandler.run(
         (context) -> {
-          disksApi.updateDisk(
-              googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
+          disksApi.updateDisk(googleProject, diskName, new UpdateDiskRequest().size(diskSize));
           return null;
         });
   }
@@ -560,15 +550,15 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listDisksAsService() {
-    var disksApi = legacyServiceDisksApiProvider.get();
+  public List<ListPersistentDiskResponse> listDisksAsService() {
+    DisksApi disksApi = serviceDisksApiProvider.get();
 
     // this call can be slow, so let a long timeout
     disksApi
         .getApiClient()
         .setReadTimeout(workbenchConfigProvider.get().firecloud.lenientTimeoutInSeconds * 1000);
 
-    return legacyLeonardoRetryHandler.run(
+    return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisks(
                 /* labels */ null,
@@ -578,11 +568,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
-      String googleProject) {
+  public List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject) {
 
-    var disksApi = legacyServiceDisksApiProvider.get();
-    return legacyLeonardoRetryHandler.run(
+    DisksApi disksApi = serviceDisksApiProvider.get();
+    return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
                 googleProject,

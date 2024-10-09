@@ -28,8 +28,7 @@ public class LeonardoConfig {
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
   public static final String USER_DISKS_API = "userDisksApi";
-  public static final String LEGACY_USER_DISKS_API = "legacyUserDisksApi";
-  public static final String LEGACY_SERVICE_DISKS_API = "legacyServiceDisksApi";
+  public static final String SERVICE_DISKS_API = "serviceDisksApi";
 
   public static final String USER_APPS_API = "userAppsApi";
 
@@ -40,6 +39,7 @@ public class LeonardoConfig {
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
   // Identifiers for the new OAS3 APIs from Leonardo. These should be used for runtimes access.
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
+  private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceApiClient";
   private static final String LEGACY_USER_LEONARDO_CLIENT = "legacyLeonardoApiClient";
   private static final String LEGACY_SERVICE_LEONARDO_CLIENT = "legacyLeonardoServiceApiClient";
 
@@ -105,6 +105,18 @@ public class LeonardoConfig {
     return apiClient;
   }
 
+  @Bean(name = SERVICE_LEONARDO_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ApiClient leoServiceApiClient(LeonardoApiClientFactory factory) {
+    ApiClient apiClient = factory.newApiClient();
+    try {
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
   @Bean(name = SERVICE_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public org.pmiops.workbench.notebooks.ApiClient workbenchServiceAccountClient(
@@ -128,16 +140,6 @@ public class LeonardoConfig {
     return api;
   }
 
-  @Bean(name = LEGACY_USER_DISKS_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.api.DisksApi legacyDisksApi(
-      @Qualifier(LEGACY_USER_LEONARDO_CLIENT)
-          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
-    var api = new org.pmiops.workbench.legacy_leonardo_client.api.DisksApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
   @Bean(name = USER_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi disksApi(@Qualifier(USER_LEONARDO_CLIENT) ApiClient apiClient) {
@@ -146,12 +148,10 @@ public class LeonardoConfig {
     return api;
   }
 
-  @Bean(name = LEGACY_SERVICE_DISKS_API)
+  @Bean(name = SERVICE_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.api.DisksApi legacyServiceDisksApi(
-      @Qualifier(LEGACY_SERVICE_LEONARDO_CLIENT)
-          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
-    var api = new org.pmiops.workbench.legacy_leonardo_client.api.DisksApi();
+  public DisksApi serviceDisksApi(@Qualifier(SERVICE_LEONARDO_CLIENT) ApiClient apiClient) {
+    var api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
   }
