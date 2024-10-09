@@ -21,10 +21,12 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
+import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
@@ -53,8 +55,7 @@ public class LeonardoMapperTest {
   private KubernetesRuntimeConfig kubernetesRuntimeConfig;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private PersistentDiskRequest persistentDiskRequest;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
-      leonardoPersistentDiskRequest;
+  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
   private AuditInfo leonardoAuditInfo;
   private LeonardoAuditInfo legacyLeonardoAuditInfo;
   private List<KubernetesError> kubernetesErrors = new ArrayList<>();
@@ -77,9 +78,7 @@ public class LeonardoMapperTest {
         new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
-            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
-            .size(10);
+        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
     leonardoAuditInfo =
         new AuditInfo()
             .createdDate("2022-10-10")
