@@ -24,7 +24,7 @@ import {
   AccessRenewalStatus,
   getAccessModuleConfig,
 } from 'app/utils/access-utils';
-import { nowPlusDays } from 'app/utils/dates';
+import { formatDate, nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -114,7 +114,7 @@ describe('AdminUserProfile', () => {
     await waitUntilPageLoaded();
   });
 
-  it("should display the user's name, username, and initial credits usage", async () => {
+  it("should display the user's name, username, initial credits information", async () => {
     const givenName = 'John Q';
     const familyName = 'Public';
     const expectedFullName = 'John Q Public';
@@ -124,6 +124,7 @@ describe('AdminUserProfile', () => {
     const freeTierUsage = 543.21;
     const freeTierDollarQuota = 678.99;
     const expectedCreditsText = '$543.21 used of $678.99 limit';
+    const initialCreditsExpirationEpochMillis = Date.now();
 
     updateTargetProfile({
       username,
@@ -131,6 +132,7 @@ describe('AdminUserProfile', () => {
       familyName,
       freeTierUsage,
       freeTierDollarQuota,
+      initialCreditsExpirationEpochMillis,
     });
 
     component();
@@ -146,6 +148,82 @@ describe('AdminUserProfile', () => {
         expectedCreditsText
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `Expire on ${formatDate(
+          initialCreditsExpirationEpochMillis
+        ).toLocaleString()}`
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText('Expiration is not bypassed.')).toBeInTheDocument();
+  });
+
+  it("should display the user's name, username, initial credits usage, and initial credits expiration status", async () => {
+    const givenName = 'John Q';
+    const familyName = 'Public';
+    const expectedFullName = 'John Q Public';
+
+    const username = 'some-email@yahoo.com';
+
+    const freeTierUsage = 543.21;
+    const freeTierDollarQuota = 678.99;
+    const expectedCreditsText = '$543.21 used of $678.99 limit';
+    const initialCreditsExpirationEpochMillis = Date.now();
+
+    updateTargetProfile({
+      username,
+      givenName,
+      familyName,
+      freeTierUsage,
+      freeTierDollarQuota,
+      initialCreditsExpirationEpochMillis,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('initial-credits-used')).getByText(
+        expectedCreditsText
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `Expire on ${formatDate(
+          initialCreditsExpirationEpochMillis
+        ).toLocaleString()}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  // Needed until all users have expiration dates (RW-13455)
+  it("should display the user's who have not yet been backfilled with initial credit expiration dates", async () => {
+    const initialCreditsExpirationEpochMillis = null;
+
+    updateTargetProfile({
+      initialCreditsExpirationEpochMillis,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(screen.getByText('Expiration date missing.')).toBeInTheDocument();
+  });
+
+  it('should display when a user is bypassed', async () => {
+    const initialCreditsExpirationBypass = false;
+
+    updateTargetProfile({
+      initialCreditsExpirationBypass,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(screen.getByText('Expiration is bypassed.')).toBeInTheDocument();
   });
 
   test.each([
