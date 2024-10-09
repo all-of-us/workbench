@@ -146,7 +146,9 @@ public class MailServiceImpl implements MailService {
       final DbUser user, final String password, final String institutionName)
       throws MessagingException {
     final String htmlMessage =
-        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user.getUsername()));
+        buildHtml(
+            WELCOME_RESOURCE,
+            welcomeMessageSubstitutionMap(password, user.getUsername(), institutionName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -506,7 +508,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password, final String username) {
+      final String password, final String username, final String institutionName) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, username)
@@ -518,26 +520,22 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
         .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
+        .put(EmailSubstitutionField.RT_STEPS, getRTSteps())
+        .put(EmailSubstitutionField.CT_STEPS, getCTSteps(institutionName))
         .build();
   }
 
-  private String getRTSteps(boolean showEraStepInRT) {
+  private String getRTSteps() {
     StringBuilder rtSteps = new StringBuilder();
     encloseInLiTag(rtSteps, TWO_STEP_VERIFICATION);
     encloseInLiTag(rtSteps, LOGIN_GOV);
-    if (showEraStepInRT) {
-      encloseInLiTag(rtSteps, ERA_COMMON);
-    }
     encloseInLiTag(rtSteps, RT_TRAINING);
     return rtSteps.toString();
   }
 
-  private String getCTSteps(boolean showEraStepInCT, String institutionName) {
+  private String getCTSteps(String institutionName) {
     StringBuilder ctSteps = new StringBuilder();
     encloseInLiTag(ctSteps, String.format(CT_INSTITUTION_CHECK, institutionName));
-    if (showEraStepInCT) {
-      encloseInLiTag(ctSteps, ERA_COMMON);
-    }
     encloseInLiTag(ctSteps, CT_TRAINING);
     return ctSteps.toString();
   }
