@@ -11,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 import {
   ComputeType,
@@ -37,6 +38,7 @@ export interface AnalysisConfig {
   gpuConfig: GpuConfig;
   autopauseThreshold: number;
   numNodes?: number;
+  zone?: string;
 }
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
@@ -61,6 +63,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
     diskConfig,
     gpuConfig,
     machine: { name: machineType },
+    zone,
   } = analysisConfig;
 
   const runtime: Runtime = {
@@ -82,12 +85,14 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
         labels: {},
         name: diskConfig.existingDiskName,
       },
+      zone,
     };
   } else {
     runtime.gceConfig = {
       machineType,
       gpuConfig,
       diskSize: diskConfig.size,
+      zone,
     };
   }
 
@@ -97,7 +102,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       'runtimeTemplate.configurationType',
       fp.find(
         ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
-        runtimePresets
+        runtimePresets()
       )
     ) || RuntimeConfigurationType.USER_OVERRIDE;
 
@@ -153,6 +158,7 @@ export const withAnalysisConfigDefaults = (
     diskConfig: { size, detachable, detachableType },
     gpuConfig,
     dataprocConfig,
+    zone,
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
@@ -160,7 +166,9 @@ export const withAnalysisConfigDefaults = (
   // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
+    zone ??= serverConfigStore.get().config.defaultGceVmZone;
     if (existingPersistentDisk) {
+      zone = existingPersistentDisk.zone;
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
@@ -177,8 +185,10 @@ export const withAnalysisConfigDefaults = (
     detachable = false;
     detachableType = null;
     gpuConfig = null;
+    zone = null;
 
-    const defaults = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+    const defaults =
+      runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig;
     dataprocConfig = {
       numberOfWorkers:
         dataprocConfig?.numberOfWorkers ?? defaults.numberOfWorkers,
@@ -208,6 +218,7 @@ export const withAnalysisConfigDefaults = (
     gpuConfig,
     autopauseThreshold:
       r.autopauseThreshold ?? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+    zone,
   };
 };
 
@@ -216,7 +227,7 @@ export const toAnalysisConfig = (
   existingDisk: Disk | null
 ): AnalysisConfig => {
   const toGceConfig = () => {
-    const { machineType, diskSize, gpuConfig } = runtime.gceConfig;
+    const { machineType, diskSize, gpuConfig, zone } = runtime.gceConfig;
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(machineType),
@@ -230,6 +241,7 @@ export const toAnalysisConfig = (
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
+      zone,
     };
   };
 
@@ -238,6 +250,7 @@ export const toAnalysisConfig = (
       machineType,
       persistentDisk: { size, diskType: detachableType },
       gpuConfig,
+      zone,
     } = runtime.gceWithPdConfig;
     return {
       computeType: ComputeType.Standard,
@@ -254,6 +267,7 @@ export const toAnalysisConfig = (
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       gpuConfig,
+      zone,
     };
   };
 

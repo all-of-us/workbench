@@ -248,10 +248,10 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.billing.accountId = "free-tier";
     config.firecloud.leoBaseUrl = LEONARDO_URL;
+    config.firecloud.gceVmZones = ImmutableList.of("us-central1-a", "us-central1-b");
     config.server.apiBaseUrl = API_BASE_URL;
     config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
-    config.firecloud.gceVmZone = "us-central-1";
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
@@ -885,7 +885,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -907,7 +908,29 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
-    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1");
+    assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central1-a");
+  }
+
+  @Test
+  public void testCreateRuntime_gce_invalidZone() throws ApiException {
+    when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace();
+
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                runtimeController.createRuntime(
+                    WORKSPACE_NS,
+                    new Runtime()
+                        .gceConfig(
+                            new GceConfig()
+                                .diskSize(50)
+                                .machineType("standard")
+                                .zone("us-central1-x"))));
+
+    assertThat(exception.getMessage()).contains("Invalid zone");
   }
 
   @Test
@@ -926,7 +949,8 @@ public class RuntimeControllerTest {
                         new PersistentDiskRequest()
                             .diskType(DiskType.SSD)
                             .name(getPdName())
-                            .size(500))));
+                            .size(500))
+                    .zone("us-central1-a")));
 
     Map<String, String> diskLabels = new HashMap<>();
     diskLabels.put(LEONARDO_LABEL_IS_RUNTIME, LEONARDO_LABEL_IS_RUNTIME_TRUE);
@@ -957,7 +981,7 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
-    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
+    assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central1-a");
   }
 
   @Test
@@ -1104,7 +1128,8 @@ public class RuntimeControllerTest {
                 new GceConfig()
                     .diskSize(50)
                     .machineType("standard")
-                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))
+                    .zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -1146,7 +1171,8 @@ public class RuntimeControllerTest {
                             .diskType(DiskType.SSD)
                             .name(getPdName())
                             .size(500))
-                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))
+                    .zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -1180,7 +1206,12 @@ public class RuntimeControllerTest {
         () ->
             runtimeController.createRuntime(
                 WORKSPACE_NS,
-                new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+                new Runtime()
+                    .gceConfig(
+                        new GceConfig()
+                            .diskSize(50)
+                            .machineType("standard")
+                            .zone("us-central1-a"))));
   }
 
   @Test
@@ -1191,7 +1222,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -1214,7 +1246,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -1238,7 +1271,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(
@@ -1262,7 +1296,8 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceConfig(new GceConfig().diskSize(50).machineType("standard").zone("us-central1-a")));
 
     verify(mockUserRuntimesApi)
         .createRuntime(

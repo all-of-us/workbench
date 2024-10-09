@@ -136,6 +136,7 @@ public class LeonardoApiClientTest {
   private static final String CDR_STORAGE_BASE_PATH = "v99";
   private static final String WGS_PATH = "wgs/cram/manifest.csv";
   private static final String LEONARDO_BASE_URL = "http://LeonardoUrl/dummy";
+  private static final String RUNTIME_NAME = "runtime-name";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -146,8 +147,8 @@ public class LeonardoApiClientTest {
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
   private PersistentDiskRequest persistentDiskRequest;
-  private Map<String, String> appLabels = new HashMap<>();
-  private Map<String, String> customEnvironmentVariables = new HashMap<>();
+  private final Map<String, String> appLabels = new HashMap<>();
+  private final Map<String, String> customEnvironmentVariables = new HashMap<>();
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -376,6 +377,55 @@ public class LeonardoApiClientTest {
     boolean deleteDisk = true;
     leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
     verify(mockUserAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+  }
+
+  @Test
+  public void testCreateRuntime_withGceConfig_Success() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    // Arrange
+    Runtime mockRuntime = new Runtime().googleProject(GOOGLE_PROJECT_ID).runtimeName(RUNTIME_NAME);
+    GceConfig gceConfig = new GceConfig().diskSize(120).machineType("n1-standard-4");
+    mockRuntime.setGceConfig(gceConfig);
+
+    // Act
+    leonardoApiClient.createRuntime(mockRuntime, WORKSPACE_NS, WORKSPACE_NAME);
+
+    // Assert
+    verify(userRuntimesApi).createRuntime(eq(GOOGLE_PROJECT_ID), eq(RUNTIME_NAME), any());
+  }
+
+  @Test
+  public void testCreateRuntime_withGceWithPdConfig_Success() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    // Arrange
+    Runtime mockRuntime = new Runtime().googleProject(GOOGLE_PROJECT_ID).runtimeName(RUNTIME_NAME);
+    GceWithPdConfig gceWithPdConfig =
+        new GceWithPdConfig()
+            .persistentDisk(new PersistentDiskRequest().diskType(DiskType.STANDARD).size(120))
+            .machineType("n1-standard-4");
+    mockRuntime.setGceWithPdConfig(gceWithPdConfig);
+
+    // Act
+    leonardoApiClient.createRuntime(mockRuntime, WORKSPACE_NS, WORKSPACE_NAME);
+
+    // Assert
+    verify(userRuntimesApi).createRuntime(eq(GOOGLE_PROJECT_ID), eq(RUNTIME_NAME), any());
+  }
+
+  @Test
+  public void testCreateRuntime_withDataProcConfig_Success() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    // Arrange
+    Runtime mockRuntime = new Runtime().googleProject(GOOGLE_PROJECT_ID).runtimeName(RUNTIME_NAME);
+    DataprocConfig dataprocConfig =
+        new DataprocConfig().masterDiskSize(120).masterMachineType("n1-standard-4");
+    mockRuntime.setDataprocConfig(dataprocConfig);
+
+    // Act
+    leonardoApiClient.createRuntime(mockRuntime, WORKSPACE_NS, WORKSPACE_NAME);
+
+    // Assert
+    verify(userRuntimesApi).createRuntime(eq(GOOGLE_PROJECT_ID), eq(RUNTIME_NAME), any());
   }
 
   @Test

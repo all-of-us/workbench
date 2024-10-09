@@ -77,7 +77,7 @@ export const throwRuntimeNotFound = (
 ) => {
   const defaultRuntime = cond<Runtime>(
     // no current or deleted runtime exists, so we default to the general analysis runtime template
-    [!currentRuntime, () => runtimePresets.generalAnalysis.runtimeTemplate],
+    [!currentRuntime, () => runtimePresets().generalAnalysis.runtimeTemplate],
     // a current runtime exists and is not deleted, so we use it plus any preset overrides if appropriate
     [
       currentRuntime?.status !== RuntimeStatus.DELETED,
@@ -115,7 +115,7 @@ export const throwRuntimeNotFound = (
         applyPresetOverride(
           maybeWithPersistentDisk(
             currentRuntime,
-            runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            runtimePresets().generalAnalysis.runtimeTemplate.gceWithPdConfig
               .persistentDisk
           )
         ),

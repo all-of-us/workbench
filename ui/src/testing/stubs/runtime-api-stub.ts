@@ -25,11 +25,13 @@ export const defaultGceConfig = (): GceConfig => ({
   // decreases in the disk size.
   diskSize: MIN_DISK_SIZE_GB + 30,
   machineType: 'n1-standard-4',
+  zone: 'us-central1-a',
 });
 
 export const defaultGceWithPdConfig = (): GceWithPdConfig => ({
   machineType: 'n1-standard-4',
   persistentDisk: stubDisk(),
+  zone: 'us-central1-a',
 });
 
 export const defaultDataprocConfig = (): DataprocConfig => ({

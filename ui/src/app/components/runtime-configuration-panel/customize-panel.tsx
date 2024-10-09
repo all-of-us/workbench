@@ -38,6 +38,7 @@ import {
   RuntimeStatusRequest,
   UpdateMessaging,
 } from 'app/utils/runtime-utils';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CustomizePanelFooter } from './customize-panel-footer';
@@ -120,6 +121,8 @@ export const CustomizePanel = ({
   }, [analysisConfig.computeType]);
 
   const disableControls = runtimeExists && !canUpdateRuntime(runtimeStatus);
+  const canChangeZone = !currentRuntime || !gcePersistentDisk;
+  const { gceVmZones } = serverConfigStore.get().config;
 
   return (
     <div style={{ marginBottom: '10px' }}>
@@ -166,7 +169,7 @@ export const CustomizePanel = ({
         <h3 style={{ ...styles.sectionHeader, ...styles.bold }}>
           Cloud compute profile
         </h3>
-        <div style={styles.formGrid3}>
+        <div style={{ display: 'flex', gap: '1.5rem' }}>
           <MachineSelector
             idPrefix='runtime'
             disabled={disableControls}
@@ -191,7 +194,7 @@ export const CustomizePanel = ({
         <FlexRow
           style={{
             marginTop: '1.5rem',
-            justifyContent: 'space-between',
+            gap: '1rem',
           }}
         >
           <FlexColumn>
@@ -239,6 +242,35 @@ export const CustomizePanel = ({
               )}
             </FlexRow>
           </FlexColumn>
+
+          {analysisConfig.computeType === ComputeType.Standard &&
+            gceVmZones &&
+            gceVmZones.length > 1 && (
+              <FlexColumn>
+                <label style={styles.label} htmlFor='runtime-compute'>
+                  Zone
+                </label>
+                <TooltipTrigger
+                  content={`Cannot change the zone when an environment or persistent disk exists. 
+                If you would like to change zones, please make sure that you first delete both your environment and your persistent disk`}
+                  disabled={canChangeZone}
+                >
+                  <div>
+                    <Dropdown
+                      id='runtime-zone'
+                      appendTo='self'
+                      disabled={disableControls || !canChangeZone}
+                      style={{ width: '15rem' }}
+                      options={gceVmZones?.sort()}
+                      value={analysisConfig.zone}
+                      onChange={({ value: zone }) => {
+                        setAnalysisConfig({ ...analysisConfig, zone });
+                      }}
+                    />
+                  </div>
+                </TooltipTrigger>
+              </FlexColumn>
+            )}
         </FlexRow>
         {analysisConfig.computeType === ComputeType.Dataproc && (
           <DataProcConfigSelector

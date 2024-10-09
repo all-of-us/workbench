@@ -396,10 +396,10 @@ describe(CustomizePanel.name, () => {
     dropdown.click();
     await waitFor(() => {
       expect(
-        screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+        screen.queryByLabelText(runtimePresets().hailAnalysis.displayName)
       ).toBeInTheDocument();
       expect(
-        screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+        screen.queryByLabelText(runtimePresets().generalAnalysis.displayName)
       ).toBeInTheDocument();
     });
   });
@@ -417,10 +417,10 @@ describe(CustomizePanel.name, () => {
       dropdown.click();
       await waitFor(() => {
         expect(
-          screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+          screen.queryByLabelText(runtimePresets().hailAnalysis.displayName)
         ).toBeInTheDocument();
         expect(
-          screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+          screen.queryByLabelText(runtimePresets().generalAnalysis.displayName)
         ).toBeInTheDocument();
       });
     }
@@ -438,10 +438,10 @@ describe(CustomizePanel.name, () => {
       dropdown.click();
       await waitFor(() => {
         expect(
-          screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+          screen.queryByLabelText(runtimePresets().hailAnalysis.displayName)
         ).not.toBeInTheDocument();
         expect(
-          screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+          screen.queryByLabelText(runtimePresets().generalAnalysis.displayName)
         ).not.toBeInTheDocument();
       });
     }

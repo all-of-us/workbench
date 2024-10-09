@@ -80,7 +80,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
-  private static Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
+  private static final Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
       ImmutableSet.of(
           LeonardoRuntimeStatus.RUNNING,
           LeonardoRuntimeStatus.STARTING,
@@ -88,7 +88,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/807c024d8e8be86b782e519319520ca3b3705a52/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L522C42-L522C42
-  private static Set<LeonardoAppStatus> DELETABLE_APP_STATUSES =
+  private static final Set<LeonardoAppStatus> DELETABLE_APP_STATUSES =
       ImmutableSet.of(
           LeonardoAppStatus.STATUS_UNSPECIFIED, LeonardoAppStatus.RUNNING, LeonardoAppStatus.ERROR);
 
@@ -220,13 +220,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceConfig(runtime.getGceConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+      return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
     } else if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper
-          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
+      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
       LeonardoMachineConfig machineConfig =
           leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());

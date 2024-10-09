@@ -8,6 +8,7 @@ import {
   RuntimeConfigurationType,
 } from 'generated/fetch';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultDataprocConfig,
@@ -34,6 +35,7 @@ import {
 } from './machines';
 import { runtimePresets } from './runtime-presets';
 import { DiskConfig } from './runtime-utils';
+import { serverConfigStore } from './stores';
 
 describe(maybeWithPersistentDisk.name, () => {
   it('returns the existing runtime when dataproc', () => {
@@ -126,6 +128,7 @@ const defaultAnalysisConfig: AnalysisConfig = {
     numOfGpus: 1,
   },
   numNodes: dataprocConfig.numberOfWorkers + 1, // +1 for the master node
+  zone: 'us-central1-a',
 };
 
 describe(fromAnalysisConfig.name, () => {
@@ -264,7 +267,7 @@ describe(fromAnalysisConfig.name, () => {
     expect(runtime.gceConfig.gpuConfig).toEqual(testConfig.gpuConfig);
   });
 
-  const generalTemplate = runtimePresets.generalAnalysis.runtimeTemplate;
+  const generalTemplate = runtimePresets().generalAnalysis.runtimeTemplate;
   const testConfigForGeneralPreset = {
     ...defaultAnalysisConfig,
 
@@ -282,6 +285,7 @@ describe(fromAnalysisConfig.name, () => {
   };
 
   it('should populate the configuration type for the generalAnalysis preset', () => {
+    serverConfigStore.set({ config: defaultServerConfig });
     const runtime = fromAnalysisConfig(testConfigForGeneralPreset);
     expect(runtime.configurationType).toEqual(
       generalTemplate.configurationType
@@ -303,7 +307,7 @@ describe(fromAnalysisConfig.name, () => {
     );
   });
 
-  const hailTemplate = runtimePresets.hailAnalysis.runtimeTemplate;
+  const hailTemplate = runtimePresets().hailAnalysis.runtimeTemplate;
   const testConfigForHailPreset = {
     ...defaultAnalysisConfig,
 
@@ -344,6 +348,7 @@ describe(fromAnalysisConfig.name, () => {
 
 describe(toAnalysisConfig.name, () => {
   it('populates from a GCE Runtime', () => {
+    const zone = 'us-central1-a';
     const machineIndex = 3; // arbitrary
     const gpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const testRuntime: Runtime = {
@@ -351,6 +356,7 @@ describe(toAnalysisConfig.name, () => {
         machineType: allMachineTypes[machineIndex].name, // needs to match one of these
         diskSize: 123,
         gpuConfig,
+        zone,
       },
       autopauseThreshold: 456,
     };
@@ -371,11 +377,13 @@ describe(toAnalysisConfig.name, () => {
     expect(config.detachedDisk).toEqual(detachedDisk);
     expect(config.autopauseThreshold).toEqual(testRuntime.autopauseThreshold);
     expect(config.gpuConfig).toEqual(gpuConfig);
+    expect(config.zone).toEqual(zone);
     expect(config.dataprocConfig).toBeNull();
   });
 
   // simplest case for 'GCE Runtime with a PD' - check all fields here
   it('populates from a GCE Runtime with a PD when there is no existing disk', () => {
+    const zone = 'us-central1-a';
     const machineIndex = 2; // arbitrary
     const gpuConfig: GpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const persistentDisk: PersistentDiskRequest = {
@@ -388,6 +396,7 @@ describe(toAnalysisConfig.name, () => {
         machineType: allMachineTypes[machineIndex].name, // needs to match one of these
         gpuConfig,
         persistentDisk,
+        zone,
       },
       autopauseThreshold: 456,
     };
@@ -408,10 +417,12 @@ describe(toAnalysisConfig.name, () => {
     expect(config.dataprocConfig).toBeNull();
     expect(config.detachedDisk).toBeNull();
     expect(config.diskConfig).toEqual(expectedDiskConfig);
+    expect(config.zone).toEqual(zone);
   });
 
   // only check fields which differ from the no-existing-disk cases
   it('populates from a GCE Runtime with a PD when an existing disk is appropriate for association', () => {
+    const zone = 'us-central1-a';
     const machineIndex = 2; // arbitrary
     const gpuConfig: GpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const persistentDisk: PersistentDiskRequest = {
@@ -424,6 +435,7 @@ describe(toAnalysisConfig.name, () => {
         machineType: allMachineTypes[machineIndex].name, // needs to match one of these
         gpuConfig,
         persistentDisk,
+        zone,
       },
       autopauseThreshold: 456,
     };
@@ -449,6 +461,7 @@ describe(toAnalysisConfig.name, () => {
   });
 
   it('populates from a GCE Runtime with a PD when an existing disk is too big', () => {
+    const zone = 'us-central1-a';
     const machineIndex = 2; // arbitrary
     const gpuConfig: GpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const persistentDisk: PersistentDiskRequest = {
@@ -461,6 +474,7 @@ describe(toAnalysisConfig.name, () => {
         machineType: allMachineTypes[machineIndex].name, // needs to match one of these
         gpuConfig,
         persistentDisk,
+        zone,
       },
       autopauseThreshold: 456,
     };
@@ -486,6 +500,7 @@ describe(toAnalysisConfig.name, () => {
   });
 
   it('populates from a GCE Runtime with a PD when an existing disk is the wrong type', () => {
+    const zone = 'us-central1-a';
     const machineIndex = 2; // arbitrary
     const gpuConfig: GpuConfig = { gpuType: 'a good one', numOfGpus: 2 };
     const persistentDisk: PersistentDiskRequest = {
@@ -498,6 +513,7 @@ describe(toAnalysisConfig.name, () => {
         machineType: allMachineTypes[machineIndex].name, // needs to match one of these
         gpuConfig,
         persistentDisk,
+        zone,
       },
       autopauseThreshold: 456,
     };
@@ -840,7 +856,7 @@ describe(withAnalysisConfigDefaults.name, () => {
 
       replaceableFields.forEach((field: string) =>
         expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
         )
       );
     });
@@ -860,7 +876,7 @@ describe(withAnalysisConfigDefaults.name, () => {
         const outConfig = withAnalysisConfigDefaults(inputConfig, undefined);
 
         expect(outConfig.dataprocConfig[field]).toEqual(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig[field]
+          runtimePresets().hailAnalysis.runtimeTemplate.dataprocConfig[field]
         );
       }
     );

@@ -155,8 +155,12 @@ public class WorkbenchConfig {
     // The workspace GCS bucket location
     public String workspaceBucketLocation;
 
-    // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
-    public String gceVmZone;
+    // The available deployment areas for the GCE VM. For example, us-east1-a or europe-west2-c
+    public List<String> gceVmZones;
+
+    // The zone that is selected by default when creating a GCE VM. This must be one of the values
+    // specified in gceVmZones.
+    public String defaultGceVmZone;
   }
 
   public static class AuthConfig {

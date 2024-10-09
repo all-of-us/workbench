@@ -7041,6 +7041,14 @@ components:
           type: boolean
           default: false
           description: If true, the api is down for maintenance and will block all requests.
+        gceVmZones:
+          type: array
+          items:
+            type: string
+            description: List of GCE VM zones that users are allowed to choose from
+        defaultGceVmZone:
+          type: string
+          description: The zone that is selected by default when creating a GCE VM. This must be one of the values specified in gceVmZones.
     AccessModuleConfig:
       required:
       - expirable
@@ -8893,6 +8901,8 @@ components:
           description: The labels to be placed on the cluster. Of type Map[String,String]
       description: configuration to create a disk
     GceConfig:
+      required:
+      - zone
       type: object
       properties:
         diskSize:
@@ -8903,10 +8913,17 @@ components:
           type: string
           description: |
             Optional, the machine type determines the number of CPUs and memory for the master node. For example "n1-standard-16" or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you, see https://cloud.google.com/compute/docs/machine-types
+        zone:
+          type: string
+          description: >
+            The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
+            Defaults to us-central1-a.
         gpuConfig:
           $ref: '#/components/schemas/GpuConfig'
       description: Configuration for Google Compute Engine instances.
     GceWithPdConfig:
+      required:
+      - zone
       type: object
       properties:
         persistentDisk:
@@ -8917,6 +8934,11 @@ components:
             Optional, the machine type determines the number of CPUs and memory for the master node. For example "n1-standard-16"
             or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
             see https://cloud.google.com/compute/docs/machine-types
+        zone:
+          type: string
+          description: >
+            The GCP zone of the GCE VM. For example, us-east1-a or europe-west2-c.
+            Defaults to us-central1-a.
         gpuConfig:
           $ref: '#/components/schemas/GpuConfig'
       description: Configuration for Google Compute Engine instances with Persistent

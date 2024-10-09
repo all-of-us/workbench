@@ -59,5 +59,7 @@ public interface WorkbenchConfigMapper {
       target = "blockComplianceTraining",
       source = "config.featureFlags.blockComplianceTraining")
   @Mapping(target = "isDownForMaintenance", source = "config.server.isDownForMaintenance")
+  @Mapping(target = "gceVmZones", source = "config.firecloud.gceVmZones")
+  @Mapping(target = "defaultGceVmZone", source = "config.firecloud.defaultGceVmZone")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

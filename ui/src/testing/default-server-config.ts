@@ -79,6 +79,8 @@ const defaultServerConfig: ConfigResponse = {
   enableGKEAppMachineTypeChoice: false,
   enableInitialCreditsExpiration: true,
   blockComplianceTraining: false,
+  defaultGceVmZone: 'us-central1-a',
+  gceVmZones: ['us-central1-a', 'us-central1-b'],
 };
 
 export default defaultServerConfig;

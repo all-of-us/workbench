@@ -30,23 +30,26 @@ describe(PresetSelector.name, () => {
     dropdown.click();
     await waitFor(() => {
       expect(
-        screen.queryByLabelText(runtimePresets.hailAnalysis.displayName)
+        screen.queryByLabelText(runtimePresets().hailAnalysis.displayName)
       ).toBeInTheDocument();
       expect(
-        screen.queryByLabelText(runtimePresets.generalAnalysis.displayName)
+        screen.queryByLabelText(runtimePresets().generalAnalysis.displayName)
       ).toBeInTheDocument();
     });
   });
 
   test.each([
     [
-      runtimePresets.hailAnalysis.displayName,
-      toAnalysisConfig(runtimePresets.hailAnalysis.runtimeTemplate, stubDisk()),
+      runtimePresets().hailAnalysis.displayName,
+      toAnalysisConfig(
+        runtimePresets().hailAnalysis.runtimeTemplate,
+        stubDisk()
+      ),
     ],
     [
-      runtimePresets.generalAnalysis.displayName,
+      runtimePresets().generalAnalysis.displayName,
       toAnalysisConfig(
-        runtimePresets.generalAnalysis.runtimeTemplate,
+        runtimePresets().generalAnalysis.runtimeTemplate,
         stubDisk()
       ),
     ],

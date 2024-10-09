@@ -20,7 +20,7 @@ export const PresetSelector = ({
   disabled,
   gcePersistentDisk,
 }: PresetSelectorProps) => {
-  const options = Object.values(runtimePresets)
+  const options = Object.values(runtimePresets())
     .filter(
       ({ runtimeTemplate }) => allowDataproc || !runtimeTemplate.dataprocConfig
     )
