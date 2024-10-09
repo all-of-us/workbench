@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.absorb.ApiException;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -326,27 +325,11 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      boolean showEraStepInRT =
-          eraRequiredForTier(userInstitution, AccessTierService.REGISTERED_TIER_SHORT_NAME);
-
-      boolean showEraStepInCT =
-          !showEraStepInRT
-              && eraRequiredForTier(userInstitution, AccessTierService.CONTROLLED_TIER_SHORT_NAME);
-
-      mail.sendWelcomeEmail(
-          user,
-          googleUser.getPassword(),
-          userInstitution.getDisplayName(),
-          showEraStepInRT,
-          showEraStepInCT);
+      mail.sendWelcomeEmail(user, googleUser.getPassword(), userInstitution.getDisplayName());
 
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
-  }
-
-  private boolean eraRequiredForTier(Institution institution, String tierShortName) {
-    return institutionService.eRaRequiredForTier(institution, tierShortName);
   }
 
   @Override

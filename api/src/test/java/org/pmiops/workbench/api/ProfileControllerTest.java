@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -264,12 +263,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     rtAddressesConfig =
         new InstitutionTierConfig()
             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-            .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
     rtDomainsConfig =
         new InstitutionTierConfig()
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-            .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
 
     Profile profile = new Profile();
@@ -1002,15 +999,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1018,17 +1014,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void resendWelcomeEmail_OK() throws MessagingException {
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing()
-        .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1036,7 +1029,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);
@@ -1055,7 +1048,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
     verify(mockMailService)
         .sendInstitutionUserInstructions(
             CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
@@ -1076,7 +1069,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);

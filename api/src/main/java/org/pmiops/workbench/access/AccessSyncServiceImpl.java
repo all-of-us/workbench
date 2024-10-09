@@ -146,18 +146,10 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     boolean allStandardRequiredModulesCompliant =
         requiredModules.stream()
             .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
-    boolean eraCompliant =
-        accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
 
-    boolean eRARequiredForTier = true;
     boolean institutionalEmailValidForTier = false;
     Optional<Institution> institution = institutionService.getByUser(user);
     if (institution.isPresent()) {
-      // eRA is required when login.gov linking is not enabled or user institution requires that in
-      // tier requirement.
-      eRARequiredForTier =
-          !workbenchConfigProvider.get().access.enableRasLoginGovLinking
-              || institutionService.eRaRequiredForTier(institution.get(), tierShortName);
       institutionalEmailValidForTier =
           institutionService.validateInstitutionalEmail(
               institution.get(), user.getContactEmail(), tierShortName);
@@ -165,7 +157,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       log.warning(String.format("Institution not found for user %s", user.getUsername()));
     }
     return !user.getDisabled()
-        && (!eRARequiredForTier || eraCompliant)
         && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
   }
