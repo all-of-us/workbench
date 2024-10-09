@@ -1561,6 +1561,7 @@ components:
       enum:
         - pd-standard
         - pd-ssd
+        - pd-balanced
     CloudProvider:
       type: string
       enum:

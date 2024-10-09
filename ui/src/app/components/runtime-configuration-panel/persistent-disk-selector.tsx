@@ -40,7 +40,11 @@ export const PersistentDiskSelector = ({
                 {...{ disabled }}
                 id={`disk-type`}
                 name={`disk-type`}
-                options={[DiskType.STANDARD, DiskType.SSD].map((value) => ({
+                options={[
+                  DiskType.STANDARD,
+                  DiskType.SSD,
+                  DiskType.BALANCED,
+                ].map((value) => ({
                   label: diskTypeLabels[value],
                   value,
                 }))}
