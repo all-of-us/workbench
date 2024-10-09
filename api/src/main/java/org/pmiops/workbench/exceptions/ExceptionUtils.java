@@ -66,8 +66,16 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertLeonardoException(
+  public static WorkbenchException convertLegacyLeonardoException(
       org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
+  public static WorkbenchException convertLeonardoException(
+      org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

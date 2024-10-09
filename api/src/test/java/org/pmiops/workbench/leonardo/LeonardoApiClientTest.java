@@ -15,6 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,17 +34,12 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.legacy_leonardo_client.api.AppsApi;
-import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
@@ -76,13 +76,14 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 public class LeonardoApiClientTest {
   @TestConfiguration
   @Import({
-    FakeClockConfiguration.class,
     CommonMappers.class,
-    LeonardoMapperImpl.class,
+    FakeClockConfiguration.class,
     FirecloudMapperImpl.class,
+    LegacyLeonardoRetryHandler.class,
     LeonardoApiClientImpl.class,
+    LeonardoApiClientImpl.class,
+    LeonardoMapperImpl.class,
     LeonardoRetryHandler.class,
-    LeonardoApiClientImpl.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
   })
@@ -338,14 +339,14 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse rstudioDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY)
+            .status(DiskStatus.READY)
             .labels(diskLabels);
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(rstudioDisk));

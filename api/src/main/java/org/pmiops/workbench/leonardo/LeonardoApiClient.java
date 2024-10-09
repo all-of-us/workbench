@@ -2,6 +2,7 @@ package org.pmiops.workbench.leonardo;
 
 import java.util.List;
 import java.util.Map;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
@@ -90,7 +91,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks owned by authenticated user in google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject);
 
   /**

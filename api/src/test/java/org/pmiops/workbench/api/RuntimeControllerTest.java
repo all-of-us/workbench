@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -61,7 +66,6 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.api.DisksApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
@@ -69,12 +73,10 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
@@ -82,6 +84,7 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.leonardo.LegacyLeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
@@ -170,6 +173,7 @@ public class RuntimeControllerTest {
     LeonardoApiClientImpl.class,
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,
+    LegacyLeonardoRetryHandler.class,
     LeonardoRetryHandler.class,
     NoBackOffPolicy.class,
     NotebooksRetryHandler.class,
@@ -995,17 +999,18 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testCreateRuntimeFail_newPdp_pdAlreadyExists() throws ApiException {
+  public void testCreateRuntimeFail_newPdp_pdAlreadyExist()
+      throws ApiException, org.broadinstitute.dsde.workbench.client.leonardo.ApiException {
     when(mockUserRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    LeonardoListPersistentDiskResponse gceDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse gceDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY);
+            .status(DiskStatus.READY);
     when(mockUserDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(List.of(gceDisk));
 

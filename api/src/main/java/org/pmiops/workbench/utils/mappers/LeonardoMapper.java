@@ -7,6 +7,7 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -109,14 +111,29 @@ public interface LeonardoMapper {
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  // these 2 values are set by listDisksAfterMapper()
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
+
+  @Mapping(target = "creator", source = "auditInfo.creator")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  // these 2 values are set by listDisksAfterMapper()
+  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "gceRuntime", ignore = true)
+  Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
 
   @AfterMapping
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
     setDiskEnvironmentType(disk, leoListDisksResponse.getLabels());
+  }
+
+  @AfterMapping
+  default void listDisksAfterMapper(
+      @MappingTarget Disk disk, ListPersistentDiskResponse listDisksResponse) {
+    setDiskEnvironmentType(disk, listDisksResponse.getLabels());
   }
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
@@ -228,10 +245,12 @@ public interface LeonardoMapper {
   @ValueMapping(source = "SAS", target = "ALLOWED")
   LeonardoAppType toLeonardoAppType(AppType appType);
 
-  @ValueMapping(source = "RSTUDIO", target = "RSTUDIO")
-  @ValueMapping(source = "SAS", target = "SAS")
+  // Cromwell is not an ALLOWED Helm Chart in Leonardo
   @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
   LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
+
+  @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
+  DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @AfterMapping
   default void listAppsAfterMapper(

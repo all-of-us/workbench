@@ -3,9 +3,9 @@ package org.pmiops.workbench.leonardo;
 import com.google.auth.oauth2.OAuth2Credentials;
 import jakarta.inject.Provider;
 import java.io.IOException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
-import org.pmiops.workbench.legacy_leonardo_client.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +36,11 @@ public class LeonardoApiClientFactory {
    * including access tier membership and eventually Terra ToS enforcement (all Terra requests will
    * fail for accounts that have not completed the latest ToS).
    */
-  public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
+  public org.pmiops.workbench.legacy_leonardo_client.ApiClient newImpersonatedLegacyApiClient(
+      String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds =
         firecloudApiClientFactory.getDelegatedUserCredentials(userEmail);
-    ApiClient client = newApiClient();
+    var client = newLegacyApiClient();
     client.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return client;
   }
@@ -48,6 +49,18 @@ public class LeonardoApiClientFactory {
    * Creates a Leonardo API client, unauthenticated. Most clients should use an authenticated,
    * request scoped bean instead of calling this directly.
    */
+  public org.pmiops.workbench.legacy_leonardo_client.ApiClient newLegacyApiClient() {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    final var apiClient =
+        new org.pmiops.workbench.legacy_leonardo_client.ApiClient()
+            .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
+            .setDebugging(workbenchConfig.firecloud.debugEndpoints)
+            .addDefaultHeader(
+                FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
+    return apiClient;
+  }
+
   public ApiClient newApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     final ApiClient apiClient =

@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -407,9 +411,43 @@ public class TestMockFactory {
     return response;
   }
 
+  public static ListPersistentDiskResponse createListPersistentDiskResponse(
+      String pdName,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
+      String date,
+      String googleProjectId,
+      DbUser user,
+      @Nullable AppType appType) {
+    ListPersistentDiskResponse response =
+        new ListPersistentDiskResponse()
+            .name(pdName)
+            .size(300)
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .status(status)
+            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()))
+            .cloudContext(
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProjectId));
+    if (appType != null) {
+      Map<String, String> label = new HashMap<>();
+      label.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
+      response.labels(label);
+    }
+    return response;
+  }
+
   public static LeonardoListPersistentDiskResponse createLeonardoListRuntimePDResponse(
       String pdName, LeonardoDiskStatus status, String date, String googleProjectId, DbUser user) {
     return createLeonardoListPersistentDiskResponse(
+        pdName, status, date, googleProjectId, user, /*appType*/ null);
+  }
+
+  public static ListPersistentDiskResponse createLeonardoRuntimePDResponse(
+      String pdName,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
+      String date,
+      String googleProjectId,
+      DbUser user) {
+    return createListPersistentDiskResponse(
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
