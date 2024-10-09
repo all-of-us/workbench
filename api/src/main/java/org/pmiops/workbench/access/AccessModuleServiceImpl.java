@@ -252,7 +252,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     final AccessConfig accessConfig = configProvider.get().access;
 
     return switch (module) {
-      case ERA_COMMONS -> accessConfig.enableEraCommons;
         // RT Compliance training  and CT Compliance training modules are
         // controlled by the same feature flag COMPLIANCE_TRAINING
       case COMPLIANCE_TRAINING, CT_COMPLIANCE_TRAINING -> accessConfig.enableComplianceTraining;

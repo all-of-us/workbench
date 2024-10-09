@@ -161,7 +161,6 @@ public class UserServiceAccessTest {
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.enableComplianceTraining = true;
-    providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
@@ -928,7 +927,6 @@ public class UserServiceAccessTest {
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
     updateUserWithRetries(this::registerUser);
-    providedWorkbenchConfig.access.enableEraCommons = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
     institutionService.updateInstitution(institution.getShortName(), institution);
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.ERA_COMMONS, false);
@@ -1105,7 +1103,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_eraFFisOff_CT() {
-    providedWorkbenchConfig.access.enableEraCommons = false;
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = completeRTAndCTRequirements(dbUser);

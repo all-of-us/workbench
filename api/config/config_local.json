@@ -95,7 +95,6 @@
   },
   "access": {
     "enableComplianceTraining": true,
-    "enableEraCommons": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasIdMeLinking": true,

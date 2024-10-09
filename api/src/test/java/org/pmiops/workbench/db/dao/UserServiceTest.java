@@ -142,7 +142,6 @@ public class UserServiceTest {
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
-    providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = 5; // arbitrary
     providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
 

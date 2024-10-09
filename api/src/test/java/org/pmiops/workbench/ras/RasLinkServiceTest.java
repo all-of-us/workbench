@@ -191,7 +191,6 @@ public class RasLinkServiceTest {
     public WorkbenchConfig getWorkbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.access.renewal.expiryDays = 365L;
-      config.access.enableEraCommons = true;
       config.access.enableRasLoginGovLinking = true;
       config.billing.initialCreditsValidityPeriodDays = 57L;
       return config;
