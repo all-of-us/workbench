@@ -785,7 +785,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     EntityOutputPreview preview =
         new EntityOutputPreview()
             .entity("person")
-            .indexSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
+            .sourceSql("SELECT person_id FROM `project.dataset`.T_ENT_person");
     EntityOutputPreviewList previewList =
         new EntityOutputPreviewList().addEntityOutputsItem(preview);
 
@@ -1437,7 +1437,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .name(DATASET_NAME)
         .includesAllParticipants(allParticipants)
         .tanagraCohortIds(ImmutableList.of("tanagraCohortId"))
-        .tanagraConceptSetIds(ImmutableList.of("tanagraConceptSetId"))
+        .tanagraFeatureSetIds(ImmutableList.of("tanagraConceptSetId"))
         .prePackagedConceptSet(prePackagedConceptSetEnumList)
         .domainValuePairs(
             domains.stream()
