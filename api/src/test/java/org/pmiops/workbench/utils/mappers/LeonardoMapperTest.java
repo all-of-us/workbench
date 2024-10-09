@@ -55,7 +55,7 @@ public class LeonardoMapperTest {
   private PersistentDiskRequest persistentDiskRequest;
   private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
       leonardoPersistentDiskRequest;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo leonardoAuditInfo;
+  private AuditInfo leonardoAuditInfo;
   private LeonardoAuditInfo legacyLeonardoAuditInfo;
   private List<KubernetesError> kubernetesErrors = new ArrayList<>();
   private List<LeonardoKubernetesError> leonardoKubernetesErrors = new ArrayList<>();
@@ -212,9 +212,9 @@ public class LeonardoMapperTest {
         new Disk()
             .diskType(DiskType.SSD)
             .gceRuntime(true)
-            .creator(legacyLeonardoAuditInfo.getCreator())
-            .dateAccessed(legacyLeonardoAuditInfo.getDateAccessed())
-            .createdDate(legacyLeonardoAuditInfo.getCreatedDate())
+            .creator(leonardoAuditInfo.getCreator())
+            .dateAccessed(leonardoAuditInfo.getDateAccessed())
+            .createdDate(leonardoAuditInfo.getCreatedDate())
             .status(DiskStatus.READY);
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse)).isEqualTo(disk);
 
