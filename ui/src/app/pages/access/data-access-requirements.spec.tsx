@@ -328,7 +328,7 @@ describe('DataAccessRequirements', () => {
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableEraCommons: false },
+      config: { ...defaultServerConfig },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.ERA_COMMONS)).toBeFalsy();
@@ -588,7 +588,7 @@ describe('DataAccessRequirements', () => {
 
   it('should not render the ERA module when its feature flag is disabled', () => {
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableEraCommons: false },
+      config: { ...defaultServerConfig },
     });
     const { container } = component();
     expect(
