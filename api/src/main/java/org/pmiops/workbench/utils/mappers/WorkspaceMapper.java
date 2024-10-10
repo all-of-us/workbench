@@ -182,6 +182,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "featuredCategory", ignore = true)
   @Mapping(target = "initialCreditsExpired", ignore = true)
   @Mapping(target = "initialCreditsExhausted", ignore = true)
+  @Mapping(target = "usesTanagra", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

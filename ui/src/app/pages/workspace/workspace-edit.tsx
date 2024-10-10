@@ -1425,12 +1425,6 @@ export const WorkspaceEdit = fp.flow(
       }
     }
 
-    onDataAppsVersionChange(e: React.FormEvent<HTMLSelectElement>) {
-      this.setState({
-        dataAppsVersion: e.currentTarget.value as DataAppsVersions,
-      });
-    }
-
     canSetBillingAccount(workspace?: Workspace, profile?: Profile): boolean {
       return (
         // can set billing account in Create and Duplicate modes
@@ -1439,17 +1433,25 @@ export const WorkspaceEdit = fp.flow(
       );
     }
 
-    displayCdrVersions() {
-      const { cdrVersions, dataAppsVersion } = this.state;
-      return environment.showDataAppsVersionSelect
-        ? cdrVersions.filter(
-            ({ tanagraEnabled }) =>
-              (dataAppsVersion === DataAppsVersions.DataAppsV1 &&
-                !tanagraEnabled) ||
-              (dataAppsVersion === DataAppsVersions.DataAppsV2 &&
-                tanagraEnabled)
-          )
-        : cdrVersions;
+    dataAppsVersionOptions() {
+      return getCdrVersion(
+        this.state.workspace,
+        this.props.cdrVersionTiersResponse
+      ).tanagraEnabled
+        ? [DataAppsVersions.DataAppsV1, DataAppsVersions.DataAppsV2]
+        : [DataAppsVersions.DataAppsV1];
+    }
+
+    onDataAppsVersionChange(e: React.ChangeEvent<HTMLSelectElement>) {
+      this.setState({
+        dataAppsVersion: e.target.value as DataAppsVersions,
+      });
+      this.setState(
+        fp.set(
+          ['workspace', 'usesTanagra'],
+          e.target.value === DataAppsVersions.DataAppsV2
+        )
+      );
     }
 
     render() {
@@ -1471,6 +1473,7 @@ export const WorkspaceEdit = fp.flow(
             reviewRequested,
           },
         },
+        cdrVersions,
         dataAppsVersion,
         loading,
         populationChecked,
@@ -1601,52 +1604,6 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                   </TooltipTrigger>
                 </FlexColumn>
-                {environment.showDataAppsVersionSelect && (
-                  <FlexColumn>
-                    <div style={styles.fieldHeader}>
-                      Data Apps version
-                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
-                        <InfoIcon style={styles.infoIcon} />
-                      </TooltipTrigger>
-                    </div>
-                    <TooltipTrigger
-                      content='To use a different version of Data Apps, create a new workspace.'
-                      disabled={this.isMode(WorkspaceEditMode.Create)}
-                    >
-                      <div
-                        data-test-id='select-data-apps-version'
-                        style={{
-                          ...styles.select,
-                          ...styles.accessTierSpacing,
-                        }}
-                      >
-                        <select
-                          style={{
-                            ...styles.selectInput,
-                            ...styles.accessTierSpacing,
-                          }}
-                          aria-label='data apps dropdown'
-                          value={dataAppsVersion}
-                          onChange={(e) =>
-                            this.setState({
-                              dataAppsVersion: e.target
-                                .value as DataAppsVersions,
-                            })
-                          }
-                          disabled={!this.isMode(WorkspaceEditMode.Create)}
-                        >
-                          {Object.entries(DataAppsVersions).map(
-                            ([key, version]) => (
-                              <option key={key} value={version}>
-                                {version}
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </div>
-                    </TooltipTrigger>
-                  </FlexColumn>
-                )}
                 <FlexColumn>
                   <div style={styles.fieldHeader}>
                     Dataset version
@@ -1688,7 +1645,7 @@ export const WorkspaceEdit = fp.flow(
                         }}
                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                       >
-                        {this.displayCdrVersions().map((version) => (
+                        {cdrVersions.map((version) => (
                           <option
                             key={version.cdrVersionId}
                             value={version.cdrVersionId}
@@ -1700,6 +1657,47 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                   </TooltipTrigger>
                 </FlexColumn>
+                {environment.showDataAppsVersionSelect && (
+                  <FlexColumn>
+                    <div style={styles.fieldHeader}>
+                      Data Apps version
+                      <TooltipTrigger content={toolTipText.dataAppsSelect}>
+                        <InfoIcon style={styles.infoIcon} />
+                      </TooltipTrigger>
+                    </div>
+                    <TooltipTrigger
+                      content='To use a different version of Data Apps, create a new workspace.'
+                      disabled={this.isMode(WorkspaceEditMode.Create)}
+                    >
+                      <div
+                        data-test-id='select-data-apps-version'
+                        style={{
+                          ...styles.select,
+                          ...styles.accessTierSpacing,
+                        }}
+                      >
+                        <select
+                          style={{
+                            ...styles.selectInput,
+                            ...styles.accessTierSpacing,
+                          }}
+                          aria-label='data apps dropdown'
+                          value={dataAppsVersion}
+                          onChange={(e) => this.onDataAppsVersionChange(e)}
+                          disabled={!this.isMode(WorkspaceEditMode.Create)}
+                        >
+                          {this.dataAppsVersionOptions().map(
+                            (version, index) => (
+                              <option key={index} value={version}>
+                                {version}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </TooltipTrigger>
+                  </FlexColumn>
+                )}
               </FlexRow>
             </WorkspaceEditSection>
             {this.isMode(WorkspaceEditMode.Duplicate) && (
