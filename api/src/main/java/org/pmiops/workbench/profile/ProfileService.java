@@ -248,6 +248,8 @@ public class ProfileService {
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
+    userService.setInitialCreditsExpirationBypassed(
+        user, updatedProfile.isInitialCreditsExpirationBypassed());
     // Address may be null for users who were created before address validation was in place. See
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
@@ -560,6 +562,8 @@ public class ProfileService {
     Optional.ofNullable(request.getAccountDisabledStatus())
         .map(AccountDisabledStatus::isDisabled)
         .ifPresent(updatedProfile::setDisabled);
+    Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
+        .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
 
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 

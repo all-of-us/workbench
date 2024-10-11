@@ -100,7 +100,8 @@ public class ProfileServiceTest {
         .familyName("Doe")
         .professionalUrl("https://scholar.google.com/citations?user=asdf")
         .areaOfResearch("asdfasdfasdf")
-        .verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
+        .verifiedInstitutionalAffiliation(BROAD_AFFILIATION)
+        .initialCreditsExpirationBypassed(false);
   }
 
   private static final Profile VALID_PROFILE = createValidProfile();
@@ -549,6 +550,30 @@ public class ProfileServiceTest {
   }
 
   @Test
+  public void updateProfile_bypassInitialCredits_user_asAdmin() {
+    // grant admin authority to loggedInUser
+    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+        .thenReturn(true);
+
+    Profile previousProfile = createValidProfile().initialCreditsExpirationBypassed(false);
+    Profile updatedProfile = createValidProfile().initialCreditsExpirationBypassed(true);
+
+    DbUser targetUser = new DbUser();
+    targetUser.setUserId(10);
+    targetUser.setGivenName("John");
+    targetUser.setFamilyName("Doe");
+
+    when(mockUserService.updateUserWithRetries(any(), any(), any())).thenReturn(targetUser);
+
+    profileService.updateProfile(
+        targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
+
+    verify(mockUserService)
+        .setInitialCreditsExpirationBypassed(
+            targetUser,true);
+  }
+
+  @Test
   public void updateProfile_demo_survey_add_v2() {
     DemographicSurveyV2 v2Survey =
         new DemographicSurveyV2()
@@ -883,13 +908,13 @@ public class ProfileServiceTest {
     user1.setInstitutionName("University 1");
 
     final UserDao.DbAdminTableUser user2 = factory.createProjection(UserDao.DbAdminTableUser.class);
-    user2.setUserId(102l);
+    user2.setUserId(102L);
     user2.setContactEmail("fred@aou.biz");
     user2.setDisabled(true);
     user2.setInstitutionName("University 2");
 
     final UserDao.DbAdminTableUser user3 = factory.createProjection(UserDao.DbAdminTableUser.class);
-    user3.setUserId(103l);
+    user3.setUserId(103L);
     user3.setContactEmail("betty@aou.biz");
     user3.setDisabled(true);
     user3.setInstitutionName("University 3");
