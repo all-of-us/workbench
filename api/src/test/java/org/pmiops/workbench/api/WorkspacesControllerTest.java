@@ -637,7 +637,14 @@ public class WorkspacesControllerTest {
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
-    assertThat(workspacesController.getWorkspaces().getBody().getItems().get(0).isUsesTanagra())
+    assertThat(
+            workspacesController
+                .getWorkspaces()
+                .getBody()
+                .getItems()
+                .get(0)
+                .getWorkspace()
+                .isUsesTanagra())
         .isEqualTo(false);
   }
 
