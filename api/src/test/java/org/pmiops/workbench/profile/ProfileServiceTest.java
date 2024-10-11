@@ -568,9 +568,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    verify(mockUserService)
-        .setInitialCreditsExpirationBypassed(
-            targetUser,true);
+    verify(mockUserService).setInitialCreditsExpirationBypassed(targetUser, true);
   }
 
   @Test
