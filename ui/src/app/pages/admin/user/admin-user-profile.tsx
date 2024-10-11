@@ -176,16 +176,6 @@ const UneditableFields = (props: { profile: Profile }) => {
             label='Initial credits used'
             value={getInitialCreditsUsage(props.profile)}
           />
-          <UneditableField
-            dataTestId='data-access-tiersd'
-            label='Initial credits expiration date'
-            value='12/21/2024'
-          />
-          <UneditableField
-            dataTestId='data-access-tiersd'
-            label='Initial credits expiration extension'
-            value='Not requested'
-          />
         </FlexColumn>
       </FlexRow>
     </FlexColumn>
