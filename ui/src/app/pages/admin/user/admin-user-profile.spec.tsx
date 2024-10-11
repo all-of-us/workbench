@@ -148,7 +148,7 @@ describe('AdminUserProfile', () => {
         expectedCreditsText
       )
     ).toBeInTheDocument();
-    expect(screen.getByText('Expiration is not bypassed.')).toBeInTheDocument();
+    expect(screen.getByText('Credits will expire')).toBeInTheDocument();
   });
 
   it("should display the user's name, username, initial credits usage, and initial credits expiration status", async () => {
