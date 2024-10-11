@@ -215,7 +215,7 @@ describe('AdminUserProfile', () => {
   });
 
   it('should display when a user is bypassed', async () => {
-    const initialCreditsExpirationBypassed = false;
+    const initialCreditsExpirationBypassed = true;
 
     updateTargetProfile({
       initialCreditsExpirationBypassed,
