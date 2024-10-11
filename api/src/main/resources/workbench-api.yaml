@@ -12000,6 +12000,10 @@ components:
             $ref: '#/components/schemas/AccessBypassRequest'
         accountDisabledStatus:
           $ref: '#/components/schemas/AccountDisabledStatus'
+        initialCreditsExpirationBypassed:
+          type: boolean
+          description: When set to true, the user will not be required to spend their
+            initial credits within the expiration period.
       description: |
         A group of changes an admin can make to a user in the Edit Information card of the individual-user admin page. Updates to the contact email or the institutional affiliation will be rejected if they do not validate.
     AccessReason:
