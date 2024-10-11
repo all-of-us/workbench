@@ -200,7 +200,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace, initialCreditsExpirationService);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
 
-    if (cdrVersion.getTanagraEnabled()) {
+    if (cdrVersion.getTanagraEnabled() && createdWorkspace.isUsesTanagra()) {
       try {
         workspaceService.createTanagraStudy(
             createdWorkspace.getNamespace(), createdWorkspace.getName());
