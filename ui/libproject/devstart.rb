@@ -105,6 +105,7 @@ def deploy_tanagra_ui(cmd_name, args)
 
   Dir.chdir('../tanagra-aou-utils/tanagra/ui') do
     common.status "Building Tanagra UI..."
+    common.run_inline("rm -rf node_modules")
     common.run_inline("npm ci")
     common.status "npm run codegen"
     common.run_inline("npm run codegen")
