@@ -24,7 +24,7 @@ import {
   AccessRenewalStatus,
   getAccessModuleConfig,
 } from 'app/utils/access-utils';
-import { formatDate, nowPlusDays } from 'app/utils/dates';
+import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
