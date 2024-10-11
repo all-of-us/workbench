@@ -114,6 +114,106 @@ describe('AdminUserProfile', () => {
     await waitUntilPageLoaded();
   });
 
+  it("should display the user's name, username, initial credits information", async () => {
+    const givenName = 'John Q';
+    const familyName = 'Public';
+    const expectedFullName = 'John Q Public';
+
+    const username = 'some-email@yahoo.com';
+
+    const freeTierUsage = 543.21;
+    const freeTierDollarQuota = 678.99;
+    const expectedCreditsText = '$543.21 used of $678.99 limit';
+    const initialCreditsExpirationEpochMillis = Date.now();
+
+    updateTargetProfile({
+      username,
+      givenName,
+      familyName,
+      freeTierUsage,
+      freeTierDollarQuota,
+      initialCreditsExpirationEpochMillis,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('initial-credits-used')).getByText(
+        expectedCreditsText
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `Expire on ${formatDate(
+          initialCreditsExpirationEpochMillis
+        ).toLocaleString()}`
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText('Expiration is not bypassed.')).toBeInTheDocument();
+  });
+
+  it("should display the user's name, username, initial credits usage, and initial credits expiration status", async () => {
+    const givenName = 'John Q';
+    const familyName = 'Public';
+    const expectedFullName = 'John Q Public';
+
+    const username = 'some-email@yahoo.com';
+
+    const freeTierUsage = 543.21;
+    const freeTierDollarQuota = 678.99;
+    const expectedCreditsText = '$543.21 used of $678.99 limit';
+    const initialCreditsExpirationEpochMillis = Date.now();
+
+    updateTargetProfile({
+      username,
+      givenName,
+      familyName,
+      freeTierUsage,
+      freeTierDollarQuota,
+      initialCreditsExpirationEpochMillis,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(
+      within(screen.getByTestId('name')).getByText(expectedFullName)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('user-name')).getByText(username)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('initial-credits-used')).getByText(
+        expectedCreditsText
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `Expire on ${formatDate(
+          initialCreditsExpirationEpochMillis
+        ).toLocaleString()}`
+      )
+    ).toBeInTheDocument();
+  });
+
+  // Needed until all users have expiration dates (RW-13455)
+  it("should display the user's who have not yet been backfilled with initial credit expiration dates", async () => {
+    const initialCreditsExpirationEpochMillis = null;
+
+    updateTargetProfile({
+      initialCreditsExpirationEpochMillis,
+    });
+
+    component();
+    await waitUntilPageLoaded();
+    expect(screen.getByText('Expiration date missing.')).toBeInTheDocument();
+  });
+
   it('should display when a user is bypassed', async () => {
     const initialCreditsExpirationBypassed = true;
 
