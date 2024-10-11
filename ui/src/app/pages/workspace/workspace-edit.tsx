@@ -1667,7 +1667,7 @@ export const WorkspaceEdit = fp.flow(
                     </div>
                     <TooltipTrigger
                       content='To use a different version of Data Apps, create a new workspace.'
-                      disabled={this.isMode(WorkspaceEditMode.Create)}
+                      disabled={!this.isMode(WorkspaceEditMode.Edit)}
                     >
                       <div
                         data-test-id='select-data-apps-version'
@@ -1684,7 +1684,7 @@ export const WorkspaceEdit = fp.flow(
                           aria-label='data apps dropdown'
                           value={dataAppsVersion}
                           onChange={(e) => this.onDataAppsVersionChange(e)}
-                          disabled={!this.isMode(WorkspaceEditMode.Create)}
+                          disabled={this.isMode(WorkspaceEditMode.Edit)}
                         >
                           {this.dataAppsVersionOptions().map(
                             (version, index) => (

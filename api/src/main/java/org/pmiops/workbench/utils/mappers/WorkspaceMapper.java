@@ -57,6 +57,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
   @Mapping(target = "initialCredits.exhausted", source = "dbWorkspace.initialCreditsExhausted")
   @Mapping(target = "initialCredits.expired", source = "dbWorkspace.initialCreditsExpired")
+  @Mapping(target = "usesTanagra", source = "dbWorkspace.usesTanagra")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace,
       RawlsWorkspaceDetails fcWorkspace,

@@ -399,6 +399,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     dbWorkspace.setCdrVersion(cdrVersion);
     dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
+    dbWorkspace.setUsesTanagra(workspace.isUsesTanagra());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
