@@ -21,6 +21,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { CommonToggle } from 'app/components/admin/common-toggle';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   ClrIcon,
@@ -302,7 +303,7 @@ export const updateAccountProperties = async (
   updatedProfile: Profile,
   accessBypassRequests?: AccessBypassRequest[]
 ): Promise<Profile> => {
-  const { username } = updatedProfile;
+  const { username, initialCreditsExpirationBypassed } = updatedProfile;
 
   const updateDisabledMaybe: boolean = getUpdatedProfileValue(
     oldProfile,
@@ -331,6 +332,7 @@ export const updateAccountProperties = async (
     affiliation: getUpdatedProfileValue(oldProfile, updatedProfile, [
       'verifiedInstitutionalAffiliation',
     ]),
+    initialCreditsExpirationBypassed,
   };
 
   return userAdminApi().updateAccountProperties(request);
@@ -601,6 +603,39 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
     >
       {children}
     </TooltipTrigger>
+  );
+};
+
+interface InitialCreditBypassSwitchProps {
+  currentlyBypassed: boolean | null;
+  previouslyBypassed: boolean | null;
+  onChange: (bypassed: boolean) => void;
+}
+
+export const InitialCreditBypassSwitch = ({
+  currentlyBypassed,
+  previouslyBypassed,
+  onChange,
+}: InitialCreditBypassSwitchProps) => {
+  return (
+    <FlexColumn style={{ paddingTop: '1.5rem', paddingLeft: '1rem' }}>
+      <label style={{ ...commonStyles.label, padding: 0 }}>
+        Initial Credit Expiration Bypass
+      </label>
+      <CommonToggle
+        name={
+          currentlyBypassed ? 'Credits will not expire' : 'Credits will expire'
+        }
+        checked={currentlyBypassed}
+        onToggle={onChange}
+        style={{
+          flex: 1,
+          ...(currentlyBypassed !== previouslyBypassed && {
+            backgroundColor: colors.highlight,
+          }),
+        }}
+      />
+    </FlexColumn>
   );
 };
 
