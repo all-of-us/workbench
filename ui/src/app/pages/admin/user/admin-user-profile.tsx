@@ -20,7 +20,7 @@ import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
