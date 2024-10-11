@@ -2372,7 +2372,7 @@ paths:
       tags:
       - userAdmin
       description: |
-        List all of the user's egress bypass windows.  Require RESEARCHER_DATA_VIEW authority
+        List all of the user's egress bypass windows.  Requires SECURITY_ADMIN authority
       operationId: listEgressBypassWindows
       parameters:
       - name: userId
