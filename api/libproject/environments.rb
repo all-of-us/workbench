@@ -77,6 +77,12 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
     :tanagra_tag => "0.0.635",
     :accessTiers => {
       "registered" => {
@@ -98,6 +104,12 @@ ENVIRONMENTS = {
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/SR2023Q3R2_test,aou/SC2023Q3R2_test",
     :tanagra_tag => "0.0.635",
     :accessTiers => {
       "registered" => {
@@ -119,6 +131,12 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/R2022Q4R13_preprod",
     :tanagra_tag => "0.0.635",
     :accessTiers => {
       "registered" => {
@@ -142,6 +160,12 @@ ENVIRONMENTS = {
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    # turn on authZ model
+    :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
+    :tanagra_auth_disable_checks => "false",
+    :tanagra_auth_gcp_access_token => "true",
+    :tanagra_underlay_files => "aou/R2022Q4R13_prod",
     :tanagra_tag => "0.0.635",
     :accessTiers => {
       "registered" => {
