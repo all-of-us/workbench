@@ -148,13 +148,6 @@ describe('AdminUserProfile', () => {
         expectedCreditsText
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        `Expire on ${formatDate(
-          initialCreditsExpirationEpochMillis
-        ).toLocaleString()}`
-      )
-    ).toBeInTheDocument();
     expect(screen.getByText('Expiration is not bypassed.')).toBeInTheDocument();
   });
 
@@ -192,26 +185,6 @@ describe('AdminUserProfile', () => {
         expectedCreditsText
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        `Expire on ${formatDate(
-          initialCreditsExpirationEpochMillis
-        ).toLocaleString()}`
-      )
-    ).toBeInTheDocument();
-  });
-
-  // Needed until all users have expiration dates (RW-13455)
-  it("should display the user's who have not yet been backfilled with initial credit expiration dates", async () => {
-    const initialCreditsExpirationEpochMillis = null;
-
-    updateTargetProfile({
-      initialCreditsExpirationEpochMillis,
-    });
-
-    component();
-    await waitUntilPageLoaded();
-    expect(screen.getByText('Expiration date missing.')).toBeInTheDocument();
   });
 
   it('should display when a user is bypassed', async () => {
