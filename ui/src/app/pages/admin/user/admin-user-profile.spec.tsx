@@ -223,7 +223,7 @@ describe('AdminUserProfile', () => {
 
     component();
     await waitUntilPageLoaded();
-    expect(screen.getByText('Expiration is bypassed.')).toBeInTheDocument();
+    expect(screen.getByText('Credits will not expire')).toBeInTheDocument();
   });
 
   test.each([
