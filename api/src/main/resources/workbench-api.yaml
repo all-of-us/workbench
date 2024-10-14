@@ -7298,6 +7298,10 @@ components:
           description: the google project used by the workspace for compute and storage
         initialCredits:
           $ref: '#/components/schemas/InitialCreditResponse'
+        usesTanagra:
+          type: boolean
+          description: Whether a workspace uses Tanagra
+          default: false
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111

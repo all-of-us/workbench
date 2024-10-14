@@ -130,6 +130,7 @@ public class TestMockFactory {
         .terraName(workspaceTerraName)
         .namespace(workspaceNamespace)
         .cdrVersionId(CDR_VERSION_ID)
+        .usesTanagra(false)
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .googleProject(DEFAULT_GOOGLE_PROJECT)

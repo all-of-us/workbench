@@ -19,4 +19,5 @@ export const environment: Environment = {
   inactivityTimeoutSecondsCt: 12 * 60 * 60, // 12 hours
   allowTestAccessTokenOverride: false,
   tanagraLocalAuth: false,
+  showDataAppsVersionSelect: false,
 };

@@ -6,29 +6,23 @@ import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { DataComponent } from 'app/pages/data/data-component';
 import { DataComponentTanagra } from 'app/pages/data/tanagra-dev/data-component-tanagra';
-import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
-import { findCdrVersion } from 'app/utils/cdr-versions';
+import { withCurrentWorkspace } from 'app/utils';
 
-export const DataComponentSplitter = fp.flow(
-  withCdrVersions(),
-  withCurrentWorkspace()
-)(({ cdrVersionTiersResponse, workspace: { cdrVersionId } }) => {
-  const DataComponentToReturn = fp.flow(
-    withRouteData,
-    withRoutingSpinner
-  )(
-    findCdrVersion(cdrVersionId, cdrVersionTiersResponse)?.tanagraEnabled
-      ? DataComponentTanagra
-      : DataComponent
-  );
-  return (
-    <DataComponentToReturn
-      routeData={{
-        title: 'Data Page',
-        breadcrumb: BreadcrumbType.Workspace,
-        workspaceNavBarTab: 'data',
-        pageKey: 'data',
-      }}
-    />
-  );
-});
+export const DataComponentSplitter = fp.flow(withCurrentWorkspace())(
+  ({ workspace: { usesTanagra } }) => {
+    const DataComponentToReturn = fp.flow(
+      withRouteData,
+      withRoutingSpinner
+    )(usesTanagra ? DataComponentTanagra : DataComponent);
+    return (
+      <DataComponentToReturn
+        routeData={{
+          title: 'Data Page',
+          breadcrumb: BreadcrumbType.Workspace,
+          workspaceNavBarTab: 'data',
+          pageKey: 'data',
+        }}
+      />
+    );
+  }
+);
