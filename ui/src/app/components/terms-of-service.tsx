@@ -11,7 +11,7 @@ import { reactStyles } from 'app/utils';
 
 // keep in sync with the API config value termsOfService.minimumAcceptedAouVersion
 // this explicitly does not derive from that value, to allow for independent updates
-export const tosVersion = 2;
+const tosVersion = 2;
 
 const baseCheckboxLabelStyle = {
   color: colors.primary,
