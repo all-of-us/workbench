@@ -100,10 +100,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               Researcher Workbench Terms of Use and Privacy Statement
             </h3>
             <p className='h-color' style={{ marginTop: '0.375rem' }}>
-              The Terra Platform terms, which are incorporated by reference into
-              the <AoU /> terms, have been updated. This update replaces
-              references to specific federal datasets with a more broad
-              reference to federal datasets as a type of data.
+              This update removes restrictions on commercial research.
             </p>
           </div>
         )}
