@@ -437,7 +437,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
-    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
+    assertThat(tosRows.get(0).getTosVersion())
+        .isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
@@ -455,7 +456,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     // between user creation and first sign-in, the AoU ToS version changes
-    config.termsOfService.minimumAcceptedAouVersion = config.termsOfService.minimumAcceptedAouVersion + 1;
+    config.termsOfService.minimumAcceptedAouVersion =
+        config.termsOfService.minimumAcceptedAouVersion + 1;
 
     // invokes Terra account creation
     Profile profile = profileController.getMe().getBody();
@@ -473,7 +475,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion - 1);
+          createAccountRequest.setTermsOfServiceVersion(
+              config.termsOfService.minimumAcceptedAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
     verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();

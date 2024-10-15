@@ -443,10 +443,6 @@ public class WorkbenchConfig {
 
   // Configs for AoU and Terra Terms of Service
   public static class TermsOfServiceConfig {
-    // which All of Us Terms of Service is considered current
-    // DEPRECATED because it does not allow smooth transitions between versions
-    @Deprecated(since = "October 2024", forRemoval = true)
-    public int latestAouVersion;
     // the minimum All of Us Terms of Service version which is considered current (newer is OK too)
     public int minimumAcceptedAouVersion;
   }

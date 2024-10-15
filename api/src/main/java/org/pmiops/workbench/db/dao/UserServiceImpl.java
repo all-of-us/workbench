@@ -428,7 +428,8 @@ public class UserServiceImpl implements UserService {
   public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
     return userTermsOfServiceDao
         .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-        .map(u -> u.getTosVersion() >= configProvider.get().termsOfService.minimumAcceptedAouVersion)
+        .map(
+            u -> u.getTosVersion() >= configProvider.get().termsOfService.minimumAcceptedAouVersion)
         .orElse(false);
   }
 
