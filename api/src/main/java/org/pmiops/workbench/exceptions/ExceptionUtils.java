@@ -74,10 +74,24 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  // converts exceptions from the Swagger client *we* generated
   public static WorkbenchException convertLeonardoException(
       org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
+    }
+    throw codeToException(e.getCode());
+  }
+
+  // converts exceptions from the Swagger client *Leonardo* generated and published
+  public static WorkbenchException convertLeonardoException(
+      org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
+    if (isSocketTimeoutException(e.getCause())) {
+      throw new GatewayTimeoutException();
+    }
+    if (e.getCode() == HttpServletResponse.SC_CONFLICT) {
+      throw new ConflictException(
+          "Please wait a few minutes and try to create your environment again.");
     }
     throw codeToException(e.getCode());
   }

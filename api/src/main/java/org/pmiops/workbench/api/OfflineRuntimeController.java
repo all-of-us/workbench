@@ -17,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -27,9 +29,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.legacy_leonardo_client.ApiException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -195,13 +195,13 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<LeonardoListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
+    final List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
-    Map<Integer, List<LeonardoListPersistentDiskResponse>> disksByDaysUnused =
+    Map<Integer, List<ListPersistentDiskResponse>> disksByDaysUnused =
         disks.stream()
-            .filter(disk -> LeonardoDiskStatus.READY.equals(disk.getStatus()))
+            .filter(disk -> DiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {
@@ -225,7 +225,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         continue;
       }
 
-      for (LeonardoListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
+      for (ListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
         try {
           if (notifyForUnusedDisk(disk, daysUnused)) {
             notifySuccess++;
@@ -261,7 +261,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   // Returns true if an email is sent.
-  private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
+  private boolean notifyForUnusedDisk(ListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
     final boolean attached;
@@ -325,8 +325,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     return true;
   }
 
-  private boolean isDiskAttached(
-      LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+  private boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
+      throws ApiException {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).isGceRuntime()) {

@@ -17,6 +17,9 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -92,9 +95,10 @@ public class RuntimeController implements RuntimeApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
     try {
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
+      GetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      if (org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus.ERROR.equals(
+          leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
                 "Observed Leonardo runtime with unexpected error status:\n%s",
@@ -106,7 +110,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
   }
 
-  private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
+  private String formatRuntimeErrors(@Nullable List<ClusterError> errors) {
     if (errors == null || errors.isEmpty()) {
       return "no error messages";
     }
@@ -127,11 +131,11 @@ public class RuntimeController implements RuntimeApiDelegate {
                     aCreatedDate = a.getAuditInfo().getCreatedDate();
                   }
 
-                  if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
-                    bCreatedDate = "";
-                  } else {
-                    bCreatedDate = b.getAuditInfo().getCreatedDate();
-                  }
+                      if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
+                        bCreatedDate = "";
+                      } else {
+                        bCreatedDate = b.getAuditInfo().getCreatedDate();
+                      }
 
                   return bCreatedDate.compareTo(aCreatedDate);
                 });

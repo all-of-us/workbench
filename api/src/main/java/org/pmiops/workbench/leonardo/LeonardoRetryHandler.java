@@ -15,7 +15,9 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {
+public class LeonardoRetryHandler
+    extends TerraServiceRetryHandler<
+        org.broadinstitute.dsde.workbench.client.leonardo.ApiException> {
 
   private static final Logger logger = Logger.getLogger(LeonardoRetryHandler.class.getName());
 

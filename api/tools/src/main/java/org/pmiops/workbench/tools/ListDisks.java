@@ -17,13 +17,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.google.GoogleConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
@@ -60,12 +60,12 @@ public class ListDisks extends Tool {
   private static Options options = new Options().addOption(outputFileOpt);
 
   // Leonardo supports Azure but we do not, so we know this is always a Google Project
-  private String getGoogleProject(LeonardoListPersistentDiskResponse response) {
+  private String getGoogleProject(ListPersistentDiskResponse response) {
     return response.getCloudContext().getCloudResource();
   }
 
   private ListDisksRow toDiskRow(
-      LeonardoListPersistentDiskResponse response,
+      ListPersistentDiskResponse response,
       String workspaceNamespace,
       String workspaceDisplayName,
       String workspaceTerraName,
@@ -107,7 +107,7 @@ public class ListDisks extends Tool {
 
     log.info("Step 1 of 3: Retrieving disk information from Leonardo");
 
-    List<LeonardoListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
+    List<ListPersistentDiskResponse> disks = leonardoApiClient.listDisksAsService();
 
     log.info("Step 2 of 3: Associating disk information with RWB workspaces");
 
