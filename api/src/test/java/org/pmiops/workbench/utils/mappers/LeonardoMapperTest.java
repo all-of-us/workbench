@@ -19,6 +19,7 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDis
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
@@ -58,17 +59,15 @@ public class LeonardoMapperTest {
   private Map<String, String> proxyUrls = new HashMap<>();
   private Map<String, String> labels = new HashMap<>();
 
-  private static Stream<
-          Map.Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>>
-      allAppTypesMap() {
+  private static Stream<Arguments> allAppTypesMap() {
     return Stream.of(
-        Map.entry(
+        Arguments.of(
             AppType.CROMWELL,
             org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL),
-        Map.entry(
+        Arguments.of(
             AppType.RSTUDIO,
             org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED),
-        Map.entry(
+        Arguments.of(
             AppType.SAS, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED));
   }
 
@@ -163,14 +162,13 @@ public class LeonardoMapperTest {
   @ParameterizedTest(name = "appType {0} can be mapped for getApp call")
   @MethodSource("allAppTypesMap")
   public void testToAppFromGetResponse(
-      Map.Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>
-          appTypeMapEntry) {
-    labels.put(
-        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
+      AppType apiAppType,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
+    labels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
 
     GetAppResponse getAppResponse =
         new GetAppResponse()
-            .appType(appTypeMapEntry.getValue())
+            .appType(leoAppType)
             .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
             .auditInfo(leonardoAuditInfo)
             .diskName(DISK_NAME)
@@ -181,19 +179,18 @@ public class LeonardoMapperTest {
             .cloudContext(
                 new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
             .labels(labels);
-    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
+    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app.appType(apiAppType));
   }
 
   @ParameterizedTest(name = "appType {0} can be mapped for listApp call")
   @MethodSource("allAppTypesMap")
   public void testToAppFromListResponse(
-      Map.Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>
-          appTypeMapEntry) {
-    labels.put(
-        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
+      AppType apiAppType,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
+    labels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
     ListAppResponse listAppResponse =
         new ListAppResponse()
-            .appType(appTypeMapEntry.getValue())
+            .appType(leoAppType)
             .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
             .auditInfo(leonardoAuditInfo)
             .diskName(DISK_NAME)
@@ -204,7 +201,7 @@ public class LeonardoMapperTest {
             .appName(APP_NAME)
             .cloudContext(
                 new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT));
-    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
+    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app.appType(apiAppType));
   }
 
   @Test
