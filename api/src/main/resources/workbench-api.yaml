@@ -7919,6 +7919,9 @@ components:
           description: The ids of all cohorts in the data set
           items:
             type: string
+        tanagraAllParticipantsCohort:
+          type: boolean
+          description: Include all participants when true
     PrePackagedConceptSetEnum:
       type: string
       enum:

@@ -1436,7 +1436,9 @@ public class DataSetServiceImpl implements DataSetService {
   private void validateDataSetRequestResources(
       long workspaceId, DataSetRequest request, DbCdrVersion dbCdrVersion) {
     if (dbCdrVersion.getTanagraEnabled()) {
-      tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
+      if (!request.isTanagraAllParticipantsCohort()) {
+        tanagraValidateCohortsInWorkspace(request.getTanagraCohortIds());
+      }
       tanagraValidateConceptSetsInWorkspace(request.getTanagraFeatureSetIds());
     } else {
       if (request.getDataSetId() == null) {
