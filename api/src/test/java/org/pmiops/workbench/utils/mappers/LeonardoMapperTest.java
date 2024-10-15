@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -164,7 +163,7 @@ public class LeonardoMapperTest {
   public void testToAppFromGetResponse(
       AppType apiAppType,
       org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
-    labels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
+    labels.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
 
     GetAppResponse getAppResponse =
         new GetAppResponse()
@@ -187,7 +186,7 @@ public class LeonardoMapperTest {
   public void testToAppFromListResponse(
       AppType apiAppType,
       org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
-    labels.put(LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
+    labels.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
     ListAppResponse listAppResponse =
         new ListAppResponse()
             .appType(leoAppType)

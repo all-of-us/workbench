@@ -175,13 +175,13 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
-  @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "toolDockerImage", ignore = true)
-  @Mapping(target = "errors", ignore = true)
   @Mapping(
       target = "configurationType",
       source = "labels",
       qualifiedByName = "mapRuntimeConfigurationLabels")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
+  @Mapping(target = "errors", ignore = true)
   // these 3 set by listRuntimeAfterMapper()
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
