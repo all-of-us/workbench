@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -488,9 +489,10 @@ public class UserServiceTest {
 
   @Test
   public void test_validateAllOfUsTermsOfService() {
-    // does not throw
-    userService.validateAllOfUsTermsOfService(
-        providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
+    assertDoesNotThrow(
+        () ->
+            userService.validateAllOfUsTermsOfService(
+                providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion));
   }
 
   @Test
@@ -511,9 +513,10 @@ public class UserServiceTest {
 
   @Test
   public void test_validateAllOfUsTermsOfService_newer_version() {
-    // does not throw
-    userService.validateAllOfUsTermsOfService(
-        providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion + 1);
+    assertDoesNotThrow(
+        () ->
+            userService.validateAllOfUsTermsOfService(
+                providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion + 1));
   }
 
   @Test
