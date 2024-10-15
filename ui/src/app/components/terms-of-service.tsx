@@ -9,7 +9,10 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-export const LATEST_TOS_VERSION = 1;
+// keep in sync with the API config value termsOfService.minimumAcceptedAouVersion
+// this explicitly does not derive from that value, to allow for independent updates
+const tosVersion = 2;
+
 const baseCheckboxLabelStyle = {
   color: colors.primary,
   fontFamily: 'Montserrat',
@@ -40,7 +43,7 @@ const styles = reactStyles({
 export interface TosProps {
   showReAcceptNotification: boolean;
   // Callback which will be called by this component when the user clicks "Next".
-  onComplete: (tosVersion) => void;
+  onComplete: (tosVersion: number) => void;
   // Path to the Terms of Service file to be displayed.
   filePath: string;
   // Coming from Institution page
@@ -97,10 +100,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               Researcher Workbench Terms of Use and Privacy Statement
             </h3>
             <p className='h-color' style={{ marginTop: '0.375rem' }}>
-              The Terra Platform terms, which are incorporated by reference into
-              the <AoU /> terms, have been updated. This update replaces
-              references to specific federal datasets with a more broad
-              reference to federal datasets as a type of data.
+              This update removes restrictions on commercial research.
             </p>
           </div>
         )}
@@ -179,7 +179,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               }
               onClick={() => {
                 this.setState({ hasClickedNext: true });
-                this.props.onComplete(LATEST_TOS_VERSION);
+                this.props.onComplete(tosVersion);
               }}
             >
               Next

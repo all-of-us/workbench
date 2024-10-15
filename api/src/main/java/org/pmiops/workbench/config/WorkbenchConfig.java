@@ -443,8 +443,8 @@ public class WorkbenchConfig {
 
   // Configs for AoU and Terra Terms of Service
   public static class TermsOfServiceConfig {
-    // which All of Us Terms of Service is considered current
-    public int latestAouVersion;
+    // the minimum All of Us Terms of Service version which is considered current (newer is OK too)
+    public int minimumAcceptedAouVersion;
   }
 
   public static class ArtifactRegistryConfig {

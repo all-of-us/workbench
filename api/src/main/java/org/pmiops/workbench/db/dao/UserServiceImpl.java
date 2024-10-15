@@ -419,7 +419,7 @@ public class UserServiceImpl implements UserService {
     if (tosVersion == null) {
       throw new BadRequestException("All of Us Terms of Service version is NULL");
     }
-    if (tosVersion != configProvider.get().termsOfService.latestAouVersion) {
+    if (tosVersion < configProvider.get().termsOfService.minimumAcceptedAouVersion) {
       throw new BadRequestException("All of Us Terms of Service version is not up to date");
     }
   }
@@ -428,7 +428,8 @@ public class UserServiceImpl implements UserService {
   public boolean hasSignedLatestAoUTermsOfService(@Nonnull DbUser dbUser) {
     return userTermsOfServiceDao
         .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-        .map(u -> u.getTosVersion() == configProvider.get().termsOfService.latestAouVersion)
+        .map(
+            u -> u.getTosVersion() >= configProvider.get().termsOfService.minimumAcceptedAouVersion)
         .orElse(false);
   }
 
