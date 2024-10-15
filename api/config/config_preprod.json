@@ -153,7 +153,7 @@
     "usersPerCheckInitialCreditsExpirationTask": 50
   },
   "termsOfService": {
-    "minimumAcceptedAouVersion": 1
+    "minimumAcceptedAouVersion": 2
   },
   "tanagra": {
     "baseUrl": "https:\/\/preprod-workbench.researchallofus.org"
