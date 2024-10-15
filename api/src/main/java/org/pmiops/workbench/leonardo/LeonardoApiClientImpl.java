@@ -681,9 +681,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName) {
     AppsApi appsApi = appsApiProvider.get();
 
-    GetAppResponse leonardoGetAppResponse =
-        leonardoRetryHandler.run((context) -> appsApi.getApp(googleProjectId, appName));
-    return leonardoMapper.toApiApp(leonardoGetAppResponse);
+    GetAppResponse response =
+        leonardoRetryHandler.run(context -> appsApi.getApp(googleProjectId, appName));
+    return leonardoMapper.toApiApp(response);
   }
 
   @Override
@@ -703,7 +703,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       String googleProjectId, AppsApi appsApi, String leonardoAppRole) {
     List<ListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
-            (context) ->
+            context ->
                 appsApi.listAppByProject(
                     googleProjectId,
                     /* labels= */ null,
@@ -711,7 +711,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* includeLabels= */ LEONARDO_APP_LABEL_KEYS,
                     leonardoAppRole));
 
-    return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
+    return listAppResponses.stream().map(leonardoMapper::toApiApp).toList();
   }
 
   @Override
@@ -720,7 +720,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     AppsApi appsApi = appsApiProvider.get();
 
     leonardoRetryHandler.run(
-        (context) -> {
+        context -> {
           appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
           return null;
         });
@@ -744,7 +744,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     AppsApi appsApiAsService = serviceAppsApiProvider.get();
     List<ListAppResponse> apps =
         leonardoRetryHandler.run(
-            (context) ->
+            context ->
                 appsApiAsService.listApp(
                     /* labels= */ LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
                     /* includeDeleted= */ false,
