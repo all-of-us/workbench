@@ -25,12 +25,9 @@ import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
@@ -159,28 +156,30 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
+  // these 4 set by getRuntimeAfterMapper()
+  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "toolDockerImage", ignore = true)
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
-  @Mapping(target = "errors", ignore = true)
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
+  @Mapping(target = "errors", ignore = true)
+  // these 4 set by getRuntimeAfterMapper()
+  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
@@ -214,6 +213,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(target = "autopauseThreshold", ignore = true)
+  // set by getAppAfterMapper()
   @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(GetAppResponse app);
 
@@ -225,6 +225,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
+  // set by listAppsAfterMapper()
   @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(ListAppResponse app);
 
@@ -251,13 +252,13 @@ public interface LeonardoMapper {
 
   @AfterMapping
   default void listAppsAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, LeonardoListAppResponse listAppResponse) {
+      @MappingTarget UserAppEnvironment appEnvironment, ListAppResponse listAppResponse) {
     setAppType(appEnvironment, listAppResponse.getLabels());
   }
 
   @AfterMapping
   default void getAppAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, LeonardoGetAppResponse getAppResponse) {
+      @MappingTarget UserAppEnvironment appEnvironment, GetAppResponse getAppResponse) {
     setAppType(appEnvironment, getAppResponse.getLabels());
   }
 
@@ -325,7 +326,8 @@ public interface LeonardoMapper {
     return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
   }
 
-  default DiskStatus toApiDiskStatus(LeonardoDiskStatus leonardoDiskStatus) {
+  default DiskStatus toApiDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus) {
     if (leonardoDiskStatus == null) {
       return DiskStatus.UNKNOWN;
     }
