@@ -216,7 +216,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  @Mapping(target = "appType", source = "labels")
+  @Mapping(target = "appType", source = "labels", qualifiedByName = "mapAppType")
   @Mapping(target = "autopauseThreshold", ignore = true)
   UserAppEnvironment toApiApp(GetAppResponse app);
 
@@ -227,7 +227,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  @Mapping(target = "appType", source = "labels")
+  @Mapping(target = "appType", source = "labels", qualifiedByName = "mapAppType")
   @Mapping(target = "autopauseThreshold", ignore = true)
   UserAppEnvironment toApiApp(ListAppResponse app);
 
@@ -252,6 +252,7 @@ public interface LeonardoMapper {
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
+  @Named("mapAppType")
   default AppType mapAppType(@Nullable Object appLabels) {
     return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
         .orElseThrow(
