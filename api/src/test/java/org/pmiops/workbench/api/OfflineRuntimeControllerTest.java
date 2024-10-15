@@ -14,12 +14,18 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
-import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,10 +44,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -177,30 +180,28 @@ public class OfflineRuntimeControllerTest {
     }
   }
 
-  private LeonardoListPersistentDiskResponse idleDisk(Duration idleTime) {
+  private ListPersistentDiskResponse idleDisk(Duration idleTime) {
     return idleDiskForProjectAndCreator(
         workspace.getGoogleProject(), user1.getUsername(), idleTime);
   }
 
-  private LeonardoListPersistentDiskResponse idleDiskForProjectAndCreator(
+  private ListPersistentDiskResponse idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
-    return new LeonardoListPersistentDiskResponse()
-        .diskType(LeonardoDiskType.STANDARD)
-        .status(LeonardoDiskStatus.READY)
+    return new ListPersistentDiskResponse()
+        .diskType(DiskType.STANDARD)
+        .status(DiskStatus.READY)
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
-                .cloudResource(googleProject))
+            new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProject))
         .name("my-disk")
         .size(200)
         .auditInfo(
-            new LeonardoAuditInfo()
+            new AuditInfo()
                 .creator(creatorEmail)
                 .createdDate(NOW.minus(idleTime.plus(Duration.ofDays(1L))).toString())
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) {
+  private void stubDisks(List<ListPersistentDiskResponse> disks) {
     when(mockLeonardoApiClient.listDisksAsService()).thenReturn(disks);
   }
 
@@ -221,7 +222,7 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testDeleteOldRuntimesNoResults() throws Exception {
-    stubRuntimes(ImmutableList.of());
+    stubRuntimes(Collections.emptyList());
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
@@ -229,7 +230,7 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testDeleteOldRuntimesActiveRuntime() throws Exception {
-    stubRuntimes(ImmutableList.of(runtimeWithAge(Duration.ofHours(10))));
+    stubRuntimes(List.of(runtimeWithAge(Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockLeonardoApiClient, never()).deleteRuntimeAsService(any(), any());
@@ -237,7 +238,7 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testDeleteOldRuntimesActiveTooOld() throws Exception {
-    stubRuntimes(ImmutableList.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
+    stubRuntimes(List.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
@@ -247,7 +248,7 @@ public class OfflineRuntimeControllerTest {
   public void testDeleteOldRuntimesIdleYoung() throws Exception {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
-        ImmutableList.of(
+        List.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -258,8 +259,7 @@ public class OfflineRuntimeControllerTest {
   public void testDeleteOldRuntimesIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
-        ImmutableList.of(
-            runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
+        List.of(runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockLeonardoApiClient).deleteRuntimeAsService(any(), any());
@@ -269,7 +269,7 @@ public class OfflineRuntimeControllerTest {
   public void testDeleteOldRuntimesBrieflyIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
     stubRuntimes(
-        ImmutableList.of(
+        List.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -279,7 +279,7 @@ public class OfflineRuntimeControllerTest {
   @Test
   public void testDeleteOldRuntimesOtherStatusFiltered() throws Exception {
     stubRuntimes(
-        ImmutableList.of(
+        List.of(
             runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -287,17 +287,17 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksNoDisks() throws Exception {
-    stubDisks(ImmutableList.of());
+  public void testCheckPersistentDisksNoDisks() {
+    stubDisks(Collections.emptyList());
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verifyNoInteractions(mockMailService);
   }
 
   @Test
-  public void testCheckPersistentDisksNoMatchingNotifications() throws Exception {
+  public void testCheckPersistentDisksNoMatchingNotifications() {
     stubDisks(
-        ImmutableList.of(
+        List.of(
             idleDisk(Duration.ofDays(0L)),
             idleDisk(Duration.ofDays(1L)),
             idleDisk(Duration.ofDays(13L)),
@@ -309,8 +309,8 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckPersistentDisksSkipsNonReady() throws Exception {
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L)).status(LeonardoDiskStatus.FAILED)));
+  public void testCheckPersistentDisksSkipsNonReady() {
+    stubDisks(List.of(idleDisk(Duration.ofDays(14L)).status(DiskStatus.FAILED)));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verifyNoInteractions(mockMailService);
@@ -318,20 +318,20 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testCheckPersistentDisksInitialThresholdNotification() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1));
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L))));
+    stubWorkspaceOwners(workspace, List.of(user1));
+    stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), anyBoolean(), eq(14), eq(null));
+            eq(List.of(user1)), eq(workspace), any(), anyBoolean(), eq(14), eq(null));
   }
 
   @Test
   public void testCheckPersistentDisksPeriodicThresholdNotification() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1));
+    stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(
-        ImmutableList.of(
+        List.of(
             idleDisk(Duration.ofDays(30L)),
             idleDisk(Duration.ofDays(60L)),
             idleDisk(Duration.ofDays(90L))));
@@ -339,46 +339,41 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService, times(3))
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), anyBoolean(), anyInt(), any());
+            eq(List.of(user1)), eq(workspace), any(), anyBoolean(), anyInt(), any());
   }
 
   @Test
   public void testCheckPersistentDisksMultipleOwners() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1, user2));
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(30L))));
+    stubWorkspaceOwners(workspace, List.of(user1, user2));
+    stubDisks(List.of(idleDisk(Duration.ofDays(30L))));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockMailService, times(1))
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1, user2)),
-            eq(workspace),
-            any(),
-            anyBoolean(),
-            anyInt(),
-            any());
+            eq(List.of(user1, user2)), eq(workspace), any(), anyBoolean(), anyInt(), any());
   }
 
   @Test
   public void testCheckPersistentDisksSkipsUnknownUser() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1));
+    stubWorkspaceOwners(workspace, List.of(user1));
 
-    LeonardoListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
+    ListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
     mysteryDisk.getAuditInfo().setCreator("404@aou.org");
-    stubDisks(ImmutableList.of(mysteryDisk, idleDisk(Duration.ofDays(30L))));
+    stubDisks(List.of(mysteryDisk, idleDisk(Duration.ofDays(30L))));
 
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     // Skips the unknown user, but still sends the rest.
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), anyBoolean(), eq(30), any());
+            eq(List.of(user1)), eq(workspace), any(), anyBoolean(), eq(30), any());
   }
 
   @Test
   public void testCheckPersistentDisksContinuesOnMailFailure() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1));
+    stubWorkspaceOwners(workspace, List.of(user1));
     stubDisks(
-        ImmutableList.of(
+        List.of(
             idleDisk(Duration.ofDays(14L)),
             idleDisk(Duration.ofDays(14L)),
             idleDisk(Duration.ofDays(14L))));
@@ -398,8 +393,8 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testCheckPersistentDisksFreeTier() throws Exception {
-    stubWorkspaceOwners(workspace, ImmutableList.of(user1));
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L))));
+    stubWorkspaceOwners(workspace, List.of(user1));
+    stubDisks(List.of(idleDisk(Duration.ofDays(14L))));
 
     workspace.setBillingAccountName(config.billing.initialCreditsBillingAccountName());
     when(mockFreeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(workspace))
@@ -409,6 +404,6 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), anyBoolean(), eq(14), eq(123.0));
+            eq(List.of(user1)), eq(workspace), any(), anyBoolean(), eq(14), eq(123.0));
   }
 }
