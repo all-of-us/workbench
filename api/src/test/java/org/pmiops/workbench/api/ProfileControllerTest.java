@@ -288,7 +288,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
@@ -431,13 +431,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_withTosVersion() {
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountAndDbUserWithAffiliation();
 
     final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
-    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(config.termsOfService.latestAouVersion);
+    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
@@ -445,17 +445,17 @@ public class ProfileControllerTest extends BaseControllerTest {
     // invokes Terra account creation, so we can check if the Terra ToS has been accepted
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getLatestTermsOfServiceVersion())
-        .isEqualTo(config.termsOfService.latestAouVersion);
+        .isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test
   public void testCreateAccount_tos_changes() {
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountAndDbUserWithAffiliation();
 
     // between user creation and first sign-in, the AoU ToS version changes
-    config.termsOfService.latestAouVersion = config.termsOfService.latestAouVersion + 1;
+    config.termsOfService.minimumAcceptedAouVersion = config.termsOfService.minimumAcceptedAouVersion + 1;
 
     // invokes Terra account creation
     Profile profile = profileController.getMe().getBody();
@@ -464,7 +464,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the Terra ToS
 
     assertThat(profile.getLatestTermsOfServiceVersion())
-        .isNotEqualTo(config.termsOfService.latestAouVersion);
+        .isNotEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
@@ -473,7 +473,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion - 1);
+          createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
     verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();

@@ -152,7 +152,8 @@
     "usersPerCheckInitialCreditsExpirationTask": 50
   },
   "termsOfService": {
-    "latestAouVersion": 2
+    "latestAouVersion": 1,
+    "minimumAcceptedAouVersion": 1
   },
   "tanagra": {
     "baseUrl": "https:\/\/test.fake-research-aou.org"
