@@ -9,7 +9,10 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-export const LATEST_TOS_VERSION = 1;
+// keep in sync with the API config value termsOfService.latestAouVersion
+// this explicitly does not derive from that value, to ensure that the UI has been independently updated
+export const LATEST_TOS_VERSION = 2;
+
 const baseCheckboxLabelStyle = {
   color: colors.primary,
   fontFamily: 'Montserrat',
@@ -40,7 +43,7 @@ const styles = reactStyles({
 export interface TosProps {
   showReAcceptNotification: boolean;
   // Callback which will be called by this component when the user clicks "Next".
-  onComplete: (tosVersion) => void;
+  onComplete: (tosVersion: number) => void;
   // Path to the Terms of Service file to be displayed.
   filePath: string;
   // Coming from Institution page

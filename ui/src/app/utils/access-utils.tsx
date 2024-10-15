@@ -363,7 +363,7 @@ export const useShowTOS = () => {
   return userRequiredToAcceptTOS;
 };
 
-export const acceptTermsOfService = (tosVersion) => {
+export const acceptTermsOfService = (tosVersion: number) => {
   (async () => {
     try {
       await profileApi().acceptTermsOfService(tosVersion);
