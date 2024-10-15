@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
@@ -33,14 +35,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.legacy_leonardo_client.api.AppsApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.DataprocConfig;
@@ -124,7 +119,9 @@ public class LeonardoApiClientTest {
 
   @Autowired LeonardoApiClient leonardoApiClient;
 
-  @Captor private ArgumentCaptor<LeonardoCreateAppRequest> createAppRequestArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest>
+      createAppRequestArgumentCaptor;
 
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String WORKSPACE_ID = "myfirstworkspace";
@@ -145,8 +142,11 @@ public class LeonardoApiClientTest {
   private DbWorkspace testWorkspace;
   private UserAppEnvironment testApp;
   private CreateAppRequest createAppRequest;
-  private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
-  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+      leonardoKubernetesRuntimeConfig;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
+
   private PersistentDiskRequest persistentDiskRequest;
   private final Map<String, String> appLabels = new HashMap<>();
   private final Map<String, String> customEnvironmentVariables = new HashMap<>();
@@ -162,10 +162,14 @@ public class LeonardoApiClientTest {
     KubernetesRuntimeConfig kubernetesRuntimeConfig =
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
-        new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig()
+            .autoscalingEnabled(false)
+            .machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
     testApp =
         new UserAppEnvironment()
             .appType(AppType.RSTUDIO)
@@ -234,7 +238,8 @@ public class LeonardoApiClientTest {
     diskLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
     diskLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAME, WORKSPACE_NAME);
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
     appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_WORKSPACE_NAMESPACE, WORKSPACE_NS);
@@ -242,18 +247,18 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
     customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
     customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
-    LeonardoCreateAppRequest expectedAppRequest =
-        new LeonardoCreateAppRequest()
-            .appType(LeonardoAppType.ALLOWED)
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest expectedAppRequest =
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest()
+            .appType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .allowedChartName(LeonardoAllowedChartName.RSTUDIO)
+            .allowedChartName(AllowedChartName.RSTUDIO)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .bucketNameToMount(WORKSPACE_BUCKET)
             .customEnvironmentVariables(customEnvironmentVariables);
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);
-    assertThat(createAppRequest.isAutodeleteEnabled()).isNull();
+    assertThat(createAppRequest.getAutodeleteEnabled()).isNull();
   }
 
   @Test
@@ -271,9 +276,10 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
-    assertThat(createAppRequest.isAutodeleteEnabled()).isTrue();
+    assertThat(createAppRequest.getAutodeleteEnabled()).isTrue();
     assertThat(createAppRequest.getAutodeleteThreshold()).isEqualTo(10);
   }
 
@@ -288,7 +294,8 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
     assertThat(createAppRequest.getBucketNameToMount()).isNull();
   }
@@ -308,9 +315,10 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
-    assertThat(createAppRequest.isAutodeleteEnabled()).isFalse();
+    assertThat(createAppRequest.getAutodeleteEnabled()).isFalse();
     assertThat(createAppRequest.getAutodeleteThreshold()).isEqualTo(10);
   }
 
@@ -326,7 +334,8 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
     assertThat(createAppRequest.getDiskConfig().getName())
         .startsWith("all-of-us-pd-" + user.getUserId() + "-" + "rstudio");

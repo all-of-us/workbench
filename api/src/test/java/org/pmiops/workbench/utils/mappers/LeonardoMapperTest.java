@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
@@ -19,10 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
@@ -52,7 +49,8 @@ public class LeonardoMapperTest {
   private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
       leonardoKubernetesRuntimeConfig;
   private PersistentDiskRequest persistentDiskRequest;
-  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
   private AuditInfo leonardoAuditInfo;
   private List<KubernetesError> kubernetesErrors = new ArrayList<>();
   private List<org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError>
@@ -84,7 +82,9 @@ public class LeonardoMapperTest {
             .machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
     leonardoAuditInfo =
         new AuditInfo()
             .createdDate("2022-10-10")
@@ -144,17 +144,19 @@ public class LeonardoMapperTest {
 
   @Test
   public void testToLeonardoAppType() {
-    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.ALLOWED);
-    assertThat(mapper.toLeonardoAppType(AppType.SAS)).isEqualTo(LeonardoAppType.ALLOWED);
-    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(LeonardoAppType.CROMWELL);
+    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO))
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED);
+    assertThat(mapper.toLeonardoAppType(AppType.SAS))
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED);
+    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL))
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL);
   }
 
   @Test
   public void testToLeonardoAllowedAppChart() {
     assertThat(mapper.toLeonardoAllowedChartName(AppType.RSTUDIO))
-        .isEqualTo(LeonardoAllowedChartName.RSTUDIO);
-    assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS))
-        .isEqualTo(LeonardoAllowedChartName.SAS);
+        .isEqualTo(AllowedChartName.RSTUDIO);
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS)).isEqualTo(AllowedChartName.SAS);
     assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
   }
 
