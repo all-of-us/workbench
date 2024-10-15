@@ -9,9 +9,9 @@ import { AoU } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-// keep in sync with the API config value termsOfService.latestAouVersion
-// this explicitly does not derive from that value, to ensure that the UI has been independently updated
-export const LATEST_TOS_VERSION = 2;
+// keep in sync with the API config value termsOfService.minimumAcceptedAouVersion
+// this explicitly does not derive from that value, to allow for independent updates
+export const tosVersion = 2;
 
 const baseCheckboxLabelStyle = {
   color: colors.primary,
@@ -179,7 +179,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               }
               onClick={() => {
                 this.setState({ hasClickedNext: true });
-                this.props.onComplete(LATEST_TOS_VERSION);
+                this.props.onComplete(tosVersion);
               }}
             >
               Next
