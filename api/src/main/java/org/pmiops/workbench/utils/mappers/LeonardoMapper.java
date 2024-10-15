@@ -160,8 +160,11 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
-  // these 4 set by getRuntimeAfterMapper()
-  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(
+      target = "configurationType",
+      source = "labels",
+      qualifiedByName = "mapRuntimeConfigurationLabels")
+  // these 3 set by getRuntimeAfterMapper()
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
@@ -175,8 +178,11 @@ public interface LeonardoMapper {
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(target = "errors", ignore = true)
-  // these 4 set by getRuntimeAfterMapper()
-  @Mapping(target = "configurationType", ignore = true)
+  @Mapping(
+      target = "configurationType",
+      source = "labels",
+      qualifiedByName = "mapRuntimeConfigurationLabels")
+  // these 3 set by listRuntimeAfterMapper()
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
@@ -187,7 +193,6 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapRuntimeLabels(runtime, leonardoGetRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoGetRuntimeResponse.getRuntimeConfig(),
@@ -197,7 +202,6 @@ public interface LeonardoMapper {
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapRuntimeLabels(runtime, leonardoListRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoListRuntimeResponse.getRuntimeConfig(),
@@ -212,21 +216,19 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "appType", source = "labels")
   @Mapping(target = "autopauseThreshold", ignore = true)
-  // set by getAppAfterMapper()
-  @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(GetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  // set by listAppsAfterMapper()
-  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "appType", source = "labels")
+  @Mapping(target = "autopauseThreshold", ignore = true)
   UserAppEnvironment toApiApp(ListAppResponse app);
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
@@ -250,41 +252,27 @@ public interface LeonardoMapper {
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
-  @AfterMapping
-  default void listAppsAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, ListAppResponse listAppResponse) {
-    setAppType(appEnvironment, listAppResponse.getLabels());
+  default AppType mapAppType(@Nullable Object appLabels) {
+    return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
+        .orElseThrow(
+            () ->
+                new ServerErrorException(
+                    String.format("Missing app type labels for app with labels %s", appLabels)));
   }
 
-  @AfterMapping
-  default void getAppAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, GetAppResponse getAppResponse) {
-    setAppType(appEnvironment, getAppResponse.getLabels());
-  }
-
-  default void setAppType(UserAppEnvironment appEnvironment, @Nullable Object appLabels) {
-    appEnvironment.setAppType(
-        LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
-            .orElseThrow(
-                () ->
-                    new ServerErrorException(
-                        String.format(
-                            "Missing app type labels for app with labels %s", appLabels))));
-  }
-
-  default void mapRuntimeLabels(Runtime runtime, Object runtimeLabelsObj) {
+  @Named("mapRuntimeConfigurationLabels")
+  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
     if (runtimeLabels == null
         || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a
       // default Dataproc config
-      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
+      return RuntimeConfigurationType.HAILGENOMICANALYSIS;
     } else {
-      runtime.setConfigurationType(
-          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-              .inverse()
-              .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
+      return RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+          .inverse()
+          .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG));
     }
   }
 
