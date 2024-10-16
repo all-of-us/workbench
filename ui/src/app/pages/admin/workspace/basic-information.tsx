@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 import { Workspace, WorkspaceActiveStatus } from 'generated/fetch';
 
-import { FlexRow } from 'app/components/flex';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { WorkspaceInfoField } from './workspace-info-field';
@@ -33,12 +32,10 @@ export const BasicInformation = ({
         </WorkspaceInfoField>
         {isUsingFreeTierBillingAccount(workspace) && (
           <WorkspaceInfoField labelText='Initial Credits Billing Status'>
-            <FlexRow>
-              {workspace.initialCredits?.exhausted
-                ? 'Exhausted'
-                : 'Not Exhausted'}
-              , {workspace.initialCredits?.expired ? 'Expired' : 'Not Expired'}
-            </FlexRow>
+            {workspace.initialCredits?.exhausted
+              ? 'Exhausted'
+              : 'Not Exhausted'}
+            , {workspace.initialCredits?.expired ? 'Expired' : 'Not Expired'}
           </WorkspaceInfoField>
         )}
         <WorkspaceInfoField labelText='Workspace Name'>
