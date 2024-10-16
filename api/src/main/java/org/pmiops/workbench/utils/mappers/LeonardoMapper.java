@@ -7,8 +7,10 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -18,22 +20,15 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAllowedChartName;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAppType;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudContext;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCloudProvider;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoClusterError;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskStatus;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListAppResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeImage;
@@ -99,8 +94,9 @@ public interface LeonardoMapper {
   @Mapping(target = "labels", ignore = true)
   PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
 
-  LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(
-      PersistentDiskRequest persistentDiskRequest);
+  @Mapping(target = "additionalProperties", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      toLeonardoPersistentDiskRequest(PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", constant = "GCE")
@@ -159,28 +155,36 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
+  @Mapping(
+      target = "configurationType",
+      source = "labels",
+      qualifiedByName = "mapRuntimeConfigurationLabels")
+  // these 3 set by getRuntimeAfterMapper()
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "toolDockerImage", ignore = true)
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
-  @Mapping(target = "errors", ignore = true)
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "legacy_cloudContextToGoogleProject")
+  @Mapping(
+      target = "configurationType",
+      source = "labels",
+      qualifiedByName = "mapRuntimeConfigurationLabels")
+  @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
+  @Mapping(target = "errors", ignore = true)
+  // these 3 set by listRuntimeAfterMapper()
+  @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
+  @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
@@ -188,7 +192,6 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapRuntimeLabels(runtime, leonardoGetRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoGetRuntimeResponse.getRuntimeConfig(),
@@ -198,7 +201,6 @@ public interface LeonardoMapper {
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapRuntimeLabels(runtime, leonardoListRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoListRuntimeResponse.getRuntimeConfig(),
@@ -208,79 +210,57 @@ public interface LeonardoMapper {
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "appName", source = "appName")
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "legacy_cloudContextToGoogleProject")
+      qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "appType", source = "labels", qualifiedByName = "mapAppType")
   @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "appType", ignore = true)
-  UserAppEnvironment toApiApp(LeonardoGetAppResponse app);
-
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(
-      target = "googleProject",
-      source = "cloudContext",
-      qualifiedByName = "legacy_cloudContextToGoogleProject")
-  @Mapping(target = "appType", ignore = true)
-  UserAppEnvironment toApiApp(LeonardoListAppResponse app);
+  UserAppEnvironment toApiApp(ListAppResponse app);
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
-      LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+          leonardoKubernetesRuntimeConfig);
 
-  LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
-      KubernetesRuntimeConfig kubernetesRuntimeConfig);
+  @Mapping(target = "additionalProperties", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+      toLeonardoKubernetesRuntimeConfig(KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
   // SAS and RStudio apps are implemented as ALLOWED Helm Charts
   @ValueMapping(source = "RSTUDIO", target = "ALLOWED")
   @ValueMapping(source = "SAS", target = "ALLOWED")
-  LeonardoAppType toLeonardoAppType(AppType appType);
+  org.broadinstitute.dsde.workbench.client.leonardo.model.AppType toLeonardoAppType(
+      AppType appType);
 
   // Cromwell is not an ALLOWED Helm Chart in Leonardo
   @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
-  LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
+  AllowedChartName toLeonardoAllowedChartName(AppType appType);
 
   @ValueMapping(source = "BALANCED", target = MappingConstants.NULL)
   DiskType toDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
-  @AfterMapping
-  default void listAppsAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, LeonardoListAppResponse listAppResponse) {
-    setAppType(appEnvironment, listAppResponse.getLabels());
+  @Named("mapAppType")
+  default AppType mapAppType(@Nullable Object appLabels) {
+    return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
+        .orElseThrow(
+            () ->
+                new ServerErrorException(
+                    String.format("Missing app type labels for app with labels %s", appLabels)));
   }
 
-  @AfterMapping
-  default void getAppAfterMapper(
-      @MappingTarget UserAppEnvironment appEnvironment, LeonardoGetAppResponse getAppResponse) {
-    setAppType(appEnvironment, getAppResponse.getLabels());
-  }
-
-  default void setAppType(UserAppEnvironment appEnvironment, @Nullable Object appLabels) {
-    appEnvironment.setAppType(
-        LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
-            .orElseThrow(
-                () ->
-                    new ServerErrorException(
-                        String.format(
-                            "Missing app type labels for app with labels %s", appLabels))));
-  }
-
-  default void mapRuntimeLabels(Runtime runtime, Object runtimeLabelsObj) {
+  @Named("mapRuntimeConfigurationLabels")
+  default RuntimeConfigurationType mapRuntimeConfigurationLabels(Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
     if (runtimeLabels == null
         || runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG) == null) {
       // If there's no label, fall back onto the old behavior where every Runtime was created with a
       // default Dataproc config
-      runtime.setConfigurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS);
+      return RuntimeConfigurationType.HAILGENOMICANALYSIS;
     } else {
-      runtime.setConfigurationType(
-          RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-              .inverse()
-              .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG)));
+      return RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+          .inverse()
+          .get(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG));
     }
   }
 
@@ -322,7 +302,8 @@ public interface LeonardoMapper {
     return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
   }
 
-  default DiskStatus toApiDiskStatus(LeonardoDiskStatus leonardoDiskStatus) {
+  default DiskStatus toApiDiskStatus(
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus) {
     if (leonardoDiskStatus == null) {
       return DiskStatus.UNKNOWN;
     }

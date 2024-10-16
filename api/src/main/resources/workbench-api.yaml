@@ -943,44 +943,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: app
   /v1/workspaces/{workspaceNamespace}/apps/{appName}:
-    get:
-      tags:
-      - apps
-      summary: Get the user's app by name in a workspace.
-      description: Returns the current user's app by name in a workspace if exists.
-      operationId: getApp
-      parameters:
-      - name: workspaceNamespace
-        in: path
-        description: The Workspace namespace
-        required: true
-        schema:
-          type: string
-      - name: appName
-        in: path
-        description: The name of the user app.
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: The user app for this user and workspace.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserAppEnvironment'
-        404:
-          description: No user app exists for this user and workspace.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        412:
-          description: Compute is temporarily suspended for security reasons.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
       - apps
