@@ -368,12 +368,6 @@ public class LeonardoApiClientTest {
   }
 
   @Test
-  public void testGetAppSuccess() throws Exception {
-    leonardoApiClient.getAppByNameByProjectId(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
-    verify(mockUserAppsApi).getApp(GOOGLE_PROJECT_ID, getAppName(AppType.RSTUDIO));
-  }
-
-  @Test
   public void testListAppSuccess() throws Exception {
     leonardoApiClient.listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
     verify(mockUserAppsApi)

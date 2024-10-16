@@ -13,7 +13,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -156,29 +155,6 @@ public class LeonardoMapperTest {
         .isEqualTo(AllowedChartName.RSTUDIO);
     assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS)).isEqualTo(AllowedChartName.SAS);
     assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
-  }
-
-  @ParameterizedTest(name = "appType {0} can be mapped for getApp call")
-  @MethodSource("allAppTypesMap")
-  public void testToAppFromGetResponse(
-      AppType apiAppType,
-      org.broadinstitute.dsde.workbench.client.leonardo.model.AppType leoAppType) {
-    labels.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(apiAppType));
-
-    GetAppResponse getAppResponse =
-        new GetAppResponse()
-            .appType(leoAppType)
-            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
-            .auditInfo(leonardoAuditInfo)
-            .diskName(DISK_NAME)
-            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .appName(APP_NAME)
-            .errors(leonardoKubernetesErrors)
-            .proxyUrls(proxyUrls)
-            .cloudContext(
-                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
-            .labels(labels);
-    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app.appType(apiAppType));
   }
 
   @ParameterizedTest(name = "appType {0} can be mapped for listApp call")

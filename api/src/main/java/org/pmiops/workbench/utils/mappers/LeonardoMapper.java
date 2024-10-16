@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.mapstruct.AfterMapping;
@@ -207,18 +206,6 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getRuntimeConfig(),
         leonardoListRuntimeResponse.getDiskConfig());
   }
-
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "appName", source = "appName")
-  @Mapping(
-      target = "googleProject",
-      source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
-  @Mapping(target = "appType", source = "labels", qualifiedByName = "mapAppType")
-  @Mapping(target = "autopauseThreshold", ignore = true)
-  UserAppEnvironment toApiApp(GetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")

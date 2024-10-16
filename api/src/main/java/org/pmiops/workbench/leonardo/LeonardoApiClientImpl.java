@@ -32,7 +32,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
@@ -675,15 +674,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
               leonardoCreateAppRequest);
           return null;
         });
-  }
-
-  @Override
-  public UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName) {
-    AppsApi appsApi = appsApiProvider.get();
-
-    GetAppResponse response =
-        leonardoRetryHandler.run(context -> appsApi.getApp(googleProjectId, appName));
-    return leonardoMapper.toApiApp(response);
   }
 
   @Override

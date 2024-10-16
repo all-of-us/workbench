@@ -103,14 +103,6 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /**
-   * Gets Leonardo app owned by app name and workspace GCP project
-   *
-   * @param googleProjectId the GCP project the app belongs to
-   * @param appName the name of the app
-   */
-  UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName);
-
-  /**
    * Lists all apps the user creates in the given workspace GCP project
    *
    * @param googleProjectId the GCP project the app belongs to
