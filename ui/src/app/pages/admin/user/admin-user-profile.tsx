@@ -221,6 +221,9 @@ const EditableFields = ({
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
   const { profile } = useStore(profileStore);
+  const {
+    config: { enableInitialCreditsExpiration },
+  } = serverConfigStore.get();
 
   // Show the link to  redirect to institution detail page,
   // if the LOGGED IN USER has Institution admin authority and
@@ -288,11 +291,15 @@ const EditableFields = ({
             highlightOnChange
             onChange={(event) => onChangeInitialCreditsLimit(event.value)}
           />
-          <InitialCreditBypassSwitch
-            currentlyBypassed={updatedProfile.initialCreditsExpirationBypassed}
-            previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
-            onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
-          />
+          {enableInitialCreditsExpiration && (
+            <InitialCreditBypassSwitch
+              currentlyBypassed={
+                updatedProfile.initialCreditsExpirationBypassed
+              }
+              previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+              onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+            />
+          )}
         </FlexRow>
         <FlexRow>
           <InstitutionalRoleDropdown
