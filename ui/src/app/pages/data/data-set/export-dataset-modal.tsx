@@ -49,6 +49,7 @@ interface Props {
   workspace: WorkspaceData;
   tanagraCohortIds?: string[];
   tanagraFeatureSetIds?: string[];
+  tanagraAllParticipantsCohort?: boolean;
 }
 
 const styles = reactStyles({
@@ -67,6 +68,7 @@ export const ExportDatasetModal = ({
   closeFunction,
   tanagraCohortIds,
   tanagraFeatureSetIds,
+  tanagraAllParticipantsCohort,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] =
     useState<string[]>(undefined);
@@ -105,6 +107,7 @@ export const ExportDatasetModal = ({
             prePackagedConceptSet: dataset?.prePackagedConceptSet ?? [],
             tanagraCohortIds,
             tanagraFeatureSetIds,
+            tanagraAllParticipantsCohort,
           }),
       domainValuePairs: [],
     };

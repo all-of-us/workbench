@@ -171,6 +171,7 @@ export function useExitActionListener(callback: () => void) {
 }
 
 export interface ExportResources {
+  allParticipantsCohort: boolean;
   cohortIds: string[];
   featureSetIds: string[];
 }
@@ -180,8 +181,15 @@ export function useExportListener(
 ) {
   useMessageListener(
     'EXPORT',
-    (event: { resources: { cohorts: string[]; featureSets: string[] } }) =>
+    (event: {
+      resources: {
+        allParticipantsCohort: boolean;
+        cohorts: string[];
+        featureSets: string[];
+      };
+    }) =>
       callback({
+        allParticipantsCohort: event.resources.allParticipantsCohort,
         cohortIds: event.resources.cohorts,
         featureSetIds: event.resources.featureSets,
       })
