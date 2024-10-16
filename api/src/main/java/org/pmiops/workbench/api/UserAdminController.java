@@ -139,7 +139,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
   public ResponseEntity<ListEgressBypassWindowResponse> listEgressBypassWindows(Long userId) {
     return ResponseEntity.ok(
         new ListEgressBypassWindowResponse()

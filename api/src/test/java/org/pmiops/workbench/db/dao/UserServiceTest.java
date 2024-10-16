@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -142,7 +143,7 @@ public class UserServiceTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
+    providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = 5; // arbitrary
     providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
 
     DbUserInitialCreditsExpiration initialCreditsExpiration =
@@ -169,8 +170,6 @@ public class UserServiceTest {
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
     when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
-    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(false);
     when(mockInstitutionService.validateInstitutionalEmail(
             institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
         .thenReturn(true);
@@ -296,7 +295,7 @@ public class UserServiceTest {
 
   @Test
   public void testSubmitAouTermsOfService() {
-    int latestVersion = providedWorkbenchConfig.termsOfService.latestAouVersion;
+    int latestVersion = providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion;
 
     // confirm empty to start
     assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
@@ -324,7 +323,7 @@ public class UserServiceTest {
     // need to do this first
     DbUser user = userDao.findUserByUsername(USERNAME);
     userService.submitAouTermsOfService(
-        user, providedWorkbenchConfig.termsOfService.latestAouVersion);
+        user, providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
 
     // to be replaced as part of RW-11416
     userService.acceptTerraTermsOfServiceDeprecated(userDao.findUserByUsername(USERNAME));
@@ -508,9 +507,10 @@ public class UserServiceTest {
 
   @Test
   public void test_validateAllOfUsTermsOfService() {
-    // does not throw
-    userService.validateAllOfUsTermsOfService(
-        providedWorkbenchConfig.termsOfService.latestAouVersion);
+    assertDoesNotThrow(
+        () ->
+            userService.validateAllOfUsTermsOfService(
+                providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion));
   }
 
   @Test
@@ -526,21 +526,39 @@ public class UserServiceTest {
         BadRequestException.class,
         () ->
             userService.validateAllOfUsTermsOfService(
-                providedWorkbenchConfig.termsOfService.latestAouVersion - 1));
+                providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1));
+  }
+
+  @Test
+  public void test_validateAllOfUsTermsOfService_newer_version() {
+    assertDoesNotThrow(
+        () ->
+            userService.validateAllOfUsTermsOfService(
+                providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion + 1));
   }
 
   @Test
   public void test_hasSignedLatestAoUTermsOfService() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
     assertThat(userService.hasSignedLatestAoUTermsOfService(user)).isTrue();
   }
 
   @Test
   public void test_hasSignedLatestAoUTermsOfService_incorrectVersion() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1);
     assertThat(userService.hasSignedLatestAoUTermsOfService(user)).isFalse();
+  }
+
+  @Test
+  public void test_hasSignedLatestAoUTermsOfService_newerVersion() {
+    DbUser user =
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion + 1);
+    assertThat(userService.hasSignedLatestAoUTermsOfService(user)).isTrue();
   }
 
   @Test
@@ -552,7 +570,8 @@ public class UserServiceTest {
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
     when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
     assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isTrue();
   }
@@ -560,7 +579,8 @@ public class UserServiceTest {
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth_has_not_accepted_terra() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion);
     when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
   }
@@ -584,7 +604,8 @@ public class UserServiceTest {
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_accepted_terra() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1);
     when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(true);
     assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
   }
@@ -592,7 +613,8 @@ public class UserServiceTest {
   @Test
   public void test_hasSignedLatestTermsOfServiceBoth_wrong_aou_version_has_not_accepted_terra() {
     DbUser user =
-        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
+        createUserWithAoUTOSVersion(
+            providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion - 1);
     when(mockFireCloudService.hasUserAcceptedLatestTerraToS()).thenReturn(false);
     assertThat(userService.hasSignedLatestTermsOfServiceForBoth(user)).isFalse();
   }

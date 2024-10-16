@@ -649,7 +649,6 @@ describe('AdminUserProfile', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enableEraCommons: false,
         enableComplianceTraining: false,
       },
     });

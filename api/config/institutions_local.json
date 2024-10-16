@@ -6,13 +6,11 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["vumc.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["vumc.org"]
 		}
 	]
@@ -24,13 +22,11 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["broadinstitute.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["broadinstitute.org"]
 		}
 	]
@@ -42,13 +38,11 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["verily.com", "google.com"]
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["verily.com", "google.com"]
 		}
 	]
@@ -62,13 +56,11 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["fake-research-aou.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired": true,
 			"emailDomains": ["fake-research-aou.org"]
 		}
 	]

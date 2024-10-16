@@ -190,7 +190,7 @@ public class ProfileServiceTest {
   @Test
   public void testReturnsLastAcknowledgedTermsOfService() {
     int latestVersion = 5; // arbitrary;
-    providedWorkbenchConfig.termsOfService.latestAouVersion = latestVersion;
+    providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = latestVersion;
 
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(latestVersion);

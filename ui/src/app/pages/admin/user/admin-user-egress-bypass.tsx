@@ -16,41 +16,41 @@ import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { displayDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
-const MIN_BYPASS_DESCRIPTION = 10;
-const MAX_BYPASS_DESCRIPTION = 4000;
 
-interface Props {
-  userId: number;
+export const MIN_BYPASS_DESCRIPTION = 10;
+export const MAX_BYPASS_DESCRIPTION = 4000;
+
+export interface AdminUserEgressBypassProps {
+  targetUserId: number;
 }
+export const AdminUserEgressBypass = (props: AdminUserEgressBypassProps) => {
+  const { targetUserId } = props;
 
-export const AdminUserEgressBypass = (props: Props) => {
+  const [apiError, setApiError] = useState(false);
+  const [bypassing, setBypassing] = useState(false);
   const [startTime, setStartTime] = useState(new Date());
   const [bypassDescription, setBypassDescription] = useState('');
-  const [apiError, setApiError] = useState(false);
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
 
   const loadEgressWindows = () => {
-    const { userId } = props;
     userAdminApi()
-      .listEgressBypassWindows(userId)
+      .listEgressBypassWindows(targetUserId)
       .then((res) => setBypassWindowsList(res.bypassWindows));
   };
 
-  useEffect(() => {
-    loadEgressWindows();
-  }, []);
+  useEffect(loadEgressWindows, []);
 
   const invalidReason =
     !bypassDescription ||
     bypassDescription.length < MIN_BYPASS_DESCRIPTION ||
     bypassDescription.length > MAX_BYPASS_DESCRIPTION;
 
-  let egressBypassButtonDisabled =
-    apiError || invalidReason || !isDateValid(startTime);
+  const egressBypassButtonDisabled =
+    bypassing || apiError || invalidReason || !isDateValid(startTime);
 
-  const getToolTipContent = apiError ? (
+  const toolTipContent = apiError ? (
     'Error occurred while creating egress bypass request'
   ) : (
     <div>
@@ -70,8 +70,7 @@ export const AdminUserEgressBypass = (props: Props) => {
   );
 
   const onCreateBypassRequest = () => {
-    const { userId } = props;
-    egressBypassButtonDisabled = true;
+    setBypassing(true);
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
@@ -79,11 +78,12 @@ export const AdminUserEgressBypass = (props: Props) => {
     setBypassDescription('');
 
     userAdminApi()
-      .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
+      .createEgressBypassWindow(targetUserId, createEgressBypassWindowRequest)
       .catch(() => {
         setApiError(true);
       })
       .finally(() => {
+        setBypassing(false);
         loadEgressWindows();
       });
   };
@@ -103,13 +103,16 @@ export const AdminUserEgressBypass = (props: Props) => {
         </FlexRow>
         {/* Text area to enter the reason for large file download */}
         <FlexRow>
-          <label style={{ fontWeight: 'bold', color: colors.primary }}>
+          <label
+            htmlFor='Egress Bypass Description'
+            style={{ fontWeight: 'bold', color: colors.primary }}
+          >
             Enter description for large file download request.
           </label>
         </FlexRow>
         <FlexColumn>
           <TextAreaWithLengthValidationMessage
-            id='BYPASS-DESCRIPTION'
+            id='Egress Bypass Description'
             textBoxStyleOverrides={{ width: '60%' }}
             heightOverride={{ height: '5rem' }}
             initialText={bypassDescription}
@@ -150,13 +153,14 @@ export const AdminUserEgressBypass = (props: Props) => {
         </FlexRow>
         <FlexRow style={{ paddingTop: '1rem' }}>
           <TooltipTrigger
-            content={getToolTipContent}
+            content={toolTipContent}
             disabled={!egressBypassButtonDisabled}
           >
             <Button
               type='primary'
               onClick={() => onCreateBypassRequest()}
               disabled={egressBypassButtonDisabled}
+              style={{ maxWidth: 'none' }}
             >
               Temporarily Enable Large File Downloads
             </Button>

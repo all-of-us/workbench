@@ -223,13 +223,6 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public boolean eRaRequiredForTier(Institution institution, String accessTierShortName) {
-    Optional<InstitutionTierConfig> tierConfig =
-        getTierConfigByTier(institution, accessTierShortName);
-    return tierConfig.isPresent() && Boolean.TRUE.equals(tierConfig.get().isEraRequired());
-  }
-
-  @Override
   public boolean validateInstitutionalEmail(
       Institution institution, String contactEmail, String accessTierShortName) {
     try {
@@ -419,7 +412,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                   userTierEligibilities.add(
                       new UserTierEligibility()
                           .accessTierShortName(tierName)
-                          .eraRequired(t.isEraRequired())
                           .eligible(
                               validateInstitutionalEmail(
                                   institution.get(), user.getContactEmail(), tierName))));

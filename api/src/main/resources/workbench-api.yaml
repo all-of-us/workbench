@@ -2372,7 +2372,7 @@ paths:
       tags:
       - userAdmin
       description: |
-        List all of the user's egress bypass windows.  Require RESEARCHER_DATA_VIEW authority
+        List all of the user's egress bypass windows.  Requires SECURITY_ADMIN authority
       operationId: listEgressBypassWindows
       parameters:
       - name: userId
@@ -7298,6 +7298,10 @@ components:
           description: the google project used by the workspace for compute and storage
         initialCredits:
           $ref: '#/components/schemas/InitialCreditResponse'
+        usesTanagra:
+          type: boolean
+          description: Whether a workspace uses Tanagra
+          default: false
 
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
@@ -7909,9 +7913,9 @@ components:
           description: All the selected domain/value pairs in the data set
           items:
             $ref: '#/components/schemas/DomainValuePair'
-        tanagraConceptSetIds:
+        tanagraFeatureSetIds:
           type: array
-          description: The ids of all concept sets in the data set
+          description: The ids of all feature sets in the data set
           items:
             type: string
         tanagraCohortIds:
@@ -9821,10 +9825,6 @@ components:
           description: The short unique name for the access tier.
         membershipRequirement:
           $ref: '#/components/schemas/InstitutionMembershipRequirement'
-        eraRequired:
-          type: boolean
-          description: Whether eRA commons is required for members in the institution
-            for this tier.
         emailDomains:
           type: array
           items:
@@ -12820,9 +12820,6 @@ components:
             User eligibility for tiers is based on their contact emails and their institution's tier
             requirements. This does not mean the user has access to these tiers; to gain
             access, the user must still complete all the necessary access requirement steps for each tier.
-        eraRequired:
-          type: boolean
-          description: If eRA Commons linking is required for this access tier.
     DemographicSurveyV2:
       type: object
       properties:

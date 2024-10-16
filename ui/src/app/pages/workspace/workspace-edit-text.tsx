@@ -246,6 +246,12 @@ export const toolTipText = {
       wish to query in this workspace.
     </div>
   ),
+  dataAppsSelect: (
+    <div>
+      Choose which versions of Cohort Builder, Concept Search and Dataset
+      Builder to use.
+    </div>
+  ),
   tierSelect: (
     <FlexColumn>
       <div style={{ fontWeight: 'bold' }}>Registered Tier dataset</div>

@@ -61,7 +61,7 @@
       "cdrVersionId": 4,
       "name": "All of Us Registered Tier Dataset v4",
       "bigqueryProject": "fc-aou-cdr-preprod",
-      "bigqueryDataset": "R2020Q4R5",
+      "bigqueryDataset": "R2020Q4R6",
       "creationTime": "2020-10-20 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 315250,

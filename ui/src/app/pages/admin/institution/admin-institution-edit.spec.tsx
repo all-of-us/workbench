@@ -17,6 +17,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   changeInputValue,
   expectTooltip,
+  expectTooltipAbsence,
   waitForNoSpinner,
 } from 'testing/react-test-helpers';
 import {
@@ -85,16 +86,12 @@ const selectDropdownOption = async (
   await userEvent.click(optionElement);
 };
 
-export const expectTooltipAbsence = async (
-  element: HTMLElement,
-  user: UserEvent
-) => {
-  await user.hover(element);
-  expect(
-    screen.queryByText(/Please correct the following errors/i)
-  ).not.toBeInTheDocument();
-  await user.unhover(element);
-};
+const expectSaveTooltipAbsence = async (user: UserEvent) =>
+  expectTooltipAbsence(
+    getSaveButton(),
+    /Please correct the following errors/i,
+    user
+  );
 
 describe('AdminInstitutionEditSpec - edit mode', () => {
   let user: UserEvent;
@@ -371,7 +368,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // Single correct format Email Address entries
     changeInputValue(getRTAddressInput(), 'correctEmail@domain.com', user);
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
@@ -417,7 +414,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'correctEmail@domain.com',
       user
     );
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
@@ -426,7 +423,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     // VERILY inst starts with RT DOMAINS
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
 
     // Single Entry with incorrect Email Domain format
     await changeInputValue(getRTDomainInput(), 'invalidEmail@domain', user);
@@ -455,7 +452,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     );
 
     await changeInputValue(getRTDomainInput(), 'domain.com', user);
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
@@ -498,7 +495,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     );
 
     await changeInputValue(getCTDomainInput(), 'domain.com', user);
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
@@ -517,7 +514,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'validEmail.com,\njustSomeRandom.domain'
     );
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
@@ -537,7 +534,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'validEmail.com,\njustSomeRandom.domain'
     );
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should ignore whitespaces in email domains in Registered Tier requirement', async () => {
@@ -556,7 +553,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'someDomain.com,\njustSomeRandom.domain'
     );
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should ignore whitespaces in email domains in Controlled Tier requirement', async () => {
@@ -577,7 +574,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
       'someDomain.com,\njustSomeRandom.domain'
     );
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should allow updating bypassInitialCreditsExpiration from false to true', async () => {
@@ -596,7 +593,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(bypassToggle).toBeChecked();
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 
   it('Should allow updating bypassInitialCreditsExpiration from true to false', async () => {
@@ -615,7 +612,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(bypassToggle).not.toBeChecked();
 
-    await expectTooltipAbsence(getSaveButton(), user);
+    await expectSaveTooltipAbsence(user);
   });
 });
 

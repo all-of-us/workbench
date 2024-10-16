@@ -13,9 +13,13 @@ import static org.pmiops.workbench.mail.MailServiceImpl.DETACHED_DISK_STATUS;
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,9 +32,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoAuditInfo;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoDiskType;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -98,7 +99,7 @@ public class MailServiceImplTest {
     when(mockMandrillApi.send(any())).thenReturn(msgStatuses);
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
     verify(mockMandrillApi, times(1)).send(any());
   }
 
@@ -107,7 +108,7 @@ public class MailServiceImplTest {
     doThrow(ApiException.class).when(mockMandrillApi).send(any());
     assertThrows(
         MessagingException.class,
-        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true));
+        () -> mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME));
     verify(mockMandrillApi, times(3)).send(any());
   }
 
@@ -117,7 +118,7 @@ public class MailServiceImplTest {
     ServerErrorException exception =
         assertThrows(
             ServerErrorException.class,
-            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, true));
+            () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
     assertThat(exception.getMessage()).isEqualTo("Email: Nota valid email is invalid.");
   }
 
@@ -126,7 +127,7 @@ public class MailServiceImplTest {
     DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, true, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
   }
 
   @Test
@@ -134,24 +135,24 @@ public class MailServiceImplTest {
     DbUser user = createDbUser().setContactEmail(INVALID_EMAIL);
     assertThrows(
         ServerErrorException.class,
-        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME, false, false));
+        () -> mailService.sendWelcomeEmail(user, PASSWORD, INSTITUTION_NAME));
   }
 
   @Test
   public void testSendWelcomeEmailRTAndCT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, true);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailOnlyRT() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, true, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   @Test
   public void testSendWelcomeEmailNoRtAndCt() throws MessagingException, ApiException {
-    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME, false, false);
+    mailService.sendWelcomeEmail(createDbUser(), PASSWORD, INSTITUTION_NAME);
     verify(mockMandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
@@ -272,14 +273,14 @@ public class MailServiceImplTest {
     Map<String, String> labelsMap = new HashMap<String, String>();
     labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
-        ImmutableList.of(user),
+        Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+        new ListPersistentDiskResponse()
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()
@@ -314,14 +315,14 @@ public class MailServiceImplTest {
     Map<String, String> labelsMap = new HashMap<String, String>();
     labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
-        ImmutableList.of(user),
+        Collections.singletonList(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+        new ListPersistentDiskResponse()
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()

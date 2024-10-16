@@ -25,8 +25,8 @@ public class DbInstitutionTierRequirement {
   private long institutionTierRequirementId;
   private DbInstitution institution;
   private DbAccessTier accessTier;
-  private boolean eraRequired;
   private MembershipRequirement membershipRequirement;
+  private boolean eraRequired; // remove when we remove the field from DB
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,16 +63,6 @@ public class DbInstitutionTierRequirement {
     return this;
   }
 
-  @Column(name = "era_required")
-  public boolean getEraRequired() {
-    return eraRequired;
-  }
-
-  public DbInstitutionTierRequirement setEraRequired(boolean eraRequired) {
-    this.eraRequired = eraRequired;
-    return this;
-  }
-
   @Enumerated(EnumType.STRING)
   @Column(name = "requirement_enum", nullable = false)
   public MembershipRequirement getMembershipRequirement() {
@@ -83,6 +73,18 @@ public class DbInstitutionTierRequirement {
       MembershipRequirement membershipRequirement) {
     this.membershipRequirement = membershipRequirement;
     return this;
+  }
+
+  // remove when we remove the field from DB
+  public DbInstitutionTierRequirement setEraRequired(boolean eraRequired) {
+    this.eraRequired = false;
+    return this;
+  }
+
+  // remove when we remove the field from DB
+  @Column(name = "era_required")
+  public boolean getEraRequired() {
+    return eraRequired;
   }
 
   /**

@@ -157,12 +157,8 @@ interface AccessModuleUIConfig extends AccessModuleConfig {
 export const getAccessModuleConfig = (
   moduleName: AccessModule
 ): AccessModuleUIConfig => {
-  const {
-    enableRasLoginGovLinking,
-    enableEraCommons,
-    enableComplianceTraining,
-    accessModules,
-  } = serverConfigStore.get().config;
+  const { enableRasLoginGovLinking, enableComplianceTraining, accessModules } =
+    serverConfigStore.get().config;
   const apiConfig = accessModules.find((m) => m.name === moduleName);
   return switchCase<AccessModule, any>(
     moduleName,
@@ -185,18 +181,6 @@ export const getAccessModuleConfig = (
         isEnabledInEnvironment: enableRasLoginGovLinking,
         adminPageTitle: 'Verify your identity',
         refreshAction: () => redirectToRas(false),
-      }),
-    ],
-
-    [
-      AccessModule.ERA_COMMONS,
-      () => ({
-        ...apiConfig,
-        isEnabledInEnvironment: enableEraCommons,
-        adminPageTitle: 'Connect your eRA Commons* account',
-        externalSyncAction: async () =>
-          await profileApi().syncEraCommonsStatus(),
-        refreshAction: async () => await profileApi().syncEraCommonsStatus(),
       }),
     ],
 
@@ -379,7 +363,7 @@ export const useShowTOS = () => {
   return userRequiredToAcceptTOS;
 };
 
-export const acceptTermsOfService = (tosVersion) => {
+export const acceptTermsOfService = (tosVersion: number) => {
   (async () => {
     try {
       await profileApi().acceptTermsOfService(tosVersion);

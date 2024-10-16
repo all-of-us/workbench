@@ -4,20 +4,15 @@ import jakarta.annotation.Nullable;
 import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
 
-  void sendWelcomeEmail(
-      final DbUser user,
-      final String password,
-      final String institutionName,
-      final Boolean showEraStepInRt,
-      final Boolean showEraStepInCt)
+  void sendWelcomeEmail(final DbUser user, final String password, final String institutionName)
       throws MessagingException;
 
   void sendInstitutionUserInstructions(
@@ -48,7 +43,7 @@ public interface MailService {
   void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
-      LeonardoListPersistentDiskResponse disk,
+      ListPersistentDiskResponse disk,
       boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)

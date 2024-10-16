@@ -41,7 +41,6 @@ public class InstitutionMapperTest {
             new InstitutionTierConfig()
                 .accessTierShortName(TIER_NAME)
                 .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                .eraRequired(true)
                 .emailDomains(sortedModelDomains)
                 .emailAddresses(sortedModelAddresses));
   }

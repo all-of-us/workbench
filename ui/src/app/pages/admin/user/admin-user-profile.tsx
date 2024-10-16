@@ -36,6 +36,7 @@ import {
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
+  renderIfAuthorized,
 } from 'app/utils/authorities';
 import {
   checkInstitutionalEmail,
@@ -224,7 +225,7 @@ const EditableFields = ({
   // Show the link to  redirect to institution detail page,
   // if the LOGGED IN USER has Institution admin authority and
   // institution name is populated
-  const showGoToInstitutionLink: Boolean =
+  const showGoToInstitutionLink =
     hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) &&
     !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
 
@@ -467,6 +468,8 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
   const {
     config: { gsuiteDomain },
   } = useStore(serverConfigStore);
+  const { profile } = useStore(profileStore);
+
   const { usernameWithoutGsuiteDomain } = useParams<MatchParams>();
   const [oldProfile, setOldProfile] = useState<Profile>(null);
   const [updatedProfile, setUpdatedProfile] = useState<Profile>(null);
@@ -771,16 +774,31 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             <h2>Egress event history</h2>
           </FlexRow>
           <FlexRow>
-            <EgressEventsTable
-              displayPageSize={10}
-              sourceUserEmail={updatedProfile.username}
-            />
+            {renderIfAuthorized(
+              profile,
+              AuthorityGuardedAction.EGRESS_EVENTS,
+              () => (
+                <EgressEventsTable
+                  displayPageSize={10}
+                  sourceUserEmail={updatedProfile.username}
+                />
+              )
+            )}
           </FlexRow>
           <FlexRow>
             <h2>Egress bypass requests for large file downloads</h2>
           </FlexRow>
           <FlexRow>
-            <AdminUserEgressBypass userId={updatedProfile.userId} />
+            {renderIfAuthorized(
+              profile,
+              AuthorityGuardedAction.EGRESS_BYPASS,
+              () => (
+                <AdminUserEgressBypass
+                  {...{ profile }}
+                  targetUserId={updatedProfile.userId}
+                />
+              )
+            )}
           </FlexRow>
         </FlexColumn>
       )}

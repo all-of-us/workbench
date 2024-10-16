@@ -94,6 +94,7 @@ public class DbWorkspace {
   private boolean initialCreditsExpired;
 
   private DbFeaturedCategory featuredCategory;
+  private boolean usesTanagra;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -772,6 +773,16 @@ public class DbWorkspace {
 
   public DbWorkspace setInitialCreditsExpired(boolean initialCreditsExpired) {
     this.initialCreditsExpired = initialCreditsExpired;
+    return this;
+  }
+
+  @Column(name = "uses_tanagra")
+  public boolean isUsesTanagra() {
+    return usesTanagra;
+  }
+
+  public DbWorkspace setUsesTanagra(boolean usesTanagra) {
+    this.usesTanagra = usesTanagra;
     return this;
   }
 }

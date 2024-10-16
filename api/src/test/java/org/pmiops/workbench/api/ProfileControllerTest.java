@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -264,12 +263,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     rtAddressesConfig =
         new InstitutionTierConfig()
             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-            .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
     rtDomainsConfig =
         new InstitutionTierConfig()
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-            .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
 
     Profile profile = new Profile();
@@ -292,7 +289,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setInitialCreditsExpirationBypassed(false);
 
     createAccountRequest = new CreateAccountRequest();
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
@@ -435,13 +432,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_withTosVersion() {
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountAndDbUserWithAffiliation();
 
     final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
-    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(config.termsOfService.latestAouVersion);
+    assertThat(tosRows.get(0).getTosVersion())
+        .isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
@@ -449,17 +447,18 @@ public class ProfileControllerTest extends BaseControllerTest {
     // invokes Terra account creation, so we can check if the Terra ToS has been accepted
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getLatestTermsOfServiceVersion())
-        .isEqualTo(config.termsOfService.latestAouVersion);
+        .isEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     verify(mockFireCloudService).acceptTermsOfServiceDeprecated();
   }
 
   @Test
   public void testCreateAccount_tos_changes() {
-    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.minimumAcceptedAouVersion);
     createAccountAndDbUserWithAffiliation();
 
     // between user creation and first sign-in, the AoU ToS version changes
-    config.termsOfService.latestAouVersion = config.termsOfService.latestAouVersion + 1;
+    config.termsOfService.minimumAcceptedAouVersion =
+        config.termsOfService.minimumAcceptedAouVersion + 1;
 
     // invokes Terra account creation
     Profile profile = profileController.getMe().getBody();
@@ -468,7 +467,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // the Terra ToS
 
     assertThat(profile.getLatestTermsOfServiceVersion())
-        .isNotEqualTo(config.termsOfService.latestAouVersion);
+        .isNotEqualTo(config.termsOfService.minimumAcceptedAouVersion);
     verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
   }
 
@@ -477,7 +476,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion - 1);
+          createAccountRequest.setTermsOfServiceVersion(
+              config.termsOfService.minimumAcceptedAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
     verify(mockFireCloudService, never()).acceptTermsOfServiceDeprecated();
@@ -1003,15 +1003,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+        .sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1019,17 +1018,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void resendWelcomeEmail_OK() throws MessagingException {
     createAccountAndDbUserWithAffiliation();
     when(mockDirectoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    doNothing()
-        .when(mockMailService)
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    doNothing().when(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
             new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
-    verify(mockMailService, times(2))
-        .sendWelcomeEmail(any(), any(), any(), anyBoolean(), anyBoolean());
+    verify(mockMailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(mockDirectoryService, times(1)).resetUserPassword(anyString());
   }
 
@@ -1037,7 +1033,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void sendUserInstructions_none() throws MessagingException {
     // default Institution in this test class has no instructions
     createAccountAndDbUserWithAffiliation();
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if there are no instructions
     verifyNoMoreInteractions(mockMailService);
@@ -1056,7 +1052,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
     verify(mockMailService)
         .sendInstitutionUserInstructions(
             CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
@@ -1077,7 +1073,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         verifiedInstitutionalAffiliation.getInstitutionShortName());
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-    verify(mockMailService).sendWelcomeEmail(any(), any(), any(), any(), any());
+    verify(mockMailService).sendWelcomeEmail(any(), any(), any());
 
     // don't send the user instructions email if the instructions have been deleted
     verifyNoMoreInteractions(mockMailService);
