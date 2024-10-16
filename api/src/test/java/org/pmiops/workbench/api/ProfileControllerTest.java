@@ -289,6 +289,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .state(STATE)
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
+    profile.setInitialCreditsExpirationBypassed(false);
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);

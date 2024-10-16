@@ -249,7 +249,7 @@ public class ProfileService {
     user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     user.setAddress(addressMapper.addressToDbAddress(updatedProfile.getAddress()));
     userService.setInitialCreditsExpirationBypassed(
-        user, updatedProfile.isInitialCreditsExpirationBypassed());
+        user, Optional.ofNullable(updatedProfile.isInitialCreditsExpirationBypassed()).orElse(false));
     // Address may be null for users who were created before address validation was in place. See
     // RW-5139.
     Optional.ofNullable(user.getAddress()).ifPresent(address -> address.setUser(user));
