@@ -573,9 +573,13 @@ public class ProfileService {
     Optional.ofNullable(request.getAccountDisabledStatus())
         .map(AccountDisabledStatus::isDisabled)
         .ifPresent(updatedProfile::setDisabled);
-    Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
-        .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
 
+    boolean enableInitialCreditsExpiration =
+        configProvider.get().featureFlags.enableInitialCreditsExpiration;
+    if(enableInitialCreditsExpiration) {
+      Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
+          .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
+    }
     updateProfile(dbUser, Agent.asAdmin(userProvider.get()), updatedProfile, originalProfile);
 
     return getProfile(dbUser);
