@@ -576,7 +576,7 @@ public class ProfileService {
 
     boolean enableInitialCreditsExpiration =
         configProvider.get().featureFlags.enableInitialCreditsExpiration;
-    if(enableInitialCreditsExpiration) {
+    if (enableInitialCreditsExpiration) {
       Optional.ofNullable(request.isInitialCreditsExpirationBypassed())
           .ifPresent(updatedProfile::setInitialCreditsExpirationBypassed);
     }
