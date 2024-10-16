@@ -95,7 +95,8 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "accessTier": "registered"
+      "accessTier": "registered",
+      "tanagraEnabled": true
     },
     {
       "cdrVersionId": 7,
@@ -116,7 +117,8 @@
       "storageBasePath": "v1",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
-      "accessTier": "controlled"
+      "accessTier": "controlled",
+      "tanagraEnabled": true
     }
   ]
 }
