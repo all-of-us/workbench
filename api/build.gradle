@@ -25,7 +25,7 @@ buildscript {
         GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '6.4.4.Final'
         JACKSON_VERSION = '2.17.2'
-        LIQUIBASE_VERSION = '4.27.0'
+        LIQUIBASE_VERSION = '4.29.0'
         LOGBACK_VERSION = '1.5.6'   // upgrading past this results in an error
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
@@ -433,17 +433,17 @@ dependencies {
     }
     implementation "com.google.cloud.opentelemetry:exporter-auto:$project.ext.OPENTELEMETRY_GOOGLE_VERSION-alpha"
 
-    implementation 'io.swagger:swagger-annotations:1.6.7'
+    implementation 'io.swagger:swagger-annotations:1.6.14'
     implementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation "org.apache.commons:commons-collections4:4.4"
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.apache.commons:commons-lang3:3.15.0'
+    implementation 'org.apache.commons:commons-text:1.11.0'
     implementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
     implementation "org.springframework.boot:spring-boot-starter-validation:$project.ext.SPRING_BOOT_VERSION"
-    implementation "commons-codec:commons-codec:1.15"
+    implementation 'commons-codec:commons-codec:1.17.0'
     implementation 'com.auth0:java-jwt:3.19.2'
-    implementation 'io.netty:netty-common:4.1.82.Final'
+    implementation 'io.netty:netty-common:4.1.112.Final'
     implementation 'org.json:json:20231013'
 
     // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
