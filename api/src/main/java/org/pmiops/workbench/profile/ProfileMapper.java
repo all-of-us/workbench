@@ -49,7 +49,7 @@ public interface ProfileMapper {
   @Mapping(
       source = "dbUser.userInitialCreditsExpiration.bypassed",
       target = "initialCreditsExpirationBypassed",
-  defaultValue = "false")
+      defaultValue = "false")
   Profile toModel(
       DbUser dbUser,
       @Context InitialCreditsExpirationService expirationService,
