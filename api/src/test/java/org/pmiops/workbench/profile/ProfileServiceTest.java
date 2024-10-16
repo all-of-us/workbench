@@ -554,8 +554,10 @@ public class ProfileServiceTest {
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  public void updateProfile_bypassInitialCredits_user_asAdmin(boolean enableInitialCreditsExpiration) {
-    providedWorkbenchConfig.featureFlags.enableInitialCreditsExpiration = enableInitialCreditsExpiration;
+  public void updateProfile_bypassInitialCredits_user_asAdmin(
+      boolean enableInitialCreditsExpiration) {
+    providedWorkbenchConfig.featureFlags.enableInitialCreditsExpiration =
+        enableInitialCreditsExpiration;
     // grant admin authority to loggedInUser
     when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
         .thenReturn(true);
@@ -573,7 +575,8 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    verify(mockUserService, times(enableInitialCreditsExpiration?1:0)).setInitialCreditsExpirationBypassed(targetUser, true);
+    verify(mockUserService, times(enableInitialCreditsExpiration ? 1 : 0))
+        .setInitialCreditsExpirationBypassed(targetUser, true);
   }
 
   @Test
