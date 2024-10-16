@@ -114,42 +114,59 @@ describe('AdminUserProfile', () => {
     await waitUntilPageLoaded();
   });
 
-  it("should display the user's name, username, initial credits information", async () => {
-    const givenName = 'John Q';
-    const familyName = 'Public';
-    const expectedFullName = 'John Q Public';
+  it.each([true, false])(
+    "should display the user's name, username, initial credits information when enableInitialCreditsExpiration is %s",
+    async (enableInitialCreditsExpiration) => {
+      const givenName = 'John Q';
+      const familyName = 'Public';
+      const expectedFullName = 'John Q Public';
 
-    const username = 'some-email@yahoo.com';
+      const username = 'some-email@yahoo.com';
 
-    const freeTierUsage = 543.21;
-    const freeTierDollarQuota = 678.99;
-    const expectedCreditsText = '$543.21 used of $678.99 limit';
-    const initialCreditsExpirationEpochMillis = Date.now();
+      const freeTierUsage = 543.21;
+      const freeTierDollarQuota = 678.99;
+      const expectedCreditsText = '$543.21 used of $678.99 limit';
+      const initialCreditsExpirationEpochMillis = Date.now();
 
-    updateTargetProfile({
-      username,
-      givenName,
-      familyName,
-      freeTierUsage,
-      freeTierDollarQuota,
-      initialCreditsExpirationEpochMillis,
-    });
+      serverConfigStore.set({
+        config: {
+          ...defaultServerConfig,
+          enableInitialCreditsExpiration,
+        },
+      });
 
-    component();
-    await waitUntilPageLoaded();
-    expect(
-      within(screen.getByTestId('name')).getByText(expectedFullName)
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('user-name')).getByText(username)
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('initial-credits-used')).getByText(
-        expectedCreditsText
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByText('Credits will expire')).toBeInTheDocument();
-  });
+      updateTargetProfile({
+        username,
+        givenName,
+        familyName,
+        freeTierUsage,
+        freeTierDollarQuota,
+        initialCreditsExpirationEpochMillis,
+      });
+
+      component();
+      await waitUntilPageLoaded();
+      expect(
+        within(screen.getByTestId('name')).getByText(expectedFullName)
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('user-name')).getByText(username)
+      ).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('initial-credits-used')).getByText(
+          expectedCreditsText
+        )
+      ).toBeInTheDocument();
+
+      if (enableInitialCreditsExpiration) {
+        expect(screen.getByText('Credits will expire')).toBeInTheDocument();
+      } else {
+        expect(
+          screen.queryByText('Credits will expire')
+        ).not.toBeInTheDocument();
+      }
+    }
+  );
 
   it("should display the user's name, username, initial credits usage, and initial credits expiration status", async () => {
     const givenName = 'John Q';
@@ -187,17 +204,33 @@ describe('AdminUserProfile', () => {
     ).toBeInTheDocument();
   });
 
-  it('should display when a user is bypassed', async () => {
-    const initialCreditsExpirationBypassed = true;
+  it.each([true, false])(
+    'should display when a user is bypassed when enableInitialCreditsExpiration is %s',
+    async (enableInitialCreditsExpiration) => {
+      serverConfigStore.set({
+        config: {
+          ...defaultServerConfig,
+          enableInitialCreditsExpiration,
+        },
+      });
+      const initialCreditsExpirationBypassed = true;
 
-    updateTargetProfile({
-      initialCreditsExpirationBypassed,
-    });
+      updateTargetProfile({
+        initialCreditsExpirationBypassed,
+      });
 
-    component();
-    await waitUntilPageLoaded();
-    expect(screen.getByText('Credits will not expire')).toBeInTheDocument();
-  });
+      component();
+      await waitUntilPageLoaded();
+
+      if (enableInitialCreditsExpiration) {
+        expect(screen.getByText('Credits will not expire')).toBeInTheDocument();
+      } else {
+        expect(
+          screen.queryByText('Credits will not expire')
+        ).not.toBeInTheDocument();
+      }
+    }
+  );
 
   test.each([
     [
