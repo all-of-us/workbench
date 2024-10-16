@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,8 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -549,8 +552,10 @@ public class ProfileServiceTest {
     assertThat(profileService.getProfile(targetUser).isDisabled()).isFalse();
   }
 
-  @Test
-  public void updateProfile_bypassInitialCredits_user_asAdmin() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void updateProfile_bypassInitialCredits_user_asAdmin(boolean enableInitialCreditsExpiration) {
+    providedWorkbenchConfig.featureFlags.enableInitialCreditsExpiration = enableInitialCreditsExpiration;
     // grant admin authority to loggedInUser
     when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
         .thenReturn(true);
@@ -568,7 +573,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    verify(mockUserService).setInitialCreditsExpirationBypassed(targetUser, true);
+    verify(mockUserService, times(enableInitialCreditsExpiration?1:0)).setInitialCreditsExpirationBypassed(targetUser, true);
   }
 
   @Test
