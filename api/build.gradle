@@ -24,14 +24,14 @@ buildscript {
         GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.9.1'
         HIBERNATE_VERSION = '6.4.4.Final'
-        JACKSON_VERSION = '2.16.1'
+        JACKSON_VERSION = '2.17.2'
         LIQUIBASE_VERSION = '4.27.0'
-        LOGBACK_VERSION = '1.5.5'
+        LOGBACK_VERSION = '1.5.6'   // upgrading past this results in an error
         MAPSTRUCT_VERSION = '1.5.5.Final'
         OKHTTP_VERSION = '4.12.0'
-        OPENTELEMETRY_SDK_VERSION = '1.36.0'
-        OPENTELEMETRY_JAVA_VERSION = '2.3.0'
-        OPENTELEMETRY_GOOGLE_VERSION = '0.27.0'
+        OPENTELEMETRY_SDK_VERSION = '1.43.0'
+        OPENTELEMETRY_JAVA_VERSION = '2.5.0'
+        OPENTELEMETRY_GOOGLE_VERSION = '0.31.0'
         SPRINGFOX_VERSION = '3.0.0'
         SPRING_BOOT_VERSION = '3.2.4'
         SPRING_FRAMEWORK_VERSION = '6.1.5'
@@ -420,7 +420,7 @@ dependencies {
     implementation "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:$project.ext.OPENTELEMETRY_SDK_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:$project.ext.OPENTELEMETRY_JAVA_VERSION"
     implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$project.ext.OPENTELEMETRY_JAVA_VERSION"
-    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-3:$project.ext.OPENTELEMETRY_JAVA_VERSION-alpha"
     implementation("com.google.cloud.opentelemetry:exporter-trace:$project.ext.OPENTELEMETRY_GOOGLE_VERSION") {
         exclude group: 'com.google.cloud', module: 'libraries-bom'
         exclude group: 'com.google.cloud', module: 'google-cloud-core'
