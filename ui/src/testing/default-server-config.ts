@@ -62,7 +62,6 @@ const defaultServerConfig: ConfigResponse = {
   publicApiKeyForErrorReports: 'notasecret',
   shibbolethUiBaseUrl: 'https://broad-shibboleth-prod.appspot.com/',
   enableComplianceTraining: true,
-  enableEraCommons: false,
   unsafeAllowSelfBypass: false,
   defaultFreeCreditsDollarLimit: 300,
   rasHost: 'https://stsstg.nih.gov/',
