@@ -34,6 +34,11 @@ def get_live_gae_version(project, validate_version=true)
   services = Set["api", "default"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
+  
+  # This is a temporary fix until these services exist in all environments
+  active_services.delete("tanagra-ui")
+  active_services.delete("tanagra-api")
+  
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
