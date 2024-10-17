@@ -20,7 +20,7 @@ import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -60,6 +60,7 @@ import {
   ErrorsTooltip,
   getInitialCreditsUsage,
   getPublicInstitutionDetails,
+  InitialCreditBypassSwitch,
   InitialCreditsDropdown,
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
@@ -108,7 +109,6 @@ const styles = reactStyles({
     fontWeight: 500,
   },
   uneditableFields: {
-    height: '221px',
     width: '650px',
     borderRadius: '9px',
     backgroundColor: colorWithWhiteness(colors.light, 0.23),
@@ -154,28 +154,30 @@ const UneditableFields = (props: { profile: Profile }) => {
         <div style={styles.uneditableFieldsSpacer} />
       </FlexRow>
       <FlexRow>
-        <UneditableField
-          dataTestId='name'
-          label='Name'
-          value={`${givenName} ${familyName}`}
-        />
-        <UneditableField
-          dataTestId='user-name'
-          label='User name'
-          value={username}
-        />
-      </FlexRow>
-      <FlexRow>
-        <UneditableField
-          dataTestId='initial-credits-used'
-          label='Initial credits used'
-          value={getInitialCreditsUsage(props.profile)}
-        />
-        <UneditableField
-          dataTestId='data-access-tiers'
-          label='Data access tiers'
-          value={accessTiers}
-        />
+        <FlexColumn>
+          <UneditableField
+            dataTestId='name'
+            label='Name'
+            value={`${givenName} ${familyName}`}
+          />
+          <UneditableField
+            dataTestId='user-name'
+            label='User name'
+            value={username}
+          />
+          <UneditableField
+            dataTestId='data-access-tiers'
+            label='Data access tiers'
+            value={accessTiers}
+          />
+        </FlexColumn>
+        <FlexColumn>
+          <UneditableField
+            dataTestId='initial-credits-used'
+            label='Initial credits used'
+            value={getInitialCreditsUsage(props.profile)}
+          />
+        </FlexColumn>
       </FlexRow>
     </FlexColumn>
   );
@@ -198,6 +200,7 @@ interface EditableFieldsProps {
   onChangeInstitution: (institutionShortName: string) => void;
   onChangeInstitutionalRole: (institutionalRoleEnum: InstitutionalRole) => void;
   onChangeInstitutionOtherText: (otherText: string) => void;
+  onChangeInitialCreditBypass: (bypass: boolean) => void;
 }
 
 const EditableFields = ({
@@ -210,6 +213,7 @@ const EditableFields = ({
   onChangeInstitution,
   onChangeInstitutionalRole,
   onChangeInstitutionOtherText,
+  onChangeInitialCreditBypass,
 }: EditableFieldsProps) => {
   const institution: PublicInstitutionDetails = institutions.find(
     (i) =>
@@ -217,6 +221,9 @@ const EditableFields = ({
       updatedProfile?.verifiedInstitutionalAffiliation?.institutionShortName
   );
   const { profile } = useStore(profileStore);
+  const {
+    config: { enableInitialCreditsExpiration },
+  } = serverConfigStore.get();
 
   // Show the link to  redirect to institution detail page,
   // if the LOGGED IN USER has Institution admin authority and
@@ -226,51 +233,57 @@ const EditableFields = ({
     !!updatedProfile.verifiedInstitutionalAffiliation?.institutionShortName;
 
   return (
-    <FlexRow style={styles.editableFields}>
+    <FlexColumn style={styles.editableFields}>
       <FlexColumn>
         <div style={styles.subHeader}>Edit information</div>
         <FlexRow>
-          <ContactEmailTextInput
-            contactEmail={updatedProfile.contactEmail}
-            previousContactEmail={oldProfile.contactEmail}
-            highlightOnChange
-            onChange={(email) => onChangeEmail(email)}
-          />
-          <InstitutionDropdown
-            institutions={institutions}
-            currentInstitutionShortName={
-              updatedProfile.verifiedInstitutionalAffiliation
-                ?.institutionShortName
-            }
-            previousInstitutionShortName={
-              oldProfile.verifiedInstitutionalAffiliation?.institutionShortName
-            }
-            highlightOnChange
-            onChange={(event) => onChangeInstitution(event.value)}
-          />
-          {showGoToInstitutionLink && (
-            <StyledRouterLink
-              style={{ paddingTop: '3.45rem', paddingLeft: '0.9rem' }}
-              path={getAdminUrl(
+          <FlexColumn>
+            <ContactEmailTextInput
+              contactEmail={updatedProfile.contactEmail}
+              previousContactEmail={oldProfile.contactEmail}
+              highlightOnChange
+              onChange={(email) => onChangeEmail(email)}
+            />
+            {emailValidationStatus === EmailValidationStatus.INVALID && (
+              <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
+                {getEmailValidationErrorMessage(institution)}
+              </div>
+            )}
+          </FlexColumn>
+          <FlexRow>
+            <InstitutionDropdown
+              institutions={institutions}
+              currentInstitutionShortName={
                 updatedProfile.verifiedInstitutionalAffiliation
                   ?.institutionShortName
-              )}
-              target='_blank'
-            >
-              <TooltipTrigger
-                content={`Click here to go to the
-                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
+              }
+              previousInstitutionShortName={
+                oldProfile.verifiedInstitutionalAffiliation
+                  ?.institutionShortName
+              }
+              highlightOnChange
+              onChange={(event) => onChangeInstitution(event.value)}
+            />
+            {showGoToInstitutionLink && (
+              <StyledRouterLink
+                style={{ paddingTop: '3.45rem', paddingLeft: '0.9rem' }}
+                path={getAdminUrl(
+                  updatedProfile.verifiedInstitutionalAffiliation
+                    ?.institutionShortName
+                )}
+                target='_blank'
               >
-                <FontAwesomeIcon icon={faLink} />
-              </TooltipTrigger>
-            </StyledRouterLink>
-          )}
+                <TooltipTrigger
+                  content={`Click here to go to the
+                '${updatedProfile.verifiedInstitutionalAffiliation?.institutionDisplayName}' Details Page`}
+                >
+                  <FontAwesomeIcon icon={faLink} />
+                </TooltipTrigger>
+              </StyledRouterLink>
+            )}
+          </FlexRow>
         </FlexRow>
-        {emailValidationStatus === EmailValidationStatus.INVALID && (
-          <div data-test-id='email-invalid' style={{ paddingLeft: '1em' }}>
-            {getEmailValidationErrorMessage(institution)}
-          </div>
-        )}
+
         <FlexRow>
           <InitialCreditsDropdown
             currentLimit={updatedProfile.freeTierDollarQuota}
@@ -278,6 +291,17 @@ const EditableFields = ({
             highlightOnChange
             onChange={(event) => onChangeInitialCreditsLimit(event.value)}
           />
+          {enableInitialCreditsExpiration && (
+            <InitialCreditBypassSwitch
+              currentlyBypassed={
+                updatedProfile.initialCreditsExpirationBypassed
+              }
+              previouslyBypassed={oldProfile.initialCreditsExpirationBypassed}
+              onChange={(bypass) => onChangeInitialCreditBypass(bypass)}
+            />
+          )}
+        </FlexRow>
+        <FlexRow>
           <InstitutionalRoleDropdown
             institutions={institutions}
             currentAffiliation={updatedProfile.verifiedInstitutionalAffiliation}
@@ -287,9 +311,6 @@ const EditableFields = ({
             highlightOnChange
             onChange={(event) => onChangeInstitutionalRole(event.value)}
           />
-        </FlexRow>
-        <FlexRow>
-          <FlexSpacer />
           <InstitutionalRoleOtherTextInput
             containerStyle={{ marginRight: '1.65rem' }}
             affiliation={updatedProfile.verifiedInstitutionalAffiliation}
@@ -302,7 +323,7 @@ const EditableFields = ({
           />
         </FlexRow>
       </FlexColumn>
-    </FlexRow>
+    </FlexColumn>
   );
 };
 
@@ -674,6 +695,9 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               ) => updateInstitutionalRole(institutionalRoleEnum)}
               onChangeInstitutionOtherText={(otherText: string) =>
                 updateInstitutionalRoleOtherText(otherText)
+              }
+              onChangeInitialCreditBypass={(bypass: boolean) =>
+                updateProfile({ initialCreditsExpirationBypassed: bypass })
               }
             />
           </FlexRow>
