@@ -258,6 +258,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       case RAS_LINK_LOGIN_GOV -> accessConfig.enableRasLoginGovLinking;
       case RAS_LINK_ID_ME -> accessConfig.enableRasIdMeLinking;
       case IDENTITY -> accessConfig.enableRasLoginGovLinking || accessConfig.enableRasIdMeLinking;
+      case ERA_COMMONS -> false;
       default -> true;
     };
   }
