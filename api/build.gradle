@@ -21,7 +21,6 @@ buildscript {
     // outside of the buildscript block aren't usable here.
     ext {
         GAE_VERSION = '2.0.31'
-        GOOGLE_TRUTH_VERSION = '1.1.3'
         GSON_VERSION = '2.10'
         HIBERNATE_VERSION = '6.5.2.Final'
         JACKSON_VERSION = '2.17.2'
@@ -414,6 +413,7 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
     implementation "com.github.rholder:guava-retrying:2.0.0"
+    // TODO: confirm ProfileServiceTest failure is caused by this
     implementation 'org.javers:javers-core:7.6.3'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
@@ -599,10 +599,11 @@ dependencies {
     __tools__Implementation 'commons-cli:commons-cli:1.9.0'
     __tools__Implementation 'com.opencsv:opencsv:5.9'
 
-    testImplementation 'org.mockito:mockito-core:5.3.1'
-    testImplementation "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
-    testImplementation "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
-    testImplementation 'com.h2database:h2:1.4.194'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    // 1.4.2+ results in a compilation error: reference to assertThat is ambiguous
+    testImplementation "com.google.truth:truth:1.4.1"
+    // 1.4.200+ results in failures due to missing DB tables
+    testImplementation 'com.h2database:h2:1.4.199'
     testImplementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
