@@ -179,7 +179,7 @@
     "minimumAcceptedAouVersion": 1
   },
   "tanagra": {
-    "baseUrl": "https:\/\/test.fake-research-aou.org"
+    "baseUrl": "https:\/\/staging.fake-research-aou.org"
   },
   "artifactRegistry": {
     "dockerRepoName": "us-central1-docker.pkg.dev\/all-of-us-rw-staging\/aou-rw-gar-remote-repo-docker-staging"
