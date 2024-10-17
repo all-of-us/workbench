@@ -49,6 +49,12 @@ def get_live_gae_version(project, validate_version=true)
   end
 
   versions = actives.map{|v| v["id"]}.to_set
+  
+  # Iterate over versions and delete any that start with "tanagra-"
+  versions.each do |version|
+    versions.delete(version) if version.start_with?("tanagra-")
+  end
+  
   if versions.length != 1
     common.warning "Found varying IDs across GAE services in project '#{project}': " +
                    "[#{versions.to_a.join(', ')}]"
