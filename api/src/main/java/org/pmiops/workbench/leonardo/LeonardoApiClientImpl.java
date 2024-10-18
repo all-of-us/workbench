@@ -35,10 +35,17 @@ import org.broadinstitute.dsde.workbench.client.leonardo.api.ResourcesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequestRuntimeConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UserJupyterExtensionConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -49,16 +56,9 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoMachineConfig;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateDataprocConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateGceConfig;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUpdateRuntimeRequest;
-import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Disk;
@@ -99,9 +99,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
   private final LeonardoApiClientFactory leonardoApiClientFactory;
-  private final Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi> oldRuntimesApiProvider;
-  private final Provider<RuntimesApi> newRuntimesApiProvider;
-  private final Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi> serviceRuntimesApiProvider;
+  private final Provider<RuntimesApi> runtimesApiProvider;
+  private final Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi>
+      serviceRuntimesApiProvider;
 
   private final Provider<ResourcesApi> resourcesApiProvider;
   private final Provider<ProxyApi> proxyApiProvider;
@@ -122,10 +122,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Autowired
   public LeonardoApiClientImpl(
       LeonardoApiClientFactory leonardoApiClientFactory,
-      @Qualifier(LeonardoConfig.LEGACY_USER_RUNTIMES_API) Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi> oldRuntimesApiProvider,
-      @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> newRuntimesApiProvider,
+      @Qualifier(LeonardoConfig.USER_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API)
-          Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi> serviceRuntimesApiProvider,
+          Provider<org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi>
+              serviceRuntimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_RESOURCE_API) Provider<ResourcesApi> resourcesApiProvider,
       Provider<ProxyApi> proxyApiProvider,
       Provider<ServiceInfoApi> serviceInfoApiProvider,
@@ -142,8 +142,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       LeonardoRetryHandler leonardoRetryHandler,
       WorkspaceDao workspaceDao) {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
-    this.oldRuntimesApiProvider = oldRuntimesApiProvider;
-    this.newRuntimesApiProvider = newRuntimesApiProvider;
+    this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
     this.resourcesApiProvider = resourcesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
@@ -162,7 +161,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workspaceDao = workspaceDao;
   }
 
-  private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
+  private CreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail,
       Runtime runtime,
       Map<String, String> customEnvironmentVariables,
@@ -190,15 +189,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest =
-        new LeonardoCreateRuntimeRequest()
+    CreateRuntimeRequest createRuntimeRequest =
+        new CreateRuntimeRequest()
             .labels(runtimeLabels)
             .defaultClientId(config.server.oauthClientId)
             // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
             .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
             .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-            .userJupyterExtensionConfig(
-                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            .userJupyterExtensionConfig(new UserJupyterExtensionConfig().nbExtensions(nbExtensions))
             // Matches Terra UI's scopes, see RW-3531 for rationale.
             .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
             .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
@@ -218,35 +216,39 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return createRuntimeRequest;
   }
 
-  private LeonardoUpdateGceConfig buildUpdateGCEConfig(Runtime runtime) {
+  private UpdateRuntimeRequestRuntimeConfig buildUpdateGCEConfig(Runtime runtime) {
     return runtime.getGceConfig() != null
-        ? leonardoMapper.toUpdateGceConfig(runtime.getGceConfig())
-        : leonardoMapper.toUpdateGceConfig(runtime.getGceWithPdConfig());
+        ? new UpdateRuntimeRequestRuntimeConfig(
+            leonardoMapper.toUpdateGceConfig(runtime.getGceConfig()))
+        : new UpdateRuntimeRequestRuntimeConfig(
+            leonardoMapper.toUpdateGceConfig(runtime.getGceWithPdConfig()));
   }
 
-  private LeonardoUpdateDataprocConfig buildUpdateDataProcConfig(Runtime runtime) {
-    return leonardoMapper.toUpdateDataprocConfig(runtime.getDataprocConfig());
+  private UpdateRuntimeRequestRuntimeConfig buildUpdateDataProcConfig(Runtime runtime) {
+    return new UpdateRuntimeRequestRuntimeConfig(
+        leonardoMapper.toUpdateDataprocConfig(runtime.getDataprocConfig()));
   }
 
-  private Object buildRuntimeConfig(Runtime runtime) {
+  private OneOfRuntimeConfig buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
-      return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
+      return new OneOfRuntimeConfig(leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig()));
     } else if (runtime.getGceWithPdConfig() != null) {
-      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
+      return new OneOfRuntimeConfig(
+          leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig()));
     } else {
-      LeonardoMachineConfig machineConfig =
-          leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
+      DataprocConfig dataprocConfig =
+          leonardoMapper.toLeonardoDataprocConfig(runtime.getDataprocConfig());
       if (workbenchConfigProvider.get().featureFlags.enablePrivateDataprocWorker) {
-        machineConfig.setWorkerPrivateAccess(true);
+        dataprocConfig.setWorkerPrivateAccess(true);
       }
-      return machineConfig;
+      return new OneOfRuntimeConfig(dataprocConfig);
     }
   }
 
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = oldRuntimesApiProvider.get();
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
@@ -262,7 +264,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
 
-    legacyLeonardoRetryHandler.run(
+    leonardoRetryHandler.run(
         (context) -> {
           runtimesApi.createRuntime(
               runtime.getGoogleProject(),
@@ -286,14 +288,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     Map<String, String> runtimeLabels =
         buildRuntimeConfigurationLabels(runtime.getConfigurationType());
 
-    legacyLeonardoRetryHandler.run(
+    leonardoRetryHandler.run(
         (context) -> {
-          oldRuntimesApiProvider
+          runtimesApiProvider
               .get()
               .updateRuntime(
                   runtime.getGoogleProject(),
                   runtime.getRuntimeName(),
-                  new LeonardoUpdateRuntimeRequest()
+                  new UpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(
                           isDataProcRuntime(runtime)
@@ -320,14 +322,16 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesAsService() {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi =
+        serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
         (context) -> runtimesApi.listRuntimes(/* labels */ null, /* includeDeleted */ false));
   }
 
   @Override
   public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi =
+        serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
         (context) ->
             runtimesApi.listRuntimesByProject(
@@ -335,18 +339,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
+  public List<ListRuntimeResponse> listRuntimesByProject(
       String googleProject, boolean includeDeleted) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = oldRuntimesApiProvider.get();
-    return legacyLeonardoRetryHandler.run(
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+    return leonardoRetryHandler.run(
         (context) ->
             runtimesApi.listRuntimesByProject(googleProject, /* labels */ null, includeDeleted));
   }
 
   @Override
   public void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = oldRuntimesApiProvider.get();
-    legacyLeonardoRetryHandler.run(
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+    leonardoRetryHandler.run(
         (context) -> {
           runtimesApi.deleteRuntime(googleProject, runtimeName, deleteDisk);
           return null;
@@ -355,7 +359,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public GetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
-    RuntimesApi runtimesApi = newRuntimesApiProvider.get();
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
           (context) -> runtimesApi.getRuntime(googleProject, runtimeName));
@@ -366,14 +370,16 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public LeonardoGetRuntimeResponse getRuntimeAsService(String googleProject, String runtimeName) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi =
+        serviceRuntimesApiProvider.get();
     return legacyLeonardoRetryHandler.run(
         (context) -> runtimesApi.getRuntime(googleProject, runtimeName));
   }
 
   @Override
   public void deleteRuntimeAsService(String googleProject, String runtimeName) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApi =
+        serviceRuntimesApiProvider.get();
     legacyLeonardoRetryHandler.run(
         (context) -> {
           runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
@@ -383,7 +389,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApiAsService = serviceRuntimesApiProvider.get();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApiAsService =
+        serviceRuntimesApiProvider.get();
     List<LeonardoListRuntimeResponse> runtimes =
         legacyLeonardoRetryHandler.run(
             (context) ->
@@ -392,7 +399,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     // Only the runtime creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApiAsImpersonatedUser = new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi runtimesApiAsImpersonatedUser =
+        new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
     try {
       runtimesApiAsImpersonatedUser.setApiClient(
           leonardoApiClientFactory.newImpersonatedLegacyApiClient(userEmail));

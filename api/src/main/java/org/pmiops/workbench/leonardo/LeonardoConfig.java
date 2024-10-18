@@ -1,6 +1,5 @@
 package org.pmiops.workbench.leonardo;
 
-import com.google.common.collect.ImmutableList;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
@@ -49,7 +48,8 @@ public class LeonardoConfig {
 
   private static final Logger log = Logger.getLogger(LeonardoConfig.class.getName());
 
-  private static final List<String> NOTEBOOK_SCOPES = List.of(
+  private static final List<String> NOTEBOOK_SCOPES =
+      List.of(
           "https://www.googleapis.com/auth/userinfo.profile",
           "https://www.googleapis.com/auth/userinfo.email");
 
@@ -139,14 +139,6 @@ public class LeonardoConfig {
     return api;
   }
 
-  @Bean(name = LEGACY_USER_RUNTIMES_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi legacyRuntimesApi(@Qualifier(LEGACY_USER_LEONARDO_CLIENT) org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi api = new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
   @Bean(name = USER_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi disksApi(@Qualifier(USER_LEONARDO_CLIENT) ApiClient apiClient) {
@@ -186,7 +178,8 @@ public class LeonardoConfig {
   public org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi serviceRuntimesApi(
       @Qualifier(LEGACY_SERVICE_LEONARDO_CLIENT)
           org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
-    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi api = new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
+    org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi api =
+        new org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi();
     api.setApiClient(apiClient);
     return api;
   }

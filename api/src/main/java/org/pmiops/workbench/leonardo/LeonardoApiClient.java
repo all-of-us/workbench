@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
@@ -31,8 +32,7 @@ public interface LeonardoApiClient {
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
   List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
-  List<LeonardoListRuntimeResponse> listRuntimesByProject(
-      String googleProject, boolean includeDeleted);
+  List<ListRuntimeResponse> listRuntimesByProject(String googleProject, boolean includeDeleted);
 
   /**
    * Creates a notebooks runtime owned by the current authenticated user.
@@ -65,8 +65,7 @@ public interface LeonardoApiClient {
   int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException;
 
   /** Gets information about a notebook runtime */
-  GetRuntimeResponse getRuntime(String googleProject, String runtimeName)
-      throws WorkbenchException;
+  GetRuntimeResponse getRuntime(String googleProject, String runtimeName) throws WorkbenchException;
 
   //
   // Welder endpoints - "notebooks" client
