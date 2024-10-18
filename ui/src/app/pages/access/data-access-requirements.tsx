@@ -674,6 +674,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         .finally(() => spinnerProps.hideSpinner());
     }, []);
 
+    /*
+      TODO Move these into the effect with an empty dependency array.
+        I suspect that these are only called when the component is reloaded,
+        so the initial effect should be run again. My goal here is that effects should
+      only depend on props or local state. When this is the case, we can them above the local
+      variables.
+    */
     // handle the route /ras-callback?code=<code>
     useEffect(() => {
       if (code) {
