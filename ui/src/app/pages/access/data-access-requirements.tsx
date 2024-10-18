@@ -14,10 +14,11 @@ import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { userAdminApi } from 'app/services/swagger-fetch-clients';
+import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
+  buildRasRedirectUrl,
   DARPageMode,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -330,6 +331,33 @@ export const renewalRequiredModules: AccessModule[] = [
   duccModule,
 ];
 
+const handleRasCallback = (
+  code: string,
+  spinnerProps: WithSpinnerOverlayProps,
+  reloadProfile: Function
+) => {
+  const profilePromise = fetchWithErrorModal(
+    () =>
+      profileApi().linkRasAccount({
+        authCode: code,
+        redirectUrl: buildRasRedirectUrl(),
+      }),
+    {
+      customErrorResponseFormatter: (apiErrorResponse) => {
+        return {
+          title: 'Error Finalizing Identity Verification',
+          message: `Error reading identity provider (ID.me or Login.gov) response: ${apiErrorResponse.responseJson.message}`,
+          showBugReportLink: true,
+        };
+      },
+    }
+  );
+
+  return profilePromise
+    .then(() => reloadProfile())
+    .finally(() => window.history.replaceState({}, '', '/'));
+};
+
 const selfBypass = async (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
@@ -552,6 +580,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
 
     const pageModeParam = urlParams.get('pageMode');
     const pageMode =
@@ -644,6 +673,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
     }, []);
+
+    // handle the route /ras-callback?code=<code>
+    useEffect(() => {
+      if (code) {
+        handleRasCallback(code, spinnerProps, reload);
+      }
+    }, [code]);
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
