@@ -332,55 +332,6 @@ export const renewalRequiredModules: AccessModule[] = [
   duccModule,
 ];
 
-const handleTerraShibbolethCallback = (
-  token: string,
-  spinnerProps: WithSpinnerOverlayProps,
-  reloadProfile: Function
-) => {
-  const handler = withErrorModal({
-    title: 'Error saving NIH Authentication status.',
-    message:
-      'An error occurred trying to save your NIH Authentication status. Please try again.',
-    onDismiss: () => {
-      spinnerProps.hideSpinner();
-    },
-  })(async () => {
-    spinnerProps.showSpinner();
-    await profileApi().updateNihToken({ jwt: token });
-    spinnerProps.hideSpinner();
-    reloadProfile();
-  });
-
-  return handler();
-};
-
-const handleRasCallback = (
-  code: string,
-  spinnerProps: WithSpinnerOverlayProps,
-  reloadProfile: Function
-) => {
-  const profilePromise = fetchWithErrorModal(
-    () =>
-      profileApi().linkRasAccount({
-        authCode: code,
-        redirectUrl: buildRasRedirectUrl(),
-      }),
-    {
-      customErrorResponseFormatter: (apiErrorResponse) => {
-        return {
-          title: 'Error Finalizing Identity Verification',
-          message: `Error reading identity provider (ID.me or Login.gov) response: ${apiErrorResponse.responseJson.message}`,
-          showBugReportLink: true,
-        };
-      },
-    }
-  );
-
-  return profilePromise
-    .then(() => reloadProfile())
-    .finally(() => window.history.replaceState({}, '', '/'));
-};
-
 const selfBypass = async (
   spinnerProps: WithSpinnerOverlayProps,
   reloadProfile: Function
@@ -604,7 +555,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    const token = urlParams.get('token');
 
     const pageModeParam = urlParams.get('pageMode');
     const pageMode =
@@ -697,27 +647,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         .catch((e) => console.error(e))
         .finally(() => spinnerProps.hideSpinner());
     }, []);
-
-    /*
-        TODO Move these into the effect with an empty dependency array.
-         I suspect that these are only called when the component is reloaded,
-          so the initial effect should be run again. My goal here is that effects should
-          only depend on props or local state. When this is the case, we can them above the local
-          variables.
-       */
-    // handle the route /nih-callback?token=<token>
-    useEffect(() => {
-      if (token) {
-        handleTerraShibbolethCallback(token, spinnerProps, reload);
-      }
-    }, [token]);
-
-    // handle the route /ras-callback?code=<code>
-    useEffect(() => {
-      if (code) {
-        handleRasCallback(code, spinnerProps, reload);
-      }
-    }, [code]);
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
