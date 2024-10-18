@@ -10,16 +10,14 @@ import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
 import { ExclamationTriangle } from 'app/components/icons';
-import { withErrorModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {
-  buildRasRedirectUrl,
   DARPageMode,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
@@ -554,7 +552,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     } = useStore(serverConfigStore);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
 
     const pageModeParam = urlParams.get('pageMode');
     const pageMode =
