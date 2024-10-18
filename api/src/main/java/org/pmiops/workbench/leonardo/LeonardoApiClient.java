@@ -2,6 +2,7 @@ package org.pmiops.workbench.leonardo;
 
 import java.util.List;
 import java.util.Map;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -64,7 +65,7 @@ public interface LeonardoApiClient {
   int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException;
 
   /** Gets information about a notebook runtime */
-  LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
+  GetRuntimeResponse getRuntime(String googleProject, String runtimeName)
       throws WorkbenchException;
 
   //

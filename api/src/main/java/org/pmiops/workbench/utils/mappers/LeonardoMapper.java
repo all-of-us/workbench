@@ -10,8 +10,10 @@ import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -158,7 +160,7 @@ public interface LeonardoMapper {
   @Mapping(
       target = "googleProject",
       source = "cloudContext",
-      qualifiedByName = "legacy_cloudContextToGoogleProject")
+      qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(
       target = "configurationType",
       source = "labels",
@@ -167,7 +169,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
-  Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
+  Runtime toApiRuntime(GetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(
@@ -311,11 +313,11 @@ public interface LeonardoMapper {
   }
 
   @Nullable
-  default String getJupyterImage(@Nullable List<LeonardoRuntimeImage> images) {
+  default String getJupyterImage(@Nullable List<RuntimeImage> images) {
     return Optional.ofNullable(images)
         .flatMap(
             i -> i.stream().filter(image -> "Jupyter".equals(image.getImageType())).findFirst())
-        .map(LeonardoRuntimeImage::getImageUrl)
+        .map(RuntimeImage::getImageUrl)
         .orElse(null);
   }
 }
