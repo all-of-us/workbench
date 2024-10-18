@@ -400,10 +400,12 @@ repositories {
 dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
+    // 3.0.57+ results in runtime errors because it adds @NotNull annotations by default:
+    // https://github.com/swagger-api/swagger-codegen-generators/issues/1295
     // 3.0.62+ results in compilation errors:
     // package org.openapitools.jackson.nullable does not exist
     // package io.swagger.configuration does not exist
-    __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:3.0.61"
+    __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:3.0.56"
 
     implementation "ch.qos.logback:logback-classic:$project.ext.LOGBACK_VERSION"
     implementation "ch.qos.logback:logback-core:$project.ext.LOGBACK_VERSION"
