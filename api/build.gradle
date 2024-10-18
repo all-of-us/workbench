@@ -602,8 +602,9 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.14.2'
     // 1.4.2+ results in a compilation error: reference to assertThat is ambiguous
     testImplementation "com.google.truth:truth:1.4.1"
-    // 1.4.200+ results in failures due to missing DB tables
-    testImplementation 'com.h2database:h2:1.4.199'
+    // 1.4.198+ results in a small number of test failures
+    // 1.4.200+ results in a large number of test failures due to missing DB tables
+    testImplementation 'com.h2database:h2:1.4.197'
     testImplementation "org.liquibase:liquibase-core:$project.ext.LIQUIBASE_VERSION"
     testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
