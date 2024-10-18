@@ -6911,10 +6911,6 @@ components:
         absorbSamlServiceProviderId:
           type: string
           description: The SAML service provider ID for Absorb.
-        enableEraCommons:
-          type: boolean
-          description: Whether the eRA Commons access module is enabled.
-          default: false
         unsafeAllowSelfBypass:
           type: boolean
           description: Whether a user is allowed to self-bypass. Only enabled in test
