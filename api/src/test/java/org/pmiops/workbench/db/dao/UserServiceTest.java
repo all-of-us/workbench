@@ -17,6 +17,7 @@ import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,8 @@ import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
@@ -38,6 +41,8 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration;
+import org.pmiops.workbench.db.model.DbUserInitialCreditsExpiration.NotificationStatus;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -135,15 +140,28 @@ public class UserServiceTest {
 
   @BeforeEach
   public void setUp() {
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user = userDao.save(user);
-    providedDbUser = user;
-
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.termsOfService.minimumAcceptedAouVersion = 5; // arbitrary
     providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays = 17L; // arbitrary
+
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        new DbUserInitialCreditsExpiration()
+            .setBypassed(false)
+            .setCreditStartTime(Timestamp.from(START_INSTANT))
+            .setExpirationTime(
+                Timestamp.from(
+                    START_INSTANT.plus(
+                        providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays,
+                        ChronoUnit.DAYS)))
+            .setExtensionCount(0)
+            .setNotificationStatus(NotificationStatus.NO_NOTIFICATION_SENT);
+
+    DbUser user = new DbUser();
+    user.setUsername(USERNAME);
+    user.setUserInitialCreditsExpiration(initialCreditsExpiration);
+    user = userDao.save(user);
+    providedDbUser = user;
 
     // key UserService logic depends on the existence of the Registered Tier
     accessTierDao.save(createRegisteredTier());
@@ -592,6 +610,44 @@ public class UserServiceTest {
 
     assertThat(userService.isServiceAccount(serviceAccountUser)).isTrue();
     assertThat(userService.isServiceAccount(nonServiceAccountUser)).isFalse();
+  }
+
+  @ParameterizedTest
+  @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+  public void testSetInitialCreditsExpirationBypassed(
+      boolean initialBypassed, boolean expectedBypassed) {
+    providedDbUser.getUserInitialCreditsExpiration().setBypassed(initialBypassed);
+    userService.setInitialCreditsExpirationBypassed(providedDbUser, expectedBypassed);
+    assertThat(providedDbUser.getUserInitialCreditsExpiration().isBypassed())
+        .isEqualTo(expectedBypassed);
+  }
+
+  @Test
+  public void testCreateInitialCreditsExpiration() {
+    DbUser user = new DbUser();
+    user.setUsername("Test User");
+    user = userDao.save(user);
+    assertThat(user.getUserInitialCreditsExpiration()).isNull();
+
+    userService.createInitialCreditsExpiration(user);
+
+    DbUserInitialCreditsExpiration initialCreditsExpiration =
+        user.getUserInitialCreditsExpiration();
+    assertThat(initialCreditsExpiration).isNotNull();
+    assertThat(initialCreditsExpiration.getCreditStartTime()).isEqualTo(FakeClockConfiguration.NOW);
+
+    Timestamp expectedExpirationTime =
+        Timestamp.from(
+            FakeClockConfiguration.NOW
+                .toInstant()
+                .atZone(FakeClockConfiguration.CLOCK.getZone())
+                .plusDays(providedWorkbenchConfig.billing.initialCreditsValidityPeriodDays)
+                .toInstant());
+    assertThat(initialCreditsExpiration.getExpirationTime()).isEqualTo(expectedExpirationTime);
+    assertThat(initialCreditsExpiration.getExtensionCount()).isEqualTo(0);
+    assertThat(initialCreditsExpiration.getNotificationStatus())
+        .isEqualTo(NotificationStatus.NO_NOTIFICATION_SENT);
+    assertThat(initialCreditsExpiration.isBypassed()).isFalse();
   }
 
   private void tick() {
