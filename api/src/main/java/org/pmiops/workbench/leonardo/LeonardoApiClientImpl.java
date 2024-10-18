@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ResourcesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
@@ -45,9 +47,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
-import org.pmiops.workbench.legacy_leonardo_client.api.ServiceInfoApi;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.legacy_leonardo_client.model.LeonardoListRuntimeResponse;
@@ -719,8 +719,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public boolean getLeonardoStatus() {
     try {
+      // do not use a retry handler. If Leonardo is down, we want to know immediately.
       serviceInfoApiProvider.get().getSystemStatus();
-    } catch (org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
+    } catch (ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;
@@ -794,12 +795,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public void deleteAllResources(String googleProject, boolean deleteDisk) {
-    legacyLeonardoRetryHandler.run(
+    leonardoRetryHandler.run(
         (context) -> {
           try {
             resourcesApiProvider.get().deleteAllResources(googleProject, deleteDisk);
-          } catch (org.pmiops.workbench.legacy_leonardo_client.ApiException e) {
-            throw ExceptionUtils.convertLegacyLeonardoException(e);
+          } catch (ApiException e) {
+            throw ExceptionUtils.convertLeonardoException(e);
           }
           return null;
         });

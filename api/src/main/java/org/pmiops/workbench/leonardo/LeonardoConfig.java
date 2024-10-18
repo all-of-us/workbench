@@ -9,12 +9,12 @@ import java.util.logging.Logger;
 import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ResourcesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.legacy_leonardo_client.api.ResourcesApi;
 import org.pmiops.workbench.legacy_leonardo_client.api.RuntimesApi;
-import org.pmiops.workbench.legacy_leonardo_client.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -186,9 +186,7 @@ public class LeonardoConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ServiceInfoApi serviceInfoApi(
-      @Qualifier(LEGACY_SERVICE_LEONARDO_CLIENT)
-          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
+  public ServiceInfoApi serviceInfoApi(@Qualifier(SERVICE_LEONARDO_CLIENT) ApiClient apiClient) {
     ServiceInfoApi api = new ServiceInfoApi();
     api.setApiClient(apiClient);
     return api;
@@ -212,9 +210,7 @@ public class LeonardoConfig {
 
   @Bean(name = SERVICE_RESOURCE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ResourcesApi serviceResourceApi(
-      @Qualifier(LEGACY_SERVICE_LEONARDO_CLIENT)
-          org.pmiops.workbench.legacy_leonardo_client.ApiClient apiClient) {
+  public ResourcesApi serviceResourceApi(@Qualifier(SERVICE_LEONARDO_CLIENT) ApiClient apiClient) {
     ResourcesApi api = new ResourcesApi();
     api.setApiClient(apiClient);
     return api;
