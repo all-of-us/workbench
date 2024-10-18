@@ -413,8 +413,8 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
     implementation "com.github.java-json-tools:json-patch:1.13"
     implementation "com.github.rholder:guava-retrying:2.0.0"
-    // TODO: confirm ProfileServiceTest failure is caused by this
-    implementation 'org.javers:javers-core:7.6.3'
+    // 6.0.0+ causes a failure in ProfileServiceTest
+    implementation 'org.javers:javers-core:5.15.0'
     implementation "com.squareup.okhttp3:logging-interceptor:$project.ext.OKHTTP_VERSION"
     implementation "com.squareup.okhttp3:okhttp:$project.ext.OKHTTP_VERSION"
 
