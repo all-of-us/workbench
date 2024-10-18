@@ -75,7 +75,6 @@ public class AccessModuleServiceTest {
   public void setup() {
     config = WorkbenchConfig.createEmptyConfig();
     config.access.enableComplianceTraining = true;
-    config.access.enableEraCommons = true;
     config.access.currentDuccVersions = ImmutableList.of(10, 11); // arbitrary for test
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);

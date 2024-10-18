@@ -32,7 +32,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "complianceTrainingRenewalLookback",
       source = "config.access.renewal.trainingLookbackPeriod")
-  @Mapping(target = "enableEraCommons", source = "config.access.enableEraCommons")
   @Mapping(target = "unsafeAllowSelfBypass", source = "config.access.unsafeAllowSelfBypass")
   @Mapping(
       target = "enableEventDateModifier",
