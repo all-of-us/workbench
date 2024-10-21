@@ -25,7 +25,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { isBlank, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import { displayNameForTier } from 'app/utils/access-tiers';
 import {
   getAccessModuleConfig,
@@ -177,11 +177,6 @@ const UneditableFields = (props: { profile: Profile }) => {
             label='Data access tiers'
             value={accessTiers}
           />
-          <UneditableField
-            dataTestId='initial-credits-used'
-            label='Initial credits used'
-            value={getInitialCreditsUsage(props.profile)}
-          />
         </FlexRow>
       </div>
       <FlexSpacer />
@@ -271,9 +266,7 @@ const EditableFields = ({
               currentInstitution={
                 updatedProfile.verifiedInstitutionalAffiliation
               }
-              previousInstitution={
-                oldProfile.verifiedInstitutionalAffiliation
-              }
+              previousInstitution={oldProfile.verifiedInstitutionalAffiliation}
               highlightOnChange
               onChange={(event) => onChangeInstitution(event.value)}
               showGoToInstitutionLink={showGoToInstitutionLink}
@@ -323,6 +316,11 @@ const EditableFields = ({
                     label='Individual Expiration Bypass'
                   />
                 )}
+                <UneditableField
+                  dataTestId='initial-credits-used'
+                  label='Usage'
+                  value={formatInitialCreditsUSD(updatedProfile.freeTierUsage)}
+                />
                 <InitialCreditsDropdown
                   currentLimit={updatedProfile.freeTierDollarQuota}
                   previousLimit={oldProfile.freeTierDollarQuota}
