@@ -236,6 +236,23 @@ public class RasLinkServiceTest {
   }
 
   @Test
+  public void testLinkRasIdMeSuccess() throws Exception {
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ID_ME);
+
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
+
+    DbUser expectedUser = userDao.findUserByUserId(userId);
+    assertThat(expectedUser.getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
+    assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
+    verify(mockIdentityVerificationService)
+            .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
+    verify(mockIdentityVerificationService, never())
+            .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
+  }
+
+  @Test
   public void testLinkRasLoginGovSuccess() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV);

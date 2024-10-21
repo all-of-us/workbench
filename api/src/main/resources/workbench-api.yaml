@@ -328,33 +328,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: createAccountRequest
-  /v1/update-nih-token:
-    post:
-      tags:
-      - profile
-      description: Updates a users NIH token
-      operationId: updateNihToken
-      requestBody:
-        description: the token retrieved from NIH
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NihToken'
-        required: false
-      responses:
-        200:
-          description: The user's updated profile.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
-        400:
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: token
   /v1/user/link-ras-account:
     post:
       tags:

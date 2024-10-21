@@ -37,7 +37,6 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
@@ -51,7 +50,6 @@ import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
 import org.pmiops.workbench.ras.RasLinkService;
-import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +80,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<MailService> mailServiceProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final ShibbolethService shibbolethService;
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
@@ -105,7 +102,6 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<MailService> mailServiceProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
@@ -122,7 +118,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.pageVisitMapper = pageVisitMapper;
     this.profileAuditor = profileAuditor;
     this.profileService = profileService;
-    this.shibbolethService = shibbolethService;
     this.userAuthenticationProvider = userAuthenticationProvider;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -510,18 +505,6 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Country");
     }
     return true;
-  }
-
-  @Override
-  public ResponseEntity<Profile> updateNihToken(NihToken token) {
-    if (token == null || token.getJwt() == null) {
-      throw new BadRequestException("Token is required.");
-    }
-
-    shibbolethService.updateShibbolethToken(token.getJwt());
-
-    userService.syncEraCommonsStatus();
-    return getProfileResponse(userProvider.get());
   }
 
   @Override
