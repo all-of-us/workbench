@@ -166,9 +166,13 @@ const getInstitution = (
   return institutions.find((i) => i.shortName === institutionShortName);
 };
 
-const UserAccess = (props: { profile: Profile }) => {
-  const { accessTierShortNames } = props.profile;
-  return (
+const UserAccess = (props: { accessTierShortNames: string[] }) => {
+  const { accessTierShortNames } = props;
+  return accessTierShortNames?.length === 0 ? (
+    <span>
+      <i>No data access</i>
+    </span>
+  ) : (
     <FlexRow style={{ gap: '0.25rem' }}>
       {accessTierShortNames.map((accessTierShortName) =>
         badgeForTier(accessTierShortName)
@@ -226,7 +230,9 @@ const EditableFields = ({
           >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
           <FlexRow style={{ gap: '0.5rem' }}>
             <div>{updatedProfile.username}</div>
-            <UserAccess profile={oldProfile} />
+            <UserAccess
+              accessTierShortNames={oldProfile.accessTierShortNames}
+            />
           </FlexRow>
         </FlexColumn>
       </FlexRow>
