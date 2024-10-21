@@ -139,51 +139,6 @@ const UneditableField = (props: {
   </div>
 );
 
-const UneditableFields = (props: { profile: Profile }) => {
-  const { givenName, familyName, username, accessTierShortNames } =
-    props.profile;
-  const accessTiers =
-    accessTierShortNames?.length === 0 ? (
-      <span>
-        <i>No data access</i>
-      </span>
-    ) : (
-      accessTierShortNames.map(displayNameForTier).join(', ')
-    );
-
-  return (
-    <FlexRow>
-      <div style={styles.uneditableFields}>
-        <div style={styles.subHeader}>Researcher information</div>
-        <FlexRow
-          style={{
-            gap: '1.5rem',
-            justifyContent: 'space-between',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <UneditableField
-            dataTestId='name'
-            label='Name'
-            value={`${givenName} ${familyName}`}
-          />
-          <UneditableField
-            dataTestId='user-name'
-            label='User name'
-            value={username}
-          />
-          <UneditableField
-            dataTestId='data-access-tiers'
-            label='Data access tiers'
-            value={accessTiers}
-          />
-        </FlexRow>
-      </div>
-      <FlexSpacer />
-    </FlexRow>
-  );
-};
-
 enum EmailValidationStatus {
   UNCHECKED,
   VALID,
@@ -242,9 +197,28 @@ const EditableFields = ({
 
   console.log('Updated Profile: ', updatedProfile);
 
+  const accessTiers =
+    updatedProfile.accessTierShortNames?.length === 0 ? (
+      <span>
+        <i>No data access</i>
+      </span>
+    ) : (
+      updatedProfile.accessTierShortNames.map(displayNameForTier).join(', ')
+    );
+
   return (
     <FlexColumn style={styles.editableFields}>
-      <div style={styles.subHeader}>Edit information</div>
+      <FlexRow>
+        <div
+          style={{ ...styles.subHeader, marginRight: '1.5rem' }}
+        >{`${updatedProfile.givenName} ${updatedProfile.familyName}`}</div>
+        <div>{updatedProfile.username}</div>
+        <UneditableField
+          dataTestId='data-access-tiers'
+          label='Data access tiers'
+          value={accessTiers}
+        />
+      </FlexRow>
       <FlexRow>
         <FlexRow style={{ flex: 0, flexWrap: 'wrap' }}>
           <FlexColumn>
@@ -704,7 +678,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </UserAuditLink>
           </FlexRow>
           <FlexColumn style={{ paddingTop: '1em' }}>
-            <UneditableFields profile={oldProfile} />
             <FlexRow style={{ flexWrap: 'wrap' }}>
               <EditableFields
                 oldProfile={oldProfile}
